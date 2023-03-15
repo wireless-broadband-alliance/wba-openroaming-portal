@@ -17,19 +17,19 @@ doctrine:
             default:
                 connection: default
                 mappings:
-                    App:
+                    App\Entity:
                         is_bundle: false
                         dir: '%kernel.project_dir%/src/Entity'
                         prefix: 'App\Entity'
-                        alias: App
+                        alias: Entity
             freeradius:
                 connection: freeradius
                 mappings:
-                    Radius:
+                    App\RadiusDb\Entity:
                         is_bundle: false
-                        dir: '%kernel.project_dir%/src/EntityRadius'
-                        prefix: 'App\EntityRadius'
-                        alias: Radius
+                        dir: '%kernel.project_dir%/src/RadiusDb/Entity'
+                        prefix: 'App\RadiusDb\Entity'
+                        alias: EntityRadius
 
 
 when@test:
