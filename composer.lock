@@ -4,7 +4,7 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "c87bde579364f70624b9b9ea9dea6439",
+  "content-hash": "b858141d4ffb9d68bd5a624880c6cbf6",
   "packages": [
     {
       "name": "doctrine/annotations",
@@ -15,16 +15,16 @@
         "reference": "e157ef3f3124bbf6fe7ce0ffd109e8a8ef284e7f"
       },
       "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/e157ef3f3124bbf6fe7ce0ffd109e8a8ef284e7f",
-                "reference": "e157ef3f3124bbf6fe7ce0ffd109e8a8ef284e7f",
-                "shasum": ""
-            },
-            "require": {
-                "doctrine/lexer": "^2 || ^3",
-                "ext-tokenizer": "*",
-                "php": "^7.2 || ^8.0",
-                "psr/cache": "^1 || ^2 || ^3"
+        "type": "zip",
+        "url": "https://api.github.com/repos/doctrine/annotations/zipball/e157ef3f3124bbf6fe7ce0ffd109e8a8ef284e7f",
+        "reference": "e157ef3f3124bbf6fe7ce0ffd109e8a8ef284e7f",
+        "shasum": ""
+      },
+      "require": {
+        "doctrine/lexer": "^2 || ^3",
+        "ext-tokenizer": "*",
+        "php": "^7.2 || ^8.0",
+        "psr/cache": "^1 || ^2 || ^3"
             },
             "require-dev": {
                 "doctrine/cache": "^2.0",
@@ -6972,14 +6972,14 @@
                 "source": "https://github.com/symfony/web-link/tree/v6.2.7"
             },
             "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                  "type": "github"
-                },
+              {
+                "url": "https://symfony.com/sponsor",
+                "type": "custom"
+              },
+              {
+                "url": "https://github.com/fabpot",
+                "type": "github"
+              },
               {
                 "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                 "type": "tidelift"
@@ -7071,16 +7071,16 @@
       "dist": {
         "type": "zip",
         "url": "https://api.github.com/repos/symfony/yaml/zipball/e8e6a1d59e050525f27a1f530aa9703423cb7f57",
-                "reference": "e8e6a1d59e050525f27a1f530aa9703423cb7f57",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.1",
-                "symfony/polyfill-ctype": "^1.8"
-            },
-            "conflict": {
-                "symfony/console": "<5.4"
-            },
+        "reference": "e8e6a1d59e050525f27a1f530aa9703423cb7f57",
+        "shasum": ""
+      },
+      "require": {
+        "php": ">=8.1",
+        "symfony/polyfill-ctype": "^1.8"
+      },
+      "conflict": {
+        "symfony/console": "<5.4"
+      },
             "require-dev": {
                 "symfony/console": "^5.4|^6.0"
             },
@@ -7125,26 +7125,73 @@
                 },
                 {
                     "url": "https://github.com/fabpot",
-                    "type": "github"
+                  "type": "github"
                 },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
+              {
+                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                "type": "tidelift"
+              }
             ],
-            "time": "2023-02-16T09:57:23+00:00"
-        },
-        {
-            "name": "twig/extra-bundle",
-            "version": "v3.5.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/twigphp/twig-extra-bundle.git",
-                "reference": "a961e553a624eebdbd423ad5ab931497ca6d87cd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/twig-extra-bundle/zipball/a961e553a624eebdbd423ad5ab931497ca6d87cd",
+      "time": "2023-02-16T09:57:23+00:00"
+    },
+    {
+      "name": "symfonycasts/verify-email-bundle",
+      "version": "v1.13.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/SymfonyCasts/verify-email-bundle.git",
+        "reference": "eb7bc997f36ad872a0d56bf209fe37fed148b0a7"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/SymfonyCasts/verify-email-bundle/zipball/eb7bc997f36ad872a0d56bf209fe37fed148b0a7",
+        "reference": "eb7bc997f36ad872a0d56bf209fe37fed148b0a7",
+        "shasum": ""
+      },
+      "require": {
+        "ext-json": "*",
+        "php": ">=7.2.5",
+        "symfony/config": "^5.4 | ^6.0",
+        "symfony/dependency-injection": "^5.4 | ^6.0",
+        "symfony/deprecation-contracts": "^2.2 | ^3.0",
+        "symfony/http-kernel": "^5.4 | ^6.0",
+        "symfony/routing": "^5.4 | ^6.0"
+      },
+      "require-dev": {
+        "doctrine/orm": "^2.7",
+        "doctrine/persistence": "^2.0",
+        "symfony/framework-bundle": "^5.4 | ^6.0",
+        "symfony/phpunit-bridge": "^5.4 | ^6.0",
+        "vimeo/psalm": "^4.3"
+      },
+      "type": "symfony-bundle",
+      "autoload": {
+        "psr-4": {
+          "SymfonyCasts\\Bundle\\VerifyEmail\\": "src/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "description": "Simple, stylish Email Verification for Symfony",
+      "support": {
+        "issues": "https://github.com/SymfonyCasts/verify-email-bundle/issues",
+        "source": "https://github.com/SymfonyCasts/verify-email-bundle/tree/v1.13.0"
+      },
+      "time": "2023-01-04T12:46:15+00:00"
+    },
+    {
+      "name": "twig/extra-bundle",
+      "version": "v3.5.1",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/twigphp/twig-extra-bundle.git",
+        "reference": "a961e553a624eebdbd423ad5ab931497ca6d87cd"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/twigphp/twig-extra-bundle/zipball/a961e553a624eebdbd423ad5ab931497ca6d87cd",
                 "reference": "a961e553a624eebdbd423ad5ab931497ca6d87cd",
                 "shasum": ""
             },
@@ -9623,9 +9670,10 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.1",
-        "ext-ctype": "*",
-        "ext-iconv": "*"
+      "php": ">=8.1",
+      "ext-ctype": "*",
+      "ext-iconv": "*",
+      "composer": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"
