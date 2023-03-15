@@ -2,6 +2,7 @@
 
 namespace App\RadiusDb\Entity;
 
+use App\RadiusDb\Repository\RadiusUserRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RadiusUserRepository::class)]
