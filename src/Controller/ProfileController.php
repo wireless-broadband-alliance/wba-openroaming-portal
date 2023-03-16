@@ -29,13 +29,13 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
         //check if radius user exists
-        $radiususer = $radiusUserRepository->findOneBy(['username' => $user->getUserIdentifier() . $this->getParameter('app.radius_realm')]);
+        $radiususer = $radiusUserRepository->findOneBy(['username' => $user->getUserIdentifier() . "@" . $this->getParameter('app.radius_realm')]);
         if (!$radiususer) {
             $user->setRadiusToken($this->generateToken());
             $userRepository->save($user, true);
             //create radius user
             $radiususer = new RadiusUser();
-            $radiususer->setUsername($user->getUserIdentifier() . $this->getParameter('app.radius_realm'));
+            $radiususer->setUsername($user->getUserIdentifier() . "@" . $this->getParameter('app.radius_realm'));
             $radiususer->setAttribute('Cleartext-Password');
             $radiususer->setOp(':=');
             $radiususer->setValue($user->getRadiusToken());
