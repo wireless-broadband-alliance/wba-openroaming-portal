@@ -48,7 +48,7 @@ class ProfileController extends AbstractController
         $profileTemplate = file_get_contents('../profile_templates/template.txt');
         $ca = file_get_contents('../profile_templates/ca.pem');
         $profileTemplate = str_replace('@CA@', $ca, $profileTemplate);
-        $profileTemplate = str_replace('@PROFILE@', base64_encode($profile), $profileTemplate);
+        $profileTemplate = str_replace('@PROFILE@', chunk_split(base64_encode($profile), 76, "\r\n"), $profileTemplate);
         $response = new Response($profileTemplate);
 
         $response->headers->set('Content-Type', 'application/x-wifi-config');
