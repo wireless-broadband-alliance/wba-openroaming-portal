@@ -29,7 +29,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
         //check if radius user exists
-        $radiususer = $radiusUserRepository->findOneBy(['username' => $user->getUserIdentifier() . getenv('RADIUS_REALM')]);
+        $radiususer = $radiusUserRepository->findOneBy(['username' => $user->getUserIdentifier() . $this->getParameter('app.radius_realm')]);
         if (!$radiususer) {
             $user->setRadiusToken($this->generateToken());
             $userRepository->save($user, true);
@@ -43,7 +43,7 @@ class ProfileController extends AbstractController
         }
 //        dd($radiususer);
         $profile = file_get_contents('../profile_templates/profile.xml');
-        $profile = str_replace('@USERNAME@', $radiususer->getUsername() . "@" . getenv('RADIUS_REALM'), $profile);
+        $profile = str_replace('@USERNAME@', $radiususer->getUsername() . "@" . $this->getParameter('app.radius_realm'), $profile);
         $profile = str_replace('@PASSWORD@', base64_encode($radiususer->getValue()), $profile);
         $profileTemplate = file_get_contents('../profile_templates/template.txt');
         $ca = file_get_contents('../profile_templates/ca.pem');
