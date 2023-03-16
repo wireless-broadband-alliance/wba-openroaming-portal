@@ -35,7 +35,7 @@ class ProfileController extends AbstractController
             $userRepository->save($user, true);
             //create radius user
             $radiususer = new RadiusUser();
-            $radiususer->setUsername($user->getUserIdentifier() . getenv('RADIUS_REALM'));
+            $radiususer->setUsername($user->getUserIdentifier() . $this->getParameter('app.radius_realm'));
             $radiususer->setAttribute('Cleartext-Password');
             $radiususer->setOp(':=');
             $radiususer->setValue($user->getRadiusToken());
