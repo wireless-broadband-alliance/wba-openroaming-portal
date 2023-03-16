@@ -57,7 +57,7 @@ class ProfileController extends AbstractController
         return $response;
     }
 
-    private function generateToken($length = 32)
+    private function generateToken($length = 16)
     {
         $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $pieces = [];
