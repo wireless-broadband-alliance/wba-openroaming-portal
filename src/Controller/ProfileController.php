@@ -43,7 +43,7 @@ class ProfileController extends AbstractController
         }
 //        dd($radiususer);
         $profile = file_get_contents('../profile_templates/profile.xml');
-        $profile = str_replace('@USERNAME@', $radiususer->getUsername() . "@" . $this->getParameter('app.radius_realm'), $profile);
+        $profile = str_replace('@USERNAME@', $radiususer->getUsername(), $profile);
         $profile = str_replace('@PASSWORD@', base64_encode($radiususer->getValue()), $profile);
         $profileTemplate = file_get_contents('../profile_templates/template.txt');
         $ca = file_get_contents('../profile_templates/ca.pem');
