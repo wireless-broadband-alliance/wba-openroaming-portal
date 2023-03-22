@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Azores GRA OR Onboarding{% endblock %}
+
+{% block body %}
+    <div class="flex flex-col justify-center items-center h-screen">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Logo_tap_air_portugal_preto.png/800px-Logo_tap_air_portugal_preto.png"
+             alt="Logo 1">
+        <img src="https://wballiancec.wpenginepowered.com/wp-content/uploads/2022/05/WBA_Logo_OpenRoaming_Secondary_Full-Colour-2-600x71.png"
+             alt="Logo 2"
+             class="mt-4">
+        {% if app.user %}
+            <div class="mt-8 flex justify-between">
+                <a class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 btn-primary "
+                   href="{{ path('profile_android') }}">Android Profile Download</a>
+                <a class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 mx-4 disabled">Windows Profile Download</a>
+                <a class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled">iOS Profile Download</a>
+            </div>
+            <div class="mt-8 flex justify-center">
+                <small>This profiles were issued to
+                    <code>{{ app.user.email }}</code> with an identity off
+                    <code>{{ app.user.uuid }}</code></small>
+            </div>
+            <div class="mt-8 flex justify-center">
+                <a class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-red-100"
+                   href="{{ path('app_logout') }}">Reset</a>
+            </div>
+        {% else %}
+            {{ form_start(registrationForm, { 'attr': {'class': 'mt-8'} }) }}
+            <div class="flex flex-col items-center">
+                <label for="email"
+                       class="mb-2">Email</label>
+                {{ form_widget(registrationForm.email, { 'attr': {'class': 'px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400'} }) }}
+            </div>
+            <div class="mt-8">
+                {{ form_widget(registrationForm.agreeTerms) }}
+                <label class="inline-flex items-center"
+                       for="{{ registrationForm.agreeTerms.vars.id }}">
+                    Agree to terms of service
+                </label>
+            </div>
+            <div class="mt-8 flex justify-center">
+                <button type="submit"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Profile
+                </button>
+            </div>
+            {{ form_end(registrationForm) }}
+        {% endif %}
+
+
+    </div>
+
+
+{% endblock %}

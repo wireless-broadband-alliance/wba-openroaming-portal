@@ -42,12 +42,18 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
-            return new RedirectResponse($targetPath);
+        // Check if there is a referer URL in the request headers
+        $refererUrl = $request->headers->get('referer');
+
+        // If there is a referer URL, redirect the user back to that URL
+        if ($refererUrl) {
+            return new RedirectResponse($refererUrl);
         }
 
-         return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        // If there is no referer URL, redirect the user to the home page
+        return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
+
 
     protected function getLoginUrl(Request $request): string
     {
