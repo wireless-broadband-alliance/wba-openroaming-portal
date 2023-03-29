@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="flex h-screen w-screen flex-row bg-neutral-100">
+        {# First Column #}
+        <div class="w-1/2 bg-[#524d53] px-40 py-16 bg-landing bg-no-repeat bg-cover">
+            <div class="h-[100%] w-[100%] flex flex-col justify-between">
+                <img class="mt-36 w-96" src="{{ asset('resources/logos/OpenRoaming.svg') }}" alt="OpenRoaming Logo"/>
+
+                <h1 class="text-6xl font-roboto text-primary mt-16 font-bold">Welcome to OpenRoaming Provisioning
+                    Service</h1>
+
+                <p class="text-white mt-8 pr-24 font-medium text-lg">This provisioning portal is for the WBA
+                    <span class="underline font-semibold">OpenRoaming®</span> Live Program. These credentials are to be
+                    used for Test
+                    Purposes only and are not valid
+                    for commercial use.</p>
+
+
+                <p class="mt-auto text-white font-light text-base">If you encounter any questions, please contact <a
+                            href="#" class="font-semibold underline">PMD@wballiance.com</a></p>
+            </div>
+        </div>
+
+        {# Form Column #}
+        <div class="w-1/2 px-40 py-16">
+            <div class="h-[100%] w-[100%]">
+
+                <img src="{{ asset('resources/logos/tetrapi.svg') }}" alt="Tetrapi Logo"/>
+
+                <div class="mt-20 pr-24 space-y-4">
+                    <p class="text-[#757575] font-medium text-lg">Use the button below to download and
+                        install the OpenRoaming profile on
+                        compatible devices.</p>
+
+                    <p class="text-[#B4B4B4] font-light text-base">OpenRoaming profiles from this service are
+                        proven to work on the majority
+                        of devices(including iOS, Android, macOS and Windows 11).</p>
+                </div>
+
+                <form>
+                    {# Email #}
+                    <div class="relative mt-24">
+                        <label for="email"
+                               class="absolute -top-3 left-4 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-lg">Email</label>
+
+                        <input id="email" type="email"
+                               class="w-3/4 border px-5 py-2.5 text-[#656565] font-medium text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
+                               placeholder="add your email here"/>
+                    </div>
+
+                    {# Checkbox: Terms #}
+                    <div class="flex flex-row justify-start items-center mt-3 space-x-2">
+                        <input id="terms" type="checkbox"
+                               class="border p-2 text-[#656565] rounded border-[#757575] checked:bg-[#7db928] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"/>
+
+                        <span class="text-gray-500 font-light text-base">I accept the <a href="#"
+                                                                                         class="underline font-base">OpenRoaming terms & conditions of use</a> and <a
+                                    href="#" class="underline font-lg">privacy policy</a>.</span>
+                    </div>
+
+                    {# Submit button #}
+                    <button type="submit"
+                            class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-lg">Download and
+                        Install Profile
+                    </button>
+
+                    {# Profile selector  #}
+                    <button type="button"
+                            class="w-3/4 rounded-lg bg-[#e1e4e6] mt-24 px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
+                        <img src="{{ asset('resources/logos/windows.svg') }}" alt="Windows Logo"/>
+                        <span class="text-left font-medium text-xl pr-8">You appear to be on a device running <b>Windows</b>.</span>
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
