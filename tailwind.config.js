@@ -6,21 +6,24 @@ module.exports = {
 		"./templates/**/*.html.twig"
 	],
 	theme: {
-		backgroundImage: {
-			landing: "url('/public/resources/images/wallpaper.png')"
+		extend: {
+			backgroundImage: {
+				landing: "url('/public/resources/images/wallpaper.png')"
+			},
+
+			colors: {
+				gray: {
+					100: '#F5F5F5',
+				},
+
+				primary: '#A0C66B',
+			},
+
+			fontFamily: {
+				sans: ["Inter var, sans-serif"],
+				roboto: ["Roboto, mono"],
+			},
 		},
-
-		colors: {
-			white: '#F5F5F5',
-
-			primary: '#A0C66B',
-		},
-
-		fontFamily: {
-			sans: ["Inter, sans-serif"],
-		},
-
-		extend: {},
 	},
 	plugins: [],
 }
