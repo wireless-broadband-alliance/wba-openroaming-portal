@@ -21,7 +21,7 @@ class SiteController extends AbstractController
         $data['title'] = 'Landing Page';
 
         $data['os'] = [
-            'selected' => OSTypes::NONE,
+            'selected' => OSTypes::WINDOWS_11,
             'items' => [
                 OSTypes::WINDOWS_11 => ['path' => 'resources/logos/windows.svg', 'alt' => 'Windows Logo'],
                 OSTypes::IOS => ['path' => 'resources/logos/apple.svg', 'alt' => 'Apple Logo'],
