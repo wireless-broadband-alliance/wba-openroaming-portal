@@ -62,7 +62,10 @@ class SiteController extends AbstractController
                     return $this->redirectToRoute($actionName);
                 }
             }
-            return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
+            if ($this->getUser() !== null) {
+                return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
+
+            }
         }
 
         $os = $request->query->get('os');
