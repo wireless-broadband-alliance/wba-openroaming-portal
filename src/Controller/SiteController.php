@@ -34,11 +34,11 @@ class SiteController extends AbstractController
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
         if ($request->isMethod('POST')) {
             $payload = $request->request->all();
-            if (empty($payload['radio-os'])) {
+            if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                 $this->addFlash('error', 'Please select OS');
-            } else if (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL)) {
+            } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
                 $this->addFlash('error', 'Please a valid enter email');
-            } else if (empty($payload['terms']) || $payload['terms'] !== 'on') {
+            } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
                 $this->addFlash('error', 'Please agree to the Terms of Service');
             } else if ($this->getUser() === null) {
                 $user = new User();
@@ -55,12 +55,17 @@ class SiteController extends AbstractController
                 );
             }
             if (!array_key_exists('radio-os', $payload)) {
-                $os = $request->query->get('os');
-                if (!empty($os)) {
-                    $payload['radio-os'] = $os;
+                if (!array_key_exists('detected-os', $payload)) {
+                    $os = $request->query->get('os');
+                    if (!empty($os)) {
+                        $payload['radio-os'] = $os;
+                    } else {
+                        return $this->redirectToRoute($actionName);
+                    }
                 } else {
-                    return $this->redirectToRoute($actionName);
+                    $payload['radio-os'] = $payload['detected-os'];
                 }
+
             }
             if ($this->getUser() !== null) {
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
@@ -73,9 +78,8 @@ class SiteController extends AbstractController
             $payload['radio-os'] = $os;
         }
 
-
         $data['os'] = [
-            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
+            'selected' => $payload['radio-os'] ?? OSTypes::IOS,
             'items' => [
 //                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
                 OSTypes::IOS => ['alt' => 'Apple Logo'],
