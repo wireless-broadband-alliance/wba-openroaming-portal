@@ -79,7 +79,7 @@ class SiteController extends AbstractController
         }
 
         $data['os'] = [
-            'selected' => $payload['radio-os'] ?? OSTypes::IOS,
+            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
             'items' => [
 //                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
                 OSTypes::IOS => ['alt' => 'Apple Logo'],
