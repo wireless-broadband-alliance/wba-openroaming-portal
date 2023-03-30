@@ -21,14 +21,13 @@ class SiteController extends AbstractController
         $data['title'] = 'Landing Page';
 
         $data['os'] = [
-            'selected' => OSTypes::WINDOWS_11,
+            'selected' => OSTypes::NONE,
             'items' => [
                 OSTypes::WINDOWS_11 => ['path' => 'resources/logos/windows.svg', 'alt' => 'Windows Logo'],
                 OSTypes::IOS => ['path' => 'resources/logos/apple.svg', 'alt' => 'Apple Logo'],
                 OSTypes::ANDROID  => ['path' => 'resources/logos/android.svg', 'alt' => 'Android Logo']
             ]
         ];
-
 
         return $this->render('site/landing.html.twig', $data);
     }
