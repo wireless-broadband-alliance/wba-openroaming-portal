@@ -42,10 +42,10 @@ class ProfileController extends AbstractController
             $radiusUserRepository->save($radiususer, true);
         }
 //        dd($radiususer);
-        $profile = file_get_contents('../profile_templates/profile.xml');
+        $profile = file_get_contents('../profile_templates/android/profile.xml');
         $profile = str_replace('@USERNAME@', $radiususer->getUsername(), $profile);
         $profile = str_replace('@PASSWORD@', base64_encode($radiususer->getValue()), $profile);
-        $profileTemplate = file_get_contents('../profile_templates/template.txt');
+        $profileTemplate = file_get_contents('../profile_templates/android/template.txt');
         $ca = file_get_contents('../profile_templates/ca.pem');
         $profileTemplate = str_replace('@CA@', $ca, $profileTemplate);
         $profileTemplate = str_replace('@PROFILE@', base64_encode($profile), $profileTemplate);
@@ -53,6 +53,37 @@ class ProfileController extends AbstractController
 
         $response->headers->set('Content-Type', 'application/x-wifi-config');
         $response->headers->set('Content-Transfer-Encoding', 'base64');
+
+        return $response;
+    }
+
+    #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
+    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        //check if radius user exists
+        $radiususer = $radiusUserRepository->findOneBy(['username' => $user->getUserIdentifier() . "@" . $this->getParameter('app.radius_realm')]);
+        if (!$radiususer) {
+            $user->setRadiusToken($this->generateToken());
+            $userRepository->save($user, true);
+            //create radius user
+            $radiususer = new RadiusUser();
+            $radiususer->setUsername($user->getUserIdentifier() . "@" . $this->getParameter('app.radius_realm'));
+            $radiususer->setAttribute('Cleartext-Password');
+            $radiususer->setOp(':=');
+            $radiususer->setValue($user->getRadiusToken());
+            $radiusUserRepository->save($radiususer, true);
+        }
+        $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
+        $profile = str_replace('@USERNAME@', $radiususer->getUsername(), $profile);
+        $profile = str_replace('@PASSWORD@', $radiususer->getValue(), $profile);
+
+        $response = new Response($profile);
+
+        $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
 
         return $response;
     }
