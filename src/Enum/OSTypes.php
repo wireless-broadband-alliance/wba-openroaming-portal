@@ -8,6 +8,6 @@ enum OSTypes
     public const IOS = 'iOS';
     public const LINUX = 'Linux';
     public const MACOS = 'macOS';
-    public const WINDOWS_11 = 'Windows 11';
+    public const WINDOWS = 'Windows';
     public const NONE = 'none';
 }

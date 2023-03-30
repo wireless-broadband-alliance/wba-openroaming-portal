@@ -13,13 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProfileController extends AbstractController
 {
-    #[Route('/profile', name: 'app_profile')]
-    public function index(): Response
-    {
-        return $this->render('profile/index.html.twig', [
-            'controller_name' => 'ProfileController',
-        ]);
-    }
 
     #[Route('/profile/android', name: 'profile_android')]
     public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
@@ -86,6 +79,12 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
 
         return $response;
+    }
+
+    #[Route('/profile/windows', name: 'profile_windows')]
+    public function profileWindows(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
+    {
+        return $this->redirectToRoute('app_landing');
     }
 
     private function generateToken($length = 16)
