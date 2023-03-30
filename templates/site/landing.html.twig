@@ -30,7 +30,8 @@
         </div>
 
         {# Form Column #}
-        <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]">
+        <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
+                {{ stimulus_controller('visibility') }}>
             <div>
                 <img class="mt-8 lg:mt-0" src="{{ asset('resources/logos/tetrapi.svg') }}" alt="Tetrapi Logo"/>
 
@@ -66,8 +67,8 @@
                                     href="#" class="underline font-base">privacy policy</a>.</span>
                     </div>
 
-                    {% if os.selected == constant('App\\Enum\\OSTypes::NONE') %}
-                        <p class="mt-14 text-[#414141] font-base lg:pr-24 text-sm lg:text-lg">Choose your operating
+                    <div class="hidden mt-14" {{ stimulus_target('visibility', 'first') }}>
+                        <p class="text-[#414141] font-base lg:pr-24 text-sm lg:text-lg">Choose your operating
                             system, so you can
                             download and install the profile:</p>
 
@@ -88,8 +89,8 @@
 
                             {% endfor %}
                         </div>
+                    </div>
 
-                    {% endif %}
 
                     {# Submit button #}
                     <div class="flex flex-row justify-center lg:justify-start">
@@ -110,12 +111,20 @@
                             {% set logo = 'resources/logos/windows.svg' %}
                         {% endif %}
 
-                        {# Profile selector  #}
-                        <button type="button"
-                                class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] mt-24 px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
-                            <img class="w-20" src="{{ asset(logo) }}" alt="Windows Logo"/>
-                            <span class="text-left font-medium text-base lg:text-xl pr-8">You appear to be on a device running <b>{{ os.selected }}</b>.</span>
-                        </button>
+                        <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                            {# Profile selector  #}
+                            <button type="button"
+                                    class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
+                                <img class="w-20" src="{{ asset(logo) }}" alt="Windows Logo"/>
+                                <span class="text-left font-medium text-base lg:text-xl pr-8">You appear to be on a device running <b>{{ os.selected }}</b>.</span>
+                            </button>
+
+
+                            <button type="button"
+                                    class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
+                                Is this Wrong? Click here to select your OS.
+                            </button>
+                        </div>
                     {% endif %}
 
                 </form>
