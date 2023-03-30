@@ -4,7 +4,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
-    <div class="h-screen w-screen flex flex-col lg:flex-row lg:flex-wrap overflow-x-hidden">
+    <div class="h-screen w-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
         <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]">
             <div class="h-[100%] w-[100%] flex flex-col justify-between">
@@ -50,7 +50,7 @@
                     {# Email #}
                     <div class="relative mt-20 lg:mt-12 xl:mt-24">
                         <label for="email"
-                               class="absolute  left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Email</label>
+                               class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Email</label>
 
                         <input id="email" type="email"
                                class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
@@ -67,8 +67,8 @@
                                     href="#" class="underline font-base">privacy policy</a>.</span>
                     </div>
 
-                    <div class="hidden mt-14" {{ stimulus_target('visibility', 'first') }}>
-                        <p class="text-[#414141] font-base lg:pr-24 text-sm lg:text-lg">Choose your operating
+                    <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden'  }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+                        <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your operating
                             system, so you can
                             download and install the profile:</p>
 
