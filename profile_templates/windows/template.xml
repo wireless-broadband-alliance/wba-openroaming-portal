@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<CarrierProvisioning xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                     xmlns="http://www.microsoft.com/networking/CarrierControl/v1">
+<CarrierProvisioning
+        xmlns="http://www.microsoft.com/networking/CarrierControl/v1">
     <Global>
-        <CarrierId>{@UUID@}</CarrierId>
+        <CarrierId>{00000000-0000-0000-0000-000000007000}</CarrierId>
         <SubscriberId>1234597890</SubscriberId>
     </Global>
     <WLANProfiles>
@@ -87,7 +87,9 @@
                                         <eapCommon:Type>26</eapCommon:Type>
                                         <eapCommon:AuthorId>0</eapCommon:AuthorId>
                                     </EapMethod>
-                                    <Credentials xmlns:eapUser="http://www.microsoft.com/provisioning/EapUserPropertiesV1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:baseEap="http://www.microsoft.com/provisioning/BaseEapUserPropertiesV1" xmlns:MsPeap="http://www.microsoft.com/provisioning/MsPeapUserPropertiesV1" xmlns:MsChapV2="http://www.microsoft.com/provisioning/MsChapV2UserPropertiesV1">
+                                    <Credentials
+                                            xmlns:baseEap="http://www.microsoft.com/provisioning/BaseEapUserPropertiesV1"
+                                            xmlns:MsChapV2="http://www.microsoft.com/provisioning/MsChapV2UserPropertiesV1">
                                         <baseEap:Eap>
                                             <baseEap:Type>26</baseEap:Type>
                                             <MsChapV2:EapType>
