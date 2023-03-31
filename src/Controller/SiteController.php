@@ -127,9 +127,9 @@ class SiteController extends AbstractController
         $os = OSTypes::NONE;
 
         // Windows
-//        if (preg_match('/windows|win32/i', $userAgent)) {
-//            $os = OSTypes::WINDOWS;
-//        }
+        if (preg_match('/windows|win32/i', $userAgent)) {
+            $os = OSTypes::WINDOWS;
+        }
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', $userAgent)) {
