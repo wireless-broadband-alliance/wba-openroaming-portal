@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<CarrierProvisioning xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns="http://www.microsoft.com/networking/CarrierControl/v1">
+    <Global>
+        <CarrierId>{@UUID@}</CarrierId>
+        <SubscriberId>1234597890</SubscriberId>
+    </Global>
+    <WLANProfiles>
+        <WLANProfile xmlns="http://www.microsoft.com/networking/CarrierControl/WLAN/v1">
+            <name>Tetrapi Duck Operations Center</name>
+            <SSIDConfig>
+                <SSID>
+                    <name>_Passpoint</name>
+                </SSID>
+            </SSIDConfig>
+            <Hotspot2>
+                <DomainName>tetrapi.pt</DomainName>
+                <RoamingConsortium>
+                    <OUI>5a03ba0000</OUI>
+                    <OUI>004096</OUI>
+                </RoamingConsortium>
+            </Hotspot2>
+            <MSM>
+                <security>
+                    <authEncryption>
+                        <authentication>WPA2</authentication>
+                        <encryption>AES</encryption>
+                        <useOneX>true</useOneX>
+                    </authEncryption>
+                    <PMKCacheMode>enabled</PMKCacheMode>
+                    <PMKCacheTTL>720</PMKCacheTTL>
+                    <PMKCacheSize>128</PMKCacheSize>
+                    <preAuthMode>disabled</preAuthMode>
+                    <OneX xmlns="http://www.microsoft.com/networking/OneX/v1">
+                        <authMode>user</authMode>
+                        <EAPConfig>
+                            <EapHostConfig xmlns="http://www.microsoft.com/provisioning/EapHostConfig">
+                                <EapMethod>
+                                    <Type xmlns="http://www.microsoft.com/provisioning/EapCommon">21</Type>
+                                    <VendorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorId>
+                                    <VendorType xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorType>
+                                    <AuthorId xmlns="http://www.microsoft.com/provisioning/EapCommon">311</AuthorId>
+                                </EapMethod>
+                                <Config xmlns="http://www.microsoft.com/provisioning/EapHostConfig">
+                                    <EapTtls xmlns="http://www.microsoft.com/provisioning/EapTtlsConnectionPropertiesV1">
+                                        <ServerValidation>
+                                            <ServerNames>openroaming.tetrapi.pt</ServerNames>
+                                            <TrustedRootCAHash>ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8</TrustedRootCAHash>
+                                            <DisablePrompt>false</DisablePrompt>
+                                        </ServerValidation>
+                                        <Phase2Authentication>
+                                            <EapHostConfig xmlns="http://www.microsoft.com/provisioning/EapHostConfig">
+                                                <EapMethod>
+                                                    <Type xmlns="http://www.microsoft.com/provisioning/EapCommon">26</Type>
+                                                    <VendorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorId>
+                                                    <VendorType xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorType>
+                                                    <AuthorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</AuthorId>
+                                                </EapMethod>
+                                                <Config xmlns="http://www.microsoft.com/provisioning/EapHostConfig">
+                                                    <Eap xmlns="http://www.microsoft.com/provisioning/BaseEapConnectionPropertiesV1">
+                                                        <Type>26</Type>
+                                                        <EapType xmlns="http://www.microsoft.com/provisioning/MsChapV2ConnectionPropertiesV1">
+                                                            <UseWinLogonCredentials>false</UseWinLogonCredentials>
+                                                        </EapType>
+                                                    </Eap>
+                                                </Config>
+                                            </EapHostConfig>
+                                        </Phase2Authentication>
+                                        <Phase1Identity>
+                                            <IdentityPrivacy>true</IdentityPrivacy>
+                                            <AnonymousIdentity>someone@tetrapi.pt</AnonymousIdentity>
+                                        </Phase1Identity>
+                                    </EapTtls>
+                                </Config>
+                            </EapHostConfig>
+                        </EAPConfig>
+                    </OneX>
+                    <EapHostUserCredentials xmlns="http://www.microsoft.com/provisioning/EapHostUserCredentials" xmlns:eapCommon="http://www.microsoft.com/provisioning/EapCommon" xmlns:baseEap="http://www.microsoft.com/provisioning/BaseEapMethodUserCredentials">
+                        <EapMethod>
+                            <eapCommon:Type>21</eapCommon:Type>
+                            <eapCommon:AuthorId>311</eapCommon:AuthorId>
+                        </EapMethod>
+                        <Credentials xmlns="http://www.microsoft.com/provisioning/EapHostUserCredentials">
+                            <EapTtls xmlns="http://www.microsoft.com/provisioning/EapTtlsUserPropertiesV1">
+                                <EapHostUserCredentials xmlns="http://www.microsoft.com/provisioning/EapHostUserCredentials" xmlns:eapCommon="http://www.microsoft.com/provisioning/EapCommon" xmlns:baseEap="http://www.microsoft.com/provisioning/BaseEapMethodUserCredentials">
+                                    <EapMethod>
+                                        <eapCommon:Type>26</eapCommon:Type>
+                                        <eapCommon:AuthorId>0</eapCommon:AuthorId>
+                                    </EapMethod>
+                                    <Credentials xmlns:eapUser="http://www.microsoft.com/provisioning/EapUserPropertiesV1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:baseEap="http://www.microsoft.com/provisioning/BaseEapUserPropertiesV1" xmlns:MsPeap="http://www.microsoft.com/provisioning/MsPeapUserPropertiesV1" xmlns:MsChapV2="http://www.microsoft.com/provisioning/MsChapV2UserPropertiesV1">
+                                        <baseEap:Eap>
+                                            <baseEap:Type>26</baseEap:Type>
+                                            <MsChapV2:EapType>
+                                                <MsChapV2:Username>@USERNAME@</MsChapV2:Username>
+                                                <MsChapV2:Password>@PASSWORD@</MsChapV2:Password>
+                                                <MsChapV2:LogonDomain/>
+                                            </MsChapV2:EapType>
+                                        </baseEap:Eap>
+                                    </Credentials>
+                                </EapHostUserCredentials>
+                            </EapTtls>
+                        </Credentials>
+                    </EapHostUserCredentials>
+                </security>
+            </MSM>
+        </WLANProfile>
+    </WLANProfiles>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+            <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+            <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+            <Reference URI="">
+                <Transforms>
+                    <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                </Transforms>
+                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                <DigestValue></DigestValue>
+            </Reference>
+        </SignedInfo>
+        <SignatureValue></SignatureValue>
+        <KeyInfo>
+            <X509Data>
+                <X509Certificate></X509Certificate>
+            </X509Data>
+        </KeyInfo>
+    </Signature>
+</CarrierProvisioning>
