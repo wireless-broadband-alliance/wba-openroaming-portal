@@ -93,7 +93,7 @@ class ProfileController extends AbstractController
         ///Windows Specific
         $randomfactorIdentifier = bin2hex(random_bytes(16));
         $randomFileName = 'windows_unsigned_' . $randomfactorIdentifier . '.xml';
-        $randomSignedFileName = 'windows_signed_' . $randomfactorIdentifier . '.xaml';
+        $randomSignedFileName = 'windows_signed_' . $randomfactorIdentifier . '.xml';
         $signedFilePath = '/tmp/' . $randomSignedFileName;
         $unSignedFilePath = '/tmp/' . $randomFileName;
         file_put_contents($unSignedFilePath, $profile);
@@ -116,7 +116,7 @@ class ProfileController extends AbstractController
             // Serve the file as a response
             $response = new BinaryFileResponse($signedFilePath);
             $response->headers->set('Content-Type', 'application/xaml+xml');
-            $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $randomFileName);
+            $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $randomfactorIdentifier);
 
             // Delete the file after serving it
             $response->deleteFileAfterSend(true);
