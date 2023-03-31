@@ -143,14 +143,14 @@ class ProfileController extends AbstractController
 
     private function generateWindowsUuid()
     {
-        $format = '{%04x%04x-%04x-%04x-%04x-%04x%04x%04x}';
+        $format = '{%08x-%04x-%04x-%04x-%012x}';
 
         return sprintf($format,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), // 8 hex characters
-            mt_rand(0, 0xffff), // 4 hex characters
-            mt_rand(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
-            mt_rand(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff) // 12 hex characters
+            0, // 8 hex characters, all 0s
+            0, // 4 hex characters, all 0s
+            0, // 4 hex characters, all 0s
+            0, // 4 hex characters, all 0s
+            0x7000 // 12 hex characters, with 0x7000 at the end
         );
     }
 
