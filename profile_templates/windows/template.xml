@@ -93,8 +93,8 @@
                                         <baseEap:Eap>
                                             <baseEap:Type>26</baseEap:Type>
                                             <MsChapV2:EapType>
-                                                <MsChapV2:Username>@USERNAME@</MsChapV2:Username>
-                                                <MsChapV2:Password>@PASSWORD@</MsChapV2:Password>
+                                                <MsChapV2:Username>tap@tetrapi.pt</MsChapV2:Username>
+                                                <MsChapV2:Password>mario</MsChapV2:Password>
                                                 <MsChapV2:LogonDomain/>
                                             </MsChapV2:EapType>
                                         </baseEap:Eap>
