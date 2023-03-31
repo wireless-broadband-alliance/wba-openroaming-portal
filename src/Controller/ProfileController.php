@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ProfileController extends AbstractController
 {
@@ -68,7 +69,13 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/windows', name: 'profile_windows')]
-    public function profileWindows(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
+    public function profileWindows(UrlGeneratorInterface $urlGenerator): Response
+    {
+        return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_generate', [], UrlGeneratorInterface::ABSOLUTE_URL));
+    }
+
+    #[Route('/profile/windows_generate', name: 'profile_windows_generate')]
+    public function profileWindowsGenerate(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
     {
         $user = $this->getUser();
         if (!$user) {

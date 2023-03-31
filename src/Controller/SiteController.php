@@ -67,7 +67,7 @@ class SiteController extends AbstractController
                 }
 
             }
-            if ($this->getUser() !== null) {
+            if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
 
             }
@@ -81,7 +81,7 @@ class SiteController extends AbstractController
         $data['os'] = [
             'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
             'items' => [
-//                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
+                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
                 OSTypes::IOS => ['alt' => 'Apple Logo'],
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
