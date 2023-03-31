@@ -83,7 +83,7 @@ class ProfileController extends AbstractController
         $profile = file_get_contents('../profile_templates/windows/template.xml');
         $profile = str_replace('@USERNAME@', $radiususer->getUsername(), $profile);
         $profile = str_replace('@PASSWORD@', $radiususer->getValue(), $profile);
-        $profile = str_replace('@UUID@', uniqid("", true), $profile);
+        $profile = str_replace('@UUID@', $this->generateWindowsUuid(), $profile);
         ///Windows Specific
         $randomfactorIdentifier = bin2hex(random_bytes(16));
         $randomFileName = 'windows_unsigned_' . $randomfactorIdentifier . '.xml';
@@ -139,6 +139,19 @@ class ProfileController extends AbstractController
             $pieces[] = $stringSpace[random_int(0, $max)];
         }
         return implode('', $pieces);
+    }
+
+    private function generateWindowsUuid()
+    {
+        $format = '{%04x%04x-%04x-%04x-%04x-%04x%04x%04x}';
+
+        return sprintf($format,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), // 8 hex characters
+            mt_rand(0, 0xffff), // 4 hex characters
+            mt_rand(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
+            mt_rand(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff) // 12 hex characters
+        );
     }
 
     private function createOrUpdateRadiusUser($user, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): RadiusUser
