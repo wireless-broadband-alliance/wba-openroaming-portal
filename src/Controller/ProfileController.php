@@ -6,12 +6,12 @@ namespace App\Controller;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\UserRepository;
+use App\Utils\CacheUtils;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
@@ -69,13 +69,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/windows', name: 'profile_windows')]
-    public function profileWindows(UrlGeneratorInterface $urlGenerator): Response
-    {
-        return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_generate', [], UrlGeneratorInterface::ABSOLUTE_URL));
-    }
-
-    #[Route('/profile/windows_generate', name: 'profile_windows_generate')]
-    public function profileWindowsGenerate(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
+    public function profileWindows(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -108,24 +102,32 @@ class ProfileController extends AbstractController
             $signedFilePath,
             $unSignedFilePath,
         ];
-
         $process = new Process($command);
         try {
             $process->mustRun();
-
-            // Serve the file as a response
-            $response = new BinaryFileResponse($signedFilePath);
-            $response->headers->set('Content-Type', 'application/xaml+xml');
-            $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $randomfactorIdentifier);
-
-            // Delete the file after serving it
-            $response->deleteFileAfterSend(true);
             unlink($unSignedFilePath);
-
-            return $response;
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException('Signing failed: ' . $exception->getMessage());
         }
+        $uuid = uniqid("", true);
+        $signedProfileContents = file_get_contents($signedFilePath);
+        unlink($signedFilePath);
+        $cache = new CacheUtils();
+        $cache->write('profile_' . $uuid, $signedProfileContents);
+        return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));
+    }
+
+    #[Route('/profile/windows_serve', name: 'profile_windows_serve')]
+    public function profileWindowsServe(Request $request): Response
+    {
+        $cache = new CacheUtils();
+        $profileData = $cache->read('profile_' . $request->query->get("uuid"));
+        if (!$profileData) {
+            throw new RuntimeException("Profile not found");
+        }
+        $response = new Response($profileData);
+        $response->headers->set('Content-Type', 'application/xaml+xml');
+        return $response;
     }
 
     private function generateToken($length = 16)
