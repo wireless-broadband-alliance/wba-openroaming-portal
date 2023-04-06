@@ -86,7 +86,6 @@ class ProfileController extends AbstractController
             'der',
             '-nodetach',
         ];
-        dd(implode(' ', $command));
         $process = new Process($command);
         try {
             $process->mustRun();
