@@ -72,7 +72,7 @@ class ProfileController extends AbstractController
             'openssl',
             'smime',
             '-sign',
-            '-in ',
+            '-in',
             $unSignedFilePath,
             '-out',
             $signedFilePath,
