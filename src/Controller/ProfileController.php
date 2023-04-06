@@ -61,7 +61,45 @@ class ProfileController extends AbstractController
         $profile = str_replace('@USERNAME@', $radiususer->getUsername(), $profile);
         $profile = str_replace('@PASSWORD@', $radiususer->getValue(), $profile);
 
-        $response = new Response($profile);
+        //iOS Specific
+        $randomfactorIdentifier = bin2hex(random_bytes(16));
+        $randomFileName = 'ios_unsigned_' . $randomfactorIdentifier . '.mobileconfig';
+        $randomSignedFileName = 'ios_signed_' . $randomfactorIdentifier . '.mobileconfig';
+        $signedFilePath = '/tmp/' . $randomSignedFileName;
+        $unSignedFilePath = '/tmp/' . $randomFileName;
+        file_put_contents($unSignedFilePath, $profile);
+        $command = [
+            'openssl',
+            'smime',
+            '-sign',
+            '-in ',
+            $unSignedFilePath,
+            '-out',
+            $signedFilePath,
+            '-signer',
+            '/var/www/openroaming/signing-keys/cert.pem',
+            '-inkey',
+            '/var/www/openroaming/signing-keys/privkey.pem',
+            '-certfile',
+            '/var/www/openroaming/signing-keys/fullchain.pem',
+            '-outform',
+            'der',
+            '-nodetach',
+        ];
+        $process = new Process($command);
+        try {
+            $process->mustRun();
+            unlink($unSignedFilePath);
+        } catch (ProcessFailedException $exception) {
+            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+        }
+        $signedProfileContents = file_get_contents($signedFilePath);
+        unlink($signedFilePath);
+
+
+        ///
+
+        $response = new Response($signedProfileContents);
 
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
 
@@ -84,7 +122,7 @@ class ProfileController extends AbstractController
         $profile = str_replace('@USERNAME@', $radiususer->getUsername(), $profile);
         $profile = str_replace('@PASSWORD@', $radiususer->getValue(), $profile);
         $profile = str_replace('@UUID@', $this->generateWindowsUuid(), $profile);
-        ///Windows Specific
+        //Windows Specific
         $randomfactorIdentifier = bin2hex(random_bytes(16));
         $randomFileName = 'windows_unsigned_' . $randomfactorIdentifier . '.xml';
         $randomSignedFileName = 'windows_signed_' . $randomfactorIdentifier . '.xml';
