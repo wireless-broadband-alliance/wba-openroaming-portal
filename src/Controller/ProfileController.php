@@ -93,6 +93,7 @@ class ProfileController extends AbstractController
         $process = new Process($command);
         try {
             $process->mustRun();
+            $process->enableOutput();
             dd($process->getOutput());
 //            unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
