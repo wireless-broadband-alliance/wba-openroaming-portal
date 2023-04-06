@@ -102,7 +102,7 @@ class ProfileController extends AbstractController
 
 
         ///
-        dd([$signedFilePath, $signedProfileContents]);
+        dd([implode(' ', $command), $signedFilePath, $signedProfileContents]);
         $response = new Response($signedProfileContents);
 
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
