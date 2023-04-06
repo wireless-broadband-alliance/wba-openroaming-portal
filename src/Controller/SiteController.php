@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\OSTypes;
 use App\Security\PasswordAuthenticator;
+use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
 
 
 class SiteController extends AbstractController
@@ -25,9 +25,9 @@ class SiteController extends AbstractController
     }
 
     #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, Closure $getEnv): Response
     {
-        dd(env('RADIUS_REALM'));
+        dd($getEnv);
         $data['title'] = 'Landing Page';
         $data['customerLogoName'] = 'resources/logos/tetrapi.svg';
         $data['customerPrefix'] = 'TCS';
