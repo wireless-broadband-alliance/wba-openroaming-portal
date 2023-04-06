@@ -91,6 +91,7 @@ class ProfileController extends AbstractController
             $process->mustRun();
 //            unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
+            dd('it blew up');
             throw new RuntimeException('Signing failed: ' . $exception->getMessage());
         }
         $signedProfileContents = file_get_contents($signedFilePath);
