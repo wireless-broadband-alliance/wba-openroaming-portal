@@ -85,25 +85,27 @@ class ProfileController extends AbstractController
             '-outform',
             'der',
             '-nodetach',
+            '&&',
+            'chmod',
+            '777',
+            $signedFilePath
         ];
         $process = new Process($command);
         try {
             $process->mustRun();
             unlink($unSignedFilePath);
-            $signedProfileContents = file_get_contents($signedFilePath);
-            unlink($signedFilePath);
-
-
-            ///
-            dd($signedProfileContents);
-            $response = new Response($signedProfileContents);
-
-            $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
-            return $response;
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException('Signing failed: ' . $exception->getMessage());
         }
+        $signedProfileContents = file_get_contents($signedFilePath);
+        unlink($signedFilePath);
 
+
+        ///
+        dd($signedProfileContents);
+        $response = new Response($signedProfileContents);
+
+        $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
         return $response;
     }
 
