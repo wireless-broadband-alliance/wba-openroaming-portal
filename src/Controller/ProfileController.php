@@ -93,7 +93,7 @@ class ProfileController extends AbstractController
         $process = new Process($command);
         try {
             $process->mustRun();
-            unlink($unSignedFilePath);
+//            unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException('Signing failed: ' . $exception->getMessage());
         }
