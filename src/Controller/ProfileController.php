@@ -16,6 +16,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
 
 class ProfileController extends AbstractController
 {
@@ -193,7 +194,7 @@ class ProfileController extends AbstractController
     private function createOrUpdateRadiusUser($user, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): RadiusUser
     {
         $radiusUser = $radiusUserRepository->findOneBy([
-            'username' => $user->getUserIdentifier() . "@" . $this->getParameter('app.radius_realm')
+            'username' => $user->getUserIdentifier() . "@" . env('RADIUS_REALM')
         ]);
 
         if (!$radiusUser) {

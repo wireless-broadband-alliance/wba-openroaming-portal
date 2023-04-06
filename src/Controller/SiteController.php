@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
 
 
 class SiteController extends AbstractController
@@ -26,6 +27,7 @@ class SiteController extends AbstractController
     #[Route('/', name: 'app_landing')]
     public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
     {
+        dd(env('RADIUS_REALM'));
         $data['title'] = 'Landing Page';
         $data['customerLogoName'] = 'resources/logos/tetrapi.svg';
         $data['customerPrefix'] = 'TCS';
