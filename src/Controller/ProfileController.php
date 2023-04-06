@@ -51,6 +51,9 @@ class ProfileController extends AbstractController
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
     {
+        $certFilePath = '/var/www/openroaming/signing-keys/cert.pem';
+        $privateKeyFilePath = '/var/www/openroaming/signing-keys/privkey.pem';
+        $fullchainFilePath = '/var/www/openroaming/signing-keys/fullchain.pem';
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
@@ -67,41 +70,24 @@ class ProfileController extends AbstractController
         $randomSignedFileName = 'ios_signed_' . $randomfactorIdentifier . '.mobileconfig';
         $signedFilePath = '/tmp/' . $randomSignedFileName;
         $unSignedFilePath = '/tmp/' . $randomFileName;
-        file_put_contents($unSignedFilePath, $profile);
-        $command = [
-            'openssl',
-            'smime',
-            '-sign',
-            '-in ',
-            $unSignedFilePath,
-            '-out',
-            $signedFilePath,
-            '-signer',
-            '/var/www/openroaming/signing-keys/cert.pem',
-            '-inkey',
-            '/var/www/openroaming/signing-keys/privkey.pem',
-            '-certfile',
-            '/var/www/openroaming/signing-keys/fullchain.pem',
-            '-outform',
-            'der',
-            '-nodetach',
-            '&&',
-            'chmod',
-            '777',
-            $signedFilePath
-        ];
-        $process = new Process($command);
-        try {
-            $process->mustRun();
-            $process->enableOutput();
-            dd($process->getOutput());
-//            unlink($unSignedFilePath);
-        } catch (ProcessFailedException $exception) {
-            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
-        }
-        $signedProfileContents = file_get_contents($signedFilePath);
-        //unlink($signedFilePath);
+        // Load the signer's certificate and private key
+        $cert = file_get_contents($certFilePath);
+        $privateKey = file_get_contents($privateKeyFilePath);
 
+// Load the additional certificates
+        $extraCerts = file_get_contents($fullchainFilePath);
+
+// Sign the input file
+        $result = openssl_pkcs7_sign(
+            $unSignedFilePath,
+            $signedFilePath,
+            $cert,
+            $privateKey,
+            [],
+            PKCS7_BINARY | PKCS7_DETACHED,
+            $extraCerts
+        );
+        dd($result);
 
         ///
         dd([implode(' ', $command), $signedFilePath, $signedProfileContents]);
