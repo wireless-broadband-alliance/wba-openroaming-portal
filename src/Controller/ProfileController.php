@@ -74,7 +74,7 @@ class ProfileController extends AbstractController
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
-        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $userRepository);
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
         $profile = str_replace([
