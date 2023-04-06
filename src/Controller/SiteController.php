@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\OSTypes;
 use App\Security\PasswordAuthenticator;
-use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,9 +24,8 @@ class SiteController extends AbstractController
     }
 
     #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, Closure $getEnv): Response
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
     {
-        dd($getEnv);
         $data['title'] = 'Landing Page';
         $data['customerLogoName'] = 'resources/logos/tetrapi.svg';
         $data['customerPrefix'] = 'TCS';
@@ -91,38 +89,6 @@ class SiteController extends AbstractController
 
         return $this->render('site/landing.html.twig', $data);
     }
-
-//    #[Route('/tap', name: 'app_gra')]
-//    public function gra(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager): Response
-//    {
-//        $user = new User();
-//        $form = $this->createForm(SimpleRegistrationFormType::class, $user);
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            // encode the plain password
-//            $user->setPassword(
-//                $userPasswordHasher->hashPassword(
-//                    $user,
-//                    "iliketurtles123456789"
-//                )
-//            );
-//            $user->setUuid(str_replace('@', "-AT-TAP-" . uniqid("", true) . "-", $user->getEmail()));
-//
-//            $entityManager->persist($user);
-//            $entityManager->flush();
-//
-//
-//            return $userAuthenticator->authenticateUser(
-//                $user,
-//                $authenticator,
-//                $request
-//            );
-//        }
-//        return $this->render('site/tap.html.twig', [
-//            'registrationForm' => $form->createView(),
-//        ]);
-//    }
 
     private function detectDevice($userAgent)
     {

@@ -7,14 +7,14 @@
     </Global>
     <WLANProfiles>
         <WLANProfile xmlns="http://www.microsoft.com/networking/CarrierControl/WLAN/v1">
-            <name>Tetrapi Duck Operations Center</name>
+            <name>@DISPLAY_NAME@</name>
             <SSIDConfig>
                 <SSID>
                     <name>_Passpoint</name>
                 </SSID>
             </SSIDConfig>
             <Hotspot2>
-                <DomainName>tetrapi.pt</DomainName>
+                <DomainName>@DOMAIN_NAME@</DomainName>
                 <RoamingConsortium>
                     <OUI>5a03ba0000</OUI>
                     <OUI>004096</OUI>
@@ -44,8 +44,8 @@
                                 <Config xmlns="http://www.microsoft.com/provisioning/EapHostConfig">
                                     <EapTtls xmlns="http://www.microsoft.com/provisioning/EapTtlsConnectionPropertiesV1">
                                         <ServerValidation>
-                                            <ServerNames>openroaming.tetrapi.pt</ServerNames>
-                                            <TrustedRootCAHash>ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8</TrustedRootCAHash>
+                                            <ServerNames>@RADIUS_TLS_NAME@</ServerNames>
+                                            <TrustedRootCAHash>@RADIUS_TRUSTED_ROOT_CA_SHA1_HASH@</TrustedRootCAHash>
                                             <DisablePrompt>false</DisablePrompt>
                                         </ServerValidation>
                                         <Phase2Authentication>
