@@ -86,7 +86,6 @@ class ProfileController extends AbstractController
             'der',
             '-nodetach',
         ];
-        dd($command);
         $process = new Process($command);
         try {
             $process->mustRun();
@@ -99,7 +98,7 @@ class ProfileController extends AbstractController
 
 
         ///
-
+        dd($signedProfileContents);
         $response = new Response($signedProfileContents);
 
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
