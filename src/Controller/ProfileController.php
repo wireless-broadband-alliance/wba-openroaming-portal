@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 
+use App\Entity\User;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
@@ -236,22 +237,26 @@ class ProfileController extends AbstractController
         );
     }
 
-    private function createOrUpdateRadiusUser($user, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, string $realmName): RadiusUser
+    private function createOrUpdateRadiusUser(User $user, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, string $realmName): RadiusUser
     {
-        $radiusUser = $radiusUserRepository->findOneBy([
-            'username' => $user->getUserIdentifier() . "@" . $realmName
-        ]);
-
-        if (!$radiusUser) {
+        if (!$user->getRadiusUser()) {
+            $androidLimit = 64;
+            $realmSize = strlen($realmName) + 1;
+            $token = $this->generateToken($androidLimit - $realmSize);
+            $user->setRadiusUser($token . "@" . $realmName);
             $user->setRadiusToken($this->generateToken());
             $userRepository->save($user, true);
 
             $radiusUser = new RadiusUser();
-            $radiusUser->setUsername($user->getUserIdentifier() . "@" . $realmName);
+            $radiusUser->setUsername($user->getRadiusUser());
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
             $radiusUser->setValue($user->getRadiusToken());
             $radiusUserRepository->save($radiusUser, true);
+        } else {
+            $radiusUser = $radiusUserRepository->findOneBy([
+                'username' => $user->getRadiusUser()
+            ]);
         }
 
         return $radiusUser;
