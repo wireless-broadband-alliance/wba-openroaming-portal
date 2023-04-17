@@ -240,7 +240,7 @@ class ProfileController extends AbstractController
     private function createOrUpdateRadiusUser(User $user, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, string $realmName): RadiusUser
     {
         if (!$user->getRadiusUser()) {
-            $androidLimit = 64;
+            $androidLimit = 32;
             $realmSize = strlen($realmName) + 1;
             $token = $this->generateToken($androidLimit - $realmSize);
             $user->setRadiusUser($token . "@" . $realmName);
