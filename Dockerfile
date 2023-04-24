@@ -14,10 +14,10 @@ RUN add-apt-repository ppa:ondrej/php \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
-    && apt-get -y install nginx php8.1-fpm php8.1-cli php8.1-curl php8.1-mbstring \
+    && apt-get -y install xmlsec1 libxmlsec1-openssl nginx php8.1-fpm php8.1-cli php8.1-curl php8.1-mbstring \
         php8.1-mysql php8.1-gd php8.1-bcmath php8.1-readline \
         php8.1-zip php8.1-imap php8.1-xml php8.1-intl php8.1-soap \
-        php8.1-memcache php8.1-memcached php8.1-yaml supervisor nodejs yarn && mkdir -p /var/log/supervisor \
+        php8.1-memcache php8.1-memcached php8.1-yaml php8.1-dom supervisor nodejs yarn && mkdir -p /var/log/supervisor \
         && rm -rf /var/lib/apt/lists/*
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --install-dir=/usr/bin --filename=composer

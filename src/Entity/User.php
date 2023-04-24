@@ -38,6 +38,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $radius_token = null;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $radius_user = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -152,6 +155,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRadiusToken(?string $radius_token): self
     {
         $this->radius_token = $radius_token;
+
+        return $this;
+    }
+
+    public function getRadiusUser(): ?string
+    {
+        return $this->radius_user;
+    }
+
+    public function setRadiusUser(?string $radius_user): self
+    {
+        $this->radius_user = $radius_user;
 
         return $this;
     }

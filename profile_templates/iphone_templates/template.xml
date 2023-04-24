@@ -3,15 +3,15 @@
 <plist version="1.0">
 	<dict>
 		<key>PayloadDisplayName</key>
-		<string>Tetrapi</string>
+		<string>@DISPLAY_NAME@</string>
 		<key>PayloadIdentifier</key>
-		<string>tetrapi.887FAE2A-F051-4CC9-99BB-8DFD66F553A9</string>
+		<string>tetrapi.@IOS_PAYLOAD_IDENTIFIER@</string>
 		<key>PayloadRemovalDisallowed</key>
 		<false/>
 		<key>PayloadType</key>
 		<string>Configuration</string>
 		<key>PayloadUUID</key>
-		<string>887FAE2A-F051-4CC9-99BB-8DFD66F553A9</string>
+		<string>@IOS_PAYLOAD_IDENTIFIER@</string>
 		<key>PayloadVersion</key>
 		<integer>1</integer>
 		<key>PayloadContent</key>
@@ -24,9 +24,9 @@
 				<key>DisableAssociationMACRandomization</key>
 				<false/>
 				<key>DisplayedOperatorName</key>
-				<string>Tetrapi DuckLand</string>
+				<string>@IOS_OPERATOR_NAME@</string>
 				<key>DomainName</key>
-				<string>tetrapi.pt</string>
+				<string>@DOMAIN_NAME@</string>
 				<key>EAPClientConfiguration</key>
 				<dict>
 					<key>AcceptEAPTypes</key>
@@ -35,7 +35,7 @@
 					</array>
 					<key>TLSTrustedServerNames</key>
 					<array>
-						<string>openroaming.tetrapi.pt</string>
+						<string>@RADIUS_TLS_NAME@</string>
 					</array>
 					<key>TTLSInnerAuthentication</key>
 					<string>MSCHAPv2</string>
@@ -44,7 +44,7 @@
 					<key>UserPassword</key>
 					<string>@PASSWORD@</string>
 					<key>OuterIdentity</key>
-					<string>anonymous@tetrapi.pt</string>
+					<string>anonymous@@DOMAIN_NAME@</string>
 				</dict>
 				<key>EncryptionType</key>
 				<string>WPA2</string>
@@ -57,11 +57,11 @@
 				<key>PayloadDisplayName</key>
 				<string>Wi-Fi</string>
 				<key>PayloadIdentifier</key>
-				<string>com.apple.wifi.managed.4D9DE7C6-2B95-47AB-A5C1-212AFB5D2D0A</string>
+				<string>com.apple.wifi.managed.@IOS_PAYLOAD_IDENTIFIER@</string>
 				<key>PayloadType</key>
 				<string>com.apple.wifi.managed</string>
 				<key>PayloadUUID</key>
-				<string>4D9DE7C6-2B95-47AB-A5C1-212AFB5D2D0A</string>
+				<string>@IOS_PAYLOAD_IDENTIFIER@</string>
 				<key>PayloadVersion</key>
 				<integer>1</integer>
 				<key>ProxyType</key>
@@ -73,7 +73,7 @@
 				</array>
 				<key>NAIRealmNames</key>
 				<array>
-					<string>tetrapi.pt</string>
+					<string>@NAI_REALM@</string>
 				</array>
 				<key>ServiceProviderRoamingEnabled</key>
 				<true/>
