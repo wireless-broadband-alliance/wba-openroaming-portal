@@ -13,11 +13,11 @@
                 <NodeName>HomeSP</NodeName>
                 <Node>
                     <NodeName>FriendlyName</NodeName>
-                    <Value>Tetrapi</Value>
+                    <Value>@DISPLAY_NAME@</Value>
                 </Node>
                 <Node>
                     <NodeName>FQDN</NodeName>
-                    <Value>openroaming.tetrapi.pt</Value>
+                    <Value>@RADIUS_TLS_NAME@</Value>
                 </Node>
                 <Node>
                     <NodeName>RoamingConsortiumOI</NodeName>
@@ -28,7 +28,7 @@
                 <NodeName>Credential</NodeName>
                 <Node>
                     <NodeName>Realm</NodeName>
-                    <Value>tetrapi.pt</Value>
+                    <Value>@DOMAIN_NAME@</Value>
                 </Node>
                 <Node>
                     <NodeName>UsernamePassword</NodeName>
@@ -65,7 +65,7 @@
                         <NodeName>AAAServerTrustedNames</NodeName>
                         <Node>
                             <NodeName>FQDN</NodeName>
-                            <Value>openroaming.tetrapi.pt</Value>
+                            <Value>@RADIUS_TLS_NAME@</Value>
                         </Node>
                     </Node>
                 </Node>

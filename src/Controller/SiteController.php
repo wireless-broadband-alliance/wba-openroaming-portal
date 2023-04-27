@@ -67,7 +67,7 @@ class SiteController extends AbstractController
                 }
 
             }
-            if ($this->getUser() !== null) {
+            if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
 
             }
@@ -81,7 +81,7 @@ class SiteController extends AbstractController
         $data['os'] = [
             'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
             'items' => [
-//                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
+                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
                 OSTypes::IOS => ['alt' => 'Apple Logo'],
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
@@ -90,46 +90,14 @@ class SiteController extends AbstractController
         return $this->render('site/landing.html.twig', $data);
     }
 
-//    #[Route('/tap', name: 'app_gra')]
-//    public function gra(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager): Response
-//    {
-//        $user = new User();
-//        $form = $this->createForm(SimpleRegistrationFormType::class, $user);
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            // encode the plain password
-//            $user->setPassword(
-//                $userPasswordHasher->hashPassword(
-//                    $user,
-//                    "iliketurtles123456789"
-//                )
-//            );
-//            $user->setUuid(str_replace('@', "-AT-TAP-" . uniqid("", true) . "-", $user->getEmail()));
-//
-//            $entityManager->persist($user);
-//            $entityManager->flush();
-//
-//
-//            return $userAuthenticator->authenticateUser(
-//                $user,
-//                $authenticator,
-//                $request
-//            );
-//        }
-//        return $this->render('site/tap.html.twig', [
-//            'registrationForm' => $form->createView(),
-//        ]);
-//    }
-
     private function detectDevice($userAgent)
     {
         $os = OSTypes::NONE;
 
         // Windows
-//        if (preg_match('/windows|win32/i', $userAgent)) {
-//            $os = OSTypes::WINDOWS;
-//        }
+        if (preg_match('/windows|win32/i', $userAgent)) {
+            $os = OSTypes::WINDOWS;
+        }
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', $userAgent)) {

@@ -29,3 +29,14 @@ yarn-error.log
 .env
 
 .idea/
+
+signing-keys/privkey.pem
+
+signing-keys/cert.pem
+
+signing-keys/windowsKey.pfx
+
+signing-keys/ca.pem
+
+signing-keys/chain.pem
+signing-keys/fullchain.pem
