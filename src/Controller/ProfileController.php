@@ -177,10 +177,8 @@ class ProfileController extends AbstractController
         $command = [
             'xmlsec1',
             '--sign',
-            '--pkcs12',
-            '/var/www/openroaming/signing-keys/windowsKey.pfx',
-            '--pwd',
-            "openroaming",
+            '--privkey-pem',
+            '/var/www/openroaming/signing-keys/privkey.pem',
             '--output',
             $signedFilePath,
             $unSignedFilePath,
