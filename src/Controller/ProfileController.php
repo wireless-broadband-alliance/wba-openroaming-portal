@@ -180,7 +180,7 @@ class ProfileController extends AbstractController
             '--pkcs12',
             '/var/www/openroaming/signing-keys/windowsKey.pfx',
             '--pwd',
-            "",
+            "openroaming",
             '--output',
             $signedFilePath,
             $unSignedFilePath,

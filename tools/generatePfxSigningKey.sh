@@ -10,7 +10,7 @@ fi
 # Create the PFX file
 cat ../signing-keys/cert.pem ../signing-keys/ca.pem \
  | openssl pkcs12 -export \
-     -inkey ../signing-keys/privkey.pem -password "pass:" -out ../signing-keys/windowsKey.pfx
+     -inkey ../signing-keys/privkey.pem -password "pass:openroaming" -out ../signing-keys/windowsKey.pfx
 
 # Check if the PFX file was created successfully
 if [ ! -f ../signing-keys/windowsKey.pfx ]; then
