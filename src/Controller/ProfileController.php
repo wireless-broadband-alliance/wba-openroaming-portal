@@ -18,8 +18,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
+
 class ProfileController extends AbstractController
 {
     private array $settings;
@@ -175,38 +174,29 @@ class ProfileController extends AbstractController
         $signedFilePath = '/tmp/' . $randomSignedFileName;
         $unSignedFilePath = '/tmp/' . $randomFileName;
         file_put_contents($unSignedFilePath, $profile);
-        $doc = new \DOMDocument();
-//        $doc->formatOutput = FALSE;
-//        $doc->preserveWhiteSpace = TRUE;
-        $doc->loadXML(file_get_contents($unSignedFilePath));
-        $objDSig = new XMLSecurityDSig('');
-        $objDSig->setCanonicalMethod(XMLSecurityDSig::C14N);
-        $options['force_uri'] = true;
-        $objDSig->addReference(
-            $doc,
-            XMLSecurityDSig::SHA1,
-            array('http://www.w3.org/2000/09/xmldsig#enveloped-signature'),
-            $options
-        );
-
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type'=>'private'));
-//        $pfx = file_get_contents('/var/www/openroaming/signing-keys/signing.pfx');
-//        openssl_pkcs12_read($pfx, $key, "");
-        $objKey->loadKey(file_get_contents('/var/www/openroaming/signing-keys/privkey.pem'));
-        $objDSig->sign($objKey);
-//        $objDSig->add509Cert($key['cert']);
-        $objDSig->add509Cert(file_get_contents('/var/www/openroaming/signing-keys/cert.pem'));
-        $objDSig->add509Cert(file_get_contents('/var/www/openroaming/signing-keys/chain.pem'));
-        $objDSig->appendSignature($doc->documentElement);
-        $doc->save($signedFilePath);
-
+        $command = [
+            'xmlsec1',
+            '--sign',
+            '--pkcs12',
+            '/var/www/openroaming/signing-keys/windowsKey.pfx',
+            '--pwd',
+            "",
+            '--output',
+            $signedFilePath,
+            $unSignedFilePath,
+        ];
+        $process = new Process($command);
+        try {
+            $process->mustRun();
+            unlink($unSignedFilePath);
+        } catch (ProcessFailedException $exception) {
+            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+        }
         $uuid = uniqid("", true);
         $signedProfileContents = file_get_contents($signedFilePath);
-//        dd($signedProfileContents);
-//        unlink($signedFilePath);
+        unlink($signedFilePath);
         $cache = new CacheUtils();
         $cache->write('profile_' . $uuid, $signedProfileContents);
-//        return $this->file($signedFilePath);
         return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));
     }
 
