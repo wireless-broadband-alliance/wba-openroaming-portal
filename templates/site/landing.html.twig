@@ -156,13 +156,21 @@
                     </div>
 
                     {% if SAML_ENABLED %}
-                        <div class="mt-10 text-center">
-                            <a href="#"
-                               class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
-                                {{ SAML_LABEL }}
-                            </a>
+                        <div class="mt-10 mb-10 text-center">
+                            <span class="float-left">
+                                <a href="#" class="rounded-lg bg-[#7DB928] px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                    {{ SAML_LABEL }}
+                                </a>
+                            </span>
+
+                            <p class="float-right align-middle">
+                                {{ SAML_DESCRIPTION }}
+                            </p>
                         </div>
                     {% endif %}
+                    <div class="mt-24 text-center">
+                        <p>By authenticating with any of the above providers you agree with our <a href="https://wballiance.com/openroaming/toc/" target="_blank" class="underline font-base">terms & conditions of use</a> and <a href="https://wballiance.com/openroaming/privacy-policy" target="_blank" class="underline font-base">privacy policy</a>.</p>
+                    </div>
                 {% endif %}
                 {% if app.user %}
                     <div class="space-y-4 mt-6 pr-2">
