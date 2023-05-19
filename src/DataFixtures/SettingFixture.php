@@ -26,6 +26,8 @@ class SettingFixture extends Fixture
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'creative@tetrapi.pt'],
+            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
         ];
 
         foreach ($settings as $settingData) {
