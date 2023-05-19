@@ -11,8 +11,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
-#, SamlUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUserInterface
+
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -136,12 +136,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUsername(): ?string
     {
-        return $this->username;
+        return $this->uuid;
     }
 
     public function setUsername(string $username): self
     {
-        $this->username = $username;
+        $this->uuid = $username;
 
         return $this;
     }
@@ -193,17 +193,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-    // public function setSamlAttributes(array $attributes)
-    // {
-    //     // $this->email = $attributes['mail'][0];
-    //     // $this->saml_identifier = $attributes['sAMAccountName'][0];
-    //     // $this->first_name = $attributes['givenName'][0];
-    //     // $this->last_name = '';
-    //     // $this->password = 'notused'; //invalid hash so won't ever authenticate
+    public function setSamlAttributes(array $attributes)
+    {
+        $this->email = $attributes['email'][0];
+        $this->saml_identifier = $attributes['sAMAccountName'][0];
+        $this->first_name = $attributes['givenName'][0];
+        $this->last_name = $attributes['surname'][0];
+        $this->uuid = $attributes['sAMAccountName'][0];
+        $this->password = 'notused'; //invalid hash so won't ever authenticate
 
-    //     // #$this->setLevel(LevelType::NONE);
-    //     return null;
-    // }
+        // #$this->setLevel(LevelType::NONE);
+    }
 
     public function getFirstName(): ?string
     {
