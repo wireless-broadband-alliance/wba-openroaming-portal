@@ -37,7 +37,7 @@ class SiteController extends AbstractController
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if ($request->isMethod('POST')) {
+        if(($data['demoMode'] === 'true') && $request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                 $this->addFlash('error', 'Please select OS');
