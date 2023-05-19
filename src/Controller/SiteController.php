@@ -45,27 +45,52 @@ class SiteController extends AbstractController
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if(($data['demoMode']) && $request->isMethod('POST')) {
+        if($data['demoMode']) {
+            if($request->isMethod('POST')){
+                $payload = $request->request->all();
+                if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
+                    $this->addFlash('error', 'Please select OS');
+                } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
+                    $this->addFlash('error', 'Please a valid enter email');
+                } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
+                    $this->addFlash('error', 'Please agree to the Terms of Service');
+                } else if ($this->getUser() === null) {
+                    $user = new User();
+                    $user->setEmail($payload['email']);
+                    $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                    $user->setUuid(str_replace('@', "-AT-" . $data['customerPrefix'] . "-" . uniqid("", true) . "-", $user->getEmail()));
+
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                    $userAuthenticator->authenticateUser(
+                        $user,
+                        $authenticator,
+                        $request
+                    );
+                }
+                if (!array_key_exists('radio-os', $payload)) {
+                    if (!array_key_exists('detected-os', $payload)) {
+                        $os = $request->query->get('os');
+                        if (!empty($os)) {
+                            $payload['radio-os'] = $os;
+                        } else {
+                            return $this->redirectToRoute($actionName);
+                        }
+                    } else {
+                        $payload['radio-os'] = $payload['detected-os'];
+                    }
+
+                }
+                if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
+                    return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
+
+                }
+            }
+
+        }else if($request->isMethod('POST')){
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                 $this->addFlash('error', 'Please select OS');
-            } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
-                $this->addFlash('error', 'Please a valid enter email');
-            } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
-                $this->addFlash('error', 'Please agree to the Terms of Service');
-            } else if ($this->getUser() === null) {
-                $user = new User();
-                $user->setEmail($payload['email']);
-                $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
-                $user->setUuid(str_replace('@', "-AT-" . $data['customerPrefix'] . "-" . uniqid("", true) . "-", $user->getEmail()));
-
-                $entityManager->persist($user);
-                $entityManager->flush();
-                $userAuthenticator->authenticateUser(
-                    $user,
-                    $authenticator,
-                    $request
-                );
             }
             if (!array_key_exists('radio-os', $payload)) {
                 if (!array_key_exists('detected-os', $payload)) {
