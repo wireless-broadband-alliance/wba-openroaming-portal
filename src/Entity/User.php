@@ -41,6 +41,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 64, nullable: true)]
     private ?string $radius_user = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $saml_identifier = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -167,6 +170,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRadiusUser(?string $radius_user): self
     {
         $this->radius_user = $radius_user;
+
+        return $this;
+    }
+
+    public function getSamlIdentifier(): ?string
+    {
+        return $this->saml_identifier;
+    }
+
+    public function setSamlIdentifier(?string $saml_identifier): self
+    {
+        $this->saml_identifier = $saml_identifier;
 
         return $this;
     }
