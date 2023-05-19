@@ -1,2 +1,7 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
 nbgrp_saml:
         resource: "@NbgrpOneloginSamlBundle/Resources/config/routes.php"
