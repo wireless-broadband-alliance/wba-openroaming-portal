@@ -19,6 +19,15 @@ class SettingFixture extends Fixture
             ['name' => 'RADIUS_TLS_NAME', 'value' => 'EditMe'],
             ['name' => 'NAI_REALM', 'value' => 'EditMe'],
             ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
+            ['name' => 'DEMO_MODE', 'value' => 'true'],
+            ['name' => 'PAGE_TITLE', 'value' => 'TETRAPI'],
+            ['name' => 'CUSTOMER_LOGO', 'value' => 'resources/logos/tetrapi.svg'],
+            ['name' => 'OPENROAMING_LOGO', 'value' => 'resources/logos/openroaming.svg'],
+            ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
+            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
+            ['name' => 'CONTACT_EMAIL', 'value' => 'creative@tetrapi.pt'],
+            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
         ];
 
         foreach ($settings as $settingData) {
