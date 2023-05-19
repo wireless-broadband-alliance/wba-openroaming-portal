@@ -45,7 +45,6 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: ROLE_USER }
 
 when@test:
     security:
