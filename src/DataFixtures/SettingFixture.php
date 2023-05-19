@@ -28,6 +28,7 @@ class SettingFixture extends Fixture
             ['name' => 'CONTACT_EMAIL', 'value' => 'creative@tetrapi.pt'],
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
+            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
         ];
 
         foreach ($settings as $settingData) {
