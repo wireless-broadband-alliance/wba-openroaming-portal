@@ -1,55 +1,19 @@
 nbgrp_onelogin_saml:
     onelogin_settings:
         default:
-            # Mandatory SAML settings
-            idp:
-                entityId: 'http://localhost/saml/metadata' 
-                singleSignOnService:
-                    url: 'https://id.example.com/saml2/idp/SSOService.php'
-                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
-                singleLogoutService:
-                    url: 'https://id.example.com/saml2/idp/SingleLogoutService.php'
-                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
-                x509cert: 'MIIC...'
-            sp:
-                entityId: 'https://localhost/saml/metadata'  #  Default: '<request_scheme_and_host>/saml/metadata'
-                assertionConsumerService:
-                    url: 'https://localhost/saml/acs'  #  Default: '<request_scheme_and_host>/saml/acs'
-                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
-                singleLogoutService:
-                    url: 'https://localhost/saml/logout'  #  Default: '<request_scheme_and_host>/saml/logout'
-                    binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
-                privateKey: 'MIIE...'
-            # Optional SAML settings
-            baseurl: 'https://myapp.com/saml/'  #  Default: '<request_scheme_and_host>/saml/'
-            strict: true
-            debug: true
-            security:
-                nameIdEncrypted: false
-                authnRequestsSigned: false
-                logoutRequestSigned: false
-                logoutResponseSigned: false
-                signMetadata: false
-                wantMessagesSigned: false
-                wantAssertionsEncrypted: false
-                wantAssertionsSigned: true
-                wantNameId: false
-                wantNameIdEncrypted: false
-                requestedAuthnContext: true
-                wantXMLValidation: false
-                relaxDestinationValidation: false
-                destinationStrictlyMatches: true
-                allowRepeatAttributeName: false
-                rejectUnsolicitedResponsesWithInResponseTo: false
-                signatureAlgorithm: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
-                digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256'
-                encryption_algorithm: 'http://www.w3.org/2001/04/xmlenc#aes256-cbc'
-                lowercaseUrlencoding: false
-            compress:
-                requests: false
-                responses: false
-
-    # Optional parameters
-    use_proxy_vars: true
-    idp_parameter_name: 'custom-idp'
-    entity_manager_name: 'custom-em'
+          # Mandatory SAML settings
+          idp:
+            entityId: '%env(string:SAML_IDP_ENTITY_ID)%'
+            singleSignOnService:
+              url: '%env(string:SAML_IDP_SSO_URL)%'
+              binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+            x509cert: '%env(string:SAML_IDP_X509_CERT)%'
+          sp:
+            entityId: '%env(string:SAML_SP_ENTITY_ID)%'
+            assertionConsumerService:
+              url: '%env(string:SAML_SP_ACS_URL)%'
+              binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
+          security:
+            allowRepeatAttributeName: true
+          strict: false
+          debug: true
