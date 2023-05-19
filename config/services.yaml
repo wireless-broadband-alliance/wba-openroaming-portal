@@ -22,3 +22,17 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    saml_user_factory:
+        class: Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory
+        arguments:
+            ##  User class
+            - App\Entity\User
+            ##  Attribute mapping
+            - password: 'notused'
+              # email: $email
+              first_name: $givenName
+              last_name: $surname
+              uuid: $sAMAccountName
+              saml_identifier: $sAMAccountName
+              roles: []

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9778c4e9762cd6690d380c44afd873a4",
+    "content-hash": "43d4c27103c866b7dd34647ab0fb1fc1",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1557,6 +1557,129 @@
                 }
             ],
             "time": "2023-02-06T13:46:10+00:00"
+        },
+        {
+            "name": "nbgrp/onelogin-saml-bundle",
+            "version": "v1.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nbgrp/onelogin-saml-bundle.git",
+                "reference": "907a59431edcfbb962b2bb952d987693b63ca757"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nbgrp/onelogin-saml-bundle/zipball/907a59431edcfbb962b2bb952d987693b63ca757",
+                "reference": "907a59431edcfbb962b2bb952d987693b63ca757",
+                "shasum": ""
+            },
+            "require": {
+                "onelogin/php-saml": "^4",
+                "php": "^8.1",
+                "psr/log": "^1 || ^2 || ^3",
+                "symfony/config": "^6",
+                "symfony/dependency-injection": "^6",
+                "symfony/deprecation-contracts": "^3",
+                "symfony/event-dispatcher-contracts": "^3",
+                "symfony/http-foundation": "^6",
+                "symfony/http-kernel": "^6",
+                "symfony/routing": "^6",
+                "symfony/security-bundle": "^6",
+                "symfony/security-core": "^6",
+                "symfony/security-http": "^6"
+            },
+            "conflict": {
+                "symfony/http-kernel": "<6.2",
+                "symfony/security-core": "<6.2"
+            },
+            "require-dev": {
+                "doctrine/orm": "^2.3 || ^3",
+                "symfony/event-dispatcher": "^6",
+                "symfony/phpunit-bridge": "^6"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Nbgrp\\OneloginSamlBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Alexander Menshchikov",
+                    "email": "alexander.menshchikov@yandex.ru"
+                }
+            ],
+            "description": "OneLogin SAML Symfony Bundle",
+            "keywords": [
+                "SSO",
+                "multiple IdP",
+                "onelogin",
+                "saml"
+            ],
+            "support": {
+                "issues": "https://github.com/nbgrp/onelogin-saml-bundle/issues",
+                "source": "https://github.com/nbgrp/onelogin-saml-bundle/tree/v1.3.2"
+            },
+            "time": "2023-03-22T20:23:42+00:00"
+        },
+        {
+            "name": "onelogin/php-saml",
+            "version": "4.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/onelogin/php-saml.git",
+                "reference": "b22a57ebd13e838b90df5d3346090bc37056409d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/b22a57ebd13e838b90df5d3346090bc37056409d",
+                "reference": "b22a57ebd13e838b90df5d3346090bc37056409d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3",
+                "robrichards/xmlseclibs": ">=3.1.1"
+            },
+            "require-dev": {
+                "pdepend/pdepend": "^2.8.0",
+                "php-coveralls/php-coveralls": "^2.0",
+                "phploc/phploc": "^4.0 || ^5.0 || ^6.0 || ^7.0",
+                "phpunit/phpunit": "^9.5",
+                "sebastian/phpcpd": "^4.0 || ^5.0 || ^6.0 ",
+                "squizlabs/php_codesniffer": "^3.5.8"
+            },
+            "suggest": {
+                "ext-curl": "Install curl lib to be able to use the IdPMetadataParser for parsing remote XMLs",
+                "ext-dom": "Install xml lib",
+                "ext-openssl": "Install openssl lib in order to handle with x509 certs (require to support sign and encryption)",
+                "ext-zlib": "Install zlib"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OneLogin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "OneLogin PHP SAML Toolkit",
+            "homepage": "https://developers.onelogin.com/saml/php",
+            "keywords": [
+                "SAML2",
+                "onelogin",
+                "saml"
+            ],
+            "support": {
+                "email": "sixto.garcia@onelogin.com",
+                "issues": "https://github.com/onelogin/php-saml/issues",
+                "source": "https://github.com/onelogin/php-saml/"
+            },
+            "time": "2022-07-15T20:44:36+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
