@@ -25,14 +25,11 @@
                     <div class="bg-red-600 text-white font-bold p-3 text-center">
                         <h2>DEMO MODE</h2>
                         <p class="text-xs lg:text-base mt-5 ">
-                            This portal is for testing purposes only and should not be used for production purposes, and cannot be used for production or comercial purposes.
-                        </p>
+                            This portal is for testing purposes only and should not be used for production purposes, and cannot be used for production or comercial purposes. </p>
                         <p class="text-xs lg:text-base">
-                            Users created via this portal can be revoked at any time without notice.
-                        </p>
+                            Users created via this portal can be revoked at any time without notice. </p>
                         <p class="text-xs lg:text-base text-green-300">
-                            Production usage of this portal is subject to being chased around with (and beaten by) a stick
-                        </p>
+                            Production usage of this portal is subject to being chased around with (and beaten by) a stick </p>
                     </div>
                 {% endif %}
             </div>
@@ -54,8 +51,7 @@
                 {% if demoMode %}
                     <div class="border-red-600 border-dashed border-2 p-3 mt-3">
                         <h3 class="text-red-600 mt-3 text-center">
-                            DEMO MODE - UNCONFIRMED EMAIL SYSTEM
-                        </h3>
+                            DEMO MODE - UNCONFIRMED EMAIL SYSTEM </h3>
                         <form method="post">
                             {% if not app.user %}
                                 {# Email #}
@@ -152,6 +148,21 @@
 
                         </form>
                     </div>
+                {% else %}
+                    <div class="mt-20">
+                        <p class="text-center">
+                            Please select one of the following authentication methods to obtain a profile:
+                        </p>
+                    </div>
+
+                    {% if SAML_ENABLED %}
+                        <div class="mt-10 text-center">
+                            <a href="#"
+                               class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                {{ SAML_LABEL }}
+                            </a>
+                        </div>
+                    {% endif %}
                 {% endif %}
                 {% if app.user %}
                     <div class="space-y-4 mt-6 pr-2">
