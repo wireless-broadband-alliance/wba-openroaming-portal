@@ -3,7 +3,7 @@ nbgrp_onelogin_saml:
         default:
             # Mandatory SAML settings
             idp:
-                entityId: 'http://localhost/smal/metadata'
+                entityId: 'http://localhost/saml/metadata' 
                 singleSignOnService:
                     url: 'https://id.example.com/saml2/idp/SSOService.php'
                     binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
@@ -12,7 +12,7 @@ nbgrp_onelogin_saml:
                     binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
                 x509cert: 'MIIC...'
             sp:
-                entityId: 'https://localhost/smal/metadata'  #  Default: '<request_scheme_and_host>/saml/metadata'
+                entityId: 'https://localhost/saml/metadata'  #  Default: '<request_scheme_and_host>/saml/metadata'
                 assertionConsumerService:
                     url: 'https://localhost/saml/acs'  #  Default: '<request_scheme_and_host>/saml/acs'
                     binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
