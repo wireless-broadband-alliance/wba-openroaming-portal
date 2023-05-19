@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\OSTypes;
+use App\Repository\SettingRepository;
 use App\Security\PasswordAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,11 +25,15 @@ class SiteController extends AbstractController
     }
 
     #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
     {
-        $data['title'] = 'Landing Page';
-        $data['customerLogoName'] = 'resources/logos/tetrapi.svg';
-        $data['customerPrefix'] = 'TCS';
+        $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $data['openroamingLogoName'] = $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue();
+        $data['welcomeText'] = $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue();
+        $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
+        $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue();
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');

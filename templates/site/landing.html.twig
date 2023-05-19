@@ -9,27 +9,32 @@
         <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]">
             <div class="h-[100%] w-[100%] flex flex-col justify-between">
                 <img class="mt-16 lg:mt-36 w-96"
-                     src="{{ asset('resources/logos/openroaming.svg') }}"
+                     src="{{ asset(openroamingLogoName) }}"
                      alt="OpenRoaming Logo"/>
 
-                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">Welcome to OpenRoaming
-                    Provisioning
-                    Service</h1>
+                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ welcomeText }}</h1>
 
-                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">This provisioning
-                    portal is for the WBA
-                    <span class="underline font-semibold">OpenRoaming®</span> Live Program. These credentials are to be
-                    used for Test
-                    Purposes only and are not valid
-                    for commercial use.
-                </p>
+                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ welcomeDescription }}</p>
 
-
-                <p class="text-white font-light text-xs lg:text-base mt-16 mb-6 lg:mt-auto">If you encounter any
+                <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any
                     questions, please contact
-                    <a href="mailto:creative@tetrapi.pt"
-                       class="font-semibold underline">creative@tetrapi.pt</a>
+                    <a href="mailto:{{ contactEmail }}"
+                       class="font-semibold underline">{{ contactEmail }}</a>
                 </p>
+                {% if demoMode %}
+                    <div class="bg-red-600 text-white font-bold p-3 text-center">
+                        <h2>DEMO MODE</h2>
+                        <p class="text-xs lg:text-base mt-5 ">
+                            This portal is for testing purposes only and should not be used for production purposes, and cannot be used for production or comercial purposes.
+                        </p>
+                        <p class="text-xs lg:text-base">
+                            Users created via this portal can be revoked at any time without notice.
+                        </p>
+                        <p class="text-xs lg:text-base text-green-300">
+                            Production usage of this portal is subject to being chased around with (and beaten by) a stick
+                        </p>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
