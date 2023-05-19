@@ -33,6 +33,5 @@ services:
               email: $email
               first_name: $givenName
               last_name: $surname
-              username: $sAMAccountName
+              uuid: $sAMAccountName
               saml_identifier: $sAMAccountName
-              roles: ['ROLE_USER']
