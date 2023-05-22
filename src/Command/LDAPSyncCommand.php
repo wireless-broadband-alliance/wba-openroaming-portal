@@ -2,7 +2,12 @@
 
 namespace App\Command;
 
+use App\Entity\UserRadiusProfile;
+use App\Enum\UserRadiusProfileStatus;
+use App\RadiusDb\Entity\RadiusUser;
+use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,11 +23,14 @@ class LDAPSyncCommand extends Command
 {
     private $userRepository;
     private $settingRepository;
+    private $radiusUserRepository;
 
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $userRadiusProfile)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
+        $this->radiusUserRepository = $radiusUserRepository;
+        $this->userRadiusProfile = $userRadiusProfile;
 
         parent::__construct();
     }
@@ -46,6 +54,7 @@ class LDAPSyncCommand extends Command
             $ldapUser = $this->fetchUserFromLDAP($user->saml_identifier);
             if(!$ldapUser) {
                 $io->writeln('User ' . $user->saml_identifier . ' not found in LDAP, disabling');
+                $this->disableProfiles($user);
                 continue;
             }
             $userAccountControl = $ldapUser['useraccountcontrol'][0];
@@ -54,10 +63,13 @@ class LDAPSyncCommand extends Command
 
             if($userLocked){
                 $io->writeln('User ' . $user->saml_identifier . ' is locked in LDAP, disabling');
+                $this->disableProfiles($user);
             }else if($passwordExpired) {
                 $io->writeln('User ' . $user->saml_identifier . ' has an expired password in LDAP, disabling');
+                $this->disableProfiles($user);
             }else{
                 $io->writeln('User ' . $user->saml_identifier . ' is enabled in LDAP, enabling');
+                $this->enableProfiles($user);
             }
 
         }
@@ -90,5 +102,43 @@ class LDAPSyncCommand extends Command
         }
 
         return null;
+    }
+
+    private function disableProfiles($user)
+    {
+        $profiles = $user->getUserRadiusProfiles();
+        foreach ($profiles as $profile) {
+            if($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE){
+                continue;
+            }
+            $profile->setStatus(UserRadiusProfileStatus::REVOKED);
+            $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
+            $this->userRadiusProfile->save($profile, true);
+            if($radiusUser){
+                $this->radiusUserRepository->remove($radiusUser);
+            }
+        }
+    }
+
+    private function enableProfiles($user)
+    {
+        $profiles = $user->getUserRadiusProfiles();
+        foreach ($profiles as $profile) {
+            if($profile->getStatus() === UserRadiusProfileStatus::ACTIVE){
+                continue;
+            }
+            $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
+            if(!$radiusUser){
+                $radiusUser = new RadiusUser();
+                $radiusUser->setUsername($profile->getRadiusUser());
+                $radiusUser->setAttribute('Cleartext-Password');
+                $radiusUser->setOp(':=');
+                $radiusUser->setValue($profile->getRadiusToken());
+                $this->radiusUserRepository->save($radiusUser, true);
+                $profile->setStatus(UserRadiusProfileStatus::ACTIVE);
+                $this->userRadiusProfile->save($profile, true);
+
+            }
+        }
     }
 }
