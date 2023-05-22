@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -51,6 +53,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $last_name = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
+    private Collection $userRadiusProfiles;
+
+    public function __construct()
+    {
+        $this->userRadiusProfiles = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -225,6 +235,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setLastName(?string $last_name): self
     {
         $this->last_name = $last_name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserRadiusProfile>
+     */
+    public function getUserRadiusProfiles(): Collection
+    {
+        return $this->userRadiusProfiles;
+    }
+
+    public function addUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
+    {
+        if (!$this->userRadiusProfiles->contains($userRadiusProfile)) {
+            $this->userRadiusProfiles->add($userRadiusProfile);
+            $userRadiusProfile->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
+    {
+        if ($this->userRadiusProfiles->removeElement($userRadiusProfile)) {
+            // set the owning side to null (unless already changed)
+            if ($userRadiusProfile->getUser() === $this) {
+                $userRadiusProfile->setUser(null);
+            }
+        }
 
         return $this;
     }
