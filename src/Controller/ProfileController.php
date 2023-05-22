@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
+use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
@@ -241,7 +242,7 @@ class ProfileController extends AbstractController
 
     private function createOrUpdateRadiusUser(User $user, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $radiusProfileRepository, UserRepository $userRepository, string $realmName): RadiusUser
     {
-        $radiusProfile = $radiusProfileRepository->findOneBy(['user' => $user]);
+        $radiusProfile = $radiusProfileRepository->findOneBy(['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]);
         if (!$radiusProfile) {
             $radiusProfile = new UserRadiusProfile();
 
@@ -252,6 +253,8 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setIssuedAt(new \DateTimeImmutable());
 
             $radiusUser = new RadiusUser();
             $radiusUser->setUsername($username);
