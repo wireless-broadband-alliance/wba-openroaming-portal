@@ -6,10 +6,10 @@
 {% block body %}
     <div class="h-screen w-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
-        <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]">
+        <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]" style="background-image: url('{{ wallpaperImageName }}');">
             <div class="h-[100%] w-[100%] flex flex-col justify-between">
                 <img class="mt-16 lg:mt-36 w-96"
-                     src="{{ asset(openroamingLogoName) }}"
+                     src="{{ openroamingLogoName }}"
                      alt="OpenRoaming Logo"/>
 
                 <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ welcomeText }}</h1>
@@ -40,7 +40,7 @@
                 {{ stimulus_controller('visibility') }}>
             <div>
                 <img class="mt-8 lg:mt-0"
-                     src="{{ asset(customerLogoName) }}"
+                     src="{{ customerLogoName }}"
                      alt="Logo"/>
 
                 <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
