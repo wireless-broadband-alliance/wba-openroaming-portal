@@ -44,7 +44,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     private ?string $radius_user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $saml_identifier = null;
+    public ?string $saml_identifier = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
