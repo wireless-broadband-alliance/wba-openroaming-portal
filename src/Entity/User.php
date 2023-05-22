@@ -40,12 +40,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     private $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $radius_token = null;
-
-    #[ORM\Column(length: 64, nullable: true)]
-    private ?string $radius_user = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -164,30 +158,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getRadiusToken(): ?string
-    {
-        return $this->radius_token;
-    }
-
-    public function setRadiusToken(?string $radius_token): self
-    {
-        $this->radius_token = $radius_token;
-
-        return $this;
-    }
-
-    public function getRadiusUser(): ?string
-    {
-        return $this->radius_user;
-    }
-
-    public function setRadiusUser(?string $radius_user): self
-    {
-        $this->radius_user = $radius_user;
 
         return $this;
     }
