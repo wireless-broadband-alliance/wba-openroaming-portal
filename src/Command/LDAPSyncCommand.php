@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,10 +17,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class LDAPSyncCommand extends Command
 {
     private $userRepository;
+    private $settingRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository)
     {
         $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
 
         parent::__construct();
     }
@@ -32,11 +35,15 @@ class LDAPSyncCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        if($this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue() === 'false'){
+            $io->writeln('LDAP sync is disabled');
+            return Command::SUCCESS;
+        }
         $ldapEnabledUsers = $this->userRepository->findLDAPEnabledUsers();
         $io->writeln('Found ' . count($ldapEnabledUsers) . ' LDAP enabled users');
         foreach ($ldapEnabledUsers as $user) {
             $io->writeln('Syncing ' . $user->saml_identifier . ' with LDAP');
-            $ldapUser = $this->fetchUserFromLDAP('or-demo');
+            $ldapUser = $this->fetchUserFromLDAP($user->saml_identifier);
             if(!$ldapUser) {
                 $io->writeln('User ' . $user->saml_identifier . ' not found in LDAP, disabling');
                 continue;
@@ -60,16 +67,16 @@ class LDAPSyncCommand extends Command
 
     private function fetchUserFromLDAP(string $identifier)
     {
-        $ldapServer = 'ldap://172.17.0.53';
-        $ldapUsername = 'CN=ORSYNC,OU=System,OU=Admin,OU=Funcionarios,DC=CCASTANHEIRO,DC=PT';
-        $ldapPassword = '';
+        $ldapServer = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SERVER'])->getValue();
+        $ldapUsername = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_DN'])->getValue();
+        $ldapPassword = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_PASSWORD'])->getValue();
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 1);
         ldap_bind($ldapConnection, $ldapUsername, $ldapPassword) or die("Could not bind to LDAP server.");
-        $searchFilter = "(sAMAccountName=$identifier)";
-        $searchBaseDN = "DC=CCASTANHEIRO,DC=PT";
+        $searchFilter = str_replace("@ID", $identifier, $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue());
+        $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
         $searchResult = ldap_search($ldapConnection, $searchBaseDN, $searchFilter);
 
         ldap_get_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
@@ -80,8 +87,8 @@ class LDAPSyncCommand extends Command
 
         if ($searchEntries['count'] === 1) {
             return $searchEntries[0];
-        } else {
-            return null;
         }
+
+        return null;
     }
 }
