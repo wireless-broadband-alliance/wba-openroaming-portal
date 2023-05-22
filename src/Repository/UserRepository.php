@@ -80,4 +80,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function findLDAPEnabledUsers()
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.saml_identifier is not null')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }
