@@ -252,7 +252,6 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfileRepository->save($radiusProfile, true);
 
             $radiusUser = new RadiusUser();
             $radiusUser->setUsername($username);
@@ -260,6 +259,7 @@ class ProfileController extends AbstractController
             $radiusUser->setOp(':=');
             $radiusUser->setValue($token);
             $radiusUserRepository->save($radiusUser, true);
+            $radiusProfileRepository->save($radiusProfile, true);
         } else {
             $radiusUser = $radiusUserRepository->findOneBy([
                 'username' => $radiusProfile->getRadiusUser(),
