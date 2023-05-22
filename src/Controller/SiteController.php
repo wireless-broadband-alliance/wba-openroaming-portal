@@ -18,11 +18,6 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class SiteController extends AbstractController
 {
-    #[Route('/home', name: 'app_home')]
-    public function index(): Response
-    {
-        return $this->render('site/index.html.twig');
-    }
 
     #[Route('/', name: 'app_landing')]
     public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
