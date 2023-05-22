@@ -51,9 +51,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
     private Collection $userRadiusProfiles;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
+    private Collection $userExternalAuths;
+
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
+        $this->userExternalAuths = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -233,6 +237,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
             // set the owning side to null (unless already changed)
             if ($userRadiusProfile->getUser() === $this) {
                 $userRadiusProfile->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserExternalAuth>
+     */
+    public function getUserExternalAuths(): Collection
+    {
+        return $this->userExternalAuths;
+    }
+
+    public function addUserExternalAuth(UserExternalAuth $userExternalAuth): self
+    {
+        if (!$this->userExternalAuths->contains($userExternalAuth)) {
+            $this->userExternalAuths->add($userExternalAuth);
+            $userExternalAuth->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): self
+    {
+        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
+            // set the owning side to null (unless already changed)
+            if ($userExternalAuth->getUser() === $this) {
+                $userExternalAuth->setUser(null);
             }
         }
 
