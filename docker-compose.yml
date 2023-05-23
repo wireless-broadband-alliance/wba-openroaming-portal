@@ -3,6 +3,7 @@ services:
   web:
     image: registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:latest
     env_file:
+      - .env
     volumes:
       - .env/:/var/www/openroaming/.env
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
