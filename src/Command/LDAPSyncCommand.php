@@ -115,8 +115,9 @@ class LDAPSyncCommand extends Command
             $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
             $this->userRadiusProfile->save($profile, true);
             if($radiusUser){
-                $this->radiusUserRepository->remove($radiusUser);
+                $this->radiusUserRepository->remove($radiusUser, true);
             }
+
         }
     }
 
