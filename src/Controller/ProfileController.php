@@ -248,8 +248,8 @@ class ProfileController extends AbstractController
 
             $androidLimit = 32;
             $realmSize = strlen($realmName) + 1;
+            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
             $token = $this->generateToken($androidLimit - $realmSize);
-            $username = $token . "@" . $realmName;
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
