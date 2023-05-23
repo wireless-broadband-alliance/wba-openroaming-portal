@@ -4,9 +4,12 @@ namespace App\Controller;
 
 
 use App\Entity\User;
+use App\Entity\UserRadiusProfile;
+use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Utils\CacheUtils;
 use Doctrine\Persistence\ManagerRegistry;
@@ -29,7 +32,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/android', name: 'profile_android')]
-    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
+    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository): Response
     {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
@@ -39,7 +42,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
         $profile = str_replace([
@@ -69,13 +72,13 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
-    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository): Response
+    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository): Response
     {
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
-        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
         $profile = str_replace([
@@ -142,13 +145,13 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/windows', name: 'profile_windows')]
-    public function profileWindows(RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator): Response
+    public function profileWindows(RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator, UserRadiusProfileRepository $radiusProfileRepository): Response
     {
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
-        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
         $profile = file_get_contents('../profile_templates/windows/template.xml');
         $profile = str_replace([
             '@USERNAME@',
@@ -237,25 +240,32 @@ class ProfileController extends AbstractController
         );
     }
 
-    private function createOrUpdateRadiusUser(User $user, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, string $realmName): RadiusUser
+    private function createOrUpdateRadiusUser(User $user, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $radiusProfileRepository, UserRepository $userRepository, string $realmName): RadiusUser
     {
-        if (!$user->getRadiusUser()) {
+        $radiusProfile = $radiusProfileRepository->findOneBy(['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]);
+        if (!$radiusProfile) {
+            $radiusProfile = new UserRadiusProfile();
+
             $androidLimit = 32;
             $realmSize = strlen($realmName) + 1;
+            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
             $token = $this->generateToken($androidLimit - $realmSize);
-            $user->setRadiusUser($token . "@" . $realmName);
-            $user->setRadiusToken($this->generateToken());
-            $userRepository->save($user, true);
+            $radiusProfile->setUser($user);
+            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusUser($username);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setIssuedAt(new \DateTimeImmutable());
 
             $radiusUser = new RadiusUser();
-            $radiusUser->setUsername($user->getRadiusUser());
+            $radiusUser->setUsername($username);
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
-            $radiusUser->setValue($user->getRadiusToken());
+            $radiusUser->setValue($token);
             $radiusUserRepository->save($radiusUser, true);
+            $radiusProfileRepository->save($radiusProfile, true);
         } else {
             $radiusUser = $radiusUserRepository->findOneBy([
-                'username' => $user->getRadiusUser()
+                'username' => $radiusProfile->getRadiusUser(),
             ]);
         }
 

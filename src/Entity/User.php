@@ -2,15 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Nbgrp\OneloginSamlBundle\Security\User\SamlUserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUserInterface
+
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,10 +40,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $radius_token = null;
+    public ?string $saml_identifier = null;
 
-    #[ORM\Column(length: 64, nullable: true)]
-    private ?string $radius_user = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $first_name = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $last_name = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
+    private Collection $userRadiusProfiles;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
+    private Collection $userExternalAuths;
+
+    public function __construct()
+    {
+        $this->userRadiusProfiles = new ArrayCollection();
+        $this->userExternalAuths = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -125,12 +144,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUsername(): ?string
     {
-        return $this->username;
+        return $this->uuid;
     }
 
     public function setUsername(string $username): self
     {
-        $this->username = $username;
+        $this->uuid = $username;
 
         return $this;
     }
@@ -147,26 +166,109 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRadiusToken(): ?string
+    public function getSamlIdentifier(): ?string
     {
-        return $this->radius_token;
+        return $this->saml_identifier;
     }
 
-    public function setRadiusToken(?string $radius_token): self
+    public function setSamlIdentifier(?string $saml_identifier): self
     {
-        $this->radius_token = $radius_token;
+        $this->saml_identifier = $saml_identifier;
+
+        return $this;
+    }
+    public function setSamlAttributes(array $attributes):void
+    {
+        # $this->email = $attributes['email'][0];
+        $this->saml_identifier = $attributes['sAMAccountName'][0];
+        $this->first_name = $attributes['givenName'][0];
+        $this->last_name = $attributes['surname'][0];
+        $this->uuid = $attributes['sAMAccountName'][0];
+        $this->password = 'notused'; //invalid hash so won't ever authenticate
+
+        // #$this->setLevel(LevelType::NONE);
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->first_name;
+    }
+
+    public function setFirstName(string $first_name): self
+    {
+        $this->first_name = $first_name;
 
         return $this;
     }
 
-    public function getRadiusUser(): ?string
+    public function getLastName(): ?string
     {
-        return $this->radius_user;
+        return $this->last_name;
     }
 
-    public function setRadiusUser(?string $radius_user): self
+    public function setLastName(?string $last_name): self
     {
-        $this->radius_user = $radius_user;
+        $this->last_name = $last_name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserRadiusProfile>
+     */
+    public function getUserRadiusProfiles(): Collection
+    {
+        return $this->userRadiusProfiles;
+    }
+
+    public function addUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
+    {
+        if (!$this->userRadiusProfiles->contains($userRadiusProfile)) {
+            $this->userRadiusProfiles->add($userRadiusProfile);
+            $userRadiusProfile->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
+    {
+        if ($this->userRadiusProfiles->removeElement($userRadiusProfile)) {
+            // set the owning side to null (unless already changed)
+            if ($userRadiusProfile->getUser() === $this) {
+                $userRadiusProfile->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserExternalAuth>
+     */
+    public function getUserExternalAuths(): Collection
+    {
+        return $this->userExternalAuths;
+    }
+
+    public function addUserExternalAuth(UserExternalAuth $userExternalAuth): self
+    {
+        if (!$this->userExternalAuths->contains($userExternalAuth)) {
+            $this->userExternalAuths->add($userExternalAuth);
+            $userExternalAuth->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): self
+    {
+        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
+            // set the owning side to null (unless already changed)
+            if ($userExternalAuth->getUser() === $this) {
+                $userExternalAuth->setUser(null);
+            }
+        }
 
         return $this;
     }

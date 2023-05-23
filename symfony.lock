@@ -47,6 +47,9 @@
             "migrations/.gitignore"
         ]
     },
+    "nbgrp/onelogin-saml-bundle": {
+        "version": "v1.3.2"
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {

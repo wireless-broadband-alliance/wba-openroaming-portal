@@ -7,9 +7,7 @@ module.exports = {
 	],
 	theme: {
 		extend: {
-			backgroundImage: {
-				landing: "url('/public/resources/images/wallpaper.png')"
-			},
+
 
 			colors: {
 				gray: {

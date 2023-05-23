@@ -9,6 +9,11 @@ security:
             entity:
                 class: App\Entity\User
                 property: uuid
+        saml_provider:
+            ##  Basic provider instantiates a user with identifier and default roles
+            saml:
+                user_class: 'App\Entity\User'
+                default_roles: ['ROLE_USER']
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -17,11 +22,21 @@ security:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\PasswordAuthenticator
-            logout:
-                path: app_logout
                 # where to redirect after logout
                 # target: app_any_route
-
+            entry_point: 'saml'
+            saml:
+                ##  Match SAML attribute 'uid' with user identifier.
+                ##  Otherwise, used \OneLogin\Saml2\Auth::getNameId() method by default.
+                identifier_attribute: sAMAccountName
+                user_factory: saml_user_factory
+                persist_user: true
+                ##  Use the attribute's friendlyName instead of the name.
+                use_attribute_friendly_name: true
+                check_path: saml_acs
+                login_path: saml_login
+            logout:
+                path: saml_logout
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -31,8 +46,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
 
 when@test:
     security:
