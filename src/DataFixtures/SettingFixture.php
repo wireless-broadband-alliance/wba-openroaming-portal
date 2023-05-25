@@ -36,6 +36,8 @@ class SettingFixture extends Fixture
             ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
+            ['name' => 'DEMO_WHITE_LABEL', 'value' => 'true'],
+
         ];
 
         foreach ($settings as $settingData) {
