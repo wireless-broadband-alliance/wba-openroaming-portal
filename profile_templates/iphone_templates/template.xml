@@ -44,7 +44,7 @@
 					<key>UserPassword</key>
 					<string>@PASSWORD@</string>
 					<key>OuterIdentity</key>
-					<string>anonymous@@DOMAIN_NAME@</string>
+					<string>@USERNAME@</string>
 				</dict>
 				<key>EncryptionType</key>
 				<string>WPA2</string>
