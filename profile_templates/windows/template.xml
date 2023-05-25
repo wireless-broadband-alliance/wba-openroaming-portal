@@ -68,7 +68,7 @@
                                         </Phase2Authentication>
                                         <Phase1Identity>
                                             <IdentityPrivacy>true</IdentityPrivacy>
-                                            <AnonymousIdentity>someone@tetrapi.pt</AnonymousIdentity>
+                                            <AnonymousIdentity>@USERNAME@</AnonymousIdentity>
                                         </Phase1Identity>
                                     </EapTtls>
                                 </Config>
