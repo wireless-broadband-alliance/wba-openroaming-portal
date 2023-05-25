@@ -52,7 +52,7 @@
                     <div class="border-red-600 border-dashed border-2 p-3 mt-3">
                         <h3 class="text-red-600 mt-3 text-center">
                             DEMO MODE - UNCONFIRMED EMAIL SYSTEM </h3>
-                        <form method="post">
+                        <form method="post" novalidate>
                             {% if not app.user %}
                                 {# Email #}
                                 <div class="relative mt-20 lg:mt-12 xl:mt-24">
@@ -162,7 +162,7 @@
                             </a>
                         </div>
                         <div class="mt-10">
-                            <form method="post">
+                            <form method="post" novalidate>
                                 <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
                                     <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your operating
                                         system, so you can
@@ -205,6 +205,10 @@
                                         Install Profile
                                     </button>
                                 </div>
+                                {# Flash error message  #}
+                                {% for message in app.session.flashbag.get('error') %}
+                                    <div class="text-white text-base bg-red-600 border-red-600 mt-1 rounded-md p-2 text-center">{{ message }}</div>
+                                {% endfor %}
 
                                 {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
 
