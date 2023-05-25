@@ -50,7 +50,7 @@ class SiteController extends AbstractController
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select OS');
                 } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
-                    $this->addFlash('error', 'Please a valid enter email');
+                    $this->addFlash('error', 'Please a enter a valid email');
                 } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
                     $this->addFlash('error', 'Please agree to the Terms of Service');
                 } else if ($this->getUser() === null) {
