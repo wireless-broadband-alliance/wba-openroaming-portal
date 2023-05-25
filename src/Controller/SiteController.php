@@ -54,7 +54,7 @@ class SiteController extends AbstractController
                     $user = new User();
                     $user->setEmail($payload['email']);
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
-                    $user->setUuid(str_replace('@', "-AT-" . $data['customerPrefix'] . "-" . uniqid("", true) . "-", $user->getEmail()));
+                    $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
 
                     $entityManager->persist($user);
                     $entityManager->flush();
