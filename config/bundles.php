@@ -16,4 +16,5 @@ return [
     SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle::class => ['all' => true],
     Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['all' => true],
     Nbgrp\OneloginSamlBundle\NbgrpOneloginSamlBundle::class => ['all' => true],
+    Sentry\SentryBundle\SentryBundle::class => ['all' => true],
 ];
