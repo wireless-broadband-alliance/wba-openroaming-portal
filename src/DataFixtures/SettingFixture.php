@@ -36,6 +36,8 @@ class SettingFixture extends Fixture
             ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
+            ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
+            ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
         ];
 
         foreach ($settings as $settingData) {
