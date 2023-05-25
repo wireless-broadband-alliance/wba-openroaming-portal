@@ -37,24 +37,27 @@ class SiteController extends AbstractController
         $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
         $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
         $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
+        //Legal Stuff
+        $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
+        $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
 
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if($data['demoMode']) {
-            if($request->isMethod('POST')){
+        if ($data['demoMode']) {
+            if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select OS');
                 } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
-                    $this->addFlash('error', 'Please a valid enter email');
+                    $this->addFlash('error', 'Please a enter a valid email');
                 } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
                     $this->addFlash('error', 'Please agree to the Terms of Service');
                 } else if ($this->getUser() === null) {
                     $user = new User();
                     $user->setEmail($payload['email']);
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
-                    $user->setUuid(str_replace('@', "-AT-" . $data['customerPrefix'] . "-" . uniqid("", true) . "-", $user->getEmail()));
+                    $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
 
                     $entityManager->persist($user);
                     $entityManager->flush();

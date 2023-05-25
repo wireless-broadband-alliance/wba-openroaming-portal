@@ -28,8 +28,6 @@
                             This portal is for testing purposes only and should not be used for production purposes, and cannot be used for production or comercial purposes. </p>
                         <p class="text-xs lg:text-base">
                             Users created via this portal can be revoked at any time without notice. </p>
-                        <p class="text-xs lg:text-base text-green-300">
-                            Production usage of this portal is subject to being chased around with (and beaten by) a stick </p>
                     </div>
                 {% endif %}
             </div>
@@ -52,7 +50,7 @@
                     <div class="border-red-600 border-dashed border-2 p-3 mt-3">
                         <h3 class="text-red-600 mt-3 text-center">
                             DEMO MODE - UNCONFIRMED EMAIL SYSTEM </h3>
-                        <form method="post">
+                        <form method="post" novalidate>
                             {% if not app.user %}
                                 {# Email #}
                                 <div class="relative mt-20 lg:mt-12 xl:mt-24">
@@ -73,10 +71,10 @@
                                            class="border p-2 text-[#656565] rounded border-[#757575] checked:bg-[#7db928] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"/>
 
                                     <span class="text-[#656565] font-light text-xs lg:text-base">I accept the <a
-                                                href="https://wballiance.com/openroaming/toc/"
+                                                href="{{ TOS_LINK }}"
                                                 target="_blank"
                                                 class="underline font-base">terms & conditions of use</a> and <a
-                                                href="https://wballiance.com/openroaming/privacy-policy"
+                                                href="{{ PRIVACY_POLICY_LINK }}"
                                                 target="_blank"
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
@@ -162,7 +160,7 @@
                             </a>
                         </div>
                         <div class="mt-10">
-                            <form method="post">
+                            <form method="post" novalidate>
                                 <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
                                     <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your operating
                                         system, so you can
@@ -205,6 +203,10 @@
                                         Install Profile
                                     </button>
                                 </div>
+                                {# Flash error message  #}
+                                {% for message in app.session.flashbag.get('error') %}
+                                    <div class="text-white text-base bg-red-600 border-red-600 mt-1 rounded-md p-2 text-center">{{ message }}</div>
+                                {% endfor %}
 
                                 {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
 
@@ -235,16 +237,17 @@
                         {% if SAML_ENABLED %}
 
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
-                                <a href="/saml/login" class="rounded-lg bg-[#7DB928] px-8 py-3 text-sm font-medium text-white lg:text-lg">{{ SAML_LABEL }}</a>
+                                <a href="/saml/login"
+                                   class="rounded-lg bg-[#7DB928] px-8 py-3 text-sm font-medium text-white lg:text-lg">{{ SAML_LABEL }}</a>
 
                                 <p>{{ SAML_DESCRIPTION }}</p>
                             </div>
                             <div class="mt-24 text-center">
                                 <p>By authenticating with any of the above providers you agree with our
-                                    <a href="https://wballiance.com/openroaming/toc/"
+                                    <a href="{{ TOS_LINK }}"
                                        target="_blank"
                                        class="underline font-base">terms & conditions of use</a> and
-                                    <a href="https://wballiance.com/openroaming/privacy-policy"
+                                    <a href="{{ PRIVACY_POLICY_LINK }}"
                                        target="_blank"
                                        class="underline font-base">privacy policy</a>.
                                 </p>
