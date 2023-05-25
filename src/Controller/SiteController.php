@@ -37,12 +37,15 @@ class SiteController extends AbstractController
         $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
         $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
         $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
+        //Legal Stuff
+        $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
+        $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
 
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if($data['demoMode']) {
-            if($request->isMethod('POST')){
+        if ($data['demoMode']) {
+            if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select OS');
