@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Email Activation Support{% endblock %}
+
+{% block body %}
+    <h1>Email Activation</h1>
+    <p>An authentication code has been sent to your email.</p>
+    <p>{{ code }}</p>
+    <form action="{{ path('app_check_email_code') }}" method="post">
+        <label for="code">Enter the code:</label>
+        <input type="number" id="code" name="code">
+        <button type="submit" class="border-solid border-2 border-sky-500 rounded-lg hover:bg-blue-400">Verify</button>
+    </form>
+{% endblock %}
