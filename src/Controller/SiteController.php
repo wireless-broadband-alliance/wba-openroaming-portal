@@ -5,12 +5,21 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\OSTypes;
 use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
@@ -87,7 +96,7 @@ class SiteController extends AbstractController
                 }
             }
 
-        }else if($request->isMethod('POST')){
+        } else if ($request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                 $this->addFlash('error', 'Please select OS');
@@ -159,4 +168,102 @@ class SiteController extends AbstractController
 
         return $os;
     }
+
+
+    private MailerInterface $mailer;
+
+    public function __construct(MailerInterface $mailer)
+    {
+        $this->mailer = $mailer; // to send and build the email
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function createEmailCode(): Email
+    {
+        // Get the current user and verification
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $email = $currentUser->getEmail();
+
+        // Generate a random code with 6 digits
+        $code = random_int(100000, 999999);
+
+        // Generate the email with the code
+        return (new Email())
+            ->from(new Address('openroaming@test_email.pt', 'OpenRoaming Testing Emails'))
+            ->to($email)
+            ->subject('Authentication Code')
+            ->text('Your authentication code: ' . $code);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/email', name: 'app_email_code')]
+    public function sendCode(UserRepository $userRepository): Response
+    {
+        // Get the current user and verification
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $isVerified = $currentUser->isVerified();
+
+        // Check if the user is already verified
+        if ($isVerified === false) {
+            // Generate a random code with 6 digits
+            $code = random_int(100000, 999999);
+
+            // Get the current user
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            // Save the verification code on the db
+            $currentUser->setVerificationCode($code);
+            $userRepository->save($currentUser, true);
+            // Store the code in the user's database record
+
+            // Create the email message
+            $message = $this->createEmailCode($code);
+
+            // Send the email
+            $this->mailer->send($message);
+
+            // Render the template with the code
+            return $this->render('email_activation/index.html.twig', ['code' => $code]);
+        }
+        return $this->render('email_activation/ola.html.twig');
+    }
+
+
+    #[Route('/email/check', name: 'app_check_email_code')]
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository): Response
+    {
+        // Get the entered code from the form
+        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
+
+        // Get the current user
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Retrieve the verification code from the user entity
+        $verificationCode = $currentUser->getVerificationCode();
+
+        // Compare the entered code with the verification code
+        $isCodeCorrect = $enteredCode === $verificationCode;
+
+        if ($isCodeCorrect) {
+            // Set the user as verified
+            $currentUser->setIsVerified(true);
+            $userRepository->save($currentUser, true);
+
+            // Code is correct, display success message or perform further actions
+            return $this->render('email_activation/success.html.twig', ['correct_code' => true]);
+        }
+
+        // Code is incorrect, display error message or redirect
+        return $this->render('email_activation/fail.html.twig', ['incorrect_code' => true]);
+    }
+
+
 }

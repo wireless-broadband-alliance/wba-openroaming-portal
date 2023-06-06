@@ -57,6 +57,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $verificationCode = null;
+
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
@@ -272,6 +275,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
                 $userExternalAuth->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getVerificationCode(): ?string
+    {
+        return $this->verificationCode;
+    }
+
+    public function setVerificationCode(?string $verificationCode): self
+    {
+        $this->verificationCode = $verificationCode;
 
         return $this;
     }
