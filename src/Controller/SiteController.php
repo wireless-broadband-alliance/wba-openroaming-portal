@@ -11,7 +11,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -171,12 +173,17 @@ class SiteController extends AbstractController
 
 
     private MailerInterface $mailer;
+    private UserRepository $userRepository;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository)
     {
         $this->mailer = $mailer; // to send and build the email
+        $this->userRepository = $userRepository; // to call the User Repository and save the changes
     }
 
+    /**
+     * @throws Exception
+     */
     /**
      * @throws Exception
      */
@@ -187,23 +194,34 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $email = $currentUser->getEmail();
 
-        // Generate a random code with 6 digits
-        $code = random_int(100000, 999999);
+        // Check if the user already has a verification code
+        $verificationCode = $currentUser->getVerificationCode();
+
+        // If the verification code doesn't exist, generate a new one and save it
+        if (empty($verificationCode)) {
+            // Generate a random code with 6 digits
+            $verificationCode = random_int(100000, 999999);
+            $currentUser->setVerificationCode($verificationCode);
+            $this->userRepository->save($currentUser, true);
+        }
 
         // Generate the email with the code
         return (new Email())
             ->from(new Address('openroaming@test_email.pt', 'OpenRoaming Testing Emails'))
             ->to($email)
             ->subject('Authentication Code')
-            ->text('Your authentication code: ' . $code);
+            ->text('Your authentication code: ' . $verificationCode);
     }
+
 
     /**
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/email', name: 'app_email_code')]
-    public function sendCode(UserRepository $userRepository): Response
+    // generate a new email with the code, this is used only if the user click the link to generate a new one
+    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
+    #[IsGranted('ROLE_USER')]
+    public function regenerateCode(): RedirectResponse
     {
         // Get the current user and verification
         /** @var User $currentUser */
@@ -212,27 +230,48 @@ class SiteController extends AbstractController
 
         // Check if the user is already verified
         if ($isVerified === false) {
-            // Generate a random code with 6 digits
-            $code = random_int(100000, 999999);
-
-            // Get the current user
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            // Save the verification code on the db
-            $currentUser->setVerificationCode($code);
-            $userRepository->save($currentUser, true);
-            // Store the code in the user's database record
+            // Generate a new code
+            $newCode = random_int(100000, 999999);
+            $currentUser->setVerificationCode($newCode);
+            $this->userRepository->save($currentUser, true);
 
             // Create the email message
-            $message = $this->createEmailCode($code);
+            $message = $this->createEmailCode();
+
+            // Send the email
+            $this->mailer->send($message);
+        }
+
+        return $this->redirectToRoute('app_email_code');
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/email', name: 'app_email_code')]
+    #[IsGranted('ROLE_USER')]
+    public function sendCode(): Response
+    {
+        // Get the current user, verification and code if he exists
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $isVerified = $currentUser->isVerified();
+        $checkCode = $currentUser->getVerificationCode();
+
+        // check if the as a code already created, because of the last route
+        // Check if the user is already verified
+        if (($checkCode !== null) && $isVerified === false) {
+            // Create the email message
+            $message = $this->createEmailCode();
 
             // Send the email
             $this->mailer->send($message);
 
             // Render the template with the code
-            return $this->render('email_activation/index.html.twig', ['code' => $code]);
+            return $this->render('email_activation/index.html.twig', ['code' => $currentUser->getVerificationCode(), 'incorrect_code' => null, 'not_verified' => true]);
         }
-        return $this->render('email_activation/ola.html.twig');
+        return $this->render('site/landing.html.twig', ['verified' => true]);
     }
 
 
@@ -258,12 +297,11 @@ class SiteController extends AbstractController
             $userRepository->save($currentUser, true);
 
             // Code is correct, display success message or perform further actions
-            return $this->render('email_activation/success.html.twig', ['correct_code' => true]);
+            return $this->render('email_activation/success.html.twig', ['correct_code' => true, 'not_verified' => false]);
         }
 
         // Code is incorrect, display error message or redirect
-        return $this->render('email_activation/fail.html.twig', ['incorrect_code' => true]);
+        return $this->render('email_activation/index.html.twig', ['incorrect_code' => true, 'not_verified' => false]);
     }
-
 
 }

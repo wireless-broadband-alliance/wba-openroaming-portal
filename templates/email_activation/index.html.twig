@@ -5,10 +5,18 @@
 {% block body %}
     <h1>Email Activation</h1>
     <p>An authentication code has been sent to your email.</p>
-    <p>{{ code }}</p>
-    <form action="{{ path('app_check_email_code') }}" method="post">
-        <label for="code">Enter the code:</label>
-        <input type="number" id="code" name="code">
-        <button type="submit" class="border-solid border-2 border-sky-500 rounded-lg hover:bg-blue-400">Verify</button>
-    </form>
+    {% if not_verified %}
+        <p>{{ code }}</p>
+        <form action="{{ path('app_check_email_code') }}" method="post">
+            <label for="code">Enter the code:</label>
+            <input type="number" id="code" name="code">
+            <button type="submit" class="border-solid border-2 border-sky-500 rounded-lg hover:bg-blue-400">Verify</button>
+        </form>
+        <p>Click <a href="{{ path("app_regenerate_email_code") }}" class="font-bold mt-5">here</a> to generate a new email with a new code</p>
+    {% endif %}
+
+    {% if incorrect_code %}
+        <p class="mb-5">Sorry but the code is incorrect</p>
+    {% endif %}
+    <p class="mb-5">Pls type the correct code from your email</p>
 {% endblock %}
