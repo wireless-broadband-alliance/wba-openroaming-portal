@@ -256,12 +256,9 @@ class SiteController extends AbstractController
         // Get the current user, verification and code if he exists
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
-        $checkCode = $currentUser->getVerificationCode();
 
-        // check if the as a code already created, because of the last route
         // Check if the user is already verified
-        if (($checkCode !== null) && $isVerified === false) {
+        if ($currentUser->isVerified() === false) {
             // Create the email message
             $message = $this->createEmailCode();
 
@@ -269,7 +266,7 @@ class SiteController extends AbstractController
             $this->mailer->send($message);
 
             // Render the template with the code
-            return $this->render('email_activation/index.html.twig', ['code' => $currentUser->getVerificationCode(), 'incorrect_code' => null, 'not_verified' => true]);
+            return $this->render('email_activation/index.html.twig', ['code' => $currentUser->getVerificationCode(), 'incorrect_code' => null, 'verified' => true]);
         }
         return $this->render('site/landing.html.twig', ['verified' => true]);
     }
@@ -294,14 +291,15 @@ class SiteController extends AbstractController
         if ($isCodeCorrect) {
             // Set the user as verified
             $currentUser->setIsVerified(true);
+            $currentUser->setRoles(['ROLE_VERIFIED']);
             $userRepository->save($currentUser, true);
 
+            $this->addFlash('success', 'Your account it is now successfully verified');
             // Code is correct, display success message or perform further actions
-            return $this->render('email_activation/success.html.twig', ['correct_code' => true, 'not_verified' => false]);
+            return $this->render('site/landing.html.twig', ['verified' => true]);
         }
-
         // Code is incorrect, display error message or redirect
-        return $this->render('email_activation/index.html.twig', ['incorrect_code' => true, 'not_verified' => false]);
+        return $this->render('email_activation/index.html.twig', ['incorrect_code' => true]);
     }
 
 }

@@ -3,20 +3,16 @@
 {% block title %}Email Activation Support{% endblock %}
 
 {% block body %}
-    <h1>Email Activation</h1>
+    <h1 class="text-2xl font-bold">Email Activation</h1>
     <p>An authentication code has been sent to your email.</p>
-    {% if not_verified %}
-        <p>{{ code }}</p>
-        <form action="{{ path('app_check_email_code') }}" method="post">
-            <label for="code">Enter the code:</label>
-            <input type="number" id="code" name="code">
-            <button type="submit" class="border-solid border-2 border-sky-500 rounded-lg hover:bg-blue-400">Verify</button>
-        </form>
-        <p>Click <a href="{{ path("app_regenerate_email_code") }}" class="font-bold mt-5">here</a> to generate a new email with a new code</p>
-    {% endif %}
-
+    <form action="{{ path('app_check_email_code') }}" method="post" class="mt-4">
+        <label for="code" class="block mb-2">Enter the code:</label>
+        <input type="number" id="code" name="code" class="border border-gray-300 px-4 py-2 rounded-lg mb-2" oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6">
+        <button type="submit" class="border-solid border-2 border-blue-500 rounded-lg px-4 py-2 bg-blue-500 text-white hover:bg-blue-400">Verify</button>
+    </form>
+    <p>Click <a href="{{ path("app_regenerate_email_code") }}" class="font-bold mt-5">here</a> to generate a new email with a new code</p>
     {% if incorrect_code %}
-        <p class="mb-5">Sorry but the code is incorrect</p>
+        <p class="text-red-500 mb-5">Sorry, but the code is incorrect.</p>
     {% endif %}
-    <p class="mb-5">Pls type the correct code from your email</p>
+    <p class="mb-5">Please type the correct code from your email.</p>
 {% endblock %}
