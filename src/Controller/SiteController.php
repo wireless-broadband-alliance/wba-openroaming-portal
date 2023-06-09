@@ -29,9 +29,19 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class SiteController extends AbstractController
 {
+    private MailerInterface $mailer;
+    private UserRepository $userRepository;
+    private SessionInterface $session;
+
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository)
+    {
+        $this->mailer = $mailer; // to send and build the email
+        $this->userRepository = $userRepository; // to call the User Repository and save the changes
+        $this->session = new \Symfony\Component\HttpFoundation\Session\Session(); // to save the info about the layout temporally
+    }
 
     #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository, SessionInterface $session): Response
     {
         //Branding
         $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
@@ -135,7 +145,7 @@ class SiteController extends AbstractController
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
         ];
-
+        $session->set('data', $data);// defines a session to save the info about the layout -> title, text, demo_mode, etc...
         return $this->render('site/landing.html.twig', $data);
     }
 
@@ -172,18 +182,6 @@ class SiteController extends AbstractController
     }
 
 
-    private MailerInterface $mailer;
-    private UserRepository $userRepository;
-
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository)
-    {
-        $this->mailer = $mailer; // to send and build the email
-        $this->userRepository = $userRepository; // to call the User Repository and save the changes
-    }
-
-    /**
-     * @throws Exception
-     */
     /**
      * @throws Exception
      */
@@ -273,8 +271,11 @@ class SiteController extends AbstractController
 
 
     #[Route('/email/check', name: 'app_check_email_code')]
-    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository): Response
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, SessionInterface $session): Response
     {
+        // Get the info about the layout saved previously on the landing router
+        $data = $session->get('data');
+
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
 
@@ -294,12 +295,26 @@ class SiteController extends AbstractController
             $currentUser->setRoles(['ROLE_VERIFIED']);
             $userRepository->save($currentUser, true);
 
-            $this->addFlash('success', 'Your account it is now successfully verified');
-            // Code is correct, display success message or perform further actions
-            return $this->render('site/landing.html.twig', ['verified' => true]);
+            $this->addFlash('success', 'Your account is now successfully verified');
+            // Render the landing template with the data layout
+            return $this->render('site/landing.html.twig', [
+                'verified' => true,
+                'data' => $data,
+                'title' => $data['title'],
+                'wallpaperImageName' => $data['wallpaperImageName'],
+                'welcomeText' => $data['welcomeText'],
+                'welcomeDescription' => $data['welcomeDescription'],
+                'contactEmail' => $data['contactEmail'],
+                'customerLogoName' => $data['customerLogoName'],
+                'openroamingLogoName' => $data['openroamingLogoName'],
+                'demoMode' => false,
+                'os' => $data['os'],
+            ]);
+
         }
-        // Code is incorrect, display error message or redirect
+        // Code is incorrect, display error message and redirect again to the check email page
         return $this->render('email_activation/index.html.twig', ['incorrect_code' => true]);
     }
+
 
 }
