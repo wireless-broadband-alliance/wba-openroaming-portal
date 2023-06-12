@@ -33,8 +33,8 @@ class SiteController extends AbstractController
 
     public function __construct(MailerInterface $mailer, UserRepository $userRepository)
     {
-        $this->mailer = $mailer; // to send and build the email
-        $this->userRepository = $userRepository; // to call the User Repository and save the changes
+        $this->mailer = $mailer;
+        $this->userRepository = $userRepository;
     }
 
     #[Route('/', name: 'app_landing')]
@@ -59,7 +59,6 @@ class SiteController extends AbstractController
         //Legal Stuff
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
-
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
@@ -85,6 +84,7 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
+                    return $this->redirectToRoute('app_email_code');
                 }
                 if (!array_key_exists('radio-os', $payload)) {
                     if (!array_key_exists('detected-os', $payload)) {
@@ -183,7 +183,7 @@ class SiteController extends AbstractController
      * @param User $user The user for whom the verification code is generated.
      * @return int The generated verification code.
      */
-    public function generateVerificationCode(User $user): int
+    protected function generateVerificationCode(User $user): int
     {
         // Generate a random verification code with 6 digits
         $verificationCode = random_int(100000, 999999);
@@ -200,7 +200,7 @@ class SiteController extends AbstractController
      * @param int|null $verificationCode The verification code to include in the email.
      * @return Email The email with the code.
      */
-    public function createEmailCode(string $email, ?int $verificationCode = null): Email
+    protected function createEmailCode(string $email, ?int $verificationCode = null,): Email
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -209,9 +209,8 @@ class SiteController extends AbstractController
             // If the verification code is not provided, generate a new one
             $verificationCode = $this->generateVerificationCode($currentUser);
         }
-
-        $Email = 'openroaming@test_email.pt';
-        $Name = 'OpenRoaming Testing Emails';
+        $Email = $_ENV['EMAIL_ADDRESS'];
+        $Name = $_ENV['SENDER_NAME'];
 
         return (new Email())
             ->from(new Address($Email, $Name))
@@ -221,11 +220,35 @@ class SiteController extends AbstractController
     }
 
     /**
+     * Send the verification code email to the user.
+     *
+     * @param string $email The user's email address.
+     * @param int|null $verificationCode The verification code.
+     * @return void
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    protected function sendEmail(string $email, ?int $verificationCode = null): void
+    {
+        if ($verificationCode === null) {
+            // If the verification code is not provided, generate a new one
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            $verificationCode = $this->generateVerificationCode($currentUser);
+        }
+
+        // Create the email message with the verification code
+        $message = $this->createEmailCode($email, $verificationCode);
+
+        // Send the email
+        $this->mailer->send($message);
+    }
+
+    /**
      * Regenerate the verification code for the user and send a new email.
      *
      * @return RedirectResponse A redirect response.
      * @throws Exception
-     *
      * @throws TransportExceptionInterface
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
@@ -239,17 +262,11 @@ class SiteController extends AbstractController
         if (!$isVerified) {
             // Regenerate the verification code for the user
             $newCode = $this->generateVerificationCode($currentUser);
-
-            // Create the email message with the new verification code
-            $message = $this->createEmailCode($currentUser->getEmail(), $newCode);
-
-            // Send the email
-            $this->mailer->send($message);
+            $this->sendEmail($currentUser->getEmail(), $newCode);
         }
 
         return $this->redirectToRoute('app_email_code');
     }
-
 
     /**
      * @throws TransportExceptionInterface
@@ -259,34 +276,28 @@ class SiteController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function sendCode(): Response
     {
-        //gets the current user
+        // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $isVerified = $currentUser->isVerified();
-        // check if his verified
+
         if (!$isVerified) {
-            // Create the email message with the verification code
-            $message = $this->createEmailCode($currentUser->getEmail(), $currentUser->getVerificationCode());
-
-            // Send the email
-            $this->mailer->send($message);
-
+            // Send the email with the verification code
+            $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
             // Render the template with the verification code
             return $this->render('email_activation/index.html.twig', [
                 'code' => $currentUser->getVerificationCode(),
-                'incorrect_code' => null,
-                'verified' => true
             ]);
         }
-
         // User is already verified, render the landing template
-        return $this->render('site/landing.html.twig', ['verified' => true]);
+        return $this->redirectToRoute('app_landing');
+
     }
 
 
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, SettingRepository $settingRepository): Response
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -301,63 +312,14 @@ class SiteController extends AbstractController
         if ($isCodeCorrect) {
             // Set the user as verified
             $currentUser->setIsVerified(true);
-            $currentUser->setRoles(['ROLE_VERIFIED']);
             $userRepository->save($currentUser, true);
-
             $this->addFlash('success', 'Your account is now successfully verified');
-
-            // Get the landing data
-            $landingData = $this->landingData($requestStack, $settingRepository);
-
-            // Render the landing template with the data layout
-            return $this->render('site/landing.html.twig', $landingData);
+            return $this->redirectToRoute('app_landing');
         }
 
         // Code is incorrect, display error message and redirect again to the check email page
-        return $this->render('email_activation/index.html.twig', ['incorrect_code' => true]);
+        $this->addFlash('error', 'The verification code is incorrect. Please try again.');
+        return $this->redirectToRoute('app_email_code');
     }
-
-    // Helper function to retrieve $data for the landing route
-    private function landingData(RequestStack $requestStack, SettingRepository $settingRepository): array
-    {
-        $data = [];
-
-        // Retrieve the data from the SettingRepository
-        $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
-        $data['openroamingLogoName'] = $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue();
-        $data['wallpaperImageName'] = $settingRepository->findOneBy(['name' => 'WALLPAPER_IMAGE'])->getValue();
-        $data['welcomeText'] = $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue();
-        $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
-        $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        //Demo Mode
-        $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
-        $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
-        //Auth Providers
-        //SAML
-        $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
-        $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
-        $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
-        //Legal Stuff
-        $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
-        $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
-
-        // Get the request and payload data
-        $request = $requestStack->getCurrentRequest();
-        $userAgent = $request->headers->get('User-Agent');
-        $payload = $request->request->all();
-
-        $data['os'] = [
-            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
-            'items' => [
-                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
-                OSTypes::IOS => ['alt' => 'Apple Logo'],
-                OSTypes::ANDROID => ['alt' => 'Android Logo']
-            ]
-        ];
-
-        return $data;
-    }
-
 
 }

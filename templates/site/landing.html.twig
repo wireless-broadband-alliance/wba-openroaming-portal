@@ -4,6 +4,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
+
     <div class="h-screen w-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
         <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
@@ -55,11 +56,23 @@
                         Windows)</p>
                 </div>
 
+                {# Flash success message  #}
+                {% for message in app.session.flashbag.get('success') %}
+                    <div class="rounded-lg bg-[#7DB928] mt-5 px-8 py-3 text-white font-medium text-sm lg:text-lg text-center">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                {# Flash error message  #}
+                {% for message in app.session.flashbag.get('error') %}
+                    <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
+                {% endfor %}
+
                 {% if demoMode %}
-                    <div class=" {% if demoModeWhiteLabel == null %} border-red-600 border-dashed border-2 p-3 mt-3 {% else %}p-3 mt-3{% endif %}">
+                    <div class=" {% if demoModeWhiteLabel == null %} border-red-600 border-dashed border-2 p-3 mt-1 {% else %}p-3 mt-1{% endif %}">
                         {% if demoModeWhiteLabel == null %}
-                        <h3 class="text-red-600 mt-3 text-center">
-                            DEMO MODE - UNCONFIRMED EMAIL SYSTEM </h3>
+                            <h3 class="text-red-600 mt-3 text-center">
+                                DEMO MODE - UNCONFIRMED EMAIL SYSTEM </h3>
                         {% endif %}
                         <form method="post">
                             {% if not app.user %}
@@ -127,7 +140,8 @@
 
                             {# Submit button #}
                             <div class="flex flex-row justify-center lg:justify-start">
-                                <button type="submit"
+                                <button
+                                        type="submit"
                                         class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
                                     Download
                                     and
@@ -215,10 +229,6 @@
                                         Install Profile
                                     </button>
                                 </div>
-                                {# Flash error message  #}
-                                {% for message in app.session.flashbag.get('error') %}
-                                    <div class="text-white text-base bg-red-600 border-red-600 mt-1 rounded-md p-2 text-center">{{ message }}</div>
-                                {% endfor %}
 
                                 {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
 
@@ -270,7 +280,6 @@
 
 
                 {% endif %}
-
             </div>
         </div>
     </div>
