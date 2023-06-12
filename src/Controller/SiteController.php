@@ -223,13 +223,13 @@ class SiteController extends AbstractController
     /**
      * Regenerate the verification code for the user and send a new email.
      *
-     * @throws TransportExceptionInterface
+     * @return RedirectResponse A redirect response.
      * @throws Exception
      *
-     * @return RedirectResponse A redirect response.
+     * @throws TransportExceptionInterface
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
-    #[IsGranted('!ROLE_VERIFIED')]
+    #[IsGranted('ROLE_USER')]
     public function regenerateCode(): RedirectResponse
     {
         /** @var User $currentUser */
@@ -285,7 +285,8 @@ class SiteController extends AbstractController
 
 
     #[Route('/email/check', name: 'app_check_email_code')]
-    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository): Response
+    #[IsGranted('ROLE_USER')]
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, SettingRepository $settingRepository): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -304,12 +305,58 @@ class SiteController extends AbstractController
             $userRepository->save($currentUser, true);
 
             $this->addFlash('success', 'Your account is now successfully verified');
-            // Render the landing template with the data layout
-            return $this->render('site/landing.html.twig');
 
+            // Get the landing data
+            $landingData = $this->landingData($requestStack, $settingRepository);
+
+            // Render the landing template with the data layout
+            return $this->render('site/landing.html.twig', $landingData);
         }
+
         // Code is incorrect, display error message and redirect again to the check email page
         return $this->render('email_activation/index.html.twig', ['incorrect_code' => true]);
+    }
+
+    // Helper function to retrieve $data for the landing route
+    private function landingData(RequestStack $requestStack, SettingRepository $settingRepository): array
+    {
+        $data = [];
+
+        // Retrieve the data from the SettingRepository
+        $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $data['openroamingLogoName'] = $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue();
+        $data['wallpaperImageName'] = $settingRepository->findOneBy(['name' => 'WALLPAPER_IMAGE'])->getValue();
+        $data['welcomeText'] = $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue();
+        $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
+        $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        //Demo Mode
+        $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
+        $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
+        //Auth Providers
+        //SAML
+        $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
+        $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
+        $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
+        //Legal Stuff
+        $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
+        $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
+
+        // Get the request and payload data
+        $request = $requestStack->getCurrentRequest();
+        $userAgent = $request->headers->get('User-Agent');
+        $payload = $request->request->all();
+
+        $data['os'] = [
+            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
+            'items' => [
+                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
+                OSTypes::IOS => ['alt' => 'Apple Logo'],
+                OSTypes::ANDROID => ['alt' => 'Android Logo']
+            ]
+        ];
+
+        return $data;
     }
 
 
