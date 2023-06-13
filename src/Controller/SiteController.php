@@ -8,11 +8,10 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -26,20 +25,45 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 
+/**
+ * @method getParameterBag()
+ */
 class SiteController extends AbstractController
 {
     private MailerInterface $mailer;
     private UserRepository $userRepository;
+    private ParameterBagInterface $parameterBag;
 
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository)
+    /**
+     * SiteController constructor.
+     *
+     * @param MailerInterface $mailer The mailer service used for sending emails.
+     * @param UserRepository $userRepository The repository for accessing user data.
+     * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
+     */
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag)
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->parameterBag = $parameterBag;
     }
+
 
     #[Route('/', name: 'app_landing')]
     public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
     {
+        // Check if the user is logged in
+        if ($this->getUser()) {
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            $verification = $currentUser->isVerified();
+            // Check if the user is verified
+            if (!$verification) {
+                $this->addFlash('error', 'Your account is not verified to access this page!');
+                return $this->redirectToRoute('app_email_code');
+            }
+        }
+
         //Branding
         $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
@@ -59,6 +83,8 @@ class SiteController extends AbstractController
         //Legal Stuff
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
+        /// Verification Form
+        $data['VERIFICATION_FORM'] = 0;
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
@@ -200,17 +226,18 @@ class SiteController extends AbstractController
      * @param int|null $verificationCode The verification code to include in the email.
      * @return Email The email with the code.
      */
-    protected function createEmailCode(string $email, ?int $verificationCode = null,): Email
+    protected function createEmailCode(string $email, ?int $verificationCode = null): Email
     {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
+        // Get the values from the services.yaml file using $parameterBag on the __construct
+        $Email = $this->parameterBag->get('app.email_address');
+        $Name = $this->parameterBag->get('app.sender_name');
 
         if ($verificationCode === null) {
             // If the verification code is not provided, generate a new one
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
             $verificationCode = $this->generateVerificationCode($currentUser);
         }
-        $Email = $_ENV['EMAIL_ADDRESS'];
-        $Name = $_ENV['SENDER_NAME'];
 
         return (new Email())
             ->from(new Address($Email, $Name))
@@ -218,6 +245,8 @@ class SiteController extends AbstractController
             ->subject('Authentication Code')
             ->text('Your authentication code: ' . $verificationCode);
     }
+
+
 
     /**
      * Send the verification code email to the user.
@@ -243,6 +272,7 @@ class SiteController extends AbstractController
         // Send the email
         $this->mailer->send($message);
     }
+
 
     /**
      * Regenerate the verification code for the user and send a new email.

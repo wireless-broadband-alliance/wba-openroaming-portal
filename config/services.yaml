@@ -5,6 +5,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.radius_realm: '%env(RADIUS_REALM)%'
+    app.email_address: 'your_email@example.com'
+    app.sender_name: 'Your Sender Name'
 services:
     # default configuration for services in *this* file
     _defaults:
