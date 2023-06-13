@@ -309,11 +309,10 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
-
-        if (!$isVerified) {
+        if (!$currentUser->isVerified()) {
             // Send the email with the verification code
             $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
+
             // Render the template with the verification code
             return $this->render('email_activation/index.html.twig', [
                 'code' => $currentUser->getVerificationCode(),
@@ -321,7 +320,6 @@ class SiteController extends AbstractController
         }
         // User is already verified, render the landing template
         return $this->redirectToRoute('app_landing');
-
     }
 
 
@@ -336,10 +334,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Compare the entered code with the verification code
-        $isCodeCorrect = $enteredCode === $currentUser->getVerificationCode();
-
-        if ($isCodeCorrect) {
+        if ($enteredCode === $currentUser->getVerificationCode()) {
             // Set the user as verified
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
@@ -351,5 +346,6 @@ class SiteController extends AbstractController
         $this->addFlash('error', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('app_email_code');
     }
+
 
 }
