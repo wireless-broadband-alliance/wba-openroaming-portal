@@ -320,7 +320,7 @@ class SiteController extends AbstractController
             $newCode = $this->generateVerificationCode($currentUser);
             $this->sendEmail($currentUser->getEmail(), $newCode);
         }
-
+        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
         return $this->redirectToRoute('app_email_code');
     }
 
