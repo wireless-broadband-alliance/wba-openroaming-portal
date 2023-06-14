@@ -33,6 +33,7 @@ class SiteController extends AbstractController
     private MailerInterface $mailer;
     private UserRepository $userRepository;
     private ParameterBagInterface $parameterBag;
+    private SettingRepository $settingRepository;
 
     /**
      * SiteController constructor.
@@ -40,31 +41,21 @@ class SiteController extends AbstractController
      * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
+     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      */
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag)
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository)
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->parameterBag = $parameterBag;
+        $this->settingRepository = $settingRepository;
     }
 
-
-    #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
+    private function getSettings(SettingRepository $settingRepository, Request $request, RequestStack $requestStack,): array
     {
-        // Check if the user is logged in
-        if ($this->getUser()) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verification = $currentUser->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
-                $this->addFlash('error', 'Your account is not verified to access this page!');
-                return $this->redirectToRoute('app_email_code');
-            }
-        }
+        $data = [];
 
-        //Branding
+        // Branding
         $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
         $data['openroamingLogoName'] = $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue();
@@ -72,19 +63,53 @@ class SiteController extends AbstractController
         $data['welcomeText'] = $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue();
         $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
         $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        //Demo Mode
+        // Demo Mode
         $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
         $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
-        //Auth Providers
-        //SAML
+        // Auth Providers
+        // SAML
         $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
         $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
         $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
-        //Legal Stuff
+        // Legal Stuff
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
         /// Verification Form
-        $data['VERIFICATION_FORM'] = 0;
+        $data['VERIFICATION_FORM'] = false;
+        $data['BTS_DOWNLOAD'] = true;
+        ///
+        $userAgent = $request->headers->get('User-Agent');
+        $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
+        $data['os'] = [
+            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
+            'items' => [
+                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
+                OSTypes::IOS => ['alt' => 'Apple Logo'],
+                OSTypes::ANDROID => ['alt' => 'Android Logo']
+            ]
+        ];
+
+        return $data;
+    }
+
+    #[Route('/', name: 'app_landing')]
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
+    {
+        // Call the getSettings function to retrieve the data
+        $data = $this->getSettings($this->settingRepository, $request, $requestStack);
+
+        // Check if the user is logged in
+        if ($this->getUser()) {
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            $verification = $currentUser->isVerified();
+            // Check if the user is verified
+            if (!$verification) {
+                $this->addFlash('error', 'Your account is not verified to download a profile!');
+                return $this->redirectToRoute('app_email_code');
+            }
+        }
+
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
@@ -208,6 +233,7 @@ class SiteController extends AbstractController
      *
      * @param User $user The user for whom the verification code is generated.
      * @return int The generated verification code.
+     * @throws Exception
      */
     protected function generateVerificationCode(User $user): int
     {
@@ -225,6 +251,7 @@ class SiteController extends AbstractController
      * @param string $email The recipient's email address.
      * @param int|null $verificationCode The verification code to include in the email.
      * @return Email The email with the code.
+     * @throws Exception
      */
     protected function createEmailCode(string $email, ?int $verificationCode = null): Email
     {
@@ -245,7 +272,6 @@ class SiteController extends AbstractController
             ->subject('Authentication Code')
             ->text('Your authentication code: ' . $verificationCode);
     }
-
 
 
     /**
@@ -304,8 +330,16 @@ class SiteController extends AbstractController
      */
     #[Route('/email', name: 'app_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function sendCode(): Response
+    public function sendCode(Request $request, RequestStack $requestStack): Response
     {
+        // Call the getSettings function to retrieve the data
+        $data = $this->getSettings($this->settingRepository, $request, $requestStack);
+
+        // Modify the needed values
+        $data['demoMode'] = false;
+        $data['VERIFICATION_FORM'] = true;
+        $data['BTS_DOWNLOAD'] = false;
+
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -314,10 +348,12 @@ class SiteController extends AbstractController
             $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
 
             // Render the template with the verification code
-            return $this->render('email_activation/index.html.twig', [
+            return $this->render('site/landing.html.twig', [
                 'code' => $currentUser->getVerificationCode(),
+                ...$data, // Spread the $data values into the template context
             ]);
         }
+
         // User is already verified, render the landing template
         return $this->redirectToRoute('app_landing');
     }
