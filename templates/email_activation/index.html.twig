@@ -5,11 +5,7 @@
 {% block body %}
     <div class="flex flex-col items-center mt-10">
         <h1 class="text-2xl font-bold mb-3">Email Activation</h1>
-        <div class="space-y-4 mb-3 pr-2">
-            <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently authenticated as
-                <span class="font-bold">{{ app.user.uuid }}</span>
-            </p>
-        </div>
+
         <p>An authentication code has been sent to your email.</p>
         <div class="mt-4">
             <form action="{{ path('app_check_email_code') }}" method="post">
