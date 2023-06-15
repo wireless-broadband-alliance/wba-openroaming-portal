@@ -5,8 +5,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.radius_realm: '%env(RADIUS_REALM)%'
-    app.email_address: 'openroaming@tetrapi.pt'
-    app.sender_name: 'Openroaming - Tetrapi'
+    app.email_address: '%env(EMAIL_ADDRESS)%'
+    app.sender_name: '%env(SENDER_NAME)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -33,6 +33,8 @@ services:
             ##  Attribute mapping
             - password: 'notused'
               # email: $email
+              email: '%app.email_address%'
+              sender_name: '%app.sender_name%'
               first_name: $givenName
               last_name: $surname
               uuid: $sAMAccountName
