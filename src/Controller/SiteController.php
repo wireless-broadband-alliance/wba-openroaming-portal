@@ -75,7 +75,7 @@ class SiteController extends AbstractController
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
         /// Verification Form
-        $data['VERIFICATION_FORM'] = false; /// This is should not be changed by the admin, this is here only to hide a form before the verification
+        $data['VERIFICATION_FORM'] = false;
         ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
