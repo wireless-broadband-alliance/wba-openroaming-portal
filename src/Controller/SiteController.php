@@ -10,6 +10,7 @@ use App\Security\PasswordAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -51,7 +52,7 @@ class SiteController extends AbstractController
         $this->settingRepository = $settingRepository;
     }
 
-    private function getSettings(SettingRepository $settingRepository, Request $request, RequestStack $requestStack,): array
+    private function getSettings(UserRepository $userRepository, SettingRepository $settingRepository, Request $request, RequestStack $requestStack,): array
     {
         $data = [];
 
@@ -75,6 +76,7 @@ class SiteController extends AbstractController
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
         /// Verification Form
+        $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
         $data['VERIFICATION_FORM'] = false;
         ///
         $userAgent = $request->headers->get('User-Agent');
@@ -92,10 +94,10 @@ class SiteController extends AbstractController
     }
 
     #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
+    public function landing(UserRepository $userRepository, Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
     {
         // Call the getSettings function to retrieve the data
-        $data = $this->getSettings($this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings($userRepository, $settingRepository, $request, $requestStack);
 
         // Check if the user is logged in
         if ($this->getUser()) {
@@ -265,11 +267,14 @@ class SiteController extends AbstractController
             $verificationCode = $this->generateVerificationCode($currentUser);
         }
 
-        return (new Email())
+        return (new TemplatedEmail())
             ->from(new Address($Email, $Name))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->text('Your authentication code: ' . $verificationCode);
+            ->htmlTemplate('email_activation/email_template.html.twig')
+            ->context([
+                'verificationCode' => $verificationCode,
+            ]);
     }
 
 
@@ -329,11 +334,10 @@ class SiteController extends AbstractController
      */
     #[Route('/email', name: 'app_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function sendCode(Request $request, RequestStack $requestStack): Response
+    public function sendCode(UserRepository $userRepository, Request $request, RequestStack $requestStack): Response
     {
         // Call the getSettings function to retrieve the data
-        $data = $this->getSettings($this->settingRepository, $request, $requestStack);
-
+        $data = $this->getSettings($userRepository, $this->settingRepository, $request, $requestStack);
         // Modify the needed values
         $data['demoMode'] = false;
         $data['VERIFICATION_FORM'] = true;
@@ -343,12 +347,11 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            // Send the email with the verification code
+            // Send the email with the verification code307398
             $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
 
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
-                'code' => $currentUser->getVerificationCode(),
                 ...$data,
             ]);
         }
