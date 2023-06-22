@@ -349,7 +349,7 @@ class SiteController extends AbstractController
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'code' => $currentUser->getVerificationCode(),
-                ...$data, // Spread the $data values into the template context
+                ...$data,
             ]);
         }
 
