@@ -347,7 +347,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            // Send the email with the verification code307398
+            // Send the email with the verification
             $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
 
             // Render the template with the verification code
