@@ -268,7 +268,7 @@ class SiteController extends AbstractController
         return (new Email())
             ->from(new Address($Email, $Name))
             ->to($email)
-            ->subject('Authentication Code')
+            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
             ->text('Your authentication code: ' . $verificationCode);
     }
 
