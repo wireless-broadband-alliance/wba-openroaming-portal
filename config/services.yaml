@@ -8,6 +8,10 @@ parameters:
     app.email_address: '%env(EMAIL_ADDRESS)%'
     app.sender_name: '%env(SENDER_NAME)%'
 services:
+    #Things to make the login with Google work
+    App\Controller\GoogleController:
+      arguments:
+        $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient'
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

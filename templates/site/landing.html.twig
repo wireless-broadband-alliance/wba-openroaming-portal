@@ -67,6 +67,17 @@
                 {% for message in app.session.flashbag.get('error') %}
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
+                {% if not app.user %}
+                    <div class="flex flex-row justify-center lg:justify-start mt-10">
+                        <a href="{{ path('connect_google') }}"
+                           class="rounded-lg bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 text-white font-medium text-sm px-5 py-2.5 lg:px-8 lg:py-3 inline-flex items-center justify-center dark:focus:ring-[#4285F4]/55 mr-2 mb-2">
+                            <svg class="mr-2 -ml-1 w-4 h-4 lg:w-6 lg:h-6" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                                <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                            </svg>
+                            Login with Google
+                        </a>
+                    </div>
+                {% endif %}
                 {% if VERIFICATION_FORM %}
                     {% include 'email_activation/index.html.twig' %}
                 {% endif %}
@@ -79,7 +90,7 @@
                         <form method="post">
                             {% if not app.user %}
                                 {# Email #}
-                                <div class="relative mt-20 lg:mt-12 xl:mt-24">
+                                <div class="relative mt-10 lg:mt-6 xl:mt-12">
                                     <label for="email"
                                            class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Email</label>
                                     <input id="email"
