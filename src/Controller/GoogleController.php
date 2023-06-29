@@ -153,7 +153,7 @@ class GoogleController extends AbstractController
     {
         // Check if the state parameter matches the cached state
         if ($state !== $cachedState) {
-            throw new RuntimeException('Potato Invalid state, go check the state and the caches variables or go back to the login page and try again');
+            throw new RuntimeException('Potato Invalid state, go check the $state and the $caches variables or go back to the landing page and try again');
         }
     }
 
@@ -162,7 +162,7 @@ class GoogleController extends AbstractController
      */
     private function findOrCreateUser(string $googleUserId, string $email): User
     {
-        // Find the user entity in the database based on the Google user ID or email
+        // Find the user entity in the database based on the Google user ID
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
 
         if (!$user) {
@@ -171,7 +171,7 @@ class GoogleController extends AbstractController
         }
 
         if (!$user) {
-            // User doesn't exist, create a new user entity
+            // User doesn't exist, create a new user with a Google id
             $user = new User();
             $user->setGoogleId($googleUserId);
             $user->setIsVerified(true);
@@ -194,7 +194,7 @@ class GoogleController extends AbstractController
             $this->entityManager->persist($user);
         }
 
-        // Update the user's last login time or perform any other post-authentication tasks
+        // Update the user's last login time
         $user->setLastLogin(new \DateTime());
         $this->entityManager->flush();
 
@@ -233,7 +233,12 @@ class GoogleController extends AbstractController
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
             // Handle any authentication exceptions
-            // You can redirect the user to an error page or perform any other actions
+
+            // Redirect the user to the landing page with the error message
+            $errorMessage = 'Authentication failed: ' . $exception->getMessage();
+            $this->addFlash('error', $errorMessage);
+            $this->redirectToRoute('app_landing');
+            return;
         }
     }
 }
