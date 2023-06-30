@@ -182,3 +182,4 @@ This table in the MySQL database contains various configuration options for the 
 24. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory. The placeholder `@ID` is replaced with the user's ID.
 25. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
 26. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
+27. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google

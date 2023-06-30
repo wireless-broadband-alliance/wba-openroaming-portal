@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Setting;
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -100,6 +102,15 @@ class GoogleController extends AbstractController
      * @throws NotFoundExceptionInterface
      * @throws Exception
      */
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     * @throws ContainerExceptionInterface
+     * @throws IdentityProviderException
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     * @throws Exception
+     */
     #[Route('/connect/google/check', name: 'connect_google_check')]
     public function connectCheckAction(Request $request): RedirectResponse
     {
@@ -135,6 +146,12 @@ class GoogleController extends AbstractController
         // Retrieve the email from the resource owner
         $email = $resourceOwner->getEmail();
 
+        // Check if the email is valid and has the correct domain
+        if (!$this->isValidEmail($email)) {
+            $this->addFlash('error', 'Invalid email or domain');
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Find or create the user based on the Google user ID and email
         $user = $this->findOrCreateUser($googleUserId, $email);
 
@@ -142,12 +159,35 @@ class GoogleController extends AbstractController
         $this->cache->deleteItem($cacheKey);
 
         // Authenticate the user
-        $this->authenticateUser($user, $request);
+        $this->authenticateUser($user);
 
         // Redirect the user to the main index page
         return $this->redirectToRoute('app_landing');
-
     }
+
+    private function isValidEmail(string $email): bool
+    {
+        $settingRepository = $this->entityManager->getRepository(Setting::class);
+        $validDomainsSetting = $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN']);
+
+        if (!$validDomainsSetting) {
+            throw new RuntimeException('Valid domains setting not found in the database.');
+        }
+
+        $validDomains = explode(',', $validDomainsSetting->getValue());
+
+        // Trim whitespace from each valid domain
+        $validDomains = array_map('trim', $validDomains);
+
+        // Extract the domain from the email
+        $domain = substr($email, strrpos($email, '@') + 1);
+
+        // Check if the extracted domain is present in the array of valid domains
+        return in_array($domain, $validDomains, true);
+    }
+
+
+
 
     private function validateState(string $state, ?string $cachedState): void
     {
@@ -195,7 +235,7 @@ class GoogleController extends AbstractController
         }
 
         // Update the user's last login time
-        $user->setLastLogin(new \DateTime());
+        $user->setLastLogin(new DateTime());
         $this->entityManager->flush();
 
         return $user;
