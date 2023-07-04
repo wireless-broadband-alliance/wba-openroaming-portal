@@ -142,7 +142,7 @@ class GoogleController extends AbstractController
             $user->setGoogleId($googleUserId);
             $user->setIsVerified(true);
             $user->setEmail($email);
-            $user->setUuid(str_replace('@', "-GOOGLE-" . uniqid("", true) . "-", $user->getEmail()));// I'm kinda confused here, idk what should i insert here and the column its not null on the db
+            $user->setUuid($email);
 
             $randomPassword = bin2hex(random_bytes(8));
             $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
