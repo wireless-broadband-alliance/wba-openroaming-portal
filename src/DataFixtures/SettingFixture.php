@@ -39,7 +39,7 @@ class SettingFixture extends Fixture
             ['name' => 'DEMO_WHITE_LABEL', 'value' => 'true'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => 'tetrapi.pt'],
+            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {

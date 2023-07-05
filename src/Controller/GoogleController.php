@@ -32,13 +32,14 @@ class GoogleController extends AbstractController
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $entityManager,
+        ClientRegistry              $clientRegistry,
+        EntityManagerInterface      $entityManager,
         UserPasswordHasherInterface $passwordEncoder,
-        TokenStorageInterface $tokenStorage,
-        RequestStack $requestStack,
-        EventDispatcherInterface $eventDispatcher
-    ) {
+        TokenStorageInterface       $tokenStorage,
+        RequestStack                $requestStack,
+        EventDispatcherInterface    $eventDispatcher
+    )
+    {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->passwordEncoder = $passwordEncoder;
@@ -66,6 +67,11 @@ class GoogleController extends AbstractController
      * @throws Exception
      */
     #[Route('/connect/google/check', name: 'connect_google_check')]
+    /**
+     * @throws IdentityProviderException
+     * @throws Exception
+     */
+    #[Route('/connect/google/check', name: 'connect_google_check')]
     public function connectCheckAction(Request $request): RedirectResponse
     {
         // Retrieve the "google" client
@@ -86,12 +92,17 @@ class GoogleController extends AbstractController
 
         // Check if the email is valid
         if (!$this->isValidEmail($email)) {
-            $this->addFlash('error', 'Sorry, you cannot login because you don\'t have a valid domain.');
+            $this->addFlash('error', 'Sorry! Your email domain is not allowed to use this platform');
             return $this->redirectToRoute('app_landing');
         }
 
         // Find or create the user based on the Google user ID and email
-        $user = $this->findOrCreateUser($googleUserId, $email);
+        $user = $this->findOrCreateGoogleUser($googleUserId, $email);
+
+        // If the user is null, redirect to the landing page
+        if ($user === null) {
+            return $this->redirectToRoute('app_landing');
+        }
 
         // Authenticate the user
         $this->authenticateUser($user);
@@ -99,6 +110,7 @@ class GoogleController extends AbstractController
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
     }
+
 
     private function isValidEmail(string $email): bool
     {
@@ -111,8 +123,14 @@ class GoogleController extends AbstractController
             throw new RuntimeException('VALID_DOMAINS_GOOGLE_LOGIN not found in the database.');
         }
 
+        // If the valid domains setting is empty, allow all domains
+        $validDomains = $validDomainsSetting->getValue();
+        if (empty($validDomains)) {
+            return true;
+        }
+
         // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $validDomainsSetting->getValue());
+        $validDomains = explode(',', $validDomains);
         $validDomains = array_map('trim', $validDomains);
 
         // Extract the domain from the email
@@ -123,40 +141,59 @@ class GoogleController extends AbstractController
         return in_array($domain, $validDomains, true);
     }
 
+
     /**
      * @throws Exception
      */
-    private function findOrCreateUser(string $googleUserId, string $email): User
+    /**
+     * @throws Exception
+     */
+    private function findOrCreateGoogleUser(string $googleUserId, string $email): ?User
     {
         // Check if a user with the given Google user ID exists
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
 
-        // If a user doesn't exist, check if a user with the given email exists
-        if (!$user) {
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        // If a user exists with the given Google user ID, return the user
+        if ($user) {
+            return $user;
         }
 
-        // If a user still doesn't exist, create a new user
-        if (!$user) {
-            $user = new User();
-            $user->setGoogleId($googleUserId);
-            $user->setIsVerified(true);
-            $user->setEmail($email);
-            $user->setUuid($email);
+        // Check if a user with the given email exists
+        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-            $randomPassword = bin2hex(random_bytes(8));
-            $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
-            $user->setPassword($hashedPassword);
-
-            $this->entityManager->persist($user);
+        // If a user with the given email exists, and it has a different login method, return null
+        if ($userWithEmail && !$userWithEmail->getGoogleId()) {
+            $this->addFlash('error', 'An account with this email exists but with a different login method. Please use your original login method.');
+            return null;
         }
+
+        // If a user with the given email exists, and it has the Google login method, update the Google ID and return the user
+        if ($userWithEmail) {
+            $userWithEmail->setGoogleId($googleUserId);
+            $this->entityManager->flush();
+            return $userWithEmail;
+        }
+
+        // If no user exists, create a new user
+        $user = new User();
+        $user->setGoogleId($googleUserId);
+        $user->setIsVerified(true);
+        $user->setEmail($email);
+        $user->setUuid($email);
+
+        $randomPassword = bin2hex(random_bytes(8));
+        $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
+        $user->setPassword($hashedPassword);
 
         // Update the last login time and save the changes
         $user->setLastLogin(new DateTime());
+
+        $this->entityManager->persist($user);
         $this->entityManager->flush();
 
         return $user;
     }
+
 
     private function authenticateUser(User $user): void
     {
