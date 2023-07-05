@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -61,12 +60,6 @@ class GoogleController extends AbstractController
         return $this->redirect($redirectUrl);
     }
 
-
-    /**
-     * @throws IdentityProviderException
-     * @throws Exception
-     */
-    #[Route('/connect/google/check', name: 'connect_google_check')]
     /**
      * @throws IdentityProviderException
      * @throws Exception
@@ -141,37 +134,34 @@ class GoogleController extends AbstractController
         return in_array($domain, $validDomains, true);
     }
 
-
-    /**
-     * @throws Exception
-     */
     /**
      * @throws Exception
      */
     private function findOrCreateGoogleUser(string $googleUserId, string $email): ?User
     {
         // Check if a user with the given Google user ID exists
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
-
-        // If a user exists with the given Google user ID, return the user
-        if ($user) {
-            return $user;
+        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
+        if ($existingUser) {
+            // If a user with the given Google user ID exists, return the user
+            return $existingUser;
         }
 
         // Check if a user with the given email exists
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-
-        // If a user with the given email exists, and it has a different login method, return null
-        if ($userWithEmail && !$userWithEmail->getGoogleId()) {
-            $this->addFlash('error', 'An account with this email exists but with a different login method. Please use your original login method.');
-            return null;
-        }
-
-        // If a user with the given email exists, and it has the Google login method, update the Google ID and return the user
         if ($userWithEmail) {
-            $userWithEmail->setGoogleId($googleUserId);
-            $this->entityManager->flush();
-            return $userWithEmail;
+            // A user with the given email already exists
+            if ($userWithEmail->getGoogleId()) {
+                // A user with the given email already has a Google login method
+                if ($userWithEmail->getGoogleId() !== $googleUserId) {
+                    // The Google account IDs don't match, indicating a potential account takeover
+                    $this->addFlash('error', 'An account with this email exists but with a different login method. Please use your original login method.');
+                    return null;
+                }
+            } else {
+                // Remove the auto-linking functionality
+                $this->addFlash('error', 'Please log in with your original login method before linking your Google account.');
+                return null;
+            }
         }
 
         // If no user exists, create a new user
@@ -185,12 +175,8 @@ class GoogleController extends AbstractController
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
-        // Update the last login time and save the changes
-        $user->setLastLogin(new DateTime());
-
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-
         return $user;
     }
 
