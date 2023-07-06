@@ -147,29 +147,18 @@ class GoogleController extends AbstractController
         }
 
         // Check if a user with the given email exists
-        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-        if ($userWithEmail) {
-            // A user with the given email already exists
-            if ($userWithEmail->getGoogleId()) {
-                // A user with the given email already has a Google login method
-                if ($userWithEmail->getGoogleId() !== $googleUserId) {
-                    // The Google account IDs don't match, indicating a potential account takeover
-                    $this->addFlash('error', 'An account with this email exists but with a different login method. Please use your original login method.');
-                    return null;
-                }
-            } else {
-                // Remove the auto-linking functionality
-                $this->addFlash('error', 'Please log in with your original login method before linking your Google account.');
-                return null;
-            }
+        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
+        if ($userWithEmail && $userWithEmail->getGoogleId() !== null) {
+            // Return the existing user with the matching Google ID
+            return $userWithEmail;
         }
 
         // If no user exists, create a new user
         $user = new User();
-        $user->setGoogleId($googleUserId);
-        $user->setIsVerified(true);
-        $user->setEmail($email);
-        $user->setUuid($email);
+        $user->setGoogleId($googleUserId)
+            ->setIsVerified(true)
+            ->setEmail($email)
+            ->setUuid($email);
 
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
@@ -177,6 +166,8 @@ class GoogleController extends AbstractController
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+
         return $user;
     }
 
