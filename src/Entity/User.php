@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -59,6 +60,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $lastLogin = null;
 
     public function __construct()
     {
@@ -287,6 +294,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setVerificationCode(?string $verificationCode): self
     {
         $this->verificationCode = $verificationCode;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getLastLogin(): ?\DateTimeInterface
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTimeInterface $lastLogin): self
+    {
+        $this->lastLogin = $lastLogin;
 
         return $this;
     }
