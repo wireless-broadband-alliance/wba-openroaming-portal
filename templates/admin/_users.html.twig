@@ -1,0 +1,102 @@
+<tr>
+    <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
+        <div class="flex justify-center items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">
+                    {{ user.uuid is defined ? user.uuid : 'No information' }}
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
+        <div class="flex justify-center items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">
+                    {{ user.email is defined ? user.email : 'No information' }}
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
+        <div class="flex justify-end items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium text-red-500">
+                    {% if user.isVerified is defined and user.isVerified == 0 %}
+                        Not Verified
+                    {% else %}
+                        <p class="text-green-500">Verified</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
+        <div class="flex justify-end items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium text-red-500">
+                    {% if user.googleId is defined and user.googleId == false %}
+                        No
+                    {% else %}
+                        <p class="text-green-500">Yes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
+        <div class="flex justify-end items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-500">
+                    <p>{{ user.getCreatedAt()|date('d/m/Y H:i') }}</p>
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap hover:transform hover:bg-gray-100">
+        <div class="flex justify-end items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium">
+                    {% if user.getBannedUntil() %}
+                        {% if user.getBannedUntil() < date() %}
+                            <p class="text-green-500">{{ user.getBannedUntil()|date('d/m/Y H:i') }}</p>
+                        {% else %}
+                            <p class="text-red-500">{{ user.getBannedUntil()|date('d/m/Y H:i') }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-green-500">Never Banned</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex justify-center items-center">
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">
+                    <div class="flex items-center space-x-4">
+                        <a onclick="return confirm('Are you sure you want to delete the user: {{ user.email }}?');"
+                           href="{{ path('admin_delete', {id : user.id}) }}"
+                           class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
+                            Delete
+                        </a>
+                        <a href="{{ path('admin_update', {id : user.id}) }}"
+                           class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
+                            Update
+                        </a>
+                        <a href="{{ path('admin_ban_user', {id: user.id}) }}"
+                           class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
+                            Ban User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </td>
+
+</tr>
