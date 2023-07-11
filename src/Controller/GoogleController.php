@@ -169,6 +169,7 @@ class GoogleController extends AbstractController
             ->setEmail($email)
             ->setFirstName($firstname)
             ->setLastName($lastname)
+            ->setCreatedAt(new \DateTime())
             ->setUuid($email);
 
         $randomPassword = bin2hex(random_bytes(8));
