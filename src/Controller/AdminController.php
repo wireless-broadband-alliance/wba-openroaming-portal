@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\UserRadiusProfileStatus;
-use App\Form\BanUserType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Entity\RadiusUser;
 use App\Repository\SettingRepository;
@@ -26,11 +25,12 @@ class AdminController extends AbstractController
     private $radiusUserRepository;
 
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        RadiusUserRepository $radiusUserRepository,
+        UserRepository              $userRepository,
+        SettingRepository           $settingRepository,
+        RadiusUserRepository        $radiusUserRepository,
         UserRadiusProfileRepository $userRadiusProfile,
-    ) {
+    )
+    {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->radiusUserRepository = $radiusUserRepository;
@@ -59,9 +59,14 @@ class AdminController extends AbstractController
         // Search users based on the provided search term
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
-        // Only let the user type more of 3 letters on the search bar
+        // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
             $this->addFlash('error_empty', 'Please enter at least 3 characters for the search.');
+
+            return $this->redirectToRoute('admin_page');
+        }
+        if (strlen($searchTerm) > 320) {
+            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
             return $this->redirectToRoute('admin_page');
         }
 

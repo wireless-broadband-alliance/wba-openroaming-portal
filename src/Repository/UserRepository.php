@@ -98,7 +98,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                     ->expr()
                     ->orX(
                         'u.uuid LIKE :searchTerm',
-                        'u.email LIKE :searchTerm'
+                        'u.email LIKE :searchTerm',
+                        'u.first_name LIKE :searchTerm',
+                        'u.last_name LIKE :searchTerm'
                     )
             )
             ->setParameter('role', '%ROLE_ADMIN%')
@@ -106,5 +108,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
-
 }
