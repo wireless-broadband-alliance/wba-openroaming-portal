@@ -42,6 +42,15 @@ class UserUpdateType extends AbstractType
             ->add('lastName', TextType::class, [
                 'label' => 'Last Name',
                 'required' => false,
+            ])
+            ->add('banned', ChoiceType::class, [
+                'label' => 'Banned',
+                'required' => true,
+                'choices' => [
+                    'Banned' => true,
+                    'Not Banned' => false,
+                ],
+                'placeholder' => 'Select an option',
             ]);
     }
 

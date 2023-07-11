@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\UserRadiusProfileStatus;
 use App\Form\BanUserType;
 use App\Form\UserUpdateType;
+use App\RadiusDb\Entity\RadiusUser;
+use App\Repository\SettingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,9 +17,26 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\RadiusDb\Repository\RadiusUserRepository;
 
 class AdminController extends AbstractController
 {
+    private $userRepository;
+    private $settingRepository;
+    private $radiusUserRepository;
+
+    public function __construct(
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        RadiusUserRepository $radiusUserRepository,
+        UserRadiusProfileRepository $userRadiusProfile,
+    ) {
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
+        $this->radiusUserRepository = $radiusUserRepository;
+        $this->userRadiusProfile = $userRadiusProfile;
+    }
+
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
     public function index(Request $request): Response
@@ -63,12 +84,18 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete')]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers($id, UserRepository $userRepository, EntityManagerInterface $em): Response
+    public function deleteUsers($id, EntityManagerInterface $em): Response
     {
-        if (!$user = $userRepository->find($id)) {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
+
+        // Disable profiles when deleting a user
+        $this->disableProfiles($user);
+
         $email = $user->getEmail();
+
         $em->remove($user);
         $em->flush();
 
@@ -85,6 +112,13 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
+
+            if ($user->isBanned()) {
+                $this->disableProfiles($user);
+            } else {
+                $this->enableProfiles($user);
+            }
+
             $userRepository->save($user, true);
             $email = $user->getEmail();
             $this->addFlash('success_admin', sprintf('User with email "%s" updated successfully.', $email));
@@ -95,36 +129,61 @@ class AdminController extends AbstractController
         return $this->render(
             'admin/edit.html.twig',
             [
-                'form' => $form,
+                'form' => $form->createView(),
                 'user' => $user
             ]
         );
     }
 
-    #[Route('dashboard/ban-user/{id<\d+>}', name: 'admin_ban_user', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function banUser(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
+    private function updateProfiles(User $user, callable $updateCallback): void
     {
-        $id = $request->attributes->getInt('id');
-
-        if (!$user = $userRepository->find($id)) {
-            $this->addFlash('error_empty', 'User not found.');
-            return $this->redirectToRoute('admin_page');
+        // reducing duplicated code
+        $profiles = $user->getUserRadiusProfiles();
+        foreach ($profiles as $profile) {
+            if ($updateCallback($profile)) {
+                $this->userRadiusProfile->save($profile, true);
+            }
         }
-
-        $banForm = $this->createForm(BanUserType::class, $user);
-        $banForm->handleRequest($request);
-
-        if ($banForm->isSubmitted() && $banForm->isValid()) {
-            $entityManager->flush();
-            $email = $user->getEmail();
-            $this->addFlash('success_admin', sprintf('User with email "%s" banned successfully.', $email));
-            return $this->redirectToRoute('admin_page');
-        }
-
-        return $this->render('admin/ban_user.html.twig', [
-            'user' => $user,
-            'banForm' => $banForm->createView(),
-        ]);
     }
+
+    private function disableProfiles(User $user): void
+    {
+        $this->updateProfiles($user, function ($profile) {
+            if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE) {
+                return false;
+            }
+
+            $profile->setStatus(UserRadiusProfileStatus::REVOKED);
+            $radiusUser = $this->radiusUserRepository->findOneBy(['uuid' => $profile->getRadiusUser()]);
+            if ($radiusUser) {
+                $this->radiusUserRepository->remove($radiusUser, true);
+            }
+
+            return true;
+        });
+    }
+
+    private function enableProfiles(User $user): void
+    {
+        $this->updateProfiles($user, function ($profile) {
+            if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE) {
+                return false;
+            }
+
+            $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
+            if (!$radiusUser) {
+                $radiusUser = new RadiusUser();
+                $radiusUser->setUsername($profile->getRadiusUser());
+                $radiusUser->setAttribute('Cleartext-Password');
+                $radiusUser->setOp(':=');
+                $radiusUser->setValue($profile->getRadiusToken());
+                $this->radiusUserRepository->save($radiusUser, true);
+
+                $profile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            }
+
+            return true;
+        });
+    }
+
 }
