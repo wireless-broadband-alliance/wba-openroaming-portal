@@ -99,6 +99,13 @@ class GoogleController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        // Check if the user is banned
+        if ($user->getBannedUntil() !== null && $user->getBannedUntil() > new \DateTime()) {
+            $bannedUntil = $user->getBannedUntil()->format('Y-m-d H:i');
+            $this->addFlash('error', "Your account has been banned until $bannedUntil");
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Authenticate the user
         $this->authenticateUser($user);
 
