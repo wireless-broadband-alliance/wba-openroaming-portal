@@ -64,8 +64,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleId = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $lastLogin = null;
+    private ?\DateTimeInterface $bannedUntil = null;
 
     public function __construct()
     {
@@ -310,15 +313,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         return $this;
     }
 
-    public function getLastLogin(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->lastLogin;
+        return $this->createdAt;
     }
 
-    public function setLastLogin(?\DateTimeInterface $lastLogin): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
-        $this->lastLogin = $lastLogin;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
+
+    public function getBannedUntil(): ?\DateTimeInterface
+    {
+        return $this->bannedUntil;
+    }
+
+    public function setBannedUntil(?\DateTimeInterface $bannedUntil): self
+    {
+        $this->bannedUntil = $bannedUntil;
+
+        return $this;
+    }
+
 }

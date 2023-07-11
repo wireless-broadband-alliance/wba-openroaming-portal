@@ -82,6 +82,8 @@ class GoogleController extends AbstractController
         $googleUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         $email = $resourceOwner->getEmail();
+        $firstname = $resourceOwner->getFirstname();
+        $lastname = $resourceOwner->getLastname();
 
         // Check if the email is valid
         if (!$this->isValidEmail($email)) {
@@ -90,10 +92,17 @@ class GoogleController extends AbstractController
         }
 
         // Find or create the user based on the Google user ID and email
-        $user = $this->findOrCreateGoogleUser($googleUserId, $email);
+        $user = $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
         if ($user === null) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Check if the user is banned
+        if ($user->getBannedUntil() !== null && $user->getBannedUntil() > new \DateTime()) {
+            $bannedUntil = $user->getBannedUntil()->format('Y-m-d H:i');
+            $this->addFlash('error', "Your account has been banned until $bannedUntil");
             return $this->redirectToRoute('app_landing');
         }
 
@@ -137,7 +146,7 @@ class GoogleController extends AbstractController
     /**
      * @throws Exception
      */
-    private function findOrCreateGoogleUser(string $googleUserId, string $email): ?User
+    private function findOrCreateGoogleUser(string $googleUserId, string $email, string $firstname, string $lastname): ?User
     {
         // Check if a user with the given Google user ID exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
@@ -158,6 +167,8 @@ class GoogleController extends AbstractController
         $user->setGoogleId($googleUserId)
             ->setIsVerified(true)
             ->setEmail($email)
+            ->setFirstName($firstname)
+            ->setLastName($lastname)
             ->setUuid($email);
 
         $randomPassword = bin2hex(random_bytes(8));

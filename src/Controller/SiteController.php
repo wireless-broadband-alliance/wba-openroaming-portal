@@ -126,6 +126,7 @@ class SiteController extends AbstractController
                 } else if ($this->getUser() === null) {
                     $user = new User();
                     $user->setEmail($payload['email']);
+                    $user->setCreatedAt(new \DateTime());
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                     $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
 
