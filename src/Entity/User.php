@@ -67,8 +67,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $Banned = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $bannedAt = null;
+
 
     public function __construct()
     {
@@ -325,14 +326,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         return $this;
     }
 
-    public function isBanned(): ?bool
+    public function getBannedAt(): ?\DateTimeInterface
     {
-        return $this->Banned;
+        return $this->bannedAt;
     }
 
-    public function setBanned(?bool $Banned): self
+    public function setBannedAt(?\DateTimeInterface $bannedAt): self
     {
-        $this->Banned = $Banned;
+        $this->bannedAt = $bannedAt;
 
         return $this;
     }

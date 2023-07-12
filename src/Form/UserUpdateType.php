@@ -43,12 +43,12 @@ class UserUpdateType extends AbstractType
                 'label' => 'Last Name',
                 'required' => false,
             ])
-            ->add('banned', ChoiceType::class, [
+            ->add('bannedAt', ChoiceType::class, [
                 'label' => 'Banned',
                 'required' => true,
                 'choices' => [
-                    'Banned' => true,
-                    'Not Banned' => false,
+                    'Banned' => new \DateTime(),
+                    'Not Banned' => null,
                 ],
                 'placeholder' => 'Select an option',
             ]);

@@ -61,8 +61,8 @@
         <div class="flex justify-end items-center">
             <div class="ml-4">
                 <div class="text-sm font-medium">
-                    {% if user.isBanned %}
-                        <p class="text-red-500">Banned</p>
+                    {% if user.getBannedAt %}
+                        <p class="text-red-500">{{ user.getBannedAt()|date('d/m/Y H:i') }}</p>
                     {% else %}
                         <p class="text-green-500">Not Banned</p>
                     {% endif %}

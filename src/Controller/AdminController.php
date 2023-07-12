@@ -118,9 +118,11 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
 
-            if ($user->isBanned()) {
+            if ($form->get('bannedAt')->getData()) {
+                $user->setBannedAt(new \DateTime());
                 $this->disableProfiles($user);
             } else {
+                $user->setBannedAt(null);
                 $this->enableProfiles($user);
             }
 
@@ -139,6 +141,7 @@ class AdminController extends AbstractController
             ]
         );
     }
+
 
     private function updateProfiles(User $user, callable $updateCallback): void
     {
