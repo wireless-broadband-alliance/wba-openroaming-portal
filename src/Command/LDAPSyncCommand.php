@@ -9,6 +9,7 @@ use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\ProfileManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,12 +26,16 @@ class LDAPSyncCommand extends Command
     private $settingRepository;
     private $radiusUserRepository;
 
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $userRadiusProfile)
+    private $profileManager;
+
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $userRadiusProfile, ProfileManager $profileManager)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->radiusUserRepository = $radiusUserRepository;
         $this->userRadiusProfile = $userRadiusProfile;
+        $this->profileManager = $profileManager;
+
 
         parent::__construct();
     }
@@ -104,42 +109,13 @@ class LDAPSyncCommand extends Command
         return null;
     }
 
-    private function disableProfiles($user)
+    private function disableProfiles($user): void
     {
-        $profiles = $user->getUserRadiusProfiles();
-        foreach ($profiles as $profile) {
-            if($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE){
-                continue;
-            }
-            $profile->setStatus(UserRadiusProfileStatus::REVOKED);
-            $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
-            $this->userRadiusProfile->save($profile, true);
-            if($radiusUser){
-                $this->radiusUserRepository->remove($radiusUser, true);
-            }
-
-        }
+        $this->profileManager->disableProfiles($user);
     }
 
-    private function enableProfiles($user)
+    private function enableProfiles($user): void
     {
-        $profiles = $user->getUserRadiusProfiles();
-        foreach ($profiles as $profile) {
-            if($profile->getStatus() === UserRadiusProfileStatus::ACTIVE){
-                continue;
-            }
-            $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
-            if(!$radiusUser){
-                $radiusUser = new RadiusUser();
-                $radiusUser->setUsername($profile->getRadiusUser());
-                $radiusUser->setAttribute('Cleartext-Password');
-                $radiusUser->setOp(':=');
-                $radiusUser->setValue($profile->getRadiusToken());
-                $this->radiusUserRepository->save($radiusUser, true);
-                $profile->setStatus(UserRadiusProfileStatus::ACTIVE);
-                $this->userRadiusProfile->save($profile, true);
-
-            }
-        }
+        $this->profileManager->enableProfiles($user);
     }
 }

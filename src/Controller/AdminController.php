@@ -9,6 +9,7 @@ use App\RadiusDb\Entity\RadiusUser;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\ProfileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,17 +25,21 @@ class AdminController extends AbstractController
     private $settingRepository;
     private $radiusUserRepository;
 
+    private $profileManager;
+
     public function __construct(
         UserRepository              $userRepository,
         SettingRepository           $settingRepository,
         RadiusUserRepository        $radiusUserRepository,
         UserRadiusProfileRepository $userRadiusProfile,
+        ProfileManager              $profileManager
     )
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->radiusUserRepository = $radiusUserRepository;
         $this->userRadiusProfile = $userRadiusProfile;
+        $this->profileManager = $profileManager;
     }
 
     #[Route('/dashboard', name: 'admin_page')]
@@ -142,56 +147,14 @@ class AdminController extends AbstractController
         );
     }
 
-
-    private function updateProfiles(User $user, callable $updateCallback): void
+    private function disableProfiles($user): void
     {
-        // reducing duplicated code
-        $profiles = $user->getUserRadiusProfiles();
-        foreach ($profiles as $profile) {
-            if ($updateCallback($profile)) {
-                $this->userRadiusProfile->save($profile, true);
-            }
-        }
+        $this->profileManager->disableProfiles($user);
     }
 
-    private function disableProfiles(User $user): void
+    private function enableProfiles($user): void
     {
-        $this->updateProfiles($user, function ($profile) {
-            if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE) {
-                return false;
-            }
-
-            $profile->setStatus(UserRadiusProfileStatus::REVOKED);
-            $radiusUser = $this->radiusUserRepository->findOneBy(['uuid' => $profile->getRadiusUser()]);
-            if ($radiusUser) {
-                $this->radiusUserRepository->remove($radiusUser, true);
-            }
-
-            return true;
-        });
-    }
-
-    private function enableProfiles(User $user): void
-    {
-        $this->updateProfiles($user, function ($profile) {
-            if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE) {
-                return false;
-            }
-
-            $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
-            if (!$radiusUser) {
-                $radiusUser = new RadiusUser();
-                $radiusUser->setUsername($profile->getRadiusUser());
-                $radiusUser->setAttribute('Cleartext-Password');
-                $radiusUser->setOp(':=');
-                $radiusUser->setValue($profile->getRadiusToken());
-                $this->radiusUserRepository->save($radiusUser, true);
-
-                $profile->setStatus(UserRadiusProfileStatus::ACTIVE);
-            }
-
-            return true;
-        });
+        $this->profileManager->enableProfiles($user);
     }
 
 }

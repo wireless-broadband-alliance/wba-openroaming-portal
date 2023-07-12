@@ -100,7 +100,7 @@ class GoogleController extends AbstractController
         }
 
         // Check if the user is banned
-        if ($user->isBanned()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', "Your account has been banned");
             return $this->redirectToRoute('app_landing');
         }
