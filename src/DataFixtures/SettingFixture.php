@@ -30,6 +30,8 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
             ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
+            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
             ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
             ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
@@ -39,6 +41,7 @@ class SettingFixture extends Fixture
             ['name' => 'DEMO_WHITE_LABEL', 'value' => 'true'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
+            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {

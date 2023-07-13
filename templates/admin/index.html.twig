@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4">
+        <div class="py-8 text-center">
+            <h1 class="text-3xl font-semibold">Admin Page - WBA</h1>
+            <p class="text-gray-500 mt-2">This page is for admin use only. Still in development.</p>
+        </div>
+
+        <div class="flex justify-between items-center mb-4">
+            {% if app.user %}
+                <a href="{{ path('saml_logout') }}" class="text-gray-500 hover:text-red-500">Logout</a>
+            {% endif %}
+
+            {% for message in app.session.flashbag.get('success_admin') %}
+                <div class="text-white text-base bg-green-500 border-green-500 mt-5 rounded-md p-2 text-center">{{ message }}</div>
+            {% endfor %}
+
+            <form action="{{ path('admin_search') }}" method="GET" class="flex items-center">
+                <input type="text" name="u" placeholder="Search users..." class="border border-gray-300 rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 hover:transform hover:scale-105">Search</button>
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table-auto w-full divide-y divide-gray-200 border border-gray-300 mb-10">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">UUID</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Email</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Verification</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Google Account</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Created At</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Banned Until</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                {% if searchTerm is empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="text-center text-gray-500 mt-2 mb-2">
+                                <p>Hello, there! This is the dashboard page. Only the admin has permission to use it.</p>
+                                <p>Please use the search box to do your work.</p>
+                                {# Flash error message #}
+                                {% for message in app.session.flashbag.get('error_empty') %}
+                                    <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    {% if users|length > 0 %}
+                        {% for user in users %}
+                            {{ include('admin/_users.html.twig', { 'user': user }) }}
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="text-center">
+                                    No users found for "{{ searchTerm }}"
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+                </tbody>
+            </table>
+            {% if totalPages > 1 %}
+                <div class="flex justify-center mt-4 mb-5 ">
+                    <div class="flex space-x-2">
+                        {% for page in 1..totalPages %}
+                            <a href="{{ path('admin_search', {'u': searchTerm, 'page': page}) }}" class="px-2 py-1 rounded hover:bg-blue-500 hover:text-white {{ currentPage == page ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500' }}">{{ page }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

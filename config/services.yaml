@@ -5,7 +5,13 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.radius_realm: '%env(RADIUS_REALM)%'
+    app.email_address: '%env(EMAIL_ADDRESS)%'
+    app.sender_name: '%env(SENDER_NAME)%'
 services:
+    #Things to make the login with Google work
+    App\Controller\GoogleController:
+      arguments:
+        $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient'
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
@@ -31,6 +37,8 @@ services:
             ##  Attribute mapping
             - password: 'notused'
               # email: $email
+              email: '%app.email_address%'
+              sender_name: '%app.sender_name%'
               first_name: $givenName
               last_name: $surname
               uuid: $sAMAccountName
