@@ -3,9 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\BanUserType;
+use App\Enum\UserRadiusProfileStatus;
 use App\Form\UserUpdateType;
+use App\RadiusDb\Entity\RadiusUser;
+use App\Repository\SettingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\ProfileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,9 +17,31 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\RadiusDb\Repository\RadiusUserRepository;
 
 class AdminController extends AbstractController
 {
+    private $userRepository;
+    private $settingRepository;
+    private $radiusUserRepository;
+
+    private $profileManager;
+
+    public function __construct(
+        UserRepository              $userRepository,
+        SettingRepository           $settingRepository,
+        RadiusUserRepository        $radiusUserRepository,
+        UserRadiusProfileRepository $userRadiusProfile,
+        ProfileManager              $profileManager
+    )
+    {
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
+        $this->radiusUserRepository = $radiusUserRepository;
+        $this->userRadiusProfile = $userRadiusProfile;
+        $this->profileManager = $profileManager;
+    }
+
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
     public function index(Request $request): Response
@@ -38,9 +64,14 @@ class AdminController extends AbstractController
         // Search users based on the provided search term
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
-        // Only let the user type more of 3 letters on the search bar
+        // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
             $this->addFlash('error_empty', 'Please enter at least 3 characters for the search.');
+
+            return $this->redirectToRoute('admin_page');
+        }
+        if (strlen($searchTerm) > 320) {
+            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
             return $this->redirectToRoute('admin_page');
         }
 
@@ -63,12 +94,18 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete')]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers($id, UserRepository $userRepository, EntityManagerInterface $em): Response
+    public function deleteUsers($id, EntityManagerInterface $em): Response
     {
-        if (!$user = $userRepository->find($id)) {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
+
+        // Disable profiles when deleting a user
+        $this->disableProfiles($user);
+
         $email = $user->getEmail();
+
         $em->remove($user);
         $em->flush();
 
@@ -85,6 +122,15 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
+
+            if ($form->get('bannedAt')->getData()) {
+                $user->setBannedAt(new \DateTime());
+                $this->disableProfiles($user);
+            } else {
+                $user->setBannedAt(null);
+                $this->enableProfiles($user);
+            }
+
             $userRepository->save($user, true);
             $email = $user->getEmail();
             $this->addFlash('success_admin', sprintf('User with email "%s" updated successfully.', $email));
@@ -95,36 +141,20 @@ class AdminController extends AbstractController
         return $this->render(
             'admin/edit.html.twig',
             [
-                'form' => $form,
+                'form' => $form->createView(),
                 'user' => $user
             ]
         );
     }
 
-    #[Route('dashboard/ban-user/{id<\d+>}', name: 'admin_ban_user', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function banUser(Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
+    private function disableProfiles($user): void
     {
-        $id = $request->attributes->getInt('id');
-
-        if (!$user = $userRepository->find($id)) {
-            $this->addFlash('error_empty', 'User not found.');
-            return $this->redirectToRoute('admin_page');
-        }
-
-        $banForm = $this->createForm(BanUserType::class, $user);
-        $banForm->handleRequest($request);
-
-        if ($banForm->isSubmitted() && $banForm->isValid()) {
-            $entityManager->flush();
-            $email = $user->getEmail();
-            $this->addFlash('success_admin', sprintf('User with email "%s" banned successfully.', $email));
-            return $this->redirectToRoute('admin_page');
-        }
-
-        return $this->render('admin/ban_user.html.twig', [
-            'user' => $user,
-            'banForm' => $banForm->createView(),
-        ]);
+        $this->profileManager->disableProfiles($user);
     }
+
+    private function enableProfiles($user): void
+    {
+        $this->profileManager->enableProfiles($user);
+    }
+
 }

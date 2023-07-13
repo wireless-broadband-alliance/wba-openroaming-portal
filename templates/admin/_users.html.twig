@@ -61,14 +61,10 @@
         <div class="flex justify-end items-center">
             <div class="ml-4">
                 <div class="text-sm font-medium">
-                    {% if user.getBannedUntil() %}
-                        {% if user.getBannedUntil() < date() %}
-                            <p class="text-green-500">{{ user.getBannedUntil()|date('d/m/Y H:i') }}</p>
-                        {% else %}
-                            <p class="text-red-500">{{ user.getBannedUntil()|date('d/m/Y H:i') }}</p>
-                        {% endif %}
+                    {% if user.getBannedAt %}
+                        <p class="text-red-500">{{ user.getBannedAt()|date('d/m/Y H:i') }}</p>
                     {% else %}
-                        <p class="text-green-500">Never Banned</p>
+                        <p class="text-green-500">Not Banned</p>
                     {% endif %}
                 </div>
             </div>
@@ -88,10 +84,6 @@
                         <a href="{{ path('admin_update', {id : user.id}) }}"
                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
                             Update
-                        </a>
-                        <a href="{{ path('admin_ban_user', {id: user.id}) }}"
-                           class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
-                            Ban User
                         </a>
                     </div>
                 </div>
