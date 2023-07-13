@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}{{ data.title }}{% endblock %}
+
+{% block body %}
+
+    <div class="h-screen w-screen flex flex-col lg:flex-row lg:flex-wrap">
+        {# First Column #}
+        <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
+             style="background-image: url('{{ data.wallpaperImageName }}');">
+            <div class="h-[100%] w-[100%] flex flex-col justify-between">
+                <img class="mt-16 lg:mt-36 w-96"
+                     src="{{ data.openroamingLogoName }}"
+                     alt="OpenRoaming Logo"/>
+
+                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ data.welcomeText }}</h1>
+
+                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ data.welcomeDescription }}</p>
+
+                <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any
+                    questions, please contact
+                    <a href="mailto:{{ data.contactEmail }}"
+                       class="font-semibold underline">{{ data.contactEmail }}</a>
+                </p>
+            </div>
+        </div>
+
+        {# Form Column #}
+        <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
+                {{ stimulus_controller('visibility') }}>
+            <div>
+                <img class="mt-8 lg:mt-0"
+                     src="{{ data.customerLogoName }}"
+                     alt="Logo"/>
+
+                <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
+                    <p class="text-[#757575] font-medium text-sm lg:text-lg">Welcome Back</p>
+                    <p class="text-[#B4B4B4] font-light text-xs lg:text-base">Currently, OpenRoaming profiles generated
+                        by this system are proven to work on the majority of devices(including iOS, Android, macOS and
+                        Windows)</p>
+                </div>
+
+                {# Flash success message  #}
+                {% for message in app.session.flashbag.get('success') %}
+                    <div class="rounded-lg bg-[#7DB928] mt-5 px-8 py-3 text-white font-medium text-sm lg:text-lg text-center">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                {# Flash error message  #}
+                {% for message in app.session.flashbag.get('error') %}
+                    <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
+                {% endfor %}
+                {% if not app.user %}
+                    {% if data.GOOGLE_LOGIN_ENABLED %}
+                        <div class="flex flex-row justify-center lg:justify-start mt-10">
+                            <a href="{{ path('connect_google') }}"
+                               class="rounded-lg bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 text-white font-medium text-sm px-5 py-2.5 lg:px-8 lg:py-3 inline-flex items-center justify-center dark:focus:ring-[#4285F4]/55 mr-2 mb-2">
+                                <svg class="mr-2 -ml-1 w-4 h-4 lg:w-6 lg:h-6" aria-hidden="true" focusable="false"
+                                     data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 488 512">
+                                    <path fill="currentColor"
+                                          d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                                </svg>
+                                {{ data.GOOGLE_LOGIN_LABEL }}
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <div class="space-y-4 mt-6 pr-2">
+                            <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
+                                authenticated as
+                                <span class="font-bold">{{ app.user.uuid }}</span>
+                            </p>
+                        </div>
+                        <div class="space-y-4 mt-6 pr-2">
+                            <a href="{{ path('saml_logout') }}"
+                               class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
