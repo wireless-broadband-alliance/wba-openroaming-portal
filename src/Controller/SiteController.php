@@ -305,7 +305,6 @@ class SiteController extends AbstractController
         // Modify the needed values
         $data['demoMode'] = false;
         $data['VERIFICATION_FORM'] = true;
-        $data['BTS_DOWNLOAD'] = false;
 
         // Get the current user
         /** @var User $currentUser */
