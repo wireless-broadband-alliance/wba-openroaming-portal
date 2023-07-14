@@ -197,7 +197,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     }
     public function setSamlAttributes(array $attributes):void
     {
-        # $this->email = $attributes['email'][0];
+        $this->email = $attributes['email'][0];
         $this->saml_identifier = $attributes['sAMAccountName'][0];
         $this->first_name = $attributes['givenName'][0];
         $this->last_name = $attributes['surname'][0];
