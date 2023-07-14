@@ -58,6 +58,8 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        $user = $this->userRepository->findOneBy(['email' => $lastUsername]);
+
         if ($error instanceof AuthenticationException) {
             $this->addFlash('error', 'Wrong credentials');
         }
