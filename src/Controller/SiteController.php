@@ -24,7 +24,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-
+use App\Service\GetSettings;
 
 /**
  * @method getParameterBag()
@@ -35,6 +35,7 @@ class SiteController extends AbstractController
     private UserRepository $userRepository;
     private ParameterBagInterface $parameterBag;
     private SettingRepository $settingRepository;
+    private GetSettings $getSettings;
 
     /**
      * SiteController constructor.
@@ -43,64 +44,22 @@ class SiteController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
+     * @param GetSettings $getSettings The instance of GetSettings class.
      */
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository)
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings)
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->parameterBag = $parameterBag;
         $this->settingRepository = $settingRepository;
-    }
-
-    private function getSettings(UserRepository $userRepository, SettingRepository $settingRepository, Request $request, RequestStack $requestStack,): array
-    {
-        $data = [];
-
-        // Branding
-        $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
-        $data['openroamingLogoName'] = $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue();
-        $data['wallpaperImageName'] = $settingRepository->findOneBy(['name' => 'WALLPAPER_IMAGE'])->getValue();
-        $data['welcomeText'] = $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue();
-        $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
-        $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        // Demo Mode
-        $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
-        $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
-        // Auth Providers
-        // SAML
-        $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
-        $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
-        $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
-        // GOOGLE
-        $data['GOOGLE_LOGIN_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true';
-        $data['GOOGLE_LOGIN_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL'])->getValue();
-        // Legal Stuff
-        $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
-        $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
-        /// Verification Form
-        $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
-        $data['VERIFICATION_FORM'] = false;
-        ///
-        $userAgent = $request->headers->get('User-Agent');
-        $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        $data['os'] = [
-            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
-            'items' => [
-                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
-                OSTypes::IOS => ['alt' => 'Apple Logo'],
-                OSTypes::ANDROID => ['alt' => 'Android Logo']
-            ]
-        ];
-
-        return $data;
+        $this->getSettings = $getSettings;
     }
 
     #[Route('/', name: 'app_landing')]
-    public function landing(UserRepository $userRepository, Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
     {
-        // Call the getSettings function to retrieve the data
-        $data = $this->getSettings($userRepository, $settingRepository, $request, $requestStack);
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
         // Check if the user is logged in
         if ($this->getUser()) {
@@ -338,14 +297,14 @@ class SiteController extends AbstractController
      */
     #[Route('/email', name: 'app_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function sendCode(UserRepository $userRepository, Request $request, RequestStack $requestStack): Response
+    public function sendCode(Request $request, RequestStack $requestStack): Response
     {
-        // Call the getSettings function to retrieve the data
-        $data = $this->getSettings($userRepository, $this->settingRepository, $request, $requestStack);
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         // Modify the needed values
         $data['demoMode'] = false;
         $data['VERIFICATION_FORM'] = true;
-        $data['BTS_DOWNLOAD'] = false;
 
         // Get the current user
         /** @var User $currentUser */

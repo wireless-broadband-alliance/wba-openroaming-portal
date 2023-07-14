@@ -203,7 +203,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         $this->last_name = $attributes['surname'][0];
         $this->uuid = $attributes['sAMAccountName'][0];
         $this->password = 'notused'; //invalid hash so won't ever authenticate
-
+        $this->isVerified = 1;
         // #$this->setLevel(LevelType::NONE);
     }
 
