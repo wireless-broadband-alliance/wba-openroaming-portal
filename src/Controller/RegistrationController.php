@@ -19,6 +19,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -45,7 +46,7 @@ class RegistrationController extends AbstractController
      * @throws Exception
      */
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, RequestStack $requestStack, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function register(Request $request, RequestStack $requestStack, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer,  UrlGeneratorInterface $urlGenerator): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
@@ -55,7 +56,6 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash('warning', 'User with the same email already exists.');
             } else {

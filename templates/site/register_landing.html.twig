@@ -57,11 +57,26 @@
                     }) }}
                     {{ form_widget(registrationForm.email, {
                         'attr': {
-                            'class': 'w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]'
+                            'class': 'w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]',
+                            'placeholder': 'Enter your email'
                         }
                     }) }}
                 </div>
 
+                {# Terms Checkbox #}
+                <div class="mt-5 flex items-center justify-center">
+                    <div class="mr-2">
+                        {{ form_widget(registrationForm.agreeTerms) }}
+                    </div>
+                    <label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-[#7db928] text-xs">
+                        I agree to the
+                        <a href="{{ data.TOS_LINK }}" target="_blank" class="underline font-base">terms & conditions of use</a>
+                        and
+                        <a href="{{ data.PRIVACY_POLICY_LINK }}" target="_blank" class="underline font-base">privacy policy</a>.
+                    </label>
+                </div>
+
+                {# Button Submit #}
                 {{ form_row(registrationForm._token) }}
                 <div class="mt-5 flex justify-center">
                     <button type="submit"
@@ -72,5 +87,6 @@
                 {{ form_end(registrationForm) }}
             </div>
         </div>
+
     </div>
 {% endblock %}
