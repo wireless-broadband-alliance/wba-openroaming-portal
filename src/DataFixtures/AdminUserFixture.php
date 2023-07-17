@@ -20,11 +20,21 @@ class AdminUserFixture extends Fixture
     {
         $admin = new User();
         $admin->setUuid('admin');
-        $admin->setEmail('admin@example.com');
+        $admin->setEmail('admin@wba.com');
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'pancakes'));
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setIsVerified(true);
         $admin->setCreatedAt(new DateTime());
+        $manager->persist($admin);
+
+        $user1 = new User();
+        $user1->setUuid('bot');
+        $user1->setEmail('bot@wba.com');
+        $user1->setPassword($this->userPasswordHashed->hashPassword($admin, '123'));
+        $user1->setIsVerified(true);
+        $user1->setCreatedAt(new DateTime());
+        $manager->persist($user1);
+
 
         // Create 10 additional users, this is only for testing the pagination system
         /*
@@ -41,7 +51,6 @@ class AdminUserFixture extends Fixture
         }
         */
 
-        $manager->persist($admin);
         $manager->flush();
     }
 }

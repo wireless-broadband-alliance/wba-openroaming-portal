@@ -3,13 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Enum\UserRadiusProfileStatus;
 use App\Form\UserUpdateType;
-use App\RadiusDb\Entity\RadiusUser;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -124,7 +123,7 @@ class AdminController extends AbstractController
             $user = $form->getData();
 
             if ($form->get('bannedAt')->getData()) {
-                $user->setBannedAt(new \DateTime());
+                $user->setBannedAt(new DateTime());
                 $this->disableProfiles($user);
             } else {
                 $user->setBannedAt(null);

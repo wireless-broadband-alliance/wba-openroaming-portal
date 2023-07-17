@@ -22,6 +22,10 @@
                 email with a new code</p>
         </div>
         <div class="mt-4">
+            {# Flash success message #}
+            {% for message in app.session.flashbag.get('success') %}
+                <div class="text-white text-base bg-[#7DB928] border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
+            {% endfor %}
             {# Flash error message  #}
             {% for message in app.session.flashbag.get('error') %}
                 <div class="text-white text-base bg-red-600 border-red-600 mt-1 rounded-md p-2 text-center">{{ message }}</div>

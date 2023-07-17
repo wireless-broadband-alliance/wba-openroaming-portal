@@ -6,13 +6,12 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 
 
@@ -26,33 +25,41 @@ class SecurityController extends AbstractController
     /**
      * SiteController constructor.
      *
-     * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
     }
 
-    #[Route('/login', name: 'app_login_landing')]
-    public function login(Request $request, RequestStack $requestStack, SettingRepository $settingRepository, AuthenticationUtils $authenticationUtils): Response
+    #[Route('/login', name: 'app_login')]
+    public function login(Request $request, RequestStack $requestStack, AuthenticationUtils $authenticationUtils): Response
     {
+        if ($this->getUser()) {
+            if ($this->isGranted('ROLE_ADMIN')){
+                return $this->redirectToRoute('admin_page');
+            }
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        if ($this->getUser() && $this->isGranted('ROLE_ADMIN')) {
-            return $this->redirectToRoute('admin_page');
-        }
-
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
+
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
+
+        $user = $this->userRepository->findOneBy(['email' => $lastUsername]);
+
+        if ($error instanceof AuthenticationException) {
+            $this->addFlash('error', 'Wrong credentials');
+        }
 
         return $this->render('site/login_landing.html.twig', [
             'last_username' => $lastUsername,

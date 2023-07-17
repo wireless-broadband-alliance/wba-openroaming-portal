@@ -8,7 +8,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: uuid
+                property: email
         saml_provider:
             ##  Basic provider instantiates a user with identifier and default roles
             saml:
@@ -21,6 +21,11 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+
             custom_authenticator: App\Security\PasswordAuthenticator
                 # where to redirect after logout
                 # target: app_any_route
