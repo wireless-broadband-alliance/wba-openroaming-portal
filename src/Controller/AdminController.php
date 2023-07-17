@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
@@ -13,6 +14,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -145,6 +150,52 @@ class AdminController extends AbstractController
             ]
         );
     }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    #[Route('/dashboard/reset/{id<\d+>}', name: 'admin_reset_password')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher,  MailerInterface $mailer): Response
+    {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
+            throw new NotFoundHttpException('User not found');
+        }
+
+        $form = $this->createForm(ResetPasswordType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // get the typed password by the admin
+            $newPassword = $form->get('password')->getData();
+            // Hash the new password
+            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashedPassword);
+
+            $em->flush();
+            // Send email to the user with the new password
+            $email = (new Email())
+                ->from('openroaming@tetrapi.pt')
+                ->to($user->getEmail())
+                ->subject('Your Password Reset Details')
+                ->html(
+                    $this->renderView(
+                        'email_activation/email_template_password.html.twig',
+                        ['password' => $newPassword, 'isNewUser' => false]
+                    )
+                );
+
+            $mailer->send($email);
+            $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
+        }
+
+        return $this->render('admin/reset_password.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user
+        ]);
+    }
+
 
     private function disableProfiles($user): void
     {

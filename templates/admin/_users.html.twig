@@ -1,4 +1,5 @@
 <tr>
+    <!-- Show UUID Column -->
     <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
         <div class="flex justify-center items-center">
             <div class="ml-4">
@@ -8,7 +9,7 @@
             </div>
         </div>
     </td>
-
+    <!-- Show Email Column -->
     <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
         <div class="flex justify-center items-center">
             <div class="ml-4">
@@ -18,7 +19,7 @@
             </div>
         </div>
     </td>
-
+    <!-- Show Verification Column -->
     <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
         <div class="flex justify-end items-center">
             <div class="ml-4">
@@ -32,7 +33,7 @@
             </div>
         </div>
     </td>
-
+    <!-- Show if is a Google account -->
     <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
         <div class="flex justify-end items-center">
             <div class="ml-4">
@@ -46,7 +47,7 @@
             </div>
         </div>
     </td>
-
+    <!-- Show date of the creation of the user Column -->
     <td class="px-6 py-4 whitespace-nowrap hover:transform  hover:bg-gray-100">
         <div class="flex justify-end items-center">
             <div class="ml-4">
@@ -56,7 +57,7 @@
             </div>
         </div>
     </td>
-
+    <!-- Show Banned At -->
     <td class="px-6 py-4 whitespace-nowrap hover:transform hover:bg-gray-100">
         <div class="flex justify-end items-center">
             <div class="ml-4">
@@ -70,25 +71,30 @@
             </div>
         </div>
     </td>
-
+    <!-- Actions Column -->
     <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex justify-center items-center">
             <div class="ml-4">
                 <div class="text-sm font-medium text-gray-900">
                     <div class="flex items-center space-x-4">
+                        <!-- Delete User Column -->
                         <a onclick="return confirm('Are you sure you want to delete the user: {{ user.email }}?');"
                            href="{{ path('admin_delete', {id : user.id}) }}"
                            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
                             Delete
                         </a>
+                        <!-- Update info User Column -->
                         <a href="{{ path('admin_update', {id : user.id}) }}"
                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow-md hover:transform hover:scale-105 cursor-pointer">
                             Update
                         </a>
+                        <!-- Reset Password Column -->
+                        <a href="{{ path('admin_reset_password', {'id': user.id}) }}" class="text-blue-500 hover:text-blue-700">Reset Password</a>
                     </div>
                 </div>
             </div>
         </div>
     </td>
+
 
 </tr>
