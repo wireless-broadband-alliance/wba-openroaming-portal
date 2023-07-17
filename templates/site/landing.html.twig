@@ -293,16 +293,17 @@
                             </div>
                         {% endif %}
 
-
+                        {% if REGISTER_ENABLED %}
                         <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
-                            <a href="{{ path('app_login') }}"
+                            <a href="{{ path('app_register') }}"
                                class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                Traditional Login
+                                {{ REGISTER_LABEL }}
                             </a>
-                            <p>Traditional Login method</p>
+                            <p>{{ REGISTER_DESCRIPTION }}</p>
                         </div>
+                        {% endif %}
 
-                        <div class="mt-24 text-center">
+                        <div class="mt-12 text-center">
                             <p>By authenticating with any of the above providers you agree with our
                                 <a href="{{ TOS_LINK }}"
                                    target="_blank"
