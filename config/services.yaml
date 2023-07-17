@@ -36,9 +36,7 @@ services:
             - App\Entity\User
             ##  Attribute mapping
             - password: 'notused'
-              # email: $email
-              email: '%app.email_address%'
-              sender_name: '%app.sender_name%'
+              email: $email
               first_name: $givenName
               last_name: $surname
               uuid: $sAMAccountName
