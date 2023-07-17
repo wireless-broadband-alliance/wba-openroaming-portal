@@ -156,10 +156,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/reset/{id<\d+>}', name: 'admin_reset_password')]
     #[IsGranted('ROLE_ADMIN')]
-    public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher,  MailerInterface $mailer): Response
+    public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
-        $user = $this->userRepository->find($id);
-        if (!$user) {
+        if (!$user = $this->userRepository->find($id)) {
             throw new NotFoundHttpException('User not found');
         }
 
@@ -174,6 +173,12 @@ class AdminController extends AbstractController
             $user->setPassword($hashedPassword);
 
             $em->flush();
+
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                $this->addFlash('success_admin', 'Your password has been changed successfully');
+                return $this->redirectToRoute('saml_logout');
+            }
+
             // Send email to the user with the new password
             $email = (new Email())
                 ->from('openroaming@tetrapi.pt')
@@ -185,7 +190,6 @@ class AdminController extends AbstractController
                         ['password' => $newPassword, 'isNewUser' => false]
                     )
                 );
-
             $mailer->send($email);
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
         }

@@ -12,6 +12,7 @@
         <div class="flex justify-between items-center mb-4">
             {% if app.user %}
                 <a href="{{ path('saml_logout') }}" class="text-gray-500 hover:text-red-500">Logout</a>
+                <a href="{{ path('admin_reset_password', {'id': app.user.id}) }}" class="text-gray-500 hover:text-blue-600 ml-4">Reset Admin Password</a>
             {% endif %}
 
             {% for message in app.session.flashbag.get('success_admin') %}
