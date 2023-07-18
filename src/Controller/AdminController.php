@@ -55,6 +55,7 @@ class AdminController extends AbstractController
         return $this->render('admin/index.html.twig', [
             'totalPages' => 0,
             'searchTerm' => $searchTerm,
+            'user' => $this->getUser()
         ]);
     }
 
@@ -70,7 +71,7 @@ class AdminController extends AbstractController
 
         // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
-            $this->addFlash('error_empty', 'Please enter at least 3 characters for the search.');
+            $this->addFlash('error_admin', 'Please enter at least 3 characters for the search.');
 
             return $this->redirectToRoute('admin_page');
         }
@@ -121,13 +122,24 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(User $user, Request $request, UserRepository $userRepository): Response
     {
+        $currentUser = $this->getUser();
+
         $form = $this->createForm(UserUpdateType::class, $user);
+
+        // Store the initial bannedAt value before form submission
+        $initialBannedAtValue = $user->getBannedAt();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
 
-            if ($form->get('bannedAt')->getData()) {
+            // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value on the db
+            if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
+                // Check if the admin is trying to ban himself
+                if ($currentUser && $currentUser->getId() === $user->getId()) {
+                    $this->addFlash('error_admin', 'You cannot ban yourself. Are you  dumb? ಠ_ಠ');
+                    return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                }
                 $user->setBannedAt(new DateTime());
                 $this->disableProfiles($user);
             } else {
@@ -150,6 +162,7 @@ class AdminController extends AbstractController
             ]
         );
     }
+
 
     /**
      * @throws TransportExceptionInterface
@@ -174,11 +187,6 @@ class AdminController extends AbstractController
 
             $em->flush();
 
-            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                $this->addFlash('success_admin', 'Your password has been changed successfully');
-                return $this->redirectToRoute('saml_logout');
-            }
-
             // Send email to the user with the new password
             $email = (new Email())
                 ->from('openroaming@tetrapi.pt')
@@ -191,6 +199,12 @@ class AdminController extends AbstractController
                     )
                 );
             $mailer->send($email);
+
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                $this->addFlash('success_admin', 'Your password has been changed successfully');
+                return $this->redirectToRoute('saml_logout');
+            }
+
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
         }
 

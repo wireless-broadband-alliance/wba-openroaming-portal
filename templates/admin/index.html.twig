@@ -13,6 +13,7 @@
             {% if app.user %}
                 <a href="{{ path('saml_logout') }}" class="text-gray-500 hover:text-red-500">Logout</a>
                 <a href="{{ path('admin_reset_password', {'id': app.user.id}) }}" class="text-gray-500 hover:text-blue-600 ml-4">Reset Admin Password</a>
+                <a href="{{ path('admin_update', {id : user.id}) }}" class="text-gray-500 hover:text-blue-600 ml-4">Account Settings</a>
             {% endif %}
 
             {% for message in app.session.flashbag.get('success_admin') %}
@@ -46,7 +47,7 @@
                                 <p>Hello, there! This is the dashboard page. Only the admin has permission to use it.</p>
                                 <p>Please use the search box to do your work.</p>
                                 {# Flash error message #}
-                                {% for message in app.session.flashbag.get('error_empty') %}
+                                {% for message in app.session.flashbag.get('error_admin') %}
                                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
                                         {{ message }}
                                     </div>
