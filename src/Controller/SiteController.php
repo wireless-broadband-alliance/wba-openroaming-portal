@@ -7,6 +7,7 @@ use App\Enum\OSTypes;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
+use App\Service\GetSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -24,7 +25,6 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use App\Service\GetSettings;
 
 /**
  * @method getParameterBag()
@@ -171,7 +171,8 @@ class SiteController extends AbstractController
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            $os = OSTypes::MACOS;
+            //Overriden to IOS so same logic is used for both
+            $os = OSTypes::IOS;
         }
 
         // iOS
