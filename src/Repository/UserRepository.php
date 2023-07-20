@@ -103,8 +103,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                         'u.last_name LIKE :searchTerm'
                     )
             )
+            ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findExcludingAdmin(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.roles NOT LIKE :role')
+            ->orderBy('u.createdAt', 'DESC')
+            ->setParameter('role', '%ROLE_ADMIN%')
             ->getQuery()
             ->getResult();
     }
