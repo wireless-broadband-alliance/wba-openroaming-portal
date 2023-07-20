@@ -22,6 +22,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\RadiusDb\Repository\RadiusUserRepository;
+use Pagerfanta\Adapter\ArrayAdapter;
+use Pagerfanta\Pagerfanta;
+
 
 class AdminController extends AbstractController
 {
@@ -48,14 +51,32 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(Request $request): Response
+    public function index(Request $request, UserRepository $userRepository): Response
     {
-        $searchTerm = $request->query->get('u');
+        $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
+        $perPage = 50; // Number of users to display per page
+
+        // Fetch all users excluding admins
+        $users = $userRepository->findExcludingAdmin();
+
+        // Perform pagination manually
+        $totalUsers = count($users); // Get the total number of users
+
+        $totalPages = ceil($totalUsers / $perPage); // Calculate the total number of pages
+
+        $offset = ($page - 1) * $perPage; // Calculate the offset for slicing the users
+
+        $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
+
+        // Get the current logged-in user (admin)
+        $user = $this->getUser();
 
         return $this->render('admin/index.html.twig', [
-            'totalPages' => 0,
-            'searchTerm' => $searchTerm,
-            'user' => $this->getUser()
+            'users' => $users,
+            'current_user' => $user,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'searchTerm' => null,
         ]);
     }
 
@@ -63,8 +84,8 @@ class AdminController extends AbstractController
     public function searchUsers(Request $request, UserRepository $userRepository): Response
     {
         $searchTerm = $request->query->get('u');
-        $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
-        $perPage = 10; // Number of users to display per page
+        $page = $request->query->getInt('page', 1);
+        $perPage = 25;
 
         // Search users based on the provided search term
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
@@ -80,18 +101,20 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        // Perform pagination manually
-        $totalUsers = count($users); // Get the total number of users for the search term
+        $totalUsers = count($users);
 
-        $totalPages = ceil($totalUsers / $perPage); // Calculate the total number of pages
+        $totalPages = ceil($totalUsers / $perPage);
 
-        $offset = ($page - 1) * $perPage; // Calculate the offset for slicing the users
+        $offset = ($page - 1) * $perPage;
 
-        $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page and search term
+        $users = array_slice($users, $offset, $perPage);
 
+        // Get the current user again (admin), in case if he wants to reset or update its own info
+        $user = $this->getUser();
         return $this->render('admin/index.html.twig', [
             'users' => $users,
             'currentPage' => $page,
+            'current_user' => $user,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
         ]);
