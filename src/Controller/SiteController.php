@@ -311,8 +311,11 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            // Send the email with the verification
-            $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
+            if (str_contains($currentUser->getUuid(), '-DEMO-')) {
+                $this->addFlash('success', 'We have sent an email with your verification code');
+                // Send the email with the verification
+                $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
+            }
 
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
