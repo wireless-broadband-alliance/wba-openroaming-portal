@@ -12,10 +12,12 @@ use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,22 +33,24 @@ class AdminController extends AbstractController
     private $userRepository;
     private $settingRepository;
     private $radiusUserRepository;
-
+    private $userRadiusProfile;
     private $profileManager;
+    private $parameterBag;
 
     public function __construct(
-        UserRepository              $userRepository,
-        SettingRepository           $settingRepository,
-        RadiusUserRepository        $radiusUserRepository,
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        RadiusUserRepository $radiusUserRepository,
         UserRadiusProfileRepository $userRadiusProfile,
-        ProfileManager              $profileManager
-    )
-    {
+        ProfileManager $profileManager,
+        ParameterBagInterface $parameterBag
+    ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->radiusUserRepository = $radiusUserRepository;
         $this->userRadiusProfile = $userRadiusProfile;
         $this->profileManager = $profileManager;
+        $this->parameterBag = $parameterBag;
     }
 
     #[Route('/dashboard', name: 'admin_page')]
@@ -194,6 +198,9 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
+        $Email = $this->parameterBag->get('app.email_address');
+        $Name = $this->parameterBag->get('app.sender_name');
+
         if (!$user = $this->userRepository->find($id)) {
             throw new NotFoundHttpException('User not found');
         }
@@ -212,7 +219,7 @@ class AdminController extends AbstractController
 
             // Send email to the user with the new password
             $email = (new Email())
-                ->from('openroaming@tetrapi.pt')
+                ->from(new Address($Email, $Name))
                 ->to($user->getEmail())
                 ->subject('Your Password Reset Details')
                 ->html(

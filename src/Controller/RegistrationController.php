@@ -12,10 +12,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
@@ -26,6 +28,8 @@ class RegistrationController extends AbstractController
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
 
+    private ParameterBagInterface $parameterBag;
+
     /**
      * SiteController constructor.
      *
@@ -33,11 +37,12 @@ class RegistrationController extends AbstractController
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
+        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -49,6 +54,9 @@ class RegistrationController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
+        $Email = $this->parameterBag->get('app.email_address');
+        $Name = $this->parameterBag->get('app.sender_name');
 
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -75,7 +83,7 @@ class RegistrationController extends AbstractController
 
                 // Send email to the user with the encrypted password
                 $email = (new TemplatedEmail())
-                    ->from('openroaming@tetrapi.pt')
+                    ->from(new Address($Email, $Name))
                     ->to($user->getEmail())
                     ->subject('Your Registration Details')
                     ->htmlTemplate('email_activation/email_template_password.html.twig')
@@ -94,6 +102,4 @@ class RegistrationController extends AbstractController
             'data' => $data,
         ]);
     }
-
-
 }
