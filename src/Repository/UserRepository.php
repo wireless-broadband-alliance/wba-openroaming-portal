@@ -103,6 +103,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                         'u.last_name LIKE :searchTerm'
                     )
             )
+            ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%')
             ->setParameter('searchTerm', '%' . $searchTerm . '%')
             ->getQuery()
