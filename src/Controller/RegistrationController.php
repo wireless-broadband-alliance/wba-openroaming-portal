@@ -85,7 +85,7 @@ class RegistrationController extends AbstractController
                 $email = (new TemplatedEmail())
                     ->from(new Address($Email, $Name))
                     ->to($user->getEmail())
-                    ->subject('Your Registration Details')
+                    ->subject('Your OpenRoaming Registration Details')
                     ->htmlTemplate('email_activation/email_template_password.html.twig')
                     ->context([
                         'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
