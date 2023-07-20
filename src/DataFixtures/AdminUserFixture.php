@@ -37,6 +37,7 @@ class AdminUserFixture extends Fixture
 
 
         // Create 10 additional users, this is only for testing the pagination system
+        /*
         for ($i = 1; $i <= 100; $i++) {
             $user = new User();
             $user->setUuid('user'.$i);
@@ -48,7 +49,7 @@ class AdminUserFixture extends Fixture
 
             $manager->persist($user);
         }
-
+        */
 
         $manager->flush();
     }
