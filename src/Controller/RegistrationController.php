@@ -180,7 +180,7 @@ class RegistrationController extends AbstractController
             }
         } else {
             // If the verification code is invalid or not found, display an error message and redirect to the login page
-            $this->addFlash('error', 'Invalid verification code or link expired.');
+            $this->addFlash('error', 'Invalid verification code or link expired. Please try to log in manually');
         }
 
         return $this->redirectToRoute('app_login');
