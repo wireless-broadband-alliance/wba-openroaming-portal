@@ -9,6 +9,7 @@ use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +22,12 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
 
 class RegistrationController extends AbstractController
 {
@@ -72,8 +79,8 @@ class RegistrationController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        $Email = $this->parameterBag->get('app.email_address');
-        $Name = $this->parameterBag->get('app.sender_name');
+        $Email_sender = $this->parameterBag->get('app.email_address');
+        $Name_sender = $this->parameterBag->get('app.sender_name');
 
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -101,11 +108,12 @@ class RegistrationController extends AbstractController
 
                 // Send email to the user with the verification code
                 $email = (new TemplatedEmail())
-                    ->from(new Address($Email, $Name))
+                    ->from(new Address($Email_sender, $Name_sender))
                     ->to($user->getEmail())
                     ->subject('Your OpenRoaming Registration Details')
                     ->htmlTemplate('email_activation/email_template_password.html.twig')
                     ->context([
+                        'uuid' => $user->getUuid(),
                         'verificationCode' => $user->getVerificationCode(),
                         'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
                         'password' => $randomPassword,
@@ -121,4 +129,59 @@ class RegistrationController extends AbstractController
             'data' => $data,
         ]);
     }
+
+    /**
+     * Handle the email link click to verify the user account.
+     *
+     * @param RequestStack $requestStack
+     * @param UserRepository $userRepository
+     * @param TokenStorageInterface $tokenStorage
+     * @param EventDispatcherInterface $eventDispatcher
+     * @return Response
+     * @throws NonUniqueResultException
+     */
+    #[Route('/login/link', name: 'app_confirm_account')]
+    public function confirmAccount(
+        RequestStack             $requestStack,
+        UserRepository           $userRepository,
+        TokenStorageInterface    $tokenStorage,
+        EventDispatcherInterface $eventDispatcher
+    ): Response
+    {
+        // Get the email and verification code from the URL query parameters
+        $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
+        $verificationCode = $requestStack->getCurrentRequest()->query->get('verificationCode');
+
+        // Get the user with the matching email, excluding admin users
+        $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
+
+        if ($user && $user->getVerificationCode() === (int)$verificationCode) {
+            try {
+                // Authenticate the user and log them in
+                $request = $requestStack->getCurrentRequest();
+
+                // Create a token manually for the user and store it in the token storage
+                $token = new UsernamePasswordToken($user, 'ROLE_USER', $user->getRoles());
+                $tokenStorage->setToken($token);
+
+                // Dispatch the login event
+                $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
+
+                $user->setIsVerified(true);
+                $userRepository->save($user, true);
+
+                $this->addFlash('success', 'Your account has been verified, thank you for your time!');
+
+                return $this->redirectToRoute('app_landing');
+            } catch (CustomUserMessageAuthenticationException) {
+                $this->addFlash('error', 'Authentication failed. Please try to log in manually.');
+            }
+        } else {
+            // If the verification code is invalid or not found, display an error message and redirect to the login page
+            $this->addFlash('error', 'Invalid verification code or link expired.');
+        }
+
+        return $this->redirectToRoute('app_login');
+    }
+
 }
