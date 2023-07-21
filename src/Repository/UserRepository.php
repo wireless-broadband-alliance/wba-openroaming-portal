@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -118,5 +119,23 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter('role', '%ROLE_ADMIN%')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findOneByUUIDExcludingAdmin(string $uuid): ?User
+    {
+        // Create a query builder
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->where('u.roles NOT LIKE :role')
+            ->setParameter('role', '%ROLE_ADMIN%');
+
+        $qb->andWhere('u.uuid = :uuid')
+            ->setParameter('uuid', $uuid);
+
+        // Execute the query and return only the uuid of some specific user
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }

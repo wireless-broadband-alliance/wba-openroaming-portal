@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -36,11 +37,15 @@ class SecurityController extends AbstractController
         $this->getSettings = $getSettings;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, RequestStack $requestStack, AuthenticationUtils $authenticationUtils): Response
     {
+        // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
-            if ($this->isGranted('ROLE_ADMIN')){
+            if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -49,14 +54,24 @@ class SecurityController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        // get the login error if there is one
+        // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
 
-        // last username entered by the user
+        // Last username entered by the user (this will be empty if the user clicked the verification link)
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $user = $this->userRepository->findOneBy(['email' => $lastUsername]);
+        // Check if there's a UUID parameter in the URL
+        $uuid = $request->query->get('uuid');
+        if ($uuid) {
+            // Try to find the user by UUID excluding admins
+            $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+            if ($user) {
+                // If the user is found, set their email as the last username to pre-fill the email field
+                $lastUsername = $user->getEmail();
+            }
+        }
 
+        // Show an error message if login attempt fails
         if ($error instanceof AuthenticationException) {
             $this->addFlash('error', 'Wrong credentials');
         }
@@ -67,6 +82,7 @@ class SecurityController extends AbstractController
             'data' => $data,
         ]);
     }
+
 
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void

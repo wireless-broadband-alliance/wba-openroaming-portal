@@ -221,8 +221,8 @@ class SiteController extends AbstractController
     protected function createEmailCode(string $email, ?int $verificationCode = null): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
-        $Email = $this->parameterBag->get('app.email_address');
-        $Name = $this->parameterBag->get('app.sender_name');
+        $Email_sender = $this->parameterBag->get('app.email_address');
+        $Name_sender = $this->parameterBag->get('app.sender_name');
 
         if ($verificationCode === null) {
             // If the verification code is not provided, generate a new one
@@ -232,7 +232,7 @@ class SiteController extends AbstractController
         }
 
         return (new TemplatedEmail())
-            ->from(new Address($Email, $Name))
+            ->from(new Address($Email_sender, $Name_sender))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
             ->htmlTemplate('email_activation/email_template.html.twig')
@@ -311,8 +311,11 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            // Send the email with the verification
-            $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
+            if (str_contains($currentUser->getUuid(), '-DEMO-')) {
+                $this->addFlash('success', 'We have sent an email with your verification code');
+                // Send the email with the verification
+                $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
+            }
 
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
