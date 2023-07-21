@@ -11,6 +11,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -22,12 +23,10 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class RegistrationController extends AbstractController
 {
@@ -130,21 +129,22 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /**
+    /*
      * Handle the email link click to verify the user account.
      *
      * @param RequestStack $requestStack
      * @param UserRepository $userRepository
-     * @param TokenStorageInterface $tokenStorage
-     * @param EventDispatcherInterface $eventDispatcher
      * @return Response
+     * @throws NonUniqueResultException
+     */
+    /**
      * @throws NonUniqueResultException
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack             $requestStack,
-        UserRepository           $userRepository,
-        TokenStorageInterface    $tokenStorage,
+        RequestStack $requestStack,
+        UserRepository $userRepository,
+        TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher
     ): Response
     {
@@ -155,18 +155,20 @@ class RegistrationController extends AbstractController
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
 
-        if ($user && $user->getVerificationCode() === (int)$verificationCode) {
+        if ($user && $user->getVerificationCode() === $verificationCode) {
             try {
-                // Authenticate the user and log them in
-                $request = $requestStack->getCurrentRequest();
+                // Create a token manually for the user
+                $token = new UsernamePasswordToken($user,'main', $user->getRoles());
 
-                // Create a token manually for the user and store it in the token storage
-                $token = new UsernamePasswordToken($user, 'ROLE_USER', $user->getRoles());
+                // Set the token in the token storage
                 $tokenStorage->setToken($token);
 
                 // Dispatch the login event
-                $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
+                $request = $requestStack->getCurrentRequest();
+                $event = new InteractiveLoginEvent($request, $token);
+                $eventDispatcher->dispatch($event);
 
+                // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $userRepository->save($user, true);
 
