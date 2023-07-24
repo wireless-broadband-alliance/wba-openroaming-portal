@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
@@ -24,8 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\RadiusDb\Repository\RadiusUserRepository;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Pagerfanta;
+
 
 
 class AdminController extends AbstractController
@@ -36,26 +36,31 @@ class AdminController extends AbstractController
     private $userRadiusProfile;
     private $profileManager;
     private $parameterBag;
+    private $entityManager;
 
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        RadiusUserRepository $radiusUserRepository,
+        UserRepository              $userRepository,
+        SettingRepository           $settingRepository,
+        RadiusUserRepository        $radiusUserRepository,
         UserRadiusProfileRepository $userRadiusProfile,
-        ProfileManager $profileManager,
-        ParameterBagInterface $parameterBag
-    ) {
+        ProfileManager              $profileManager,
+        ParameterBagInterface       $parameterBag,
+        EntityManagerInterface      $entityManager
+    )
+    {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->radiusUserRepository = $radiusUserRepository;
         $this->userRadiusProfile = $userRadiusProfile;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
+        $this->entityManager = $entityManager;
     }
 
-    #[Route('/dashboard', name: 'admin_page')]
+    #[
+        Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository): Response
     {
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 50; // Number of users to display per page
@@ -241,6 +246,18 @@ class AdminController extends AbstractController
         return $this->render('admin/reset_password.html.twig', [
             'form' => $form->createView(),
             'user' => $user
+        ]);
+    }
+
+    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings(): Response
+    {
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        return $this->render('admin/settings.html.twig', [
+            'settings' => $settings,
         ]);
     }
 
