@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Form\ResetPasswordType;
+use App\Form\SettingType;
 use App\Form\UserUpdateType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
@@ -255,6 +256,10 @@ class AdminController extends AbstractController
     {
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(SettingType::class, null, [
+            'settings' => $settings, // Pass the settings data to the form
+        ]);
 
         return $this->render('admin/settings.html.twig', [
             'settings' => $settings,

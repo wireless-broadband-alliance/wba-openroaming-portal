@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Entity\Setting;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -10,7 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SettingsType extends AbstractType
+class SettingType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -23,23 +22,29 @@ class SettingsType extends AbstractType
             'SYNC_LDAP_ENABLED' => CheckboxType::class,
         ];
 
-        // Retrieve the settings data from the options
-        $settings = $options['settings'] ?? [];
+        $settings = $options['settings'];
 
         foreach ($settings as $setting) {
             $inputType = $settingTypes[$setting->getName()] ?? TextType::class;
-
-            // Add required option if the value is NOT empty
             $required = !empty($setting->getValue());
 
-            // Set default value for checkboxes based on the database value
-            $defaultValue = $setting->getValue() === 'true';
+            // Convert true/false strings to boolean values
+            $value = $this->convertToBoolean($setting->getValue(), $inputType === CheckboxType::class);
 
             $builder->add($setting->getName(), $inputType, [
                 'required' => $required,
-                'data' => $defaultValue,
+                'data' => $value, // Set the value for the form field
             ]);
         }
+    }
+
+    private function convertToBoolean($value, $isCheckboxType): bool
+    {
+        if ($isCheckboxType) {
+            return $value === 'true';
+        }
+
+        return $value;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
