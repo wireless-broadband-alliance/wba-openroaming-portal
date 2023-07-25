@@ -26,26 +26,32 @@ class SettingType extends AbstractType
 
         foreach ($settings as $setting) {
             $inputType = $settingTypes[$setting->getName()] ?? TextType::class;
-            $required = !empty($setting->getValue());
 
-            // Convert true/false strings to boolean values
-            $value = $this->convertToBoolean($setting->getValue(), $inputType === CheckboxType::class);
+            // Convert true/false strings to boolean values if it's a checkbox type
+            $isCheckboxType = $inputType === CheckboxType::class;
+            $value = $this->convertToBoolean($setting->getValue(), $isCheckboxType);
+
+            // Convert boolean values back into strings if it is a checkbox type
+            $value = (!$isCheckboxType) ? (string)$value : $value;
 
             $builder->add($setting->getName(), $inputType, [
-                'required' => $required,
-                'data' => $value, // Set the value for the form field
+                'data' => $value, // Set the current value for the form field
             ]);
         }
     }
 
-    private function convertToBoolean($value, $isCheckboxType): bool
+
+    private function convertToBoolean($value, $isCheckboxType) //: bool DON'T ADD THIS
     {
+        // pls do not update this function adding this ": bool", it will change all the string values to 1 and not display the real values
         if ($isCheckboxType) {
             return $value === 'true';
         }
 
+        // return the value directly if it's not a checkbox type
         return $value;
     }
+
 
     public function configureOptions(OptionsResolver $resolver): void
     {

@@ -7,8 +7,6 @@ use App\Entity\User;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
 use App\Form\UserUpdateType;
-use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use DateTime;
@@ -25,34 +23,24 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\RadiusDb\Repository\RadiusUserRepository;
 
 
 
 class AdminController extends AbstractController
 {
-    private $userRepository;
-    private $settingRepository;
-    private $radiusUserRepository;
-    private $userRadiusProfile;
-    private $profileManager;
-    private $parameterBag;
-    private $entityManager;
+    private UserRepository $userRepository;
+    private ProfileManager $profileManager;
+    private ParameterBagInterface $parameterBag;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         UserRepository              $userRepository,
-        SettingRepository           $settingRepository,
-        RadiusUserRepository        $radiusUserRepository,
-        UserRadiusProfileRepository $userRadiusProfile,
         ProfileManager              $profileManager,
         ParameterBagInterface       $parameterBag,
         EntityManagerInterface      $entityManager
     )
     {
         $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userRadiusProfile = $userRadiusProfile;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->entityManager = $entityManager;
@@ -252,7 +240,7 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings(): Response
+    public function settings(Request $request, EntityManagerInterface $em): Response
     {
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -261,10 +249,36 @@ class AdminController extends AbstractController
             'settings' => $settings, // Pass the settings data to the form
         ]);
 
+        // Handle the request
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            foreach ($form as $name => $field) {
+                // Recover the setting from DB
+                $setting = $settingsRepository->findOneBy(['name' => $name]);
+
+                if ($setting) {
+                    // Update its value with the newly submitted value
+                    $setting->setValue($field->getData());
+
+                    // Persist the updated setting
+                    $em->persist($setting);
+                }
+            }
+
+            $em->flush();
+            $this->addFlash('success', 'It works. Why? ಠ_ಠ');
+
+            // Redirect the user to the same page after updating the settings
+            return $this->redirectToRoute('admin_dashboard_settings');
+        }
+
         return $this->render('admin/settings.html.twig', [
             'settings' => $settings,
+            'form' => $form->createView(),
         ]);
     }
+
 
 
     private function disableProfiles($user): void
