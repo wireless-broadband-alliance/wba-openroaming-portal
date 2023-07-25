@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType; // Import ChoiceType
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,11 +15,12 @@ class SettingType extends AbstractType
     {
         $settingTypes = [
             'CONTACT_EMAIL' => EmailType::class,
-            'DEMO_MODE' => CheckboxType::class,
-            'AUTH_METHOD_SAML_ENABLED' => CheckboxType::class,
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => CheckboxType::class,
-            'AUTH_METHOD_REGISTER_METHOD_ENABLED' => CheckboxType::class,
-            'SYNC_LDAP_ENABLED' => CheckboxType::class,
+            'DEMO_MODE' => ChoiceType::class,
+            'AUTH_METHOD_SAML_ENABLED' => ChoiceType::class,
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ChoiceType::class,
+            'AUTH_METHOD_REGISTER_METHOD_ENABLED' => ChoiceType::class,
+            'SYNC_LDAP_ENABLED' => ChoiceType::class,
+            'DEMO_WHITE_LABEL' => ChoiceType::class,
         ];
 
         $settings = $options['settings'];
@@ -27,31 +28,23 @@ class SettingType extends AbstractType
         foreach ($settings as $setting) {
             $inputType = $settingTypes[$setting->getName()] ?? TextType::class;
 
-            // Convert true/false strings to boolean values if it's a checkbox type
-            $isCheckboxType = $inputType === CheckboxType::class;
-            $value = $this->convertToBoolean($setting->getValue(), $isCheckboxType);
-
-            // Convert boolean values back into strings if it is a checkbox type
-            $value = (!$isCheckboxType) ? (string)$value : $value;
-
-            $builder->add($setting->getName(), $inputType, [
-                'data' => $value, // Set the current value for the form field
-            ]);
+            if ($inputType === ChoiceType::class) {
+                // Set the "choices" option only for choice-based fields
+                $builder->add($setting->getName(), $inputType, [
+                    'choices' => [
+                        'Enable' => 'true', // 'true' is the value submitted when enabled
+                        'Disable' => 'false', // 'false' is the value submitted when disabled
+                    ],
+                    'data' => $setting->getValue() ? 'true' : 'false', // Convert boolean value to 'true' or 'false'
+                ]);
+            } else {
+                // For other fields, simply add them without the "choices" option
+                $builder->add($setting->getName(), $inputType, [
+                    'data' => $setting->getValue(),
+                ]);
+            }
         }
     }
-
-
-    private function convertToBoolean($value, $isCheckboxType) //: bool DON'T ADD THIS
-    {
-        // pls do not update this function adding this ": bool", it will change all the string values to 1 and not display the real values
-        if ($isCheckboxType) {
-            return $value === 'true';
-        }
-
-        // return the value directly if it's not a checkbox type
-        return $value;
-    }
-
 
     public function configureOptions(OptionsResolver $resolver): void
     {

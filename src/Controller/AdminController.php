@@ -25,25 +25,21 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
-
 class AdminController extends AbstractController
 {
     private UserRepository $userRepository;
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
-    private EntityManagerInterface $entityManager;
 
     public function __construct(
-        UserRepository              $userRepository,
-        ProfileManager              $profileManager,
-        ParameterBagInterface       $parameterBag,
-        EntityManagerInterface      $entityManager
+        UserRepository         $userRepository,
+        ProfileManager         $profileManager,
+        ParameterBagInterface  $parameterBag,
     )
     {
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
-        $this->entityManager = $entityManager;
     }
 
     #[
@@ -242,7 +238,7 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settings(Request $request, EntityManagerInterface $em): Response
     {
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
+        $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(SettingType::class, null, [
@@ -253,13 +249,15 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($form as $name => $field) {
+            $submittedData = $form->getData();
+
+            foreach ($submittedData as $name => $value) {
                 // Recover the setting from DB
                 $setting = $settingsRepository->findOneBy(['name' => $name]);
 
                 if ($setting) {
                     // Update its value with the newly submitted value
-                    $setting->setValue($field->getData());
+                    $setting->setValue($value);
 
                     // Persist the updated setting
                     $em->persist($setting);
@@ -267,7 +265,7 @@ class AdminController extends AbstractController
             }
 
             $em->flush();
-            $this->addFlash('success', 'It works. Why? ಠ_ಠ');
+            $this->addFlash('success', 'Settings updated successfully.');
 
             // Redirect the user to the same page after updating the settings
             return $this->redirectToRoute('admin_dashboard_settings');
@@ -278,7 +276,6 @@ class AdminController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
 
 
     private function disableProfiles($user): void
