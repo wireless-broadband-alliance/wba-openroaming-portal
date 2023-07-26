@@ -32,10 +32,10 @@ class SettingType extends AbstractType
                 // Set the "choices" option only for choice-based fields
                 $builder->add($setting->getName(), $inputType, [
                     'choices' => [
-                        'Enable' => 'true', // 'true' is the value submitted when enabled
-                        'Disable' => 'false', // 'false' is the value submitted when disabled
+                        'Enabled' => 'true', // 'true' is the value submitted when enabled
+                        'Disabled' => 'false', // 'false' is the value submitted when disabled
                     ],
-                    'data' => $setting->getValue() ? 'true' : 'false', // Convert boolean value to 'true' or 'false'
+                    'data' => $setting->getValue(), // Use the value from the db as the selected choice
                 ]);
             } else {
                 // For other fields, simply add them without the "choices" option
@@ -45,6 +45,7 @@ class SettingType extends AbstractType
             }
         }
     }
+
 
     public function configureOptions(OptionsResolver $resolver): void
     {

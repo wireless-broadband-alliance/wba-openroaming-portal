@@ -32,9 +32,9 @@ class AdminController extends AbstractController
     private ParameterBagInterface $parameterBag;
 
     public function __construct(
-        UserRepository         $userRepository,
-        ProfileManager         $profileManager,
-        ParameterBagInterface  $parameterBag,
+        UserRepository        $userRepository,
+        ProfileManager        $profileManager,
+        ParameterBagInterface $parameterBag,
     )
     {
         $this->userRepository = $userRepository;
@@ -241,11 +241,7 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(SettingType::class, null, [
-            'settings' => $settings, // Pass the settings data to the form
-        ]);
-
-        // Get the entity object containing the data from the database
+        // Get the entity object containing the info from the db
         $settingsEntity = new Setting();
         foreach ($settings as $setting) {
             $methodName = 'set' . ucfirst(strtolower($setting->getName()));
@@ -253,6 +249,10 @@ class AdminController extends AbstractController
                 $settingsEntity->$methodName($setting->getValue());
             }
         }
+
+        $form = $this->createForm(SettingType::class, null, [
+            'settings' => $settings, // Pass the settings data to the form
+        ]);
 
         $form->handleRequest($request);
 
@@ -267,7 +267,6 @@ class AdminController extends AbstractController
                     // Update its value with the newly submitted value
                     $setting->setValue($value);
 
-                    // Persist the updated setting
                     $em->persist($setting);
                 }
             }
