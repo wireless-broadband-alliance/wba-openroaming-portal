@@ -245,14 +245,22 @@ class AdminController extends AbstractController
             'settings' => $settings, // Pass the settings data to the form
         ]);
 
-        // Handle the request
+        // Get the entity object containing the data from the database
+        $settingsEntity = new Setting();
+        foreach ($settings as $setting) {
+            $methodName = 'set' . ucfirst(strtolower($setting->getName()));
+            if (method_exists($settingsEntity, $methodName)) {
+                $settingsEntity->$methodName($setting->getValue());
+            }
+        }
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
             foreach ($submittedData as $name => $value) {
-                // Recover the setting from DB
+
                 $setting = $settingsRepository->findOneBy(['name' => $name]);
 
                 if ($setting) {
@@ -265,10 +273,9 @@ class AdminController extends AbstractController
             }
 
             $em->flush();
-            $this->addFlash('success', 'Settings updated successfully.');
+            $this->addFlash('success_admin', 'Settings updated successfully.');
 
-            // Redirect the user to the same page after updating the settings
-            return $this->redirectToRoute('admin_dashboard_settings');
+            return $this->redirectToRoute('admin_page');
         }
 
         return $this->render('admin/settings.html.twig', [

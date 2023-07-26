@@ -9,14 +9,8 @@
             <p class="text-gray-500 mt-2">This page is for admin use only. Still in development.</p>
         </div>
 
-        {# Flash success message  #}
-        {% for message in app.session.flashbag.get('success') %}
-            <div class="rounded-lg bg-[#7DB928] mt-5 px-8 py-3 text-white font-medium text-sm lg:text-lg text-center">
-                {{ message }}
-            </div>
-        {% endfor %}
-
         <form action="{{ path('admin_dashboard_settings') }}" method="post">
+            {{ form_row(form._token) }}
             <h2 class="text-center text-xl font-semibold mb-5">Main Settings</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {# Input Types Cards (Choice Boxes) #}
