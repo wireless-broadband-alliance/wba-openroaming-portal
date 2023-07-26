@@ -5,13 +5,13 @@
 		<key>PayloadDisplayName</key>
 		<string>@DISPLAY_NAME@</string>
 		<key>PayloadIdentifier</key>
-		<string>tetrapi.@IOS_PAYLOAD_IDENTIFIER@</string>
+		<string>tetrapi.@IOS_PAYLOAD_IDENTIFIER@-4</string>
 		<key>PayloadRemovalDisallowed</key>
 		<false/>
 		<key>PayloadType</key>
 		<string>Configuration</string>
 		<key>PayloadUUID</key>
-		<string>@IOS_PAYLOAD_IDENTIFIER@</string>
+		<string>@IOS_PAYLOAD_IDENTIFIER@-3</string>
 		<key>PayloadVersion</key>
 		<integer>1</integer>
 		<key>PayloadContent</key>
@@ -57,11 +57,11 @@
 				<key>PayloadDisplayName</key>
 				<string>Wi-Fi</string>
 				<key>PayloadIdentifier</key>
-				<string>com.apple.wifi.managed.@IOS_PAYLOAD_IDENTIFIER@</string>
+				<string>com.apple.wifi.managed.@IOS_PAYLOAD_IDENTIFIER@-2</string>
 				<key>PayloadType</key>
 				<string>com.apple.wifi.managed</string>
 				<key>PayloadUUID</key>
-				<string>@IOS_PAYLOAD_IDENTIFIER@</string>
+				<string>@IOS_PAYLOAD_IDENTIFIER@-1</string>
 				<key>PayloadVersion</key>
 				<integer>1</integer>
 				<key>ProxyType</key>
