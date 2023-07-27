@@ -13,7 +13,7 @@
             {{ form_row(form._token) }}
             <h2 class="text-center text-xl font-semibold mb-5">Main Settings</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {# Input Types Cards (Choice Boxes) #}
+                {# Choice Cards - Main Cards #}
                 {% set inputSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] == 'choice') %}
                 {% for setting in inputSettings %}
                     <div class="border border-gray-300 rounded-lg p-4">
@@ -33,7 +33,7 @@
 
             <h2 class="text-center text-lg font-semibold">Sub Settings</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">
-                {# Content Types Cards #}
+                {# Content Types Cards - Sub Cards#}
                 {% set contentSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] != 'choice') %}
                 {% for setting in contentSettings %}
                     <div class="border border-gray-300 rounded-lg p-4">
@@ -41,6 +41,7 @@
                             {{ setting.name }}
                         </div>
                         <div class="border border-gray-300 rounded-md p-2">
+                            {# Set the empty values to "Not Defined" #}
                             {% set value = form[setting.name].vars.value %}
                             {% set displayValue = value|default('Not Defined') %}
                             {% if value is empty %}

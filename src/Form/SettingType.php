@@ -13,6 +13,7 @@ class SettingType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Specifying each type of input
         $settingTypes = [
             'CONTACT_EMAIL' => EmailType::class,
             'DEMO_MODE' => ChoiceType::class,
@@ -26,6 +27,7 @@ class SettingType extends AbstractType
         $settings = $options['settings'];
 
         foreach ($settings as $setting) {
+            // set the default type of input to TextType
             $inputType = $settingTypes[$setting->getName()] ?? TextType::class;
 
             if ($inputType === ChoiceType::class) {
@@ -38,7 +40,7 @@ class SettingType extends AbstractType
                     'data' => $setting->getValue(), // Use the value from the db as the selected choice
                 ]);
             } else {
-                // For other fields, simply add them without the "choices" option
+                // For other fields return the default type
                 $builder->add($setting->getName(), $inputType, [
                     'data' => $setting->getValue(),
                 ]);
@@ -50,7 +52,6 @@ class SettingType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => null,
             'settings' => [],
         ]);
     }

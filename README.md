@@ -176,12 +176,16 @@ This table in the MySQL database contains various configuration options for the 
 18. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
 19. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
 20. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-21. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-22. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-23. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-24. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-25. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-26. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory. The placeholder `@ID` is replaced with the user's ID.
-27. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-28. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
-29. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone with a google account login
+21. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+22. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
+23. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
+24. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
+25. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+26. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+27. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+28. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+29. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+30. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory. The placeholder `@ID` is replaced with the user's ID.
+31. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+32. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
+33. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone with a google account login
