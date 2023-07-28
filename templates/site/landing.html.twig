@@ -68,12 +68,6 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if app.request.cookies.has('success_message') %}
-                    <div class="rounded-lg bg-[#7DB928] mt-5 px-8 py-3 text-white font-medium text-sm lg:text-lg text-center">
-                        {{ app.request.cookies.get('success_message') }}
-                    </div>
-                {% endif %}
-
                 {% if app.user %}
                     <div class="flex flex-col items-center justify-center text-center">
                         <div class="space-y-4 mt-6 pr-2">

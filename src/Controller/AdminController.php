@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Form\ResetPasswordType;
+use App\Form\SettingType;
 use App\Form\UserUpdateType;
-use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use DateTime;
@@ -23,39 +23,29 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\RadiusDb\Repository\RadiusUserRepository;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Pagerfanta;
 
 
 class AdminController extends AbstractController
 {
-    private $userRepository;
-    private $settingRepository;
-    private $radiusUserRepository;
-    private $userRadiusProfile;
-    private $profileManager;
-    private $parameterBag;
+    private UserRepository $userRepository;
+    private ProfileManager $profileManager;
+    private ParameterBagInterface $parameterBag;
 
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        RadiusUserRepository $radiusUserRepository,
-        UserRadiusProfileRepository $userRadiusProfile,
-        ProfileManager $profileManager,
-        ParameterBagInterface $parameterBag
-    ) {
+        UserRepository        $userRepository,
+        ProfileManager        $profileManager,
+        ParameterBagInterface $parameterBag,
+    )
+    {
         $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userRadiusProfile = $userRadiusProfile;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
     }
 
-    #[Route('/dashboard', name: 'admin_page')]
+    #[
+        Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository): Response
     {
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 50; // Number of users to display per page
@@ -241,6 +231,55 @@ class AdminController extends AbstractController
         return $this->render('admin/reset_password.html.twig', [
             'form' => $form->createView(),
             'user' => $user
+        ]);
+    }
+
+    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings(Request $request, EntityManagerInterface $em): Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        // Get the entity object containing the info from the db
+        $settingsEntity = new Setting();
+        foreach ($settings as $setting) {
+            $methodName = 'set' . ucfirst(strtolower($setting->getName()));
+            if (method_exists($settingsEntity, $methodName)) {
+                $settingsEntity->$methodName($setting->getValue());
+            }
+        }
+
+        $form = $this->createForm(SettingType::class, null, [
+            'settings' => $settings, // Pass the settings data to the form
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            foreach ($submittedData as $name => $value) {
+
+                $setting = $settingsRepository->findOneBy(['name' => $name]);
+
+                if ($setting) {
+                    // Update its value with the newly submitted value
+                    $setting->setValue($value);
+
+                    $em->persist($setting);
+                }
+            }
+
+            $em->flush();
+            $this->addFlash('success_admin', 'Settings updated successfully.');
+
+            return $this->redirectToRoute('admin_page');
+        }
+
+        return $this->render('admin/settings.html.twig', [
+            'settings' => $settings,
+            'form' => $form->createView(),
         ]);
     }
 
