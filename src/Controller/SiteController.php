@@ -171,8 +171,7 @@ class SiteController extends AbstractController
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            //Overriden to IOS so same logic is used for both
-            $os = OSTypes::IOS;
+            $os = OSTypes::MACOS;
         }
 
         // iOS
