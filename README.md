@@ -91,7 +91,7 @@ Congratulations on finishing the essential requirements 🎉! Now we need to get
 ```bash
 - composer install
 ```
-3. **NPM Run Build**: Use Node Package Manager (NPM) to build the frontend assets when running npm run build command. This instruction tells Webpack to bundle and generate the JavaScript, CSS, and other needed assets. The created files will be saved in the build directory.
+3. **NPM Run Build**: Use Node Package Manager (NPM) to build the frontend assets when running npm run build command. This instruction tells Webpack to bundle and generate the JavaScript, CSS, and other needed assets. The created files will be saved in the build directory.
 ```bash
 - npm run build
 ```
@@ -101,7 +101,7 @@ Congratulations on finishing the essential requirements 🎉! Now we need to get
 - php bin/console doctrine:migrations:migrate
 ```
 
-5. **Load Initial Data**: Now we'll populate the database with the requested configuration data. This data it's located in "src/DataFixtures/SettingFixture.php". Execute it use the following command:
+5. **Load Initial Data**: Now we'll populate the database with the requested configuration data. This data it'slocated in "src/DataFixtures/SettingFixture.php". Execute it use the following command:
 
 ```bash
 - php bin/console doctrine:fixtures:load
@@ -122,9 +122,42 @@ If you encounter any issues or have any questions along the way, don't hesitate 
 Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier to connect in any location! 💻📱
 
 
+## 🚧 Troubleshooting
+Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal installation:
+
+1. **Missing or Incorrect Environment Variables**: Check if you don't forget to update the environment variables in the `.env` file. Make sure you have carefully followed the instructions to duplicate the `.env.sample` file and update the necessary variables with the correct values.
+2. **Node.js Version Compatibility**: You can face problems during the yarn build step if you have an older version of Node.js installed on your machine. Make sure you have the correct version of Node.js installed. Version 16 or higher is required.
+3. **Docker Compose Errors**: Docker Compose may encounter problems if your system setup or Docker version does not meet the prerequisites. Check if you have the latest Docker and Docker Compose versions installed.
+4. **Container Not Running**: If you encounter errors while checking container status with `docker ps` command, it could indicate that the containers did not start correctly. Make sure you have followed the installation steps correctly and have the necessary permissions to run Docker containers. Don't forget to check if you don't have any container using the same ports necessary to run this project.
+5. **Database Connectivity**: Database connectivity issues could happen you provide the incorrect database credentials or set up the database URL incorrectly. Check if you have the right database connection data in your `.env` file.
+6. **Missing Node.js Packages**: During the npm run build step, you might encounter errors if you have not installed all the required Node.js packages. Ensure that you have run `yarn install` to install the required packages before executing `npm run build` on the `web` container.
+7. **Composer Dependency Issues**: If you face issues during the `composer install` step that means Composer found problems while installing PHP dependencies. Check you have the necessary PHP version and extensions installed.
+8. **Database Migration Errors**: If you have problems with database migrations, it may be due to database schema conflicts or other migration-related issues. To verify any related problems with migrations, go to the terminal and use the following commands to check the respective logs of the `web` container.
+```bash
+- docker ps
+- docker logs <container-web-id>
+```
+## 📞 Contact and Support
+If you have any problems installing or using the OpenRoaming Provisioning Portal, our dedicated support staff is available to help. Please feel free to contact us via email:
+- **Email**: creative@tetrapi.pt
+- **Support Hotline**: Our support team is available Monday to Friday, from 9:00 to 17:00
+- **Response Time**: We strive to respond to all inquiries within 24 hours on business days. During weekends or public holidays, our response time may be slightly longer.
+
+Please don't hesitate to reach out to us for any assistance you may need. We are committed to providing you with the best experience with the OpenRoaming Provisioning Portal.
+
+# How it Looks and How it Works?
+Now we will show how the project looks, and give you some base information about how it works.
+
+## Project Mode
+
+The project provides two modes: demo mode set to **TRUE** or **FALSE**, each serving to different needs.
+
+- **Demo Mode (TRUE)**: When demo mode is set to TRUE, the system generates demo profiles based on the submitted email. This allows users to explore and test the portal's functionality without the need to create a user account. In demo mode, only "demo login" is displayed, and SAML and other login methods are disabled, regardless of other settings. A demo warning is also displayed, indicating that the system is in demo mode.
+- **Production Mode (FALSE)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted to the interests and needs of each user. Users can set up accounts in production mode and use all available login methods, including SAML and Google authentication.
+
 ## 🔧 Environment Variables
 
-This application uses environment variables for configuration. Here's an overview of the different variables and what they do:
+The OpenRoaming Provisioning Portal utilizes environment variables for its configuration. Below is an overview of the different variables and their functions:
 
 - `APP_ENV`: This sets the environment mode for the Symfony application. It can be `dev` or `prod`.
 - `APP_SECRET`: This is the application secret used by Symfony for encrypting cookies and generating CSRF tokens.
@@ -144,7 +177,7 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from the IdP.
 
 ### 🛠️ Settings Table
-This application uses environment variables for configuration. Below is an overview of the different variables and their functions:
+The OpenRoaming Provisioning Portal has a detailed "setting" table that allows you to customize the application to your individual needs. Here's a rundown of several important variables and their functions:
 
 1. `RADIUS_REALM_NAME`: The realm name for your RADIUS server.
 2. `DISPLAY_NAME`: The name used on the profiles.
@@ -180,25 +213,11 @@ This application uses environment variables for configuration. Below is an overv
 32. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
 33. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone with a google account login
 
-## 🚧 Troubleshooting
-Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal installation:
+#### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
-1. **Missing or Incorrect Environment Variables**: Check if you don't forget to update the environment variables in the `.env` file. Make sure you have carefully followed the instructions to duplicate the `.env.sample` file and update the necessary variables with the correct values.
-2. **Node.js Version Compatibility**: You can face problems during the yarn build step if you have an older version of Node.js installed on your machine. Make sure you have the correct version of Node.js installed. Version 16 or higher is required.
-3. **Docker Compose Errors**: Docker Compose may encounter problems if your system setup or Docker version does not meet the prerequisites. Check if you have the latest Docker and Docker Compose versions installed.
-4. **Container Not Running**: If you encounter errors while checking container status with `docker ps` command, it could indicate that the containers did not start correctly. Make sure you have followed the installation steps correctly and have the necessary permissions to run Docker containers. Don't forget to check if you don't have any container using the same ports necessary to run this project.
-5. **Database Connectivity**: Database connectivity issues could happen you provide the incorrect database credentials or set up the database URL incorrectly. Check if you have the right database connection data in your `.env` file.
-6. **Missing Node.js Packages**: During the npm run build step, you might encounter errors if you have not installed all the required Node.js packages. Ensure that you have run `yarn install` to install the required packages before executing `npm run build` on the `web` container.
-7. **Composer Dependency Issues**: If you face issues during the `composer install` step that means Composer found problems while installing PHP dependencies. Check you have the necessary PHP version and extensions installed.
-8. **Database Migration Errors**: If you have problems with database migrations, it may be due to database schema conflicts or other migration-related issues. To verify any related problems with migrations, go to the terminal and use the following commands to check the respective logs of the `web` container.
-```bash
-- docker ps
-- docker logs <container-web-id>
-```
-## 📞 Contact and Support
-If you have any problems installing or using the OpenRoaming Provisioning Portal, our dedicated support staff is available to help. Please feel free to contact us via email:
-- **Email**: creative@tetrapi.pt
-- **Support Hotline**: Our support team is available Monday to Friday, from 9:00 to 17:00
-- **Response Time**: We strive to respond to all inquiries within 24 hours on business days. During weekends or public holidays, our response time may be slightly longer.
+### 1. Main Page Overview
+![Main_Page_Demo_False](assets/wba_screenshots/main_page_demo_false.png)
 
-Please don't hesitate to reach out to us for any assistance you may need. We are committed to providing you with the best experience with the OpenRoaming Provisioning Portal.
+The main page of the OpenRoaming Provisioning Portal provides an intuitive user interface with...
+
+
