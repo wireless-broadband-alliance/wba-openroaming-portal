@@ -1,137 +1,112 @@
+# 🌐︎ OpenRoaming Provisioning Portal
 
-# OpenRoaming Provisioning Portal
+Welcome to the OpenRoaming Provisioning Portal - Your One-Stop Solution for Automated Device Authentication on Wireless Networks! 🚀
+The OpenRoaming Provisioning Portal improves the process of connecting to Wi-Fi in any area by creating a secure and unique profile for each user. With automatic device authentication, you can enjoy an easy and secure Wi-Fi experience.
 
-The OpenRoaming Provisioning Portal is a tool that enables automated device authentication on wireless networks. Here's a simple guide to help you get started with it.
+This Portal was created with the objective of simplifying Wi-Fi connectivity and improving security for users in a variety of contexts. We think that everyone should have access to secure Wi-Fi without having to log in several times. Our goal is to make Wi-Fi connectivity for people and companies easier, quicker, and more user-friendly.
 
-## Prerequisites
+### Benefits
+- Seamless Wi-Fi connectivity: Say goodbye to manual login problems and connect to Wi-Fi networks with simplicity. 📶
+- Improved security: Have peace of mind knowing that your personal information is safe with secure profile encryption. 🔒
+- Personalization: Each user gets a unique profile tailored to their specific needs and preferences. 🎯
+- Scalability: Because the portal is built for a high number of users and devices, it is excellent for both local and large-scale installations. 🌟
+
+### Use Cases
+- Public Wi-Fi hotspots: Simplify the login method for users accessing Wi-Fi in coffee shops, airports, hotels, and other public locations. ☕️✈
+- Corporate networks: Facilitate employee onboarding and Wi-Fi access in workplaces while maintaining secure connectivity for all devices. 💼
+- Events and conferences: Provide seamless Wi-Fi access to attendees with personalized profiles, enhancing the overall event experience. 🎉
+
+In this guide, we'll lead you through the setup of the OpenRoaming Provisioning Portal step by step. To understand how it works, you'll get basic knowledge behind each stage. You will possess a fully working automatic device authentication for your wireless networks by the end of this guide. Let's get started! 🚀
+Let's get started
+
+### Prerequisites
 - Docker
 - Docker-compose
-- Git (if you plan to clone the repository)
+- Node Js - 16 or higher
+- Composer
+- Git (if you prefer to clone the repository)
 
-## Getting Started
-1. First clone the repository or download the zipped project package.
+## How to get the Project
+You have two options to get the project:
+1. **Download Zip File**: You can download the project as a zip file and extract it to a directory on your machine.
+
+2. **Clone the Repository**: If you're familiar with Git, you can clone the repository using the following command:
 
 ```bash
-git clone <repository-url>
+- git clone <repository-url>
+```
+## Installation Commands
+Please follow the instructions below, on the root folder of the project, to prepare and install it:
+
+1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
+2. **Install Dependencies**: Before starting the project, you need to install its dependencies. Ensure that you have Node.js installed on your machine. Run the following command in your terminal to install the required packages:
+```bash
+- yarn build
+```
+3. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
+
+```bash
+- docker-compose -f docker-compose.yml up -d
+```
+4. **Check Container Status**: After executing the previous command, ensure that all containers for each service are appropriately formed. The following command may be used to verify the status of each container, example:
+
+```bash
+- docker ps
 ```
 
-OR
-
-Unzip the project package.
-
-2. Authenticate with TETRAPI GitLab registry:
+⇓ Finally after you create the containers, they should look like this. ⇓
 
 ```bash
-docker login registry.tetrapi.pt
-```
-
-Alternatively, you can build the image yourself using the provided Dockerfile.
-
-3. Update your environment variables. You can find a sample in the `.env.sample` file provided in the project root directory. Make sure you duplicate the sample file and rename it to `.env`.
-
-4. Run docker-compose to build and start the services:
-
-```bash
-docker-compose up -d
+Starting cc-openroaming-provisioning-web_mailcatcher_1 ... done
+Starting cc-openroaming-provisioning-web_web_1         ... done
+Starting cc-openroaming-provisioning-web_memcached_1   ... done
+Starting cc-openroaming-provisioning-web_mysql_1       ... done
 ```
 
 ## Post Installation
-Once the containers are up and running, you'll need to perform a few more steps.
+Congratulations on finishing the essential requirements 🎉! Now we need to get the project up and running.
 
-1. Go into the `web` container:
-
-```bash
-docker exec -it <web-container-id> bash
-```
-
-2. Run migrations to set up your database schema:
+1. **Access the web Container**: To make adjustments to the project, you'll need to access the `web` container. Type the following command in your terminal:
 
 ```bash
-php bin/console doctrine:migrations:migrate
+- docker exec -it <web-container-id> bash
 ```
-
-3. Load fixtures to populate your database with initial data:
+2. **Composer Install**: Once inside the `web` container, use the composer install command to install all the required PHP dependencies for the project. Composer will read the composer.json file and download the necessary packages into the vendor directory.
+```bash
+- composer install
+```
+3. **NPM Run Build**: Use Node Package Manager (NPM) to build the frontend assets when running npm run build command. This instruction tells Webpack to bundle and generate the JavaScript, CSS, and other needed assets. The created files will be saved in the build directory.
+```bash
+- npm run build
+```
+4. **Set Up Database Schema**: After that, run the migration command to set up your database schema:
 
 ```bash
-php bin/console doctrine:fixtures:load
+- php bin/console doctrine:migrations:migrate
 ```
 
-4. Upload your certificate files to the `signing-keys` directory.
-
-5. Inside the `web` container, navigate to the `tools` directory and run the `generatePfx` script:
+5. **Load Initial Data**: Now we'll populate the database with the requested configuration data. This data it's located in "src/DataFixtures/SettingFixture.php". Execute it use the following command:
 
 ```bash
-cd tools
-sh generatePfxSigningKey.sh
+- php bin/console doctrine:fixtures:load
 ```
 
-6. Finally, connect to your MySQL database instance and update the details on the `settings` table according to your requirements.
 
-## Troubleshooting
-If you encounter any issues during setup, please check the logs of the relevant Docker container. You can view the logs with the following command:
+## Congratulations! 🎉
+You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
 
-```bash
-docker logs <container-id>
-```
+Now, it's time to access your fully set up portal! 🌐
 
-## Development Build
+To get started, open your favorite web browser and type the following address in the URL bar:
+http://127.0.0.1:80
 
-To set up a development build, follow the steps below. This build uses `docker-compose-dev.yml` for configuration and includes steps for building the necessary assets.
+If you encounter any issues or have any questions along the way, don't hesitate to check to the [**Troubleshooting**](#troubleshooting) section on this README or reach out to our support team for assistance.
 
-1. Run docker-compose to build and start the services using the development compose file:
 
-```bash
-docker-compose -f docker-compose-dev.yml up -d
-```
+Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier to connect in any location! 💻📱
 
-2. Go into the `web` container:
 
-```bash
-docker exec -it <web-container-id> bash
-```
-
-3. Install composer dependencies:
-
-```bash
-composer i
-```
-
-4. Install npm dependencies:
-
-```bash
-npm i
-```
-
-5. Build assets:
-
-```bash
-npm run build
-```
-
-6. Run migrations to set up your database schema:
-
-```bash
-php bin/console doctrine:migrations:migrate
-```
-
-7. Load fixtures to populate your database with initial data:
-
-```bash
-php bin/console doctrine:fixtures:load
-```
-
-8. Upload your certificate files to the `signing-keys` directory.
-
-9. Inside the `web` container, navigate to the `tools` directory and run the `generatePfx` script:
-
-```bash
-cd tools
-sh generatePfxSigningKey.sh
-```
-
-10. Finally, connect to your MySQL database instance and update the details on the `settings` table according to your requirements.
-
-## Environment Variables
+## 🔧 Environment Variables
 
 This application uses environment variables for configuration. Here's an overview of the different variables and what they do:
 
@@ -142,9 +117,9 @@ This application uses environment variables for configuration. Here's an overvie
 - `MESSENGER_TRANSPORT_DSN`: This defines the transport (e.g., AMQP, Doctrine, etc.) that Symfony Messenger will use for dispatching messages. The value `doctrine://default?auto_setup=0` uses Doctrine DBAL with auto setup disabled.
 - `MAILER_DSN`: This sets the transport for sending emails via the Symfony Mailer component. The value `null://null` disables sending emails.
 
-### SAML Specific Settings
+### 🔒 SAML Specific Settings
 
-These environment variables are used to configure the SAML Service Provider (SP) and Identity Provider (IdP):
+These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
 
 - `SAML_IDP_ENTITY_ID`: This is the entity ID (URI) of the IdP.
 - `SAML_IDP_SSO_URL`: This is the URL of the IdP's Single Sign-On (SSO) service.
@@ -152,9 +127,8 @@ These environment variables are used to configure the SAML Service Provider (SP)
 - `SAML_SP_ENTITY_ID`: This is the entity ID (URI) of the SP.
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from the IdP.
 
-## Settings Table
-
-This table in the MySQL database contains various configuration options for the OpenRoaming Provisioning Portal. Here's a brief description of each row and its use:
+### 🛠️ Settings Table
+This application uses environment variables for configuration. Below is an overview of the different variables and their functions:
 
 1. `RADIUS_REALM_NAME`: The realm name for your RADIUS server.
 2. `DISPLAY_NAME`: The name used on the profiles.
@@ -189,3 +163,19 @@ This table in the MySQL database contains various configuration options for the 
 31. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
 32. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
 33. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone with a google account login
+
+## 🚧 Troubleshooting
+Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal installation:
+
+1. **Missing or Incorrect Environment Variables**: Check if you don't forget to update the environment variables in the `.env` file. Make sure you have carefully followed the instructions to duplicate the `.env.sample` file and update the necessary variables with the correct values.
+2. **Node.js Version Compatibility**: You can face problems during the yarn build step if you have an older version of Node.js installed on your machine. Make sure you have the correct version of Node.js installed. Version 16 or higher is required.
+3. **Docker Compose Errors**: Docker Compose may encounter problems if your system setup or Docker version does not meet the prerequisites. Check if you have the latest Docker and Docker Compose versions installed.
+4. **Container Not Running**: If you encounter errors while checking container status with `docker ps` command, it could indicate that the containers did not start correctly. Make sure you have followed the installation steps correctly and have the necessary permissions to run Docker containers. Don't forget to check if you don't have any container using the same ports necessary to run this project.
+5. **Database Connectivity**: Database connectivity issues could happen you provide the incorrect database credentials or set up the database URL incorrectly. Check if you have the right database connection data in your `.env` file.
+6. **Missing Node.js Packages**: During the npm run build step, you might encounter errors if you have not installed all the required Node.js packages. Ensure that you have run `yarn install` to install the required packages before executing `npm run build` on the `web` container.
+7. **Composer Dependency Issues**: If you face issues during the `composer install` step that means Composer found problems while installing PHP dependencies. Check you have the necessary PHP version and extensions installed.
+8. **Database Migration Errors**: If you have problems with database migrations, it may be due to database schema conflicts or other migration-related issues. To verify any related problems with migrations, go to the terminal and use the following commands to check the respective logs of the `web` container.
+```bash
+- docker ps
+- docker logs <container-web-id>
+```
