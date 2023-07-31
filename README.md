@@ -3,7 +3,19 @@
 Welcome to the OpenRoaming Provisioning Portal - Your One-Stop Solution for Automated Device Authentication on Wireless Networks! 🚀
 The OpenRoaming Provisioning Portal improves the process of connecting to Wi-Fi in any area by creating a secure and unique profile for each user. With automatic device authentication, you can enjoy an easy and secure Wi-Fi experience.
 
-This Portal was created with the objective of simplifying Wi-Fi connectivity and improving security for users in a variety of contexts. We think that everyone should have access to secure Wi-Fi without having to log in several times. Our goal is to make Wi-Fi connectivity for people and companies easier, quicker, and more user-friendly.
+## Why it was created?
+This Portal was created with the objective of **simplifying Wi-Fi connectivity** and improving security for users in a variety of contexts. We think that **everyone should have access to secure Wi-Fi** without having to log in several times. Our goal is to make Wi-Fi connectivity for people and companies easier, quicker, and more user-friendly.
+
+## How it works?
+OpenRoaming is an innovative technology that is changing the way people connect to Wi-Fi networks. It is an open standard that has been developed to **enable globally, secure, and automatic Wi-Fi connectivity**.
+
+Users are able to connect to Wi-Fi networks using OpenRoaming without asking for login credentials. Instead, makes use of **digital certificates and secure authentication mechanisms**. This means that users can **switch quickly between Wi-Fi networks, such as public hotspots, corporate networks, and other places, without delays or several logins**.
+
+The technology ensures that each user is **provided with a unique and secure profile** that caters to their specific needs and preferences.
+
+The OpenRoaming Provisioning Portal acts as a **key enabler for OpenRoaming technology by simplifying the setup and configuration process** for network administrators.
+
+You are taking an **important step** toward **improving Wi-Fi connection** for your users by providing a safe and **user-friendly experience for everybody** by utilizing the OpenRoaming Provisioning Portal.
 
 ### Benefits
 - Seamless Wi-Fi connectivity: Say goodbye to manual login problems and connect to Wi-Fi networks with simplicity. 📶
@@ -16,8 +28,12 @@ This Portal was created with the objective of simplifying Wi-Fi connectivity and
 - Corporate networks: Facilitate employee onboarding and Wi-Fi access in workplaces while maintaining secure connectivity for all devices. 💼
 - Events and conferences: Provide seamless Wi-Fi access to attendees with personalized profiles, enhancing the overall event experience. 🎉
 
-In this guide, we'll lead you through the setup of the OpenRoaming Provisioning Portal step by step. To understand how it works, you'll get basic knowledge behind each stage. You will possess a fully working automatic device authentication for your wireless networks by the end of this guide. Let's get started! 🚀
-Let's get started
+Whether you're our solution aims to exceed your expectations and make  Wi-Fi connectivity better. Let's embark on this journey together and redefine how we connect wirelessly! 🚀
+
+## Getting Started - Setup Guide
+In this guide, we'll lead you through the setup of the OpenRoaming Provisioning Portal step by step.
+
+To understand how it works, you'll get basic knowledge behind each stage. You will possess a fully working automatic device authentication for your wireless networks by the end of this guide. Let's get started! 🚀
 
 ### Prerequisites
 - Docker
@@ -26,7 +42,7 @@ Let's get started
 - Composer
 - Git (if you prefer to clone the repository)
 
-## How to get the Project
+### How to get the Project
 You have two options to get the project:
 1. **Download Zip File**: You can download the project as a zip file and extract it to a directory on your machine.
 
@@ -35,7 +51,7 @@ You have two options to get the project:
 ```bash
 - git clone <repository-url>
 ```
-## Installation Commands
+### Installation Commands
 Please follow the instructions below, on the root folder of the project, to prepare and install it:
 
 1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
@@ -63,7 +79,7 @@ Starting cc-openroaming-provisioning-web_memcached_1   ... done
 Starting cc-openroaming-provisioning-web_mysql_1       ... done
 ```
 
-## Post Installation
+### Post Installation
 Congratulations on finishing the essential requirements 🎉! Now we need to get the project up and running.
 
 1. **Access the web Container**: To make adjustments to the project, you'll need to access the `web` container. Type the following command in your terminal:
@@ -179,3 +195,10 @@ Here are some probable troubleshooting issues you may experience during the Open
 - docker ps
 - docker logs <container-web-id>
 ```
+## 📞 Contact and Support
+If you have any problems installing or using the OpenRoaming Provisioning Portal, our dedicated support staff is available to help. Please feel free to contact us via email:
+- **Email**: creative@tetrapi.pt
+- **Support Hotline**: Our support team is available Monday to Friday, from 9:00 to 17:00
+- **Response Time**: We strive to respond to all inquiries within 24 hours on business days. During weekends or public holidays, our response time may be slightly longer.
+
+Please don't hesitate to reach out to us for any assistance you may need. We are committed to providing you with the best experience with the OpenRoaming Provisioning Portal.
