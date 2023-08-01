@@ -324,10 +324,18 @@ class AdminController extends AbstractController
                         // Use a unique name for the uploaded file to avoid overwriting
                         $newFilename = $originalFilename.'-'.uniqid('', true).'.'.$file->guessExtension();
 
-                        $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/logos/';
+                        if ($settingName === 'OPENROAMING_LOGO' || $settingName === 'CUSTOMER_LOGO') {
+                            $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/logos/';
+                        }
+
+                        if ($settingName === 'WALLPAPER_IMAGE') {
+                            $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/images/';
+                        }
+
                         $file->move($destinationDirectory, $newFilename);
-                        $setting->setValue('/resources/logos/' . $newFilename);
+                        $setting->setValue('/resources/' . ($settingName === 'OPENROAMING_LOGO' ? 'logos/' : 'images/') . $newFilename);
                     }
+
                 }
             }
 
