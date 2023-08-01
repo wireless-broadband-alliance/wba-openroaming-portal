@@ -257,7 +257,6 @@ class AdminController extends AbstractController
                 'PAGE_TITLE',
                 'WELCOME_TEXT',
                 'WELCOME_DESCRIPTION',
-                'CONTACT_EMAIL',
             ];
 
             foreach ($settings as $setting) {
@@ -280,6 +279,39 @@ class AdminController extends AbstractController
         }
 
         return $this->render('admin/settings.html.twig', [
+            'settings' => $settings,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function customize(Request $request, EntityManagerInterface $em): Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(SettingType::class, null, [
+            'settings' => $settings, // Pass the settings data to the form
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $Custom = [ // this are the settings related with the customization of the page
+                'CUSTOMER_LOGO',
+                'OPENROAMING_LOGO',
+                'WALLPAPER_IMAGE',
+                'PAGE_TITLE',
+                'WELCOME_TEXT',
+                'WELCOME_DESCRIPTION',
+            ];
+
+        }
+
+        return $this->render('admin/custom.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
         ]);

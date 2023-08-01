@@ -29,7 +29,7 @@ class SettingType extends AbstractType
 
         foreach ($settings as $setting) {
             // Check if the setting is one of the excluded values
-            if (in_array($setting->getName(), ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'], true)) {
+            if (in_array($setting->getName(), ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'], true)) {
                 // If the setting is excluded, add a HiddenType field instead
                 $builder->add($setting->getName(), HiddenType::class, [
                     'data' => $setting->getValue(),

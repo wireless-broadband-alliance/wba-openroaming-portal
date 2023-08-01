@@ -17,7 +17,7 @@
                 {% set inputSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] == 'choice') %}
                 {% for setting in inputSettings %}
                     {# Exclude the settings you don't want to show #}
-                    {% if setting.name not in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION', 'CONTACT_EMAIL'] %}
+                    {% if setting.name not in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
                         <div class="border border-gray-300 rounded-lg p-4">
                             <div class="text-sm font-medium text-gray-700 mb-2 text-center">
                                 {{ setting.name }}
@@ -40,7 +40,7 @@
                 {% set contentSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] != 'choice') %}
                 {% for setting in contentSettings %}
                     {# Exclude the settings you don't want to show #}
-                    {% if setting.name not in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION', 'CONTACT_EMAIL'] %}
+                    {% if setting.name not in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
                         <div class="border border-gray-300 rounded-lg p-4">
                             <div class="text-sm font-medium text-gray-700 mb-2 text-center">
                                 {{ setting.name }}
