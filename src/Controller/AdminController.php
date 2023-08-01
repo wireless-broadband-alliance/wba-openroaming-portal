@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Form\CustomType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
 use App\Form\UserUpdateType;
@@ -291,24 +292,34 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(SettingType::class, null, [
-            'settings' => $settings, // Pass the settings data to the form
+        // Create the form with the CustomType and pass the relevant settings
+        $form = $this->createForm(CustomType::class, null, [
+            'settings' => $settings,
         ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle submitted data and update the settings accordingly
             $submittedData = $form->getData();
 
-            $Custom = [ // this are the settings related with the customization of the page
-                'CUSTOMER_LOGO',
-                'OPENROAMING_LOGO',
-                'WALLPAPER_IMAGE',
-                'PAGE_TITLE',
-                'WELCOME_TEXT',
-                'WELCOME_DESCRIPTION',
-            ];
+            // Update the settings based on the form submission
+            foreach ($settings as $setting) {
+                $settingName = $setting->getName();
 
+                // Check if the setting is in the allowed settings for customization
+                if (in_array($settingName, ['PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'])) {
+                    // Get the value from the submitted form data
+                    $submittedValue = $submittedData[$settingName];
+
+                    // Update the setting value
+                    $setting->setValue($submittedValue);
+                }
+            }
+            $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
+
+            $em->flush();
+            return $this->redirectToRoute('admin_page');
         }
 
         return $this->render('admin/custom.html.twig', [
