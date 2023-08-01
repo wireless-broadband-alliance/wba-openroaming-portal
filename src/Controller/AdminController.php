@@ -241,15 +241,6 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        // Get the entity object containing the info from the db
-        $settingsEntity = new Setting();
-        foreach ($settings as $setting) {
-            $methodName = 'set' . ucfirst(strtolower($setting->getName()));
-            if (method_exists($settingsEntity, $methodName)) {
-                $settingsEntity->$methodName($setting->getValue());
-            }
-        }
-
         $form = $this->createForm(SettingType::class, null, [
             'settings' => $settings, // Pass the settings data to the form
         ]);
@@ -259,12 +250,15 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            foreach ($submittedData as $name => $value) {
+            $excludedSettings = ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'];
 
-                $setting = $settingsRepository->findOneBy(['name' => $name]);
+            foreach ($settings as $setting) {
+                $name = $setting->getName();
 
-                if ($setting) {
-                    // Update its value with the newly submitted value
+                // Exclude the 'CUSTOMER_LOGO', 'OPENROAMING_LOGO', and 'WALLPAPER_IMAGE' settings from being updated
+                // Check if the submitted data contains the setting's name
+                if (!in_array($name, $excludedSettings, true)) {
+                    $value = $submittedData[$name] ?? null;
                     $setting->setValue($value);
 
                     $em->persist($setting);
@@ -272,6 +266,7 @@ class AdminController extends AbstractController
             }
 
             $em->flush();
+
             $this->addFlash('success_admin', 'Settings updated successfully.');
 
             return $this->redirectToRoute('admin_page');
@@ -282,8 +277,7 @@ class AdminController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
-
+    
     private function disableProfiles($user): void
     {
         $this->profileManager->disableProfiles($user);
