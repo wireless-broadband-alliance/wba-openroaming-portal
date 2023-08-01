@@ -14,6 +14,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -308,17 +309,33 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array($settingName, ['PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'])) {
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION'])) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 
                     // Update the setting value
                     $setting->setValue($submittedValue);
+                } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
+                    // Handle file uploads for logos and wallpaper image
+                    $file = $form->get($settingName)->getData();
+
+                    if ($file) { // submits the new file to the respective path
+                        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        // Use a unique name for the uploaded file to avoid overwriting
+                        $newFilename = $originalFilename.'-'.uniqid('', true).'.'.$file->guessExtension();
+
+                        $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/logos/';
+                        $file->move($destinationDirectory, $newFilename);
+                        $setting->setValue('/resources/logos/' . $newFilename);
+                    }
                 }
             }
+
             $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
 
+            // Flush the changes to the database
             $em->flush();
+
             return $this->redirectToRoute('admin_page');
         }
 

@@ -15,6 +15,9 @@ class CustomType extends AbstractType
     {
         $allowedSettings = [
             'PAGE_TITLE' => TextType::class,
+            'CUSTOMER_LOGO' => FileType::class,
+            'OPENROAMING_LOGO' => FileType::class,
+            'WALLPAPER_IMAGE' => FileType::class,
             'WELCOME_TEXT' => TextareaType::class,
             'WELCOME_DESCRIPTION' => TextareaType::class,
         ];
@@ -26,6 +29,12 @@ class CustomType extends AbstractType
                 $formFieldOptions = [
                     'data' => $setting->getValue(),
                 ];
+
+                if ($formFieldType === FileType::class) {
+                    // If the field is an image, set the appropriate options for uploading images
+                    $formFieldOptions['mapped'] = false;
+                    $formFieldOptions['required'] = false;
+                }
 
                 $builder->add($settingName, $formFieldType, $formFieldOptions);
             }
