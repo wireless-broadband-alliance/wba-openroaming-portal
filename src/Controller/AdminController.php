@@ -250,17 +250,24 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            $excludedSettings = ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'];
+            $excludedSettings = [ // this are the settings related with the customization of the page
+                'CUSTOMER_LOGO',
+                'OPENROAMING_LOGO',
+                'WALLPAPER_IMAGE',
+                'PAGE_TITLE',
+                'WELCOME_TEXT',
+                'WELCOME_DESCRIPTION',
+                'CONTACT_EMAIL',
+            ];
 
             foreach ($settings as $setting) {
                 $name = $setting->getName();
 
-                // Exclude the 'CUSTOMER_LOGO', 'OPENROAMING_LOGO', and 'WALLPAPER_IMAGE' settings from being updated
+                // Exclude the settings in $excludedSettings from being updated
                 // Check if the submitted data contains the setting's name
                 if (!in_array($name, $excludedSettings, true)) {
                     $value = $submittedData[$name] ?? null;
                     $setting->setValue($value);
-
                     $em->persist($setting);
                 }
             }
@@ -277,7 +284,8 @@ class AdminController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-    
+
+
     private function disableProfiles($user): void
     {
         $this->profileManager->disableProfiles($user);
