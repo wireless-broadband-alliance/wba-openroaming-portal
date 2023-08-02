@@ -22,22 +22,26 @@ class CustomType extends AbstractType
             'PAGE_TITLE' => TextType::class,
         ];
 
-        foreach ($options['settings'] as $setting) {
-            $settingName = $setting->getName();
-            if (array_key_exists($settingName, $allowedSettings)) {
-                $formFieldType = $allowedSettings[$settingName];
-                $formFieldOptions = [
-                    'data' => $setting->getValue(),
-                ];
+        foreach ($allowedSettings as $settingName => $formFieldType) {
+            $formFieldOptions = [
+                'data' => null, // Set data to null for FileType fields
+            ];
 
-                if ($formFieldType === FileType::class) {
-                    // If the field is an image, set the appropriate options
-                    $formFieldOptions['mapped'] = false;
-                    $formFieldOptions['required'] = false;
+            if ($formFieldType === FileType::class) {
+                // If the field is an image, set the appropriate options
+                $formFieldOptions['mapped'] = false;
+                $formFieldOptions['required'] = false;
+            } else {
+                // If the field is not an image, get the corresponding Setting entity and set its value
+                foreach ($options['settings'] as $setting) {
+                    if ($setting->getName() === $settingName) {
+                        $formFieldOptions['data'] = $setting->getValue();
+                        break;
+                    }
                 }
-
-                $builder->add($settingName, $formFieldType, $formFieldOptions);
             }
+
+            $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
     }
 
