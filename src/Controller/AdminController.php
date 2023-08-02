@@ -322,7 +322,7 @@ class AdminController extends AbstractController
                     if ($file) { // submits the new file to the respective path
                         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                         // Use a unique name for the uploaded file to avoid overwriting
-                        $newFilename = $originalFilename.'-'.uniqid('', true).'.'.$file->guessExtension();
+                        $newFilename = $originalFilename.'.'.$file->guessExtension();
 
                         if ($settingName === 'OPENROAMING_LOGO' || $settingName === 'CUSTOMER_LOGO') {
                             $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/logos/';
@@ -333,7 +333,7 @@ class AdminController extends AbstractController
                         }
 
                         $file->move($destinationDirectory, $newFilename);
-                        $setting->setValue('/resources/' . ($settingName === 'OPENROAMING_LOGO' ? 'logos/' : 'images/') . $newFilename);
+                        $setting->setValue('/resources/' . ($settingName === 'OPENROAMING_LOGO' || $settingName === 'CUSTOMER_LOGO' ? 'logos/' : 'images/') . $newFilename);
                     }
 
                 }

@@ -14,12 +14,12 @@ class CustomType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowedSettings = [
-            'PAGE_TITLE' => TextType::class,
             'CUSTOMER_LOGO' => FileType::class,
             'OPENROAMING_LOGO' => FileType::class,
             'WALLPAPER_IMAGE' => FileType::class,
             'WELCOME_TEXT' => TextareaType::class,
             'WELCOME_DESCRIPTION' => TextareaType::class,
+            'PAGE_TITLE' => TextType::class,
         ];
 
         foreach ($options['settings'] as $setting) {
@@ -31,7 +31,7 @@ class CustomType extends AbstractType
                 ];
 
                 if ($formFieldType === FileType::class) {
-                    // If the field is an image, set the appropriate options for uploading images
+                    // If the field is an image, set the appropriate options
                     $formFieldOptions['mapped'] = false;
                     $formFieldOptions['required'] = false;
                 }
