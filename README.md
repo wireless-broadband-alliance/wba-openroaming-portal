@@ -148,7 +148,7 @@ Please don't hesitate to reach out to us for any assistance you may need. We are
 # How it Looks and How it Works?
 Now we will show how the project looks, and give you some base information about how it works.
 
-## Project Mode
+## Production Mode && Demo Mode
 
 The project provides two modes: demo mode set to **TRUE** or **FALSE**, each serving to different needs.
 
@@ -215,9 +215,49 @@ The OpenRoaming Provisioning Portal has a detailed "setting" table that allows y
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
-### 1. Main Page Overview
+## How the Platform Works
+
+### 1. Main Page Overview - Demo Mode - False
 ![Main_Page_Demo_False](assets/wba_screenshots/main_page_demo_false.png)
 
-The main page of the OpenRoaming Provisioning Portal provides an intuitive user interface with...
+The main page in production mode (demo mode set to **FALSE**) provides a user-friendly interface for users with individual accounts. The page welcomes visitors with a customisable banner that includes the company logo, welcome text, and a brief summary of the portal's features.
 
+Depending on the settings made by the administrator, users can log in using multiple authentication methods such as SAML, Google, and Register authentication. The main page provides a smooth and customized experience, allowing users to safely and quickly connect to Wi-Fi networks.
 
+### 1.2 Main Page Overview - Demo Mode - True
+![Main_Page_Demo_True](assets/wba_screenshots/main_page_demo_true.png)
+
+The main page in demo mode (demo mode set to **TRUE**) displays the platform's possibilities for users who want to browse the portal without creating individual accounts. The demo mode displays only the option for "demo login" on the page, providing a simplified appearance. To show the portal's key functions, SAML and other login methods are disabled, allowing users to explore the system's functionalities using a demo profile built based on the given email.
+
+Users are informed via a demo warning that the system is now in demo mode.
+
+### 2. Verification Step
+![Verification_Step](assets/wba_screenshots/verification_step.png)
+
+The platform begins the verification procedure to validate the user after registration or when in demo mode. The verification system sends an email to the user's provided email address. This email contains an unique verification link and code that the user must click in order to complete the verification procedure.
+
+The verification phase is a critical security defend that validates the user's identity and makes sure their email address is valid. The user validates ownership of the email account and shows permission to use the OpenRoaming Provisioning Portal by clicking the verification link or by submiting the code given on the email. This procedure improves the platform's security by preventing unwanted access.
+
+### 3. After Verification
+
+![After_Verification](assets/wba_screenshots/after_verification.png)
+
+After successfully completing the verification process by clicking the verification link or submitting the verification code, the user will be directed to this page. The actions taken during the verification process depend on the mode in which the user created their account.
+
+#### 3.1 Production Mode
+
+If the user created an account in production mode (demo mode set to **FALSE**), they will receive an email with essential account information. The email includes a link to return to the verified portal, a verification code, and a randomly generated password. With this information, the user can log in securely to the OpenRoaming Provisioning Portal.
+
+#### 3.2 Demo Mode
+
+Users who registered an account in demo mode (demo mode set to TRUE) can access the verified portal instantly. Because demo mode allows users to explore the site without registering individual accounts, the verification procedure makes sure that the user's session is safe. Based on the submitted email, the system creates a demo profile that grants access to the portal's features while keeping user data secure.
+
+### 4. Download Profile
+
+At the final stage of the process, users have the option to download a profile customized for their specific operating system. The OpenRoaming Provisioning Portal has intelligent auto-detection that identifies the type of device being used.
+
+When the user clicks the "Download" button, the portal generates a profile with information based on the user's account information. This profile is designed to improve the Wi-Fi experience by providing smooth connectivity and increased security.
+
+The downloaded profile includes all of the essential settings and variables to make connecting to Wi-Fi networks easier. The OpenRoaming Provisioning Portal improves Wi-Fi connectivity by giving a user-specific profile, making it easier and more convenient for consumers and companies.
+
+With this final step, users can effortlessly connect to Wi-Fi networks in various contexts, whether it's in public hotspots, corporate networks, or events and conferences, experiencing the full benefits of the OpenRoaming Provisioning Portal. Say goodbye to manual login problems and enjoy a seamless, secure, and personalized Wi-Fi experience! 📶🔒🌐
