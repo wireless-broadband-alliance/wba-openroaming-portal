@@ -215,7 +215,9 @@ The OpenRoaming Provisioning Portal has a detailed "setting" table that allows y
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
-## How the Platform Works
+# How the Platform Works
+
+## Main Page
 
 ### 1. Main Page Overview - Demo Mode - False
 ![Main_Page_Demo_False](assets/wba_screenshots/main_page_demo_false.png)
@@ -261,3 +263,23 @@ When the user clicks the "Download" button, the portal generates a profile with 
 The downloaded profile includes all of the essential settings and variables to make connecting to Wi-Fi networks easier. The OpenRoaming Provisioning Portal improves Wi-Fi connectivity by giving a user-specific profile, making it easier and more convenient for consumers and companies.
 
 With this final step, users can effortlessly connect to Wi-Fi networks in various contexts, whether it's in public hotspots, corporate networks, or events and conferences, experiencing the full benefits of the OpenRoaming Provisioning Portal. Say goodbye to manual login problems and enjoy a seamless, secure, and personalized Wi-Fi experience! 📶🔒🌐
+
+## Admin Dashboard Overview
+
+The OpenRoaming Provisioning Portal also has an easy and intuitive admin interface, allowing administrators to easily administer and customize the platform. The admin dashboard includes a number of features and tools that help simplify the Wi-Fi provisioning process and guarantee that it runs smoothly. Here's an overview of the admin dashboard and its primary features:
+
+### 1. Admin Login
+
+![Admin_Login](assets/wba_screenshots/admin_login.png)
+
+The admin dashboard is only accessible after a secure login. To access the dashboard, administrators must provide their credentials. The login page provides authorized users with a secure and private entry point to control the platform.
+
+### 2. Admin Page
+![Admin_Page](assets/wba_screenshots/admin_page.png)
+
+Administrators are presented with the dashboard overview after successfully logging in. Administrators may quickly access/search information about the users on the portal, the system customization, the current applied settings and another essential data.
+
+### 3. Options
+![Options](assets/wba_screenshots/options.png)
+
+The "Options" button is a feature that offers users a simple dropdown menu with various important actions and capabilities. For authorized users, the button provides access to improving the experience on the OpenRoaming Provisioning Portal.
