@@ -321,21 +321,16 @@ class AdminController extends AbstractController
 
                     if ($file) { // submits the new file to the respective path
                         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                        // Use a unique name for the uploaded file to avoid overwriting
-                        $newFilename = $originalFilename.'.'.$file->guessExtension();
+                        // Use a unique id for the uploaded file to avoid overwriting
+                        $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
-                        if ($settingName === 'OPENROAMING_LOGO' || $settingName === 'CUSTOMER_LOGO') {
-                            $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/logos/';
-                        }
-
-                        if ($settingName === 'WALLPAPER_IMAGE') {
-                            $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/images/';
-                        }
+                        // Set the destination directory based on the setting name
+                        $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
-                        $setting->setValue('/resources/' . ($settingName === 'OPENROAMING_LOGO' || $settingName === 'CUSTOMER_LOGO' ? 'logos/' : 'images/') . $newFilename);
+                        $setting->setValue('/resources/uploaded/' . $newFilename);
                     }
-
+                    // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
                 }
             }
 
