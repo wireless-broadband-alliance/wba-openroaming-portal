@@ -35,42 +35,43 @@ In this guide, we'll lead you through the setup of the OpenRoaming Provisioning 
 
 To understand how it works, you'll get basic knowledge behind each stage. You will possess a fully working automatic device authentication for your wireless networks by the end of this guide. Let's get started! 🚀
 
-### Prerequisites
-- Docker
-- Docker-compose
-- Node Js - 16 or higher
-- Composer
-- Git (if you prefer to clone the repository)
+### Prerequisites:
+- Docker (required for running the application locally)
+- Docker-compose (required for managing multiple containers)
+- Node Js - 16 or higher (required for building front-end assets)
+- Git (optional, if you prefer to clone the repository)
+
 
 ### How to get the Project
 You have two options to get the project:
-1. **Download Zip File**: You can download the project as a zip file and extract it to a directory on your machine.
+1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains only the required components to run the OpenRoaming Provisioning Portal, including `.env.sample`, `docker-compose-local.yml`, and other necessary files.
 
-2. **Clone the Repository**: If you're familiar with Git, you can clone the repository using the following command:
+
+2. **Clone the Repository**: If you're familiar with Git and want to access the complete source code, you can clone the repository using the following command:
 
 ```bash
 - git clone <repository-url>
 ```
-### Installation Commands
-Please follow the instructions below, on the root folder of the project, to prepare and install it:
+
+### ⚙️ Installation
+Please follow the instructions below, on the root folder of the project, to prepare it:
 
 1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
-2. **Install Dependencies**: Before starting the project, you need to install its dependencies. Ensure that you have Node.js installed on your machine. Run the following command in your terminal to install the required packages:
-```bash
-- yarn build
-```
-3. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
+
+**Note**: When updating the database credentials in the .env file, make sure they match the credentials specified in the docker-compose-local.yml file. Failure to match the credentials may result in the application being unable to connect to the database.
+
+2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
 
 ```bash
-- docker-compose -f docker-compose.yml up -d
+- docker-compose up -d
 ```
-4. **Check Container Status**: After executing the previous command, ensure that all containers for each service are appropriately formed. The following command may be used to verify the status of each container, example:
+3. **Check Container Status**: After executing the previous command, ensure that all containers for each service are appropriately formed. The following command may be used to verify the status of each container, example:
 
 ```bash
 - docker ps
 ```
 
-⇓ Finally after you create the containers, they should look like this. ⇓
+⇓ After you create the containers they should look like this. ⇓
 
 ```bash
 Starting cc-openroaming-provisioning-web_mailcatcher_1 ... done
@@ -78,35 +79,34 @@ Starting cc-openroaming-provisioning-web_web_1         ... done
 Starting cc-openroaming-provisioning-web_memcached_1   ... done
 Starting cc-openroaming-provisioning-web_mysql_1       ... done
 ```
+4. **Upload Certificates**: Upload your certificate files to the `signing-keys` directory for the portal generates profiles based on your certificates.
 
-### Post Installation
-Congratulations on finishing the essential requirements 🎉! Now we need to get the project up and running.
-
-1. **Access the web Container**: To make adjustments to the project, you'll need to access the `web` container. Type the following command in your terminal:
+5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx script by doing this:
 
 ```bash
 - docker exec -it <web-container-id> bash
+- cd tools
+- sh generatePfxSigningKey.sh
 ```
-2. **Composer Install**: Once inside the `web` container, use the composer install command to install all the required PHP dependencies for the project. Composer will read the composer.json file and download the necessary packages into the vendor directory.
-```bash
-- composer install
-```
-3. **NPM Run Build**: Use Node Package Manager (NPM) to build the frontend assets when running npm run build command. This instruction tells Webpack to bundle and generate the JavaScript, CSS, and other needed assets. The created files will be saved in the build directory.
-```bash
-- npm run build
-```
-4. **Set Up Database Schema**: After that, run the migration command to set up your database schema:
+
+6. **Migrations and Fixtures**: Still inside of the`web` container, you need to run the 2 commands to load the database schema and load is respective settings:
 
 ```bash
 - php bin/console doctrine:migrations:migrate
-```
-
-5. **Load Initial Data**: Now we'll populate the database with the requested configuration data. This data it'slocated in "src/DataFixtures/SettingFixture.php". Execute it use the following command:
-
-```bash
 - php bin/console doctrine:fixtures:load
 ```
 
+**IMPORTANT**: After you load the fixtures by running the second command, you need to change the following environment variable, is crucial for TLS connections:
+
+`RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to the SHA1 hash of the LetsEncrypt CA.
+
+This number is needed to validate the RADIUS server's certificate during TLS negotiation. If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root certificate. **TLS connection errors** can happen if the right SHA1 hash is not provided.
+
+Make sure to check the `SettingFixture.php` file for any reference about the default data and check the migrations about the database on the migrations folder of the project.
+
+### 🛑 Important Security Notice after Installation 🛑
+
+**It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital information and debug logs to possible attackers**, providing serious risks for security.
 
 ## Congratulations! 🎉
 You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
@@ -114,7 +114,9 @@ You've successfully completed the installation process of the OpenRoaming Provis
 Now, it's time to access your fully set up portal! 🌐
 
 To get started, open your favorite web browser and type the following address in the URL bar:
-http://127.0.0.1:80
+http://YOUR_SERVER_IP:80
+
+Replace YOUR_SERVER_IP with your server's real IP address or domain name. If you are running the portal locally, you can use localhost for an IP address.
 
 If you encounter any issues or have any questions along the way, don't hesitate to check to the [**Troubleshooting**](#troubleshooting) section on this README or reach out to our support team for assistance.
 
@@ -126,24 +128,22 @@ Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps you
 Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal installation:
 
 1. **Missing or Incorrect Environment Variables**: Check if you don't forget to update the environment variables in the `.env` file. Make sure you have carefully followed the instructions to duplicate the `.env.sample` file and update the necessary variables with the correct values.
-2. **Node.js Version Compatibility**: You can face problems during the yarn build step if you have an older version of Node.js installed on your machine. Make sure you have the correct version of Node.js installed. Version 16 or higher is required.
-3. **Docker Compose Errors**: Docker Compose may encounter problems if your system setup or Docker version does not meet the prerequisites. Check if you have the latest Docker and Docker Compose versions installed.
-4. **Container Not Running**: If you encounter errors while checking container status with `docker ps` command, it could indicate that the containers did not start correctly. Make sure you have followed the installation steps correctly and have the necessary permissions to run Docker containers. Don't forget to check if you don't have any container using the same ports necessary to run this project.
-5. **Database Connectivity**: Database connectivity issues could happen you provide the incorrect database credentials or set up the database URL incorrectly. Check if you have the right database connection data in your `.env` file.
-6. **Missing Node.js Packages**: During the npm run build step, you might encounter errors if you have not installed all the required Node.js packages. Ensure that you have run `yarn install` to install the required packages before executing `npm run build` on the `web` container.
-7. **Composer Dependency Issues**: If you face issues during the `composer install` step that means Composer found problems while installing PHP dependencies. Check you have the necessary PHP version and extensions installed.
-8. **Database Migration Errors**: If you have problems with database migrations, it may be due to database schema conflicts or other migration-related issues. To verify any related problems with migrations, go to the terminal and use the following commands to check the respective logs of the `web` container.
-```bash
-- docker ps
-- docker logs <container-web-id>
-```
-## 📞 Contact and Support
-If you have any problems installing or using the OpenRoaming Provisioning Portal, our dedicated support staff is available to help. Please feel free to contact us via email:
-- **Email**: creative@tetrapi.pt
-- **Support Hotline**: Our support team is available Monday to Friday, from 9:00 to 17:00
-- **Response Time**: We strive to respond to all inquiries within 24 hours on business days. During weekends or public holidays, our response time may be slightly longer.
+2. **Docker Compose Errors**: Docker Compose may encounter problems if your system setup or Docker version does not meet the prerequisites. Check if you have the latest Docker and Docker Compose versions installed.
+3. **Container Not Running**: If you encounter errors while checking container status with `docker ps` command, it could indicate that the containers did not start correctly. Make sure you have followed the installation steps correctly and have the necessary permissions to run Docker containers. Don't forget to check if you don't have any container using the same ports necessary to run this project.
+4. **DevMode instead of Production**: It's essential to switch the OpenRoaming Provisioning Portal to Production Mode (prod) when deploying it on the internet. Running the portal in Development Mode (dev) can lead to security vulnerabilities and suboptimal performance. Again please gou check your `.env` file and change it to prod.
+5. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to grant executable permissions to the script file before executing it.
 
-Please don't hesitate to reach out to us for any assistance you may need. We are committed to providing you with the best experience with the OpenRoaming Provisioning Portal.
+To solve this, use the chmod command inside the `web` container, to give the script executable rights.
+```bash
+- docker exec -it <web-container-id> bash
+- chmod +x tools/generatePfxSigningKey.sh
+```
+
+## 📞 Contact and Support
+If you have any problems installing or using the OpenRoaming Provisioning Portal, please feel free to contact us via email:
+- **Email**: creative@tetrapi.pt
+
+Please don't hesitate to reach out to us for any assistance you may need.
 
 # How it Looks and How it Works?
 Now we will show how the project looks, and give you some base information about how it works.
@@ -164,7 +164,7 @@ The OpenRoaming Provisioning Portal utilizes environment variables for its confi
 - `DATABASE_URL`: This is the connection string for the primary MySQL database. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `DATABASE_FREERADIUS_URL`: This is the connection string for the FreeRADIUS MySQL database, used for RADIUS related operations. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `MESSENGER_TRANSPORT_DSN`: This defines the transport (e.g., AMQP, Doctrine, etc.) that Symfony Messenger will use for dispatching messages. The value `doctrine://default?auto_setup=0` uses Doctrine DBAL with auto setup disabled.
-- `MAILER_DSN`: This sets the transport for sending emails via the Symfony Mailer component. The value `null://null` disables sending emails.
+
 
 ### 🔒 SAML Specific Settings
 
@@ -187,6 +187,11 @@ The OpenRoaming Provisioning Portal has a detailed "setting" table that allows y
 6. `RADIUS_TLS_NAME`: The hostname of your RADIUS server used for TLS.
 7. `NAI_REALM`: The realm used for Network Access Identifier (NAI).
 8. `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA (Defaults to LetsEncrypt CA).
+
+**IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value. This number is important since it is needed to validate the RADIUS server's certificate during TLS negotiation.
+
+If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root certificate. **TLS connection errors** can happen if the right SHA1 hash is not provided.
+
 9. `DEMO_MODE`: Enable or disable demo mode. When enabled, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.
 10. `PAGE_TITLE`: The title displayed on the webpage.
 11. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
@@ -272,7 +277,7 @@ The OpenRoaming Provisioning Portal also has an easy and intuitive admin interfa
 
 ![Admin_Login](assets/wba_screenshots/admin_login.png)
 
-The admin dashboard is only accessible after a secure login. To access the dashboard, administrators must provide their credentials. The login page provides authorized users with a secure and private entry point to control the platform.
+The admin dashboard is only accessible after a secure login. To access the dashboard, administrators must provide their credentials **(admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and private entry point to control the platform.
 
 ### 2. Admin Page
 ![Admin_Page](assets/wba_screenshots/admin_page.png)
