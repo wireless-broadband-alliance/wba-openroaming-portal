@@ -89,11 +89,12 @@ Starting cc-openroaming-provisioning-web_mysql_1       ... done
 - sh generatePfxSigningKey.sh
 ```
 
-6. **Migrations and Fixtures**: Still inside of the`web` container, you need to run the 2 commands to load the database schema and load is respective settings:
+6. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load the database schema, load is respective settings and add permissions to a specific folder to save images:
 
 ```bash
 - php bin/console doctrine:migrations:migrate
 - php bin/console doctrine:fixtures:load
+- chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
 ```
 
 **IMPORTANT**: After you load the fixtures by running the second command, you need to change the following environment variable, is crucial for TLS connections:
