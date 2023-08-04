@@ -58,7 +58,7 @@ Please follow the instructions below, on the root folder of the project, to prep
 
 1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
 
-**Note**: When updating the database credentials in the .env file, make sure they match the credentials specified in the docker-compose-local.yml file. Failure to match the credentials may result in the application being unable to connect to the database.
+**Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in the docker-compose-local.yml** file. Failure to match the credentials may result in the application being unable to connect to the database.
 
 2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
 
