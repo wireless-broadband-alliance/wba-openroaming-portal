@@ -18,17 +18,25 @@ The OpenRoaming Provisioning Portal acts as a **key enabler for OpenRoaming tech
 You are taking an **important step** toward **improving Wi-Fi connection** for your users by providing a safe and **user-friendly experience for everybody** by utilizing the OpenRoaming Provisioning Portal.
 
 ### Benefits
-- Seamless Wi-Fi connectivity: Say goodbye to manual login problems and connect to Wi-Fi networks with simplicity. 📶
-- Improved security: Have peace of mind knowing that your personal information is safe with secure profile encryption. 🔒
-- Personalization: Each user gets a unique profile tailored to their specific needs and preferences. 🎯
-- Scalability: Because the portal is built for a high number of users and devices, it is excellent for both local and large-scale installations. 🌟
+- **Seamless Wi-Fi Connectivity**: Say goodbye to manual login problems and connect to Wi-Fi networks with simplicity. 📶
+- **Improved Security**: Have peace of mind knowing that your personal information is safe with secure profile encryption. 🔒
+- **Personalization**: Each user gets a unique profile tailored to their specific needs and preferences. 🎯
+- **Scalability**: Because the portal is built for a high number of users and devices, it is excellent for both local and large-scale installations. 🌟
 
 ### Use Cases
-- Public Wi-Fi hotspots: Simplify the login method for users accessing Wi-Fi in coffee shops, airports, hotels, and other public locations. ☕️✈
-- Corporate networks: Facilitate employee onboarding and Wi-Fi access in workplaces while maintaining secure connectivity for all devices. 💼
-- Events and conferences: Provide seamless Wi-Fi access to attendees with personalized profiles, enhancing the overall event experience. 🎉
+- **Public Wi-Fi Hotspots**: Simplify the login method for users accessing Wi-Fi in coffee shops, airports, hotels, and other public locations. ☕️✈
+- **Corporate Networks**: Facilitate employee onboarding and Wi-Fi access in workplaces while maintaining secure connectivity for all devices. 💼
+- **Events and Conferences**: Provide seamless Wi-Fi access to attendees with personalized profiles, enhancing the overall event experience. 🎉
 
 Whether you're our solution aims to exceed your expectations and make  Wi-Fi connectivity better. Let's embark on this journey together and redefine how we connect wirelessly! 🚀
+
+## 🛠️ Tools Used 🛠️
+These are some of the most important tools used on the development of this project.
+- **PHP**: Open source general-purpose scripting language that is especially suited for web development.
+- **Symfony Framework**: The core of the portal, the Symfony framework provides a solid and scalable base for web applications.
+- **Twig Templating Engine**: Generates consistent, responsive views by separating logic.
+- **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
+- **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
 ## Getting Started - Setup Guide
 In this guide, we'll lead you through the setup of the OpenRoaming Provisioning Portal step by step.
