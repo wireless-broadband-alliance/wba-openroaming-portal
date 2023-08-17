@@ -287,9 +287,7 @@ class AdminController extends AbstractController
     #[Route('/dashboard/profiles', name: 'admin_profiles')]
     public function index(): Response
     {
-        return $this->render('admin/profiles.html.twig', [
-            'controller_name' => 'StartedPageController',
-        ]);
+        return $this->render('admin/profiles.html.twig');
     }
 
     private function disableProfiles($user): void
