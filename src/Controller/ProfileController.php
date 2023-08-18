@@ -90,6 +90,7 @@ class ProfileController extends AbstractController
             '@IOS_PAYLOAD_IDENTIFIER@',
             '@IOS_OPERATOR_NAME@',
             '@NAI_REALM@',
+            '@PROFILES_ENCRYPTION_TYPE@',
         ], [
             $radiususer->getUsername(),
             $radiususer->getValue(),
@@ -99,6 +100,7 @@ class ProfileController extends AbstractController
             $this->settings['PAYLOAD_IDENTIFIER'],
             $this->settings['OPERATOR_NAME'],
             $this->settings['NAI_REALM'],
+            $this->settings['PROFILES_ENCRYPTION_TYPE'],
         ], $profile);
 
         //iOS Specific
@@ -161,6 +163,7 @@ class ProfileController extends AbstractController
             '@RADIUS_TLS_NAME@',
             '@RADIUS_TRUSTED_ROOT_CA_SHA1_HASH@',
             '@DISPLAY_NAME@',
+            '@PROFILES_ENCRYPTION_TYPE@',
         ], [
             $radiususer->getUsername(),
             $radiususer->getValue(),
@@ -169,6 +172,7 @@ class ProfileController extends AbstractController
             $this->settings['RADIUS_TLS_NAME'],
             $this->settings['RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'],
             $this->settings['DISPLAY_NAME'],
+            $this->settings['PROFILES_ENCRYPTION_TYPE'],
         ], $profile);
         //Windows Specific
         $randomfactorIdentifier = bin2hex(random_bytes(16));

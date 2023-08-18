@@ -76,6 +76,9 @@ class GetSettings
 /// Verification Form
         $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
         $data['VERIFICATION_FORM'] = false;
+/// Type of Encryption for profiles
+        $data['PROFILES_ENCRYPTION_TYPE'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE'])->getValue();
+
 ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');

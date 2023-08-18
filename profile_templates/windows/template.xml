@@ -23,7 +23,7 @@
             <MSM>
                 <security>
                     <authEncryption>
-                        <authentication>WPA2</authentication>
+                        <authentication>@PROFILES_ENCRYPTION_TYPE@</authentication>
                         <encryption>AES</encryption>
                         <useOneX>true</useOneX>
                     </authEncryption>

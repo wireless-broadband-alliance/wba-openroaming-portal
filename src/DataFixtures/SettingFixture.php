@@ -46,6 +46,7 @@ class SettingFixture extends Fixture
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
+            ['name' => 'PROFILES_ENCRYPTION_TYPE', 'value' => 'WPA2'],
         ];
 
         foreach ($settings as $settingData) {
