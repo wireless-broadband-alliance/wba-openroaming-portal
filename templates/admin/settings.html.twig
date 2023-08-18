@@ -16,12 +16,12 @@
                 {# Choice Cards - Main Cards #}
                 {% set inputSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] == 'choice') %}
                 {% for setting in inputSettings %}
-                    <div class="border border-gray-300 rounded-lg p-4">
-                        <div class="text-sm font-medium text-gray-700 mb-2 text-center">
+                    <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-3 w-full border border-gray-300">
+                        <div class="text-base font-medium my-2 text-center break-normal md:break-all">
                             {{ setting.name }}
                         </div>
-                        <div class="border border-gray-300 rounded-md p-2 bg-gray-50">
-                            {{ form_widget(form[setting.name], {'attr': {'class': 'text-gray-700 text-base block w-full p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                        <div class="p-2 w-full mt-1 flex justify-center">
+                            {{ form_widget(form[setting.name], {'attr': {'class': 'rounded text-gray-700 text-base block w-full xl:w-1/2 p-2 shadow-sm border focus:border-custom focus:outline-none focus:ring-2'}}) }}
                             {{ form_label(form[setting.name], null, {'label_attr': {'class': 'hidden'}}) }}
                             {{ form_errors(form[setting.name]) }}
                         </div>
@@ -29,31 +29,33 @@
                 {% endfor %}
             </div>
 
+
             <hr class="my-8 border-t-2 border-gray-300">
 
             <h2 class="text-center text-lg font-semibold">Sub Settings</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">
-                {# Content Types Cards - Sub Cards#}
+                {# Content Types Cards - Sub Cards #}
                 {% set contentSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] != 'choice') %}
                 {% for setting in contentSettings %}
-                    <div class="border border-gray-300 rounded-lg p-4">
-                        <div class="text-sm font-medium text-gray-700 mb-2 text-center">
+                    <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-3 border border-gray-300">
+                        <div class="text-sm font-medium text-gray-700 mb-2 text-center break-normal md:break-all">
                             {{ setting.name }}
                         </div>
-                        <div class="border border-gray-300 rounded-md p-2">
+                        <div class="p-2 w-full">
                             {# Set the empty values to "Not Defined" #}
                             {% set value = form[setting.name].vars.value %}
                             {% set displayValue = value|default('Not Defined') %}
                             {% if value is empty %}
-                                {{ form_widget(form[setting.name], {'value': displayValue, 'attr': {'class': 'text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                                {{ form_widget(form[setting.name], {'value': displayValue, 'attr': {'class': 'rounded text-base block w-full p-2 shadow-sm border focus:border-custom focus:outline-none focus:ring-2'}}) }}
                             {% else %}
-                                {{ form_widget(form[setting.name], {'attr': {'class': 'text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                                {{ form_widget(form[setting.name], {'attr': {'class': 'rounded text-gray-500 text-base block w-full p-2 shadow-sm border focus:outline-none focus:ring-2'}}) }}
                                 {{ form_errors(form[setting.name]) }}
                             {% endif %}
                         </div>
                     </div>
                 {% endfor %}
             </div>
+
             <div class="flex justify-center mt-6 mb-6">
                 <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition ease-in duration-200"
                         onclick="return confirm('Are you sure you want to apply this new settings?')"
