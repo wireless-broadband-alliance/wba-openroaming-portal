@@ -79,14 +79,6 @@ Please follow the instructions below, on the root folder of the project, to prep
 - docker ps
 ```
 
-⇓ After you create the containers they should look like this. ⇓
-
-```bash
-Starting cc-openroaming-provisioning-web_mailcatcher_1 ... done
-Starting cc-openroaming-provisioning-web_web_1         ... done
-Starting cc-openroaming-provisioning-web_memcached_1   ... done
-Starting cc-openroaming-provisioning-web_mysql_1       ... done
-```
 4. **Upload Certificates**: Upload your certificate files to the `signing-keys` directory for the portal generates profiles based on your certificates.
 
 5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx script by doing this:
