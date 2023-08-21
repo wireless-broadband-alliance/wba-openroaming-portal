@@ -73,7 +73,7 @@ Please follow the instructions below, on the root folder of the project, to prep
 ```bash
 - docker-compose up -d
 ```
-3. **Check Container Status**: After executing the previous command, ensure that all containers for each service are appropriately formed. The following command may be used to verify the status of each container, example:
+3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are appropriately formed. The following command may be used to verify the status of each container, example:
 
 ```bash
 - docker ps
@@ -123,7 +123,7 @@ You've successfully completed the installation process of the OpenRoaming Provis
 Now, it's time to access your fully set up portal! 🌐
 
 To get started, open your favorite web browser and type the following address in the URL bar:
-http://YOUR_SERVER_IP:80
+http://YOUR_SERVER_IP
 
 Replace YOUR_SERVER_IP with your server's real IP address or domain name. If you are running the portal locally, you can use localhost for an IP address.
 
@@ -149,10 +149,9 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 ```
 
 ## 📞 Contact and Support
-If you have any problems installing or using the OpenRoaming Provisioning Portal, please feel free to contact us via email our to open an issue on this repository:
-- **Email**: creative@tetrapi.pt
+We're here to help if you have any problems installing or using the OpenRoaming Provisioning Portal. You request assistance by creating an issue in this repository.
 
-Please don't hesitate to reach out to us for any assistance you may need.
+Your suggestions and questions will help us improve the platform's usability and experience.
 
 # How it Looks and How it Works?
 Now we will show how the project looks, and give you some base information about how it works.
@@ -177,7 +176,21 @@ The OpenRoaming Provisioning Portal utilizes environment variables for its confi
 - `DATABASE_URL`: This is the connection string for the primary MySQL database. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `DATABASE_FREERADIUS_URL`: This is the connection string for the FreeRADIUS MySQL database, used for RADIUS related operations. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `MESSENGER_TRANSPORT_DSN`: This defines the transport (e.g., AMQP, Doctrine, etc.) that Symfony Messenger will use for dispatching messages. The value `doctrine://default?auto_setup=0` uses Doctrine DBAL with auto setup disabled.
-- `MAILER_DSN`: This sets the transport for sending emails via the Symfony Mailer component. The value `null://null` disables sending emails. The default value for this setting is : `native://default`
+- `MAILER_DSN`: This specifies the method of transport used to send emails with the Symfony Mailer component.
+  Examples:
+    ```dotenv
+    # Example 1: Sending emails via SMTP (e.g., Gmail)
+    MAILER_DSN=smtp://user:password@smtp.gmail.com:587?encryption=tls&auth_mode=login
+
+    # Example 2: Disabling email sending
+    MAILER_DSN=null://null
+
+    # Example 3: Default email transport, using this default value will not send work
+    MAILER_DSN=native://default
+
+  # Example 4: Using the default email transport (using PHP's mail() function)
+    MAILER_DSN=mail://default
+    ```
 
 ### 🔒 SAML Specific Settings
 
