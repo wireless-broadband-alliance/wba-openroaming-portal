@@ -71,8 +71,9 @@ device authentication for your wireless networks by the end of this guide. Let's
 
 ### Prerequisites:
 
-- Ubuntu 22.04 LS
+- Ubuntu 22.04 LTS
 - Knowledge about Linux OS (required to setup the project)
+- Radius db and a stack IDP prepared to use the portal
 - Docker (required for running the application)
 - Docker-compose (required for managing multiple containers)
 - Node Js 16 or higher (required for building front-end assets)
