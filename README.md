@@ -172,16 +172,13 @@ The OpenRoaming Provisioning Portal utilizes environment variables for its confi
   Examples:
     ```dotenv
     # Example 1: Sending emails via SMTP (e.g., Gmail)
-    MAILER_DSN=smtp://user:password@smtp.gmail.com:587?encryption=tls&auth_mode=login
+    MAILER_DSN=smtp://user:password@smtp.gmail.com:587?encryption=tls&auth_mode=login # this is just a example, please do not use it
 
     # Example 2: Disabling email sending
     MAILER_DSN=null://null
 
-    # Example 3: Default email transport, using this default value will not send work
-    MAILER_DSN=native://default
-
-  # Example 4: Using the default email transport (using PHP's mail() function)
-    MAILER_DSN=mail://default
+    # Example 3: Using the default email transport (using PHP's mail() function)
+    MAILER_DSN=mail://default # using this default value will not work
     ```
 
 ### 🔒 SAML Specific Settings
