@@ -40,3 +40,7 @@ signing-keys/ca.pem
 
 signing-keys/chain.pem
 signing-keys/fullchain.pem
+
+.env.martelado
+
+release-package/release.zip

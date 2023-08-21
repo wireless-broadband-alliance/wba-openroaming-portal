@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -80,4 +81,61 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function findLDAPEnabledUsers()
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.saml_identifier is not null')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function findExcludingAdminWithSearch(string $searchTerm): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.roles NOT LIKE :role')
+            ->andWhere(
+                $this->createQueryBuilder('u')
+                    ->expr()
+                    ->orX(
+                        'u.uuid LIKE :searchTerm',
+                        'u.email LIKE :searchTerm',
+                        'u.first_name LIKE :searchTerm',
+                        'u.last_name LIKE :searchTerm'
+                    )
+            )
+            ->orderBy('u.createdAt', 'DESC')
+            ->setParameter('role', '%ROLE_ADMIN%')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findExcludingAdmin(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.roles NOT LIKE :role')
+            ->orderBy('u.createdAt', 'DESC')
+            ->setParameter('role', '%ROLE_ADMIN%')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findOneByUUIDExcludingAdmin(string $uuid): ?User
+    {
+        // Create a query builder
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->where('u.roles NOT LIKE :role')
+            ->setParameter('role', '%ROLE_ADMIN%');
+
+        $qb->andWhere('u.uuid = :uuid')
+            ->setParameter('uuid', $uuid);
+
+        // Execute the query and return only the uuid of some specific user
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

@@ -1,0 +1,13 @@
+image: docker:latest
+services:
+  - docker:dind
+stages:
+  - build
+
+build_image:
+  stage: build
+  script:
+    - if [ -z "$CI_COMMIT_TAG" ]; then CI_COMMIT_TAG=$CI_COMMIT_SHORT_SHA; fi
+    - docker build --build-arg CICDVERSION=$CI_COMMIT_TAG -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME

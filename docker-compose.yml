@@ -1,13 +1,12 @@
 version: '3'
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:0.9.2
     env_file:
       - .env
     volumes:
-      - ./:/var/www/openroaming
+      - .env/:/var/www/openroaming/.env
+      - ./signing-keys/:/var/www/openroaming/signing-keys/
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
