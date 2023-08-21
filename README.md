@@ -289,6 +289,10 @@ individual needs. Here's a rundown of several important variables and their func
 This number is important since it is needed
 to validate the RADIUS server's certificate.
 
+Missing Values: Please check that all crucial fields are fully filled if any values are missing.
+Pay attention to the UUID field, it's critical to provide a unique UUID that differs from the default.
+The Same uuid may result in conflicts between different portals, resulting in profile overrides.
+
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
 certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
