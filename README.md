@@ -173,7 +173,7 @@ The OpenRoaming Provisioning Portal utilizes environment variables for its confi
 - `DATABASE_URL`: This is the connection string for the primary MySQL database. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `DATABASE_FREERADIUS_URL`: This is the connection string for the FreeRADIUS MySQL database, used for RADIUS related operations. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `MESSENGER_TRANSPORT_DSN`: This defines the transport (e.g., AMQP, Doctrine, etc.) that Symfony Messenger will use for dispatching messages. The value `doctrine://default?auto_setup=0` uses Doctrine DBAL with auto setup disabled.
-- `MAILER_DSN`: This sets the transport for sending emails via the Symfony Mailer component. The value `null://null` disables sending emails.
+- `MAILER_DSN`: This sets the transport for sending emails via the Symfony Mailer component. The value `null://null` disables sending emails. The default value for this setting is : `native://default`
 
 ### 🔒 SAML Specific Settings
 
