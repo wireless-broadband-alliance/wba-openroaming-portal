@@ -162,7 +162,11 @@ Now we will show how the project looks, and give you some base information about
 The project provides two modes: demo mode set to **TRUE** or **FALSE**, each serving to different needs.
 
 - **Demo Mode (TRUE)**: When demo mode is set to TRUE, the system generates demo profiles based on the submitted email. This allows users to explore and test the portal's functionality without the need to create a user account. In demo mode, only "demo login" is displayed, and SAML and other login methods are disabled, regardless of other settings. A demo warning is also displayed, indicating that the system is in demo mode.
-- **Production Mode (FALSE)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted to the interests and needs of each user. Users can set up accounts in production mode and use all available login methods, including SAML and Google authentication. When this mode is activated the not required to verify the user again after the first time.
+
+When this mode is activated **it's required** to verify the account every time the user want to download a profile again, because it's a new demo account being generated on the portal.
+- **Production Mode (FALSE)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted to the interests and needs of each user. Users can set up accounts in production mode and use all available login methods, including SAML and Google authentication.
+
+When this mode is activated **it's not required** to verify the user account several time.
 
 ## 🔧 Environment Variables
 
