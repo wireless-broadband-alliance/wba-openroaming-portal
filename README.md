@@ -44,7 +44,7 @@ In this guide, we'll lead you through the setup of the OpenRoaming Provisioning 
 To understand how it works, you'll get basic knowledge behind each stage. You will possess a fully working automatic device authentication for your wireless networks by the end of this guide. Let's get started! 🚀
 
 ### Prerequisites:
-- Docker (required for running the application locally)
+- Docker (required for running the application)
 - Docker-compose (required for managing multiple containers)
 - Node Js - 16 or higher (required for building front-end assets)
 - Git (optional, if you prefer to clone the repository)
@@ -52,7 +52,7 @@ To understand how it works, you'll get basic knowledge behind each stage. You wi
 
 ### How to get the Project
 You have two options to get the project:
-1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains only the required components to run the OpenRoaming Provisioning Portal, including `.env.sample`, `docker-compose-local.yml`, and other necessary files.
+1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains only the required components to run the OpenRoaming Provisioning Portal, including `.env.sample`, `docker-compose.yml`, and other necessary files.
 
 
 2. **Clone the Repository**: If you're familiar with Git and want to access the complete source code, you can clone the repository using the following command:
@@ -66,7 +66,7 @@ Please follow the instructions below, on the root folder of the project, to prep
 
 1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
 
-**Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in the docker-compose-local.yml** file. Failure to match the credentials may result in the application being unable to connect to the database.
+**Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in the docker-compose.yml** file. Failure to match the credentials may result in the application being unable to connect to the database.
 
 2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
 
@@ -105,11 +105,11 @@ Starting cc-openroaming-provisioning-web_mysql_1       ... done
 - chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
 ```
 
-**IMPORTANT**: After you load the fixtures by running the second command, you need to change the following environment variable, is crucial for TLS connections:
+**IMPORTANT**: After you load the fixtures by running the second command, you need to change the following environment variable:
 
 `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to the SHA1 hash of the LetsEncrypt CA.
 
-This number is needed to validate the RADIUS server's certificate during TLS negotiation. If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root certificate. **TLS connection errors** can happen if the right SHA1 hash is not provided.
+This number is needed to validate the RADIUS server's certificate. If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root certificate. **Connections errors** can happen if the right SHA1 hash is not provided.
 
 Make sure to check the `SettingFixture.php` file for any reference about the default data and check the migrations about the database on the migrations folder of the project.
 
@@ -149,7 +149,7 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 ```
 
 ## 📞 Contact and Support
-If you have any problems installing or using the OpenRoaming Provisioning Portal, please feel free to contact us via email:
+If you have any problems installing or using the OpenRoaming Provisioning Portal, please feel free to contact us via email our to open an issue on this repository:
 - **Email**: creative@tetrapi.pt
 
 Please don't hesitate to reach out to us for any assistance you may need.
@@ -162,7 +162,7 @@ Now we will show how the project looks, and give you some base information about
 The project provides two modes: demo mode set to **TRUE** or **FALSE**, each serving to different needs.
 
 - **Demo Mode (TRUE)**: When demo mode is set to TRUE, the system generates demo profiles based on the submitted email. This allows users to explore and test the portal's functionality without the need to create a user account. In demo mode, only "demo login" is displayed, and SAML and other login methods are disabled, regardless of other settings. A demo warning is also displayed, indicating that the system is in demo mode.
-- **Production Mode (FALSE)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted to the interests and needs of each user. Users can set up accounts in production mode and use all available login methods, including SAML and Google authentication.
+- **Production Mode (FALSE)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted to the interests and needs of each user. Users can set up accounts in production mode and use all available login methods, including SAML and Google authentication. When this mode is activated the not required to verify the user again after the first time.
 
 ## 🔧 Environment Variables
 
@@ -173,7 +173,7 @@ The OpenRoaming Provisioning Portal utilizes environment variables for its confi
 - `DATABASE_URL`: This is the connection string for the primary MySQL database. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `DATABASE_FREERADIUS_URL`: This is the connection string for the FreeRADIUS MySQL database, used for RADIUS related operations. It should be in the format `mysql://user:pass@host:port/dbname`.
 - `MESSENGER_TRANSPORT_DSN`: This defines the transport (e.g., AMQP, Doctrine, etc.) that Symfony Messenger will use for dispatching messages. The value `doctrine://default?auto_setup=0` uses Doctrine DBAL with auto setup disabled.
-
+- `MAILER_DSN`: This sets the transport for sending emails via the Symfony Mailer component. The value `null://null` disables sending emails.
 
 ### 🔒 SAML Specific Settings
 
@@ -197,9 +197,9 @@ The OpenRoaming Provisioning Portal has a detailed "setting" table that allows y
 7. `NAI_REALM`: The realm used for Network Access Identifier (NAI).
 8. `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA (Defaults to LetsEncrypt CA).
 
-**IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value. This number is important since it is needed to validate the RADIUS server's certificate during TLS negotiation.
+**IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value. This number is important since it is needed to validate the RADIUS server's certificate.
 
-If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root certificate. **TLS connection errors** can happen if the right SHA1 hash is not provided.
+If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
 9. `DEMO_MODE`: Enable or disable demo mode. When enabled, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.
 10. `PAGE_TITLE`: The title displayed on the webpage.
