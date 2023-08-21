@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Form\CustomType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
 use App\Form\UserUpdateType;
@@ -13,6 +14,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -241,15 +243,6 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        // Get the entity object containing the info from the db
-        $settingsEntity = new Setting();
-        foreach ($settings as $setting) {
-            $methodName = 'set' . ucfirst(strtolower($setting->getName()));
-            if (method_exists($settingsEntity, $methodName)) {
-                $settingsEntity->$methodName($setting->getValue());
-            }
-        }
-
         $form = $this->createForm(SettingType::class, null, [
             'settings' => $settings, // Pass the settings data to the form
         ]);
@@ -259,25 +252,97 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            foreach ($submittedData as $name => $value) {
+            $excludedSettings = [ // this are the settings related with the customization of the page
+                'CUSTOMER_LOGO',
+                'OPENROAMING_LOGO',
+                'WALLPAPER_IMAGE',
+                'PAGE_TITLE',
+                'WELCOME_TEXT',
+                'WELCOME_DESCRIPTION',
+            ];
 
-                $setting = $settingsRepository->findOneBy(['name' => $name]);
+            foreach ($settings as $setting) {
+                $name = $setting->getName();
 
-                if ($setting) {
-                    // Update its value with the newly submitted value
+                // Exclude the settings in $excludedSettings from being updated
+                // Check if the submitted data contains the setting's name
+                if (!in_array($name, $excludedSettings, true)) {
+                    $value = $submittedData[$name] ?? null;
                     $setting->setValue($value);
-
                     $em->persist($setting);
                 }
             }
 
             $em->flush();
+
             $this->addFlash('success_admin', 'Settings updated successfully.');
 
             return $this->redirectToRoute('admin_page');
         }
 
         return $this->render('admin/settings.html.twig', [
+            'settings' => $settings,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function customize(Request $request, EntityManagerInterface $em): Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        // Create the form with the CustomType and pass the relevant settings
+        $form = $this->createForm(CustomType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Handle submitted data and update the settings accordingly
+            $submittedData = $form->getData();
+
+            // Update the settings based on the form submission
+            foreach ($settings as $setting) {
+                $settingName = $setting->getName();
+
+                // Check if the setting is in the allowed settings for customization
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION'])) {
+                    // Get the value from the submitted form data
+                    $submittedValue = $submittedData[$settingName];
+
+                    // Update the setting value
+                    $setting->setValue($submittedValue);
+                } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
+                    // Handle file uploads for logos and wallpaper image
+                    $file = $form->get($settingName)->getData();
+
+                    if ($file) { // submits the new file to the respective path
+                        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        // Use a unique id for the uploaded file to avoid overwriting
+                        $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+                        // Set the destination directory based on the setting name
+                        $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/uploaded/';
+
+                        $file->move($destinationDirectory, $newFilename);
+                        $setting->setValue('/resources/uploaded/' . $newFilename);
+                    }
+                    // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
+                }
+            }
+
+            $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
+
+            // Flush the changes to the database
+            $em->flush();
+
+            return $this->redirectToRoute('admin_page');
+        }
+
+        return $this->render('admin/custom.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
         ]);
