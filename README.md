@@ -71,9 +71,11 @@ device authentication for your wireless networks by the end of this guide. Let's
 
 ### Prerequisites:
 
+- Ubuntu 22.04 LS
+- Knowledge about Linux OS (required to setup the project)
 - Docker (required for running the application)
 - Docker-compose (required for managing multiple containers)
-- Node Js - 16 or higher (required for building front-end assets)
+- Node Js 16 or higher (required for building front-end assets)
 - Git (optional, if you prefer to clone the repository)
 
 ### How to get the Project
@@ -249,14 +251,12 @@ Below is an overview of the different variables and their functions:
 - `MAILER_DSN`: This specifies the method of transport used to send emails with the Symfony Mailer component.
   Examples:
     ```dotenv
+    # This are just a examples, please DO NOT USE IT
     # Example 1: Sending emails via SMTP (e.g., Gmail)
-    MAILER_DSN=smtp://user:password@smtp.gmail.com:587?encryption=tls&auth_mode=login # this is just a example, please do not use it
+    MAILER_DSN=smtp://user:password@smtp.gmail.com:587?encryption=tls&auth_mode=login
 
-    # Example 2: Disabling email sending
-    MAILER_DSN=null://null
-
-    # Example 3: Using the default email transport (using PHP's mail() function)
-    MAILER_DSN=mail://default # using this default value will not work
+    # Example 2: Using the default email transport (using PHP's mail() function)
+    MAILER_DSN=mail://default
     ```
 
 ### 🔒 SAML Specific Settings
