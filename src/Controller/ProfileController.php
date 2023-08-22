@@ -90,6 +90,7 @@ class ProfileController extends AbstractController
             '@IOS_PAYLOAD_IDENTIFIER@',
             '@IOS_OPERATOR_NAME@',
             '@NAI_REALM@',
+            '@PROFILES_ENCRYPTION_TYPE@',
         ], [
             $radiususer->getUsername(),
             $radiususer->getValue(),
@@ -99,6 +100,7 @@ class ProfileController extends AbstractController
             $this->settings['PAYLOAD_IDENTIFIER'],
             $this->settings['OPERATOR_NAME'],
             $this->settings['NAI_REALM'],
+            $this->settings['PROFILES_ENCRYPTION_TYPE'],
         ], $profile);
 
         //iOS Specific

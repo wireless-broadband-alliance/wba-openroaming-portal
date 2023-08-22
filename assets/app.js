@@ -10,3 +10,12 @@ import './styles/app.css';
 
 // start the Stimulus application
 import './bootstrap';
+
+// Initialization for ES Users
+import {
+	Dropdown,
+	Ripple,
+	initTE,
+} from "tw-elements";
+
+initTE({ Dropdown, Ripple });

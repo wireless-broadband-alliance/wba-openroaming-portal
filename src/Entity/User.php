@@ -2,18 +2,20 @@
 
 namespace App\Entity;
 
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUserInterface
 
 {
@@ -56,6 +58,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $verificationCode = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $bannedAt = null;
+
 
     public function __construct()
     {
@@ -182,13 +197,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     }
     public function setSamlAttributes(array $attributes):void
     {
-        # $this->email = $attributes['email'][0];
+        $this->email = $attributes['email'][0];
         $this->saml_identifier = $attributes['sAMAccountName'][0];
         $this->first_name = $attributes['givenName'][0];
         $this->last_name = $attributes['surname'][0];
         $this->uuid = $attributes['sAMAccountName'][0];
         $this->password = 'notused'; //invalid hash so won't ever authenticate
-
+        $this->isVerified = 1;
         // #$this->setLevel(LevelType::NONE);
     }
 
@@ -275,4 +290,61 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
 
         return $this;
     }
+
+    public function getVerificationCode(): ?string
+    {
+        return $this->verificationCode;
+    }
+
+    public function setVerificationCode(?string $verificationCode): self
+    {
+        $this->verificationCode = $verificationCode;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getBannedAt(): ?\DateTimeInterface
+    {
+        return $this->bannedAt;
+    }
+
+    public function setBannedAt(?\DateTimeInterface $bannedAt): self
+    {
+        $this->bannedAt = $bannedAt;
+
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function prePresist(): void
+    {
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
+    }
+
 }
