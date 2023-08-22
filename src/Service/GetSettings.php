@@ -54,6 +54,7 @@ class GetSettings
         $data['welcomeText'] = $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue();
         $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
         $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $data['ADDITIONAL_LABEL'] = $settingRepository->findOneBy(['name' => 'ADDITIONAL_LABEL'])->getValue();
 // Demo Mode
         $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
         $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
@@ -76,6 +77,9 @@ class GetSettings
 /// Verification Form
         $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
         $data['VERIFICATION_FORM'] = false;
+/// Type of Encryption for profiles
+        $data['PROFILES_ENCRYPTION_TYPE'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE'])->getValue();
+
 ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');

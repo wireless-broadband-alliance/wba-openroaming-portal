@@ -26,6 +26,7 @@ class SettingFixture extends Fixture
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This is only for extra info, it will stay above the login options and on top of the term and conditions links.'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
@@ -46,6 +47,7 @@ class SettingFixture extends Fixture
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
+            ['name' => 'PROFILES_ENCRYPTION_TYPE', 'value' => 'WPA2'],
         ];
 
         foreach ($settings as $settingData) {

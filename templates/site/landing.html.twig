@@ -304,6 +304,12 @@
                             </div>
                         {% endif %}
 
+                        {% if ADDITIONAL_LABEL %}
+                            <div class="text-center text-base font-normal -mb-5">
+                                <p>{{ ADDITIONAL_LABEL }}</p>
+                            </div>
+                        {% endif %}
+
                         <div class="mt-12 text-center">
                             <p>By authenticating with any of the above providers you agree with our
                                 <a href="{{ TOS_LINK }}"
