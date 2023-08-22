@@ -2,17 +2,19 @@
 
 namespace App\Controller;
 
+use App\Entity\Setting;
 use App\Entity\User;
+use App\Form\CustomType;
 use App\Form\ResetPasswordType;
+use App\Form\SettingType;
 use App\Form\UserUpdateType;
-use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -23,39 +25,29 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\RadiusDb\Repository\RadiusUserRepository;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Pagerfanta;
 
 
 class AdminController extends AbstractController
 {
-    private $userRepository;
-    private $settingRepository;
-    private $radiusUserRepository;
-    private $userRadiusProfile;
-    private $profileManager;
-    private $parameterBag;
+    private UserRepository $userRepository;
+    private ProfileManager $profileManager;
+    private ParameterBagInterface $parameterBag;
 
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        RadiusUserRepository $radiusUserRepository,
-        UserRadiusProfileRepository $userRadiusProfile,
-        ProfileManager $profileManager,
-        ParameterBagInterface $parameterBag
-    ) {
+        UserRepository        $userRepository,
+        ProfileManager        $profileManager,
+        ParameterBagInterface $parameterBag,
+    )
+    {
         $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userRadiusProfile = $userRadiusProfile;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
     }
 
-    #[Route('/dashboard', name: 'admin_page')]
+    #[
+        Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository): Response
     {
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 50; // Number of users to display per page
@@ -241,6 +233,118 @@ class AdminController extends AbstractController
         return $this->render('admin/reset_password.html.twig', [
             'form' => $form->createView(),
             'user' => $user
+        ]);
+    }
+
+    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings(Request $request, EntityManagerInterface $em): Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(SettingType::class, null, [
+            'settings' => $settings, // Pass the settings data to the form
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $excludedSettings = [ // this are the settings related with the customization of the page
+                'CUSTOMER_LOGO',
+                'OPENROAMING_LOGO',
+                'WALLPAPER_IMAGE',
+                'PAGE_TITLE',
+                'WELCOME_TEXT',
+                'WELCOME_DESCRIPTION',
+            ];
+
+            foreach ($settings as $setting) {
+                $name = $setting->getName();
+
+                // Exclude the settings in $excludedSettings from being updated
+                // Check if the submitted data contains the setting's name
+                if (!in_array($name, $excludedSettings, true)) {
+                    $value = $submittedData[$name] ?? null;
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            $em->flush();
+
+            $this->addFlash('success_admin', 'Settings updated successfully.');
+
+            return $this->redirectToRoute('admin_page');
+        }
+
+        return $this->render('admin/settings.html.twig', [
+            'settings' => $settings,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function customize(Request $request, EntityManagerInterface $em): Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        // Create the form with the CustomType and pass the relevant settings
+        $form = $this->createForm(CustomType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Handle submitted data and update the settings accordingly
+            $submittedData = $form->getData();
+
+            // Update the settings based on the form submission
+            foreach ($settings as $setting) {
+                $settingName = $setting->getName();
+
+                // Check if the setting is in the allowed settings for customization
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION'])) {
+                    // Get the value from the submitted form data
+                    $submittedValue = $submittedData[$settingName];
+
+                    // Update the setting value
+                    $setting->setValue($submittedValue);
+                } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
+                    // Handle file uploads for logos and wallpaper image
+                    $file = $form->get($settingName)->getData();
+
+                    if ($file) { // submits the new file to the respective path
+                        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        // Use a unique id for the uploaded file to avoid overwriting
+                        $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+                        // Set the destination directory based on the setting name
+                        $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/uploaded/';
+
+                        $file->move($destinationDirectory, $newFilename);
+                        $setting->setValue('/resources/uploaded/' . $newFilename);
+                    }
+                    // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
+                }
+            }
+
+            $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
+
+            // Flush the changes to the database
+            $em->flush();
+
+            return $this->redirectToRoute('admin_page');
+        }
+
+        return $this->render('admin/custom.html.twig', [
+            'settings' => $settings,
+            'form' => $form->createView(),
         ]);
     }
 

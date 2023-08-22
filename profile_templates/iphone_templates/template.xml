@@ -47,7 +47,7 @@
 					<string>@USERNAME@</string>
 				</dict>
 				<key>EncryptionType</key>
-				<string>WPA2</string>
+				<string>@PROFILES_ENCRYPTION_TYPE@</string>
 				<key>HIDDEN_NETWORK</key>
 				<false/>
 				<key>IsHotspot</key>
