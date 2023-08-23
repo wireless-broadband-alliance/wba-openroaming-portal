@@ -23,7 +23,7 @@
                                 {{ setting.name }}
                             </div>
                             <div class="p-2 w-full mt-1 flex justify-center">
-                                {{ form_widget(form[setting.name], {'attr': {'class': 'text-gray-700 text-base block w-full p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                                {{ form_widget(form[setting.name], {'attr': {'class': 'text-center rounded text-gray-700 text-base block w-full p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                 {{ form_label(form[setting.name], null, {'label_attr': {'class': 'hidden'}}) }}
                                 {{ form_errors(form[setting.name]) }}
                             </div>
@@ -53,7 +53,7 @@
                                 {% if value is empty %}
                                     {{ form_widget(form[setting.name], {'value': displayValue, 'attr': {'class': 'text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                 {% else %}
-                                    {{ form_widget(form[setting.name], {'attr': {'class': 'text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                                    {{ form_widget(form[setting.name], {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                     {{ form_errors(form[setting.name]) }}
                                 {% endif %}
                             </div>
