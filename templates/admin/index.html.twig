@@ -13,17 +13,11 @@
             <div class="flex flex-col items-center md:flex-row md:space-x-6">
                 {% include 'admin/partials/_options_dropdown.html.twig' %}
 
-                <button
+                <a      href="{{ path('admin_dashboard_statistics') }}"
                         class="flex md:w-auto whitespace-nowrap rounded bg-sky-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-                        type="button"
-                        id="dropdownMenuButton1d"
-                        data-te-dropdown-toggle-ref
-                        aria-expanded="false"
-                        data-te-ripple-init
-                        data-te-ripple-color="light"
                 >
                     Statistics
-                </button>
+                </a>
             </div>
 
             {% for message in app.session.flashbag.get('success_admin') %}

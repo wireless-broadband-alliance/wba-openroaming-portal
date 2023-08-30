@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4">
+        <div class="py-8 text-center">
+            <h1 class="text-3xl font-semibold">Admin Page - WBA</h1>
+            <p class="text-gray-500 mt-2">This page is for admin use only. Still in development.</p>
+        </div>
+
+        <div class="flex flex-col items-center md:flex-row md:space-x-6">
+            {% include 'admin/partials/_options_dropdown.html.twig' %}
+
+            <a href="{{ path('admin_page') }}"
+               class="flex md:w-auto whitespace-nowrap rounded bg-blue-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
+            >
+                Return Dashboard
+            </a>
+        </div>
+    </div>
+{% endblock %}

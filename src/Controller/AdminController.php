@@ -296,9 +296,13 @@ class AdminController extends AbstractController
         $userRepository = $em->getRepository(User::class);
         $users = $userRepository->findAll();
 
+        // Get the current logged-in user (admin)
+        $user = $this->getUser();
+
         return $this->render('admin/statistics.html.twig', [
             'settings' => $settings,
-            'users' => $users
+            'users' => $users,
+            'current_user' => $user
         ]);
     }
 
