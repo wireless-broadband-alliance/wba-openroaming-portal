@@ -19,7 +19,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-              rel="stylesheet">
+          rel="stylesheet">
+
+    {#  Graphic table - Statistics #}
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
+    <link rel="stylesheet"
+          href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
 
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
@@ -32,8 +37,9 @@
 </head>
 
 <body class="bg-neutral-100">
-    {% block body %}{% endblock %}
-    {% include 'admin/partials/_app_version.html.twig' %}
+{% block body %}{% endblock %}
+{% include 'admin/partials/_app_version.html.twig' %}
 </body>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
 
 </html>

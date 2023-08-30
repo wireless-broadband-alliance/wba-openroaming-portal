@@ -57,6 +57,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
+
+    public function findByCreationYear($year) // get the creation date of the user for the graphic of the statistics page
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('YEAR(u.createdAt) = :year')
+            ->setParameter('year', $year)
+            ->getQuery()
+            ->getResult();
+    }
+
+
 //    /**
 //     * @return User[] Returns an array of User objects
 //     */
@@ -86,8 +97,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->createQueryBuilder('u')
             ->andWhere('u.saml_identifier is not null')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
     public function findExcludingAdminWithSearch(string $searchTerm): array

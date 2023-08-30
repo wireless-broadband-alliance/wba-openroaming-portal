@@ -44,8 +44,7 @@ class AdminController extends AbstractController
         $this->parameterBag = $parameterBag;
     }
 
-    #[
-        Route('/dashboard', name: 'admin_page')]
+    #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(Request $request, UserRepository $userRepository): Response
     {
@@ -288,13 +287,18 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statistics(EntityManagerInterface $em): Response
+    public function statistics(EntityManagerInterface $em, UserRepository $userRepository): Response
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $userRepository = $em->getRepository(User::class);
         $users = $userRepository->findAll();
+        $currentYear = date('Y');
+        // Search for the user data based on their creation year
+        $usersCurrentYear = $userRepository->findByCreationYear($currentYear);
+        $usersPreviousYear = $userRepository->findByCreationYear($currentYear - 1);
+
+        $userCount = count($users);
 
         // Get the current logged-in user (admin)
         $user = $this->getUser();
@@ -302,7 +306,10 @@ class AdminController extends AbstractController
         return $this->render('admin/statistics.html.twig', [
             'settings' => $settings,
             'users' => $users,
-            'current_user' => $user
+            'current_user' => $user,
+            'user_count' => $userCount,
+            'usersCurrentYear' => $usersCurrentYear,
+            '$usersPreviousYear' => $usersPreviousYear
         ]);
     }
 
