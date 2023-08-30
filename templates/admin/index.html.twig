@@ -9,23 +9,37 @@
             <p class="text-gray-500 mt-2">This page is for admin use only. Still in development.</p>
         </div>
 
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+            <div class="flex flex-col items-center md:flex-row md:space-x-6">
+                {% include 'admin/partials/_options_dropdown.html.twig' %}
 
-            {% include 'admin/_options_dropdown.html.twig' %}
+                <button
+                        class="flex md:w-auto whitespace-nowrap rounded bg-sky-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
+                        type="button"
+                        id="dropdownMenuButton1d"
+                        data-te-dropdown-toggle-ref
+                        aria-expanded="false"
+                        data-te-ripple-init
+                        data-te-ripple-color="light"
+                >
+                    Statistics
+                </button>
+            </div>
 
             {% for message in app.session.flashbag.get('success_admin') %}
                 <div class="text-white text-base bg-green-500 border-green-500 mt-5 rounded-md p-2 text-center">{{ message }}</div>
             {% endfor %}
 
-            <form action="{{ path('admin_search') }}" method="GET" class="flex items-center">
+            <form action="{{ path('admin_search') }}" method="GET" class="flex items-center mt-5 md:mt-0">
                 <input type="text" name="u" placeholder="Search users..."
-                       class="border border-gray-300 rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="border border-gray-300 rounded-l px-4 py-2 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="submit"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 hover:transform hover:scale-105">
+                        class="md:mt-0 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 md:py-2.5 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 hover:transform hover:scale-105">
                     Search
                 </button>
             </form>
         </div>
+
 
         <div class="overflow-x-auto">
             <table class="table-auto w-full divide-y divide-gray-200 border border-gray-300 mb-10">
@@ -52,7 +66,7 @@
                 {# Show the users with the partial _users #}
                 {% if users|length > 0 %}
                     {% for user in users %}
-                        {{ include('admin/_users.html.twig', { 'user': user }) }}
+                        {{ include('admin//partials/_users.html.twig', { 'user': user }) }}
                     {% endfor %}
                 {% else %}
                     <tr>

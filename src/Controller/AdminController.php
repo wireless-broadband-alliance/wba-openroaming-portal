@@ -286,6 +286,22 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function statistics(EntityManagerInterface $em): Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $userRepository = $em->getRepository(User::class);
+        $users = $userRepository->findAll();
+
+        return $this->render('admin/statistics.html.twig', [
+            'settings' => $settings,
+            'users' => $users
+        ]);
+    }
+
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em): Response
