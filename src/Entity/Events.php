@@ -23,6 +23,10 @@ class Events
     #[ORM\Column(type: Types::TEXT)]
     private ?string $event_metadata = null;
 
+    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +64,18 @@ class Events
     public function setEventMetadata(string $event_metadata): static
     {
         $this->event_metadata = $event_metadata;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
