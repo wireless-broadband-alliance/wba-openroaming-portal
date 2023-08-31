@@ -2,12 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Events;
 use App\Entity\User;
 use App\Enum\OSTypes;
+use App\Repository\EventsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\GetSettings;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -329,7 +332,7 @@ class SiteController extends AbstractController
 
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository): Response
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventsRepository $eventsRepository): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -337,11 +340,18 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $event = new Events();
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
             // Set the user as verified
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
+
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName("USER_VERIFICATION");
+            $eventsRepository->save($event, true);
+
             $this->addFlash('success', 'Your account is now successfully verified');
             return $this->redirectToRoute('app_landing');
         }

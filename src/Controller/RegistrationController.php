@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Events;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Repository\EventsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -82,6 +84,7 @@ class RegistrationController extends AbstractController
         $Name_sender = $this->parameterBag->get('app.sender_name');
 
         $user = new User();
+        $event = new Events();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -101,8 +104,13 @@ class RegistrationController extends AbstractController
                 $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
                 $user->isVerified(0);
                 $user->setCreatedAt(new DateTime());
-
                 $entityManager->persist($user);
+
+                // Defines the Event to the table
+                $event->setUser($user);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName("USER_CREATION");
+                $entityManager->persist($event);
                 $entityManager->flush();
 
                 // Send email to the user with the verification code
@@ -145,7 +153,8 @@ class RegistrationController extends AbstractController
         RequestStack $requestStack,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        EventsRepository $eventsRepository
     ): Response
     {
         // Get the email and verification code from the URL query parameters
@@ -171,6 +180,13 @@ class RegistrationController extends AbstractController
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $userRepository->save($user, true);
+
+                // Defines the Event to the table
+                $event = new Events();
+                $event->setUser($user);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName("USER_VERIFICATION");
+                $eventsRepository->save($event, true);
 
                 $this->addFlash('success', 'Your account has been verified, thank you for your time!');
 

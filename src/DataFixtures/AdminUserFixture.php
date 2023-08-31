@@ -30,13 +30,13 @@ class AdminUserFixture extends Fixture
         $manager->persist($admin);
 
         $event = new Events();
-        $event->setEventName("user_creation");
+        $event->setEventName("USER_CREATION");
         $event->setEventDatetime(new DateTime());
         $event->setUser($admin);
         $manager->persist($event);
 
         $event_2 = new Events();
-        $event_2->setEventName("user_verification");
+        $event_2->setEventName("USER_VERIFICATION");
         $event_2->setEventDatetime(new DateTime());
         $event_2->setUser($admin);
         $manager->persist($event_2);
