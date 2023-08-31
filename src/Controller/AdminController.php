@@ -14,7 +14,6 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -287,7 +286,7 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statistics(EntityManagerInterface $em, UserRepository $userRepository): Response
+    public function statistics(EntityManagerInterface $em): Response
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();

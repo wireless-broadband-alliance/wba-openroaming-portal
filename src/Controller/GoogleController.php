@@ -175,12 +175,12 @@ class GoogleController extends AbstractController
 
         $event_create = new Events();
         $event_create->setUser($user);
-        $event_create->setEventName('USER_CREATION_GOOGLE');
+        $event_create->setEventName('USER_CREATION');
         $event_create->setEventDatetime(new \DateTime());
 
         $event_verify = new Events();
         $event_verify->setUser($user);
-        $event_verify->setEventName('USER_VERIFICATION_GOOGLE');
+        $event_verify->setEventName('USER_VERIFICATION');
         $event_verify->setEventDatetime(new \DateTime());
 
         $randomPassword = bin2hex(random_bytes(8));
