@@ -47,7 +47,7 @@
                      src="{{ customerLogoName }}"
                      alt="Logo"/>
 
-                <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
+                <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20 text-center">
                     <p class="text-[#757575] font-medium text-sm lg:text-lg">On this portal you are able to download and
                         install the OpenRoaming profile matching your identity</p>
 
@@ -68,6 +68,10 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
+                {% if VERIFICATION_FORM %}
+                    {% include 'email_activation/index.html.twig' %}
+                {% endif %}
+
                 {% if app.user %}
                     <div class="flex flex-col items-center justify-center text-center">
                         <div class="space-y-4 mt-6 pr-2">
@@ -83,9 +87,6 @@
                             </a>
                         </div>
                     </div>
-                {% endif %}
-                {% if VERIFICATION_FORM %}
-                    {% include 'email_activation/index.html.twig' %}
                 {% endif %}
                 {% if demoMode %}
                     <div class=" {% if demoModeWhiteLabel == null %} border-red-600 border-dashed border-2 p-3 mt-1 {% else %}p-3 mt-1{% endif %}">
