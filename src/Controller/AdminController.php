@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Events;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Form\CustomType;
@@ -14,6 +15,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -286,17 +288,22 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statistics(EntityManagerInterface $em): Response
+    public function statisticsData(EntityManagerInterface $em): JsonResponse
     {
-        $settingsRepository = $em->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
-        // Get the current logged-in user (admin)
-        $user = $this->getUser();
+        // Fetch data from your database, for example:
+        $data = $em->getRepository(Events::class)->findAll(); // Adjust YourEntity
 
-        return $this->render('admin/statistics.html.twig', [
-            'settings' => $settings,
-            'current_user' => $user,
-        ]);
+        $formattedData = [];
+        dd($formattedData, $data);
+
+        foreach ($data as $item) {
+            $formattedData[] = [
+                'label' => $item->getLabel(),
+                'date' => $item->getDate()->format('Y-m-d'), // Adjust the date format as needed
+                'count' => $item->getCount(),
+            ];
+        }
+        return $this->json($formattedData);
     }
 
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
