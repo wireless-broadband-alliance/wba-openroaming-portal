@@ -291,25 +291,12 @@ class AdminController extends AbstractController
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
-
-        $users = $userRepository->findAll();
-        $currentYear = date('Y');
-        // Search for the user data based on their creation year
-        $usersCurrentYear = $userRepository->findByCreationYear($currentYear);
-        $usersPreviousYear = $userRepository->findByCreationYear($currentYear - 1);
-
-        $userCount = count($users);
-
         // Get the current logged-in user (admin)
         $user = $this->getUser();
 
         return $this->render('admin/statistics.html.twig', [
             'settings' => $settings,
-            'users' => $users,
             'current_user' => $user,
-            'user_count' => $userCount,
-            'usersCurrentYear' => $usersCurrentYear,
-            '$usersPreviousYear' => $usersPreviousYear
         ]);
     }
 

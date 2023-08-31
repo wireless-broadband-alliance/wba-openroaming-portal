@@ -57,17 +57,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
-
-    public function findByCreationYear($year) // get the creation date of the user for the graphic of the statistics page
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('YEAR(u.createdAt) = :year')
-            ->setParameter('year', $year)
-            ->getQuery()
-            ->getResult();
-    }
-
-
 //    /**
 //     * @return User[] Returns an array of User objects
 //     */
