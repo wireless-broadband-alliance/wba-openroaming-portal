@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Events;
 use App\Entity\Setting;
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -161,7 +163,7 @@ class GoogleController extends AbstractController
             return $userWithEmail;
         }
 
-        // If no user exists, create a new user
+        // If no user exists, create a new user with a new set of Events
         $user = new User();
         $user->setGoogleId($googleUserId)
             ->setIsVerified(true)
@@ -171,10 +173,22 @@ class GoogleController extends AbstractController
             ->setCreatedAt(new \DateTime())
             ->setUuid($email);
 
+        $event_create = new Events();
+        $event_create->setUser($user);
+        $event_create->setEventName('USER_CREATION_GOOGLE');
+        $event_create->setEventDatetime(new \DateTime());
+
+        $event_verify = new Events();
+        $event_verify->setUser($user);
+        $event_verify->setEventName('USER_VERIFICATION_GOOGLE');
+        $event_verify->setEventDatetime(new \DateTime());
+
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
+        $this->entityManager->persist($event_create);
+        $this->entityManager->persist($event_verify);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
