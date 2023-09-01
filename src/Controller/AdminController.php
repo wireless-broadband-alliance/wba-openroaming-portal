@@ -9,7 +9,9 @@ use App\Form\CustomType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
 use App\Form\UserUpdateType;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -34,21 +37,35 @@ class AdminController extends AbstractController
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
 
+    private GetSettings $getSettings;
+
+    private SettingRepository $settingRepository;
+
+
     public function __construct(
         UserRepository        $userRepository,
         ProfileManager        $profileManager,
         ParameterBagInterface $parameterBag,
+        GetSettings           $getSettings,
+        SettingRepository     $settingRepository
+
     )
     {
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
+        $this->getSettings = $getSettings;
+        $this->settingRepository = $settingRepository;
     }
 
-    #[Route('/dashboard', name: 'admin_page')]
+    #[
+        Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 50; // Number of users to display per page
 
@@ -73,6 +90,7 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'searchTerm' => null,
+            'data' => $data
         ]);
     }
 
@@ -156,7 +174,7 @@ class AdminController extends AbstractController
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 // Check if the admin is trying to ban himself
                 if ($currentUser && $currentUser->getId() === $user->getId()) {
-                    $this->addFlash('error_admin', 'You cannot ban yourself. Are you  dumb? ಠ_ಠ');
+                    $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
                 }
                 $user->setBannedAt(new DateTime());
@@ -238,8 +256,11 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings(Request $request, EntityManagerInterface $em): Response
+    public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
@@ -283,7 +304,9 @@ class AdminController extends AbstractController
         return $this->render('admin/settings.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
+            'data' => $data,
         ]);
+
     }
 
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
@@ -308,8 +331,11 @@ class AdminController extends AbstractController
 
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em): Response
+    public function customize(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
@@ -365,6 +391,7 @@ class AdminController extends AbstractController
         return $this->render('admin/custom.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
+            'data' => $data,
         ]);
     }
 

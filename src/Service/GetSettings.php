@@ -78,7 +78,7 @@ class GetSettings
         $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
         $data['VERIFICATION_FORM'] = false;
 /// Type of Encryption for profiles
-        $data['PROFILES_ENCRYPTION_TYPE'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE'])->getValue();
+        $data['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'])->getValue();
 
 ///
         $userAgent = $request->headers->get('User-Agent');

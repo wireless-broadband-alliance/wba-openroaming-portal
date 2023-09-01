@@ -20,7 +20,7 @@ class SettingFixture extends Fixture
             ['name' => 'NAI_REALM', 'value' => 'EditMe'],
             ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
             ['name' => 'DEMO_MODE', 'value' => 'true'],
-            ['name' => 'PAGE_TITLE', 'value' => 'TETRAPI'],
+            ['name' => 'PAGE_TITLE', 'value' => 'OPENROAMING'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/tetrapi.svg'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
@@ -35,7 +35,7 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
             ['name' => 'AUTH_METHOD_REGISTER_METHOD_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_METHOD_LABEL', 'value' => 'Login with Username and Password'],
+            ['name' => 'AUTH_METHOD_REGISTER_METHOD_LABEL', 'value' => 'Create one account'],
             ['name' => 'AUTH_METHOD_REGISTER_METHOD_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
             ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
@@ -43,11 +43,11 @@ class SettingFixture extends Fixture
             ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
-            ['name' => 'DEMO_WHITE_LABEL', 'value' => 'true'],
+            ['name' => 'DEMO_WHITE_LABEL', 'value' => 'false'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'PROFILES_ENCRYPTION_TYPE', 'value' => 'WPA2'],
+            ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
         ];
 
         foreach ($settings as $settingData) {

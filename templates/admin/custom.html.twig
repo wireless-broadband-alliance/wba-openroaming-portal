@@ -4,10 +4,7 @@
 
 {% block body %}
     <div class="container mx-auto px-4">
-        <div class="py-8 text-center">
-            <h1 class="text-3xl font-semibold">Admin Customize Landing Page - WBA</h1>
-            <p class="text-gray-500 mt-2">This page is for admin use only. Still in development.</p>
-        </div>
+        {% include 'admin/partials/_header_admin.html.twig' %}
 
         <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
             {{ form_row(form._token) }}
