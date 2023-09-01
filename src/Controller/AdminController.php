@@ -258,6 +258,7 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
@@ -273,7 +274,7 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            $excludedSettings = [ // this are the settings related with the customization of the page
+            $excludedSettings = [ // these are the settings related with the customization of the page
                 'CUSTOMER_LOGO',
                 'OPENROAMING_LOGO',
                 'WALLPAPER_IMAGE',
@@ -300,7 +301,6 @@ class AdminController extends AbstractController
 
             return $this->redirectToRoute('admin_page');
         }
-
         return $this->render('admin/settings.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),

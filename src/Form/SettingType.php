@@ -29,13 +29,21 @@ class SettingType extends AbstractType
 
         $settings = $options['settings'];
 
+        // Retrieve the current value of DEMO_WHITE_LABEL from the database
+        $demoWhiteLabelValue = null;
+        foreach ($settings as $setting) {
+            if ($setting->getName() === 'DEMO_WHITE_LABEL') {
+                $demoWhiteLabelValue = $setting->getValue();
+                break;
+            }
+        }
         $builder->add('DEMO_WHITE_LABEL', $settingTypes['DEMO_WHITE_LABEL'], [
             'choices' => [
                 'Remove Warning Demo Boxes' => 'true',
                 'Demo - Confirmation Email' => 'email',
                 'Demo - Unconfirmation Email' => 'no_email',
             ],
-            'data' => $settings['DEMO_WHITE_LABEL']->getValue(),
+            'data' => $demoWhiteLabelValue, // Set the current value from the db as the selected choice
         ]);
 
         foreach ($settings as $setting) {
