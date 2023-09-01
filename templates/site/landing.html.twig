@@ -1,6 +1,5 @@
 {% extends 'base.html.twig' %}
 
-
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
@@ -24,13 +23,13 @@
                        class="font-semibold underline">{{ contactEmail }}</a>
                 </p>
                 {% if demoMode %}
-                    {% if demoModeWhiteLabel == null %}
+                    {% if demoModeWhiteLabel != "true" %}
                         <div class="bg-red-600 text-white font-bold p-3 text-center">
                             <h2>DEMO MODE</h2>
                             <p class="text-xs lg:text-base mt-5 ">
                                 This portal is for testing purposes only and should not be used for production purposes,
                                 and
-                                cannot be used for production or comercial purposes. </p>
+                                cannot be used for production or commercial purposes. </p>
                             <p class="text-xs lg:text-base">
                                 Users created via this portal can be revoked at any time without notice. </p>
                         </div>
@@ -52,7 +51,7 @@
                         install the OpenRoaming profile matching your identity</p>
 
                     <p class="text-[#B4B4B4] font-light text-xs lg:text-base">Currently, OpenRoaming profiles generated
-                        by this system are proven to work on the majority of devices(including iOS, Android, macOS and
+                        by this system are proven to work on the majority of devices (including iOS, Android, macOS, and
                         Windows)</p>
                 </div>
 
@@ -89,11 +88,21 @@
                     </div>
                 {% endif %}
                 {% if demoMode %}
-                    <div class=" {% if demoModeWhiteLabel == null %} border-red-600 border-dashed border-2 p-3 mt-1 {% else %}p-3 mt-1{% endif %}">
-                        {% if demoModeWhiteLabel == null %}
+                    <div class="{% if demoModeWhiteLabel != "true" %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if demoModeWhiteLabel == "no_email" %}
                             <h3 class="text-red-600 mt-3 text-center">
-                                DEMO MODE - EMAIL SYSTEM </h3>
+                                DEMO MODE</h3>
+                            <h4 class="text-red-600/50 text-center text-base mt-2">
+                                WITHOUT EMAIL VERIFICATION SYSTEM
+                            </h4>
+                        {% elseif demoModeWhiteLabel == "email" %}
+                            <h3 class="text-red-600 mt-3 text-center">
+                                DEMO MODE</h3>
+                            <h4 class="text-red-600/50 text-center text-base mt-2">
+                                WITH EMAIL VERIFICATION SYSTEM
+                            </h4>
                         {% endif %}
+
                         <form method="post">
                             {% if not app.user %}
                                 {# Email #}
@@ -149,7 +158,6 @@
 
                                             <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
                                         </div>
-
                                     {% endfor %}
                                 </div>
                             </div>
@@ -157,7 +165,6 @@
                                    id="detected-os"
                                    name="detected-os"
                                    value="{{ os.selected }}"/>
-
 
                             {# Submit button #}
                             <div class="flex flex-row justify-center lg:justify-start">
@@ -171,7 +178,6 @@
                             </div>
 
                             {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-
                                 <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                     {# Profile selector  #}
                                     <button type="button"
@@ -182,14 +188,12 @@
                                         <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
                                     </button>
 
-
                                     <button type="button"
                                             class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
                                         Is this Wrong? Click here to select your OS.
                                     </button>
                                 </div>
                             {% endif %}
-
                         </form>
                     </div>
                 {% else %}
@@ -221,7 +225,6 @@
 
                                                     <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
                                                 </div>
-
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -229,7 +232,6 @@
                                            id="detected-os"
                                            name="detected-os"
                                            value="{{ os.selected }}"/>
-
 
                                     {# Submit button #}
                                     <div class="flex flex-row justify-center lg:justify-start">
@@ -242,7 +244,6 @@
                                     </div>
 
                                     {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-
                                         <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                             {# Profile selector  #}
                                             <button type="button"
@@ -252,7 +253,6 @@
                                                      alt="Windows Logo"/>
                                                 <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
                                             </button>
-
 
                                             <button type="button"
                                                     class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
@@ -307,25 +307,18 @@
                         {% endif %}
 
                         {% if ADDITIONAL_LABEL %}
-                            <div class="text-center text-base font-normal -mb-5">
-                                <p>{{ ADDITIONAL_LABEL }}</p>
+                            <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
+                                <a href="{{ ADDITIONAL_LINK }}"
+                                   class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
+                                    {{ ADDITIONAL_LABEL }}
+                                </a>
+                                <p>{{ ADDITIONAL_DESCRIPTION }}</p>
                             </div>
                         {% endif %}
-
-                        <div class="mt-12 text-center">
-                            <p>By authenticating with any of the above providers you agree with our
-                                <a href="{{ TOS_LINK }}"
-                                   target="_blank"
-                                   class="underline font-base">terms & conditions of use</a> and
-                                <a href="{{ PRIVACY_POLICY_LINK }}"
-                                   target="_blank"
-                                   class="underline font-base">privacy policy</a>.
-                            </p>
-                        </div>
                     {% endif %}
-
                 {% endif %}
             </div>
         </div>
     </div>
+
 {% endblock %}

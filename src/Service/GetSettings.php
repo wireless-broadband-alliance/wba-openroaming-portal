@@ -57,7 +57,10 @@ class GetSettings
         $data['ADDITIONAL_LABEL'] = $settingRepository->findOneBy(['name' => 'ADDITIONAL_LABEL'])->getValue();
 // Demo Mode
         $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
-        $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
+        $demoWhiteLabelSetting = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL']);
+        if ($demoWhiteLabelSetting !== null) {
+            $data['demoModeWhiteLabel'] = $demoWhiteLabelSetting->getValue();
+        }
 // Auth Providers
 // SAML
         $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';

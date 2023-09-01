@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType; // Import ChoiceType
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+
+// Import ChoiceType
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -27,6 +29,15 @@ class SettingType extends AbstractType
 
         $settings = $options['settings'];
 
+        $builder->add('DEMO_WHITE_LABEL', $settingTypes['DEMO_WHITE_LABEL'], [
+            'choices' => [
+                'Remove Warning Demo Boxes' => 'true',
+                'Demo - Confirmation Email' => 'email',
+                'Demo - Unconfirmation Email' => 'no_email',
+            ],
+            'data' => $settings['DEMO_WHITE_LABEL']->getValue(),
+        ]);
+
         foreach ($settings as $setting) {
             // Check if the setting is one of the excluded values
             if (in_array($setting->getName(), ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'], true)) {
@@ -34,8 +45,8 @@ class SettingType extends AbstractType
                 $builder->add($setting->getName(), HiddenType::class, [
                     'data' => $setting->getValue(),
                 ]);
-            } else {
-                // Otherwise, use the defined input type for other fields
+            } elseif ($setting->getName() !== 'DEMO_WHITE_LABEL') {
+                // Use the defined input type for other fields
                 $inputType = $settingTypes[$setting->getName()] ?? TextType::class;
 
                 if ($inputType === ChoiceType::class) {
@@ -48,7 +59,7 @@ class SettingType extends AbstractType
                         'data' => $setting->getValue(), // Use the value from the db as the selected choice
                     ]);
                 } else {
-                    // For other fields return the default type
+                    // For other fields, return the default type
                     $builder->add($setting->getName(), $inputType, [
                         'data' => $setting->getValue(),
                     ]);
