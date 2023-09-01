@@ -93,7 +93,7 @@
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE</h3>
                             <h4 class="text-red-600/50 text-center text-base mt-2">
-                                WITHOUT EMAIL VERIFICATION SYSTEM
+                                <b>WITHOUT</b> EMAIL VERIFICATION SYSTEM
                             </h4>
                         {% elseif demoModeWhiteLabel == "email" %}
                             <h3 class="text-red-600 mt-3 text-center">
@@ -104,6 +104,7 @@
                         {% endif %}
 
                         <form method="post">
+
                             {% if not app.user %}
                                 {# Email #}
                                 <div class="relative mt-10 lg:mt-6 xl:mt-12">
@@ -113,7 +114,7 @@
                                            name="email"
                                            type="email"
                                            class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
-                                           placeholder="add your email here"/>
+                                           placeholder="Add your email here"/>
                                 </div>
 
                                 {# Checkbox: Terms #}

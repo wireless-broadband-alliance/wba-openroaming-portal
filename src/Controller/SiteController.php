@@ -64,13 +64,26 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        // Check if the user is logged in
-        if ($this->getUser()) {
+        // Check the DEMO_WHITE_LABEL value
+        if ($data["demoModeWhiteLabel"] === 'email') {
+            // Check if the user is logged in
+            if ($this->getUser()) {
+                /** @var User $currentUser */
+                $currentUser = $this->getUser();
+                $verification = $currentUser->isVerified();
+                // Check if the user is verified
+                if (!$verification) {
+                    $this->addFlash('error', 'Your account is not verified to download a profile!');
+                    return $this->redirectToRoute('app_email_code');
+                }
+            }
+        } else if ($data["demoModeWhiteLabel"] === "no_email") {
+            $data['VERIFICATION_FORM'] = false;
             /** @var User $currentUser */
             $currentUser = $this->getUser();
             $verification = $currentUser->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
+            // Auto verifies the user, in that way, automatically return to the page with the download profiles buttons
+            if ($verification) {
                 $this->addFlash('error', 'Your account is not verified to download a profile!');
                 return $this->redirectToRoute('app_email_code');
             }
