@@ -77,19 +77,7 @@ class SiteController extends AbstractController
                     return $this->redirectToRoute('app_email_code');
                 }
             }
-        } else if ($data["demoModeWhiteLabel"] === "no_email") {
-            $data['VERIFICATION_FORM'] = false;
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verification = $currentUser->isVerified();
-            // Auto verifies the user, in that way, automatically return to the page with the download profiles buttons
-            if ($verification) {
-                $this->addFlash('error', 'Your account is not verified to download a profile!');
-                return $this->redirectToRoute('app_email_code');
-            }
         }
-
-        ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
         if ($data['demoMode']) {
@@ -107,7 +95,9 @@ class SiteController extends AbstractController
                     $user->setCreatedAt(new \DateTime());
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                     $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-
+                    if ($data["demoModeWhiteLabel"] === "no_email") {
+                        $user->isVerified(true);
+                    }
                     $entityManager->persist($user);
                     $entityManager->flush();
                     $userAuthenticator->authenticateUser(
@@ -115,8 +105,13 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
+                    if ($data["demoModeWhiteLabel"] === "no_email") {
+                        $this->addFlash('success', 'You are now currently using a demo account to be able to download a profile without email verification!');
+                        return $this->redirectToRoute('app_landing');
+                    }
                     return $this->redirectToRoute('app_email_code');
                 }
+
                 if (!array_key_exists('radio-os', $payload)) {
                     if (!array_key_exists('detected-os', $payload)) {
                         $os = $request->query->get('os');
