@@ -149,7 +149,6 @@ class SiteController extends AbstractController
             }
             if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
-
             }
         }
 

@@ -95,8 +95,11 @@ class AdminController extends AbstractController
     }
 
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
-    public function searchUsers(Request $request, UserRepository $userRepository): Response
+    public function searchUsers(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $searchTerm = $request->query->get('u');
         $page = $request->query->getInt('page', 1);
         $perPage = 25;
@@ -131,6 +134,7 @@ class AdminController extends AbstractController
             'current_user' => $user,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
+            'data' => $data
         ]);
     }
 
