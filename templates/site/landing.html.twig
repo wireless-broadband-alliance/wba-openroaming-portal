@@ -91,16 +91,10 @@
                     <div class="{% if demoModeWhiteLabel != "true" %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
                         {% if demoModeWhiteLabel == "no_email" %}
                             <h3 class="text-red-600 mt-3 text-center">
-                                DEMO MODE</h3>
-                            <h4 class="text-red-600/50 text-center text-base mt-2">
-                                <b>WITHOUT</b> EMAIL VERIFICATION SYSTEM
-                            </h4>
+                                DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
                         {% elseif demoModeWhiteLabel == "email" %}
                             <h3 class="text-red-600 mt-3 text-center">
-                                DEMO MODE</h3>
-                            <h4 class="text-red-600/50 text-center text-base mt-2">
-                                <b>WITH</b> EMAIL VERIFICATION SYSTEM
-                            </h4>
+                                DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
 
                         <form method="post">
