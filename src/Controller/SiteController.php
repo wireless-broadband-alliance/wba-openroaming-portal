@@ -102,14 +102,11 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["demoMode"] === "true" || $data["demoModeWhiteLabel"] === "email") {
-                        $data['VERIFICATION_FORM'] = true;
-                        return $this->redirectToRoute('app_email_code', $data);
+                    if ($data["demoModeWhiteLabel"] === "email") {
+                        return $this->redirectToRoute('app_email_code');
                     }
-                    if ($data["demoMode"] === "false") {
-                        $data['VERIFICATION_FORM'] = true;
-                        dd("eu sou lindo com o demo mode false");
-                        return $this->redirectToRoute('app_landing', $data);
+                    if ($data["demoModeWhiteLabel"] === "no_email") {
+                        return $this->redirectToRoute('app_landing');
                     }
                 }
 
@@ -316,7 +313,6 @@ class SiteController extends AbstractController
 
         // Modify the needed values
         $data['demoMode'] = false;
-        $data['VERIFICATION_FORM'] = true;
 
         // Get the current user
         /** @var User $currentUser */

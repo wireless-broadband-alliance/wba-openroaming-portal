@@ -70,10 +70,14 @@ class GetSettings
         $data['GOOGLE_LOGIN_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true';
         $data['GOOGLE_LOGIN_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL'])->getValue();
         $data['GOOGLE_LOGIN_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'])->getValue();
-//LOGIN TRADITIONAL
+//REGISTER/LOGIN TRADITIONAL
         $data['REGISTER_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_METHOD_ENABLED'])->getValue() === 'true';
         $data['REGISTER_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_METHOD_LABEL'])->getValue();
         $data['REGISTER_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_METHOD_DESCRIPTION'])->getValue();
+        $data['LOGIN_TRADITIONAL_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_ENABLED'])->getValue() === 'true';
+        $data['LOGIN_TRADITIONAL_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_LABEL'])->getValue();
+        $data['LOGIN_TRADITIONAL_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_DESCRIPTION'])->getValue();
+
 // Legal Stuff
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();

@@ -142,18 +142,21 @@ class AdminController extends AbstractController
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
-
-        // Disable profiles when deleting a user
-        $this->disableProfiles($user);
-
         $email = $user->getEmail();
 
+        // Remove associated UserRadiusProfile entities
+        foreach ($user->getUserRadiusProfiles() as $userRadiusProfile) {
+            $em->remove($userRadiusProfile);
+        }
+
+        // Now, remove the user
         $em->remove($user);
         $em->flush();
 
         $this->addFlash('success_admin', sprintf('User with the email "%s" deleted successfully.', $email));
         return $this->redirectToRoute('admin_page');
     }
+
 
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]

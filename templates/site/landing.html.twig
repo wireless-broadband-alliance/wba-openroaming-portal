@@ -67,29 +67,9 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if VERIFICATION_FORM %}
-                    {% include 'email_activation/index.html.twig' %}
-                {% endif %}
-
-                {% if app.user %}
-                    <div class="flex flex-col items-center justify-center text-center">
-                        <div class="space-y-4 mt-6 pr-2">
-                            <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
-                                authenticated as
-                                <span class="font-bold">{{ app.user.uuid }}</span>
-                            </p>
-                        </div>
-                        <div class="space-y-4 mt-6 pr-2">
-                            <a href="{{ path('saml_logout') }}"
-                               class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                {% endif %}
-                {% if demoMode == "true" %}
+                {% if demoMode %}
                     <div class="{% if demoModeWhiteLabel != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if demoMode == "true" and demoModeWhiteLabel == "no_email" %}
+                        {% if demoMode and demoModeWhiteLabel == "no_email" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
                         {% elseif demoMode == "true" and demoModeWhiteLabel == "email" %}
@@ -126,10 +106,31 @@
                                                 target="_blank"
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
+                            {% else %}
+                                {% if demoModeWhiteLabel == "email" %}
+                                    {% if not app.user.isVerified %}
+                                        {% include 'email_activation/index.html.twig' %}
+                                    {% endif %}
+                                {% endif %}
+
+                                <div class="flex flex-col items-center justify-center text-center">
+                                    <div class="space-y-2 mt-4 pr-2">
+                                        <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
+                                            authenticated as
+                                            <span class="font-bold">{{ app.user.uuid }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="space-y-2 mt-6 pr-2">
+                                        <a href="{{ path('saml_logout') }}"
+                                           class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                            Logout
+                                        </a>
+                                    </div>
+                                </div>
                             {% endif %}
 
                             {# OS #}
-                            <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+                            <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
                                 <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your operating
                                     system, so you can
                                     download and install the profile:</p>
@@ -261,6 +262,9 @@
                                     {% endif %}
                                 </form>
                             </div>
+                        {% else %}
+                            <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">Your account is not verified to download a profile!</div>
+                            {% include 'email_activation/index.html.twig' %}
                         {% endif %}
                     {% else %}
 
@@ -306,9 +310,36 @@
                             </div>
                         {% endif %}
 
+
+                        {% if LOGIN_TRADITIONAL_ENABLED %}
+                            <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
+                                <a href="{{ path('app_login') }}"
+                                   class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
+                                    {{ LOGIN_TRADITIONAL_LABEL }}
+                                </a>
+                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION }}</p>
+                            </div>
+                        {% endif %}
+
                         {# ADDITIONAL_LABEL - Demo Mode - False #}
                         <div class=" mt-5 text-center items-center">
                             {{ ADDITIONAL_LABEL }}
+                        </div>
+                    {% endif %}
+                    {% if app.user %}
+                        <div class="flex flex-col items-center justify-center text-center">
+                            <div class="space-y-4 mt-6 pr-2">
+                                <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
+                                    authenticated as
+                                    <span class="font-bold">{{ app.user.uuid }}</span>
+                                </p>
+                            </div>
+                            <div class="space-y-4 mt-6 pr-2">
+                                <a href="{{ path('saml_logout') }}"
+                                   class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                    Logout
+                                </a>
+                            </div>
                         </div>
                     {% endif %}
                 {% endif %}
