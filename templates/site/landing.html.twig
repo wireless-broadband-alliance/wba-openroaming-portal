@@ -87,12 +87,12 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if demoMode %}
-                    <div class="{% if demoModeWhiteLabel != "true" %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if demoModeWhiteLabel == "no_email" %}
+                {% if demoMode == "true" %}
+                    <div class="{% if demoModeWhiteLabel != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if demoMode == "true" and demoModeWhiteLabel == "no_email" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
-                        {% elseif demoModeWhiteLabel == "email" %}
+                        {% elseif demoMode == "true" and demoModeWhiteLabel == "email" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
@@ -258,7 +258,8 @@
                             </div>
                         {% endif %}
                     {% else %}
-                        <div class="mt-20">
+
+                        <div class="mt-16">
                             <p class="text-center">
                                 Please select one of the following authentication methods to obtain a profile: </p>
                         </div>
@@ -300,15 +301,9 @@
                             </div>
                         {% endif %}
 
-                        {% if ADDITIONAL_LABEL %}
-                            <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
-                                <a href="{{ ADDITIONAL_LINK }}"
-                                   class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ ADDITIONAL_LABEL }}
-                                </a>
-                                <p>{{ ADDITIONAL_DESCRIPTION }}</p>
-                            </div>
-                        {% endif %}
+                        <div class=" mt-5 text-center items-center">
+                            {{ ADDITIONAL_LABEL }}
+                        </div>
                     {% endif %}
                 {% endif %}
             </div>

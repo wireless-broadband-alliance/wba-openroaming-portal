@@ -95,9 +95,6 @@ class SiteController extends AbstractController
                     $user->setCreatedAt(new \DateTime());
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                     $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                    if ($data["demoModeWhiteLabel"] === "no_email") {
-                        $user->isVerified(true);
-                    }
                     $entityManager->persist($user);
                     $entityManager->flush();
                     $userAuthenticator->authenticateUser(
@@ -105,11 +102,15 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["demoModeWhiteLabel"] === "no_email") {
-                        $this->addFlash('success', 'You are now currently using a demo account to be able to download a profile without email verification!');
-                        return $this->redirectToRoute('app_landing');
+                    if ($data["demoMode"] === "true" || $data["demoModeWhiteLabel"] === "email") {
+                        $data['VERIFICATION_FORM'] = true;
+                        return $this->redirectToRoute('app_email_code', $data);
                     }
-                    return $this->redirectToRoute('app_email_code');
+                    if ($data["demoMode"] === "false") {
+                        $data['VERIFICATION_FORM'] = true;
+                        dd("eu sou lindo com o demo mode false");
+                        return $this->redirectToRoute('app_landing', $data);
+                    }
                 }
 
                 if (!array_key_exists('radio-os', $payload)) {

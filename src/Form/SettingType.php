@@ -39,7 +39,6 @@ class SettingType extends AbstractType
         }
         $builder->add('DEMO_WHITE_LABEL', $settingTypes['DEMO_WHITE_LABEL'], [
             'choices' => [
-                'Remove Warning Demo Boxes' => 'true',
                 'Demo - Confirmation Email' => 'email',
                 'Demo - Unconfirmation Email' => 'no_email',
             ],
