@@ -171,6 +171,11 @@
                                 </button>
                             </div>
 
+                            {# ADDITIONAL_LABEL - Demo Mode - True #}
+                            <div class=" mt-5 text-center items-center">
+                                {{ ADDITIONAL_LABEL }}
+                            </div>
+
                             {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
                                 <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                     {# Profile selector  #}
@@ -301,6 +306,7 @@
                             </div>
                         {% endif %}
 
+                        {# ADDITIONAL_LABEL - Demo Mode - False #}
                         <div class=" mt-5 text-center items-center">
                             {{ ADDITIONAL_LABEL }}
                         </div>

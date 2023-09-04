@@ -26,7 +26,7 @@ class SettingFixture extends Fixture
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This is only for extra info, it will stay above the login options and on top of the term and conditions links.'],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => "This label is only for extra info, it's just to display extra content if necessary."],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
