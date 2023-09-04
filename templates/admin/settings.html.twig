@@ -31,8 +31,10 @@
 
 
             <hr class="my-8 border-t-2 border-gray-300">
-
-            <h2 class="text-center text-lg font-semibold">Sub Settings</h2>
+            <div class="text-center space-y-2">
+                <h2 class="text-lg font-semibold">Sub Settings</h2>
+                <h3 class="text-gray-500 text-break">Please if you want to insert an empty value type, <b>"Not Defined"</b></h3>
+            </div>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">
                 {# Content Types Cards - Sub Cards #}
                 {% set contentSettings = settings|filter(item => form[item.name] is defined and form[item.name].vars.block_prefixes[1] != 'choice') %}
@@ -46,9 +48,9 @@
                             <div class="p-2 w-full">
                                 {# Set the empty values to "Not Defined" #}
                                 {% set value = form[setting.name].vars.value %}
-                                {% set displayValue = value|default('Not Defined') %}
+                                {% set displayValue = value|default("Not Defined") %}
                                 {% if value is empty %}
-                                    {{ form_widget(form[setting.name], {'value': displayValue, 'attr': {'class': 'text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                                    {{ form_widget(form[setting.name], {'value': displayValue, 'attr': {'class': 'text-base text-red-500 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                 {% else %}
                                     {{ form_widget(form[setting.name], {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                     {{ form_errors(form[setting.name]) }}

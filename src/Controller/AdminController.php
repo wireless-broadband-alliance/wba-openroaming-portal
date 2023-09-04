@@ -290,6 +290,10 @@ class AdminController extends AbstractController
                 // Check if the submitted data contains the setting's name
                 if (!in_array($name, $excludedSettings, true)) {
                     $value = $submittedData[$name] ?? null;
+                    // Check if the setting is a text input
+                    if ($value === 'Not Defined') {
+                        $value = "";
+                    }
                     $setting->setValue($value);
                     $em->persist($setting);
                 }
