@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Events;
 use App\Entity\User;
+use App\Enum\DemoWhiteLabel;
+use App\Enum\EventsEnum;
 use App\Enum\OSTypes;
 use App\Repository\EventsRepository;
 use App\Repository\SettingRepository;
@@ -65,7 +67,7 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
         // Check the DEMO_WHITE_LABEL value
-        if ($data["demoModeWhiteLabel"] === 'email') {
+        if ($data["demoModeWhiteLabel"] === DemoWhiteLabel::EMAIL) {
             // Check if the user is logged in
             if ($this->getUser()) {
                 /** @var User $currentUser */
@@ -102,10 +104,10 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["demoModeWhiteLabel"] === "email") {
+                    if ($data["demoModeWhiteLabel"] === DemoWhiteLabel::EMAIL) {
                         return $this->redirectToRoute('app_email_code');
                     }
-                    if ($data["demoModeWhiteLabel"] === "no_email") {
+                    if ($data["demoModeWhiteLabel"] === DemoWhiteLabel::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -353,7 +355,7 @@ class SiteController extends AbstractController
 
             $event->setUser($currentUser);
             $event->setEventDatetime(new DateTime());
-            $event->setEventName("USER_VERIFICATION");
+            $event->setEventName(EventsEnum::USER_VERIFICATION);
             $eventsRepository->save($event, true);
 
             $this->addFlash('success', 'Your account is now successfully verified');

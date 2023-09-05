@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Events;
 use App\Entity\User;
+use App\Enum\EventsEnum;
 use App\Form\RegistrationFormType;
 use App\Repository\EventsRepository;
 use App\Repository\SettingRepository;
@@ -109,7 +110,7 @@ class RegistrationController extends AbstractController
                 // Defines the Event to the table
                 $event->setUser($user);
                 $event->setEventDatetime(new DateTime());
-                $event->setEventName("USER_CREATION");
+                $event->setEventName(EventsEnum::USER_CREATION);
                 $entityManager->persist($event);
                 $entityManager->flush();
 
@@ -150,11 +151,11 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack $requestStack,
-        UserRepository $userRepository,
-        TokenStorageInterface $tokenStorage,
+        RequestStack             $requestStack,
+        UserRepository           $userRepository,
+        TokenStorageInterface    $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
-        EventsRepository $eventsRepository
+        EventsRepository         $eventsRepository
     ): Response
     {
         // Get the email and verification code from the URL query parameters
@@ -167,7 +168,7 @@ class RegistrationController extends AbstractController
         if ($user && $user->getVerificationCode() === $verificationCode) {
             try {
                 // Create a token manually for the user
-                $token = new UsernamePasswordToken($user,'main', $user->getRoles());
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
                 // Set the token in the token storage
                 $tokenStorage->setToken($token);

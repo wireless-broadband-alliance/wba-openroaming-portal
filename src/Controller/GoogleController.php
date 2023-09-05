@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Events;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\EventsEnum;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -175,12 +176,12 @@ class GoogleController extends AbstractController
 
         $event_create = new Events();
         $event_create->setUser($user);
-        $event_create->setEventName('USER_CREATION');
+        $event_create->setEventName(EventsEnum::USER_CREATION);
         $event_create->setEventDatetime(new \DateTime());
 
         $event_verify = new Events();
         $event_verify->setUser($user);
-        $event_verify->setEventName('USER_VERIFICATION');
+        $event_verify->setEventName(EventsEnum::USER_VERIFICATION);
         $event_verify->setEventDatetime(new \DateTime());
 
         $randomPassword = bin2hex(random_bytes(8));
