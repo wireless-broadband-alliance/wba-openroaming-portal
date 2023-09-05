@@ -25,6 +25,7 @@ import {
 initTE({Dropdown, Ripple});
 
 /*
+Same Has I have said previously, another stuff first and them new branch just for the graphic logic
 let config = {
 	type: "line",
 	data: {

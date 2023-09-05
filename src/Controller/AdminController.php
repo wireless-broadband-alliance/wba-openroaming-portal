@@ -320,6 +320,7 @@ class AdminController extends AbstractController
 
     }
 
+    // This route it's in development, again I need to fix and check for another stuff first
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
     public function statisticsData(EntityManagerInterface $em): JsonResponse
