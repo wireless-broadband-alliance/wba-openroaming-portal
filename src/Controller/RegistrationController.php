@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Form\RegistrationFormType;
@@ -80,6 +81,10 @@ class RegistrationController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
+        if ($data['PLATFORM_MODE'] === true) {
+            return $this->redirectToRoute('app_landing');
+        }
 
         $Email_sender = $this->parameterBag->get('app.email_address');
         $Name_sender = $this->parameterBag->get('app.sender_name');
