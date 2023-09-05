@@ -11,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use App\Enum\DemoWhiteLabel;
+
 
 class SettingType extends AbstractType
 {
@@ -29,20 +31,18 @@ class SettingType extends AbstractType
 
         $settings = $options['settings'];
 
-        // Retrieve the current value of DEMO_WHITE_LABEL from the database
-        $demoWhiteLabelValue = null;
         foreach ($settings as $setting) {
             if ($setting->getName() === 'DEMO_WHITE_LABEL') {
                 $demoWhiteLabelValue = $setting->getValue();
                 break;
             }
         }
-        $builder->add('DEMO_WHITE_LABEL', $settingTypes['DEMO_WHITE_LABEL'], [
+        $builder->add('DEMO_WHITE_LABEL', ChoiceType::class, [
             'choices' => [
-                'Demo - WITH Email Verification' => 'email',
-                'Demo - NO Email Verification' => 'no_email',
+                'Demo - WITH Email Verification' => DemoWhiteLabel::EMAIL,
+                'Demo - NO Email Verification' => DemoWhiteLabel::NO_EMAIL,
             ],
-            'data' => $demoWhiteLabelValue, // Set the current value from the db as the selected choice
+            'data' => $demoWhiteLabelValue ?? null, // Set the current value from the database as the selected choice
         ]);
 
         foreach ($settings as $setting) {
