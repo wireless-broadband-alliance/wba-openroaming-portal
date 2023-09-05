@@ -67,10 +67,10 @@
 
                 {% if PLATFORM_MODE %}
                     <div class="{% if EMAIL_VERIFICATION != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if PLATFORM_MODE and EMAIL_VERIFICATION == "no_email" %}
+                        {% if PLATFORM_MODE and EMAIL_VERIFICATION == "OFF" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
-                        {% elseif PLATFORM_MODE == "true" and EMAIL_VERIFICATION == "email" %}
+                        {% elseif PLATFORM_MODE == "true" and EMAIL_VERIFICATION == "ON" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
@@ -105,7 +105,7 @@
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
                             {% else %}
-                                {% if EMAIL_VERIFICATION == "email" %}
+                                {% if EMAIL_VERIFICATION == "ON" %}
                                     {% if not app.user.isVerified %}
                                         {% include 'email_activation/index.html.twig' %}
                                     {% endif %}
@@ -261,7 +261,7 @@
                                 </form>
                             </div>
                         {% else %}
-                            {% if EMAIL_VERIFICATION == "email" %}
+                            {% if EMAIL_VERIFICATION == "ON" %}
                                 {% include 'email_activation/index.html.twig' %}
                             {% else %}
                                 <div class="mt-10">

@@ -22,7 +22,7 @@ class SettingFixture extends Fixture
             ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
 
             ['name' => 'PLATFORM_MODE', 'value' => 'true'],
-            ['name' => 'EMAIL_VERIFICATION', 'value' => 'no_email'],
+            ['name' => 'EMAIL_VERIFICATION', 'value' => 'NO'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_20th_logo.png'],
