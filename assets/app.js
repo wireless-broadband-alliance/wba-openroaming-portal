@@ -21,9 +21,10 @@ import {
 	initTE,
 } from "tw-elements";
 
+
 initTE({Dropdown, Ripple});
 
-
+/*
 let config = {
 	type: "line",
 	data: {
@@ -120,5 +121,4 @@ let config = {
 };
 let ctx = document.getElementById("line-chart").getContext("2d");
 window.myLine = new Chart(ctx, config);
-
-
+*/
