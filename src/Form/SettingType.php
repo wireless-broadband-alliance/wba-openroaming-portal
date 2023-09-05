@@ -22,13 +22,12 @@ class SettingType extends AbstractType
             'PLATFORM_MODE' => ChoiceType::class,
             'AUTH_METHOD_SAML_ENABLED' => ChoiceType::class,
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ChoiceType::class,
-            'AUTH_METHOD_REGISTER_METHOD_ENABLED' => ChoiceType::class,
+            'AUTH_METHOD_REGISTER_ENABLED' => ChoiceType::class,
             'SYNC_LDAP_ENABLED' => ChoiceType::class,
             'EMAIL_VERIFICATION' => ChoiceType::class,
         ];
 
         $settings = $options['settings'];
-
         foreach ($settings as $setting) {
             $settingName = $setting->getName();
             $settingValue = $setting->getValue();

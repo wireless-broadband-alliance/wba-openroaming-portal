@@ -40,12 +40,12 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_REGISTER_METHOD_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_METHOD_LABEL', 'value' => 'Create an account'],
-            ['name' => 'AUTH_METHOD_REGISTER_METHOD_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_LABEL', 'value' => 'Login an account'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_DESCRIPTION', 'value' => 'Already have an account? Login then'],
+            ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
+            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create an account'],
+            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
+            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Login an account'],
+            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
 
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
             ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
@@ -54,7 +54,6 @@ class SettingFixture extends Fixture
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
 
-            // Redirections Links
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
