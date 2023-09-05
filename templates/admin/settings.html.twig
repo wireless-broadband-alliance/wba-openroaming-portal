@@ -6,7 +6,7 @@
     <div class="container mx-auto px-4">
         {% include 'admin/partials/_header_admin.html.twig' %}
 
-        <form action="{{ path('admin_dashboard_settings') }}" method="post">
+        <form action="{{ path('admin_dashboard_settings') }}" method="post" novalidate>
             {{ form_row(form._token) }}
             <h2 class="text-center text-xl font-semibold mb-5">Main Settings</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -33,7 +33,6 @@
             <hr class="my-8 border-t-2 border-gray-300">
             <div class="text-center space-y-2">
                 <h2 class="text-lg font-semibold">Sub Settings</h2>
-                <h3 class="text-gray-500 text-break">Please if you want to insert an empty value type, <b>"Not Defined"</b></h3>
             </div>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">
                 {# Content Types Cards - Sub Cards #}
