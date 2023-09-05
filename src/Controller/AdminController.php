@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Events;
+use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Form\CustomType;
@@ -325,7 +325,7 @@ class AdminController extends AbstractController
     public function statisticsData(EntityManagerInterface $em): JsonResponse
     {
         // Fetch data from your database, for example:
-        $data = $em->getRepository(Events::class)->findAll(); // Adjust YourEntity
+        $data = $em->getRepository(Event::class)->findAll(); // Adjust YourEntity
 
         $formattedData = [];
         dd($formattedData, $data);

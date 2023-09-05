@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Events;
+use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\DemoWhiteLabel;
-use App\Enum\EventsEnum;
+use App\Enum\EventEnum;
 use App\Enum\OSTypes;
-use App\Repository\EventsRepository;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
@@ -338,7 +338,7 @@ class SiteController extends AbstractController
 
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventsRepository $eventsRepository): Response
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventRepository $eventRepository): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -346,7 +346,7 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $event = new Events();
+        $event = new Event();
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
             // Set the user as verified
@@ -355,8 +355,8 @@ class SiteController extends AbstractController
 
             $event->setUser($currentUser);
             $event->setEventDatetime(new DateTime());
-            $event->setEventName(EventsEnum::USER_VERIFICATION);
-            $eventsRepository->save($event, true);
+            $event->setEventName(EventEnum::USER_VERIFICATION);
+            $eventRepository->save($event, true);
 
             $this->addFlash('success', 'Your account is now successfully verified');
             return $this->redirectToRoute('app_landing');

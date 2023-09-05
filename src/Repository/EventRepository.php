@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Events;
+use App\Entity\Event;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Events>
+ * @extends ServiceEntityRepository<Event>
  *
- * @method Events|null find($id, $lockMode = null, $lockVersion = null)
- * @method Events|null findOneBy(array $criteria, array $orderBy = null)
- * @method Events[]    findAll()
- * @method Events[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Event|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Event|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Event[]    findAll()
+ * @method Event[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class EventsRepository extends ServiceEntityRepository
+class EventRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Events::class);
+        parent::__construct($registry, Event::class);
     }
 
-    public function save(Events $entity, bool $flush = false): void
+    public function save(Event $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class EventsRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Events $entity, bool $flush = false): void
+    public function remove(Event $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class EventsRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Events[] Returns an array of Events objects
+//     * @return Event[] Returns an array of Event objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class EventsRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Events
+//    public function findOneBySomeField($value): ?Event
 //    {
 //        return $this->createQueryBuilder('e')
 //            ->andWhere('e.exampleField = :val')

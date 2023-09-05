@@ -71,15 +71,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Events::class, orphanRemoval: true)]
-    private Collection $events;
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
+    private Collection $event;
 
 
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
-        $this->events = new ArrayCollection();
+        $this->event = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -353,26 +353,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     }
 
     /**
-     * @return Collection<int, Events>
+     * @return Collection<int, Event>
      */
-    public function getEvents(): Collection
+    public function getEvent(): Collection
     {
-        return $this->events;
+        return $this->event;
     }
 
-    public function addEvent(Events $event): static
+    public function addEvent(Event $event): static
     {
-        if (!$this->events->contains($event)) {
-            $this->events->add($event);
+        if (!$this->event->contains($event)) {
+            $this->event->add($event);
             $event->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeEvent(Events $event): static
+    public function removeEvent(Event $event): static
     {
-        if ($this->events->removeElement($event)) {
+        if ($this->event->removeElement($event)) {
             // set the owning side to null (unless already changed)
             if ($event->getUser() === $this) {
                 $event->setUser(null);

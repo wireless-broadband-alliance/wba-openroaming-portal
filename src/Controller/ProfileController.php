@@ -3,14 +3,14 @@
 namespace App\Controller;
 
 
-use App\Entity\Events;
-use App\Enum\EventsEnum;
+use App\Entity\Event;
+use App\Enum\EventEnum;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
-use App\Repository\EventsRepository;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
@@ -36,7 +36,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/android', name: 'profile_android')]
-    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventsRepository $eventsRepository): Response
+    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
     {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
@@ -74,17 +74,17 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Transfer-Encoding', 'base64');
 
         // Defines the Event to the table
-        $event = new Events();
+        $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(EventsEnum::DOWNLOAD_ANDROID);
-        $eventsRepository->save($event, true);
+        $event->setEventName(EventEnum::DOWNLOAD_ANDROID);
+        $eventRepository->save($event, true);
 
         return $response;
     }
 
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
-    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventsRepository $eventsRepository): Response
+    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -157,16 +157,16 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
 
         // Defines the Event to the table
-        $event = new Events();
+        $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(EventsEnum::DOWNLOAD_IOS);
-        $eventsRepository->save($event, true);
+        $event->setEventName(EventEnum::DOWNLOAD_IOS);
+        $eventRepository->save($event, true);
         return $response;
     }
 
     #[Route('/profile/windows', name: 'profile_windows')]
-    public function profileWindows(RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator, UserRadiusProfileRepository $radiusProfileRepository, EventsRepository $eventsRepository): Response
+    public function profileWindows(RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -223,11 +223,11 @@ class ProfileController extends AbstractController
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
         // Defines the Event to the table
-        $event = new Events();
+        $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(EventsEnum::DOWNLOAD_WINDOWS);
-        $eventsRepository->save($event, true);
+        $event->setEventName(EventEnum::DOWNLOAD_WINDOWS);
+        $eventRepository->save($event, true);
 
         return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));
     }
