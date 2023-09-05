@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Event;
 use App\Entity\User;
-use App\Enum\EventEnum;
+use App\Enum\AnalyticalEventType;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -31,13 +31,13 @@ class AdminUserFixture extends Fixture
         $manager->persist($admin);
 
         $event = new Event();
-        $event->setEventName(EventEnum::USER_CREATION);
+        $event->setEventName(AnalyticalEventType::USER_CREATION);
         $event->setEventDatetime(new DateTime());
         $event->setUser($admin);
         $manager->persist($event);
 
         $event_2 = new Event();
-        $event_2->setEventName(EventEnum::USER_VERIFICATION);
+        $event_2->setEventName(AnalyticalEventType::USER_VERIFICATION);
         $event_2->setEventDatetime(new DateTime());
         $event_2->setUser($admin);
         $manager->persist($event_2);

@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum EventEnum
+enum AnalyticalEventType
 {
     public const DOWNLOAD_ANDROID = 'DOWNLOAD_PROFILE_ANDROID';
     public const DOWNLOAD_IOS = 'DOWNLOAD_PROFILE_IOS';

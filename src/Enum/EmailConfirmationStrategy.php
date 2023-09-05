@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum DemoWhiteLabel
+enum EmailConfirmationStrategy
 {
     public const EMAIL = 'email';
     public const NO_EMAIL = 'no_email';

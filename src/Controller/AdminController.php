@@ -317,7 +317,6 @@ class AdminController extends AbstractController
             'form' => $form->createView(),
             'data' => $data,
         ]);
-
     }
 
     // This route it's in development, again I need to fix and check for another stuff first

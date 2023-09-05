@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\User;
-use App\Enum\EventEnum;
+use App\Enum\AnalyticalEventType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -110,7 +110,7 @@ class RegistrationController extends AbstractController
                 // Defines the Event to the table
                 $event->setUser($user);
                 $event->setEventDatetime(new DateTime());
-                $event->setEventName(EventEnum::USER_CREATION);
+                $event->setEventName(AnalyticalEventType::USER_CREATION);
                 $entityManager->persist($event);
                 $entityManager->flush();
 
@@ -186,7 +186,7 @@ class RegistrationController extends AbstractController
                 $event = new Event();
                 $event->setUser($user);
                 $event->setEventDatetime(new DateTime());
-                $event->setEventName(EventEnum::USER_VERIFICATION);
+                $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
                 $eventRepository->save($event, true);
 
                 $this->addFlash('success', 'Your account has been verified, thank you for your time!');

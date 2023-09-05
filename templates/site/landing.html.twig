@@ -22,18 +22,16 @@
                     <a href="mailto:{{ contactEmail }}"
                        class="font-semibold underline">{{ contactEmail }}</a>
                 </p>
-                {% if demoMode %}
-                    {% if demoModeWhiteLabel != "true" %}
-                        <div class="bg-red-600 text-white font-bold p-3 text-center">
-                            <h2>DEMO MODE</h2>
-                            <p class="text-xs lg:text-base mt-5 ">
-                                This portal is for testing purposes only and should not be used for production purposes,
-                                and
-                                cannot be used for production or commercial purposes. </p>
-                            <p class="text-xs lg:text-base">
-                                Users created via this portal can be revoked at any time without notice. </p>
-                        </div>
-                    {% endif %}
+                {% if PLATFORM_MODE %}
+                    <div class="bg-red-600 text-white font-bold p-3 text-center">
+                        <h2>DEMO MODE</h2>
+                        <p class="text-xs lg:text-base mt-5 ">
+                            This portal is for testing purposes only and should not be used for production purposes,
+                            and
+                            cannot be used for production or commercial purposes. </p>
+                        <p class="text-xs lg:text-base">
+                            Users created via this portal can be revoked at any time without notice. </p>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -67,12 +65,12 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if demoMode %}
-                    <div class="{% if demoModeWhiteLabel != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if demoMode and demoModeWhiteLabel == "no_email" %}
+                {% if PLATFORM_MODE %}
+                    <div class="{% if EMAIL_VERIFICATION != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if PLATFORM_MODE and EMAIL_VERIFICATION == "no_email" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
-                        {% elseif demoMode == "true" and demoModeWhiteLabel == "email" %}
+                        {% elseif PLATFORM_MODE == "true" and EMAIL_VERIFICATION == "email" %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
@@ -107,7 +105,7 @@
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
                             {% else %}
-                                {% if demoModeWhiteLabel == "email" %}
+                                {% if EMAIL_VERIFICATION == "email" %}
                                     {% if not app.user.isVerified %}
                                         {% include 'email_activation/index.html.twig' %}
                                     {% endif %}
@@ -172,7 +170,7 @@
                                 </button>
                             </div>
 
-                            {# ADDITIONAL_LABEL - Demo Mode - True #}
+                            {# ADDITIONAL_LABEL - PLATFORM_MODE - Demo #}
                             <div class=" mt-5 text-center items-center">
                                 {{ ADDITIONAL_LABEL }}
                             </div>
@@ -263,7 +261,7 @@
                                 </form>
                             </div>
                         {% else %}
-                            {% if demoModeWhiteLabel == "email" %}
+                            {% if EMAIL_VERIFICATION == "email" %}
                                 {% include 'email_activation/index.html.twig' %}
                             {% else %}
                                 <div class="mt-10">
@@ -388,7 +386,7 @@
                             </div>
                         {% endif %}
 
-                        {# ADDITIONAL_LABEL - Demo Mode - False #}
+                        {# ADDITIONAL_LABEL - PLATFORM_MODE - Live #}
                         <div class=" mt-5 text-center items-center">
                             {{ ADDITIONAL_LABEL }}
                         </div>

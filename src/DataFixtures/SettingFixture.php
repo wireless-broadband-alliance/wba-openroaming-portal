@@ -21,22 +21,16 @@ class SettingFixture extends Fixture
             ['name' => 'NAI_REALM', 'value' => 'EditMe'],
             ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
 
-            // Demo Mode
-            ['name' => 'DEMO_MODE', 'value' => 'true'],
-            ['name' => 'DEMO_WHITE_LABEL', 'value' => 'no_email'],
+            ['name' => 'PLATFORM_MODE', 'value' => 'true'],
+            ['name' => 'EMAIL_VERIFICATION', 'value' => 'no_email'],
 
-            // Page Settings
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_20th_logo.png'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
-
-            // Additional Label
             ['name' => 'ADDITIONAL_LABEL', 'value' => "This label is only for extra info, it's just to display extra content if necessary."],
-
-            // Contact Email
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
 
             // Authentication Methods
@@ -53,7 +47,6 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_LABEL', 'value' => 'Login an account'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_METHOD_DESCRIPTION', 'value' => 'Already have an account? Login then'],
 
-            // LDAP Sync Settings
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
             ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
             ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
@@ -61,12 +54,10 @@ class SettingFixture extends Fixture
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
 
-            // Links
+            // Redirections Links
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-
-            // Profiles Encryption Type
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
         ];
 

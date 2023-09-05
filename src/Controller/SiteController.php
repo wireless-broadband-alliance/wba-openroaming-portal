@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\User;
-use App\Enum\DemoWhiteLabel;
-use App\Enum\EventEnum;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -66,8 +66,7 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        // Check the DEMO_WHITE_LABEL value
-        if ($data["demoModeWhiteLabel"] === DemoWhiteLabel::EMAIL) {
+        if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
             // Check if the user is logged in
             if ($this->getUser()) {
                 /** @var User $currentUser */
@@ -82,7 +81,7 @@ class SiteController extends AbstractController
         }
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if ($data['demoMode']) {
+        if ($data['PLATFORM_MODE']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
@@ -104,10 +103,10 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["demoModeWhiteLabel"] === DemoWhiteLabel::EMAIL) {
+                    if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
                         return $this->redirectToRoute('app_email_code');
                     }
-                    if ($data["demoModeWhiteLabel"] === DemoWhiteLabel::NO_EMAIL) {
+                    if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -313,7 +312,7 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
         // Modify the needed values
-        $data['demoMode'] = false;
+        $data['PLATFORM_MODE'] = false;
 
         // Get the current user
         /** @var User $currentUser */
@@ -355,7 +354,7 @@ class SiteController extends AbstractController
 
             $event->setUser($currentUser);
             $event->setEventDatetime(new DateTime());
-            $event->setEventName(EventEnum::USER_VERIFICATION);
+            $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
             $eventRepository->save($event, true);
 
             $this->addFlash('success', 'Your account is now successfully verified');

@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Enum\EmailConfirmationStrategy;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -9,7 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use App\Enum\DemoWhiteLabel;
 
 
 class SettingType extends AbstractType
@@ -19,29 +19,37 @@ class SettingType extends AbstractType
         // Specifying each type of input
         $settingTypes = [
             'CONTACT_EMAIL' => EmailType::class,
-            'DEMO_MODE' => ChoiceType::class,
+            'PLATFORM_MODE' => ChoiceType::class,
             'AUTH_METHOD_SAML_ENABLED' => ChoiceType::class,
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ChoiceType::class,
             'AUTH_METHOD_REGISTER_METHOD_ENABLED' => ChoiceType::class,
             'SYNC_LDAP_ENABLED' => ChoiceType::class,
-            'DEMO_WHITE_LABEL' => ChoiceType::class,
+            'EMAIL_VERIFICATION' => ChoiceType::class,
         ];
 
         $settings = $options['settings'];
 
         foreach ($settings as $setting) {
-            if ($setting->getName() === 'DEMO_WHITE_LABEL') {
-                $demoWhiteLabelValue = $setting->getValue();
-                break;
+            $settingName = $setting->getName();
+            $settingValue = $setting->getValue();
+            if ($settingName === 'EMAIL_VERIFICATION') {
+                $builder->add('EMAIL_VERIFICATION', ChoiceType::class, [
+                    'choices' => [
+                        'ON' => EmailConfirmationStrategy::EMAIL,
+                        'OFF' => EmailConfirmationStrategy::NO_EMAIL,
+                    ],
+                    'data' => $settingValue,
+                ]);
+            } elseif ($settingName === 'PLATFORM_MODE') {
+                $builder->add('PLATFORM_MODE', ChoiceType::class, [
+                    'choices' => [
+                        'Demo' => 'true',
+                        'Live' => 'false',
+                    ],
+                    'data' => $settingValue,
+                ]);
             }
         }
-        $builder->add('DEMO_WHITE_LABEL', ChoiceType::class, [
-            'choices' => [
-                'Demo - WITH Email Verification' => DemoWhiteLabel::EMAIL,
-                'Demo - NO Email Verification' => DemoWhiteLabel::NO_EMAIL,
-            ],
-            'data' => $demoWhiteLabelValue ?? null, // Set the current value from the database as the selected choice
-        ]);
 
         foreach ($settings as $setting) {
             // Check if the setting is one of the excluded values
@@ -50,7 +58,7 @@ class SettingType extends AbstractType
                 $builder->add($setting->getName(), HiddenType::class, [
                     'data' => $setting->getValue(),
                 ]);
-            } elseif ($setting->getName() !== 'DEMO_WHITE_LABEL') {
+            } elseif ($setting->getName() !== 'EMAIL_VERIFICATION' && $setting->getName() !== 'PLATFORM_MODE') {
                 // Use the defined input type for other fields
                 $inputType = $settingTypes[$setting->getName()] ?? TextType::class;
 
@@ -74,7 +82,8 @@ class SettingType extends AbstractType
     }
 
 
-    public function configureOptions(OptionsResolver $resolver): void
+    public
+    function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'settings' => [],

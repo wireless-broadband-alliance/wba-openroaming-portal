@@ -55,11 +55,11 @@ class GetSettings
         $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
         $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $data['ADDITIONAL_LABEL'] = $settingRepository->findOneBy(['name' => 'ADDITIONAL_LABEL'])->getValue();
-// Demo Mode
-        $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
-        $demoWhiteLabelSetting = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL']);
-        if ($demoWhiteLabelSetting !== null) {
-            $data['demoModeWhiteLabel'] = $demoWhiteLabelSetting->getValue();
+// Platform Mode
+        $data['PLATFORM_MODE'] = $settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'true';
+        $email_verification = $settingRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+        if ($email_verification !== null) {
+            $data['EMAIL_VERIFICATION'] = $email_verification->getValue();
         }
 // Auth Providers
 // SAML
