@@ -2,12 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\UserRadiusProfile;
-use App\Enum\UserRadiusProfileStatus;
-use App\RadiusDb\Entity\RadiusUser;
-use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -62,8 +57,8 @@ class LDAPSyncCommand extends Command
                 continue;
             }
             $userAccountControl = $ldapUser['useraccountcontrol'][0];
-            $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
-            $userLocked = ($userAccountControl & 0x000002) == 0x000002;
+            $passwordExpired = ($userAccountControl & 0x800000) === 0x800000;
+            $userLocked = ($userAccountControl & 0x000002) === 0x000002;
 
             if ($userLocked) {
                 $io->writeln('User ' . $user->saml_identifier . ' is locked in LDAP, disabling');
