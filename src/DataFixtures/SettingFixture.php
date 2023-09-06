@@ -20,7 +20,7 @@ class SettingFixture extends Fixture
             ['name' => 'NAI_REALM', 'value' => 'EditMe'],
             ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
 
-            ['name' => 'PLATFORM_MODE', 'value' => 'true'],
+            ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'EMAIL_VERIFICATION', 'value' => 'OFF'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
@@ -42,7 +42,7 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create an account'],
             ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Login an account'],
+            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
 
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
