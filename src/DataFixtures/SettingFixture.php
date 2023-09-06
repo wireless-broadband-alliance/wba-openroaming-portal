@@ -29,7 +29,7 @@ class SettingFixture extends Fixture
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => "This label is only for extra info, it's just to display extra content if necessary."],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => "This label it's to add extra content if necessary."],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
@@ -39,7 +39,7 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
             ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create an account'],
+            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account'],
             ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
