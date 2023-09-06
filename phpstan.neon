@@ -1,0 +1,13 @@
+#includes:
+#	- phpstan-baseline.neon
+parameters:
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+        constantHassers: false
+    level: 3
+    reportUnmatchedIgnoredErrors: false
+    excludePaths:
+        - vendor/*
+        - var/*
+    scanDirectories:
+        - var/cache/dev/Symfony/Config

@@ -2,25 +2,30 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
+/**
+ *
+ */
 class GoogleController extends AbstractController
 {
     private ClientRegistry $clientRegistry;
@@ -30,6 +35,14 @@ class GoogleController extends AbstractController
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
 
+    /**
+     * @param ClientRegistry $clientRegistry
+     * @param EntityManagerInterface $entityManager
+     * @param UserPasswordHasherInterface $passwordEncoder
+     * @param TokenStorageInterface $tokenStorage
+     * @param RequestStack $requestStack
+     * @param EventDispatcherInterface $eventDispatcher
+     */
     public function __construct(
         ClientRegistry              $clientRegistry,
         EntityManagerInterface      $entityManager,
@@ -47,6 +60,9 @@ class GoogleController extends AbstractController
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    /**
+     * @return RedirectResponse
+     */
     #[Route('/connect/google', name: 'connect_google')]
     public function connectAction(): RedirectResponse
     {
@@ -81,8 +97,11 @@ class GoogleController extends AbstractController
         // Retrieve the user ID and email from the resource owner
         $googleUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
+        /** @phpstan-ignore-next-line */
         $email = $resourceOwner->getEmail();
+        /** @phpstan-ignore-next-line */
         $firstname = $resourceOwner->getFirstname();
+        /** @phpstan-ignore-next-line */
         $lastname = $resourceOwner->getLastname();
 
         // Check if the email is valid
@@ -113,6 +132,10 @@ class GoogleController extends AbstractController
     }
 
 
+    /**
+     * @param string $email
+     * @return bool
+     */
     private function isValidEmail(string $email): bool
     {
         // Retrieve the valid domains setting from the database
@@ -161,7 +184,7 @@ class GoogleController extends AbstractController
             return $userWithEmail;
         }
 
-        // If no user exists, create a new user
+        // If no user exists, create a new user with a new set of Events
         $user = new User();
         $user->setGoogleId($googleUserId)
             ->setIsVerified(true)
@@ -171,10 +194,22 @@ class GoogleController extends AbstractController
             ->setCreatedAt(new \DateTime())
             ->setUuid($email);
 
+        $event_create = new Event();
+        $event_create->setUser($user);
+        $event_create->setEventName(AnalyticalEventType::USER_CREATION);
+        $event_create->setEventDatetime(new \DateTime());
+
+        $event_verify = new Event();
+        $event_verify->setUser($user);
+        $event_verify->setEventName(AnalyticalEventType::USER_VERIFICATION);
+        $event_verify->setEventDatetime(new \DateTime());
+
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
+        $this->entityManager->persist($event_create);
+        $this->entityManager->persist($event_verify);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
@@ -183,6 +218,10 @@ class GoogleController extends AbstractController
     }
 
 
+    /**
+     * @param User $user
+     * @return void
+     */
     private function authenticateUser(User $user): void
     {
         // Get the current request from the request stack
@@ -192,6 +231,7 @@ class GoogleController extends AbstractController
             // Get the current token and firewall name
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
+            /** @phpstan-ignore-next-line */
             $firewallName = $token ? $token->getFirewallName() : 'main';
 
             // Create a new token with the authenticated user

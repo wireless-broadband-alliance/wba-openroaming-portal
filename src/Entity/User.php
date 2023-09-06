@@ -71,11 +71,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
+    private Collection $event;
+
 
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
+        $this->event = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -195,7 +199,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
 
         return $this;
     }
-    public function setSamlAttributes(array $attributes):void
+
+    public function setSamlAttributes(array $attributes): void
     {
         $this->email = $attributes['email'][0];
         $this->saml_identifier = $attributes['sAMAccountName'][0];
@@ -345,6 +350,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         if ($this->createdAt === null) {
             $this->createdAt = new \DateTimeImmutable();
         }
+    }
+
+    /**
+     * @return Collection<int, Event>
+     */
+    public function getEvent(): Collection
+    {
+        return $this->event;
+    }
+
+    public function addEvent(Event $event): static
+    {
+        if (!$this->event->contains($event)) {
+            $this->event->add($event);
+            $event->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(Event $event): static
+    {
+        if ($this->event->removeElement($event)) {
+            // set the owning side to null (unless already changed)
+            if ($event->getUser() === $this) {
+                $event->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
 }

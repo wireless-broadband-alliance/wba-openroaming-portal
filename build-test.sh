@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker build -t registry.tetrapi.pt/tcs/wba/wba-provisioning-web:tests -f DockerfileTests .
-docker push registry.tetrapi.pt/tcs/wba/wba-provisioning-web:tests
+docker build -t registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:tests -f DockerfileTests .
+docker push registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:tests

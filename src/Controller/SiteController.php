@@ -2,12 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\GetSettings;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -55,28 +60,37 @@ class SiteController extends AbstractController
         $this->getSettings = $getSettings;
     }
 
+    /**
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param UserAuthenticatorInterface $userAuthenticator
+     * @param PasswordAuthenticator $authenticator
+     * @param EntityManagerInterface $entityManager
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/', name: 'app_landing')]
-    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack, SettingRepository $settingRepository): Response
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        // Check if the user is logged in
-        if ($this->getUser()) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verification = $currentUser->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
-                $this->addFlash('error', 'Your account is not verified to download a profile!');
-                return $this->redirectToRoute('app_email_code');
+        if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
+            // Check if the user is logged in
+            if ($this->getUser()) {
+                /** @var User $currentUser */
+                $currentUser = $this->getUser();
+                $verification = $currentUser->isVerified();
+                // Check if the user is verified
+                if (!$verification) {
+                    $this->addFlash('error', 'Your account is not verified to download a profile!');
+                    return $this->redirectToRoute('app_email_code');
+                }
             }
         }
-
-        ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if ($data['demoMode']) {
+        if ($data['PLATFORM_MODE']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
@@ -91,7 +105,6 @@ class SiteController extends AbstractController
                     $user->setCreatedAt(new \DateTime());
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                     $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-
                     $entityManager->persist($user);
                     $entityManager->flush();
                     $userAuthenticator->authenticateUser(
@@ -99,8 +112,14 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    return $this->redirectToRoute('app_email_code');
+                    if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
+                        return $this->redirectToRoute('app_email_code');
+                    }
+                    if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::NO_EMAIL) {
+                        return $this->redirectToRoute('app_landing');
+                    }
                 }
+
                 if (!array_key_exists('radio-os', $payload)) {
                     if (!array_key_exists('detected-os', $payload)) {
                         $os = $request->query->get('os');
@@ -115,6 +134,13 @@ class SiteController extends AbstractController
 
                 }
                 if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
+                    /*
+                     * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
+                     * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
+                    */
+                    if ($payload['radio-os'] === OSTypes::MACOS) {
+                        $payload['radio-os'] = OSTypes::IOS;
+                    }
                     return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
 
                 }
@@ -140,7 +166,6 @@ class SiteController extends AbstractController
             }
             if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
-
             }
         }
 
@@ -160,6 +185,10 @@ class SiteController extends AbstractController
         return $this->render('site/landing.html.twig', $data);
     }
 
+    /**
+     * @param $userAgent
+     * @return string
+     */
     private function detectDevice($userAgent)
     {
         $os = OSTypes::NONE;
@@ -302,10 +331,6 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        // Modify the needed values
-        $data['demoMode'] = false;
-        $data['VERIFICATION_FORM'] = true;
-
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -327,9 +352,15 @@ class SiteController extends AbstractController
     }
 
 
+    /**
+     * @param RequestStack $requestStack
+     * @param UserRepository $userRepository
+     * @param EventRepository $eventRepository
+     * @return Response
+     */
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository): Response
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventRepository $eventRepository): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -339,9 +370,16 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
+            $event = new Event();
             // Set the user as verified
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
+
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
+            $eventRepository->save($event, true);
+
             $this->addFlash('success', 'Your account is now successfully verified');
             return $this->redirectToRoute('app_landing');
         }
@@ -350,6 +388,4 @@ class SiteController extends AbstractController
         $this->addFlash('error', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('app_email_code');
     }
-
-
 }
