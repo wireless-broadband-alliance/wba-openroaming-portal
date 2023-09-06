@@ -61,7 +61,7 @@
                 {# Show the users with the partial _users #}
                 {% if users|length > 0 %}
                     {% for user in users %}
-                        {{ include('admin//partials/_users.html.twig', { 'user': user }) }}
+                        {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
                     {% endfor %}
                 {% else %}
                     <tr>

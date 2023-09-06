@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Form\CustomType;
@@ -17,7 +16,6 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -71,8 +69,7 @@ class AdminController extends AbstractController
      * @param RequestStack $requestStack
      * @return Response
      */
-    #[
-        Route('/dashboard', name: 'admin_page')]
+    #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {

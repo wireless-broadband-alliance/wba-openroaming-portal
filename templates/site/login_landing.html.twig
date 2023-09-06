@@ -80,7 +80,7 @@
                                 class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-5 py-2.5 lg:px-8 lg:py-3 inline-flex items-center justify-center dark:focus:ring-[#7DB928]/55 mr-2 mb-2">
                             Log in
                         </button>
-                        {% if data.PLATFORM_MODE != "Demo" %}
+                        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::Demo') %}
                             <a href="{{ path('app_landing') }}"
                                class="rounded-lg bg-[#E1E4E6] hover:bg-[#E1E4E6]/90 focus:ring-[#E1E4E6]/50  focus:ring-4 focus:outline-none text-[#3F474D] font-medium text-sm px-5 py-2.5 lg:px-8 lg:py-3 inline-flex items-center justify-center mr-2 mb-2">
                                 Choose Another

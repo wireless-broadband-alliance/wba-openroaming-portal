@@ -22,7 +22,7 @@
                     <a href="mailto:{{ contactEmail }}"
                        class="font-semibold underline">{{ contactEmail }}</a>
                 </p>
-                {% if PLATFORM_MODE == "Demo" %}
+                {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') %}
                     <div class="bg-red-600 text-white font-bold p-3 text-center">
                         <h2>DEMO MODE</h2>
                         <p class="text-xs lg:text-base mt-5 ">
@@ -30,7 +30,7 @@
                             and
                             cannot be used for production or commercial purposes. </p>
                         <p class="text-xs lg:text-base">
-                            Users created via this portal can be revoked at any time without notice. </p>
+                            Users created via this portal can be revoked at any time without a notice.</p>
                     </div>
                 {% endif %}
             </div>
@@ -65,12 +65,12 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if PLATFORM_MODE == "Demo" %}
+                {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') %}
                     <div class="{% if EMAIL_VERIFICATION != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if PLATFORM_MODE == "Demo" and EMAIL_VERIFICATION == "OFF" %}
+                        {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') and EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
-                        {% elseif PLATFORM_MODE == "Demo" and EMAIL_VERIFICATION == "ON" %}
+                        {% elseif PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') and EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
@@ -105,7 +105,7 @@
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
                             {% else %}
-                                {% if EMAIL_VERIFICATION == "ON" %}
+                                {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                     {% if not app.user.isVerified %}
                                         {% include 'email_activation/index.html.twig' %}
                                     {% endif %}
@@ -261,7 +261,7 @@
                                 </form>
                             </div>
                         {% else %}
-                            {% if EMAIL_VERIFICATION == "ON" %}
+                            {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 {% include 'email_activation/index.html.twig' %}
                             {% else %}
                                 <div class="mt-10">

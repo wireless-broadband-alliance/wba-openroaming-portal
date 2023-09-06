@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\Platform_mode;
+use App\Enum\PlatformMode;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -43,8 +44,8 @@ class SettingType extends AbstractType
             } elseif ($settingName === 'PLATFORM_MODE') {
                 $builder->add('PLATFORM_MODE', ChoiceType::class, [
                     'choices' => [
-                        Platform_mode::Demo => Platform_mode::Demo,
-                        Platform_mode::Live => Platform_mode::Live,
+                        PlatformMode::Demo => PlatformMode::Demo,
+                        PlatformMode::Live => PlatformMode::Live,
                     ],
                     'data' => $settingValue,
                 ]);

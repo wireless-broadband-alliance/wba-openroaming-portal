@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum Platform_mode
+enum PlatformMode
 {
     public const Live = 'Live';
     public const Demo = 'Demo';

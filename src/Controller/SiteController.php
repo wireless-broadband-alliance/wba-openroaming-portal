@@ -361,9 +361,9 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $event = new Event();
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
+            $event = new Event();
             // Set the user as verified
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
