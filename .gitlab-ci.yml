@@ -2,7 +2,19 @@ image: docker:latest
 services:
   - docker:dind
 stages:
+  - test
   - build
+
+test-phpstan :
+  image : "$CI_REGISTRY_IMAGE:tests"
+  allow_failure : false
+  before_script :
+    - COMPOSER_CACHE_DIR=composer-cache composer install
+  script :
+    - php -d memory_limit=4G vendor/bin/phpstan analyse .
+  stage : test
+  only :
+    - develop
 
 build_image:
   stage: build
