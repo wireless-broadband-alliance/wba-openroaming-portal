@@ -106,7 +106,6 @@ class RegistrationController extends AbstractController
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
-                $user->isVerified(0);
                 $user->setCreatedAt(new DateTime());
                 $entityManager->persist($user);
 
