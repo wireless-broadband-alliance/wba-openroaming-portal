@@ -46,7 +46,6 @@ class GetSettings
     {
         $data = [];
 
-        // Branding
         $data['title'] = $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $data['customerLogoName'] = $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
         $data['openroamingLogoName'] = $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue();
@@ -55,32 +54,29 @@ class GetSettings
         $data['welcomeDescription'] = $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue();
         $data['contactEmail'] = $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $data['ADDITIONAL_LABEL'] = $settingRepository->findOneBy(['name' => 'ADDITIONAL_LABEL'])->getValue();
-// Demo Mode
-        $data['demoMode'] = $settingRepository->findOneBy(['name' => 'DEMO_MODE'])->getValue() === 'true';
-        $data['demoModeWhiteLabel'] = $settingRepository->findOneBy(['name' => 'DEMO_WHITE_LABEL'])->getValue() === 'true';
-// Auth Providers
-// SAML
+        $data['PLATFORM_MODE'] = $settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo';
+        $email_verification = $settingRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+        if ($email_verification !== null) {
+            $data['EMAIL_VERIFICATION'] = $email_verification->getValue();
+        }
         $data['SAML_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true';
         $data['SAML_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue();
         $data['SAML_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue();
-// GOOGLE
         $data['GOOGLE_LOGIN_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true';
         $data['GOOGLE_LOGIN_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL'])->getValue();
         $data['GOOGLE_LOGIN_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'])->getValue();
-//LOGIN TRADITIONAL
-        $data['REGISTER_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_METHOD_ENABLED'])->getValue() === 'true';
-        $data['REGISTER_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_METHOD_LABEL'])->getValue();
-        $data['REGISTER_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_METHOD_DESCRIPTION'])->getValue();
-// Legal Stuff
+        $data['REGISTER_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_ENABLED'])->getValue() === 'true';
+        $data['REGISTER_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_LABEL'])->getValue();
+        $data['REGISTER_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION'])->getValue();
+        $data['LOGIN_TRADITIONAL_ENABLED'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue() === 'true';
+        $data['LOGIN_TRADITIONAL_LABEL'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL'])->getValue();
+        $data['LOGIN_TRADITIONAL_DESCRIPTION'] = $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue();
         $data['TOS_LINK'] = $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
         $data['PRIVACY_POLICY_LINK'] = $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
-/// Verification Form
         $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
-        $data['VERIFICATION_FORM'] = false;
-/// Type of Encryption for profiles
-        $data['PROFILES_ENCRYPTION_TYPE'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE'])->getValue();
+        $data['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'])->getValue();
 
-///
+        ///
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
         $data['os'] = [

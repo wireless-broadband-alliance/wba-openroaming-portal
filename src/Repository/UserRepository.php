@@ -86,8 +86,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->createQueryBuilder('u')
             ->andWhere('u.saml_identifier is not null')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
     public function findExcludingAdminWithSearch(string $searchTerm): array

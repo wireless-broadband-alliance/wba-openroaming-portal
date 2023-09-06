@@ -18,7 +18,6 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class SecurityController extends AbstractController
 {
-
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
@@ -71,7 +70,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        // Show an error message if login attempt fails
+        // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
             $this->addFlash('error', 'Wrong credentials');
         }

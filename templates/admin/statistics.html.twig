@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block body %}
+    {# This file it's not being used yet, I still fixing another stuff before start working with chart.js #}
+    <div class="container mx-auto px-4">
+        <div class="py-8 text-center">
+            <h1 class="text-3xl font-semibold">Admin Page - WBA</h1>
+            <p class="text-gray-500 mt-2">This page is for admin use only. Still in development.</p>
+        </div>
+        {# Return Button #}
+        <div class="flex flex-col items-center md:flex-row md:space-x-6">
+            {% include 'admin/partials/_options_dropdown.html.twig' %}
+
+            <a href="{{ path('admin_page') }}"
+               class="flex md:w-auto whitespace-nowrap rounded bg-blue-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
+            >
+                Return Dashboard
+            </a>
+        </div>
+
+        {# Graphic table - Users #}
+        <section class="py-16 my-6">
+            <div class="w-full xl:w-8/12 xl:mb-0 px-4 mx-auto mt-6">
+                <div class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded bg-gray-200 hover:bg-gray-200/50">
+                    <div class="rounded-t mb-0 px-4 py-3 bg-transparent">
+                        <div class="flex flex-wrap items-center">
+                            <div class="relative w-full max-w-full flex-grow flex-1">
+                                <h6 class="text-center text-black mb-1 text-xl font-semibold">
+                                    Total of Users
+                                </h6>
+                                <h2 class="text-black md:text-base text-sm font-semibold">
+                                    Nª Users
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 flex-auto">
+                        <!-- Chart -->
+                        <div class="relative h-350-px">
+                            <div class="chartjs-size-monitor">
+                                <div class="chartjs-size-monitor-expand">
+                                    <div class=""></div>
+                                </div>
+                                <div class="chartjs-size-monitor-shrink">
+                                    <div class=""></div>
+                                </div>
+                            </div>
+                            <canvas id="line-chart" style="display: block; height: 350px; width: 791px;" width="1582"
+                                    height="700" class="chartjs-render-monitor"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+{% endblock %}
