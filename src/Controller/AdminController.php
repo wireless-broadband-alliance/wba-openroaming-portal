@@ -31,17 +31,24 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
+/**
+ *
+ */
 class AdminController extends AbstractController
 {
     private UserRepository $userRepository;
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
-
     private GetSettings $getSettings;
-
     private SettingRepository $settingRepository;
 
-
+    /**
+     * @param UserRepository $userRepository
+     * @param ProfileManager $profileManager
+     * @param ParameterBagInterface $parameterBag
+     * @param GetSettings $getSettings
+     * @param SettingRepository $settingRepository
+     */
     public function __construct(
         UserRepository        $userRepository,
         ProfileManager        $profileManager,
@@ -58,6 +65,12 @@ class AdminController extends AbstractController
         $this->settingRepository = $settingRepository;
     }
 
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[
         Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
@@ -94,6 +107,12 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     public function searchUsers(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
@@ -138,6 +157,11 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param $id
+     * @param EntityManagerInterface $em
+     * @return Response
+     */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete')]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers($id, EntityManagerInterface $em): Response
@@ -162,6 +186,12 @@ class AdminController extends AbstractController
     }
 
 
+    /**
+     * @param User $user
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @return Response
+     */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(User $user, Request $request, UserRepository $userRepository): Response
@@ -261,6 +291,12 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
@@ -319,7 +355,7 @@ class AdminController extends AbstractController
         ]);
     }
 
-    // This route it's in development, again I need to fix and check for another stuff first
+    /*This route it's in development, again I need to fix and check for another stuff first
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
     public function statisticsData(EntityManagerInterface $em): JsonResponse
@@ -340,6 +376,13 @@ class AdminController extends AbstractController
         return $this->json($formattedData);
     }
 
+    */
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
@@ -407,11 +450,19 @@ class AdminController extends AbstractController
     }
 
 
+    /**
+     * @param $user
+     * @return void
+     */
     private function disableProfiles($user): void
     {
         $this->profileManager->disableProfiles($user);
     }
 
+    /**
+     * @param $user
+     * @return void
+     */
     private function enableProfiles($user): void
     {
         $this->profileManager->enableProfiles($user);

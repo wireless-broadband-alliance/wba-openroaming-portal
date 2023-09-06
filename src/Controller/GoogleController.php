@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\Platform_mode;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -23,6 +24,9 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
+/**
+ *
+ */
 class GoogleController extends AbstractController
 {
     private ClientRegistry $clientRegistry;
@@ -32,6 +36,14 @@ class GoogleController extends AbstractController
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
 
+    /**
+     * @param ClientRegistry $clientRegistry
+     * @param EntityManagerInterface $entityManager
+     * @param UserPasswordHasherInterface $passwordEncoder
+     * @param TokenStorageInterface $tokenStorage
+     * @param RequestStack $requestStack
+     * @param EventDispatcherInterface $eventDispatcher
+     */
     public function __construct(
         ClientRegistry              $clientRegistry,
         EntityManagerInterface      $entityManager,
@@ -49,6 +61,9 @@ class GoogleController extends AbstractController
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    /**
+     * @return RedirectResponse
+     */
     #[Route('/connect/google', name: 'connect_google')]
     public function connectAction(): RedirectResponse
     {
@@ -115,6 +130,10 @@ class GoogleController extends AbstractController
     }
 
 
+    /**
+     * @param string $email
+     * @return bool
+     */
     private function isValidEmail(string $email): bool
     {
         // Retrieve the valid domains setting from the database
@@ -197,6 +216,10 @@ class GoogleController extends AbstractController
     }
 
 
+    /**
+     * @param User $user
+     * @return void
+     */
     private function authenticateUser(User $user): void
     {
         // Get the current request from the request stack

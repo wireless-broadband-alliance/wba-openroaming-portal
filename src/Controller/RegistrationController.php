@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\Platform_mode;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -37,7 +38,6 @@ class RegistrationController extends AbstractController
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
-
     private ParameterBagInterface $parameterBag;
 
     /**

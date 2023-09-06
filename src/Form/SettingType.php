@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
+use App\Enum\Platform_mode;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -34,16 +35,16 @@ class SettingType extends AbstractType
             if ($settingName === 'EMAIL_VERIFICATION') {
                 $builder->add('EMAIL_VERIFICATION', ChoiceType::class, [
                     'choices' => [
-                        'ON' => EmailConfirmationStrategy::EMAIL,
-                        'OFF' => EmailConfirmationStrategy::NO_EMAIL,
+                        EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
+                        EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
                     ],
                     'data' => $settingValue,
                 ]);
             } elseif ($settingName === 'PLATFORM_MODE') {
                 $builder->add('PLATFORM_MODE', ChoiceType::class, [
                     'choices' => [
-                        'Demo' => 'true',
-                        'Live' => 'false',
+                        Platform_mode::Demo => Platform_mode::Demo,
+                        Platform_mode::Live => Platform_mode::Live,
                     ],
                     'data' => $settingValue,
                 ]);

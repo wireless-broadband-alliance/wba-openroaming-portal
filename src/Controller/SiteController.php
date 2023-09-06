@@ -60,6 +60,15 @@ class SiteController extends AbstractController
         $this->getSettings = $getSettings;
     }
 
+    /**
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param UserAuthenticatorInterface $userAuthenticator
+     * @param PasswordAuthenticator $authenticator
+     * @param EntityManagerInterface $entityManager
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/', name: 'app_landing')]
     public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
     {
@@ -169,6 +178,10 @@ class SiteController extends AbstractController
         return $this->render('site/landing.html.twig', $data);
     }
 
+    /**
+     * @param $userAgent
+     * @return string
+     */
     private function detectDevice($userAgent)
     {
         $os = OSTypes::NONE;
@@ -311,9 +324,6 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        // Modify the needed values
-        $data['PLATFORM_MODE'] = false;
-
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -335,6 +345,12 @@ class SiteController extends AbstractController
     }
 
 
+    /**
+     * @param RequestStack $requestStack
+     * @param UserRepository $userRepository
+     * @param EventRepository $eventRepository
+     * @return Response
+     */
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
     public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventRepository $eventRepository): Response
@@ -365,6 +381,4 @@ class SiteController extends AbstractController
         $this->addFlash('error', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('app_email_code');
     }
-
-
 }

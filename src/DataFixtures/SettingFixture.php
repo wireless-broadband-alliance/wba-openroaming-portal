@@ -11,7 +11,6 @@ class SettingFixture extends Fixture
     public function load(ObjectManager $manager)
     {
         $settings = [
-            // General Settings
             ['name' => 'RADIUS_REALM_NAME', 'value' => 'EditMe'],
             ['name' => 'DISPLAY_NAME', 'value' => 'EditMe'],
             ['name' => 'PAYLOAD_IDENTIFIER', 'value' => '887FAE2A-F051-4CC9-99BB-8DFD66F553A9'],
@@ -33,7 +32,6 @@ class SettingFixture extends Fixture
             ['name' => 'ADDITIONAL_LABEL', 'value' => "This label is only for extra info, it's just to display extra content if necessary."],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
 
-            // Authentication Methods
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
             ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
