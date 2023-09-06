@@ -29,7 +29,7 @@ WORKDIR /var/www/openroaming
 COPY . /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
 RUN composer install
-
+RUN php bin/console cache:warmup --env=dev
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY service-config/nginx/mime.types /etc/nginx/mime.types

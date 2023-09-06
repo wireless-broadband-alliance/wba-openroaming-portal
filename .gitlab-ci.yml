@@ -11,8 +11,6 @@ test-phpstan :
   script :
     - php -d memory_limit=4G vendor/bin/phpstan analyse .
   stage : test
-  only :
-    - develop
 
 build_image:
   stage: build
