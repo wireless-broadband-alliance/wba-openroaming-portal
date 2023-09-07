@@ -76,18 +76,6 @@ class GetSettings
         $data['code'] = ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null;
         $data['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] = $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'])->getValue();
 
-        ///
-        $userAgent = $request->headers->get('User-Agent');
-        $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        $data['os'] = [
-            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
-            'items' => [
-                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
-                OSTypes::IOS => ['alt' => 'Apple Logo'],
-                OSTypes::ANDROID => ['alt' => 'Android Logo']
-            ]
-        ];
-
         return $data;
     }
 
