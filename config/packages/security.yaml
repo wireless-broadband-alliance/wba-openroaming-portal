@@ -8,7 +8,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: uuid
         saml_provider:
             ##  Basic provider instantiates a user with identifier and default roles
             saml:
@@ -33,6 +33,7 @@ security:
             saml:
                 ##  Match SAML attribute 'uid' with user identifier.
                 ##  Otherwise, used \OneLogin\Saml2\Auth::getNameId() method by default.
+#                 identifier_attribute: sAMAccountName
                 identifier_attribute: sAMAccountName
                 user_factory: saml_user_factory
                 persist_user: true
