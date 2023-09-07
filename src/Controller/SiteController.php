@@ -165,6 +165,13 @@ class SiteController extends AbstractController
 
             }
             if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
+                /*
+                    * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
+                    * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
+                   */
+                if ($payload['radio-os'] === OSTypes::MACOS) {
+                    $payload['radio-os'] = OSTypes::IOS;
+                }
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
             }
         }
@@ -222,6 +229,30 @@ class SiteController extends AbstractController
     }
 
     /**
+     * Regenerate the verification code for the user and send a new email.
+     *
+     * @return RedirectResponse A redirect response.
+     * @throws Exception
+     * @throws TransportExceptionInterface
+     */
+    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
+    #[IsGranted('ROLE_USER')]
+    public function regenerateCode(): RedirectResponse
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $isVerified = $currentUser->isVerified();
+
+        if (!$isVerified) {
+            // Regenerate the verification code for the user
+            $newCode = $this->generateVerificationCode($currentUser);
+            $this->sendEmail($currentUser->getEmail(), $newCode);
+        }
+        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
+        return $this->redirectToRoute('app_email_code');
+    }
+
+    /**
      * Generate a new verification code for the user.
      *
      * @param User $user The user for whom the verification code is generated.
@@ -236,6 +267,31 @@ class SiteController extends AbstractController
         $this->userRepository->save($user, true);
 
         return $verificationCode;
+    }
+
+    /**
+     * Send the verification code email to the user.
+     *
+     * @param string $email The user's email address.
+     * @param int|null $verificationCode The verification code.
+     * @return void
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    protected function sendEmail(string $email, ?int $verificationCode = null): void
+    {
+        if ($verificationCode === null) {
+            // If the verification code is not provided, generate a new one
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            $verificationCode = $this->generateVerificationCode($currentUser);
+        }
+
+        // Create the email message with the verification code
+        $message = $this->createEmailCode($email, $verificationCode);
+
+        // Send the email
+        $this->mailer->send($message);
     }
 
     /**
@@ -267,57 +323,6 @@ class SiteController extends AbstractController
             ->context([
                 'verificationCode' => $verificationCode,
             ]);
-    }
-
-
-    /**
-     * Send the verification code email to the user.
-     *
-     * @param string $email The user's email address.
-     * @param int|null $verificationCode The verification code.
-     * @return void
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    protected function sendEmail(string $email, ?int $verificationCode = null): void
-    {
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
-
-        // Create the email message with the verification code
-        $message = $this->createEmailCode($email, $verificationCode);
-
-        // Send the email
-        $this->mailer->send($message);
-    }
-
-
-    /**
-     * Regenerate the verification code for the user and send a new email.
-     *
-     * @return RedirectResponse A redirect response.
-     * @throws Exception
-     * @throws TransportExceptionInterface
-     */
-    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
-    #[IsGranted('ROLE_USER')]
-    public function regenerateCode(): RedirectResponse
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
-
-        if (!$isVerified) {
-            // Regenerate the verification code for the user
-            $newCode = $this->generateVerificationCode($currentUser);
-            $this->sendEmail($currentUser->getEmail(), $newCode);
-        }
-        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
-        return $this->redirectToRoute('app_email_code');
     }
 
     /**
