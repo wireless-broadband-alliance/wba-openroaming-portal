@@ -2,12 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\UserRadiusProfile;
-use App\Enum\UserRadiusProfileStatus;
-use App\RadiusDb\Entity\RadiusUser;
-use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use Symfony\Component\Console\Attribute\AsCommand;
