@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OSTypes;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
@@ -77,7 +78,8 @@ class ProfileController extends AbstractController
         $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_ANDROID);
+        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
+        $event->setEventMetadata(OSTypes::ANDROID);
         $eventRepository->save($event, true);
 
         return $response;
@@ -160,7 +162,8 @@ class ProfileController extends AbstractController
         $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_IOS);
+        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
+        $event->setEventMetadata(OSTypes::IOS);
         $eventRepository->save($event, true);
         return $response;
     }
@@ -226,7 +229,8 @@ class ProfileController extends AbstractController
         $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_WINDOWS);
+        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
+        $event->setEventMetadata(OSTypes::WINDOWS);
         $eventRepository->save($event, true);
 
         return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));
