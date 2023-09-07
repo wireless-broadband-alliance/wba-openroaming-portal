@@ -40,4 +40,5 @@ services:
               last_name: $surname
               uuid: $sAMAccountName
               saml_identifier: $sAMAccountName
+              isVerified: 1
               roles: []
