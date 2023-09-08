@@ -22,7 +22,7 @@ class AdminUserFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         $admin = new User();
-        $admin->setUuid('admin');
+        $admin->setUuid('admin@example.com');
         $admin->setEmail('admin@example.com');
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
         $admin->setRoles(['ROLE_ADMIN']);
