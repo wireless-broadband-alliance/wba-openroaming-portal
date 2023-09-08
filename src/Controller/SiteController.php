@@ -113,7 +113,7 @@ class SiteController extends AbstractController
                         $request
                     );
                     if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
-                        return $this->redirectToRoute('app_email_code');
+                        return $this->redirectToRoute('app_regenerate_email_code');
                     }
                     if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
@@ -310,11 +310,10 @@ class SiteController extends AbstractController
             $this->sendEmail($currentUser->getEmail(), $newCode);
         }
         $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
-        return $this->redirectToRoute('app_email_code');
+        return $this->redirectToRoute('app_landing');
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws Exception
      */
     #[Route('/email', name: 'app_email_code')]
@@ -328,12 +327,6 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            if (str_contains($currentUser->getUuid(), '-DEMO-')) {
-                $this->addFlash('success', 'We have sent an email with your verification code');
-                // Send the email with the verification
-                $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
-            }
-
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 ...$data,
