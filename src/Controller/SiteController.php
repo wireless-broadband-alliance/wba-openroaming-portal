@@ -264,6 +264,7 @@ class SiteController extends AbstractController
      *
      * @return RedirectResponse A redirect response.
      * @throws Exception
+     * @throws TransportExceptionInterface
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
@@ -275,7 +276,8 @@ class SiteController extends AbstractController
 
         if (!$isVerified) {
             // Regenerate the verification code for the user
-            $this->createEmailCode($currentUser->getEmail());
+            $email = $this->createEmailCode($currentUser->getEmail());
+            $this->mailer->send($email);
         }
         $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
         return $this->redirectToRoute('app_landing');
