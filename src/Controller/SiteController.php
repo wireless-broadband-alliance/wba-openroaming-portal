@@ -235,22 +235,19 @@ class SiteController extends AbstractController
      * Create an email message with the verification code.
      *
      * @param string $email The recipient's email address.
-     * @param int|null $verificationCode The verification code to include in the email.
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailCode(string $email, ?int $verificationCode = null): Email
+    protected function createEmailCode(string $email): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $Email_sender = $this->parameterBag->get('app.email_address');
         $Name_sender = $this->parameterBag->get('app.sender_name');
 
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
+        // If the verification code is not provided, generate a new one
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $verificationCode = $this->generateVerificationCode($currentUser);
 
         return (new TemplatedEmail())
             ->from(new Address($Email_sender, $Name_sender))
@@ -278,8 +275,7 @@ class SiteController extends AbstractController
 
         if (!$isVerified) {
             // Regenerate the verification code for the user
-            $newCode = $this->generateVerificationCode($currentUser);
-            $this->createEmailCode($currentUser->getEmail(), $newCode);
+            $this->createEmailCode($currentUser->getEmail());
         }
         $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
         return $this->redirectToRoute('app_landing');
