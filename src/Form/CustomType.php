@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Validator\NoEmotes;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -40,7 +41,9 @@ class CustomType extends AbstractType
                     }
                 }
             }
-
+            $formFieldOptions['constraints'] = [
+                new NoEmotes(),
+            ];
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
     }
