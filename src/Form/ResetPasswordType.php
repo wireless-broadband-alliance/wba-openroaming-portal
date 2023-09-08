@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Validator\NoEmotes;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,6 +18,9 @@ class ResetPasswordType extends AbstractType
                 'label' => 'New Password',
                 'attr' => [
                     'placeholder' => 'Enter your new password',
+                ],
+                'constraints' => [
+                    new NoEmotes(),
                 ],
             ])
         ;
