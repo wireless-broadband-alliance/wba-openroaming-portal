@@ -134,6 +134,13 @@ class SiteController extends AbstractController
 
                 }
                 if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
+                    /*
+                     * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
+                     * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
+                    */
+                    if ($payload['radio-os'] === OSTypes::MACOS) {
+                        $payload['radio-os'] = OSTypes::IOS;
+                    }
                     return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
 
                 }
@@ -158,6 +165,13 @@ class SiteController extends AbstractController
 
             }
             if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
+                /*
+                    * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
+                    * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
+                   */
+                if ($payload['radio-os'] === OSTypes::MACOS) {
+                    $payload['radio-os'] = OSTypes::IOS;
+                }
                 return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
             }
         }

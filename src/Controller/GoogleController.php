@@ -12,13 +12,13 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -97,8 +97,11 @@ class GoogleController extends AbstractController
         // Retrieve the user ID and email from the resource owner
         $googleUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
+        /** @phpstan-ignore-next-line */
         $email = $resourceOwner->getEmail();
+        /** @phpstan-ignore-next-line */
         $firstname = $resourceOwner->getFirstname();
+        /** @phpstan-ignore-next-line */
         $lastname = $resourceOwner->getLastname();
 
         // Check if the email is valid
@@ -228,6 +231,7 @@ class GoogleController extends AbstractController
             // Get the current token and firewall name
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
+            /** @phpstan-ignore-next-line */
             $firewallName = $token ? $token->getFirewallName() : 'main';
 
             // Create a new token with the authenticated user
