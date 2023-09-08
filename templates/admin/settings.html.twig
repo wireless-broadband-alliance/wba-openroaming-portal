@@ -50,7 +50,9 @@
                                     {{ form_widget(form[setting.name], {'attr': {'class': 'text-center text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2', 'placeholder': 'Not Defined'}}) }}
                                 {% else %}
                                     {{ form_widget(form[setting.name], {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
-                                    {{ form_errors(form[setting.name], {'attr': {'class': 'mt-2 text-center text-red-500 text-base'}}) }}
+                                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                                        {{ form_errors(form[setting.name]) }}
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
