@@ -113,7 +113,7 @@ class SiteController extends AbstractController
                         $request
                     );
                     if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
-                        return $this->redirectToRoute('app_email_code');
+                        return $this->redirectToRoute('app_regenerate_email_code');
                     }
                     if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
@@ -246,7 +246,22 @@ class SiteController extends AbstractController
         if (!$isVerified) {
             // Regenerate the verification code for the user
             $newCode = $this->generateVerificationCode($currentUser);
-            $this->sendEmail($currentUser->getEmail(), $newCode);
+//            $this->sendEmail($currentUser->getEmail(), $newCode);
+            $emailSender = $this->parameterBag->get('app.email_address');
+            $emailSenderName = $this->parameterBag->get('app.sender_name');
+            $email = (new TemplatedEmail())
+                ->from(new Address($emailSender, $emailSenderName))
+                ->to($currentUser->getEmail())
+                ->subject('Your OpenRoaming Registration Details')
+                ->htmlTemplate('email_activation/email_template_password.html.twig')
+                ->context([
+                    'uuid' => $currentUser->getUuid(),
+                    'verificationCode' => $newCode,
+                    'isNewUser' => true,
+                    'password' => null,
+                ]);
+
+            $this->mailer->send($email);
         }
         $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
         return $this->redirectToRoute('app_email_code');
@@ -269,30 +284,30 @@ class SiteController extends AbstractController
         return $verificationCode;
     }
 
-    /**
-     * Send the verification code email to the user.
-     *
-     * @param string $email The user's email address.
-     * @param int|null $verificationCode The verification code.
-     * @return void
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    protected function sendEmail(string $email, ?int $verificationCode = null): void
-    {
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
-
-        // Create the email message with the verification code
-        $message = $this->createEmailCode($email, $verificationCode);
-
-        // Send the email
-        $this->mailer->send($message);
-    }
+//    /**
+//     * Send the verification code email to the user.
+//     *
+//     * @param string $email The user's email address.
+//     * @param int|null $verificationCode The verification code.
+//     * @return void
+//     * @throws TransportExceptionInterface
+//     * @throws Exception
+//     */
+//    protected function sendEmail(string $email, ?int $verificationCode = null): void
+//    {
+//        if ($verificationCode === null) {
+//            // If the verification code is not provided, generate a new one
+//            /** @var User $currentUser */
+//            $currentUser = $this->getUser();
+//            $verificationCode = $this->generateVerificationCode($currentUser);
+//        }
+//
+//        // Create the email message with the verification code
+//        $message = $this->createEmailCode($email, $verificationCode);
+//
+//        // Send the email
+//        $this->mailer->send($message);
+//    }
 
     /**
      * Create an email message with the verification code.
@@ -302,28 +317,28 @@ class SiteController extends AbstractController
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailCode(string $email, ?int $verificationCode = null): Email
-    {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $Email_sender = $this->parameterBag->get('app.email_address');
-        $Name_sender = $this->parameterBag->get('app.sender_name');
-
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
-
-        return (new TemplatedEmail())
-            ->from(new Address($Email_sender, $Name_sender))
-            ->to($email)
-            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->htmlTemplate('email_activation/email_template.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-            ]);
-    }
+//    protected function createEmailCode(string $email, ?int $verificationCode = null): Email
+//    {
+//        // Get the values from the services.yaml file using $parameterBag on the __construct
+//        $Email_sender = $this->parameterBag->get('app.email_address');
+//        $Name_sender = $this->parameterBag->get('app.sender_name');
+//
+//        if ($verificationCode === null) {
+//            // If the verification code is not provided, generate a new one
+//            /** @var User $currentUser */
+//            $currentUser = $this->getUser();
+//            $verificationCode = $this->generateVerificationCode($currentUser);
+//        }
+//
+//        return (new TemplatedEmail())
+//            ->from(new Address($Email_sender, $Name_sender))
+//            ->to($email)
+//            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
+//            ->htmlTemplate('email_activation/email_template.html.twig')
+//            ->context([
+//                'verificationCode' => $verificationCode,
+//            ]);
+//    }
 
     /**
      * @throws TransportExceptionInterface
@@ -340,11 +355,11 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            if (str_contains($currentUser->getUuid(), '-DEMO-')) {
-                $this->addFlash('success', 'We have sent an email with your verification code');
-                // Send the email with the verification
-                $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
-            }
+//            if (str_contains($currentUser->getUuid(), '-DEMO-')) {
+//                $this->addFlash('success', 'We have sent an email with your verification code');
+//                // Send the email with the verification
+//                $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
+//            }
 
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
