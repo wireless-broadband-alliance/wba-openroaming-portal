@@ -22,6 +22,16 @@ import {
 } from "tw-elements";
 
 
+document.addEventListener('DOMContentLoaded', function() {
+	const searchForm = document.getElementById('searchForm');
+	const searchDemoUsers = document.getElementById('searchDemoUsers');
+
+	searchDemoUsers.addEventListener('change', function() {
+		// Submit the form when the toggle is changed
+		searchForm.submit();
+	});
+});
+
 initTE({Dropdown, Ripple});
 
 /*

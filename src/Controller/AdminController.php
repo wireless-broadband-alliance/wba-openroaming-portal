@@ -69,8 +69,7 @@ class AdminController extends AbstractController
      * @param RequestStack $requestStack
      * @return Response
      */
-    #[
-        Route('/dashboard', name: 'admin_page')]
+    #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
@@ -121,8 +120,13 @@ class AdminController extends AbstractController
         $page = $request->query->getInt('page', 1);
         $perPage = 25;
 
-        // Search users based on the provided search term
-        $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
+        $searchDemoUsers = $request->query->get('search_demo_users', 0); // get the request to select the correct search
+        if ($searchDemoUsers) {
+            $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
+        } else {
+            // Search only non-demo users
+            $users = $userRepository->findNonDemoUsersWithSearch($searchTerm);
+        }
 
         // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
@@ -151,6 +155,7 @@ class AdminController extends AbstractController
             'current_user' => $user,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
+            'searchDemoUsers' => $searchDemoUsers,
             'data' => $data
         ]);
     }
