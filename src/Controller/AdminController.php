@@ -27,6 +27,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 
 /**
@@ -52,8 +53,7 @@ class AdminController extends AbstractController
         ProfileManager        $profileManager,
         ParameterBagInterface $parameterBag,
         GetSettings           $getSettings,
-        SettingRepository     $settingRepository
-
+        SettingRepository     $settingRepository,
     )
     {
         $this->userRepository = $userRepository;
@@ -69,7 +69,8 @@ class AdminController extends AbstractController
      * @param RequestStack $requestStack
      * @return Response
      */
-    #[Route('/dashboard', name: 'admin_page')]
+    #[
+        Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
@@ -261,6 +262,21 @@ class AdminController extends AbstractController
 
             $em->flush();
 
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                // Send email to the user with the new password
+                $email = (new Email())
+                    ->from(new Address($Email, $Name))
+                    ->to($user->getEmail())
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email_activation/email_template_password_admin.html.twig'
+                        )
+                    );
+                $mailer->send($email);
+                return $this->redirectToRoute('saml_logout');
+            }
+
             // Send email to the user with the new password
             $email = (new Email())
                 ->from(new Address($Email, $Name))
@@ -273,11 +289,6 @@ class AdminController extends AbstractController
                     )
                 );
             $mailer->send($email);
-
-            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                $this->addFlash('success_admin', 'Your password has been changed successfully');
-                return $this->redirectToRoute('saml_logout');
-            }
 
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
         }

@@ -47,7 +47,7 @@
                             <div class="p-2 w-full">
                                 {% set value = form[setting.name].vars.value %}
                                 {% if value is empty %}
-                                    {{ form_widget(form[setting.name], {'attr': {'class': 'text-base text-red-500 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                                    {{ form_widget(form[setting.name], {'attr': {'class': 'text-center text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2', 'placeholder': 'Not Defined'}}) }}
                                 {% else %}
                                     {{ form_widget(form[setting.name], {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                     {{ form_errors(form[setting.name]) }}
