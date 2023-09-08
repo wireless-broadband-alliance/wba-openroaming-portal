@@ -262,39 +262,11 @@ class SiteController extends AbstractController
             ]);
     }
 
-
-    /**
-     * Send the verification code email to the user.
-     *
-     * @param string $email The user's email address.
-     * @param int|null $verificationCode The verification code.
-     * @return void
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    protected function sendEmail(string $email, ?int $verificationCode = null): void
-    {
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
-
-        // Create the email message with the verification code
-        $message = $this->createEmailCode($email, $verificationCode);
-
-        // Send the email
-        $this->mailer->send($message);
-    }
-
-
     /**
      * Regenerate the verification code for the user and send a new email.
      *
      * @return RedirectResponse A redirect response.
      * @throws Exception
-     * @throws TransportExceptionInterface
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
@@ -307,7 +279,7 @@ class SiteController extends AbstractController
         if (!$isVerified) {
             // Regenerate the verification code for the user
             $newCode = $this->generateVerificationCode($currentUser);
-            $this->sendEmail($currentUser->getEmail(), $newCode);
+            $this->createEmailCode($currentUser->getEmail(), $newCode);
         }
         $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
         return $this->redirectToRoute('app_landing');
