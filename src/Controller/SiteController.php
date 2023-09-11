@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
+use App\Enum\PlatformMode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -101,11 +102,20 @@ class SiteController extends AbstractController
                     $this->addFlash('error', 'Please agree to the Terms of Service');
                 } else if ($this->getUser() === null) {
                     $user = new User();
+                    $event = new Event();
+
                     $user->setEmail($payload['email']);
                     $user->setCreatedAt(new \DateTime());
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                     $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                     $entityManager->persist($user);
+
+                    $event->setUser($user);
+                    $event->setEventDatetime(new DateTime());
+                    $event->setEventName(AnalyticalEventType::USER_CREATION);
+                    $event->setEventMetadata(PlatformMode::Demo);
+                    $entityManager->persist($event);
+
                     $entityManager->flush();
                     $userAuthenticator->authenticateUser(
                         $user,
