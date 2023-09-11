@@ -4,8 +4,16 @@ namespace App\Validator;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+
 class NoEmotesValidator extends ConstraintValidator
 {
+    /**
+     * @param $value
+     * @param Constraint $constraint
+     * @return void
+     * This validator finds emoji characters in the input string.
+     * If emojis are present, it indicates a violation using the NoEmotes constraint's stated error message.
+     */
     public function validate($value, Constraint $constraint): void
     {
         /** @var NoEmotes $constraint */
