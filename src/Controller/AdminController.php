@@ -123,7 +123,7 @@ class AdminController extends AbstractController
 
         // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
-            $this->addFlash('error_admin', 'Please enter at least 3 characters for the search.');
+            $this->addFlash('error_admin', 'Please enter at least 3 characters to search.');
 
             return $this->redirectToRoute('admin_page');
         }
