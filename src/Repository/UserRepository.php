@@ -110,29 +110,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    public function findNonDemoUsersWithSearch(string $searchTerm): array
-    {
-        return $this->createQueryBuilder('u')
-            ->where('u.roles NOT LIKE :role')
-            ->andWhere(
-                $this->createQueryBuilder('u')
-                    ->expr()
-                    ->orX(
-                        'u.uuid LIKE :searchTerm',
-                        'u.email LIKE :searchTerm',
-                        'u.first_name LIKE :searchTerm',
-                        'u.last_name LIKE :searchTerm'
-                    )
-            )
-            ->andWhere('u.uuid NOT LIKE :demoTag') // Exclude users with the "DEMO" tag on the UUID
-            ->orderBy('u.createdAt', 'DESC')
-            ->setParameter('role', '%ROLE_ADMIN%')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->setParameter('demoTag', '%-DEMO-%')
-            ->getQuery()
-            ->getResult();
-    }
-
     public function findExcludingAdmin(): array
     {
         return $this->createQueryBuilder('u')
