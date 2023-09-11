@@ -8,6 +8,7 @@ class NoEmotesValidator extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint): void
     {
+        /** @var NoEmotes $constraint */
         // Define a regular expression pattern to match emojis
         $emojiPattern = '/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}]/u';
 
@@ -15,5 +16,6 @@ class NoEmotesValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }
+
 }
 
