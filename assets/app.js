@@ -21,13 +21,13 @@ import {
 	initTE,
 } from "tw-elements";
 
-
+// Gets the current value from the toggle on the admin_page
+// To select the correct search system
 document.addEventListener('DOMContentLoaded', function() {
 	const searchForm = document.getElementById('searchForm');
 	const searchDemoUsers = document.getElementById('searchDemoUsers');
 
 	searchDemoUsers.addEventListener('change', function() {
-		// Submit the form when the toggle is changed
 		searchForm.submit();
 	});
 });
