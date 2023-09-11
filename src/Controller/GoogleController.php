@@ -198,7 +198,9 @@ class GoogleController extends AbstractController
         $event_create = new Event();
         $event_create->setUser($user);
         $event_create->setEventName(AnalyticalEventType::USER_CREATION);
-        $event_create->setEventMetadata(PlatformMode::Live);
+        $event_create->setEventMetadata([
+            'platform' => PlatformMode::Live,
+        ]);
         $event_create->setEventDatetime(new \DateTime());
 
         $event_verify = new Event();

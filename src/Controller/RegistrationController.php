@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
@@ -114,7 +115,9 @@ class RegistrationController extends AbstractController
                 $event->setUser($user);
                 $event->setEventDatetime(new DateTime());
                 $event->setEventName(AnalyticalEventType::USER_CREATION);
-                $event->setEventMetadata(PlatformMode::Live);
+                $event->setEventMetadata([
+                    'platform' => PlatformMode::Live,
+                ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
 

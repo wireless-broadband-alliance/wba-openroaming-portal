@@ -113,7 +113,9 @@ class SiteController extends AbstractController
                     $event->setUser($user);
                     $event->setEventDatetime(new DateTime());
                     $event->setEventName(AnalyticalEventType::USER_CREATION);
-                    $event->setEventMetadata(PlatformMode::Demo);
+                    $event->setEventMetadata([
+                        'platform' => PlatformMode::Demo,
+                    ]);
                     $entityManager->persist($event);
 
                     $entityManager->flush();
