@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
-use App\Validator\NoEmotes;
+use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -80,7 +80,7 @@ class SettingType extends AbstractType
                     $builder->add($setting->getName(), $inputType, [
                         'data' => $setting->getValue(),
                         'constraints' => [
-                            new NoEmotes(),
+                            new NoSpecialCharacters(),
                         ],
                     ]);
                 }

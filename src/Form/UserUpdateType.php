@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\Validator\NoEmotes;
+use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -20,7 +20,7 @@ class UserUpdateType extends AbstractType
                 'label' => 'UUID',
                 'required' => true,
                 'constraints' => [
-                    new NoEmotes(),
+                    new NoSpecialCharacters(),
                 ],
             ])
             ->add('email', EmailType::class, [
@@ -39,21 +39,21 @@ class UserUpdateType extends AbstractType
                 'label' => 'SAML Identifier',
                 'required' => false,
                 'constraints' => [
-                    new NoEmotes(),
+                    new NoSpecialCharacters(),
                 ],
             ])
             ->add('firstName', TextType::class, [
                 'label' => 'First Name',
                 'required' => false,
                 'constraints' => [
-                    new NoEmotes(),
+                    new NoSpecialCharacters(),
                 ],
             ])
             ->add('lastName', TextType::class, [
                 'label' => 'Last Name',
                 'required' => false,
                 'constraints' => [
-                    new NoEmotes(),
+                    new NoSpecialCharacters(),
                 ],
             ])
             ->add('bannedAt', ChoiceType::class, [
