@@ -69,9 +69,13 @@ class AdminController extends AbstractController
      * @return Response
      */
     #[Route('/dashboard', name: 'admin_page')]
-    #[IsGranted('ROLE_ADMIN')]
     public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
+        if ($this->isGranted('ROLE_ADMIN') === false) {
+            $this->addFlash('error', 'You don\'t have access use this page!');
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
