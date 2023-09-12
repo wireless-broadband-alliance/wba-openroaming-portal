@@ -29,7 +29,7 @@ security:
             custom_authenticator: App\Security\PasswordAuthenticator
                 # where to redirect after logout
                 # target: app_any_route
-            entry_point: 'saml'
+            entry_point: App\Security\AuthenticationEntryPoint
             saml:
                 ##  Match SAML attribute 'uid' with user identifier.
                 ##  Otherwise, used \OneLogin\Saml2\Auth::getNameId() method by default.
