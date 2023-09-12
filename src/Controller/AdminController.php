@@ -240,8 +240,8 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
-        $Email = $this->parameterBag->get('app.email_address');
-        $Name = $this->parameterBag->get('app.sender_name');
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
 
         if (!$user = $this->userRepository->find($id)) {
             throw new NotFoundHttpException('User not found');
@@ -262,7 +262,7 @@ class AdminController extends AbstractController
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 // Send email to the user with the new password
                 $email = (new Email())
-                    ->from(new Address($Email, $Name))
+                    ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your Password Reset Details')
                     ->html(
@@ -276,7 +276,7 @@ class AdminController extends AbstractController
 
             // Send email to the user with the new password
             $email = (new Email())
-                ->from(new Address($Email, $Name))
+                ->from(new Address($emailSender, $nameSender))
                 ->to($user->getEmail())
                 ->subject('Your Password Reset Details')
                 ->html(

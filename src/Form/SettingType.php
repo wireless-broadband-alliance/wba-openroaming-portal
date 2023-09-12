@@ -79,9 +79,11 @@ class SettingType extends AbstractType
                     // For other fields, return the default type
                     $builder->add($setting->getName(), $inputType, [
                         'data' => $setting->getValue(),
+                        /*
                         'constraints' => [
                             new NoSpecialCharacters(),
                         ],
+                        */
                     ]);
                 }
             }

@@ -86,8 +86,8 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $Email_sender = $this->parameterBag->get('app.email_address');
-        $Name_sender = $this->parameterBag->get('app.sender_name');
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
 
         $user = new User();
         $event = new Event();
@@ -123,7 +123,7 @@ class RegistrationController extends AbstractController
 
                 // Send email to the user with the verification code
                 $email = (new TemplatedEmail())
-                    ->from(new Address($Email_sender, $Name_sender))
+                    ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your OpenRoaming Registration Details')
                     ->htmlTemplate('email_activation/email_template_password.html.twig')

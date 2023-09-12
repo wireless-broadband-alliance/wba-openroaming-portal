@@ -19,11 +19,12 @@ class ResetPasswordType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter your new password',
                 ],
+                /*
                 'constraints' => [
                     new NoSpecialCharacters(),
                 ],
-            ])
-        ;
+                */
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

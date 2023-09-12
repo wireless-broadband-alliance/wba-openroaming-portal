@@ -41,9 +41,11 @@ class CustomType extends AbstractType
                     }
                 }
             }
+            /*
             $formFieldOptions['constraints'] = [
                 new NoSpecialCharacters(),
             ];
+            */
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
     }
