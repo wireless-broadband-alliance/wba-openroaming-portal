@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
+use App\Enum\PlatformMode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -101,11 +102,22 @@ class SiteController extends AbstractController
                     $this->addFlash('error', 'Please agree to the Terms of Service');
                 } else if ($this->getUser() === null) {
                     $user = new User();
+                    $event = new Event();
+
                     $user->setEmail($payload['email']);
                     $user->setCreatedAt(new \DateTime());
                     $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                     $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                     $entityManager->persist($user);
+
+                    $event->setUser($user);
+                    $event->setEventDatetime(new DateTime());
+                    $event->setEventName(AnalyticalEventType::USER_CREATION);
+                    $event->setEventMetadata([
+                        'platform' => PlatformMode::Demo,
+                    ]);
+                    $entityManager->persist($event);
+
                     $entityManager->flush();
                     $userAuthenticator->authenticateUser(
                         $user,
@@ -113,7 +125,7 @@ class SiteController extends AbstractController
                         $request
                     );
                     if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
-                        return $this->redirectToRoute('app_email_code');
+                        return $this->redirectToRoute('app_regenerate_email_code');
                     }
                     if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
@@ -229,30 +241,6 @@ class SiteController extends AbstractController
     }
 
     /**
-     * Regenerate the verification code for the user and send a new email.
-     *
-     * @return RedirectResponse A redirect response.
-     * @throws Exception
-     * @throws TransportExceptionInterface
-     */
-    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
-    #[IsGranted('ROLE_USER')]
-    public function regenerateCode(): RedirectResponse
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
-
-        if (!$isVerified) {
-            // Regenerate the verification code for the user
-            $newCode = $this->generateVerificationCode($currentUser);
-            $this->sendEmail($currentUser->getEmail(), $newCode);
-        }
-        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
-        return $this->redirectToRoute('app_email_code');
-    }
-
-    /**
      * Generate a new verification code for the user.
      *
      * @param User $user The user for whom the verification code is generated.
@@ -270,53 +258,25 @@ class SiteController extends AbstractController
     }
 
     /**
-     * Send the verification code email to the user.
-     *
-     * @param string $email The user's email address.
-     * @param int|null $verificationCode The verification code.
-     * @return void
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    protected function sendEmail(string $email, ?int $verificationCode = null): void
-    {
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
-
-        // Create the email message with the verification code
-        $message = $this->createEmailCode($email, $verificationCode);
-
-        // Send the email
-        $this->mailer->send($message);
-    }
-
-    /**
      * Create an email message with the verification code.
      *
      * @param string $email The recipient's email address.
-     * @param int|null $verificationCode The verification code to include in the email.
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailCode(string $email, ?int $verificationCode = null): Email
+    protected function createEmailCode(string $email): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
-        $Email_sender = $this->parameterBag->get('app.email_address');
-        $Name_sender = $this->parameterBag->get('app.sender_name');
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
 
-        if ($verificationCode === null) {
-            // If the verification code is not provided, generate a new one
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $verificationCode = $this->generateVerificationCode($currentUser);
-        }
+        // If the verification code is not provided, generate a new one
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $verificationCode = $this->generateVerificationCode($currentUser);
 
         return (new TemplatedEmail())
-            ->from(new Address($Email_sender, $Name_sender))
+            ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
             ->htmlTemplate('email_activation/email_template.html.twig')
@@ -326,7 +286,30 @@ class SiteController extends AbstractController
     }
 
     /**
+     * Regenerate the verification code for the user and send a new email.
+     *
+     * @return RedirectResponse A redirect response.
+     * @throws Exception
      * @throws TransportExceptionInterface
+     */
+    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
+    #[IsGranted('ROLE_USER')]
+    public function regenerateCode(): RedirectResponse
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $isVerified = $currentUser->isVerified();
+
+        if (!$isVerified) {
+            // Regenerate the verification code for the user
+            $email = $this->createEmailCode($currentUser->getEmail());
+            $this->mailer->send($email);
+        }
+        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
+        return $this->redirectToRoute('app_landing');
+    }
+
+    /**
      * @throws Exception
      */
     #[Route('/email', name: 'app_email_code')]
@@ -340,12 +323,6 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
-            if (str_contains($currentUser->getUuid(), '-DEMO-')) {
-                $this->addFlash('success', 'We have sent an email with your verification code');
-                // Send the email with the verification
-                $this->sendEmail($currentUser->getEmail(), $currentUser->getVerificationCode());
-            }
-
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 ...$data,

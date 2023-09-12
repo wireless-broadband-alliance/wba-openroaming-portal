@@ -20,8 +20,8 @@ class Event
     #[ORM\Column(length: 255)]
     private ?string $event_name = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $event_metadata = null;
+    #[ORM\Column(type: Types::JSON)]
+    private ?array $event_metadata = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
@@ -56,12 +56,12 @@ class Event
         return $this;
     }
 
-    public function getEventMetadata(): ?string
+    public function getEventMetadata(): array
     {
         return $this->event_metadata;
     }
 
-    public function setEventMetadata(string $event_metadata): static
+    public function setEventMetadata(array $event_metadata): static
     {
         $this->event_metadata = $event_metadata;
 

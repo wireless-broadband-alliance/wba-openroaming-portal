@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\PlatformMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -197,6 +198,9 @@ class GoogleController extends AbstractController
         $event_create = new Event();
         $event_create->setUser($user);
         $event_create->setEventName(AnalyticalEventType::USER_CREATION);
+        $event_create->setEventMetadata([
+            'platform' => PlatformMode::Live,
+        ]);
         $event_create->setEventDatetime(new \DateTime());
 
         $event_verify = new Event();

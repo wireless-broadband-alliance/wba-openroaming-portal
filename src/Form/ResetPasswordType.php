@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -18,8 +19,12 @@ class ResetPasswordType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter your new password',
                 ],
-            ])
-        ;
+                /*
+                'constraints' => [
+                    new NoSpecialCharacters(),
+                ],
+                */
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
