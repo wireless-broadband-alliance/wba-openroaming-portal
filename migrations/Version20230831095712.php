@@ -20,7 +20,7 @@ final class Version20230831095712 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE Event (id INT AUTO_INCREMENT NOT NULL, event_datetime DATETIME NOT NULL, event_name VARCHAR(255) NOT NULL, event_metadata JSON DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE Event (id INT AUTO_INCREMENT NOT NULL, event_datetime DATETIME NOT NULL, event_name VARCHAR(255) NOT NULL, event_metadata LONGTEXT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
     }
 
     public function down(Schema $schema): void
