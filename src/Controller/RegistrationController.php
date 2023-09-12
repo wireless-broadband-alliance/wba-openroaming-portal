@@ -82,7 +82,7 @@ class RegistrationController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        if ($data['PLATFORM_MODE'] !== PlatformMode::Live) {
+        if ($data['PLATFORM_MODE'] === true) {
             $this->addFlash('error', 'This portal it\'s in Demo mode. It is impossible use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
