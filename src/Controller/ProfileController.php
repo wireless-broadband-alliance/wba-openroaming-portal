@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OSTypes;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
@@ -30,13 +31,18 @@ class ProfileController extends AbstractController
 {
     private array $settings;
 
-    public function __construct(SettingRepository $settingRepository)
+    /**
+     * @param SettingRepository $settingRepository
+     */
+    public function __construct(
+        SettingRepository $settingRepository,
+    )
     {
         $this->settings = $this->getSettings($settingRepository);
     }
 
     #[Route('/profile/android', name: 'profile_android')]
-    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
+    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository, SettingRepository $settingRepository): Response
     {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
@@ -77,7 +83,11 @@ class ProfileController extends AbstractController
         $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_ANDROID);
+        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
+        $event->setEventMetadata([
+            'platform' => $this->settings['PLATFORM_MODE'],
+            'type' => OSTypes::ANDROID
+        ]);
         $eventRepository->save($event, true);
 
         return $response;
@@ -160,7 +170,11 @@ class ProfileController extends AbstractController
         $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_IOS);
+        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
+        $event->setEventMetadata([
+            'platform' => $this->settings['PLATFORM_MODE'],
+            'type' => OSTypes::IOS
+        ]);
         $eventRepository->save($event, true);
         return $response;
     }
@@ -226,7 +240,11 @@ class ProfileController extends AbstractController
         $event = new Event();
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_WINDOWS);
+        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
+        $event->setEventMetadata([
+            'platform' => $this->settings['PLATFORM_MODE'],
+            'type' => OSTypes::WINDOWS
+        ]);
         $eventRepository->save($event, true);
 
         return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));

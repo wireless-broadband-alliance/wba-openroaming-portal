@@ -3,12 +3,13 @@
 namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
-use App\Enum\Platform_mode;
 use App\Enum\PlatformMode;
+use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,6 +28,8 @@ class SettingType extends AbstractType
             'AUTH_METHOD_REGISTER_ENABLED' => ChoiceType::class,
             'SYNC_LDAP_ENABLED' => ChoiceType::class,
             'EMAIL_VERIFICATION' => ChoiceType::class,
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => ChoiceType::class,
+            'SYNC_LDAP_BIND_USER_PASSWORD' => PasswordType::class
         ];
 
         $settings = $options['settings'];
@@ -76,6 +79,11 @@ class SettingType extends AbstractType
                     // For other fields, return the default type
                     $builder->add($setting->getName(), $inputType, [
                         'data' => $setting->getValue(),
+                        /*
+                        'constraints' => [
+                            new NoSpecialCharacters(),
+                        ],
+                        */
                     ]);
                 }
             }

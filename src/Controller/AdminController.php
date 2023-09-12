@@ -52,8 +52,7 @@ class AdminController extends AbstractController
         ProfileManager        $profileManager,
         ParameterBagInterface $parameterBag,
         GetSettings           $getSettings,
-        SettingRepository     $settingRepository
-
+        SettingRepository     $settingRepository,
     )
     {
         $this->userRepository = $userRepository;
@@ -120,12 +119,11 @@ class AdminController extends AbstractController
         $page = $request->query->getInt('page', 1);
         $perPage = 25;
 
-        // Search users based on the provided search term
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
         // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
-            $this->addFlash('error_admin', 'Please enter at least 3 characters for the search.');
+            $this->addFlash('error_admin', 'Please enter at least 3 characters to search.');
 
             return $this->redirectToRoute('admin_page');
         }
@@ -242,8 +240,8 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
-        $Email = $this->parameterBag->get('app.email_address');
-        $Name = $this->parameterBag->get('app.sender_name');
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
 
         if (!$user = $this->userRepository->find($id)) {
             throw new NotFoundHttpException('User not found');
@@ -261,9 +259,24 @@ class AdminController extends AbstractController
 
             $em->flush();
 
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                // Send email to the user with the new password
+                $email = (new Email())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($user->getEmail())
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email_activation/email_template_password_admin.html.twig'
+                        )
+                    );
+                $mailer->send($email);
+                return $this->redirectToRoute('saml_logout');
+            }
+
             // Send email to the user with the new password
             $email = (new Email())
-                ->from(new Address($Email, $Name))
+                ->from(new Address($emailSender, $nameSender))
                 ->to($user->getEmail())
                 ->subject('Your Password Reset Details')
                 ->html(
@@ -273,11 +286,6 @@ class AdminController extends AbstractController
                     )
                 );
             $mailer->send($email);
-
-            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                $this->addFlash('success_admin', 'Your password has been changed successfully');
-                return $this->redirectToRoute('saml_logout');
-            }
 
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
         }
@@ -331,7 +339,7 @@ class AdminController extends AbstractController
                 if (!in_array($name, $excludedSettings, true)) {
                     $value = $submittedData[$name] ?? null;
                     // Check if the setting is a text input
-                    if ($value === 'Not Defined' || $value === null) {
+                    if ($value === null) {
                         $value = "";
                     }
                     $setting->setValue($value);

@@ -22,7 +22,7 @@
             </div>
 
             {% for message in app.session.flashbag.get('success_admin') %}
-                <div class="text-white text-base bg-green-500 border-green-500 mt-5 rounded-md p-2 text-center">{{ message }}</div>
+                <div class="text-white text-base bg-primary border-primary mt-5 rounded-md p-2 text-center">{{ message }}</div>
             {% endfor %}
 
             <form action="{{ path('admin_search') }}" method="GET" class="flex items-center mt-5 md:mt-0">
