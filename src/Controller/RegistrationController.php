@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\OSTypes;
+use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
@@ -127,21 +127,23 @@ class RegistrationController extends AbstractController
                 $entityManager->persist($event);
                 $entityManager->flush();
 
-                // Send email to the user with the verification code
-                $email = (new TemplatedEmail())
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($user->getEmail())
-                    ->subject('Your OpenRoaming Registration Details')
-                    ->htmlTemplate('email_activation/email_template_password.html.twig')
-                    ->context([
-                        'uuid' => $user->getUuid(),
-                        'verificationCode' => $user->getVerificationCode(),
-                        'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
-                        'password' => $randomPassword,
-                    ]);
+                if ($data['EMAIL_VERIFICATION'] === EmailConfirmationStrategy::EMAIL) {
+                    // Send email to the user with the verification code
+                    $email = (new TemplatedEmail())
+                        ->from(new Address($emailSender, $nameSender))
+                        ->to($user->getEmail())
+                        ->subject('Your OpenRoaming Registration Details')
+                        ->htmlTemplate('email_activation/email_template_password.html.twig')
+                        ->context([
+                            'uuid' => $user->getUuid(),
+                            'verificationCode' => $user->getVerificationCode(),
+                            'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
+                            'password' => $randomPassword,
+                        ]);
 
-                $this->addFlash('success', 'We have sent an email with your account password and verification code');
-                $mailer->send($email);
+                    $this->addFlash('success', 'We have sent an email with your account password and verification code');
+                    $mailer->send($email);
+                }
             }
         }
 
