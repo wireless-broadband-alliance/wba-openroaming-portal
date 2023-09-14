@@ -21,6 +21,7 @@ export default class extends Controller {
 			emailVerification.classList.add("cursor-not-allowed");
 		} else {
 			emailVerification.disabled = false;
+			emailVerification.classList.remove('cursor-not-allowed');
 		}
 	}
 }
