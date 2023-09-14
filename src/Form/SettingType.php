@@ -42,6 +42,9 @@ class SettingType extends AbstractType
                         EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
                     ],
+                    'attr' => [
+                        'data-controller' => 'alwaysOnEmail',
+                    ],
                     'data' => $settingValue,
                 ]);
             } elseif ($settingName === 'PLATFORM_MODE') {

@@ -103,7 +103,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash('warning', 'User with the same email already exists.');
-            } else {
+            } else if ($data['EMAIL_VERIFICATION'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -127,23 +127,24 @@ class RegistrationController extends AbstractController
                 $entityManager->persist($event);
                 $entityManager->flush();
 
-                if ($data['EMAIL_VERIFICATION'] === EmailConfirmationStrategy::EMAIL) {
-                    // Send email to the user with the verification code
-                    $email = (new TemplatedEmail())
-                        ->from(new Address($emailSender, $nameSender))
-                        ->to($user->getEmail())
-                        ->subject('Your OpenRoaming Registration Details')
-                        ->htmlTemplate('email_activation/email_template_password.html.twig')
-                        ->context([
-                            'uuid' => $user->getUuid(),
-                            'verificationCode' => $user->getVerificationCode(),
-                            'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
-                            'password' => $randomPassword,
-                        ]);
 
-                    $this->addFlash('success', 'We have sent an email with your account password and verification code');
-                    $mailer->send($email);
-                }
+                // Send email to the user with the verification code
+                $email = (new TemplatedEmail())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($user->getEmail())
+                    ->subject('Your OpenRoaming Registration Details')
+                    ->htmlTemplate('email_activation/email_template_password.html.twig')
+                    ->context([
+                        'uuid' => $user->getUuid(),
+                        'verificationCode' => $user->getVerificationCode(),
+                        'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
+                        'password' => $randomPassword,
+                    ]);
+
+                $this->addFlash('success', 'We have sent an email with your account password and verification code');
+                $mailer->send($email);
+            } else {
+                return new Response('It is impossible to use proceed with you authentication. Please check settings.', Response::HTTP_UNAUTHORIZED);
             }
         }
 
