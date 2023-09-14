@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\EmailConfirmationStrategy;
+use App\Enum\PlatformMode;
 use App\Form\CustomType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
@@ -110,6 +112,7 @@ class AdminController extends AbstractController
      * @return Response
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function searchUsers(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -306,7 +309,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
-
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
@@ -333,7 +335,6 @@ class AdminController extends AbstractController
 
             foreach ($settings as $setting) {
                 $name = $setting->getName();
-
                 // Exclude the settings in $excludedSettings from being updated
                 // Check if the submitted data contains the setting's name
                 if (!in_array($name, $excludedSettings, true)) {
@@ -341,6 +342,9 @@ class AdminController extends AbstractController
                     // Check if the setting is a text input
                     if ($value === null) {
                         $value = "";
+                    }
+                    if ($name === 'EMAIL_VERIFICATION' && $submittedData['PLATFORM_MODE'] === PlatformMode::Live) {
+                        $value = EmailConfirmationStrategy::EMAIL;
                     }
                     $setting->setValue($value);
                     $em->persist($setting);
