@@ -92,9 +92,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
         $user = new User();
         $event = new Event();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -127,6 +124,8 @@ class RegistrationController extends AbstractController
                 $entityManager->persist($event);
                 $entityManager->flush();
 
+                $emailSender = $this->parameterBag->get('app.email_address');
+                $nameSender = $this->parameterBag->get('app.sender_name');
 
                 // Send email to the user with the verification code
                 $email = (new TemplatedEmail())
@@ -143,8 +142,6 @@ class RegistrationController extends AbstractController
 
                 $this->addFlash('success', 'We have sent an email with your account password and verification code');
                 $mailer->send($email);
-            } else {
-                return new Response('It is impossible to use proceed with you authentication. Please check settings.', Response::HTTP_UNAUTHORIZED);
             }
         }
 
