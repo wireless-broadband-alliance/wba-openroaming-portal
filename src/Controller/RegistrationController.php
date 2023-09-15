@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\OSTypes;
+use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
@@ -92,9 +92,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
         $user = new User();
         $event = new Event();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -103,7 +100,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash('warning', 'User with the same email already exists.');
-            } else {
+            } else if ($data['EMAIL_VERIFICATION'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -126,6 +123,9 @@ class RegistrationController extends AbstractController
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
+
+                $emailSender = $this->parameterBag->get('app.email_address');
+                $nameSender = $this->parameterBag->get('app.sender_name');
 
                 // Send email to the user with the verification code
                 $email = (new TemplatedEmail())
