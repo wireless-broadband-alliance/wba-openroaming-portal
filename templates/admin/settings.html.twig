@@ -59,19 +59,28 @@
                     {% endif %}
                 {% endfor %}
             </div>
+            <div class="flex flex-col md:flex-row justify-evenly items-center">
+                <div class="mt-6 mb-6">
+                    <a href="{{ path('admin_page') }}"
+                       class="bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105">
+                        Return Dashboard
+                    </a>
+                </div>
 
-            <div class="flex justify-center mt-6 mb-6">
-                <button class="bg-green-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-                        onclick="return confirm('Are you sure you want to apply these new settings?')"
-                        type="submit">Save Changes
-                </button>
-            </div>
+                <div class=" mt-6 mb-6">
+                    <button class="bg-green-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
+                            onclick="return confirm('Are you sure you want to apply these new settings?')"
+                            type="submit">Save Changes
+                    </button>
+                </div>
 
-            <div class="flex justify-center mt-6 mb-6">
-                <a href="{{ path('admin_page') }}"
-                   class="bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105">
-                    Return Dashboard
-                </a>
+                <div class="mt-6 mb-4">
+                    <a href="#"
+                       onclick="return confirm('Are you sure you want to reset to the default settings?')"
+                       class="bg-yellow-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105">
+                        Reset All Settings
+                    </a>
+                </div>
             </div>
 
         </form>
