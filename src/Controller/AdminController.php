@@ -19,6 +19,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -367,6 +368,13 @@ class AdminController extends AbstractController
     }
 
 
+    /**
+     * @param ChartBuilderInterface $chartBuilder
+     * @param Request $request
+     * @param RequestStack $requestStack
+     * @return Response
+     * @throws \JsonException
+     */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
     public function statisticsData(ChartBuilderInterface $chartBuilder, Request $request, RequestStack $requestStack): Response
@@ -374,34 +382,48 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
         $user = $this->getUser();
 
-        $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
+        $fetchChart = $this->fetchChartData();
 
-        $chart->setData([
+        // Create a Chart object and set the data
+        $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
+        $chart->setData($fetchChart);
+
+        return $this->render('admin/statistics.html.twig', [
+            'data' => $data,
+            'current_user' => $user,
+            'chart' => $chart, // Pass the Chart object to the template
+            'chartDataJson' => json_encode($fetchChart, JSON_THROW_ON_ERROR),
+        ]);
+    }
+
+
+    /**
+     * @return array|JsonResponse
+     */
+    private function fetchChartData(): JsonResponse|array
+    {
+        // This is fake data just for testing
+        return [
             'labels' => ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
             'datasets' => [
                 [
-                    'label' => 'My First dataset',
-                    'backgroundColor' => 'rgb(255, 99, 132)',
+                    'label' => 'Cookies eaten 🍪',
+                    'backgroundColor' => 'rgb(255, 99, 132, .4)',
                     'borderColor' => 'rgb(255, 99, 132)',
-                    'data' => [0, 10, 5, 2, 20, 30, 45],
+                    'data' => [2, 10, 5, 18, 20, 30, 45],
+                    'tension' => 0.4,
+                ],
+                [
+                    'label' => 'Km walked 🏃‍♀️',
+                    'backgroundColor' => 'rgba(45, 220, 126, .4)',
+                    'borderColor' => 'rgba(45, 220, 126)',
+                    'data' => [10, 15, 4, 3, 25, 41, 25],
+                    'tension' => 0.4,
                 ],
             ],
-        ]);
-
-        $chart->setOptions([
-            'scales' => [
-                'y' => [
-                    'suggestedMin' => 0,
-                    'suggestedMax' => 100,
-                ],
-            ],
-        ]);
-        return $this->render('admin/statistics.html.twig', [
-            'chart' => $chart,
-            'data' => $data,
-            'current_user' => $user,
-        ]);
+        ];
     }
+
 
     /**
      * @param Request $request
