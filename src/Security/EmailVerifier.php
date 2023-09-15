@@ -24,8 +24,11 @@ class EmailVerifier
     {
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
             $verifyEmailRouteName,
+            /** @phpstan-ignore-next-line */
             $user->getId(),
+            /** @phpstan-ignore-next-line */
             $user->getEmail(),
+            /** @phpstan-ignore-next-line */
             ['id' => $user->getId()]
         );
 
@@ -44,8 +47,9 @@ class EmailVerifier
      */
     public function handleEmailConfirmation(Request $request, UserInterface $user): void
     {
+        /** @phpstan-ignore-next-line */
         $this->verifyEmailHelper->validateEmailConfirmation($request->getUri(), $user->getId(), $user->getEmail());
-
+        /** @phpstan-ignore-next-line */
         $user->setIsVerified(true);
 
         $this->entityManager->persist($user);

@@ -2,8 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EmailConfirmationStrategy;
+use App\Enum\PlatformMode;
 use App\Form\RegistrationFormType;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -33,7 +38,6 @@ class RegistrationController extends AbstractController
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
-
     private ParameterBagInterface $parameterBag;
 
     /**
@@ -78,17 +82,25 @@ class RegistrationController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
-        $Email_sender = $this->parameterBag->get('app.email_address');
-        $Name_sender = $this->parameterBag->get('app.sender_name');
+        if ($data['PLATFORM_MODE'] === true) {
+            $this->addFlash('error', 'This portal it\'s in Demo mode. It is impossible use this authentication method.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['REGISTER_ENABLED'] !== true) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
 
         $user = new User();
+        $event = new Event();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash('warning', 'User with the same email already exists.');
-            } else {
+            } else if ($data['EMAIL_VERIFICATION'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -99,15 +111,25 @@ class RegistrationController extends AbstractController
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
-                $user->isVerified(0);
                 $user->setCreatedAt(new DateTime());
-
                 $entityManager->persist($user);
+
+                // Defines the Event to the table
+                $event->setUser($user);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::USER_CREATION);
+                $event->setEventMetadata([
+                    'platform' => PlatformMode::Live,
+                ]);
+                $entityManager->persist($event);
                 $entityManager->flush();
+
+                $emailSender = $this->parameterBag->get('app.email_address');
+                $nameSender = $this->parameterBag->get('app.sender_name');
 
                 // Send email to the user with the verification code
                 $email = (new TemplatedEmail())
-                    ->from(new Address($Email_sender, $Name_sender))
+                    ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your OpenRoaming Registration Details')
                     ->htmlTemplate('email_activation/email_template_password.html.twig')
@@ -142,10 +164,11 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack $requestStack,
-        UserRepository $userRepository,
-        TokenStorageInterface $tokenStorage,
-        EventDispatcherInterface $eventDispatcher
+        RequestStack             $requestStack,
+        UserRepository           $userRepository,
+        TokenStorageInterface    $tokenStorage,
+        EventDispatcherInterface $eventDispatcher,
+        EventRepository          $eventRepository
     ): Response
     {
         // Get the email and verification code from the URL query parameters
@@ -158,7 +181,7 @@ class RegistrationController extends AbstractController
         if ($user && $user->getVerificationCode() === $verificationCode) {
             try {
                 // Create a token manually for the user
-                $token = new UsernamePasswordToken($user,'main', $user->getRoles());
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
                 // Set the token in the token storage
                 $tokenStorage->setToken($token);
@@ -171,6 +194,13 @@ class RegistrationController extends AbstractController
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $userRepository->save($user, true);
+
+                // Defines the Event to the table
+                $event = new Event();
+                $event->setUser($user);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
+                $eventRepository->save($event, true);
 
                 $this->addFlash('success', 'Your account has been verified, thank you for your time!');
 
@@ -185,5 +215,4 @@ class RegistrationController extends AbstractController
 
         return $this->redirectToRoute('app_login');
     }
-
 }

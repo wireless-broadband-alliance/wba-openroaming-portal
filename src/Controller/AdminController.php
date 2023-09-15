@@ -4,51 +4,79 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\EmailConfirmationStrategy;
+use App\Enum\PlatformMode;
 use App\Form\CustomType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
 use App\Form\UserUpdateType;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
+/**
+ *
+ */
 class AdminController extends AbstractController
 {
     private UserRepository $userRepository;
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
+    private GetSettings $getSettings;
+    private SettingRepository $settingRepository;
 
+    /**
+     * @param UserRepository $userRepository
+     * @param ProfileManager $profileManager
+     * @param ParameterBagInterface $parameterBag
+     * @param GetSettings $getSettings
+     * @param SettingRepository $settingRepository
+     */
     public function __construct(
         UserRepository        $userRepository,
         ProfileManager        $profileManager,
         ParameterBagInterface $parameterBag,
+        GetSettings           $getSettings,
+        SettingRepository     $settingRepository,
     )
     {
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
+        $this->getSettings = $getSettings;
+        $this->settingRepository = $settingRepository;
     }
 
-    #[
-        Route('/dashboard', name: 'admin_page')]
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @param RequestStack $requestStack
+     * @return Response
+     */
+    #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 50; // Number of users to display per page
 
@@ -73,22 +101,32 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'searchTerm' => null,
+            'data' => $data
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
-    public function searchUsers(Request $request, UserRepository $userRepository): Response
+    #[IsGranted('ROLE_ADMIN')]
+    public function searchUsers(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $searchTerm = $request->query->get('u');
         $page = $request->query->getInt('page', 1);
         $perPage = 25;
 
-        // Search users based on the provided search term
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
         // Only let the user type more of 3 and less than 320 letters on the search bar
         if (empty($searchTerm) || strlen($searchTerm) < 3) {
-            $this->addFlash('error_admin', 'Please enter at least 3 characters for the search.');
+            $this->addFlash('error_admin', 'Please enter at least 3 characters to search.');
 
             return $this->redirectToRoute('admin_page');
         }
@@ -113,9 +151,15 @@ class AdminController extends AbstractController
             'current_user' => $user,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
+            'data' => $data
         ]);
     }
 
+    /**
+     * @param $id
+     * @param EntityManagerInterface $em
+     * @return Response
+     */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete')]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers($id, EntityManagerInterface $em): Response
@@ -124,12 +168,14 @@ class AdminController extends AbstractController
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
-
-        // Disable profiles when deleting a user
-        $this->disableProfiles($user);
-
         $email = $user->getEmail();
 
+        // Remove associated UserRadiusProfile entities
+        foreach ($user->getUserRadiusProfiles() as $userRadiusProfile) {
+            $em->remove($userRadiusProfile);
+        }
+
+        // Now, remove the user
         $em->remove($user);
         $em->flush();
 
@@ -137,6 +183,13 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_page');
     }
 
+
+    /**
+     * @param User $user
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @return Response
+     */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(User $user, Request $request, UserRepository $userRepository): Response
@@ -155,8 +208,8 @@ class AdminController extends AbstractController
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value on the db
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 // Check if the admin is trying to ban himself
-                if ($currentUser && $currentUser->getId() === $user->getId()) {
-                    $this->addFlash('error_admin', 'You cannot ban yourself. Are you  dumb? ಠ_ಠ');
+                if ($currentUser && $currentUser->getUserIdentifier() === $user->getId()) {
+                    $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
                 }
                 $user->setBannedAt(new DateTime());
@@ -190,8 +243,8 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
-        $Email = $this->parameterBag->get('app.email_address');
-        $Name = $this->parameterBag->get('app.sender_name');
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
 
         if (!$user = $this->userRepository->find($id)) {
             throw new NotFoundHttpException('User not found');
@@ -209,9 +262,24 @@ class AdminController extends AbstractController
 
             $em->flush();
 
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                // Send email to the user with the new password
+                $email = (new Email())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($user->getEmail())
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email_activation/email_template_password_admin.html.twig'
+                        )
+                    );
+                $mailer->send($email);
+                return $this->redirectToRoute('saml_logout');
+            }
+
             // Send email to the user with the new password
             $email = (new Email())
-                ->from(new Address($Email, $Name))
+                ->from(new Address($emailSender, $nameSender))
                 ->to($user->getEmail())
                 ->subject('Your Password Reset Details')
                 ->html(
@@ -222,11 +290,6 @@ class AdminController extends AbstractController
                 );
             $mailer->send($email);
 
-            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                $this->addFlash('success_admin', 'Your password has been changed successfully');
-                return $this->redirectToRoute('saml_logout');
-            }
-
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
         }
 
@@ -236,10 +299,19 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings(Request $request, EntityManagerInterface $em): Response
+    public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
@@ -252,7 +324,7 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            $excludedSettings = [ // this are the settings related with the customization of the page
+            $excludedSettings = [ // these are the settings related with the customization of the page
                 'CUSTOMER_LOGO',
                 'OPENROAMING_LOGO',
                 'WALLPAPER_IMAGE',
@@ -263,11 +335,17 @@ class AdminController extends AbstractController
 
             foreach ($settings as $setting) {
                 $name = $setting->getName();
-
                 // Exclude the settings in $excludedSettings from being updated
                 // Check if the submitted data contains the setting's name
                 if (!in_array($name, $excludedSettings, true)) {
                     $value = $submittedData[$name] ?? null;
+                    // Check if the setting is a text input
+                    if ($value === null) {
+                        $value = "";
+                    }
+                    if ($name === 'EMAIL_VERIFICATION' && $submittedData['PLATFORM_MODE'] === PlatformMode::Live) {
+                        $value = EmailConfirmationStrategy::EMAIL;
+                    }
                     $setting->setValue($value);
                     $em->persist($setting);
                 }
@@ -279,17 +357,48 @@ class AdminController extends AbstractController
 
             return $this->redirectToRoute('admin_page');
         }
-
         return $this->render('admin/settings.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
+            'data' => $data,
         ]);
     }
 
+    /*This route it's in development, again I need to fix and check for another stuff first
+    #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function statisticsData(EntityManagerInterface $em): JsonResponse
+    {
+        // Fetch data from your database, for example:
+        $data = $em->getRepository(Event::class)->findAll(); // Adjust YourEntity
+
+        $formattedData = [];
+        dd($formattedData, $data);
+
+        foreach ($data as $item) {
+            $formattedData[] = [
+                'label' => $item->getLabel(),
+                'date' => $item->getDate()->format('Y-m-d'), // Adjust the date format as needed
+                'count' => $item->getCount(),
+            ];
+        }
+        return $this->json($formattedData);
+    }
+
+    */
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param RequestStack $requestStack
+     * @return Response
+     */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em): Response
+    public function customize(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
@@ -345,15 +454,24 @@ class AdminController extends AbstractController
         return $this->render('admin/custom.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
+            'data' => $data,
         ]);
     }
 
 
+    /**
+     * @param $user
+     * @return void
+     */
     private function disableProfiles($user): void
     {
         $this->profileManager->disableProfiles($user);
     }
 
+    /**
+     * @param $user
+     * @return void
+     */
     private function enableProfiles($user): void
     {
         $this->profileManager->enableProfiles($user);

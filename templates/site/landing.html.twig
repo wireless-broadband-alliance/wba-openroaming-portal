@@ -1,6 +1,5 @@
 {% extends 'base.html.twig' %}
 
-
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
@@ -23,18 +22,16 @@
                     <a href="mailto:{{ contactEmail }}"
                        class="font-semibold underline">{{ contactEmail }}</a>
                 </p>
-                {% if demoMode %}
-                    {% if demoModeWhiteLabel == null %}
-                        <div class="bg-red-600 text-white font-bold p-3 text-center">
-                            <h2>DEMO MODE</h2>
-                            <p class="text-xs lg:text-base mt-5 ">
-                                This portal is for testing purposes only and should not be used for production purposes,
-                                and
-                                cannot be used for production or comercial purposes. </p>
-                            <p class="text-xs lg:text-base">
-                                Users created via this portal can be revoked at any time without notice. </p>
-                        </div>
-                    {% endif %}
+                {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') %}
+                    <div class="bg-red-600 text-white font-bold p-3 text-center">
+                        <h2>DEMO MODE</h2>
+                        <p class="text-xs lg:text-base mt-5 ">
+                            This portal is for testing purposes only and should not be used for production purposes,
+                            and
+                            cannot be used for production or commercial purposes. </p>
+                        <p class="text-xs lg:text-base">
+                            Users created via this portal can be revoked at any time without a notice.</p>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -47,12 +44,12 @@
                      src="{{ customerLogoName }}"
                      alt="Logo"/>
 
-                <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
+                <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20 text-center">
                     <p class="text-[#757575] font-medium text-sm lg:text-lg">On this portal you are able to download and
                         install the OpenRoaming profile matching your identity</p>
 
                     <p class="text-[#B4B4B4] font-light text-xs lg:text-base">Currently, OpenRoaming profiles generated
-                        by this system are proven to work on the majority of devices(including iOS, Android, macOS and
+                        by this system are proven to work on the majority of devices (including iOS, Android, macOS, and
                         Windows)</p>
                 </div>
 
@@ -68,33 +65,17 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if app.user %}
-                    <div class="flex flex-col items-center justify-center text-center">
-                        <div class="space-y-4 mt-6 pr-2">
-                            <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
-                                authenticated as
-                                <span class="font-bold">{{ app.user.uuid }}</span>
-                            </p>
-                        </div>
-                        <div class="space-y-4 mt-6 pr-2">
-                            <a href="{{ path('saml_logout') }}"
-                               class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                {% endif %}
-                {% if VERIFICATION_FORM %}
-                    {% include 'email_activation/index.html.twig' %}
-                {% endif %}
-                {% if demoMode %}
-                    <div class=" {% if demoModeWhiteLabel == null %} border-red-600 border-dashed border-2 p-3 mt-1 {% else %}p-3 mt-1{% endif %}">
-                        {% if demoModeWhiteLabel == null %}
+                {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') %}
+                    <div class="{% if EMAIL_VERIFICATION != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
-                                DEMO MODE - EMAIL SYSTEM </h3>
+                                DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
+                        {% elseif  EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            <h3 class="text-red-600 mt-3 text-center">
+                                DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
-                        <form method="post">
-                            {% if not app.user %}
+                        {% if not app.user %}
+                            <form method="post">
                                 {# Email #}
                                 <div class="relative mt-10 lg:mt-6 xl:mt-12">
                                     <label for="email"
@@ -103,7 +84,7 @@
                                            name="email"
                                            type="email"
                                            class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
-                                           placeholder="add your email here"/>
+                                           placeholder="Add your email here"/>
                                 </div>
 
                                 {# Checkbox: Terms #}
@@ -111,7 +92,8 @@
                                     <input id="terms"
                                            name="terms"
                                            type="checkbox"
-                                           class="border p-2 text-[#656565] rounded border-[#757575] checked:bg-[#7db928] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"/>
+                                           class="border p-2 text-[#656565] rounded border-[#757575] checked:bg-[#7db928] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
+                                           required/>
 
                                     <span class="text-[#656565] font-light text-xs lg:text-base">I accept the <a
                                                 href="{{ TOS_LINK }}"
@@ -121,74 +103,164 @@
                                                 target="_blank"
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
+                                {# OS #}
+                                <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
+                                    <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
+                                        operating
+                                        system, so you can
+                                        download and install the profile:</p>
+
+                                    <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
+                                        {% for key, item in os.items %}
+                                            <div>
+                                                <input type="radio"
+                                                       id="radio-os-{{ key }}"
+                                                       name="radio-os"
+                                                       value="{{ key }}"
+                                                       class="hidden peer"/>
+
+                                                <label for="radio-os-{{ key }}"
+                                                       class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
+                                                    <img class="w-9 peer-checked:opacity-50"
+                                                         src="{{ asset('resources/logos/'~key~'.svg') }}"
+                                                         alt="{{ item.alt }}"/>
+                                                </label>
+
+                                                <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <input type="hidden"
+                                       id="detected-os"
+                                       name="detected-os"
+                                       value="{{ os.selected }}"/>
+
+                                {# Submit button #}
+                                <div class="flex flex-row justify-center">
+                                    <button
+                                            type="submit"
+                                            class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                        Download
+                                        and
+                                        Install Profile
+                                    </button>
+                                </div>
+
+                                {# ADDITIONAL_LABEL - PLATFORM_MODE - Demo #}
+                                <div class=" mt-5 text-center items-center">
+                                    {{ ADDITIONAL_LABEL }}
+                                </div>
+
+                                {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+                                    <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                        {# Profile selector  #}
+                                        <button type="button"
+                                                class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
+                                            <img class="w-20"
+                                                 src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                                 alt="Windows Logo"/>
+                                            <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                        </button>
+
+                                        <button type="button"
+                                                class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
+                                            Is this Wrong? Click here to select your OS.
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                                {% if not app.user.isVerified %}
+                                    {% include 'email_activation/index.html.twig' %}
+                                {% endif %}
                             {% endif %}
+                            <div class="flex flex-col items-center justify-center text-center">
+                                <div class="space-y-2 mt-4 pr-2">
+                                    <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
+                                        authenticated as
+                                        <span class="font-bold">{{ app.user.uuid }}</span>
+                                    </p>
+                                </div>
+                                <div class="space-y-2 mt-6 mb-6 pr-2">
+                                    <a href="{{ path('saml_logout') }}"
+                                       class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
+                            {% if app.request.attributes.get('_route') != 'app_email_code' %}
+                                <form method="post">
+                                    {# OS #}
+                                    <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
+                                        <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
+                                            operating
+                                            system, so you can
+                                            download and install the profile:</p>
 
-                            {# OS #}
-                            <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
-                                <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your operating
-                                    system, so you can
-                                    download and install the profile:</p>
+                                        <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
+                                            {% for key, item in os.items %}
+                                                <div>
+                                                    <input type="radio"
+                                                           id="radio-os-{{ key }}"
+                                                           name="radio-os"
+                                                           value="{{ key }}"
+                                                           class="hidden peer"/>
 
-                                <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
-                                    {% for key, item in os.items %}
-                                        <div>
-                                            <input type="radio"
-                                                   id="radio-os-{{ key }}"
-                                                   name="radio-os"
-                                                   value="{{ key }}"
-                                                   class="hidden peer"/>
+                                                    <label for="radio-os-{{ key }}"
+                                                           class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
+                                                        <img class="w-9 peer-checked:opacity-50"
+                                                             src="{{ asset('resources/logos/'~key~'.svg') }}"
+                                                             alt="{{ item.alt }}"/>
+                                                    </label>
 
-                                            <label for="radio-os-{{ key }}"
-                                                   class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
-                                                <img class="w-9 peer-checked:opacity-50"
-                                                     src="{{ asset('resources/logos/'~key~'.svg') }}"
-                                                     alt="{{ item.alt }}"/>
-                                            </label>
-
-                                            <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
+                                                    <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
+                                                </div>
+                                            {% endfor %}
                                         </div>
+                                    </div>
+                                    <input type="hidden"
+                                           id="detected-os"
+                                           name="detected-os"
+                                           value="{{ os.selected }}"/>
 
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <input type="hidden"
-                                   id="detected-os"
-                                   name="detected-os"
-                                   value="{{ os.selected }}"/>
+                                    {# Submit button #}
+                                    <div class="flex flex-row justify-center">
+                                        <button
+                                                type="submit"
+                                                class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                            Download
+                                            and
+                                            Install Profile
+                                        </button>
+                                    </div>
 
+                                    {# ADDITIONAL_LABEL - PLATFORM_MODE - Demo #}
+                                    <div class=" mt-5 text-center items-center">
+                                        {{ ADDITIONAL_LABEL }}
+                                    </div>
 
-                            {# Submit button #}
-                            <div class="flex flex-row justify-center lg:justify-start">
-                                <button
-                                        type="submit"
-                                        class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
-                                    Download
-                                    and
-                                    Install Profile
-                                </button>
-                            </div>
+                                    {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+                                        <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                            {# Profile selector  #}
+                                            <button type="button"
+                                                    class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
+                                                <img class="w-20"
+                                                     src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                                     alt="Windows Logo"/>
+                                                <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                            </button>
 
-                            {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-
-                                <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
-                                    {# Profile selector  #}
-                                    <button type="button"
-                                            class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
-                                        <img class="w-20"
-                                             src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
-                                             alt="Windows Logo"/>
-                                        <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
-                                    </button>
-
-
-                                    <button type="button"
-                                            class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
-                                        Is this Wrong? Click here to select your OS.
-                                    </button>
-                                </div>
+                                            <button type="button"
+                                                    class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
+                                                Is this Wrong? Click here to select your OS.
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </form>
                             {% endif %}
-
-                        </form>
+                        {% endif %}
                     </div>
                 {% else %}
                     {% if app.user %}
@@ -219,7 +291,6 @@
 
                                                     <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
                                                 </div>
-
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -228,9 +299,8 @@
                                            name="detected-os"
                                            value="{{ os.selected }}"/>
 
-
                                     {# Submit button #}
-                                    <div class="flex flex-row justify-center lg:justify-start">
+                                    <div class="flex flex-row justify-center">
                                         <button type="submit"
                                                 class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
                                             Download
@@ -240,7 +310,6 @@
                                     </div>
 
                                     {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-
                                         <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                             {# Profile selector  #}
                                             <button type="button"
@@ -251,7 +320,6 @@
                                                 <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
                                             </button>
 
-
                                             <button type="button"
                                                     class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
                                                 Is this Wrong? Click here to select your OS.
@@ -260,9 +328,79 @@
                                     {% endif %}
                                 </form>
                             </div>
+                        {% else %}
+                            {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                                {% include 'email_activation/index.html.twig' %}
+                            {% else %}
+                                <div class="mt-10">
+                                    <form method="post" novalidate>
+                                        <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+                                            <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
+                                                operating
+                                                system, so you can
+                                                download and install the profile:</p>
+
+                                            <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
+                                                {% for key, item in os.items %}
+                                                    <div>
+                                                        <input type="radio"
+                                                               id="radio-os-{{ key }}"
+                                                               name="radio-os"
+                                                               value="{{ key }}"
+                                                               class="hidden peer"/>
+
+                                                        <label for="radio-os-{{ key }}"
+                                                               class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
+                                                            <img class="w-9 peer-checked:opacity-50"
+                                                                 src="{{ asset('resources/logos/'~key~'.svg') }}"
+                                                                 alt="{{ item.alt }}"/>
+                                                        </label>
+
+                                                        <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <input type="hidden"
+                                               id="detected-os"
+                                               name="detected-os"
+                                               value="{{ os.selected }}"/>
+
+                                        {# Submit button #}
+                                        <div class="flex flex-row justify-center">
+                                            <button type="submit"
+                                                    class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                                Download
+                                                and
+                                                Install Profile
+                                            </button>
+                                        </div>
+
+                                        {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+                                            <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                                {# Profile selector  #}
+                                                <button type="button"
+                                                        class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
+                                                    <img class="w-20"
+                                                         src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                                         alt="Windows Logo"/>
+                                                    <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                                </button>
+
+                                                <button type="button"
+                                                        class="text-xs lg:text-base text-[#656565] mt-4 px-2" {{ stimulus_action('visibility', 'toggle') }}>
+                                                    Is this Wrong? Click here to select your OS.
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            {% endif %}
                         {% endif %}
+
                     {% else %}
-                        <div class="mt-20">
+
+                        <div class="mt-16">
                             <p class="text-center">
                                 Please select one of the following authentication methods to obtain a profile: </p>
                         </div>
@@ -271,7 +409,8 @@
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('connect_google') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    <svg class="mr-2 -ml-1 w-4 h-4 lg:w-6 lg:h-6" aria-hidden="true" focusable="false"
+                                    <svg class="mr-2 -ml-1 w-4 h-4 lg:w-6 lg:h-6" aria-hidden="true"
+                                         focusable="false"
                                          data-prefix="fab" data-icon="google" role="img"
                                          xmlns="http://www.w3.org/2000/svg"
                                          viewBox="0 0 488 512">
@@ -304,26 +443,41 @@
                             </div>
                         {% endif %}
 
-                        {% if ADDITIONAL_LABEL %}
-                            <div class="text-center text-base font-normal -mb-5">
-                                <p>{{ ADDITIONAL_LABEL }}</p>
+
+                        {% if LOGIN_TRADITIONAL_ENABLED %}
+                            <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
+                                <a href="{{ path('app_login') }}"
+                                   class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
+                                    {{ LOGIN_TRADITIONAL_LABEL }}
+                                </a>
+                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION }}</p>
                             </div>
                         {% endif %}
 
-                        <div class="mt-12 text-center">
-                            <p>By authenticating with any of the above providers you agree with our
-                                <a href="{{ TOS_LINK }}"
-                                   target="_blank"
-                                   class="underline font-base">terms & conditions of use</a> and
-                                <a href="{{ PRIVACY_POLICY_LINK }}"
-                                   target="_blank"
-                                   class="underline font-base">privacy policy</a>.
-                            </p>
+                        {# ADDITIONAL_LABEL - PLATFORM_MODE - Live #}
+                        <div class=" mt-5 text-center items-center">
+                            {{ ADDITIONAL_LABEL }}
                         </div>
                     {% endif %}
-
+                    {% if app.user %}
+                        <div class="flex flex-col items-center justify-center text-center">
+                            <div class="space-y-4 mt-6 pr-2">
+                                <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
+                                    authenticated as
+                                    <span class="font-bold">{{ app.user.uuid }}</span>
+                                </p>
+                            </div>
+                            <div class="space-y-4 mt-6 pr-2">
+                                <a href="{{ path('saml_logout') }}"
+                                   class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
     </div>
+
 {% endblock %}

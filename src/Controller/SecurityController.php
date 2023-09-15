@@ -15,10 +15,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 
-
 class SecurityController extends AbstractController
 {
-
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
@@ -43,16 +41,20 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, RequestStack $requestStack, AuthenticationUtils $authenticationUtils): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
             if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('admin_page');
             }
+            $traditionalLoginEnabled = $data['LOGIN_TRADITIONAL_ENABLED'];
+            if (!$traditionalLoginEnabled) {
+                return $this->redirectToRoute('saml_logout');
+            }
             return $this->redirectToRoute('app_landing');
         }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -71,7 +73,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        // Show an error message if login attempt fails
+        // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
             $this->addFlash('error', 'Wrong credentials');
         }

@@ -24,7 +24,8 @@
     "build": "encore production --progress"
   },
   "dependencies": {
-    "pdf2json": "1.2.5",
+    "chart.js": "^4.4.0",
+    "pdf2json": "^3.0.4",
     "tw-elements": "^1.0.0-beta2"
   }
 }

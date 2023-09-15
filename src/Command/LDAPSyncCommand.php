@@ -2,12 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\UserRadiusProfile;
-use App\Enum\UserRadiusProfileStatus;
-use App\RadiusDb\Entity\RadiusUser;
-use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -22,20 +17,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class LDAPSyncCommand extends Command
 {
-    private $userRepository;
-    private $settingRepository;
-    private $radiusUserRepository;
+    private UserRepository $userRepository;
+    private SettingRepository $settingRepository;
+    private ProfileManager $profileManager;
 
-    private $profileManager;
-
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $userRadiusProfile, ProfileManager $profileManager)
+    public function __construct(
+        UserRepository    $userRepository,
+        SettingRepository $settingRepository,
+        ProfileManager    $profileManager
+    )
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userRadiusProfile = $userRadiusProfile;
         $this->profileManager = $profileManager;
-
 
         parent::__construct();
     }
@@ -48,7 +42,7 @@ class LDAPSyncCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        if($this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue() === 'false'){
+        if ($this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue() === 'false') {
             $io->writeln('LDAP sync is disabled');
             return Command::SUCCESS;
         }
@@ -57,7 +51,7 @@ class LDAPSyncCommand extends Command
         foreach ($ldapEnabledUsers as $user) {
             $io->writeln('Syncing ' . $user->saml_identifier . ' with LDAP');
             $ldapUser = $this->fetchUserFromLDAP($user->saml_identifier);
-            if(!$ldapUser) {
+            if (!$ldapUser) {
                 $io->writeln('User ' . $user->saml_identifier . ' not found in LDAP, disabling');
                 $this->disableProfiles($user);
                 continue;
@@ -66,13 +60,13 @@ class LDAPSyncCommand extends Command
             $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
             $userLocked = ($userAccountControl & 0x000002) == 0x000002;
 
-            if($userLocked){
+            if ($userLocked) {
                 $io->writeln('User ' . $user->saml_identifier . ' is locked in LDAP, disabling');
                 $this->disableProfiles($user);
-            }else if($passwordExpired) {
+            } else if ($passwordExpired) {
                 $io->writeln('User ' . $user->saml_identifier . ' has an expired password in LDAP, disabling');
                 $this->disableProfiles($user);
-            }else{
+            } else {
                 $io->writeln('User ' . $user->saml_identifier . ' is enabled in LDAP, enabling');
                 $this->enableProfiles($user);
             }
