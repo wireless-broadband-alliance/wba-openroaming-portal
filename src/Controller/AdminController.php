@@ -29,6 +29,8 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
 
 
 /**
@@ -364,28 +366,43 @@ class AdminController extends AbstractController
         ]);
     }
 
-    /*This route it's in development, again I need to fix and check for another stuff first
+
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(EntityManagerInterface $em): JsonResponse
+    public function statisticsData(ChartBuilderInterface $chartBuilder, Request $request, RequestStack $requestStack): Response
     {
-        // Fetch data from your database, for example:
-        $data = $em->getRepository(Event::class)->findAll(); // Adjust YourEntity
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $user = $this->getUser();
 
-        $formattedData = [];
-        dd($formattedData, $data);
+        $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
 
-        foreach ($data as $item) {
-            $formattedData[] = [
-                'label' => $item->getLabel(),
-                'date' => $item->getDate()->format('Y-m-d'), // Adjust the date format as needed
-                'count' => $item->getCount(),
-            ];
-        }
-        return $this->json($formattedData);
+        $chart->setData([
+            'labels' => ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            'datasets' => [
+                [
+                    'label' => 'My First dataset',
+                    'backgroundColor' => 'rgb(255, 99, 132)',
+                    'borderColor' => 'rgb(255, 99, 132)',
+                    'data' => [0, 10, 5, 2, 20, 30, 45],
+                ],
+            ],
+        ]);
+
+        $chart->setOptions([
+            'scales' => [
+                'y' => [
+                    'suggestedMin' => 0,
+                    'suggestedMax' => 100,
+                ],
+            ],
+        ]);
+        return $this->render('admin/statistics.html.twig', [
+            'chart' => $chart,
+            'data' => $data,
+            'current_user' => $user,
+        ]);
     }
 
-    */
     /**
      * @param Request $request
      * @param EntityManagerInterface $em
