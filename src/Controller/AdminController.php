@@ -18,8 +18,10 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +39,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AdminController extends AbstractController
 {
+    private MailerInterface $mailer;
     private UserRepository $userRepository;
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
@@ -44,6 +47,7 @@ class AdminController extends AbstractController
     private SettingRepository $settingRepository;
 
     /**
+     * @param MailerInterface $mailer
      * @param UserRepository $userRepository
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
@@ -51,6 +55,7 @@ class AdminController extends AbstractController
      * @param SettingRepository $settingRepository
      */
     public function __construct(
+        MailerInterface       $mailer,
         UserRepository        $userRepository,
         ProfileManager        $profileManager,
         ParameterBagInterface $parameterBag,
@@ -58,6 +63,7 @@ class AdminController extends AbstractController
         SettingRepository     $settingRepository,
     )
     {
+        $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
@@ -302,19 +308,7 @@ class AdminController extends AbstractController
                 $em->persist($user);
                 $em->flush();
 
-                // Send email to the admin with the new verification code to confirm the reset
-                $email = (new Email())
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($user->getEmail())
-                    ->subject('Your Password Reset Details')
-                    ->html(
-                        $this->renderView(
-                            'email_activation/email_template_password_admin.html.twig',
-                            ['verificationCode' => $verificationCode]
-                        ));
-                $mailer->send($email);
-                $this->addFlash('success_admin', 'A verification code has been sent to your email address. Please check your inbox to confirm the password reset.');
-                return $this->redirectToRoute('admin_confirm_password_reset');
+                return $this->redirectToRoute('app_dashboard_regenerate_code_admin');
             }
             $user->setPassword($hashedPassword);
             $em->flush();
@@ -384,6 +378,57 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_confirm_password_reset');
     }
 
+    /**
+     * Regenerate the verification code for the user and send a new email.
+     *
+     * @return RedirectResponse A redirect response.
+     * @throws Exception
+     * @throws TransportExceptionInterface
+     */
+    #[Route('/dashboard/regenerate', name: 'app_dashboard_regenerate_code_admin')]
+    #[IsGranted('ROLE_USER')]
+    public function regenerateCode(): RedirectResponse
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $isVerified = $currentUser->isVerified();
+
+        if (!$isVerified) {
+            // Regenerate the verification code for the user
+            $email = $this->createEmailCodeAdmin($currentUser->getEmail());
+            $this->mailer->send($email);
+        }
+        $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+        return $this->redirectToRoute('admin_confirm_password_reset');
+    }
+
+    /**
+     * Create an email message with the verification code.
+     *
+     * @param string $email The recipient's email address.
+     * @return Email The email with the code.
+     * @throws Exception
+     */
+    protected function createEmailCodeAdmin(string $email): Email
+    {
+        // Get the values from the services.yaml file using $parameterBag on the __construct
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        // If the verification code is not provided, generate a new one
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $verificationCode = $this->generateVerificationCode($currentUser);
+
+        return (new TemplatedEmail())
+            ->from(new Address($emailSender, $nameSender))
+            ->to($email)
+            ->subject('Your Password Reset Details')
+            ->htmlTemplate('email_activation/email_template_password_admin.html.twig')
+            ->context([
+                'verificationCode' => $verificationCode,
+            ]);
+    }
 
     /**
      * @param Request $request
