@@ -18,13 +18,11 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -32,7 +30,6 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
 /**
@@ -265,7 +262,7 @@ class AdminController extends AbstractController
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 $verificationCode = $this->generateVerificationCode($user);
-                // Generate the confirmation URL with a token
+                // Removes the admin access until he confirms his new password
                 $user->setVerificationCode($verificationCode);
                 $user->setIsVerified(0);
                 $em->persist($user);
@@ -283,7 +280,7 @@ class AdminController extends AbstractController
                         ));
                 $mailer->send($email);
                 $this->addFlash('success_admin', 'A verification code has been sent to your email address. Please check your inbox to confirm the password reset.');
-                return $this->redirectToRoute('admin_confirm_reset');
+                return $this->redirectToRoute('admin_confirm_password_reset');
             }
             $user->setPassword($hashedPassword);
             $em->flush();
@@ -312,12 +309,12 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param RequestStack $requestStack
-     * @param SessionInterface $session
      * @return Response
+     * Render a confirmation password form
      */
-    #[Route('/dashboard/confirm', name: 'admin_confirm_reset')]
+    #[Route('/dashboard/confirm', name: 'admin_confirm_password_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(Request $request, RequestStack $requestStack, SessionInterface $session): Response
+    public function confirmReset(Request $request, RequestStack $requestStack): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
@@ -328,12 +325,42 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @param RequestStack $requestStack
+     * @param UserPasswordHasherInterface $passwordHasher
+     * @param EntityManagerInterface $em
+     * @return Response
+     * Check if the code is correct and then return
+     */
+    #[Route('/dashboard/confirm-checker', name: 'admin_confirm_password_checker')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function checkReset(RequestStack $requestStack, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
+    {
+        // Get the entered code from the form
+        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if ($enteredCode === $currentUser->getVerificationCode()) {
+            // Removes the admin access until he confirms his new password
+            $currentUser->setIsVerified(1);
+            $hashedPassword = $passwordHasher->hashPassword($currentUser, $currentUser->getPassword());
+            $currentUser->setPassword($hashedPassword);
+            $em->persist($currentUser);
+            $em->flush();
+            return $this->redirectToRoute('admin_page');
+        }
+        $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
+        return $this->redirectToRoute('admin_confirm_password_reset');
+    }
+
+
+    /**
      * @param Request $request
      * @param EntityManagerInterface $em
      * @param RequestStack $requestStack
      * @return Response
      */
-    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
+    #[
+        Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {

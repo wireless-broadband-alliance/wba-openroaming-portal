@@ -11,9 +11,14 @@
                     {{ message }}
                 </div>
             {% endfor %}
+            {% for message in app.session.flashbag.get('error_admin') %}
+                <div class="bg-red-500 text-white font-semibold rounded-lg shadow-md text-center mt-5 p-4 w-3/4 ">
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
         <div class="flex flex-row md:flex-col items-center justify-center">
-            <form action="{{ path('admin_confirm_reset') }}" method="post"
+            <form action="{{ path('admin_confirm_password_checker') }}" method="post"
                   class="rounded-lg bg-gray-200/50 p-12 m-10 mt-32">
                 <label for="code" class="block text-center text-lg mb-6">Enter the verification code from your
                     email</label>
