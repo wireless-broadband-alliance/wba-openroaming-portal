@@ -220,7 +220,7 @@ class AdminController extends AbstractController
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value on the db
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 // Check if the admin is trying to ban himself
-                if ($currentUser && $currentUser->getUserIdentifier() === $user->getId()) {
+                if ($currentUser && $currentUser->getId() === $user->getId()) {
                     $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
                 }
