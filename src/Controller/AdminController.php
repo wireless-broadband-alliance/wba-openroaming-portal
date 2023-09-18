@@ -16,12 +16,15 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -29,6 +32,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
 /**
@@ -238,6 +242,7 @@ class AdminController extends AbstractController
 
     /**
      * @throws TransportExceptionInterface
+     * @throws Exception
      */
     #[Route('/dashboard/reset/{id<\d+>}', name: 'admin_reset_password')]
     #[IsGranted('ROLE_ADMIN')]
@@ -258,24 +263,30 @@ class AdminController extends AbstractController
             $newPassword = $form->get('password')->getData();
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-            $user->setPassword($hashedPassword);
-
-            $em->flush();
-
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                // Send email to the user with the new password
+                $verificationCode = $this->generateVerificationCode($user);
+                // Generate the confirmation URL with a token
+                $user->setVerificationCode($verificationCode);
+                $user->setIsVerified(0);
+                $em->persist($user);
+                $em->flush();
+
+                // Send email to the admin with the new verification code to confirm the reset
                 $email = (new Email())
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your Password Reset Details')
                     ->html(
                         $this->renderView(
-                            'email_activation/email_template_password_admin.html.twig'
-                        )
-                    );
+                            'email_activation/email_template_password_admin.html.twig',
+                            ['verificationCode' => $verificationCode]
+                        ));
                 $mailer->send($email);
-                return $this->redirectToRoute('saml_logout');
+                $this->addFlash('success_admin', 'A verification code has been sent to your email address. Please check your inbox to confirm the password reset.');
+                return $this->redirectToRoute('admin_confirm_reset');
             }
+            $user->setPassword($hashedPassword);
+            $em->flush();
 
             // Send email to the user with the new password
             $email = (new Email())
@@ -289,13 +300,30 @@ class AdminController extends AbstractController
                     )
                 );
             $mailer->send($email);
-
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
         }
 
         return $this->render('admin/reset_password.html.twig', [
             'form' => $form->createView(),
             'user' => $user
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param RequestStack $requestStack
+     * @param SessionInterface $session
+     * @return Response
+     */
+    #[Route('/dashboard/confirm', name: 'admin_confirm_reset')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function confirmReset(Request $request, RequestStack $requestStack, SessionInterface $session): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+
+        return $this->render('admin/confirm_reset.html.twig', [
+            'data' => $data
         ]);
     }
 
@@ -458,6 +486,22 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * Generate a new verification code for the admin.
+     *
+     * @param User $user The user for whom the verification code is generated.
+     * @return int The generated verification code.
+     * @throws Exception
+     */
+    protected function generateVerificationCode(User $user): int
+    {
+        // Generate a random verification code with 6 digits
+        $verificationCode = random_int(100000, 999999);
+        $user->setVerificationCode($verificationCode);
+        $this->userRepository->save($user, true);
+
+        return $verificationCode;
+    }
 
     /**
      * @param $user
