@@ -94,11 +94,16 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
 
         // Get the current logged-in user (admin)
-        $user = $this->getUser();
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
-            'current_user' => $user,
+            'current_user' => $currentUser,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'searchTerm' => null,
@@ -144,12 +149,18 @@ class AdminController extends AbstractController
 
         $users = array_slice($users, $offset, $perPage);
 
-        // Get the current user again (admin), in case if he wants to reset or update its own info
-        $user = $this->getUser();
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->isVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
+
         return $this->render('admin/index.html.twig', [
             'users' => $users,
             'currentPage' => $page,
-            'current_user' => $user,
+            'current_user' => $currentUser,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
             'data' => $data
@@ -264,6 +275,7 @@ class AdminController extends AbstractController
                 $verificationCode = $this->generateVerificationCode($user);
                 // Removes the admin access until he confirms his new password
                 $user->setVerificationCode($verificationCode);
+                $user->setPassword($hashedPassword);
                 $user->setIsVerified(0);
                 $em->persist($user);
                 $em->flush();
