@@ -176,6 +176,14 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers($id, EntityManagerInterface $em): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
+
         $user = $this->userRepository->find($id);
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -206,7 +214,13 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(User $user, Request $request, UserRepository $userRepository): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
 
         $form = $this->createForm(UserUpdateType::class, $user);
 
@@ -220,7 +234,7 @@ class AdminController extends AbstractController
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value on the db
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 // Check if the admin is trying to ban himself
-                if ($currentUser && $currentUser->getId() === $user->getId()) {
+                if ($currentUser->getId() === $user->getId()) {
                     $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
                 }
@@ -256,6 +270,14 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
+
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
@@ -376,6 +398,14 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
@@ -463,6 +493,14 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_password_reset');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
 
