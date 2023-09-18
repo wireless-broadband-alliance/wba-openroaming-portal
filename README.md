@@ -325,9 +325,9 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     The placeholder `@ID` is replaced with
     the user's ID.
 32. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-33. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
-34. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
+33. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
     with a google account login
+34.  `ADDITIONAL_LABEL`: Additional label displayed on the landing page for more, if necessary, information.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
