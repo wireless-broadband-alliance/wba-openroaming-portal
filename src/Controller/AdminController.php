@@ -360,14 +360,13 @@ class AdminController extends AbstractController
 
     /**
      * @param RequestStack $requestStack
-     * @param UserPasswordHasherInterface $passwordHasher
      * @param EntityManagerInterface $em
      * @return Response
      * Check if the code is correct and then return
      */
     #[Route('/dashboard/confirm-checker', name: 'admin_confirm_password_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkReset(RequestStack $requestStack, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
+    public function checkReset(RequestStack $requestStack, EntityManagerInterface $em): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -376,10 +375,9 @@ class AdminController extends AbstractController
         if ($enteredCode === $currentUser->getVerificationCode()) {
             // Removes the admin access until he confirms his new password
             $currentUser->setIsVerified(1);
-            $hashedPassword = $passwordHasher->hashPassword($currentUser, $currentUser->getPassword());
-            $currentUser->setPassword($hashedPassword);
             $em->persist($currentUser);
             $em->flush();
+            $this->addFlash('success_admin', 'Your password has been rested successfully');
             return $this->redirectToRoute('admin_page');
         }
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
