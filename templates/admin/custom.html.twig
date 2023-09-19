@@ -8,31 +8,39 @@
 
         <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
             {{ form_row(form._token) }}
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 p-2">
                 {% for setting in form %}
-                    {# Display only the desired settings #}
+                    {# Display only the customization settings #}
                     {% if setting.vars.name in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
-                        <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-3 w-full border border-gray-300">
-                            <div class="text-base font-medium my-2 text-center break-normal md:break-all">
-                                {{ setting.vars.name }}
+                        <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-4 w-full border border-gray-300 relative">
+                            <div class="flex flex-row justify-between">
+                                <div class="text-base font-medium m-2 p-2 text-center break-normal md:break-all">
+                                    {{ setting.vars.name }}
+                                </div>
+                                <label class="flex items-center p-2 rounded-lg bg-opacity-40 cursor-pointer relative"
+                                       id="description_icon"
+                                >
+                                    <img class="group-hover:opacity-80 w-6"
+                                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                                </label>
+                            </div>
+                            <div class="flex justify-center items-center">
+                                <div class="bg-indigo-400 rounded-lg p-4 m-2 w-3/4 text-center text-white">
+                                    Potato description goes here Lorem ipsum dolor sit amet, consectetur adipisicing
+                                    elit. Accusamus adipisci atque dolores ea earum ex facere facilis fuga, nesciunt
+                                    recusandae sequi ullam unde vitae voluptate voluptatem. Aperiam assumenda nisi
+                                    perferendis.
+                                </div>
                             </div>
                             <div class="flex items-center space-x-2 mt-1 relative">
                                 {{ form_widget(setting, {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
-
-                                <label class="flex items-center p-2 rounded-lg bg-opacity-40 cursor-pointer group">
-                                    <img class="w-6 group-hover:opacity-80"
-                                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                                    <div class="bg-red-500 rounded-xl p-2 m-2 shadow-md absolute top-0 left-12 hidden group-hover:block">
-                                        Description goes here
-                                    </div>
-                                </label>
                             </div>
 
                             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                                 {{ form_errors(setting) }}
                             </div>
-
                         </div>
+
                     {% endif %}
                 {% endfor %}
             </div>
