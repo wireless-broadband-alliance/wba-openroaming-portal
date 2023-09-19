@@ -74,9 +74,9 @@ class SiteController extends AbstractController
     public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
+        if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
             // Check if the user is logged in
             if ($this->getUser()) {
                 /** @var User $currentUser */
@@ -91,7 +91,7 @@ class SiteController extends AbstractController
         }
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
-        if ($data['PLATFORM_MODE']) {
+        if ($data['PLATFORM_MODE']['value']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
@@ -124,10 +124,10 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::EMAIL) {
+                    if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
-                    if ($data["EMAIL_VERIFICATION"] === EmailConfirmationStrategy::NO_EMAIL) {
+                    if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -314,10 +314,10 @@ class SiteController extends AbstractController
      */
     #[Route('/email', name: 'app_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function sendCode(Request $request, RequestStack $requestStack): Response
+    public function sendCode(): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Get the current user
         /** @var User $currentUser */

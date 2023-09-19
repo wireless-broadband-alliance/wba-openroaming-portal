@@ -20,9 +20,10 @@
                                 {{ form_widget(setting, {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
 
                                 <label class="flex items-center p-2 rounded-lg bg-opacity-40 cursor-pointer group">
-                                    <img class="w-6 group-hover:opacity-80" src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                                    <img class="w-6 group-hover:opacity-80"
+                                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                                     <div class="bg-red-500 rounded-xl p-2 m-2 shadow-md absolute top-0 left-12 hidden group-hover:block">
-                                        {{ setting.vars.description }}
+                                        Description goes here
                                     </div>
                                 </label>
                             </div>

@@ -74,15 +74,14 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
-     * @param RequestStack $requestStack
      * @return Response
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
+    public function dashboard(Request $request, UserRepository $userRepository): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 50; // Number of users to display per page
@@ -120,15 +119,14 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
-     * @param RequestStack $requestStack
      * @return Response
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository, RequestStack $requestStack): Response
+    public function searchUsers(Request $request, UserRepository $userRepository): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
         $page = $request->query->getInt('page', 1);
@@ -335,17 +333,15 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param RequestStack $requestStack
      * @return Response
      * Render a confirmation password form
      */
     #[Route('/dashboard/confirm', name: 'admin_confirm_password_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(Request $request, RequestStack $requestStack): Response
+    public function confirmReset(): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         return $this->render('admin/confirm_reset.html.twig', [
             'data' => $data
@@ -436,10 +432,9 @@ class AdminController extends AbstractController
      * @param RequestStack $requestStack
      * @return Response
      */
-    #[
-        Route('/dashboard/settings', name: 'admin_dashboard_settings')]
+    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
+    public function settings(Request $request, EntityManagerInterface $em): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -450,7 +445,7 @@ class AdminController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -529,12 +524,11 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param EntityManagerInterface $em
-     * @param RequestStack $requestStack
      * @return Response
      */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em, RequestStack $requestStack): Response
+    public function customize(Request $request, EntityManagerInterface $em): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -545,7 +539,7 @@ class AdminController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
