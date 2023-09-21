@@ -34,6 +34,9 @@ class CustomType extends AbstractType
         foreach ($allowedSettings as $settingName => $formFieldType) {
             $formFieldOptions = [
                 'data' => null, // Set data to null for FileType fields
+                'attr' => [
+                    'data-controller' => 'descriptionCard',
+                ],
             ];
 
             if ($formFieldType === FileType::class) {
