@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Service\GetSettings;
 use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -12,6 +13,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CustomType extends AbstractType
 {
+    private GetSettings $getSettings;
+
+    public function __construct(GetSettings $getSettings)
+    {
+        $this->getSettings = $getSettings;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowedSettings = [
@@ -41,6 +49,10 @@ class CustomType extends AbstractType
                     }
                 }
             }
+
+            // GetSettings service retrieves each description
+            $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+
             /*
             $formFieldOptions['constraints'] = [
                 new NoSpecialCharacters(),

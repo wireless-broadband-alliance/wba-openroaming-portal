@@ -26,16 +26,12 @@
                             </div>
                             <div class="flex justify-center items-center">
                                 <div class="bg-indigo-400 rounded-lg p-4 m-2 w-3/4 text-center text-white">
-                                    Potato description goes here Lorem ipsum dolor sit amet, consectetur adipisicing
-                                    elit. Accusamus adipisci atque dolores ea earum ex facere facilis fuga, nesciunt
-                                    recusandae sequi ullam unde vitae voluptate voluptatem. Aperiam assumenda nisi
-                                    perferendis.
+                                    {{ setting.vars.attr.description }}
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2 mt-1 relative">
                                 {{ form_widget(setting, {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                             </div>
-
                             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                                 {{ form_errors(setting) }}
                             </div>

@@ -177,7 +177,7 @@ class GetSettings
         return $data;
     }
 
-    private function getSettingDescription($settingName): string
+    public function getSettingDescription($settingName): string
     {
         $descriptions = [
             'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
