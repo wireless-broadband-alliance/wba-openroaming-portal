@@ -429,12 +429,12 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param EntityManagerInterface $em
-     * @param RequestStack $requestStack
+     * @param GetSettings $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings(Request $request, EntityManagerInterface $em): Response
+    public function settings(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -496,6 +496,7 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
+            'getSettings' => $getSettings,
         ]);
     }
 
@@ -524,11 +525,12 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
      * @return Response
      */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em): Response
+    public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -597,6 +599,7 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
+            'getSettings' => $getSettings,
         ]);
     }
 

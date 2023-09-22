@@ -5,8 +5,6 @@ namespace App\Service;
 use App\Enum\OSTypes;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class GetSettings
 {
@@ -40,6 +38,81 @@ class GetSettings
     public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository)
     {
         $data = [];
+
+        $data['RADIUS_REALM_NAME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue(),
+            'description' => $this->getSettingDescription('RADIUS_REALM_NAME'),
+        ];
+
+        $data['DISPLAY_NAME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
+            'description' => $this->getSettingDescription('DISPLAY_NAME'),
+        ];
+
+        $data['PAYLOAD_IDENTIFIER'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PAYLOAD_IDENTIFIER'])->getValue(),
+            'description' => $this->getSettingDescription('PAYLOAD_IDENTIFIER'),
+        ];
+
+        $data['OPERATOR_NAME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'OPERATOR_NAME'])->getValue(),
+            'description' => $this->getSettingDescription('OPERATOR_NAME'),
+        ];
+
+        $data['DOMAIN_NAME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
+            'description' => $this->getSettingDescription('DOMAIN_NAME'),
+        ];
+
+        $data['RADIUS_TLS_NAME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
+            'description' => $this->getSettingDescription('RADIUS_TLS_NAME'),
+        ];
+
+        $data['NAI_REALM'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'NAI_REALM'])->getValue(),
+            'description' => $this->getSettingDescription('NAI_REALM'),
+        ];
+
+        $data['RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'])->getValue(),
+            'description' => $this->getSettingDescription('RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'),
+        ];
+
+        $data['SYNC_LDAP_ENABLED'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue(),
+            'description' => $this->getSettingDescription('SYNC_LDAP_ENABLED'),
+        ];
+        
+        $data['SYNC_LDAP_SERVER'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_SERVER'])->getValue(),
+            'description' => $this->getSettingDescription('SYNC_LDAP_SERVER'),
+        ];
+
+        $data['SYNC_LDAP_BIND_USER_DN'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_DN'])->getValue(),
+            'description' => $this->getSettingDescription('SYNC_LDAP_BIND_USER_DN'),
+        ];
+
+        $data['SYNC_LDAP_BIND_USER_PASSWORD'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_PASSWORD'])->getValue(),
+            'description' => $this->getSettingDescription('SYNC_LDAP_BIND_USER_PASSWORD'),
+        ];
+
+        $data['SYNC_LDAP_SEARCH_BASE_DN'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue(),
+            'description' => $this->getSettingDescription('SYNC_LDAP_SEARCH_BASE_DN'),
+        ];
+
+        $data['SYNC_LDAP_SEARCH_FILTER'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue(),
+            'description' => $this->getSettingDescription('SYNC_LDAP_SEARCH_FILTER'),
+        ];
+
+        $data['VALID_DOMAINS_GOOGLE_LOGIN'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN'])->getValue(),
+            'description' => $this->getSettingDescription('VALID_DOMAINS_GOOGLE_LOGIN'),
+        ];
 
         $data['title'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),

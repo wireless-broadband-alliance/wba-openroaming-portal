@@ -21,11 +21,13 @@
                                     {{ setting.name }}
                                 </div>
                                 <label class="flex items-center rounded-lg bg-opacity-40 cursor-pointer relative"
+                                       data-controller="descriptionCard"
                                        name="description_icon"
                                 >
                                     <img class="w-6"
                                          src="{{ asset('resources/logos/info_icon.svg') }}"
-                                         alt="info_icon"/>
+                                         alt="info_icon"
+                                    />
                                 </label>
                             </div>
                             <div class="p-2 w-full mt-1 flex justify-center">
@@ -35,14 +37,13 @@
                             <div class="flex justify-center items-center">
                                 <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white -translate-y-6 absolute hidden"
                                      name="description">
-                                    Testing Potatoes Description
+                                    {{ getSettings.getSettingDescription(setting.name) }}
                                 </div>
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
-
 
             <hr class="my-8 border-t-2 border-gray-300">
             <div class="text-center space-y-2">
@@ -82,7 +83,7 @@
                             <div class="flex justify-center items-center">
                                 <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white -translate-y-6 absolute hidden"
                                      name="description">
-                                    Testing Potatoes Description
+                                    {{ getSettings.getSettingDescription(setting.name) }}
                                 </div>
                             </div>
                         </div>
