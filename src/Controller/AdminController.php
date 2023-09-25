@@ -103,7 +103,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         return $this->render('admin/index.html.twig', [
@@ -158,7 +158,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->isVerified()) {
             $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         return $this->render('admin/index.html.twig', [
@@ -185,7 +185,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         $user = $this->userRepository->find($id);
@@ -223,7 +223,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         $form = $this->createForm(UserUpdateType::class, $user);
@@ -279,7 +279,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -305,8 +305,7 @@ class AdminController extends AbstractController
                 $user->setIsVerified(0);
                 $em->persist($user);
                 $em->flush();
-
-                return $this->redirectToRoute('app_dashboard_regenerate_code_admin');
+                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
             }
             $user->setPassword($hashedPassword);
             $em->flush();
@@ -333,72 +332,95 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @return Response
+     * @param string $type Type of action
      * Render a confirmation password form
+     * @return Response
      */
-    #[Route('/dashboard/confirm', name: 'admin_confirm_reset')]
+    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(): Response
+    public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         return $this->render('admin/confirm_reset.html.twig', [
-            'data' => $data
+            'data' => $data,
+            'type' => $type
         ]);
     }
 
     /**
      * @param RequestStack $requestStack
      * @param EntityManagerInterface $em
+     * @param string $type Type of action
      * @return Response
      * Check if the code is correct and then return
      */
-    #[Route('/dashboard/confirm-checker', name: 'admin_confirm_password_checker')]
+    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkReset(RequestStack $requestStack, EntityManagerInterface $em): Response
+    public function checkPassword(RequestStack $requestStack, EntityManagerInterface $em, string $type): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($enteredCode === $currentUser->getVerificationCode()) {
-            // Removes the admin access until he confirms his new password
-            $currentUser->setIsVerified(1);
-            $em->persist($currentUser);
-            $em->flush();
-            $this->addFlash('success_admin', 'Your password has been rested successfully');
-            return $this->redirectToRoute('admin_page');
+            if ($type === 'settingMain') {
+                dd('This is testing settingMain route logic');
+            } else if ($type === 'password') {
+                // Removes the admin access until he confirms his new password
+                $currentUser->setIsVerified(1);
+                $em->persist($currentUser);
+                $em->flush();
+                $this->addFlash('success_admin', 'Your password has been rested successfully');
+                return $this->redirectToRoute('admin_page');
+            } else if ($type === 'settingCustom') {
+                dd('This is testing settingCustom route logic');
+            }
         }
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
-        return $this->redirectToRoute('admin_confirm_reset');
+        return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
     /**
      * Regenerate the verification code for the user and send a new email.
      *
+     * @param string $type Type of action
      * @return RedirectResponse A redirect response.
      * @throws Exception
      * @throws TransportExceptionInterface
      */
-    #[Route('/dashboard/regenerate', name: 'app_dashboard_regenerate_code_admin')]
+    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function regenerateCode(): RedirectResponse
+    public function regenerateCode(string $type): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $isVerified = $currentUser->isVerified();
 
-        if (!$isVerified) {
+        if (!$isVerified && $type === 'password') {
             // Regenerate the verification code for the admin to reset password
             $email = $this->createEmailAdmin($currentUser->getEmail(), true);
-        } else {
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        if ($type === 'settingMain') {
             // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingMain']);
         }
-        $this->mailer->send($email);
-        $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-        return $this->redirectToRoute('admin_confirm_reset');
+
+        if ($type === 'settingCustom') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
+        }
     }
 
     /**
@@ -456,7 +478,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset',);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -528,7 +550,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -578,7 +600,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
