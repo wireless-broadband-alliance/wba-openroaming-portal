@@ -452,6 +452,7 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
         }
+        return $this->redirectToRoute('admin_page');
     }
 
     /**
@@ -509,7 +510,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset',);
+            return $this->redirectToRoute('admin_confirm_reset');
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
