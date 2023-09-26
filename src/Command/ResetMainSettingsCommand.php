@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -126,7 +127,7 @@ EOL;
             // Output the styled message
             $output->write($message);
             $output->writeln(['']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Handle any exceptions and roll back in case of an error
             $this->entityManager->rollback();
             $output->writeln('An error occurred while resetting settings: ' . $e->getMessage());
