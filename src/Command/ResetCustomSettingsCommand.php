@@ -40,7 +40,7 @@ class ResetCustomSettingsCommand extends Command
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion('This action will reset the main settings. [y/N] ', false);
-
+            /** @phpstan-ignore-next-line */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
                 return Command::SUCCESS;
