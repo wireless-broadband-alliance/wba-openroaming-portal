@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -29,17 +30,21 @@ class ResetMainSettingsCommand extends Command
     {
         $this
             ->setName('reset:mainS')
-            ->setDescription('Reset Main Settings');
+            ->setDescription('Reset Main Settings')
+            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('This action will reset the main settings. Type "yes" to confirm? (No - enter) ', false);
+        // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
+        if (!$input->getOption('yes')) {
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('This action will reset the main settings. [y/N] ', false);
 
-        if (!$helper->ask($input, $output, $question)) {
-            $output->writeln('Command aborted.');
-            return Command::SUCCESS;
+            if (!$helper->ask($input, $output, $question)) {
+                $output->writeln('Command aborted.');
+                return Command::SUCCESS;
+            }
         }
 
         $settings = [
@@ -55,6 +60,7 @@ class ResetMainSettingsCommand extends Command
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'EMAIL_VERIFICATION', 'value' => 'OFF'],
 
+            ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
             ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],

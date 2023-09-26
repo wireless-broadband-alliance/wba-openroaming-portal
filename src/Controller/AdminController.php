@@ -31,6 +31,8 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -354,7 +356,8 @@ class AdminController extends AbstractController
      * @param EntityManagerInterface $em
      * @param string $type Type of action
      * @return Response
-     * Check if the code is correct and then return
+     * Check if the code and then return the correct action
+     * @throws Exception
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
@@ -366,16 +369,44 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if ($enteredCode === $currentUser->getVerificationCode()) {
             if ($type === 'settingMain') {
-                dd('This is testing settingMain route logic');
-            } else if ($type === 'password') {
+                $command = 'php bin/console reset:mainS --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                // Run the command
+                $process->run();
+                // Check if the command executed
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The setting has been rested successfully');
+                return $this->redirectToRoute('admin_page');
+            }
+
+            if ($type === 'password') {
                 // Removes the admin access until he confirms his new password
                 $currentUser->setIsVerified(1);
                 $em->persist($currentUser);
                 $em->flush();
                 $this->addFlash('success_admin', 'Your password has been rested successfully');
                 return $this->redirectToRoute('admin_page');
-            } else if ($type === 'settingCustom') {
-                dd('This is testing settingCustom route logic');
+            }
+
+            if ($type === 'settingCustom') {
+                $command = 'php bin/console reset:customS --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The setting has been rested successfully');
+                return $this->redirectToRoute('admin_page');
             }
         }
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');

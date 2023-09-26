@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -29,17 +30,20 @@ class ResetCustomSettingsCommand extends Command
     {
         $this
             ->setName('reset:customS')
-            ->setDescription('Reset Customization Settings');
+            ->setDescription('Reset Customization Settings')
+            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('This action will reset the custom settings. Type "yes" to confirm? (No - enter) ', false);
+        if (!$input->getOption('yes')) {
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('This action will reset the main settings. [y/N] ', false);
 
-        if (!$helper->ask($input, $output, $question)) {
-            $output->writeln('Command aborted.');
-            return Command::SUCCESS;
+            if (!$helper->ask($input, $output, $question)) {
+                $output->writeln('Command aborted.');
+                return Command::SUCCESS;
+            }
         }
 
         $settings = [
