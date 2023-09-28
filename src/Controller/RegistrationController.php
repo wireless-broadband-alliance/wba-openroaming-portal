@@ -83,7 +83,7 @@ class RegistrationController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal it\'s in Demo mode. It is impossible use this authentication method.');
+            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 

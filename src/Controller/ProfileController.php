@@ -57,7 +57,7 @@ class ProfileController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($currentUser->getBannedAt()) {
-            $this->addFlash('error', 'Your account it\'s banned. Please, for more information contact our support.');
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -113,7 +113,7 @@ class ProfileController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($currentUser->getBannedAt()) {
-            $this->addFlash('error', 'Your account it\'s banned. Please, for more information contact our support.');
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -203,12 +203,12 @@ class ProfileController extends AbstractController
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
-        
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($currentUser->getBannedAt()) {
-            $this->addFlash('error', 'Your account it\'s banned. Please, for more information contact our support.');
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 

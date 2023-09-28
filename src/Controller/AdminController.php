@@ -104,7 +104,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
@@ -186,7 +186,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
@@ -224,7 +224,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
@@ -280,7 +280,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
@@ -509,7 +509,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset');
         }
 
@@ -581,7 +581,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
@@ -631,7 +631,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account it\'s not verified. Please check your email.');
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
