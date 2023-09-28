@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:customS',
+    name: 'reset:customSettings',
     description: 'Reset Customization Settings',
 )]
 class ResetCustomSettingsCommand extends Command
@@ -30,7 +30,7 @@ class ResetCustomSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:customS')
+            ->setName('reset:customSettings')
             ->setDescription('Reset Customization Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }

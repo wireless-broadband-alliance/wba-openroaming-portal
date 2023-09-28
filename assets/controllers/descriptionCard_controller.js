@@ -3,7 +3,7 @@ import {Controller} from '@hotwired/stimulus';
 export default class extends Controller {
 	connect() {
 		const description_values = document.getElementsByName("description");
-		const description_targets = document.getElementsByName("description_icon");
+		const description_targets = document.getElementsByName("descriptionIcon");
 
 		description_targets.forEach((description_target, index) => {
 			description_target.addEventListener('mouseover', function handleMouseOver() {
