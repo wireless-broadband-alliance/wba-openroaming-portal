@@ -160,23 +160,83 @@
                 </div>
             </div>
         </div>
-        <div class="p-7 w-full">
+        <div class="p-7 w-full bg-white">
             {# Header section #}
             <div class="flex items-center justify-between pb-10" id="header_page">
                 {# Header - Title and Buttons #}
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
             {# MainContent of the page #}
-            <div id="content" class="p-3 text-center bg-gray-200 space-y-3 rounded">
-                <h1 class="text-2xl font-bold">Think this is the Main content of the page</h1>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec justo enim. Curabitur posuere
-                    tortor non ex gravida eleifend.</p>
-                <p>Suspendisse potenti. Nunc a ex non turpis tincidunt posuere. Proin vestibulum quam id lorem placerat,
-                    eget lacinia ex tristique.</p>
-                <p>Integer viverra, mi nec consequat laoreet, arcu libero consequat velit, nec pharetra lorem odio vel
-                    ligula.</p>
-                <p>Morbi a facilisis mi. Praesent vel nunc eu libero pharetra venenatis. Sed aliquam, tellus eu pharetra
-                    elementum, neque velit congue nisi.</p>
+            <div id="content" class="p-3 text-center hover:shadow space-y-3 rounded-lg">
+                <div class="flex flex-col md:flex-row justify-end items-center mb-4">
+
+                    {% for message in app.session.flashbag.get('success_admin') %}
+                        <div class="text-white text-base bg-primary border-primary mt-5 rounded-md p-2 text-center">{{ message }}</div>
+                    {% endfor %}
+
+                    <form action="{{ path('admin_search') }}" method="GET" class="flex items-center mt-5 md:mt-0">
+                        <input type="text" name="u" placeholder="Search users..."
+                               class="border border-gray-300 rounded-l px-4 py-2 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit"
+                                class="md:mt-0 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 md:py-2.5 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 hover:transform hover:scale-105">
+                            Search
+                        </button>
+                    </form>
+                </div>
+
+
+                <div class="overflow-x-auto">
+                    <table class="table-auto w-full divide-y divide-gray-200 border border-gray-300 mb-10">
+                        <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">UUID</th>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Email</th>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Verification</th>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Google Account</th>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Created At</th>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Banned At</th>
+                            <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+
+                        {# Flash error message #}
+                        {% for message in app.session.flashbag.get('error_admin') %}
+                            <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        {# Show the users with the partial _users #}
+                        {% if users|length > 0 %}
+                            {% for user in users %}
+                                {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="text-center">
+                                        No users found for "{{ searchTerm }}"
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+
+                        </tbody>
+                    </table>
+                    {% if searchTerm != null %}
+                        {% if totalPages > 1 %}
+                            <div class="flex justify-center mt-4 mb-5 ">
+                                <div class="flex space-x-2">
+                                    {% for page in 1..totalPages %}
+                                        <a href="{{ path('admin_search', {'u': searchTerm, 'page': page}) }}"
+                                           class="px-2 py-1 rounded hover:bg-blue-500 hover:text-white {{ currentPage == page ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500' }}">{{ page }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </section>
