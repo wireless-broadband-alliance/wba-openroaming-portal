@@ -28,7 +28,7 @@
         <ul class="py-2 text-sm" aria-labelledby="dropdownButton">
             {# Header - Button - Reset Password #}
             <li>
-                <a href="#"
+                <a href="{{ path('admin_reset_password', {'id': app.user.id}) }}"
                    class="flex items-center space-x-2 px-4 py-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
                     <svg class="w-7 pr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -40,7 +40,7 @@
             </li>
             {# Header - Button - Download Profile #}
             <li>
-                <a href="#"
+                <a href="{{ path('app_landing') }}"
                    class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
                     <svg class="w-7 pr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -55,7 +55,8 @@
             </li>
             {# Header - Button - Logout #}
             <li>
-                <a href="#"
+                <a href="{{ path('saml_logout') }}"
+                   onclick="return confirm('Are you sure you to leave?')"
                    class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
                     <svg class="w-7 pr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

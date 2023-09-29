@@ -10,16 +10,16 @@
             <div id="sideHeader" class="flex flex-col justify-center items-center">
                 {# SideBar Header #}
                 <h1 class="pt-4 font-semibold text-2xl font-break">
-                    OpenRoaming Admin
+                    OpenRoaming Admin Page
                 </h1>
-                <img src="{{ asset('icons/tetrapi.svg') }}" class="w-2/5 pt-1 mx-auto mt-auto mb-8"
+                <img src="{{ data.customerLogoName.value }}" class="w-2/5 pt-3 mx-auto mt-auto mb-6"
                      alt="customer_logo">
                 <hr class="w-full m-5 mx-4 h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
             </div>
             {# SideBar Button (User/PortalSettings #}
             <div id="selectAction" class="py-4 flex flex-col space-y-2 font-medium">
                 {# SideBar Button - User - Button #}
-                <a href="#">
+                <a href="">
                     <div id="UserButton"
                          class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow-md hover:bg-veryDarkButton hover:text-white selected">
                         <div class="flex items-center space-x-2">
@@ -65,7 +65,7 @@
                         <ul class="mx-2">
                             <li>
                                 <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
-                                   href="#">
+                                   href="{{ path('admin_dashboard_settings') }}">
                                     <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -76,7 +76,7 @@
                             </li>
                             <li>
                                 <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
-                                   href="#">
+                                   href="{{ path('admin_dashboard_customize') }}">
                                     <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
                                          stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
                                          aria-hidden="true">
@@ -87,7 +87,7 @@
                             </li>
                             <li>
                                 <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
-                                   href="#">
+                                   href="{{ path('admin_update', {id : current_user.id}) }}">
                                     <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
                                          stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
                                          aria-hidden="true">
@@ -123,7 +123,7 @@
                         <ul class="mx-2">
                             <li>
                                 <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
-                                   href="#">
+                                   href="{{ path('admin_reset_password', {'id': app.user.id}) }}">
                                     <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -134,7 +134,7 @@
                             </li>
                             <li>
                                 <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
-                                   href="#">
+                                   href="{{ path('app_landing') }}">
                                     <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -145,7 +145,8 @@
                             </li>
                             <li>
                                 <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
-                                   href="#">
+                                   href="{{ path('saml_logout') }}"
+                                   onclick="return confirm('Are you sure you to leave?')">
                                     <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
