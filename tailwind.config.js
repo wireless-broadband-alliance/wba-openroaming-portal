@@ -15,6 +15,8 @@ module.exports = {
 				},
 
 				primary: '#A0C66B',
+				veryDarkPurple: '#594B60',
+				veryDarkButton: '#1C0523',
 			},
 
 			fontFamily: {

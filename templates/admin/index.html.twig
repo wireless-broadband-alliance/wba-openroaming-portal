@@ -1,92 +1,251 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Page WBA{% endblock %}
+{% block title %}Hello SideBar!{% endblock %}
 
 {% block body %}
-    <div class="container mx-auto px-4">
-
-        {% include 'admin/partials/_header_admin.html.twig' %}
-
-        <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-            <div class="flex flex-col items-center md:flex-row md:space-x-6">
-                {% include 'admin/partials/_options_dropdown.html.twig' %}
-                {# I need to fix another stuff before start working with chart.js
-                <a href="{{ path('admin_dashboard_statistics') }}"
-                   type="button"
-                   id="statistic_button"
-                   class="flex md:w-auto whitespace-nowrap rounded bg-sky-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-                >
-                    Statistics
-                </a>
-                #}
+    <!--Make a partial file of this-->
+    <section class="flex text-veryDarkPurple">
+        <div class="bg-white hidden md:block h-screen p-4 pt-4 w-10/12 md:w-4/12 duration-300 relative border-r border-gray-300/50"
+             data-controller="sidebar" id="sidebar">
+            <!-- Sidebar container -->
+            <div id="sideHeader" class="flex flex-col justify-center items-center">
+                <!-- Sidebar header section -->
+                <h1 class="pt-4 font-semibold text-2xl font-break">
+                    OpenRoaming Admins
+                </h1>
+                <img src="{{ asset('icons/tetrapi.svg') }}" class="w-2/5 pt-1 mx-auto mt-auto mb-8"
+                     alt="customer_logo">
+                <hr class="w-full m-5 mx-4 h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
             </div>
-
-            {% for message in app.session.flashbag.get('success_admin') %}
-                <div class="text-white text-base bg-primary border-primary mt-5 rounded-md p-2 text-center">{{ message }}</div>
-            {% endfor %}
-
-            <form action="{{ path('admin_search') }}" method="GET" class="flex items-center mt-5 md:mt-0">
-                <input type="text" name="u" placeholder="Search users..."
-                       class="border border-gray-300 rounded-l px-4 py-2 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button type="submit"
-                        class="md:mt-0 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 md:py-2.5 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 hover:transform hover:scale-105">
-                    Search
-                </button>
-            </form>
-        </div>
-
-
-        <div class="overflow-x-auto">
-            <table class="table-auto w-full divide-y divide-gray-200 border border-gray-300 mb-10">
-                <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">UUID</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Email</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Verification</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Google Account</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Created At</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Banned At</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-
-                {# Flash error message #}
-                {% for message in app.session.flashbag.get('error_admin') %}
-                    <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-
-                {# Show the users with the partial _users #}
-                {% if users|length > 0 %}
-                    {% for user in users %}
-                        {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="7">
-                            <div class="text-center">
-                                No users found for "{{ searchTerm }}"
-                            </div>
-                        </td>
-                    </tr>
-                {% endif %}
-
-                </tbody>
-            </table>
-            {% if searchTerm != null %}
-                {% if totalPages > 1 %}
-                    <div class="flex justify-center mt-4 mb-5 ">
-                        <div class="flex space-x-2">
-                            {% for page in 1..totalPages %}
-                                <a href="{{ path('admin_search', {'u': searchTerm, 'page': page}) }}"
-                                   class="px-2 py-1 rounded hover:bg-blue-500 hover:text-white {{ currentPage == page ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500' }}">{{ page }}</a>
-                            {% endfor %}
+            <div id="selectAction" class="py-4 flex flex-col space-y-2 font-medium">
+                <!-- User button section -->
+                <a href="#">
+                    <div id="UserButton"
+                         class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow-md hover:bg-veryDarkButton hover:text-white selected">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 hover:stroke-white selected-icon" fill="none" stroke="currentColor"
+                                 stroke-width="1.5"
+                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+                            </svg>
+                            <h1 class="selected-text">Users</h1>
                         </div>
+                        <svg class="w-4 hover:stroke-white selected-icon" fill="none" stroke="currentColor"
+                             stroke-width="1.5"
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
                     </div>
-                {% endif %}
-            {% endif %}
+                </a>
+                <!-- Settings button section -->
+                <div class="relative" id="selectDropdownButton">
+                    <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
+                        hover:shadow-md hover:bg-veryDarkButton hover:text-white">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 hover:stroke-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <h1>Portal Settings</h1>
+                        </div>
+                        <svg id="selectArrow" class="w-4 hover:stroke-white duration-300" fill="none"
+                             stroke="currentColor" stroke-width="1.5"
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                        </svg>
+                    </div>
+                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow-xl" id="selectDropDown">
+                        <ul class="mx-2">
+                            <li>
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                   href="#">
+                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                         stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
+                                    </svg>
+                                    Main Settings</a>
+                            </li>
+                            <li>
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                   href="#">
+                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                         aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
+                                    </svg>
+                                    Page Style</a>
+                            </li>
+                            <li>
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                   href="#">
+                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                         aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Account Settings</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Option's sidebar section (only works on lower resolutions) -->
+                <div class="hidden" id="optionsDropdownButton">
+                    <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
+                        hover:shadow-md hover:bg-veryDarkButton hover:text-white">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 hover:stroke-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <h1>Options</h1>
+                        </div>
+                        <svg id="selectArrow" class="w-4 hover:stroke-white duration-300" fill="none"
+                             stroke="currentColor" stroke-width="1.5"
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                        </svg>
+                    </div>
+                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow-xl" id="optionsDropdown">
+                        <ul class="mx-2">
+                            <li>
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                   href="#">
+                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                         stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path>
+                                    </svg>
+                                    Reset Password</a>
+                            </li>
+                            <li>
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                   href="#">
+                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                         stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
+                                    </svg>
+                                    Download Profile</a>
+                            </li>
+                            <li>
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                   href="#">
+                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                         stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
+                                    </svg>
+                                    Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+        <div class="p-7 w-full">
+            <!-- Header section with user icon and title -->
+            <div class="flex items-center justify-between pb-10" id="header_page">
+                <div class="flex flex-row items-center -pl-2"> <!-- Added a flex container for user icon and title -->
+                    <svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5"
+                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+                    </svg>
+                    <h1 class="text-2xl font-semibold p-5">Users</h1>
+                </div>
+                <!-- Option button Make Include file of this on the main project-->
+                <div class="relative">
+                    <!--Main Button-->
+                    <button
+                            data-controller="optionsDropDown"
+                            id="dropdownButton"
+                            type="button"
+                            class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300"
+                    >
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+                        </svg>
+                    </button>
+                    <div id="dropdown"
+                         class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-xl min-w-max absolute right-0 mt-2">
+                        <ul class="py-2 text-sm" aria-labelledby="dropdownButton">
+                            <!-- Account Setting -->
+                            <li>
+                                <a href="#"
+                                   class="flex items-center space-x-2 px-4 py-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                                    <svg class="w-7 pr-2" fill="none" stroke="currentColor" stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path>
+                                    </svg>
+                                    Reset Password
+                                </a>
+                            </li>
+                            <!-- Download Profile -->
+                            <li>
+                                <a href="#"
+                                   class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                                    <svg class="w-7 pr-2" fill="none" stroke="currentColor" stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
+                                    </svg>
+                                    Download Profile
+                                </a>
+                            </li>
+                            <li class="py-1">
+                                <hr class="border-gray-300/50">
+                            </li>
+                            <!-- Logout Button -->
+                            <li>
+                                <a href="#"
+                                   class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                                    <svg class="w-7 pr-2" fill="none" stroke="currentColor" stroke-width="1.5"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
+                                    </svg>
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Hamburger Icon (visible on mobile screens) -->
+                <button id="sidebarButton" data-controller="sideBar"
+                        class="block hamburger md:hidden focus:outline-none mt-3">
+                    <span class="hamburger-top"></span>
+                    <span class="hamburger-middle"></span>
+                    <span class="hamburger-bottom"></span>
+                </button>
+            </div>
+            <div id="content" class="p-3 text-center bg-gray-200 space-y-3 rounded">
+                <!-- Main content of the page -->
+                <h1 class="text-2xl font-bold">Think this is the Main content of the page</h1>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec justo enim. Curabitur posuere
+                    tortor non ex gravida eleifend.</p>
+                <p>Suspendisse potenti. Nunc a ex non turpis tincidunt posuere. Proin vestibulum quam id lorem placerat,
+                    eget lacinia ex tristique.</p>
+                <p>Integer viverra, mi nec consequat laoreet, arcu libero consequat velit, nec pharetra lorem odio vel
+                    ligula.</p>
+                <p>Morbi a facilisis mi. Praesent vel nunc eu libero pharetra venenatis. Sed aliquam, tellus eu pharetra
+                    elementum, neque velit congue nisi.</p>
+            </div>
+        </div>
+    </section>
 {% endblock %}
