@@ -43,7 +43,7 @@ class SettingType extends AbstractType
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
                     ],
                     'attr' => [
-                        'data-controller' => 'alwaysOnEmail',
+                        'data-controller' => 'alwaysOnEmail descriptionCard',
                     ],
                     'data' => $settingValue,
                 ]);

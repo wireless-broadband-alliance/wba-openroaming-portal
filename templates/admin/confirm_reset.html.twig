@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4">
+        {% include 'admin/partials/_header_admin.html.twig' %}
+        <div class="flex justify-center">
+            {% for message in app.session.flashbag.get('success_admin') %}
+                <div class="bg-primary text-white font-semibold rounded-lg shadow-md text-center mt-5 p-4 w-3/4 ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% for message in app.session.flashbag.get('error_admin') %}
+                <div class="bg-red-500 text-white font-semibold rounded-lg shadow-md text-center mt-5 p-4 w-3/4 ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex flex-row md:flex-col items-center justify-center">
+            <form {% if type == 'password' %} action="{{ path('admin_confirm_checker', {'type': 'password'}) }}"{% endif %}
+                    {% if type == 'settingMain' %} action="{{ path('admin_confirm_checker', {'type': 'settingMain'}) }}"{% endif %}
+                    {% if type == 'settingCustom' %} action="{{ path('admin_confirm_checker', {'type': 'settingCustom'}) }}"{% endif %}
+                    method="post"
+                    class="rounded-lg bg-gray-200/50 p-12 m-10 mt-32">
+                <label for="code" class="block text-center text-lg mb-6">Enter the verification code from your
+                    email</label>
+                <input type="number" id="code" name="code" class="border border-gray-300 px-4 py-2 rounded-lg mb-2"
+                       oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                       maxlength="6">
+                <button type="submit"
+                        class="border-solid border-2 hover:border-primary/50 rounded-lg px-4 py-2 bg-primary text-white">
+                    Verify
+                </button>
+                <p>Click
+                    <a {% if type == 'password' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'password'}) }}"{% endif %}
+                            {% if type == 'settingMain' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingMain'}) }}"{% endif %}
+                            {% if type == 'settingCustom' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCustom'}) }}"{% endif %}
+                       class="font-bold mt-5">here</a> to
+                    generate a
+                    new
+                    email with a new code</p>
+            </form>
+        </div>
+    </div>
+{% endblock %}

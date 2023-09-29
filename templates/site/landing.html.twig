@@ -1,28 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title.value }}{% endblock %}
 
 {% block body %}
 
     <div class="h-screen w-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
         <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
-             style="background-image: url('{{ wallpaperImageName }}');">
+             style="background-image: url('{{ wallpaperImageName.value }}');">
             <div class="h-[100%] w-[100%] flex flex-col justify-between">
                 <img class="mt-16 lg:mt-36 w-96"
-                     src="{{ openroamingLogoName }}"
+                     src="{{ openroamingLogoName.value }}"
                      alt="OpenRoaming Logo"/>
 
-                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ welcomeText }}</h1>
+                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ welcomeText.value }}</h1>
 
-                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ welcomeDescription }}</p>
+                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ welcomeDescription.value }}</p>
 
                 <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any
                     questions, please contact
-                    <a href="mailto:{{ contactEmail }}"
-                       class="font-semibold underline">{{ contactEmail }}</a>
+                    <a href="mailto:{{ contactEmail.value }}"
+                       class="font-semibold underline">{{ contactEmail.value }}</a>
                 </p>
-                {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') %}
+                {% if PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
                     <div class="bg-red-600 text-white font-bold p-3 text-center">
                         <h2>DEMO MODE</h2>
                         <p class="text-xs lg:text-base mt-5 ">
@@ -41,7 +41,7 @@
                 {{ stimulus_controller('visibility') }}>
             <div>
                 <img class="mt-8 lg:mt-0"
-                     src="{{ customerLogoName }}"
+                     src="{{ customerLogoName.value }}"
                      alt="Logo"/>
 
                 <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20 text-center">
@@ -65,12 +65,12 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if PLATFORM_MODE == constant('App\\Enum\\PlatformMode::Demo') %}
-                    <div class="{% if EMAIL_VERIFICATION != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
+                {% if PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
+                    <div class="{% if EMAIL_VERIFICATION.value != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
-                        {% elseif  EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                        {% elseif  EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
@@ -96,10 +96,10 @@
                                            required/>
 
                                     <span class="text-[#656565] font-light text-xs lg:text-base">I accept the <a
-                                                href="{{ TOS_LINK }}"
+                                                href="{{ TOS_LINK.value }}"
                                                 target="_blank"
                                                 class="underline font-base">terms & conditions of use</a> and <a
-                                                href="{{ PRIVACY_POLICY_LINK }}"
+                                                href="{{ PRIVACY_POLICY_LINK.value }}"
                                                 target="_blank"
                                                 class="underline font-base">privacy policy</a>.</span>
                                 </div>
@@ -149,7 +149,7 @@
 
                                 {# ADDITIONAL_LABEL - PLATFORM_MODE - Demo #}
                                 <div class=" mt-5 text-center items-center">
-                                    {{ ADDITIONAL_LABEL }}
+                                    {{ ADDITIONAL_LABEL.value }}
                                 </div>
 
                                 {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
@@ -171,7 +171,7 @@
                                 {% endif %}
                             </form>
                         {% else %}
-                            {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            {% if EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 {% if not app.user.isVerified %}
                                     {% include 'email_activation/index.html.twig' %}
                                 {% endif %}
@@ -238,7 +238,7 @@
 
                                     {# ADDITIONAL_LABEL - PLATFORM_MODE - Demo #}
                                     <div class=" mt-5 text-center items-center">
-                                        {{ ADDITIONAL_LABEL }}
+                                        {{ ADDITIONAL_LABEL.value }}
                                     </div>
 
                                     {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
@@ -329,7 +329,7 @@
                                 </form>
                             </div>
                         {% else %}
-                            {% if EMAIL_VERIFICATION == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            {% if EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 {% include 'email_activation/index.html.twig' %}
                             {% else %}
                                 <div class="mt-10">
@@ -405,7 +405,7 @@
                                 Please select one of the following authentication methods to obtain a profile: </p>
                         </div>
 
-                        {% if GOOGLE_LOGIN_ENABLED %}
+                        {% if GOOGLE_LOGIN_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('connect_google') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
@@ -417,46 +417,46 @@
                                         <path fill="currentColor"
                                               d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
                                     </svg>
-                                    {{ GOOGLE_LOGIN_LABEL }}
+                                    {{ GOOGLE_LOGIN_LABEL.value }}
                                 </a>
-                                <p>{{ GOOGLE_LOGIN_DESCRIPTION }}</p>
+                                <p>{{ GOOGLE_LOGIN_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
-                        {% if SAML_ENABLED %}
+                        {% if SAML_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="/saml/login"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ SAML_LABEL }}
+                                    {{ SAML_LABEL.value }}
                                 </a>
-                                <p>{{ SAML_DESCRIPTION }}</p>
+                                <p>{{ SAML_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
-                        {% if REGISTER_ENABLED %}
+                        {% if REGISTER_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('app_register') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ REGISTER_LABEL }}
+                                    {{ REGISTER_LABEL.value }}
                                 </a>
-                                <p>{{ REGISTER_DESCRIPTION }}</p>
+                                <p>{{ REGISTER_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
 
-                        {% if LOGIN_TRADITIONAL_ENABLED %}
+                        {% if LOGIN_TRADITIONAL_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('app_login') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ LOGIN_TRADITIONAL_LABEL }}
+                                    {{ LOGIN_TRADITIONAL_LABEL.value }}
                                 </a>
-                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION }}</p>
+                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
                         {# ADDITIONAL_LABEL - PLATFORM_MODE - Live #}
                         <div class=" mt-5 text-center items-center">
-                            {{ ADDITIONAL_LABEL }}
+                            {{ ADDITIONAL_LABEL.value }}
                         </div>
                     {% endif %}
                     {% if app.user %}
