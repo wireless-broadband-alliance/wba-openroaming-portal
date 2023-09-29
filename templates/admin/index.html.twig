@@ -19,7 +19,7 @@
             {# SideBar Button (User/PortalSettings #}
             <div id="selectAction" class="py-4 flex flex-col space-y-2 font-medium">
                 {# SideBar Button - User - Button #}
-                <a href="">
+                <a href="{{ path('admin_page') }}">
                     <div id="UserButton"
                          class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow-md hover:bg-veryDarkButton hover:text-white selected">
                         <div class="flex items-center space-x-2">
@@ -166,8 +166,14 @@
                 {# Header - Title and Buttons #}
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
+            {# Flash error message #}
+            {% for message in app.session.flashbag.get('error_admin') %}
+                <div class="duration-300 transition text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
+                    {{ message }}
+                </div>
+            {% endfor %}
             {# MainContent of the page #}
-            <div id="content" class="p-3 text-center hover:shadow space-y-3 rounded-lg">
+            <div id="content" class="p-3 text-center space-y-3 rounded-lg">
                 <div class="flex flex-col md:flex-row justify-end items-center mb-4">
 
                     {% for message in app.session.flashbag.get('success_admin') %}
@@ -199,13 +205,6 @@
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-
-                        {# Flash error message #}
-                        {% for message in app.session.flashbag.get('error_admin') %}
-                            <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
 
                         {# Show the users with the partial _users #}
                         {% if users|length > 0 %}
