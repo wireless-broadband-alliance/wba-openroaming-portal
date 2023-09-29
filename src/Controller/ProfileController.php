@@ -53,6 +53,14 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if ($currentUser->getBannedAt()) {
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
@@ -100,6 +108,15 @@ class ProfileController extends AbstractController
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
+
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if ($currentUser->getBannedAt()) {
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
@@ -186,6 +203,15 @@ class ProfileController extends AbstractController
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
+
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if ($currentUser->getBannedAt()) {
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
         $profile = file_get_contents('../profile_templates/windows/template.xml');
         $profile = str_replace([
