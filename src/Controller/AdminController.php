@@ -696,6 +696,7 @@ class AdminController extends AbstractController
             'form' => $form->createView(),
             'data' => $data,
             'getSettings' => $getSettings,
+            'current_user' => $currentUser,
         ]);
     }
 
