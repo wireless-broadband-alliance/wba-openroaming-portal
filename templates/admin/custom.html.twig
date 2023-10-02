@@ -183,12 +183,12 @@
                         {% for setting in form %}
                             {# Display only the customization settings #}
                             {% if setting.vars.name in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
-                                <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-4 w-full border border-gray-300 relative">
+                                <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-4 w-full border border-gray-300">
                                     <div class="flex flex-row justify-between">
                                         <div class="text-base font-medium m-2 p-2 text-center break-normal md:break-all">
                                             {{ setting.vars.name }}
                                         </div>
-                                        <label class="flex items-center rounded-lg bg-opacity-40 cursor-pointer relative"
+                                        <label class="flex items-center rounded-lg bg-opacity-40 cursor-pointer"
                                                name="descriptionIcon"
                                         >
                                             <img class="w-6"
@@ -196,7 +196,7 @@
                                                  alt="info_icon"/>
                                         </label>
                                     </div>
-                                    <div class="flex items-center space-x-2 mt-1 relative">
+                                    <div class="flex items-center space-x-2 mt-1">
                                         {{ form_widget(setting, {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
                                     </div>
                                     <div class="flex justify-center items-center">
