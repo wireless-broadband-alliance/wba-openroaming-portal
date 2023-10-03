@@ -3,9 +3,9 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block body %}
-    <section class="flex text-veryDarkPurple">
+    <section class="flex text-veryDarkPurple" data-controller="sidebar">
         <div class="bg-lightGray hidden md:block h-screen p-4 pt-4 w-10/12 md:w-3/12 duration-300 relative border-r border-gray-300/50"
-             data-controller="sidebar" id="sidebar">
+             id="sidebar">
             {# SideBar Container #}
             <div id="sideHeader" class="flex flex-col justify-center items-center">
                 {# SideBar Header #}
@@ -63,7 +63,7 @@
                         </svg>
                     </div>
                     {# SideBar - Portal Settings - Dropdown Items #}
-                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow" id="PortalDropDown">
+                    <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" id="PortalDropDown">
                         <ul class="mx-2">
                             <li>
                                 <a class=" flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
