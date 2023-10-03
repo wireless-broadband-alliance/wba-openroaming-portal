@@ -200,21 +200,25 @@
                                 </div>
                             </div>
                             {# Right Search Bar #}
-                            <form action="#" method="get" class="w-full md:w-4/6">
-                                <label for="table-search" class="sr-only">Search</label>
+                            <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-4/6">
                                 <div class="flex flex-row items-center bg-white border rounded-md">
                                     {# Search Icon #}
-                                    <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
-                                         stroke-width="1.5"
-                                         viewBox="0 0 24 24"
-                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-                                    </svg>
+                                    <button type="submit">
+                                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                                             stroke-width="1.5"
+                                             viewBox="0 0 24 24"
+                                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                                        </svg>
+                                    </button>
                                     {# Search Input #}
-                                    <input type="text" id="table-search"
-                                           class="w-full p-2 bg-transparent border-none outline-none"
-                                           placeholder="Search Users">
+                                    <label>
+                                        <input type="text"
+                                               class="w-full p-2 bg-transparent border-none outline-none"
+                                               placeholder="Search Users ..."
+                                               name="u">
+                                    </label>
                                 </div>
                             </form>
                         </div>
@@ -260,91 +264,38 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr class="bg-white text-xs">
-                                    <th scope="row"
-                                        class="px-6 py-4 font-medium whitespace-nowrap">
-                                        marcelofernandes-DEMO-123@tetrapi.pt
-                                    </th>
-                                    <td class="px-6 py-4">
-                                        marcelofernandes@tetrapi.pt
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-center font-semibold p-1 text-red-400 bg-red-100/50 rounded-full">
-                                            Not Verified
-                                        </p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Demo Account
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        20/09/2023 22:00
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-center font-semibold p-1 text-green-400 bg-green-100/50 rounded-full">
-                                            Not Verified
-                                        </p>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        {# Items Button Dropdown #}
-                                        <button id="itemsDropDownButton"
-                                                class="inline-flex items-center p-2 rounded-lg hover:shadow duration-300"
-                                                type="button">
-                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                                                 fill="currentColor" viewBox="0 0 4 15">
-                                                <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
-                                            </svg>
-                                        </button>
-
-                                        {# Items List Dropdown #}
-                                        <div id="itemsDropDown"
-                                             class="rounded-lg shadow w-44 mt-2 hidden transition duration-300 transform scale-0 origin-top">
-                                            <ul class="py-2 text-gray-700">
-                                                <li>
-                                                    <a href="#"
-                                                       class="flex flex-row items-center space-x-2 px-2 py-2 mx-2 my-2 hover:bg-lightGreen hover:text-white duration-300 rounded">
-                                                        <svg class="w-5 mr-2 " fill="none"
-                                                             stroke="currentColor" stroke-width="1.5"
-                                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
-                                                        </svg>
-                                                        Edit</a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                       class="flex flex-row items-center space-x-2 px-2 py-2 mx-2 my-2 hover:bg-lightGreen hover:text-white duration-300 rounded">
-                                                        <svg class="w-5 mr-2 "
-                                                             fill="none" stroke="currentColor" stroke-width="1.5"
-                                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"></path>
-                                                        </svg>
-                                                        Delete</a>
-                                                </li>
-                                                <li>
-                                                    <a href="#"
-                                                       class="flex flex-row items-center space-x-2 px-2 py-2 mx-2 my-2 hover:bg-lightGreen hover:text-white duration-300 rounded">
-                                                        <svg class="w-5 mr-2 " fill="none"
-                                                             stroke="currentColor"
-                                                             stroke-width="1.5"
-                                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path>
-                                                        </svg>
-                                                        Reset
-                                                        Password</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
+                                {# Show the users with the partial _users #}
+                                {% if users|length > 0 %}
+                                    {% for user in users %}
+                                        {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="text-center">
+                                                No users found for "{{ searchTerm }}"
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="m-8">
                         <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                        {# Pagination goes here, make it on the main project #}
+                        {% if searchTerm != null %}
+                            {% if totalPages > 1 %}
+                                <div class="flex justify-center mt-4 mb-5 ">
+                                    <div class="flex space-x-2">
+                                        {% for page in 1..totalPages %}
+                                            <a href="{{ path('admin_search', {'u': searchTerm, 'page': page}) }}"
+                                               class="px-2 py-1 rounded hover:bg-blue-500 hover:text-white {{ currentPage == page ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500' }}">{{ page }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
