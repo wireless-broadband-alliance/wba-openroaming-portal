@@ -50,6 +50,7 @@ export default class extends Controller {
 		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
 		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
 
+		/*
 		function initializeDropdown_Items(buttonId, menuId) {
 			const dropdownButtonItems = document.getElementById(buttonId);
 			const dropdownItems = document.getElementById(menuId);
@@ -73,5 +74,6 @@ export default class extends Controller {
 		}
 
 		initializeDropdown_Items('itemsDropDownButton', 'itemsDropDown');
+		*/
 	}
 }

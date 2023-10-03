@@ -43,7 +43,7 @@
                 <div class="relative" id="PortalDropdownButton">
                     {# SideBar - Portal Settings - Dropdown Main #}
                     <div class="selected duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-                        hover:shadow-md hover:text-lightGreen">
+                        hover:shadow hover:text-lightGreen">
                         <div class="flex items-center space-x-2">
                             <svg class="w-5 mr-2  selected-icon" fill="none" stroke="currentColor"
                                  stroke-width="1.5"
@@ -63,11 +63,11 @@
                         </svg>
                     </div>
                     {# SideBar - Portal Settings - Dropdown Items #}
-                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow-xl" id="PortalDropDown">
+                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow" id="PortalDropDown">
                         <ul class="mx-2">
                             <li>
-                                <a class="selected flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                                   href="{{ path('admin_dashboard_settings') }}">
+                                <a class="selected flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 cursor-default"
+                                >
                                     <svg class="w-5 mr-2  selected-icon " fill="none"
                                          stroke="currentColor"
                                          stroke-width="1.5"
@@ -78,7 +78,7 @@
                                     <h1 class="selected-text">Main Settings</h1></a>
                             </li>
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('admin_dashboard_customize') }}">
                                     <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +89,7 @@
                                     Page Style</a>
                             </li>
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('admin_update', {id : current_user.id}) }}">
                                     <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
