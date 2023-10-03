@@ -4,13 +4,13 @@
 
 {% block body %}
     <section class="flex text-veryDarkPurple">
-        <div class="bg-white hidden md:block min-h-screen p-4 pt-4 w-10/12 md:w-4/12 duration-300 relative border-r border-gray-300/50"
+        <div class="bg-lightGray hidden md:block h-screen p-4 pt-4 w-10/12 md:w-3/12 duration-300 relative border-r border-gray-300/50"
              data-controller="sidebar" id="sidebar">
             {# SideBar Container #}
             <div id="sideHeader" class="flex flex-col justify-center items-center">
                 {# SideBar Header #}
                 <h1 class="pt-4 font-semibold text-2xl font-break">
-                    OpenRoaming Admin Page
+                    OpenRoaming Admin
                 </h1>
                 <img src="{{ data.customerLogoName.value }}" class="w-2/5 pt-3 mx-auto mt-auto mb-6"
                      alt="customer_logo">
@@ -21,9 +21,9 @@
                 {# SideBar Button - User - Button #}
                 <a href="{{ path('admin_page') }}">
                     <div id="UserButton"
-                         class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow-md hover:bg-veryDarkButton hover:text-white selected">
+                         class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-white selected">
                         <div class="flex items-center space-x-2">
-                            <svg class="w-5 hover:stroke-white selected-icon" fill="none" stroke="currentColor"
+                            <svg class="w-5 mr-2 selected-icon" fill="none" stroke="currentColor"
                                  stroke-width="1.5"
                                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -31,20 +31,20 @@
                             </svg>
                             <h1 class="selected-text">Users</h1>
                         </div>
-                        <svg class="w-4 hover:stroke-white selected-icon" fill="none" stroke="currentColor"
+                        <svg class="w-4 selected-icon" fill="none" stroke="currentColor"
                              stroke-width="1.5"
                              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
                         </svg>
                     </div>
                 </a>
+
                 {# SideBar - Portal Settings - Dropdown #}
-                <div class="relative" id="selectDropdownButton">
-                    {# SideBar - Portal Settings - Dropdown Main #}
+                <div class="relative" id="PortalDropdownButton">
                     <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-                        hover:shadow-md hover:bg-veryDarkButton hover:text-white">
+                        hover:shadow hover:text-lightGreen">
                         <div class="flex items-center space-x-2">
-                            <svg class="w-5 hover:stroke-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                            <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                                  viewBox="0 0 24 24"
                                  xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -54,19 +54,19 @@
                             </svg>
                             <h1>Portal Settings</h1>
                         </div>
-                        <svg id="selectArrow" class="w-4 hover:stroke-white duration-300" fill="none"
+                        <svg id="selectArrow" class="w-4 duration-300" fill="none"
                              stroke="currentColor" stroke-width="1.5"
                              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
                         </svg>
                     </div>
-                    {# SideBar - Portal Settings - Dropdown Items #}
-                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow-xl" id="selectDropDown">
+                    <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
+                         id="PortalDropDown">
                         <ul class="mx-2">
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('admin_dashboard_settings') }}">
-                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                    <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -75,9 +75,9 @@
                                     Main Settings</a>
                             </li>
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('admin_dashboard_customize') }}">
-                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                    <svg class="w-5 mr-2" fill="none" stroke="currentColor"
                                          stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
                                          aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -86,9 +86,9 @@
                                     Page Style</a>
                             </li>
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('admin_update', {id : current_user.id}) }}">
-                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                    <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
                                          aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -101,30 +101,29 @@
                 </div>
                 {# SideBar - Options - Dropdown (only shows on lower resolutions) #}
                 <div class="hidden" id="optionsDropdownButton">
-                    {# SideBar - Options - Dropdown Main #}
                     <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-                        hover:shadow-md hover:bg-veryDarkButton hover:text-white">
+                        hover:shadow hover:text-lightGreen">
                         <div class="flex items-center space-x-2">
-                            <svg class="w-5 hover:stroke-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                            <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
                             <h1>Options</h1>
                         </div>
-                        <svg id="selectArrow" class="w-4 hover:stroke-white duration-300" fill="none"
+                        <svg id="selectArrow" class="w-4  duration-300" fill="none"
                              stroke="currentColor" stroke-width="1.5"
                              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
                         </svg>
                     </div>
-                    {# SideBar - Options - Dropdown Items #}
-                    <div class="hidden px-2 py-2 mt-1 bg-white rounded-md duration-300 shadow-xl" id="optionsDropdown">
+                    <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
+                         id="optionsDropdown">
                         <ul class="mx-2">
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('admin_reset_password', {'id': app.user.id}) }}">
-                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                    <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -133,9 +132,9 @@
                                     Reset Password</a>
                             </li>
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('app_landing') }}">
-                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                    <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -144,10 +143,10 @@
                                     Download Profile</a>
                             </li>
                             <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg hover:bg-veryDarkButton hover:text-white duration-300"
+                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                    href="{{ path('saml_logout') }}"
                                    onclick="return confirm('Are you sure you to leave?')">
-                                    <svg class="w-5 mr-2 hover:stroke-white" fill="none" stroke="currentColor"
+                                    <svg class="w-5 mr-2 " fill="none" stroke="currentColor"
                                          stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -160,13 +159,13 @@
                 </div>
             </div>
         </div>
-        <div class="p-7 w-full bg-white">
+        <div class="p-7 w-full bg-lightGray">
             {# Header section #}
             <div class="flex items-center justify-between pb-10" id="header_page">
                 {# Header - Title and Buttons #}
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
-            Still Implementing new sidebar style, just saving progress
+            Still Implementing new sidebar style, just saving progress (Users Table goes here)
         </div>
     </section>
 {% endblock %}
