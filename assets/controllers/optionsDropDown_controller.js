@@ -25,7 +25,7 @@ export default class extends Controller {
 			});
 		}
 
-		initializeDropdown('dropdownButton', 'dropdown');
+		initializeDropdown('adminActionsDropdownButton', 'adminActionsDropdown');
 
 		function initializeDropdown_Select(buttonId, menuId) {
 			const dropdownButtonSelect = document.getElementById(buttonId);
@@ -47,7 +47,31 @@ export default class extends Controller {
 			});
 		}
 
-		initializeDropdown_Select('selectDropdownButton', 'selectDropDown');
+		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
 		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
+
+		function initializeDropdown_Items(buttonId, menuId) {
+			const dropdownButtonItems = document.getElementById(buttonId);
+			const dropdownItems = document.getElementById(menuId);
+
+			dropdownButtonItems.addEventListener('click', () => {
+				if (dropdownItems.style.display === 'block') {
+					dropdownItems.style.display = 'none';
+					console.log('Items Menu OFF')
+				} else {
+					dropdownItems.style.display = 'block';
+					console.log('Items Menu ON')
+				}
+			});
+
+			// Close the dropdown when clicking outside it
+			document.addEventListener('click', (event) => {
+				if (!dropdownButtonItems.contains(event.target) && !dropdownItems.contains(event.target)) {
+					dropdownItems.style.display = 'none';
+				}
+			});
+		}
+
+		initializeDropdown_Items('itemsDropDownButton', 'itemsDropDown');
 	}
 }

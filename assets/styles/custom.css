@@ -45,19 +45,17 @@
 }
 
 
-/* Add a background color and text color for selected buttons on the sideBar */
+/* Add a background color and text color for selected buttons of the sidebar*/
 .selected {
-	background-color: #1C0523;
-	color: #fff;
+	background-color: #f1f8f4;
+	color: #57a475;
 	font-weight: bold;
 }
 
-/* Style the selected icon differently */
 .selected-icon {
-	stroke: #fff;
+	stroke: #57a475;
 }
 
-/* Style the selected text differently */
 .selected-text {
-	color: #fff;
+	color: #57a475;
 }

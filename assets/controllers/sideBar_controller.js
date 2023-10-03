@@ -4,7 +4,7 @@ export default class extends Controller {
 	connect() {
 		const sidebarBtnElement = document.getElementById('sidebarButton');
 		const sidebarElement = document.getElementById('sidebar');
-		const dropdownButton = document.getElementById('dropdownButton');
+		const dropdownButton = document.getElementById('adminActionsDropdownButton');
 		const optionsSidebarButton = document.getElementById('optionsDropdownButton');
 
 		const alertElement = document.getElementById('alert-2');
