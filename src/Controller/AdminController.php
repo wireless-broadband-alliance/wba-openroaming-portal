@@ -100,6 +100,11 @@ class AdminController extends AbstractController
 
         $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
 
+        // Fetch user counts for table header (All/Verified/Banned)
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
+        $verifiedUsersCount = $userRepository->countVerifiedUsers();
+        $bannedUsersCount = $userRepository->countBannedUsers();
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -114,7 +119,10 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'searchTerm' => null,
-            'data' => $data
+            'data' => $data,
+            'allUsersCount' => $allUsersCount,
+            'verifiedUsersCount' => $verifiedUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
         ]);
     }
 
@@ -155,6 +163,10 @@ class AdminController extends AbstractController
 
         $users = array_slice($users, $offset, $perPage);
 
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
+        $verifiedUsersCount = $userRepository->countVerifiedUsers();
+        $bannedUsersCount = $userRepository->countBannedUsers();
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -169,7 +181,10 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
-            'data' => $data
+            'data' => $data,
+            'allUsersCount' => $allUsersCount,
+            'verifiedUsersCount' => $verifiedUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
         ]);
     }
 
