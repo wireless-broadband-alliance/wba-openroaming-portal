@@ -217,7 +217,8 @@
                                         <input type="text"
                                                class="w-full p-2 bg-transparent border-none outline-none"
                                                placeholder="Search Users ..."
-                                               name="u">
+                                               name="u"
+                                               value="{{ app.request.query.get('u', '') }}">
                                     </label>
                                 </div>
                             </form>
@@ -272,8 +273,10 @@
                                 {% else %}
                                     <tr>
                                         <td colspan="7">
-                                            <div class="text-center">
-                                                No users found for "{{ searchTerm }}"
+                                            <div class="flex justify-center items-center text-center p-1">
+                                                <div class="bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold text-base">
+                                                    No users found with "{{ searchTerm }}"
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
