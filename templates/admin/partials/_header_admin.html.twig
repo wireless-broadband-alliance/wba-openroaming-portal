@@ -1,6 +1,6 @@
 {# Header - Title - left conner  #}
 <div class="flex flex-row items-center -pl-2">
-    {% if app.request.attributes.get('_route') == 'admin_page' %}
+    {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_search' %}
         <svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5"
              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round"
