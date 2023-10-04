@@ -163,7 +163,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.isVerified = :verified')
+            ->andWhere('u.roles NOT LIKE :adminRole')
             ->setParameter('verified', true)
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
             ->getQuery()
             ->getSingleScalarResult();
     }
