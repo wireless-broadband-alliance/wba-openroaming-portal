@@ -1,7 +1,7 @@
 {# Table Content #}
-<tr class="bg-white text-xs">
+<tr class="bg-white text-xs whitespace-nowrap">
     {# UUID #}
-    <th class="px-6 py-4 font-medium whitespace-nowrap">
+    <th class="px-6 py-4 font-medium ">
         {{ user.uuid is defined ? user.uuid : 'No information' }}
     </th>
     {# Email #}
@@ -9,7 +9,7 @@
         {{ user.email is defined ? user.email : 'No information' }}
     </td>
     {# User Verification #}
-    <td class="px-6 py-4">
+    <td class="px-6 py-4 ">
         {% if user.isVerified is defined and user.isVerified == 0 %}
             <p class="font-semibold p-1">
             <span class="p-1.5 text-red-400 bg-red-100/50 rounded-full">
@@ -25,22 +25,22 @@
         {% endif %}
     </td>
     {# User Provider #}
-    <td class="px-6 py-4">
-        {% if user.googleId is defined and user.googleId == false %}
+    <td class="px-6 py-4 ">
+        {% if user.googleId is defined and user.googleId == true %}
             <p class="text-center p-1">
-                Google
+                Google Account
             </p>
-        {% elseif user.saml_identifier is defined and user.saml_identifier == false %}
+        {% elseif user.saml_identifier is defined and user.saml_identifier == true %}
             <p class="text-center p-1">
                 SAML
             </p>
-        {% endif %}
-        {% if user.googleId is not defined and user.googleId == false and user.saml_identifier is not defined and user.saml_identifier == false %}
+        {% else %}
             <p class="text-center p-1">
-                Portal Authentication
+                Portal Account
             </p>
         {% endif %}
     </td>
+
     {# Created At #}
     <td class="px-6 py-4">
         <div class="font-medium">
