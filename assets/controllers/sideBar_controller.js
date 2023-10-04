@@ -93,30 +93,34 @@ export default class extends Controller {
 		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
 		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
 
-		/*
-		function initializeDropdown_Items(buttonId, menuId) {
-			const dropdownButtonItems = document.getElementById(buttonId);
-			const dropdownItems = document.getElementById(menuId);
+		function initializeDropdown_ActionItems(buttonName, menuName) {
+			const dropdownButtonItems = document.getElementsByName(buttonName);
+			const dropdownMenuItems = document.getElementsByName(menuName);
 
-			dropdownButtonItems.addEventListener('click', () => {
-				if (dropdownItems.style.display === 'block') {
-					dropdownItems.style.display = 'none';
-					console.log('Items Menu OFF')
-				} else {
-					dropdownItems.style.display = 'block';
-					console.log('Items Menu ON')
-				}
+			// Loop through all elements with the given name and attach event listeners
+			dropdownButtonItems.forEach((button, index) => {
+				button.addEventListener('click', () => {
+					const dropdownMenu = dropdownMenuItems[index];
+					if (dropdownMenu.style.display === 'block') {
+						dropdownMenu.style.display = 'none';
+					} else {
+						dropdownMenu.style.display = 'block';
+					}
+				});
 			});
 
 			// Close the dropdown when clicking outside it
 			document.addEventListener('click', (event) => {
-				if (!dropdownButtonItems.contains(event.target) && !dropdownItems.contains(event.target)) {
-					dropdownItems.style.display = 'none';
-				}
+				dropdownButtonItems.forEach((button, index) => {
+					const dropdownMenu = dropdownMenuItems[index];
+					if (!button.contains(event.target) && !dropdownMenu.contains(event.target)) {
+						dropdownMenu.style.display = 'none';
+					}
+				});
 			});
 		}
 
-		initializeDropdown_Items('itemsDropDownButton', 'itemsDropDown');
-		*/
+		initializeDropdown_ActionItems('itemsDropDownButton', 'itemsDropDown');
+
 	}
 }

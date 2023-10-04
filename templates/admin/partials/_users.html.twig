@@ -66,8 +66,8 @@
     {# Actions #}
     <td class="px-6 py-4 text-right">
         {# Items Button Dropdown #}
-        <button id="itemsDropDownButton"
-                class="inline-flex items-center p-2 rounded-lg hover:shadow duration-300"
+        <button name="itemsDropDownButton"
+                class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
                 type="button">
             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"
                  fill="currentColor" viewBox="0 0 4 15">
@@ -76,13 +76,13 @@
         </button>
 
         {# Items List Dropdown #}
-        <div id="itemsDropDown"
-             class="rounded-lg shadow w-44 mt-2 hidden transition duration-300 transform scale-0 origin-top">
+        <div name="itemsDropDown"
+             class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-10 mt-2 z-10">
             <ul class="py-2 text-gray-700">
                 <li>
                     <a href="{{ path('admin_update', {id : user.id}) }}"
-                       class="flex flex-row items-center space-x-2 px-2 py-2 mx-2 my-2 hover:bg-lightGreen hover:text-white duration-300 rounded">
-                        <svg class="w-5 mr-2 " fill="none"
+                       class="flex flex-row items-center px-2 py-2 mx-2 my-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                        <svg class="w-5 mr-3" fill="none"
                              stroke="currentColor" stroke-width="1.5"
                              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -93,8 +93,8 @@
                 <li>
                     <a onclick="return confirm('Are you sure you want to delete the user: {{ user.email }}?')"
                        href="{{ path('admin_delete', {id : user.id}) }}"
-                       class="flex flex-row items-center space-x-2 px-2 py-2 mx-2 my-2 hover:bg-lightGreen hover:text-white duration-300 rounded">
-                        <svg class="w-5 mr-2"
+                       class="flex flex-row items-center px-2 py-2 mx-2 my-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                        <svg class="w-5 mr-3"
                              fill="none" stroke="currentColor" stroke-width="1.5"
                              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -104,8 +104,8 @@
                 </li>
                 <li>
                     <a href="{{ path('admin_reset_password', {'id': user.id}) }}"
-                       class="flex flex-row items-center space-x-2 px-2 py-2 mx-2 my-2 hover:bg-lightGreen hover:text-white duration-300 rounded">
-                        <svg class="w-5 mr-2 " fill="none"
+                       class="flex flex-row items-center px-2 py-2 mx-2 my-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                        <svg class="w-5 mr-3" fill="none"
                              stroke="currentColor"
                              stroke-width="1.5"
                              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
