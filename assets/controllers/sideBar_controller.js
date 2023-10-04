@@ -122,5 +122,20 @@ export default class extends Controller {
 
 		initializeDropdown_ActionItems('itemsDropDownButton', 'itemsDropDown');
 
+		function remove_element(elementId) {
+			setTimeout(function () {
+				let errorContainer = document.getElementById(elementId);
+				if (errorContainer) {
+					errorContainer.style.transition = 'opacity 0.5s';
+					errorContainer.style.opacity = '0';
+					setTimeout(function () {
+						errorContainer.remove();
+					}, 500); // Wait for the transition to finish and then remove the element
+				}
+			}, 5000); // set a time of five seconds and then remove the error
+		}
+
+		remove_element('errorDisplay');
+		remove_element('successDisplay');
 	}
 }
