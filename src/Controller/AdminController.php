@@ -86,7 +86,7 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
-        $perPage = 6; // Number of users to display per page
+        $perPage = 15; // Number of users to display per page
 
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
@@ -140,7 +140,7 @@ class AdminController extends AbstractController
 
         $searchTerm = $request->query->get('u');
         $page = $request->query->getInt('page', 1);
-        $perPage = 6;
+        $perPage = 15;
 
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
@@ -292,6 +292,9 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -341,11 +344,14 @@ class AdminController extends AbstractController
                 );
             $mailer->send($email);
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
+            return $this->redirectToRoute('admin_page');
         }
 
         return $this->render('admin/reset_password.html.twig', [
             'form' => $form->createView(),
-            'user' => $user
+            'user' => $user,
+            'data' => $data,
+            'current_user' => $currentUser,
         ]);
     }
 
