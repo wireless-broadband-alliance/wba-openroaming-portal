@@ -22,8 +22,10 @@ export default class extends Controller {
 
 		const mediaQuery = window.matchMedia('(max-width: 768px)');
 
+		// Function to handle changes in resolution
 		function handleResolutionChange(mediaQuery) {
 			if (mediaQuery.matches) {
+				sidebarElement.classList.add('hidden');
 				sidebarElement.classList.add('absolute');
 				sidebarElement.classList.remove('relative');
 				dropdownButton.classList.remove('relative');
@@ -31,18 +33,22 @@ export default class extends Controller {
 				optionsSidebarButton.classList.remove('hidden');
 				optionsSidebarButton.classList.add('relative');
 			} else {
+				sidebarElement.classList.remove('hidden');
 				sidebarElement.classList.remove('absolute');
 				sidebarElement.classList.add('relative');
 				dropdownButton.classList.remove('hidden');
 				dropdownButton.classList.add('relative');
+				optionsSidebarButton.classList.remove('relative');
+				optionsSidebarButton.classList.add('hidden');
 			}
 		}
 
-		// Initial check on a page load
+// Initial check on page load
 		handleResolutionChange(mediaQuery);
 
-		// Listen for resolution changes
+// Listen for resolution changes
 		mediaQuery.addListener(handleResolutionChange);
+
 
 		function initializeDropdown_AdminActions(buttonId, menuId) {
 			const dropdownButton = document.getElementById(buttonId);
