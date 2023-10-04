@@ -86,7 +86,7 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
-        $perPage = 50; // Number of users to display per page
+        $perPage = 6; // Number of users to display per page
 
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
@@ -140,7 +140,7 @@ class AdminController extends AbstractController
 
         $searchTerm = $request->query->get('u');
         $page = $request->query->getInt('page', 1);
-        $perPage = 25;
+        $perPage = 6;
 
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
@@ -180,6 +180,7 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'current_user' => $currentUser,
             'totalPages' => $totalPages,
+            'perPage' => $perPage,
             'searchTerm' => $searchTerm,
             'data' => $data,
             'allUsersCount' => $allUsersCount,
