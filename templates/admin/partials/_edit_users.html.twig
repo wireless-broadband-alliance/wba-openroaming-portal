@@ -6,7 +6,7 @@
         <div>
             {{ form_errors(form) }}
         </div>
-        <div class="grid grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="mb-4 mt-1">
                 <div class="relative h-10 w-full min-w-[200px]">
                     {{ form_widget(form.uuid, {
@@ -87,13 +87,13 @@
                     {{ form_errors(form.samlIdentifier) }}
                 </div>
             </div>
-            <div class="flex flex-row justify-start space-x-4">
+            <div class="mt-2.5 w-full lg:w-1/2 flex flex-row justify-start md:justify-between space-x-2 md:space-x-4">
                 <div class="mb-4 mt-1 flex-grow relative">
                     <div class="flex items-center space-x-2">
-                        {{ form_label(form.isVerified, 'Verification', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
+                        {{ form_label(form.isVerified, 'Verified', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
                         <input type="checkbox"
-                               class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md"/>
-                        <span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6 group-hover:after:translate-x-1"></span>
+                               class="absolute left-1/2 -translate-x-1/2 w-10 h-5 peer appearance-none rounded-md"/>
+                        <span class="w-10 h-5 flex items-center flex-shrink-0 ml-2 p-0.5 bg-lightGray rounded-full duration-300 ease-in-out peer-checked:bg-primary after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-3 group-hover:after:translate-x-0.5"></span>
                     </div>
                     {{ form_widget(form.isVerified, {'attr': {'class': 'sr-only', 'type': 'checkbox'}}) }}
                     {{ form_errors(form.isVerified) }}
@@ -102,8 +102,8 @@
                     <div class="flex items-center space-x-2">
                         {{ form_label(form.bannedAt, 'Banned', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
                         <input type="checkbox"
-                               class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md"/>
-                        <span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6 group-hover:after:translate-x-1"></span>
+                               class="absolute left-1/2 -translate-x-1/2 w-20 h-5 peer appearance-none rounded-md"/>
+                        <span class="w-10 h-5 flex items-center flex-shrink-0 ml-2 p-0.5 bg-lightGray rounded-full duration-300 ease-in-out peer-checked:bg-primary after:w-4 after:h-4 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-3 group-hover:after:translate-x-0.5"></span>
                     </div>
                     {{ form_widget(form.bannedAt, {'attr': {'class': 'sr-only', 'type': 'checkbox'}}) }}
                     {{ form_errors(form.bannedAt) }}
