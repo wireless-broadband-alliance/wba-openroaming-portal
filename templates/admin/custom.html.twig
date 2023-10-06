@@ -91,20 +91,29 @@
                                     </h1>
                                 </a>
                             </li>
-                            <li>
-                                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                                   href="{{ path('admin_update', {id : current_user.id}) }}">
-                                    <svg class="w-5 mr-4 " fill="none" stroke="currentColor"
-                                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                                         aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    Account Settings</a>
-                            </li>
                         </ul>
                     </div>
                 </div>
+                {# SideBar Button - Account Settings - Button #}
+                <a href="{{ path('admin_update', {id : current_user.id}) }}">
+                    <div id="UserButton"
+                         class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 mr-2" fill="none" stroke="currentColor"
+                                 stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                 aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <h1>Account Settings</h1>
+                        </div>
+                        <svg class="w-4" fill="none" stroke="currentColor"
+                             stroke-width="1.5"
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
+                    </div>
+                </a>
                 {# SideBar - Options - Dropdown (only shows on lower resolutions) #}
                 <div class="hidden" id="optionsDropdownButton">
                     <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
@@ -113,7 +122,7 @@
                             <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
                             </svg>
                             <h1>Options</h1>
                         </div>
