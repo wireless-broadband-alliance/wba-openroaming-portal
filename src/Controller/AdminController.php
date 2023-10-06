@@ -352,6 +352,7 @@ class AdminController extends AbstractController
             'user' => $user,
             'data' => $data,
             'current_user' => $currentUser,
+            'confirm_reset' => false,
         ]);
     }
 
@@ -366,10 +367,14 @@ class AdminController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
-        return $this->render('admin/confirm_reset.html.twig', [
+        return $this->render('admin/reset_password.html.twig', [
             'data' => $data,
-            'type' => $type
+            'type' => $type,
+            'current_user' => $currentUser,
+            'confirm_reset' => true
         ]);
     }
 
@@ -532,7 +537,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
