@@ -20,6 +20,7 @@ module.exports = {
 				lightGreen: '#57a475',
 				veryLightGreen: '#f1f8f4',
 				lightGray: '#f7f6f8',
+				inputGray: '#D9D9D9',
 			},
 
 			fontFamily: {

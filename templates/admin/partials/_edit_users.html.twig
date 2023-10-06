@@ -1,12 +1,6 @@
-<div class="container mx-auto mt-10">
-    <div class="bg-white rounded-lg shadow-md border border-white p-6">
-        <h1 class="text-2xl font-semibold mb-6">Update User</h1>
-        {# Flash error message #}
-        {% for message in app.session.flashbag.get('error_admin') %}
-            <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
-                {{ message }}
-            </div>
-        {% endfor %}
+<div class="p-4">
+    <h1 class="text-2xl font-semibold mb-6">User Info</h1>
+    <div class="p-6 mx-auto bg-white rounded-lg ">
 
         {{ form_start(form) }}
         <div>
@@ -14,50 +8,117 @@
         </div>
         <div class="grid grid-cols-2 gap-6">
             <div class="mb-4 mt-1">
-                {{ form_label(form.uuid, 'UUID', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 '}}) }}
-                {{ form_widget(form.uuid, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 '}}) }}
-                {{ form_errors(form.uuid) }}
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(form.uuid, {
+                        'attr': {
+                            'class': 'peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(form.uuid, 'UUID', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(form.uuid) }}
+                </div>
             </div>
             <div class="mb-4 mt-1">
-                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 '}}) }}
-                {{ form_widget(form.email, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 '}}) }}
-                {{ form_errors(form.email) }}
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(form.email, {
+                        'attr': {
+                            'class': 'peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(form.email, 'Email', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(form.email) }}
+                </div>
             </div>
             <div class="mb-4 mt-1">
-                {{ form_label(form.isVerified, 'Verification', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 '}}) }}
-                {{ form_widget(form.isVerified, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 '}}) }}
-                {{ form_errors(form.isVerified) }}
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(form.firstName, {
+                        'attr': {
+                            'class': 'peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(form.firstName, 'First Name', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
             </div>
             <div class="mb-4 mt-1">
-                {{ form_label(form.samlIdentifier, 'SAML Identifier', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 '}}) }}
-                {{ form_widget(form.samlIdentifier, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 '}}) }}
-                {{ form_errors(form.samlIdentifier) }}
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(form.lastName, {
+                        'attr': {
+                            'class': 'peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(form.lastName, 'Last Name', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(form.lastName) }}
+                </div>
             </div>
             <div class="mb-4 mt-1">
-                {{ form_label(form.firstName, 'First Name', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 '}}) }}
-                {{ form_widget(form.firstName, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 '}}) }}
-                {{ form_errors(form.firstName) }}
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(form.samlIdentifier, {
+                        'attr': {
+                            'class': 'peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(form.samlIdentifier, 'SAML Identifier', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(form.samlIdentifier) }}
+                </div>
             </div>
-            <div class="mb-4 mt-1">
-                {{ form_label(form.lastName, 'Last Name', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 '}}) }}
-                {{ form_widget(form.lastName, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2 '}}) }}
-                {{ form_errors(form.lastName) }}
+            <div class="flex flex-row justify-start space-x-4">
+                <div class="mb-4 mt-1 flex-grow relative">
+                    <div class="flex items-center space-x-2">
+                        {{ form_label(form.isVerified, 'Verification', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
+                        <input type="checkbox"
+                               class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md"/>
+                        <span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6 group-hover:after:translate-x-1"></span>
+                    </div>
+                    {{ form_widget(form.isVerified, {'attr': {'class': 'sr-only', 'type': 'checkbox'}}) }}
+                    {{ form_errors(form.isVerified) }}
+                </div>
+                <div class="mb-4 mt-1 flex-grow relative">
+                    <div class="flex items-center space-x-2">
+                        {{ form_label(form.bannedAt, 'Banned', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
+                        <input type="checkbox"
+                               class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md"/>
+                        <span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6 group-hover:after:translate-x-1"></span>
+                    </div>
+                    {{ form_widget(form.bannedAt, {'attr': {'class': 'sr-only', 'type': 'checkbox'}}) }}
+                    {{ form_errors(form.bannedAt) }}
+                </div>
             </div>
-        </div>
-        <div class="mb-4 mt-1">
-            {{ form_label(form.bannedAt, 'Banned', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-            {{ form_widget(form.bannedAt, {'attr': {'class': 'text-gray-700 text-base mb-4 mt-3 block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
-            {{ form_errors(form.bannedAt) }}
-        </div>
-        <div class="flex justify-center mt-6">
-            <button class="bg-green-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-                    type="submit">Apply Changes
-            </button>
-        </div>
-        {{ form_end(form) }}
 
-        <div class="mt-6 text-center">
-            <a href="{{ path('admin_page') }}" class="text-gray-500 hover:text-red-700">Cancel Operation</a>
+
         </div>
+
     </div>
+    <div class="flex justify-center md:justify-end mt-6">
+        <button class="text-sm hover:bg-veryDarkButton hover:text-white font-bold p-3 rounded-lg transition ease-in duration-200"
+                type="submit">Apply Changes
+        </button>
+    </div>
+    {{ form_end(form) }}
 </div>
+
