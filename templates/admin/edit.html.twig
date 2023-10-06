@@ -93,7 +93,10 @@
                 {# SideBar Button - Account Settings - Button #}
                 <a href="{{ path('admin_update', {id : current_user.id}) }}">
                     <div id="UserButton"
-                         class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
+                         class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+                {% if current_user.id == user.id %}
+                    selected
+                {% endif %}">
                         <div class="flex items-center space-x-2">
                             <svg class="w-5 mr-2" fill="none" stroke="currentColor"
                                  stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
