@@ -89,21 +89,26 @@
             </div>
             <div class="mt-2.5 w-full lg:w-1/2 flex flex-row justify-start md:justify-between space-x-4">
                 <div class="mb-4 mt-1 flex-grow">
-                    <div class="flex flex-col">
-                        {{ form_label(form.isVerified, 'Verification', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
-                        {{ form_widget(form.isVerified, {'attr': {'class': 'text-gray-700 text-base mb-2 mt-1 rounded-md p-2 focus:outline-none focus:ring-2'}}) }}
+                    <div class="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 justify-center items-center">
+                        {{ form_label(form.isVerified) }}
+                        <label class="relative inline-flex items-center cursor-pointer toggle-switch-container">
+                            {{ form_widget(form.isVerified, {'attr': {'class': 'sr-only', 'id': 'banned-toggle', 'type': 'checkbox'}}) }}
+                            <div class="toggle-switch-thumb"></div>
+                        </label>
                         {{ form_errors(form.isVerified) }}
                     </div>
                 </div>
                 <div class="mb-4 mt-1 flex-grow">
-                    <div class="flex flex-col">
-                        {{ form_label(form.bannedAt, 'Banned', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
-                        {{ form_widget(form.bannedAt, {'attr': {'class': 'text-gray-700 text-base mb-2 mt-1 rounded-md p-2 focus:outline-none focus:ring-2'}}) }}
+                    <div class="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 justify-center items-center">
+                        {{ form_label(form.bannedAt) }}
+                        <label class="relative inline-flex items-center cursor-pointer toggle-switch-container">
+                            {{ form_widget(form.bannedAt, {'attr': {'class': 'sr-only', 'id': 'banned-toggle', 'type': 'checkbox'}}) }}
+                            <div class="toggle-switch-thumb"></div>
+                        </label>
                         {{ form_errors(form.bannedAt) }}
                     </div>
                 </div>
             </div>
-            
         </div>
 
     </div>

@@ -51,3 +51,48 @@
 	color: #57a475;
 	font-weight: bold;
 }
+
+/* Custom Toggle Styles */
+.toggle-switch-container {
+	position: relative;
+	display: inline-block;
+	width: 40px;
+	height: 20px;
+	background-color: #ccc; /* Default background color */
+	border-radius: 20px;
+	cursor: pointer;
+}
+
+.toggle-switch-thumb {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	transition: transform 0.3s ease-in-out;
+	content: "";
+	top: 2px;
+	left: 2px;
+	border: 1px solid #ccc;
+}
+
+/* Checked state */
+.toggle-switch-container input:checked + .toggle-switch-thumb {
+	transform: translateX(20px);
+	background-color: #4CAF50; /* Green background color */
+	border-color: #4CAF50; /* Green border color */
+}
+
+/* Background color when not checked */
+.toggle-switch-container input:not(:checked) {
+	background-color: #ccc; /* Default background color */
+}
+
+/* Hide the checkbox */
+.toggle-switch-container input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
