@@ -43,10 +43,10 @@ export default class extends Controller {
 			}
 		}
 
-// Initial check on page load
+		// Initial check on a page load
 		handleResolutionChange(mediaQuery);
 
-// Listen for resolution changes
+		// Listen for resolution changes
 		mediaQuery.addListener(handleResolutionChange);
 
 
