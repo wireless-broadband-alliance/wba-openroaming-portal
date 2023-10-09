@@ -64,7 +64,7 @@ class UserUpdateType extends AbstractType
                 'label' => 'Verification',
                 'required' => false,
             ]);
-
+        // Transforms the bannedAt bool to datetime when checked
         $builder->get('bannedAt')->addModelTransformer(new BooleanToDateTimeTransformer());
     }
 
