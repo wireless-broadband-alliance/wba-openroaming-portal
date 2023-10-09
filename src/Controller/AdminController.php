@@ -271,7 +271,7 @@ class AdminController extends AbstractController
             }
 
             // Does the same as the ban, checks if the admin is trying to ban himself
-            if ($currentUser->getId() === $user->getId() && $form->get('isVerified')->getData() === 0) {
+            if ($currentUser->getId() === $user->getId() && $form->get('isVerified')->getData() !== 1) {
                 $this->addFlash('error_admin', 'Sorry, administrators cannot remove their own verification status.');
                 return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
             }
