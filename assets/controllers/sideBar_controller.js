@@ -6,6 +6,7 @@ export default class extends Controller {
 		const sidebarElement = document.getElementById('sidebar');
 		const dropdownButton = document.getElementById('adminActionsDropdownButton');
 		const optionsSidebarButton = document.getElementById('optionsDropdownButton');
+		const customCards = document.getElementsByName('customCards');
 
 		const alertElement = document.getElementById('alert-2');
 		if (alertElement) {
@@ -32,6 +33,11 @@ export default class extends Controller {
 				dropdownButton.classList.add('hidden');
 				optionsSidebarButton.classList.remove('hidden');
 				optionsSidebarButton.classList.add('relative');
+
+				customCards.forEach((description_target, index) => {
+					customCards[index].classList.remove('hover:-translate-y-1');
+				});
+
 			} else {
 				sidebarElement.classList.remove('hidden');
 				sidebarElement.classList.remove('absolute');
@@ -40,6 +46,9 @@ export default class extends Controller {
 				dropdownButton.classList.add('relative');
 				optionsSidebarButton.classList.remove('relative');
 				optionsSidebarButton.classList.add('hidden');
+				customCards.forEach((description_target, index) => {
+					customCards[index].classList.add('hover:-translate-y-1');
+				});
 			}
 		}
 

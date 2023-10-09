@@ -1,10 +1,11 @@
 <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2">
+    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
         {% for setting in form %}
             {# Display only the customization settings #}
             {% if setting.vars.name in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-gray-200 hover:bg-gray-200/50 rounded-md p-4 w-full">
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-4 w-full"
+                     name="customCards">
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium m-2 p-2 text-center break-normal md:break-all">
@@ -18,10 +19,10 @@
                             }[setting.vars.name] ?? setting.vars.name %}
                             {{ displayName }}
                         </div>
-                        <label class="flex items-center rounded-lg bg-opacity-40 cursor-pointer"
-                               name="descriptionIcon"
+                        <label class="flex items-center bg-opacity-40"
                         >
-                            <img class="w-6"
+                            <img class="w-6 cursor-pointer"
+                                 name="descriptionIcon"
                                  src="{{ asset('resources/logos/info_icon.svg') }}"
                                  alt="info_icon"/>
                         </label>
