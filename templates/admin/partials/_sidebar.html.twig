@@ -38,7 +38,7 @@
         {# SideBar - Portal Settings - Dropdown #}
         <div class="relative" id="PortalDropdownButton">
             <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-                        hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_settings' or app.request.attributes.get('_route') == 'admin_dashboard_customize' %}selected{% endif %}">
+                        hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_settings' or app.request.attributes.get('_route') == 'admin_dashboard_customize' or app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                          viewBox="0 0 24 24"
@@ -82,8 +82,8 @@
                             Page Style</a>
                     </li>
                     <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                           href="#">
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_terms') }}">
                             <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
                                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
