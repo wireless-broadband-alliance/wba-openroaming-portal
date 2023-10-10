@@ -36,7 +36,7 @@
                                 'WALLPAPER_IMAGE': asset(data.wallpaperImageName.value)
                             } %}
                             <img data-image-preview src="{{ imagePaths[setting.vars.name] ?? '' }}"
-                                 alt="CustomizationImages" class="w-24 h-24 shadow rounded-full">
+                                 alt="CustomizationImages" class="w-24 h-24 shadow rounded-full object-cover">
 
                             {# Button Upload #}
                             <label class="flex justify-center items-center bg-lightGray rounded-lg text-center text-gray-500 p-3 relative z-0 cursor-pointer"
@@ -54,7 +54,7 @@
                         </div>
                     {% else %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'text-center text-gray-500 text-base block w-full rounded-md p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>
                     {% endif %}
 
