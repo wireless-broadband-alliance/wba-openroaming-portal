@@ -77,11 +77,32 @@
 	border: 1px solid #ccc;
 }
 
+.toggle-switch-thumb-red {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	transition: transform 0.3s ease-in-out;
+	content: "";
+	top: 2px;
+	left: 2px;
+	border: 1px solid #ccc;
+}
+
 /* Checked state */
 .toggle-switch-container input:checked + .toggle-switch-thumb {
 	transform: translateX(20px);
 	background-color: #4CAF50; /* Green background color */
 	border-color: #4CAF50; /* Green border color */
+}
+
+/* Checked state Red */
+.toggle-switch-container input:checked + .toggle-switch-thumb-red {
+	transform: translateX(20px);
+	background-color: rgb(220 38 38);
+	border-color: rgb(220 38 38);
 }
 
 /* Background color when not checked */
