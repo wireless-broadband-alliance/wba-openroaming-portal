@@ -726,7 +726,7 @@ class AdminController extends AbstractController
             // Flush the changes to the database
             $em->flush();
 
-            return $this->redirectToRoute('admin_page');
+            return $this->redirectToRoute('admin_dashboard_customize');
         }
 
         return $this->render('admin/custom.html.twig', [

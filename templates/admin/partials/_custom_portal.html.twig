@@ -28,23 +28,23 @@
                         </label>
                     </div>
                     {% if setting.vars.name in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'] %}
-                        <div class="flex flex-row justify-center items-center space-x-20 space-y-2 mt-5">
-                            {#  Image Path #}
+                        <div class="image-container flex flex-row justify-center items-center space-x-20 space-y-2 mt-5">
+                            {# Image Path #}
                             {% set imagePaths = {
                                 'CUSTOMER_LOGO': asset(data.customerLogoName.value),
                                 'OPENROAMING_LOGO': asset(data.openroamingLogoName.value),
                                 'WALLPAPER_IMAGE': asset(data.wallpaperImageName.value)
                             } %}
-                            <img src="{{ imagePaths[setting.vars.name] ?? '' }}" alt="CustomizationImages"
-                                 class="w-20 h-20 rounded-full">
+                            <img data-image-preview src="{{ imagePaths[setting.vars.name] ?? '' }}"
+                                 alt="CustomizationImages" class="w-24 h-24 shadow rounded-full">
 
-                            {#  Button Upload #}
-                            <label class="flex justify-center items-center bg-lightGray rounded-lg text-center text-gray-500 p-3 relative z-0 cursor-pointer">
+                            {# Button Upload #}
+                            <label class="flex justify-center items-center bg-lightGray rounded-lg text-center text-gray-500 p-3 relative z-0 cursor-pointer"
+                                   data-image-input>
                                 {{ form_widget(setting, {'attr': {'class': 'w-full h-full opacity-0 absolute top-0 left-0 '}}) }}
                                 <div class="w-28 h-12 rounded-lg bg-lightGray flex flex-col justify-center items-center space-y-2 cursor-pointer font-semibold">
                                     <svg class="w-5" fill="none" stroke="currentColor" stroke-width="3"
-                                         viewBox="0 0 24 24"
-                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path>
                                     </svg>
@@ -82,6 +82,7 @@
         </a>
 
         <button class="text-sm hover:bg-veryDarkButton hover:text-white font-bold p-3 rounded-lg transition ease-in duration-300"
+                onclick="return confirm('Are you sure you want to apply this new changes?')"
                 type="submit">Save Changes
         </button>
     </div>
