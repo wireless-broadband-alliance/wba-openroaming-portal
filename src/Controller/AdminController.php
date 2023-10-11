@@ -800,8 +800,8 @@ class AdminController extends AbstractController
             // Flush the changes to the database
             $em->flush();
 
-            $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
-            return $this->redirectToRoute('admin_dashboard_settings_terms');
+            $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_radius');
         }
 
         return $this->render('admin/settings_actions.html.twig', [
