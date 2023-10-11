@@ -9,6 +9,7 @@ use App\Enum\PlatformMode;
 use App\Form\CustomType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
+use App\Form\TermsType;
 use App\Form\UserUpdateType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -656,14 +657,59 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
-        // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(TermsType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Get the submitted data
+            $submittedData = $form->getData();
+
+            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            $tosLink = $submittedData['TOS_LINK'] ?? null;
+            $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
+
+            // Check if the setting is an empty input
+            if ($tosLink === null) {
+                $tosLink = "";
+            }
+            if ($privacyPolicyLink === null) {
+                $privacyPolicyLink = "";
+            }
+
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            if ($tosSetting) {
+                $tosSetting->setValue($tosLink);
+                $em->persist($tosSetting);
+            }
+
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            if ($privacyPolicySetting) {
+                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicySetting);
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_terms');
+        }
 
 
         return $this->render('admin/terms.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
