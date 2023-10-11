@@ -29,6 +29,7 @@ class TermsType extends AbstractType
                 'attr' => [
                     'data-controller' => 'descriptionCard',
                 ],
+                'required' => false,
             ];
 
             // Get the corresponding Setting entity and set its value
