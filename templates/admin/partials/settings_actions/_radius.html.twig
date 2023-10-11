@@ -3,7 +3,7 @@
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
         {% for setting in form %}
             {# Display only the customization settings #}
-            {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'PAYLOAD_IDENTIFIER', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH','PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
+            {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="customCards">
                     {# Title and Icon #}
@@ -30,7 +30,7 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'PAYLOAD_IDENTIFIER', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH','PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
+                    {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>
@@ -43,7 +43,7 @@
                             {{ setting.vars.attr.description }}
                         </div>
                     </div>
-
+                    
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {{ form_errors(setting) }}
                     </div>

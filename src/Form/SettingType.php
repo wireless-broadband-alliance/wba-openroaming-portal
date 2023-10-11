@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
-use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
