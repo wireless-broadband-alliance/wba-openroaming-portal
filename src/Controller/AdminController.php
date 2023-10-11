@@ -804,7 +804,7 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
 
-        return $this->render('admin/radius.html.twig', [
+        return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,

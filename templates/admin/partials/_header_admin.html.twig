@@ -48,6 +48,13 @@
                   d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12"></path>
         </svg>
         <h1 class="text-2xl font-semibold p-5">Terms and Policies</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
+        <svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
+        </svg>
+        <h1 class="text-2xl font-semibold p-5">Radius Configuration</h1>
     {% endif %}
 </div>
 
