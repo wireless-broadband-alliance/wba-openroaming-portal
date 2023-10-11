@@ -12,9 +12,11 @@
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
             {# MainContent of the page #}
-            <div>
-                {% include 'admin/partials/_custom_portal.html.twig' %}
-            </div>
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_custom_portal.html.twig' %}
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}

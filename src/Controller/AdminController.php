@@ -908,7 +908,7 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_customize');
         }
 
-        return $this->render('admin/custom.html.twig', [
+        return $this->render('admin/settings_actions.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
