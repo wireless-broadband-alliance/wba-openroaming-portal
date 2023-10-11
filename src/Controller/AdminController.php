@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Form\CustomType;
+use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
 use App\Form\TermsType;
@@ -728,6 +729,82 @@ class AdminController extends AbstractController
 
 
         return $this->render('admin/terms.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(RadiusType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'RADIUS_REALM_NAME',
+                'DISPLAY_NAME',
+                'PAYLOAD_IDENTIFIER',
+                'OPERATOR_NAME',
+                'DOMAIN_NAME',
+                'RADIUS_TLS_NAME',
+                'NAI_REALM',
+                'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_terms');
+        }
+
+        return $this->render('admin/radius.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
