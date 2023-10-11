@@ -467,6 +467,22 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The setting has been rested successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
+
+            if ($type === 'settingRadius') {
+                $command = 'php bin/console reset:radiusSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The Radius configurations has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_radius');
+            }
+
         }
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
@@ -519,6 +535,15 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTerms']);
         }
+
+        if ($type === 'settingRadius') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingRadius']);
+        }
+
         return $this->redirectToRoute('admin_page');
     }
 
