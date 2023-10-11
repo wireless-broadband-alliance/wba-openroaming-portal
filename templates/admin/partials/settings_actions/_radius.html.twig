@@ -30,7 +30,12 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
+                    {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER'] %}
+                        <div class="flex items-center space-x-2 mt-5">
+                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                        </div>
+                    {% endif %}
+                    {% if setting.vars.name in ['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>

@@ -53,34 +53,29 @@ class RadiusType extends AbstractType
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
+            // Get the corresponding Setting entity and set its value
+            foreach ($options['settings'] as $setting) {
+                if ($setting->getName() === $settingName) {
+                    $formFieldOptions['data'] = $setting->getValue();
+                    if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
+                        $formFieldOptions['choices'] = [
+                            'WPA 2' => Profile_Type::WPA2,
+                            'WPA 3' => Profile_Type::WPA3,
+                        ];
+                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['required'] = true;
+                    }
+                    $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    $builder->add($settingName, $config['type'], $formFieldOptions);
+                    break;
+                }
+            }
             $formFieldOptions = [
                 'attr' => [
                     'data-controller' => 'descriptionCard',
                 ],
                 'required' => false,
             ];
-
-            // Get the corresponding Setting entity and set its value
-            foreach ($options['settings'] as $setting) {
-                if ($setting->getName() === $settingName) {
-                    if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
-                        // Define choices for the select input
-                        $formFieldOptions['choices'] = [
-                            'WPA 2' => Profile_Type::WPA2,
-                            'WPA 3' => Profile_Type::WPA3,
-                        ];
-                        $formFieldOptions['data'] = $setting->getValue();
-                    } else {
-                        $formFieldOptions['data'] = $setting->getValue();
-                    }
-
-                    // Get the setting description
-                    $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
-
-                    $builder->add($settingName, $config['type'], $formFieldOptions);
-                    break;
-                }
-            }
         }
     }
 
