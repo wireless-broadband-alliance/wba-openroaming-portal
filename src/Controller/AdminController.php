@@ -411,8 +411,17 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($enteredCode === $currentUser->getVerificationCode()) {
+            if ($type === 'password') {
+                // Removes the admin access until he confirms his new password
+                $currentUser->setIsVerified(1);
+                $em->persist($currentUser);
+                $em->flush();
+                $this->addFlash('success_admin', 'Your password has been rested successfully');
+                return $this->redirectToRoute('admin_page');
+            }
+
             if ($type === 'settingMain') {
-                $command = 'php bin/console reset:mainS --yes';
+                $command = 'php bin/console reset:mainSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
                 // Run the command
@@ -425,20 +434,11 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The setting has been rested successfully');
-                return $this->redirectToRoute('admin_page');
-            }
-
-            if ($type === 'password') {
-                // Removes the admin access until he confirms his new password
-                $currentUser->setIsVerified(1);
-                $em->persist($currentUser);
-                $em->flush();
-                $this->addFlash('success_admin', 'Your password has been rested successfully');
-                return $this->redirectToRoute('admin_page');
+                return $this->redirectToRoute('admin_dashboard_settings');
             }
 
             if ($type === 'settingCustom') {
-                $command = 'php bin/console reset:customS --yes';
+                $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
                 $process->run();
@@ -449,7 +449,22 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The setting has been rested successfully');
-                return $this->redirectToRoute('admin_page');
+                return $this->redirectToRoute('admin_dashboard_customize');
+            }
+
+            if ($type === 'settingTerms') {
+                $command = 'php bin/console reset:termsSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The setting has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
         }
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
@@ -494,6 +509,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
+        }
+
+        if ($type === 'settingTerms') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTerms']);
         }
         return $this->redirectToRoute('admin_page');
     }
