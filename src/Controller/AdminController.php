@@ -728,7 +728,7 @@ class AdminController extends AbstractController
         }
 
 
-        return $this->render('admin/terms.html.twig', [
+        return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,

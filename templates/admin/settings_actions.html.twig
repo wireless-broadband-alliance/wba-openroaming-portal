@@ -17,6 +17,11 @@
                     {% include 'admin/partials/settings_actions/_custom_portal.html.twig' %}
                 </div>
             {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_terms.html.twig' %}
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
