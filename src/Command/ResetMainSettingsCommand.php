@@ -14,8 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:mainSettings',
-    description: 'Reset Main Settings',
+    name: 'reset:allSettings',
+    description: 'Reset All Settings',
 )]
 class ResetMainSettingsCommand extends Command
 {
@@ -31,8 +31,8 @@ class ResetMainSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:mainSettings')
-            ->setDescription('Reset Main Settings')
+            ->setName('reset:allSettings')
+            ->setDescription('Reset All Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -62,7 +62,15 @@ class ResetMainSettingsCommand extends Command
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'EMAIL_VERIFICATION', 'value' => 'OFF'],
 
+            ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
+            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_20th_logo.png'],
+            ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
+            ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
+            ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
+            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
+
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
             ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
@@ -119,7 +127,7 @@ class ResetMainSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> The main settings have been set to the default values.
+<info>Success:</info> All the settings have been set to the default values.
 <comment>Note:</comment> If you want to reset the custom settings too,
        make sure to run the following command:
        <fg=blue>php bin/console reset:customS</>
