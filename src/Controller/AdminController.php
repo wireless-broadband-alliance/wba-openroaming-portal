@@ -137,6 +137,8 @@ class AdminController extends AbstractController
      * @param Request $request
      * @param UserRepository $userRepository
      * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
@@ -276,7 +278,7 @@ class AdminController extends AbstractController
                 $user->setBannedAt(null);
                 $this->enableProfiles($user);
             }
-            
+
             $userRepository->save($user, true);
             $email = $user->getEmail();
             $this->addFlash('success_admin', sprintf('User with email "%s" updated successfully.', $email));
@@ -478,6 +480,20 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
+            if ($type === 'settingStatus') {
+                $command = 'php bin/console reset:statusSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The platform mode status has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_radius');
+            }
         }
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
@@ -537,6 +553,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingRadius']);
+        }
+
+        if ($type === 'settingStatus') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
         }
 
         return $this->redirectToRoute('admin_page');
@@ -648,6 +672,7 @@ class AdminController extends AbstractController
 
             return $this->redirectToRoute('admin_page');
         }
+
         return $this->render('admin/settings.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
@@ -866,35 +891,28 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
-            $tosLink = $submittedData['PLATFORM_MODE'] ?? null;
-            $privacyPolicyLink = $submittedData['EMAIL_VERIFICATION'] ?? null;
+            // Update the 'PLATFORM_MODE' and 'EMAIL_VERIFICATION' settings
+            $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
+            // Update the 'EMAIL_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
+            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['EMAIL_VERIFICATION'] ?? null;
 
-            // Check if the setting is an empty input
-            if ($tosLink === null) {
-                $tosLink = "";
-            }
-            if ($privacyPolicyLink === null) {
-                $privacyPolicyLink = "";
-            }
-
-            $tosSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
-            if ($tosSetting) {
-                $tosSetting->setValue($tosLink);
-                $em->persist($tosSetting);
+            $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
+            if ($platformModeSetting) {
+                $platformModeSetting->setValue($platformMode);
+                $em->persist($platformModeSetting);
             }
 
-            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
-            if ($privacyPolicySetting) {
-                $privacyPolicySetting->setValue($privacyPolicyLink);
-                $em->persist($privacyPolicySetting);
+            $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+            if ($emailVerificationSetting) {
+                $emailVerificationSetting->setValue($emailVerification);
+                $em->persist($emailVerificationSetting);
             }
 
             // Flush the changes to the database
             $em->flush();
 
             $this->addFlash('success_admin', 'The new changes have been applied successfully.');
-            return $this->redirectToRoute('admin_dashboard_settings_terms');
+            return $this->redirectToRoute('admin_dashboard_settings_status');
         }
 
 

@@ -4,6 +4,7 @@
             {% if type == 'settingCustom' %} action="{{ path('admin_confirm_checker', {'type': 'settingCustom'}) }}"{% endif %}
             {% if type == 'settingTerms' %} action="{{ path('admin_confirm_checker', {'type': 'settingTerms'}) }}"{% endif %}
             {% if type == 'settingRadius' %} action="{{ path('admin_confirm_checker', {'type': 'settingRadius'}) }}"{% endif %}
+            {% if type == 'settingStatus' %} action="{{ path('admin_confirm_checker', {'type': 'settingStatus'}) }}"{% endif %}
             method="post">
         <label for="code" class="block text-center text-lg mb-6">Enter the verification code from your
             email</label>
@@ -19,6 +20,7 @@
                             {% if type == 'settingCustom' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCustom'}) }}"{% endif %}
                             {% if type == 'settingTerms' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingTerms'}) }}"{% endif %}
                             {% if type == 'settingRadius' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingRadius'}) }}"{% endif %}
+                            {% if type == 'settingStatus' %} href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingStatus'}) }}"{% endif %}
                        class="font-bold mt-5">here</a> to
                     generate a
                     new
