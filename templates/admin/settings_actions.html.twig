@@ -32,6 +32,11 @@
                     {% include 'admin/partials/settings_actions/_status.html.twig' %}
                 </div>
             {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_LDAP.html.twig' %}
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
