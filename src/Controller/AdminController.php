@@ -10,6 +10,7 @@ use App\Form\CustomType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
+use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
 use App\Repository\SettingRepository;
@@ -822,6 +823,80 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_radius');
         }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_status(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(StatusType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Get the submitted data
+            $submittedData = $form->getData();
+
+            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            $tosLink = $submittedData['PLATFORM_MODE'] ?? null;
+            $privacyPolicyLink = $submittedData['EMAIL_VERIFICATION'] ?? null;
+
+            // Check if the setting is an empty input
+            if ($tosLink === null) {
+                $tosLink = "";
+            }
+            if ($privacyPolicyLink === null) {
+                $privacyPolicyLink = "";
+            }
+
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
+            if ($tosSetting) {
+                $tosSetting->setValue($tosLink);
+                $em->persist($tosSetting);
+            }
+
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+            if ($privacyPolicySetting) {
+                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicySetting);
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_terms');
+        }
+
 
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,

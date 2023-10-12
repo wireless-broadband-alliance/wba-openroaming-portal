@@ -1,26 +1,19 @@
-<form action="{{ path('admin_dashboard_settings_radius') }}" method="post" enctype="multipart/form-data">
+<form action="{{ path('admin_dashboard_settings_status') }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+    <div class="grid gap-4 lg:grid-cols-2 p-2 z-0">
         {% for setting in form %}
             {# Display only the customization settings #}
-            {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
+            {% if setting.vars.name in ['PLATFORM_MODE', 'EMAIL_VERIFICATION'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="customCards">
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between m-2 p-2">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
-                                'RADIUS_REALM_NAME': 'Radius Realm Name',
-                                'DISPLAY_NAME': 'Display Name',
-                                'PAYLOAD_IDENTIFIER': 'Payload Identifier',
-                                'OPERATOR_NAME': 'Operator Name',
-                                'DOMAIN_NAME': 'Domain Name',
-                                'RADIUS_TLS_NAME': 'Privacy and Policy Link',
-                                'NAI_REALM': 'NAI Realm',
-                                'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH': 'Trusted Root CA SHA1 Hash',
-                                'PROFILES_ENCRYPTION_TYPE_IOS_ONLY': 'Profile Encrytion Type (IOS_ONLY)',
+                                'PLATFORM_MODE': 'Platform Mode',
+                                'EMAIL_VERIFICATION': 'Email Verification',
                             }[setting.vars.name] ?? setting.vars.name %}
-                            <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
+                            <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                         </div>
                         <label class="flex items-center bg-opacity-40"
                         >
@@ -30,14 +23,9 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER'] %}
+                    {% if setting.vars.name in ['PLATFORM_MODE', 'EMAIL_VERIFICATION'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
-                        </div>
-                    {% endif %}
-                    {% if setting.vars.name in ['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
-                        <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'text-center  p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>
                     {% endif %}
 
@@ -58,7 +46,7 @@
     </div>
     <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
     <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingRadius'}) }}"
+        <a href="#"
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             Reset

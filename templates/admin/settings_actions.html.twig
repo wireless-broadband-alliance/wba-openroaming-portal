@@ -27,6 +27,11 @@
                     {% include 'admin/partials/settings_actions/_radius.html.twig' %}
                 </div>
             {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_status.html.twig' %}
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
