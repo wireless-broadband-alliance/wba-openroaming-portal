@@ -16,19 +16,34 @@
                     {# Exclude the settings you don't want to show #}
                     {% if setting.name not in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-3 w-full border border-gray-300">
-                            <div class="text-base font-medium my-2 text-center break-normal md:break-all">
-                                {{ setting.name }}
+                            <div class="flex flex-row justify-between">
+                                <div class="text-base font-medium m-2 p-2 text-center break-normal md:break-all">
+                                    {{ setting.name }}
+                                </div>
+                                <label class="flex items-center rounded-lg bg-opacity-40 cursor-pointer relative"
+                                       data-controller="descriptionCard"
+                                       name="descriptionIcon"
+                                >
+                                    <img class="w-6"
+                                         src="{{ asset('resources/logos/info_icon.svg') }}"
+                                         alt="info_icon"
+                                    />
+                                </label>
                             </div>
                             <div class="p-2 w-full mt-1 flex justify-center">
                                 {{ form_widget(form[setting.name], {'attr': {'class': 'text-center rounded text-gray-700 text-base block w-full p-2 shadow-sm focus:outline-none focus:ring-2'}}) }}
-                                {{ form_label(form[setting.name], null, {'label_attr': {'class': 'hidden'}}) }}
                                 {{ form_errors(form[setting.name], {'attr': {'class': 'mt-2 text-center text-red-500 text-base'}}) }}
+                            </div>
+                            <div class="flex justify-center items-center">
+                                <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white -translate-y-6 absolute hidden"
+                                     name="description">
+                                    {{ getSettings.getSettingDescription(setting.name) }}
+                                </div>
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
-
 
             <hr class="my-8 border-t-2 border-gray-300">
             <div class="text-center space-y-2">
@@ -41,9 +56,19 @@
                     {# Exclude the settings you don't want to show #}
                     {% if setting.name not in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE', 'PAGE_TITLE', 'WELCOME_TEXT', 'WELCOME_DESCRIPTION'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow-md hover:shadow-black/50 bg-gray-200 hover:bg-gray-200/50 rounded p-3 border border-gray-300">
-                            <div class="text-sm font-medium text-gray-700 mb-2 text-center break-normal md:break-all">
-                                {{ setting.name }}
+                            <div class="flex flex-row justify-between">
+                                <div class="text-sm font-medium text-gray-700 mb-2 text-center break-normal md:break-all">
+                                    {{ setting.name }}
+                                </div>
+                                <label class="flex items-center rounded-lg bg-opacity-40 cursor-pointer relative"
+                                       name="descriptionIcon"
+                                >
+                                    <img class="w-4 md:w-5"
+                                         src="{{ asset('resources/logos/info_icon.svg') }}"
+                                         alt="info_icon"/>
+                                </label>
                             </div>
+
                             <div class="p-2 w-full">
                                 {% set value = form[setting.name].vars.value %}
                                 {% if value is empty %}
@@ -55,23 +80,38 @@
                                     </div>
                                 {% endif %}
                             </div>
+                            <div class="flex justify-center items-center">
+                                <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white -translate-y-6 absolute hidden"
+                                     name="description">
+                                    {{ getSettings.getSettingDescription(setting.name) }}
+                                </div>
+                            </div>
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
+            <div class="flex flex-col md:flex-row justify-evenly items-center">
+                <div class="mt-6 mb-6">
+                    <a href="{{ path('admin_page') }}"
+                       class="bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105">
+                        Return Dashboard
+                    </a>
+                </div>
 
-            <div class="flex justify-center mt-6 mb-6">
-                <button class="bg-green-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-                        onclick="return confirm('Are you sure you want to apply these new settings?')"
-                        type="submit">Save Changes
-                </button>
-            </div>
+                <div class=" mt-6 mb-6">
+                    <button class="bg-green-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
+                            onclick="return confirm('Are you sure you want to apply these new settings?')"
+                            type="submit">Save Changes
+                    </button>
+                </div>
 
-            <div class="flex justify-center mt-6 mb-6">
-                <a href="{{ path('admin_page') }}"
-                   class="bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105">
-                    Return Dashboard
-                </a>
+                <div class="mt-6 mb-4">
+                    <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingMain'}) }}"
+                       onclick="return confirm('Are you sure you want to reset to the default settings?')"
+                       class="bg-yellow-500 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105">
+                        Reset All Settings
+                    </a>
+                </div>
             </div>
 
         </form>

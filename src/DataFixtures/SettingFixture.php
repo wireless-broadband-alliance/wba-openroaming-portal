@@ -28,8 +28,8 @@ class SettingFixture extends Fixture
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program.'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary.'],
+            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
@@ -56,6 +56,10 @@ class SettingFixture extends Fixture
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
+
+            ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
+            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://wifi.tetrapi.pt/'],
+            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://galactikperspective.pt/'],
         ];
 
         foreach ($settings as $settingData) {

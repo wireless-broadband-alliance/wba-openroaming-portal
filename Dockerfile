@@ -9,16 +9,18 @@ RUN apt-get update \
 RUN echo "UTC" >> /etc/timezone \
   && dpkg-reconfigure -f noninteractive tzdata
 
+
 RUN add-apt-repository ppa:ondrej/php \
-    && curl -sL https://deb.nodesource.com/setup_18.x | bash - \
-    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
     && apt-get -y install xmlsec1 libxmlsec1-openssl nginx php8.1-fpm php8.1-cli php8.1-curl php8.1-mbstring \
         php8.1-mysql php8.1-gd php8.1-bcmath php8.1-readline \
         php8.1-zip php8.1-imap php8.1-xml php8.1-intl php8.1-soap \
-        php8.1-memcache php8.1-memcached php8.1-yaml php8.1-dom php8.1-ldap supervisor nodejs yarn && mkdir -p /var/log/supervisor \
+        php8.1-memcache php8.1-memcached php8.1-yaml php8.1-dom php8.1-ldap supervisor ca-certificates curl gnupg && mkdir -p /var/log/supervisor \
         && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update -y && apt-get install nodejs yarn -y
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --install-dir=/usr/bin --filename=composer
 
@@ -29,7 +31,7 @@ WORKDIR /var/www/openroaming
 COPY . /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
 RUN composer install
-RUN npm i yarn && yarn install && yarn run build
+RUN npm i && npm run build
 RUN rm -rf /var/www/openroaming/.env
 
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/

@@ -8,7 +8,6 @@ use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -39,17 +38,17 @@ class SecurityController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/login', name: 'app_login')]
-    public function login(Request $request, RequestStack $requestStack, AuthenticationUtils $authenticationUtils): Response
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
             if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('admin_page');
             }
-            $traditionalLoginEnabled = $data['LOGIN_TRADITIONAL_ENABLED'];
+            $traditionalLoginEnabled = $data['LOGIN_TRADITIONAL_ENABLED']['value'];
             if (!$traditionalLoginEnabled) {
                 return $this->redirectToRoute('saml_logout');
             }
