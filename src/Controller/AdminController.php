@@ -493,7 +493,7 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The platform mode status has been rested successfully');
-                return $this->redirectToRoute('admin_dashboard_settings_radius');
+                return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
             if ($type === 'settingLDAP') {

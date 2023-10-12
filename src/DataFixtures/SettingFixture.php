@@ -58,8 +58,8 @@ class SettingFixture extends Fixture
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
 
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
-            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://wifi.tetrapi.pt/'],
-            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://galactikperspective.pt/'],
+            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
+            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://example.com/'],
         ];
 
         foreach ($settings as $settingData) {

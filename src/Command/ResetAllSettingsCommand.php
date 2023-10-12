@@ -95,6 +95,10 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
+
+            ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
+            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
+            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://example.com/'],
         ];
 
         // Begin a database transaction to ensure data consistency

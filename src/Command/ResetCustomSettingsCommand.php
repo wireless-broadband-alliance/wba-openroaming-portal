@@ -57,15 +57,6 @@ class ResetCustomSettingsCommand extends Command
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
-
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account'],
-            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
         ];
 
         $this->entityManager->beginTransaction();
