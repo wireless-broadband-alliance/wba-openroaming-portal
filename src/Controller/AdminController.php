@@ -495,7 +495,23 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The platform mode status has been rested successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
+
+            if ($type === 'settingLDAP') {
+                $command = 'php bin/console reset:ldapSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The LDAP settings has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_LDAP');
+            }
         }
+
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
@@ -562,6 +578,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
+        }
+
+        if ($type === 'settingLDAP') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
         }
 
         return $this->redirectToRoute('admin_page');
