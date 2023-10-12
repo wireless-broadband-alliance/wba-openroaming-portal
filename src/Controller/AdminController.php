@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Form\CustomType;
+use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
@@ -945,11 +946,55 @@ class AdminController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(LDAPType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'SYNC_LDAP_ENABLED',
+                'SYNC_LDAP_SERVER',
+                'SYNC_LDAP_BIND_USER_DN',
+                'SYNC_LDAP_BIND_USER_PASSWORD',
+                'SYNC_LDAP_SEARCH_BASE_DN',
+                'SYNC_LDAP_SEARCH_FILTER',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_LDAP');
+        }
 
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
