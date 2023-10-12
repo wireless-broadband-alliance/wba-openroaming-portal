@@ -42,6 +42,11 @@
                     {% include 'admin/partials/settings_actions/_auth.html.twig' %}
                 </div>
             {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_capport.html.twig' %}
+                </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
