@@ -57,7 +57,6 @@ class SettingFixture extends Fixture
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
 
-
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
             ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://wifi.tetrapi.pt/'],
             ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://galactikperspective.pt/'],
