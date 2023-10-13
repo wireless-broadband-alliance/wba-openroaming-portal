@@ -98,7 +98,7 @@ class ResetAllSettingsCommand extends Command
 
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
             ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
-            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://example.com/'],
+            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => ' https://openroaming.org/'],
         ];
 
         // Begin a database transaction to ensure data consistency

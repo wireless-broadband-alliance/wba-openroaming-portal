@@ -59,7 +59,7 @@ class SettingFixture extends Fixture
 
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
             ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
-            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://example.com/'],
+            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://openroaming.org/'],
         ];
 
         foreach ($settings as $settingData) {
