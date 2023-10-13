@@ -38,7 +38,7 @@
         {# SideBar - Portal Settings - Dropdown #}
         <div class="relative" id="PortalDropdownButton">
             <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-                        hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_settings' or app.request.attributes.get('_route') == 'admin_dashboard_customize' or app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' or app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' or app.request.attributes.get('_route') == 'admin_dashboard_settings_status' or app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' or app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' or app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}">
+                        hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_settings' or app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' or app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' or app.request.attributes.get('_route') == 'admin_dashboard_settings_status' or app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' or app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' or app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                          viewBox="0 0 24 24"
@@ -79,17 +79,6 @@
                                       d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path>
                             </svg>
                             Platform Status</a>
-                    </li>
-                    <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}selected{% endif %}"
-                           href="{{ path('admin_dashboard_customize') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor"
-                                 stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                                 aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
-                            </svg>
-                            Page Style</a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}"
@@ -139,11 +128,31 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"></path>
                             </svg>
-                            Capport Configuration</a>
+                            User Engagement</a>
                     </li>
                 </ul>
             </div>
         </div>
+        {# SideBar Button - Page Style - Button #}
+        <a href="{{ path('admin_dashboard_customize') }}">
+            <div id="UserButton"
+                 class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' or app.request.attributes.get('_route') == 'admin_search' %}selected{% endif %}">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-4" fill="none" stroke="currentColor"
+                         stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                         aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
+                    </svg>
+                    Page Style
+                </div>
+                <svg class="w-4" fill="none" stroke="currentColor"
+                     stroke-width="1.5"
+                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                </svg>
+            </div>
+        </a>
         {# SideBar Button - Account Settings - Button #}
         <a href="{{ path('admin_update', {id : current_user.id}) }}">
             <div id="UserButton"
