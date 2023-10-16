@@ -38,9 +38,8 @@ export default class extends Controller {
 			});
 		});
 
-		// Listen to changes in the select input of the capport form
-// Function to display the message
-		function toggleMessage() {
+		// Function to display the message
+		function showMessageCapport() {
 			const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
 			const capportMessage = document.getElementById('capportMessage');
 
@@ -60,50 +59,54 @@ export default class extends Controller {
 			}
 		}
 
-// Function to manage background colors and input disable actions
-		function toggleBackgroundColorsAndInputState() {
-			const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
-			const capportPortalUrlInput = document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]');
-			const capportVenueInfoUrlInput = document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]');
-			const capportPortalUrlCard = document.getElementById('CAPPORT_PORTAL_URL');
-			const capportVenueInfoUrlCard = document.getElementById('CAPPORT_VENUE_INFO_URL');
-
-			if (capportEnabledSelect) {
+		function DisableEnableCards(
+			selectInput,
+			firstInput,
+			secondInput,
+			firstCard,
+			secondCard,
+		) {
+			if (selectInput) {
 				const toggleInputState = () => {
-					const capportEnabledValue = capportEnabledSelect.value;
+					const capportEnabledValue = selectInput.value;
 
 					if (capportEnabledValue === 'true') {
-						// Enable the input fields
-						capportPortalUrlInput.disabled = false;
-						capportVenueInfoUrlInput.disabled = false;
-						// Remove the style classes indicating that the inputs are blocked
-						capportPortalUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
-						capportVenueInfoUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
-						capportPortalUrlCard.classList.add('bg-white');
-						capportVenueInfoUrlCard.classList.add('bg-red');
-						capportPortalUrlCard.classList.remove('bg-disableCardsColor');
-						capportVenueInfoUrlCard.classList.remove('bg-disableCardsColor');
+						firstInput.disabled = false;
+						secondInput.disabled = false;
+
+						firstInput.classList.remove('cursor-not-allowed');
+						secondInput.classList.remove('cursor-not-allowed');
+						firstCard.classList.add('bg-white');
+						secondCard.classList.add('bg-white');
+						firstCard.classList.remove('bg-disableCardsColor');
+						secondCard.classList.remove('bg-disableCardsColor');
 					} else {
-						capportPortalUrlInput.disabled = true;
-						capportVenueInfoUrlInput.disabled = true;
-						// Add style classes to indicate that the inputs are blocked and make the cards appear darker
-						capportPortalUrlInput.classList.add('cursor-not-allowed', 'bg-gray-400');
-						capportVenueInfoUrlInput.classList.add('cursor-not-allowed', 'bg-gray-400');
-						capportPortalUrlCard.classList.remove('bg-white');
-						capportVenueInfoUrlCard.classList.remove('bg-white');
-						capportPortalUrlCard.classList.add('bg-disableCardsColor');
-						capportVenueInfoUrlCard.classList.add('bg-disableCardsColor');
+						firstInput.disabled = true;
+						secondInput.disabled = true;
+
+						firstInput.classList.add('cursor-not-allowed');
+						secondInput.classList.add('cursor-not-allowed');
+						firstCard.classList.remove('bg-white');
+						secondCard.classList.remove('bg-white');
+						firstCard.classList.add('bg-disableCardsColor');
+						secondCard.classList.add('bg-disableCardsColor');
 					}
 				};
 
 				toggleInputState();
-				capportEnabledSelect.addEventListener('input', toggleInputState);
+				selectInput.addEventListener('input', toggleInputState);
 			}
 		}
 
 		// Call the functions
-		toggleMessage();
-		toggleBackgroundColorsAndInputState();
+		DisableEnableCards(
+			document.querySelector('[name="capport[CAPPORT_ENABLED]"]'),
+			document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]'),
+			document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]'),
+			document.getElementById('CAPPORT_PORTAL_URL'),
+			document.getElementById('CAPPORT_VENUE_INFO_URL'),
+		);
+		showMessageCapport();
 	}
 
 	// Loads the uploaded image from the cache
