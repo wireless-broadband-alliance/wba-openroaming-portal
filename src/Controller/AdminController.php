@@ -528,6 +528,20 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
+            if ($type === 'settingAUTH') {
+                $command = 'php bin/console reset:authSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The authentication settings has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_auth');
+            }
         }
 
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
@@ -612,6 +626,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
+        }
+
+        if ($type === 'settingAUTH') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
         }
 
         return $this->redirectToRoute('admin_page');

@@ -7,6 +7,7 @@
             {% if type == 'settingStatus' %} action="{{ path('admin_confirm_checker', {'type': 'settingStatus'}) }}"{% endif %}
             {% if type == 'settingLDAP' %} action="{{ path('admin_confirm_checker', {'type': 'settingLDAP'}) }}"{% endif %}
             {% if type == 'settingCAPPORT' %} action="{{ path('admin_confirm_checker', {'type': 'settingCAPPORT'}) }}"{% endif %}
+            {% if type == 'settingAUTH' %} action="{{ path('admin_confirm_checker', {'type': 'settingAUTH'}) }}"{% endif %}
             method="post">
         <label for="code" class="block text-center text-lg mb-6">Enter the verification code from your
             email</label>
@@ -25,6 +26,7 @@
                             {% if type == 'settingStatus' %} href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingStatus'}) }}"{% endif %}
                             {% if type == 'settingLDAP' %} href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingLDAP'}) }}"{% endif %}
                             {% if type == 'settingCAPPORT' %} href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCAPPORT'}) }}"{% endif %}
+                            {% if type == 'settingAUTH' %} href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingAUTH'}) }}"{% endif %}
                        class="font-bold mt-5">here</a> to
                     generate a
                     new
