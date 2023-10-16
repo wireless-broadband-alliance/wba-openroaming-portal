@@ -45,7 +45,6 @@ export default class extends Controller {
 		const capportVenueInfoUrlInput = document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]');
 		const capportPortalUrlCard = document.getElementById('CAPPORT_PORTAL_URL');
 		const capportVenueInfoUrlCard = document.getElementById('CAPPORT_VENUE_INFO_URL');
-		console.log(capportVenueInfoUrlCard)
 
 		if (capportEnabledSelect) {
 			const toggleMessageAndInputState = () => {
@@ -62,8 +61,8 @@ export default class extends Controller {
 					capportVenueInfoUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
 					capportPortalUrlCard.classList.add('bg-white');
 					capportVenueInfoUrlCard.classList.add('bg-red');
-					capportPortalUrlCard.classList.remove('bg-red-500');
-					capportVenueInfoUrlCard.classList.remove('bg-red-500');
+					capportPortalUrlCard.classList.remove('bg-disableCardsColor');
+					capportVenueInfoUrlCard.classList.remove('bg-disableCardsColor');
 				} else {
 					capportMessage.classList.add('hidden');
 					// Disable the input fields
@@ -74,8 +73,8 @@ export default class extends Controller {
 					capportVenueInfoUrlInput.classList.add('cursor-not-allowed');
 					capportPortalUrlCard.classList.remove('bg-white');
 					capportVenueInfoUrlCard.classList.remove('bg-white');
-					capportPortalUrlCard.classList.add('bg-red-500');
-					capportVenueInfoUrlCard.classList.add('bg-red-500');
+					capportPortalUrlCard.classList.add('bg-disableCardsColor');
+					capportVenueInfoUrlCard.classList.add('bg-disableCardsColor');
 				}
 			};
 
