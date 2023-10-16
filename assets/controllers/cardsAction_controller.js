@@ -12,7 +12,7 @@ export default class extends Controller {
 					const isEnabled = selectInput.value === 'true';
 
 					textInputs.forEach((input) => {
-						input.disabled = !isEnabled;
+						input.readOnly = !isEnabled;
 						input.classList.toggle('cursor-not-allowed', !isEnabled);
 					});
 
