@@ -41,23 +41,49 @@ export default class extends Controller {
 		// Listen to changes in the select input of the capport form
 		const capportMessage = document.getElementById('capportMessage');
 		const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
+		const capportPortalUrlInput = document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]');
+		const capportVenueInfoUrlInput = document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]');
+		const capportPortalUrlCard = document.getElementById('CAPPORT_PORTAL_URL');
+		const capportVenueInfoUrlCard = document.getElementById('CAPPORT_VENUE_INFO_URL');
+		console.log(capportVenueInfoUrlCard)
+
 		if (capportEnabledSelect) {
-			const toggleMessage = () => {
+			const toggleMessageAndInputState = () => {
 				const capportEnabledValue = capportEnabledSelect.value;
 
 				// Check if the value is "true" and show or hide the message accordingly
 				if (capportEnabledValue === 'true') {
 					capportMessage.classList.remove('hidden');
+					// Enable the input fields
+					capportPortalUrlInput.disabled = false;
+					capportVenueInfoUrlInput.disabled = false;
+					// Remove the style classes indicating that the inputs are blocked
+					capportPortalUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
+					capportVenueInfoUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
+					capportPortalUrlCard.classList.add('bg-white');
+					capportVenueInfoUrlCard.classList.add('bg-red');
+					capportPortalUrlCard.classList.remove('bg-red-500');
+					capportVenueInfoUrlCard.classList.remove('bg-red-500');
 				} else {
 					capportMessage.classList.add('hidden');
+					// Disable the input fields
+					capportPortalUrlInput.disabled = true;
+					capportVenueInfoUrlInput.disabled = true;
+					// Add style classes to indicate that the inputs are blocked and make the cards appear darker
+					capportPortalUrlInput.classList.add('cursor-not-allowed');
+					capportVenueInfoUrlInput.classList.add('cursor-not-allowed');
+					capportPortalUrlCard.classList.remove('bg-white');
+					capportVenueInfoUrlCard.classList.remove('bg-white');
+					capportPortalUrlCard.classList.add('bg-red-500');
+					capportVenueInfoUrlCard.classList.add('bg-red-500');
 				}
 			};
 
 			// Initial check when the page loads
-			toggleMessage();
+			toggleMessageAndInputState();
 
-			// Listen to input changes and update the message
-			capportEnabledSelect.addEventListener('input', toggleMessage);
+			// Listen to input changes and update the message and input state
+			capportEnabledSelect.addEventListener('input', toggleMessageAndInputState);
 		}
 	}
 
