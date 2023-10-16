@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Form\CapportType;
 use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
@@ -510,6 +511,22 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The LDAP settings has been rested successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
+
+            if ($type === 'settingCAPPORT') {
+                $command = 'php bin/console reset:capportSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The CAPPORT settings has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_capport');
+            }
+
         }
 
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
@@ -586,6 +603,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
+        }
+
+        if ($type === 'settingCAPPORT') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
         }
 
         return $this->redirectToRoute('admin_page');
@@ -1070,11 +1095,52 @@ class AdminController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(CapportType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'CAPPORT_ENABLED',
+                'CAPPORT_PORTAL_URL',
+                'CAPPORT_VENUE_INFO_URL',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_capport');
+        }
 
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
