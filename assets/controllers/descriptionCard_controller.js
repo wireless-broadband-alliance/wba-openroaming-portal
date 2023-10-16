@@ -37,6 +37,28 @@ export default class extends Controller {
 				imageInput.click();
 			});
 		});
+
+		// Listen to changes in the select input of the capport form
+		const capportMessage = document.getElementById('capportMessage');
+		const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
+		if (capportEnabledSelect) {
+			const toggleMessage = () => {
+				const capportEnabledValue = capportEnabledSelect.value;
+
+				// Check if the value is "true" and show or hide the message accordingly
+				if (capportEnabledValue === 'true') {
+					capportMessage.classList.remove('hidden');
+				} else {
+					capportMessage.classList.add('hidden');
+				}
+			};
+
+			// Initial check when the page loads
+			toggleMessage();
+
+			// Listen to input changes and update the message
+			capportEnabledSelect.addEventListener('input', toggleMessage);
+		}
 	}
 
 	// Loads the uploaded image from the cache

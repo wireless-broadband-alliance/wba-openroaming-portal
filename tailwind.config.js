@@ -21,6 +21,8 @@ module.exports = {
 				veryLightGreen: '#f1f8f4',
 				lightGray: '#f7f6f8',
 				inputGray: '#D9D9D9',
+				infoBgColor: '#DFEBFC',
+				infoTextColor: '#1D65A7',
 			},
 
 			fontFamily: {
