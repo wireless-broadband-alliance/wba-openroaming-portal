@@ -315,8 +315,8 @@ class GetSettings
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => 'Type of encryption defined for the creation of the profiles',
 
             'CAPPORT_ENABLED' => 'Enable or disable Capport DHCP configuration',
-            'CAPPORT_PORTAL_URL' => 'No description for this now',
-            'CAPPORT_VENUE_INFO_URL' => 'No description for this now',
+            'CAPPORT_PORTAL_URL' => 'Domain that is from the entity hosting the service',
+            'CAPPORT_VENUE_INFO_URL' => 'Domain where the user is redirected after clicking the DHCP notification',
         ];
 
         return $descriptions[$settingName] ?? '';
