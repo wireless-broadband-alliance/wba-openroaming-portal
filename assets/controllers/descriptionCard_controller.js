@@ -39,51 +39,71 @@ export default class extends Controller {
 		});
 
 		// Listen to changes in the select input of the capport form
-		const capportMessage = document.getElementById('capportMessage');
-		const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
-		const capportPortalUrlInput = document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]');
-		const capportVenueInfoUrlInput = document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]');
-		const capportPortalUrlCard = document.getElementById('CAPPORT_PORTAL_URL');
-		const capportVenueInfoUrlCard = document.getElementById('CAPPORT_VENUE_INFO_URL');
+// Function to display the message
+		function toggleMessage() {
+			const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
+			const capportMessage = document.getElementById('capportMessage');
 
-		if (capportEnabledSelect) {
-			const toggleMessageAndInputState = () => {
-				const capportEnabledValue = capportEnabledSelect.value;
+			if (capportEnabledSelect) {
+				const toggleMessageState = () => {
+					const capportEnabledValue = capportEnabledSelect.value;
 
-				// Check if the value is "true" and show or hide the message accordingly
-				if (capportEnabledValue === 'true') {
-					capportMessage.classList.remove('hidden');
-					// Enable the input fields
-					capportPortalUrlInput.disabled = false;
-					capportVenueInfoUrlInput.disabled = false;
-					// Remove the style classes indicating that the inputs are blocked
-					capportPortalUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
-					capportVenueInfoUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
-					capportPortalUrlCard.classList.add('bg-white');
-					capportVenueInfoUrlCard.classList.add('bg-red');
-					capportPortalUrlCard.classList.remove('bg-disableCardsColor');
-					capportVenueInfoUrlCard.classList.remove('bg-disableCardsColor');
-				} else {
-					capportMessage.classList.add('hidden');
-					// Disable the input fields
-					capportPortalUrlInput.disabled = true;
-					capportVenueInfoUrlInput.disabled = true;
-					// Add style classes to indicate that the inputs are blocked and make the cards appear darker
-					capportPortalUrlInput.classList.add('cursor-not-allowed');
-					capportVenueInfoUrlInput.classList.add('cursor-not-allowed');
-					capportPortalUrlCard.classList.remove('bg-white');
-					capportVenueInfoUrlCard.classList.remove('bg-white');
-					capportPortalUrlCard.classList.add('bg-disableCardsColor');
-					capportVenueInfoUrlCard.classList.add('bg-disableCardsColor');
-				}
-			};
+					if (capportEnabledValue === 'true') {
+						capportMessage.classList.remove('hidden');
+					} else {
+						capportMessage.classList.add('hidden');
+					}
+				};
 
-			// Initial check when the page loads
-			toggleMessageAndInputState();
-
-			// Listen to input changes and update the message and input state
-			capportEnabledSelect.addEventListener('input', toggleMessageAndInputState);
+				toggleMessageState();
+				capportEnabledSelect.addEventListener('input', toggleMessageState);
+			}
 		}
+
+// Function to manage background colors and input disable actions
+		function toggleBackgroundColorsAndInputState() {
+			const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
+			const capportPortalUrlInput = document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]');
+			const capportVenueInfoUrlInput = document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]');
+			const capportPortalUrlCard = document.getElementById('CAPPORT_PORTAL_URL');
+			const capportVenueInfoUrlCard = document.getElementById('CAPPORT_VENUE_INFO_URL');
+
+			if (capportEnabledSelect) {
+				const toggleInputState = () => {
+					const capportEnabledValue = capportEnabledSelect.value;
+
+					if (capportEnabledValue === 'true') {
+						// Enable the input fields
+						capportPortalUrlInput.disabled = false;
+						capportVenueInfoUrlInput.disabled = false;
+						// Remove the style classes indicating that the inputs are blocked
+						capportPortalUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
+						capportVenueInfoUrlInput.classList.remove('bg-gray-400', 'cursor-not-allowed');
+						capportPortalUrlCard.classList.add('bg-white');
+						capportVenueInfoUrlCard.classList.add('bg-red');
+						capportPortalUrlCard.classList.remove('bg-disableCardsColor');
+						capportVenueInfoUrlCard.classList.remove('bg-disableCardsColor');
+					} else {
+						capportPortalUrlInput.disabled = true;
+						capportVenueInfoUrlInput.disabled = true;
+						// Add style classes to indicate that the inputs are blocked and make the cards appear darker
+						capportPortalUrlInput.classList.add('cursor-not-allowed', 'bg-gray-400');
+						capportVenueInfoUrlInput.classList.add('cursor-not-allowed', 'bg-gray-400');
+						capportPortalUrlCard.classList.remove('bg-white');
+						capportVenueInfoUrlCard.classList.remove('bg-white');
+						capportPortalUrlCard.classList.add('bg-disableCardsColor');
+						capportVenueInfoUrlCard.classList.add('bg-disableCardsColor');
+					}
+				};
+
+				toggleInputState();
+				capportEnabledSelect.addEventListener('input', toggleInputState);
+			}
+		}
+
+		// Call the functions
+		toggleMessage();
+		toggleBackgroundColorsAndInputState();
 	}
 
 	// Loads the uploaded image from the cache
