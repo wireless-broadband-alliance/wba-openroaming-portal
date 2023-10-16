@@ -2,7 +2,7 @@
     {{ form_row(form._token) }}
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0">
         {% for setting in form %}
-            {# Display only the customization settings #}
+            {# Display only the platform and the email verification settings #}
             {% if setting.vars.name in ['PLATFORM_MODE', 'EMAIL_VERIFICATION'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="statusCards">

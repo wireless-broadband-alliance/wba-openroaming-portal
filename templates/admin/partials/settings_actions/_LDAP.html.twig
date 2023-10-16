@@ -2,7 +2,7 @@
     {{ form_row(form._token) }}
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
         {% for setting in form %}
-            {# Display only the customization settings #}
+            {# Display only the LDAP settings #}
             {% if setting.vars.name in ['SYNC_LDAP_ENABLED', 'SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN','SYNC_LDAP_BIND_USER_PASSWORD','SYNC_LDAP_SEARCH_BASE_DN','SYNC_LDAP_SEARCH_FILTER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="LDAPCards"
