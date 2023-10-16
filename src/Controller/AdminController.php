@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Form\authType;
 use App\Form\CapportType;
 use App\Form\CustomType;
 use App\Form\LDAPType;
@@ -1067,11 +1068,64 @@ class AdminController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(authType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'AUTH_METHOD_SAML_ENABLED',
+                'AUTH_METHOD_SAML_LABEL',
+                'AUTH_METHOD_SAML_DESCRIPTION',
+
+                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+                'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+
+                'AUTH_METHOD_REGISTER_ENABLED',
+                'AUTH_METHOD_REGISTER_LABEL',
+                'AUTH_METHOD_REGISTER_DESCRIPTION',
+
+                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New autheticaition configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_auth');
+        }
 
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
