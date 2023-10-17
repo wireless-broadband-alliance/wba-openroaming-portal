@@ -35,7 +35,6 @@ export default class extends Controller {
 			document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]'),
 			document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]')
 		];
-
 		const capportCards = [
 			document.getElementById('CAPPORT_PORTAL_URL'),
 			document.getElementById('CAPPORT_VENUE_INFO_URL')
@@ -52,7 +51,6 @@ export default class extends Controller {
 			document.querySelector('[name="ldap[SYNC_LDAP_SEARCH_BASE_DN]"]'),
 			document.querySelector('[name="ldap[SYNC_LDAP_SEARCH_FILTER]"]'),
 		];
-
 		const ldapCards = [
 			document.getElementById('SYNC_LDAP_SERVER'),
 			document.getElementById('SYNC_LDAP_BIND_USER_DN'),
@@ -62,41 +60,19 @@ export default class extends Controller {
 		];
 		CardsActions(ldapRadioButtons, ldapTextInputs, ldapCards);
 
-
-		// Iterate over LDAP settings to populate the arrays
-
-		ldapSettings.forEach(settingName => {
-			const textInput = document.querySelector(`[name="ldap[${settingName}]"]`);
-			const card = document.getElementById(settingName);
-
-			if (textInput && card) {
-				ldapTextInputs.push(textInput);
-				ldapCards.push(card);
-			}
-		});
-
-		CardsActions(
-			document.querySelector('[name="ldap[SYNC_LDAP_ENABLED]"]'),
-			ldapTextInputs,
-			ldapCards
-		);
-
 		// SAML
+		const samlRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_SAML_ENABLED]"]');
 		const samlTextInputs = [
 			document.querySelector('[name="auth[AUTH_METHOD_SAML_LABEL]"]'),
-			document.querySelector('[name="auth[AUTH_METHOD_SAML_DESCRIPTION]"]')
+			document.querySelector('[name="auth[AUTH_METHOD_SAML_DESCRIPTION]"]'),
 		];
-
 		const samlCards = [
 			document.getElementById('AUTH_METHOD_SAML_LABEL'),
-			document.getElementById('AUTH_METHOD_SAML_DESCRIPTION')
-		];
+			document.getElementById('AUTH_METHOD_SAML_DESCRIPTION'),
 
-		CardsActions(
-			document.querySelector('[name="auth[AUTH_METHOD_SAML_ENABLED]"]'),
-			samlTextInputs,
-			samlCards
-		);
+		];
+		CardsActions(samlRadioButtons, samlTextInputs, samlCards);
+
 
 		// Google
 		const googleTextInputs = [
