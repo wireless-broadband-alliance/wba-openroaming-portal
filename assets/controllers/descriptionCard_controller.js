@@ -2,15 +2,24 @@ import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
 	connect() {
-// JavaScript to display the correct icon when the page loads
+		// JavaScript to display the correct icon when the page loads
 		document.addEventListener("DOMContentLoaded", function () {
 			const onLabel = document.getElementById("onLabel");
 			const offLabel = document.getElementById("offLabel");
 			const onCustomRadio = document.getElementById("onCustomRadio");
 			const offCustomRadio = document.getElementById("offCustomRadio");
 
-			onCustomRadio.classList.add("hidden");
-			offCustomRadio.classList.add("hidden");
+			// Check which radio button is selected
+			const onRadio = document.querySelector('input[type="radio"][value="true"]');
+			const offRadio = document.querySelector('input[type="radio"][value="false"]');
+
+			if (onRadio.checked) {
+				onCustomRadio.classList.remove("hidden");
+				offCustomRadio.classList.add("hidden");
+			} else if (offRadio.checked) {
+				offCustomRadio.classList.remove("hidden");
+				onCustomRadio.classList.add("hidden");
+			}
 
 			onLabel.addEventListener("click", function () {
 				onCustomRadio.classList.remove("hidden");
