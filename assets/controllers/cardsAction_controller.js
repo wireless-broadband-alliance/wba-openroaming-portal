@@ -3,13 +3,13 @@ import {Controller} from '@hotwired/stimulus';
 export default class extends Controller {
 	connect() {
 		function CardsActions(
-			selectInput,
+			radioButtons,
 			textInputs,
 			cards
 		) {
-			if (selectInput) {
+			if (radioButtons && radioButtons.length > 0) {
 				const toggleInputState = () => {
-					const isEnabled = selectInput.value === 'true';
+					const isEnabled = radioButtons[0].checked; // Use the first radio button to determine the state
 
 					textInputs.forEach((input) => {
 						input.readOnly = !isEnabled;
@@ -23,10 +23,24 @@ export default class extends Controller {
 				};
 
 				toggleInputState();
-				selectInput.addEventListener('input', toggleInputState);
+				radioButtons.forEach((radioButton) => {
+					radioButton.addEventListener('input', toggleInputState);
+				});
 			}
 		}
 
+		// Capport
+		const capportRadioButtons = document.querySelectorAll('[name="capport[CAPPORT_ENABLED]"]');
+		const capportTextInputs = [
+			document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]'),
+			document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]')
+		];
+
+		const capportCards = [
+			document.getElementById('CAPPORT_PORTAL_URL'),
+			document.getElementById('CAPPORT_VENUE_INFO_URL')
+		];
+		CardsActions(capportRadioButtons, capportTextInputs, capportCards);
 		const ldapTextInputs = [];
 		const ldapCards = [];
 
@@ -48,23 +62,6 @@ export default class extends Controller {
 			ldapTextInputs,
 			ldapCards
 		);
-
-
-		const capportTextInputs = [
-			document.querySelector('[name="capport[CAPPORT_PORTAL_URL]"]'),
-			document.querySelector('[name="capport[CAPPORT_VENUE_INFO_URL]"]')
-		];
-
-		const capportCards = [
-			document.getElementById('CAPPORT_PORTAL_URL'),
-			document.getElementById('CAPPORT_VENUE_INFO_URL')
-		];
-		CardsActions(
-			document.querySelector('[name="capport[CAPPORT_ENABLED]"]'),
-			capportTextInputs,
-			capportCards
-		);
-
 
 		// SAML
 		const samlTextInputs = [
