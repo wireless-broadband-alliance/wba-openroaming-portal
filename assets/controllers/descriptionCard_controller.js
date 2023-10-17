@@ -38,14 +38,14 @@ export default class extends Controller {
 			});
 		});
 
-		// Function to display the message
+		// Function to display the capport message
 		function showMessageCapport() {
-			const capportEnabledSelect = document.querySelector('[name="capport[CAPPORT_ENABLED]"]');
+			const capportRadioButtons = document.querySelectorAll('[name="capport[CAPPORT_ENABLED]"]');
 			const capportMessage = document.getElementById('capportMessage');
 
-			if (capportEnabledSelect) {
+			if (capportRadioButtons) {
 				const toggleMessageState = () => {
-					const capportEnabledValue = capportEnabledSelect.value;
+					const capportEnabledValue = document.querySelector('[name="capport[CAPPORT_ENABLED]"]:checked').value;
 
 					if (capportEnabledValue === 'true') {
 						capportMessage.classList.remove('hidden');
@@ -54,11 +54,15 @@ export default class extends Controller {
 					}
 				};
 
-				toggleMessageState();
-				capportEnabledSelect.addEventListener('input', toggleMessageState);
+				// Attach input event listener to all radio buttons
+				capportRadioButtons.forEach(radioButton => {
+					radioButton.addEventListener('input', toggleMessageState);
+				});
+
+				toggleMessageState(); // Call it initially to handle the default state
 			}
 		}
-		
+
 		showMessageCapport();
 	}
 
