@@ -1,0 +1,82 @@
+<div {{ stimulus_controller('auth') }}>
+{#SAML#}
+<h1 class="text-2xl px-6 font-semibold mb-6">SAML</h1>
+<div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+    {#MODE#}
+    <div class="bg-white rounded-lg p-2 w-full">
+        {# Title and Info Card #}
+        <div class="flex flex-row rounded-md justify-between p-2">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">Mode</h1>
+            </div>
+            <img class="w-6 cursor-pointer"
+                id="descriptionIcon"
+                src="{{ asset('resources/logos/info_icon.svg') }}"
+                alt="info_icon" />
+            {# Description Setting #}
+            <div role="tooltip" class="w-sm h-fit bg-indigo-400 p-2 rounded-lg text-center text-white z-10 transition transform translate-y-6 ease-in-out duration-300 absolute hidden"
+                    name="description">
+                Estse cenas faz cenas e depois podes clicar e fazer outras cenas pra nao ficares sem cenas pra fazer
+            </div>
+        </div
+        {# On/Off #}
+        <div id="onSAML" class="m-3 cursor-pointer rounded-md flex flex-row justify-between p-2"> 
+            {# <label class="flex items-center bg-opacity-40"> #}
+            On
+            <div id="on-check" class="w-6 h-6 rounded-full flex items-center justify-center">
+                <img id="onSAMLicon" class="w-6 h-6 fill-current" src="{{asset('resources/logos/check.svg')}}"></img>
+            </div>
+        </div>
+        <div id="offSAML" class="m-3 cursor-pointer flex flex-row justify-between p-2">
+            Off
+            <div id="off-check" class="w-6 h-6 rounded-full flex items-center justify-center">
+                <img id="offSAMLicon" class="w-6 h-6 fill-current" src="{{asset('resources/logos/check.svg')}}"></img>
+            </div>
+        </div>
+    </div>
+    {#LABEL#}
+    <div class="bg-white rounded-lg p-2 w-full h-fit">
+        {# Title and Info Card #}
+        <div id="labelSAML" class="flex flex-row rounded-md justify-between p-2">
+            <label for="labelSAMLinput" class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">Label</h1>
+            </label>
+            <img class="w-6 cursor-pointer"
+                name="descriptionIcon"
+                src="{{ asset('resources/logos/info_icon.svg') }}"
+                alt="info_icon" />    
+        </div>
+        {#INPUT#}
+        <div class="flex flex-col justify-items-end w-full border-1 border-black pb-2">
+            <input id="labelSAMLinput" type="text" placeholder="Edit Me" 
+                class="py-2 px-3 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full">
+        </div>
+    </div>
+    {#DESCRIPTION#}
+    <div id="descriptionSAML"  class="bg-white rounded-lg p-2 w-full h-fit">
+        {# Title and Info Card #}
+        <div class="flex flex-row rounded-md justify-between p-2">
+            <label for="descriptionSAMLinput" class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">Description</h1>
+            </label>
+            <img class="w-6 cursor-pointer"
+                name="descriptionIcon"
+                src="{{ asset('resources/logos/info_icon.svg') }}"
+                alt="info_icon" />    
+        </div>
+        {#INPUT#}
+        <div class="flex flex-col justify-items-end w-full border-1 border-black pb-2">
+            <input id="descriptionSAMLinput" type="text" placeholder="Edit Me" 
+                class="py-2 px-3 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full">
+        </div>
+    </div>
+</div>
+{#GOOGLE#}
+{#EMAIL REGISTER#}
+{#NORMAL LOGIN#}
+{# DIVIDER #}  
+<hr class="my-2 mx-2 h-0.5 border-t-0 bg-slate-200 opacity-100" />
+{#SAVE BUTTON#}
+<div class="flex justify-end">
+    <button type="button" class="self-end h-fit text-white bg-slate-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Save Changes</button>
+</div>
