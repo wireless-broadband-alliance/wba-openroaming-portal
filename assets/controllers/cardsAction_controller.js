@@ -41,11 +41,29 @@ export default class extends Controller {
 			document.getElementById('CAPPORT_VENUE_INFO_URL')
 		];
 		CardsActions(capportRadioButtons, capportTextInputs, capportCards);
-		const ldapTextInputs = [];
-		const ldapCards = [];
+
+
+		// LDAP
+		const ldapRadioButtons = document.querySelectorAll('[name="ldap[SYNC_LDAP_ENABLED]"]');
+		const ldapTextInputs = [
+			document.querySelector('[name="ldap[SYNC_LDAP_SERVER]"]'),
+			document.querySelector('[name="ldap[SYNC_LDAP_BIND_USER_DN]"]'),
+			document.querySelector('[name="ldap[SYNC_LDAP_BIND_USER_PASSWORD]"]'),
+			document.querySelector('[name="ldap[SYNC_LDAP_SEARCH_BASE_DN]"]'),
+			document.querySelector('[name="ldap[SYNC_LDAP_SEARCH_FILTER]"]'),
+		];
+
+		const ldapCards = [
+			document.getElementById('SYNC_LDAP_SERVER'),
+			document.getElementById('SYNC_LDAP_BIND_USER_DN'),
+			document.getElementById('SYNC_LDAP_BIND_USER_PASSWORD'),
+			document.getElementById('SYNC_LDAP_SEARCH_BASE_DN'),
+			document.getElementById('SYNC_LDAP_SEARCH_FILTER'),
+		];
+		CardsActions(ldapRadioButtons, ldapTextInputs, ldapCards);
+
 
 		// Iterate over LDAP settings to populate the arrays
-		const ldapSettings = ['SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN', 'SYNC_LDAP_BIND_USER_PASSWORD', 'SYNC_LDAP_SEARCH_BASE_DN', 'SYNC_LDAP_SEARCH_FILTER'];
 
 		ldapSettings.forEach(settingName => {
 			const textInput = document.querySelector(`[name="ldap[${settingName}]"]`);
