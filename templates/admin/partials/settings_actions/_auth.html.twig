@@ -1,10 +1,10 @@
-<div {{ stimulus_controller('auth') }}>
-{#SAML#}
+ <div {{ stimulus_controller('auth') }}>
+ {#SAML#}
 <h1 class="text-2xl px-6 font-semibold mb-6">SAML</h1>
 <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
     {#MODE#}
     <div class="bg-white rounded-lg p-2 w-full">
-        {# Title and Info Card #}
+        {# Title and Info Card#}
         <div class="flex flex-row rounded-md justify-between p-2">
             <div class="text-base font-medium text-center break-normal md:break-all">
                 <h1 class="text-base md:text-lg whitespace-nowrap">Mode</h1>
@@ -18,19 +18,18 @@
                     name="description">
                 Estse cenas faz cenas e depois podes clicar e fazer outras cenas pra nao ficares sem cenas pra fazer
             </div>
-        </div
+        </div>
         {# On/Off #}
         <div id="onSAML" class="m-3 cursor-pointer rounded-md flex flex-row justify-between p-2"> 
-            {# <label class="flex items-center bg-opacity-40"> #}
             On
-            <div id="on-check" class="w-6 h-6 rounded-full flex items-center justify-center">
-                <img id="onSAMLicon" class="w-6 h-6 fill-current" src="{{asset('resources/logos/check.svg')}}"></img>
+            <div class="w-6 h-6 rounded-full flex items-center justify-center">
+                <img id="onIconSAML" class="w-6 h-6 fill-current" src="{{asset('resources/logos/check.svg')}}"></img>
             </div>
         </div>
         <div id="offSAML" class="m-3 cursor-pointer flex flex-row justify-between p-2">
             Off
-            <div id="off-check" class="w-6 h-6 rounded-full flex items-center justify-center">
-                <img id="offSAMLicon" class="w-6 h-6 fill-current" src="{{asset('resources/logos/check.svg')}}"></img>
+            <div class="w-6 h-6 rounded-full flex items-center justify-center">
+                <img id="offIconSAML" class="w-6 h-6 fill-current" src="{{asset('resources/logos/check.svg')}}"></img>
             </div>
         </div>
     </div>
@@ -48,7 +47,7 @@
         </div>
         {#INPUT#}
         <div class="flex flex-col justify-items-end w-full border-1 border-black pb-2">
-            <input id="labelSAMLinput" type="text" placeholder="Edit Me" 
+            <input id="labelInputSAML" type="text" placeholder="Edit Me" 
                 class="py-2 px-3 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full">
         </div>
     </div>
@@ -66,14 +65,14 @@
         </div>
         {#INPUT#}
         <div class="flex flex-col justify-items-end w-full border-1 border-black pb-2">
-            <input id="descriptionSAMLinput" type="text" placeholder="Edit Me" 
+            <input id="descriptionInputSAML" type="text" placeholder="Edit Me" 
                 class="py-2 px-3 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full">
         </div>
     </div>
 </div>
 {#GOOGLE#}
-{#EMAIL REGISTER#}
-{#NORMAL LOGIN#}
+{#EMAIL-REGISTER#}
+{#NORMAL-LOGIN#}
 {# DIVIDER #}  
 <hr class="my-2 mx-2 h-0.5 border-t-0 bg-slate-200 opacity-100" />
 {#SAVE BUTTON#}

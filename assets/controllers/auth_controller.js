@@ -1,43 +1,34 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["onSAML", "offSAML"]
-    SAMLtoggle = true;
 
-    disableSAML(){
-        console.log("off")
-        document.getElementById('offSAML').classList.add('border-2','border-black','rounded-md');
-        document.getElementById('onSAML').classList.remove('border-2','border-black','rounded-md');
-        document.getElementById('offSAMLicon').classList.remove('invisible');
-        document.getElementById('onSAMLicon').classList.add('invisible');
-        //this.onSAML.classList.remove('border-2')
-        // border-black rounded-md")
-        //SAML_On_Div.classList.remove('border-2')
-        // border-black rounded-md")
+    disable(name){
+        console.log(name)
+        document.getElementById(`off${name}`).classList.add('border-2','border-black','rounded-md');
+        document.getElementById(`on${name}`).classList.remove('border-2','border-black','rounded-md');
+        document.getElementById(`offIcon${name}`).classList.remove('invisible');
+        document.getElementById(`onIcon${name}`).classList.add('invisible');
+        //ADD LOGIC TO DISABLE LABEL AND DESCRIPTION
     }
-    enableSAML(){
-        //.add('border-2','border-black','rounded-md'); - selected
-        //nonselected - 'bg-gray-50', 'border-gray-300', 'text-gray-800'
-        console.log("on")
-        document.getElementById('onSAML').classList.add('border-2','border-black','rounded-md');
-        document.getElementById('offSAML').classList.remove('border-2','border-black','rounded-md');
-        document.getElementById('onSAMLicon').classList.remove('invisible');
-        document.getElementById('offSAMLicon').classList.add('invisible');
-        //SAML_On_Div = document.getElementById('SAML-On');
-        //SAML_On_Div.classList.add('border-2')
-        // border-black rounded-md")
-        //this.offSAMLTarget.classList.add('border-2')
-
+    enable(name){
+        console.log(name)
+        document.getElementById(`on${name}`).classList.add('border-2','border-black','rounded-md');
+        document.getElementById(`off${name}`).classList.remove('border-2','border-black','rounded-md');
+        document.getElementById(`onIcon${name}`).classList.remove('invisible');
+        document.getElementById(`offIcon${name}`).classList.add('invisible');
+        //ADD LOGIC TO ENABLE LABEL AND DESCRIPTION
     }
     connect() {
         document.addEventListener('DOMContentLoaded', () => {
-
+            // Iterate over settings to populate the arrays
+            /* LOAD INITIAL VALUE FROM USER SETTINGS */
+            this.enable("SAML");
+            //Description Animation
             const description_values = document.getElementsByName("description");
             const description_targets = document.getElementsByName("descriptionIcon");
             description_targets.forEach((description_target, index) => {
                 let timeout; // Initialize a timeout variable
                 description_target.addEventListener('mouseover', function handleMouseOver() {
-                    console.log("in");
                     // Delay showing the description box for 500 milliseconds (adjust as needed)
                     timeout = setTimeout(() => {
                         description_values[index].classList.remove('hidden');
@@ -46,27 +37,19 @@ export default class extends Controller {
                 });
 
                 description_target.addEventListener('mouseout', function handleMouseOut() {
-                    console.log("out");
                     clearTimeout(timeout); // Clear the timeout if the user moves the mouse out before the delay
                     description_values[index].classList.add('hidden');
                     description_values[index].classList.remove('opacity-100');
                 });
             });
-        
-            const onSAMLdiv = document.getElementById('onSAML');
-            const offSAMLdiv = document.getElementById('offSAML');
-
-            onSAMLdiv.addEventListener('click', () => {
-                this.enableSAML()})
-            offSAMLdiv.addEventListener('click', () => {
-                this.disableSAML()})
-
+            //event listeners to Buttons    
+            document.getElementById("onSAML").addEventListener('click', () => {
+                this.enable('SAML')})
+            document.getElementById("offSAML").addEventListener('click', () => {
+                this.disable('SAML')})
+            
         });
-        console.log("connect1")
-        /* LOAD INITIAL VALUE FROM USER SETTINGS */
-        if(this.SAMLtoggle)
-            this.enableSAML();
-        else
-            this.disableSAML();
+        console.log("connect")
+
     }
 }
