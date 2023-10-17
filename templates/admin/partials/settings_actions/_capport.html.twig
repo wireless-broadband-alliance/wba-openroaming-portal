@@ -35,10 +35,22 @@
                     {% endif %}
                     {% if setting.vars.name in ['CAPPORT_ENABLED'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'text-center  p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            {# Render "ON" Radio Input #}
+                            <label>
+                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}"
+                                       value="true" {{ form.CAPPORT_ENABLED.vars.data == 'true' ? 'checked' : '' }}>
+                                ON
+                            </label>
+
+                            {# Render "OFF" Radio Input #}
+                            <label>
+                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}"
+                                       value="false" {{ form.CAPPORT_ENABLED.vars.data == 'false' ? 'checked' : '' }}>
+                                OFF
+                            </label>
                         </div>
                     {% endif %}
-
+                    
                     {# Description Setting #}
                     <div class="flex justify-center items-center">
                         <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
