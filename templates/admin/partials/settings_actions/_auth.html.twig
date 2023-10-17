@@ -177,7 +177,21 @@
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'text-center  p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                                {# Render "ON" Radio Input #}
+                                <label>
+                                    <input type="radio"
+                                           name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
+                                           value="true" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == 'true' ? 'checked' : '' }}>
+                                    ON
+                                </label>
+
+                                {# Render "OFF" Radio Input #}
+                                <label>
+                                    <input type="radio"
+                                           name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
+                                           value="false" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == 'false' ? 'checked' : '' }}>
+                                    OFF
+                                </label>
                             </div>
                         {% endif %}
 
@@ -234,7 +248,21 @@
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'text-center  p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                                {# Render "ON" Radio Input #}
+                                <label>
+                                    <input type="radio"
+                                           name="{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.full_name }}"
+                                           value="true" {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.data == 'true' ? 'checked' : '' }}>
+                                    ON
+                                </label>
+
+                                {# Render "OFF" Radio Input #}
+                                <label>
+                                    <input type="radio"
+                                           name="{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.full_name }}"
+                                           value="false" {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.data == 'false' ? 'checked' : '' }}>
+                                    OFF
+                                </label>
                             </div>
                         {% endif %}
 
