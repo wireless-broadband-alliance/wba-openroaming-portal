@@ -73,23 +73,18 @@ export default class extends Controller {
 		];
 		CardsActions(samlRadioButtons, samlTextInputs, samlCards);
 
-
-		// Google
+		// GOOGLE
+		const googleRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_ENABLED]"]');
 		const googleTextInputs = [
 			document.querySelector('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_LABEL]"]'),
-			document.querySelector('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION]"]')
+			document.querySelector('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION]"]'),
 		];
-
 		const googleCards = [
 			document.getElementById('AUTH_METHOD_GOOGLE_LOGIN_LABEL'),
-			document.getElementById('AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION')
-		];
+			document.getElementById('AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'),
 
-		CardsActions(
-			document.querySelector('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_ENABLED]"]'),
-			googleTextInputs,
-			googleCards
-		);
+		];
+		CardsActions(googleRadioButtons, googleTextInputs, googleCards);
 
 		// REGISTER
 		const registerTextInputs = [
