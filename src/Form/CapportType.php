@@ -53,7 +53,7 @@ class CapportType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction',
+                    'data-controller' => 'descriptionCard cardsAction capportMessage',
                 ],
                 'required' => false,
             ];
