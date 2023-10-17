@@ -100,7 +100,7 @@
                 {# Display only the authentication settings #}
                 {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                         name="Cards"
+                         name="GoogleCards"
                          id="{{ setting.vars.name }}">
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
@@ -129,13 +129,13 @@
                             <div class="flex flex-col items-center space-y-2 mt-5">
                                 {# Render "ON" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                       name="onLabel">
+                                       name="onLabelGoogle">
                                     On
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.full_name }}"
                                            value="true"
                                            class="radio-input hidden"{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioGoogle">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -147,13 +147,13 @@
                                 </label>
                                 {# Render "OFF" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                       name="offLabel">
+                                       name="offLabelGoogle">
                                     Off
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.full_name }}"
                                            value="false"
                                            class="radio-input hidden"{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioGoogle">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -192,7 +192,7 @@
                 {# Display only the authentication settings #}
                 {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                         name="Cards"
+                         name="RegisterCards"
                          id="{{ setting.vars.name }}">
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
@@ -221,13 +221,13 @@
                             <div class="flex flex-col items-center space-y-2 mt-5">
                                 {# Render "ON" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                       name="onLabel">
+                                       name="onLabelRegister">
                                     On
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
                                            value="true"
                                            class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioRegister">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -239,13 +239,13 @@
                                 </label>
                                 {# Render "OFF" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                       name="offLabel">
+                                       name="offLabelRegister">
                                     Off
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
                                            value="false"
                                            class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioRegister">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -284,7 +284,7 @@
                 {# Display only the authentication settings #}
                 {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                         name="Cards"
+                         name="LoginCards"
                          id="{{ setting.vars.name }}">
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
@@ -313,13 +313,13 @@
                             <div class="flex flex-col items-center space-y-2 mt-5">
                                 {# Render "ON" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                       name="onLabel">
+                                       name="onLabelLogin">
                                     On
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.full_name }}"
                                            value="true"
                                            class="radio-input hidden"{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioLogin">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -331,13 +331,13 @@
                                 </label>
                                 {# Render "OFF" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                       name="offLabel">
+                                       name="offLabelLogin">
                                     Off
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.full_name }}"
                                            value="false"
                                            class="radio-input hidden" {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioLogin">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
