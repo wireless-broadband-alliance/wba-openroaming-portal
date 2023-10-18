@@ -417,7 +417,7 @@ class AdminController extends AbstractController
                 $currentUser->setIsVerified(1);
                 $em->persist($currentUser);
                 $em->flush();
-                $this->addFlash('success_admin', 'Your password has been rested successfully');
+                $this->addFlash('success_admin', 'Your password has been reseted successfully');
                 return $this->redirectToRoute('admin_page');
             }
 
@@ -434,7 +434,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been rested successfully');
+                $this->addFlash('success_admin', 'The setting has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings');
             }
 
@@ -449,7 +449,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been rested successfully');
+                $this->addFlash('success_admin', 'The setting has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
@@ -464,7 +464,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been rested successfully');
+                $this->addFlash('success_admin', 'The setting has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
@@ -479,7 +479,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The Radius configurations has been rested successfully');
+                $this->addFlash('success_admin', 'The Radius configurations has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
@@ -494,7 +494,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The platform mode status has been rested successfully');
+                $this->addFlash('success_admin', 'The platform mode status has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
@@ -509,7 +509,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The LDAP settings has been rested successfully');
+                $this->addFlash('success_admin', 'The LDAP settings has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
@@ -524,7 +524,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The CAPPORT settings has been rested successfully');
+                $this->addFlash('success_admin', 'The CAPPORT settings has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
@@ -539,7 +539,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The authentication settings has been rested successfully');
+                $this->addFlash('success_admin', 'The authentication settings has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
         }
