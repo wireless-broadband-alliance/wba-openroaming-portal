@@ -17,11 +17,11 @@ module.exports = {
 				veryDarkButton: '#232B35',
 				lightGreen: '#57a475',
 				veryLightGreen: '#f1f8f4',
-				lightGray: '#f7f6f8',
+				lightGray: '#F7F7F9',
 				inputGray: '#D9D9D9',
-				lightBlue: "#DFEBFC",
-				textBlue: "#1D65A7"
-
+				infoBgColor: '#DFEBFC',
+				infoTextColor: '#1D65A7',
+				disableCardsColor: '#E4E4E4'
 			},
 
 			fontFamily: {

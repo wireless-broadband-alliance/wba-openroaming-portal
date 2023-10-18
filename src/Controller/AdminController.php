@@ -6,6 +6,8 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Form\authType;
+use App\Form\CapportType;
 use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
@@ -510,6 +512,36 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The LDAP settings has been rested successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
+
+            if ($type === 'settingCAPPORT') {
+                $command = 'php bin/console reset:capportSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The CAPPORT settings has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_capport');
+            }
+
+            if ($type === 'settingAUTH') {
+                $command = 'php bin/console reset:authSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The authentication settings has been rested successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_auth');
+            }
         }
 
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
@@ -588,6 +620,22 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
         }
 
+        if ($type === 'settingCAPPORT') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
+        }
+
+        if ($type === 'settingAUTH') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
+        }
+
         return $this->redirectToRoute('admin_page');
     }
 
@@ -629,82 +677,6 @@ class AdminController extends AbstractController
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
             ]);
-    }
-
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
-    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settings(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
-    {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $settingsRepository = $em->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
-
-        $form = $this->createForm(SettingType::class, null, [
-            'settings' => $settings, // Pass the settings data to the form
-        ]);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
-
-            $excludedSettings = [ // these are the settings related with the customization of the page
-                'CUSTOMER_LOGO',
-                'OPENROAMING_LOGO',
-                'WALLPAPER_IMAGE',
-                'PAGE_TITLE',
-                'WELCOME_TEXT',
-                'WELCOME_DESCRIPTION',
-            ];
-
-            foreach ($settings as $setting) {
-                $name = $setting->getName();
-                // Exclude the settings in $excludedSettings from being updated
-                // Check if the submitted data contains the setting's name
-                if (!in_array($name, $excludedSettings, true)) {
-                    $value = $submittedData[$name] ?? null;
-                    // Check if the setting is a text input
-                    if ($value === null) {
-                        $value = "";
-                    }
-                    if ($name === 'EMAIL_VERIFICATION' && $submittedData['PLATFORM_MODE'] === PlatformMode::Live) {
-                        $value = EmailConfirmationStrategy::EMAIL;
-                    }
-                    $setting->setValue($value);
-                    $em->persist($setting);
-                }
-            }
-
-            $em->flush();
-
-            $this->addFlash('success_admin', 'Settings updated successfully.');
-
-            return $this->redirectToRoute('admin_page');
-        }
-
-        return $this->render('admin/settings.html.twig', [
-            'settings' => $settings,
-            'form' => $form->createView(),
-            'data' => $data,
-            'getSettings' => $getSettings,
-            'current_user' => $currentUser
-        ]);
     }
 
     /**
@@ -1042,11 +1014,64 @@ class AdminController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(authType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'AUTH_METHOD_SAML_ENABLED',
+                'AUTH_METHOD_SAML_LABEL',
+                'AUTH_METHOD_SAML_DESCRIPTION',
+
+                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+                'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+
+                'AUTH_METHOD_REGISTER_ENABLED',
+                'AUTH_METHOD_REGISTER_LABEL',
+                'AUTH_METHOD_REGISTER_DESCRIPTION',
+
+                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New autheticaition configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_auth');
+        }
 
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -1070,11 +1095,52 @@ class AdminController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(CapportType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'CAPPORT_ENABLED',
+                'CAPPORT_PORTAL_URL',
+                'CAPPORT_VENUE_INFO_URL',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_capport');
+        }
 
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 

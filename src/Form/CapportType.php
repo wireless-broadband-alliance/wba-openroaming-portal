@@ -6,12 +6,11 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class LDAPType extends AbstractType
+class CapportType extends AbstractType
 {
     private GetSettings $getSettings;
 
@@ -23,22 +22,13 @@ class LDAPType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'SYNC_LDAP_ENABLED' => [
+            'CAPPORT_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
-            'SYNC_LDAP_BIND_USER_DN' => [
+            'CAPPORT_PORTAL_URL' => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_BIND_USER_PASSWORD' => [
-                'type' => PasswordType::class,
-            ],
-            'SYNC_LDAP_SERVER' => [
-                'type' => TextType::class,
-            ],
-            'SYNC_LDAP_SEARCH_BASE_DN' => [
-                'type' => TextType::class,
-            ],
-            'SYNC_LDAP_SEARCH_FILTER' => [
+            'CAPPORT_VENUE_INFO_URL' => [
                 'type' => TextType::class,
             ],
         ];
@@ -48,7 +38,7 @@ class LDAPType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'SYNC_LDAP_ENABLED') {
+                    if ($settingName === 'CAPPORT_ENABLED') {
                         $formFieldOptions['choices'] = [
                             EmailConfirmationStrategy::EMAIL => 'true',
                             EmailConfirmationStrategy::NO_EMAIL => 'false',
@@ -63,7 +53,7 @@ class LDAPType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showIconRadios',
+                    'data-controller' => 'descriptionCard cardsAction showMessageCapport showIconRadios',
                 ],
                 'required' => false,
             ];

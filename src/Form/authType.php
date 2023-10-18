@@ -6,12 +6,11 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class LDAPType extends AbstractType
+class authType extends AbstractType
 {
     private GetSettings $getSettings;
 
@@ -23,22 +22,43 @@ class LDAPType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'SYNC_LDAP_ENABLED' => [
+            'AUTH_METHOD_SAML_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
-            'SYNC_LDAP_BIND_USER_DN' => [
+            'AUTH_METHOD_SAML_LABEL' => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_BIND_USER_PASSWORD' => [
-                'type' => PasswordType::class,
-            ],
-            'SYNC_LDAP_SERVER' => [
+            'AUTH_METHOD_SAML_DESCRIPTION' => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_SEARCH_BASE_DN' => [
+
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
+                'type' => ChoiceType::class,
+            ],
+            'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_SEARCH_FILTER' => [
+            'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => [
+                'type' => TextType::class,
+            ],
+
+            'AUTH_METHOD_REGISTER_ENABLED' => [
+                'type' => ChoiceType::class,
+            ],
+            'AUTH_METHOD_REGISTER_LABEL' => [
+                'type' => TextType::class,
+            ],
+            'AUTH_METHOD_REGISTER_DESCRIPTION' => [
+                'type' => TextType::class,
+            ],
+
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
+                'type' => ChoiceType::class,
+            ],
+            'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => [
+                'type' => TextType::class,
+            ],
+            'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => [
                 'type' => TextType::class,
             ],
         ];
@@ -48,7 +68,11 @@ class LDAPType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'SYNC_LDAP_ENABLED') {
+                    if ($settingName === 'AUTH_METHOD_SAML_ENABLED' ||
+                        $settingName === 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' ||
+                        $settingName === 'AUTH_METHOD_REGISTER_ENABLED' ||
+                        $settingName === 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                    ) {
                         $formFieldOptions['choices'] = [
                             EmailConfirmationStrategy::EMAIL => 'true',
                             EmailConfirmationStrategy::NO_EMAIL => 'false',
@@ -63,7 +87,7 @@ class LDAPType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showIconRadios',
+                    'data-controller' => 'descriptionCard cardsAction showIconRadiosAuth',
                 ],
                 'required' => false,
             ];
