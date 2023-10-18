@@ -39,7 +39,7 @@
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="onLabel">
                                 On
-                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" value="true"
+                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" id="onRadio" value="true"
                                        class="radio-input hidden"{{ form.CAPPORT_ENABLED.vars.value == "true" ? 'checked' : '' }}>
                                 <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
@@ -54,7 +54,7 @@
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="offLabel">
                                 Off
-                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" value="false"
+                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" id="offRadio" value="false"
                                        class="radio-input hidden"{{ form.CAPPORT_ENABLED.vars.value == "false" ? 'checked' : '' }}>
                                 <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"

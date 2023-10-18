@@ -5,26 +5,28 @@ export default class extends Controller {
 		// Show/hide icon on each radio button
 		function initializeRadioButtons(onLabel, offLabel, onCustomRadio, offCustomRadio) {
 			// Check which radio button is selected
-			const onRadio = onLabel.parentElement.querySelector('input[type="radio"][value="true"]');
-			const offRadio = offLabel.parentElement.querySelector('input[type="radio"][value="false"]');
+			const onRadio = document.getElementById('onRadio');
+			const offRadio = document.getElementById('offRadio');
 
-			if (onRadio.checked) {
-				onCustomRadio.classList.remove("hidden");
-				offCustomRadio.classList.add("hidden");
-			} else if (offRadio.checked) {
-				offCustomRadio.classList.remove("hidden");
-				onCustomRadio.classList.add("hidden");
+			if (onRadio && offRadio && onCustomRadio && offCustomRadio) {
+				if (onRadio.checked) {
+					onCustomRadio.classList.remove("hidden");
+					offCustomRadio.classList.add("hidden");
+				} else if (offRadio.checked) {
+					offCustomRadio.classList.remove("hidden");
+					onCustomRadio.classList.add("hidden");
+				}
+
+				onRadio.addEventListener("change", function () {
+					onCustomRadio.classList.remove("hidden");
+					offCustomRadio.classList.add("hidden");
+				});
+
+				offRadio.addEventListener("change", function () {
+					offCustomRadio.classList.remove("hidden");
+					onCustomRadio.classList.add("hidden");
+				});
 			}
-
-			onLabel.addEventListener("click", function () {
-				onCustomRadio.classList.remove("hidden");
-				offCustomRadio.classList.add("hidden");
-			});
-
-			offLabel.addEventListener("click", function () {
-				offCustomRadio.classList.remove("hidden");
-				onCustomRadio.classList.add("hidden");
-			});
 		}
 
 		// Looks for the first element with the name declared
@@ -38,45 +40,6 @@ export default class extends Controller {
 				const offCustomRadio = radioSet.querySelector('[name="offCustomRadio"]');
 
 				initializeRadioButtons(onLabel, offLabel, onCustomRadio, offCustomRadio);
-			});
-		});
-
-		// Looks for the specific name second name element
-		document.addEventListener("DOMContentLoaded", function () {
-			const GoogleRadioSets = document.querySelectorAll('[name="GoogleCards"]');
-			GoogleRadioSets.forEach(function (radioSet) {
-				const onLabelGoogle = radioSet.querySelector('[name="onLabelGoogle"]');
-				const offLabelGoogle = radioSet.querySelector('[name="offLabelGoogle"]');
-				const onCustomRadioGoogle = radioSet.querySelector('[name="onCustomRadioGoogle"]');
-				const offCustomRadioGoogle = radioSet.querySelector('[name="offCustomRadioGoogle"]');
-
-				initializeRadioButtons(onLabelGoogle, offLabelGoogle, onCustomRadioGoogle, offCustomRadioGoogle);
-			});
-		});
-
-		// Looks for the specific name third name element
-		document.addEventListener("DOMContentLoaded", function () {
-			const RegisterRadioSets = document.querySelectorAll('[name="RegisterCards"]');
-			RegisterRadioSets.forEach(function (radioSet) {
-				const onLabelRegister = radioSet.querySelector('[name="onLabelRegister"]');
-				const offLabelRegister = radioSet.querySelector('[name="offLabelRegister"]');
-				const onCustomRadioRegister = radioSet.querySelector('[name="onCustomRadioRegister"]');
-				const offCustomRadioRegister = radioSet.querySelector('[name="offCustomRadioRegister"]');
-
-				initializeRadioButtons(onLabelRegister, offLabelRegister, onCustomRadioRegister, offCustomRadioRegister);
-			});
-		});
-
-		// Looks for the specific name fourth name element
-		document.addEventListener("DOMContentLoaded", function () {
-			const LoginRadioSets = document.querySelectorAll('[name="LoginCards"]');
-			LoginRadioSets.forEach(function (radioSet) {
-				const onLabelLogin = radioSet.querySelector('[name="onLabelLogin"]');
-				const offLabelLogin = radioSet.querySelector('[name="offLabelLogin"]');
-				const onCustomRadioLogin = radioSet.querySelector('[name="onCustomRadioLogin"]');
-				const offCustomRadioLogin = radioSet.querySelector('[name="offCustomRadioLogin"]');
-
-				initializeRadioButtons(onLabelLogin, offLabelLogin, onCustomRadioLogin, offCustomRadioLogin);
 			});
 		});
 	}
