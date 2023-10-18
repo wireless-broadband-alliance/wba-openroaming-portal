@@ -87,7 +87,7 @@ class authType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showIconRadios',
+                    'data-controller' => 'descriptionCard cardsAction showIconRadiosAuth',
                 ],
                 'required' => false,
             ];
