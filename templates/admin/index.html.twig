@@ -3,90 +3,194 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block body %}
-    <div class="container mx-auto px-4">
-
-        {% include 'admin/partials/_header_admin.html.twig' %}
-
-        <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-            <div class="flex flex-col items-center md:flex-row md:space-x-6">
-                {% include 'admin/partials/_options_dropdown.html.twig' %}
-                {# I need to fix another stuff before start working with chart.js
-                <a href="{{ path('admin_dashboard_statistics') }}"
-                   type="button"
-                   id="statistic_button"
-                   class="flex md:w-auto whitespace-nowrap rounded bg-sky-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-                >
-                    Statistics
-                </a>
-                #}
+    <section class="flex text-veryDarkPurple" data-controller="sidebar">
+        {% include 'admin/partials/_sidebar.html.twig' %}
+        <div class="p-7 w-full bg-lightGray">
+            {# Header section #}
+            <div class="flex flew-row items-center justify-between pb-10" id="header_page">
+                {# Header - Title and Buttons #}
+                {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
-
-            {% for message in app.session.flashbag.get('success_admin') %}
-                <div class="text-white text-base bg-primary border-primary mt-5 rounded-md p-2 text-center">{{ message }}</div>
-            {% endfor %}
-
-            <form action="{{ path('admin_search') }}" method="GET" class="flex items-center mt-5 md:mt-0">
-                <input type="text" name="u" placeholder="Search users..."
-                       class="border border-gray-300 rounded-l px-4 py-2 md:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button type="submit"
-                        class="md:mt-0 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 md:py-2.5 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 hover:transform hover:scale-105">
-                    Search
-                </button>
-            </form>
-        </div>
-
-
-        <div class="overflow-x-auto">
-            <table class="table-auto w-full divide-y divide-gray-200 border border-gray-300 mb-10">
-                <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">UUID</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Email</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Verification</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Google Account</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Created At</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Banned At</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-
-                {# Flash error message #}
-                {% for message in app.session.flashbag.get('error_admin') %}
-                    <div class="text-white text-base bg-red-600 border-red-600 mt-5 mb-5 rounded-md p-2 mx-auto max-w-md text-center">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-
-                {# Show the users with the partial _users #}
-                {% if users|length > 0 %}
-                    {% for user in users %}
-                        {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="7">
-                            <div class="text-center">
-                                No users found for "{{ searchTerm }}"
+            <div class="p-5 text-left space-y-3 rounded bg-white">
+                <div class="w-full mx-auto">
+                    <div class="sm:w-auto p-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                            <div class="flex items-center space-x-6 cursor-default">
+                                <div class="flex items-center space-x-6 cursor-default">
+                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100">
+                                        <h1 class="px-2">
+                                            All
+                                        </h1>
+                                        <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                                            {{ allUsersCount }}
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100">
+                                        <h1 class="px-2">
+                                            Verified
+                                        </h1>
+                                        <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
+                                            {{ verifiedUsersCount }}
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-red-400 transition-all duration-100">
+                                        <h1 class="px-2">
+                                            Banned
+                                        </h1>
+                                        <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
+                                            {{ bannedUsersCount }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                {% endif %}
-
-                </tbody>
-            </table>
-            {% if searchTerm != null %}
-                {% if totalPages > 1 %}
-                    <div class="flex justify-center mt-4 mb-5 ">
-                        <div class="flex space-x-2">
-                            {% for page in 1..totalPages %}
-                                <a href="{{ path('admin_search', {'u': searchTerm, 'page': page}) }}"
-                                   class="px-2 py-1 rounded hover:bg-blue-500 hover:text-white {{ currentPage == page ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500' }}">{{ page }}</a>
-                            {% endfor %}
+                            {# Right Search Bar #}
+                            <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-4/6">
+                                <div class="flex flex-row items-center bg-white border rounded-md">
+                                    {# Search Icon #}
+                                    <button type="submit">
+                                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                                             stroke-width="1.5"
+                                             viewBox="0 0 24 24"
+                                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                                        </svg>
+                                    </button>
+                                    {# Search Input #}
+                                    <label>
+                                        <input type="text"
+                                               class="w-full p-2 bg-transparent border-none outline-none"
+                                               placeholder="Search Users ..."
+                                               name="u"
+                                               value="{{ app.request.query.get('u', '') }}">
+                                    </label>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                {% endif %}
-            {% endif %}
+                    <div class="overflow-x-auto sm:rounded-lg">
+                        <div class="space-y-4 sm:space-y-0">
+                            {# Table Content #}
+                            <table class="w-full items-start">
+                                <thead class="text-sm text-gray-700 bg-veryLightGreen/50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">
+                                        <div class="flex flex-row justify-between">
+                                            <h1>UUID</h1>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        <div class="flex flex-row justify-between">
+                                            <h1>Email</h1>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Verification
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Provider
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Created At
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Banned Until
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        <span class="none"> </span>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {# Show the users with the partial _users #}
+                                {% if users|length > 0 %}
+                                    {% for user in users %}
+                                        {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="flex justify-center items-center text-center p-1">
+                                                <div class="bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold text-base">
+                                                    No users found with "{{ searchTerm }}"
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="m-8">
+                        <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+                        {% if searchTerm != null %}{# The conditional statement in this comment prevents the main page from displaying all existing users with pagination. This is done to prevent potential issues with loading excessive amounts of data. #}
+                            {% if totalPages > 1 %}
+                                <div class="flex space-x-2 justify-end mt-5">
+                                    <div class="flex flex-row text-base cursor-default">
+                                        <div class="flex space-x-2 mr-4">
+                                            {# Display the range of user numbers on the current page #}
+                                            <span class="text-veryDarkPurple">{{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, allUsersCount) }}</span>
+                                            <span class="text-veryDarkPurple"> of {{ allUsersCount }} </span>
+                                        </div>
+                                        <div class="flex space-x-2.5">
+                                            {# Previous page navigation #}
+                                            {% if currentPage > 1 %}
+                                                <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage - 1}) }}"
+                                                   class="hover:shadow-md p-1 rounded-lg">
+                                                    <svg class="text-veryDarkButton w-4 cursor-pointer"
+                                                         fill="none"
+                                                         stroke="currentColor" stroke-width="1.5"
+                                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                                         aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M15.75 19.5L8.25 12l7.5-7.5"></path>
+                                                    </svg>
+                                                </a>
+                                            {% else %}
+                                                <a class="p-1">
+                                                    {# Left limit pagination #}
+                                                    <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
+                                                         stroke="currentColor" stroke-width="1.5"
+                                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                                         aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M15.75 19.5L8.25 12l7.5-7.5"></path>
+                                                    </svg>
+                                                </a>
+                                            {% endif %}
+                                            {# Next page navigation #}
+                                            {% if currentPage < totalPages %}
+                                                <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage + 1}) }}"
+                                                   class="hover:shadow-md p-1 rounded-lg">
+                                                    <svg class="w-4 cursor-pointer"
+                                                         fill="none"
+                                                         stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                                                    </svg>
+                                                </a>
+                                            {% else %}
+                                                <a class="p-1">
+                                                    {# Right limit pagination #}
+                                                    <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
+                                                         stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                                                    </svg>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 {% endblock %}

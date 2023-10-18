@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block body %}
+    <section class="flex text-veryDarkPurple" data-controller="sidebar">
+        {% include 'admin/partials/_sidebar.html.twig' %}
+        <div class="p-7 w-full bg-lightGray">
+            {# Header section #}
+            <div class="flex items-center justify-between pb-10" id="header_page">
+                {# Header - Title and Buttons #}
+                {% include 'admin/partials/_header_admin.html.twig' %}
+            </div>
+            {# MainContent of the page #}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_custom_portal.html.twig' %}
+                </div>
+            {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_terms.html.twig' %}
+                </div>
+            {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_radius.html.twig' %}
+                </div>
+            {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_status.html.twig' %}
+                </div>
+            {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_LDAP.html.twig' %}
+                </div>
+            {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_auth.html.twig' %}
+                </div>
+            {% endif %}
+            {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
+                <div>
+                    {% include 'admin/partials/settings_actions/_capport.html.twig' %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

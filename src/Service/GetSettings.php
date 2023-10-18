@@ -83,7 +83,7 @@ class GetSettings
             'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue(),
             'description' => $this->getSettingDescription('SYNC_LDAP_ENABLED'),
         ];
-        
+
         $data['SYNC_LDAP_SERVER'] = [
             'value' => $settingRepository->findOneBy(['name' => 'SYNC_LDAP_SERVER'])->getValue(),
             'description' => $this->getSettingDescription('SYNC_LDAP_SERVER'),
@@ -247,6 +247,21 @@ class GetSettings
             'description' => $this->getSettingDescription('PROFILES_ENCRYPTION_TYPE_IOS_ONLY'),
         ];
 
+        $data['CAPPORT_ENABLED'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() === 'true',
+            'description' => $this->getSettingDescription('CAPPORT_ENABLED'),
+        ];
+
+        $data['CAPPORT_PORTAL_URL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_PORTAL_URL'])->getValue(),
+            'description' => $this->getSettingDescription('CAPPORT_PORTAL_URL'),
+        ];
+
+        $data['CAPPORT_VENUE_INFO_URL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_VENUE_INFO_URL'])->getValue(),
+            'description' => $this->getSettingDescription('CAPPORT_VENUE_INFO_URL'),
+        ];
+
         return $data;
     }
 
@@ -298,6 +313,10 @@ class GetSettings
             'PRIVACY_POLICY_LINK' => 'Privacy policy URL',
             'VALID_DOMAINS_GOOGLE_LOGIN' => 'Valid domains to authenticate with google, if you let this options empty',
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => 'Type of encryption defined for the creation of the profiles',
+
+            'CAPPORT_ENABLED' => 'Enable or disable Capport DHCP configuration',
+            'CAPPORT_PORTAL_URL' => 'Domain that is from the entity hosting the service',
+            'CAPPORT_VENUE_INFO_URL' => 'Domain where the user is redirected after clicking the DHCP notification',
         ];
 
         return $descriptions[$settingName] ?? '';

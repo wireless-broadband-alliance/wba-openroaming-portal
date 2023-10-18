@@ -14,10 +14,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:customSettings',
-    description: 'Reset Customization Settings',
+    name: 'reset:radiusSettings',
+    description: 'Reset Radius Configuration Settings',
 )]
-class ResetCustomSettingsCommand extends Command
+class ResetRadiusSettingsCommand extends Command
 {
     private EntityManagerInterface $entityManager;
 
@@ -31,8 +31,8 @@ class ResetCustomSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:customSettings')
-            ->setDescription('Reset Customization Settings')
+            ->setName('reset:radiusSettings')
+            ->setDescription('Reset Radius Configuration Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -40,7 +40,7 @@ class ResetCustomSettingsCommand extends Command
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the main settings. [y/N] ', false);
+            $question = new ConfirmationQuestion('This action will reset the radius configuration settings. [y/N] ', false);
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -49,15 +49,17 @@ class ResetCustomSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
-            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_20th_logo.png'],
-            ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
-            ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
-            ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
+            ['name' => 'RADIUS_REALM_NAME', 'value' => 'EditMe'],
+            ['name' => 'DISPLAY_NAME', 'value' => 'EditMe'],
+            ['name' => 'PAYLOAD_IDENTIFIER', 'value' => '887FAE2A-F051-4CC9-99BB-8DFD66F553A9'],
+            ['name' => 'OPERATOR_NAME', 'value' => 'EditMe'],
+            ['name' => 'DOMAIN_NAME', 'value' => 'EditMe'],
+            ['name' => 'RADIUS_TLS_NAME', 'value' => 'EditMe'],
+            ['name' => 'NAI_REALM', 'value' => 'EditMe'],
+            ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
+            ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
         ];
+
 
         $this->entityManager->beginTransaction();
 
@@ -86,7 +88,7 @@ class ResetCustomSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> The custom settings have been set to the default values.
+<info>Success:</info> The Radius Configuration has been set to the default values.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;

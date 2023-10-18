@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -136,5 +137,49 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         // Execute the query and return only the uuid of some specific user
         return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    /* This data is to call and be used on the admin Users Page */
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function countAllUsersExcludingAdmin(): int
+    {
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles NOT LIKE :adminRole')
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function countVerifiedUsers(): int
+    {
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.isVerified = :verified')
+            ->andWhere('u.roles NOT LIKE :adminRole')
+            ->setParameter('verified', true)
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function countBannedUsers(): int
+    {
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.bannedAt IS NOT NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }
