@@ -2,8 +2,8 @@ import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
 	connect() {
-		const platformMode = document.getElementById("setting_PLATFORM_MODE");
-		const emailVerification = document.getElementById("setting_EMAIL_VERIFICATION");
+		const platformMode = document.getElementById("status_PLATFORM_MODE");
+		const emailVerification = document.getElementById("status_EMAIL_VERIFICATION");
 
 		// Initial update based on setting_PLATFORM_MODE value
 		this.updateForm(platformMode, emailVerification);

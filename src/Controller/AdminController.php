@@ -6,9 +6,15 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Form\authType;
+use App\Form\CapportType;
 use App\Form\CustomType;
+use App\Form\LDAPType;
+use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
 use App\Form\SettingType;
+use App\Form\StatusType;
+use App\Form\TermsType;
 use App\Form\UserUpdateType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -16,6 +22,8 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -77,6 +85,8 @@ class AdminController extends AbstractController
      * @param Request $request
      * @param UserRepository $userRepository
      * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
@@ -86,7 +96,7 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
-        $perPage = 50; // Number of users to display per page
+        $perPage = 15; // Number of users to display per page
 
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
@@ -99,6 +109,11 @@ class AdminController extends AbstractController
         $offset = ($page - 1) * $perPage; // Calculate the offset for slicing the users
 
         $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
+
+        // Fetch user counts for table header (All/Verified/Banned)
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
+        $verifiedUsersCount = $userRepository->countVerifiedUsers();
+        $bannedUsersCount = $userRepository->countBannedUsers();
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -114,7 +129,10 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'searchTerm' => null,
-            'data' => $data
+            'data' => $data,
+            'allUsersCount' => $allUsersCount,
+            'verifiedUsersCount' => $verifiedUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
         ]);
     }
 
@@ -122,6 +140,8 @@ class AdminController extends AbstractController
      * @param Request $request
      * @param UserRepository $userRepository
      * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
@@ -132,7 +152,7 @@ class AdminController extends AbstractController
 
         $searchTerm = $request->query->get('u');
         $page = $request->query->getInt('page', 1);
-        $perPage = 25;
+        $perPage = 15;
 
         $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
 
@@ -155,6 +175,10 @@ class AdminController extends AbstractController
 
         $users = array_slice($users, $offset, $perPage);
 
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
+        $verifiedUsersCount = $userRepository->countVerifiedUsers();
+        $bannedUsersCount = $userRepository->countBannedUsers();
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -168,8 +192,12 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'current_user' => $currentUser,
             'totalPages' => $totalPages,
+            'perPage' => $perPage,
             'searchTerm' => $searchTerm,
-            'data' => $data
+            'data' => $data,
+            'allUsersCount' => $allUsersCount,
+            'verifiedUsersCount' => $verifiedUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
         ]);
     }
 
@@ -220,6 +248,9 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(User $user, Request $request, UserRepository $userRepository): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -262,7 +293,9 @@ class AdminController extends AbstractController
             'admin/edit.html.twig',
             [
                 'form' => $form->createView(),
-                'user' => $user
+                'user' => $user,
+                'data' => $data,
+                'current_user' => $currentUser
             ]
         );
     }
@@ -276,6 +309,9 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -325,11 +361,15 @@ class AdminController extends AbstractController
                 );
             $mailer->send($email);
             $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
+            return $this->redirectToRoute('admin_page');
         }
 
         return $this->render('admin/reset_password.html.twig', [
             'form' => $form->createView(),
-            'user' => $user
+            'user' => $user,
+            'data' => $data,
+            'current_user' => $currentUser,
+            'confirm_reset' => false,
         ]);
     }
 
@@ -344,10 +384,14 @@ class AdminController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
-        return $this->render('admin/confirm_reset.html.twig', [
+        return $this->render('admin/reset_password.html.twig', [
             'data' => $data,
-            'type' => $type
+            'type' => $type,
+            'current_user' => $currentUser,
+            'confirm_reset' => true
         ]);
     }
 
@@ -368,8 +412,17 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($enteredCode === $currentUser->getVerificationCode()) {
+            if ($type === 'password') {
+                // Removes the admin access until he confirms his new password
+                $currentUser->setIsVerified(1);
+                $em->persist($currentUser);
+                $em->flush();
+                $this->addFlash('success_admin', 'Your password has been reseted successfully');
+                return $this->redirectToRoute('admin_page');
+            }
+
             if ($type === 'settingMain') {
-                $command = 'php bin/console reset:mainS --yes';
+                $command = 'php bin/console reset:mainSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
                 // Run the command
@@ -381,21 +434,12 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been rested successfully');
-                return $this->redirectToRoute('admin_page');
-            }
-
-            if ($type === 'password') {
-                // Removes the admin access until he confirms his new password
-                $currentUser->setIsVerified(1);
-                $em->persist($currentUser);
-                $em->flush();
-                $this->addFlash('success_admin', 'Your password has been rested successfully');
-                return $this->redirectToRoute('admin_page');
+                $this->addFlash('success_admin', 'The setting has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings');
             }
 
             if ($type === 'settingCustom') {
-                $command = 'php bin/console reset:customS --yes';
+                $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
                 $process->run();
@@ -405,10 +449,101 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been rested successfully');
-                return $this->redirectToRoute('admin_page');
+                $this->addFlash('success_admin', 'The setting has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_customize');
+            }
+
+            if ($type === 'settingTerms') {
+                $command = 'php bin/console reset:termsSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The setting has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_terms');
+            }
+
+            if ($type === 'settingRadius') {
+                $command = 'php bin/console reset:radiusSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The Radius configurations has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_radius');
+            }
+
+            if ($type === 'settingStatus') {
+                $command = 'php bin/console reset:statusSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The platform mode status has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_status');
+            }
+
+            if ($type === 'settingLDAP') {
+                $command = 'php bin/console reset:ldapSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The LDAP settings has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_LDAP');
+            }
+
+            if ($type === 'settingCAPPORT') {
+                $command = 'php bin/console reset:capportSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The CAPPORT settings has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_capport');
+            }
+
+            if ($type === 'settingAUTH') {
+                $command = 'php bin/console reset:authSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The authentication settings has been reseted successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
         }
+
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
@@ -452,6 +587,55 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
         }
+
+        if ($type === 'settingTerms') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTerms']);
+        }
+
+        if ($type === 'settingRadius') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingRadius']);
+        }
+
+        if ($type === 'settingStatus') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
+        }
+
+        if ($type === 'settingLDAP') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
+        }
+
+        if ($type === 'settingCAPPORT') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
+        }
+
+        if ($type === 'settingAUTH') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
+        }
+
         return $this->redirectToRoute('admin_page');
     }
 
@@ -496,80 +680,6 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
-    #[Route('/dashboard/settings', name: 'admin_dashboard_settings')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settings(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
-    {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset');
-        }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $settingsRepository = $em->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
-
-        $form = $this->createForm(SettingType::class, null, [
-            'settings' => $settings, // Pass the settings data to the form
-        ]);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
-
-            $excludedSettings = [ // these are the settings related with the customization of the page
-                'CUSTOMER_LOGO',
-                'OPENROAMING_LOGO',
-                'WALLPAPER_IMAGE',
-                'PAGE_TITLE',
-                'WELCOME_TEXT',
-                'WELCOME_DESCRIPTION',
-            ];
-
-            foreach ($settings as $setting) {
-                $name = $setting->getName();
-                // Exclude the settings in $excludedSettings from being updated
-                // Check if the submitted data contains the setting's name
-                if (!in_array($name, $excludedSettings, true)) {
-                    $value = $submittedData[$name] ?? null;
-                    // Check if the setting is a text input
-                    if ($value === null) {
-                        $value = "";
-                    }
-                    if ($name === 'EMAIL_VERIFICATION' && $submittedData['PLATFORM_MODE'] === PlatformMode::Live) {
-                        $value = EmailConfirmationStrategy::EMAIL;
-                    }
-                    $setting->setValue($value);
-                    $em->persist($setting);
-                }
-            }
-
-            $em->flush();
-
-            $this->addFlash('success_admin', 'Settings updated successfully.');
-
-            return $this->redirectToRoute('admin_page');
-        }
-        return $this->render('admin/settings.html.twig', [
-            'settings' => $settings,
-            'form' => $form->createView(),
-            'data' => $data,
-            'getSettings' => $getSettings,
-        ]);
-    }
-
-    /**
      * @param GetSettings $getSettings
      * @return Response
      */
@@ -592,6 +702,445 @@ class AdminController extends AbstractController
         return $this->render('admin/settings.html.twig', [
             'data' => $data,
             'getSettings' => $getSettings,
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_terms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(TermsType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Get the submitted data
+            $submittedData = $form->getData();
+
+            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            $tosLink = $submittedData['TOS_LINK'] ?? null;
+            $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
+
+            // Check if the setting is an empty input
+            if ($tosLink === null) {
+                $tosLink = "";
+            }
+            if ($privacyPolicyLink === null) {
+                $privacyPolicyLink = "";
+            }
+
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            if ($tosSetting) {
+                $tosSetting->setValue($tosLink);
+                $em->persist($tosSetting);
+            }
+
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            if ($privacyPolicySetting) {
+                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicySetting);
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_terms');
+        }
+
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(RadiusType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'RADIUS_REALM_NAME',
+                'DISPLAY_NAME',
+                'PAYLOAD_IDENTIFIER',
+                'OPERATOR_NAME',
+                'DOMAIN_NAME',
+                'RADIUS_TLS_NAME',
+                'NAI_REALM',
+                'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_radius');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_status(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(StatusType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Get the submitted data
+            $submittedData = $form->getData();
+
+            // Update the 'PLATFORM_MODE' and 'EMAIL_VERIFICATION' settings
+            $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
+            // Update the 'EMAIL_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
+            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['EMAIL_VERIFICATION'] ?? null;
+
+            $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
+            if ($platformModeSetting) {
+                $platformModeSetting->setValue($platformMode);
+                $em->persist($platformModeSetting);
+            }
+
+            $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+            if ($emailVerificationSetting) {
+                $emailVerificationSetting->setValue($emailVerification);
+                $em->persist($emailVerificationSetting);
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_status');
+        }
+
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_LDAP(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(LDAPType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'SYNC_LDAP_ENABLED',
+                'SYNC_LDAP_SERVER',
+                'SYNC_LDAP_BIND_USER_DN',
+                'SYNC_LDAP_BIND_USER_PASSWORD',
+                'SYNC_LDAP_SEARCH_BASE_DN',
+                'SYNC_LDAP_SEARCH_FILTER',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_LDAP');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_auth(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(authType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'AUTH_METHOD_SAML_ENABLED',
+                'AUTH_METHOD_SAML_LABEL',
+                'AUTH_METHOD_SAML_DESCRIPTION',
+
+                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+                'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+
+                'AUTH_METHOD_REGISTER_ENABLED',
+                'AUTH_METHOD_REGISTER_LABEL',
+                'AUTH_METHOD_REGISTER_DESCRIPTION',
+
+                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New autheticaition configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_auth');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_capport(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(CapportType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'CAPPORT_ENABLED',
+                'CAPPORT_PORTAL_URL',
+                'CAPPORT_VENUE_INFO_URL',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_capport');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -687,14 +1236,15 @@ class AdminController extends AbstractController
             // Flush the changes to the database
             $em->flush();
 
-            return $this->redirectToRoute('admin_page');
+            return $this->redirectToRoute('admin_dashboard_customize');
         }
 
-        return $this->render('admin/custom.html.twig', [
+        return $this->render('admin/settings_actions.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
             'getSettings' => $getSettings,
+            'current_user' => $currentUser,
         ]);
     }
 

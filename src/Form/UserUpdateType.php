@@ -3,11 +3,11 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\Validator\NoSpecialCharacters;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\Transformer\BooleanToDateTimeTransformer;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -27,14 +27,6 @@ class UserUpdateType extends AbstractType
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'required' => true,
-            ])
-            ->add('isVerified', ChoiceType::class, [
-                'label' => 'Verification',
-                'choices' => [
-                    'Not Verified' => 0,
-                    'Verified' => 1,
-                ],
                 'required' => true,
             ])
             ->add('samlIdentifier', TextType::class, [
@@ -64,15 +56,16 @@ class UserUpdateType extends AbstractType
                 ],
                 */
             ])
-            ->add('bannedAt', ChoiceType::class, [
+            ->add('bannedAt', CheckboxType::class, [
                 'label' => 'Banned',
-                'required' => true,
-                'choices' => [
-                    'Banned' => new \DateTime(),
-                    'Not Banned' => null,
-                ],
-                'placeholder' => 'Select an option',
+                'required' => false,
+            ])
+            ->add('isVerified', CheckboxType::class, [
+                'label' => 'Verification',
+                'required' => false,
             ]);
+        // Transforms the bannedAt bool to datetime when checked
+        $builder->get('bannedAt')->addModelTransformer(new BooleanToDateTimeTransformer());
     }
 
 

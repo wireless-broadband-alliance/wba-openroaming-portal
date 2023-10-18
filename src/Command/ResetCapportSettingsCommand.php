@@ -14,10 +14,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:customSettings',
-    description: 'Reset Customization Settings',
+    name: 'reset:capportSettings',
+    description: 'Reset Capport configuration Settings',
 )]
-class ResetCustomSettingsCommand extends Command
+class ResetCapportSettingsCommand extends Command
 {
     private EntityManagerInterface $entityManager;
 
@@ -31,8 +31,8 @@ class ResetCustomSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:customSettings')
-            ->setDescription('Reset Customization Settings')
+            ->setName('reset:capportSettings')
+            ->setDescription('Reset Capport configuration Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -40,7 +40,7 @@ class ResetCustomSettingsCommand extends Command
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the main settings. [y/N] ', false);
+            $question = new ConfirmationQuestion('This action will reset the capport configuration settings. [y/N] ', false);
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -49,14 +49,9 @@ class ResetCustomSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
-            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_20th_logo.png'],
-            ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
-            ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
-            ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
+            ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
+            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
+            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => ' https://openroaming.org/'],
         ];
 
         $this->entityManager->beginTransaction();
@@ -86,7 +81,7 @@ class ResetCustomSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> The custom settings have been set to the default values.
+<info>Success:</info> The Capport Configuration settings have been set to the default values.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;
