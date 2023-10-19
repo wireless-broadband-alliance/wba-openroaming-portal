@@ -25,7 +25,43 @@
                     </div>
                     {% if setting.vars.name in ['PLATFORM_MODE', 'EMAIL_VERIFICATION'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                        </div>
+                    {% endif %}
+
+                    {% if setting.vars.name in ['PLATFORM_MODE'] %}
+                        <div class="flex items-center space-x-2 mt-5">
+                            {# Render "Demo" Radio Input #}
+                            <label>
+                                <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}"
+                                       value="Demo" {{ form.PLATFORM_MODE.vars.data == 'Demo' ? 'checked' : '' }}>
+                                Demo
+                            </label>
+
+                            {# Render "Live" Radio Input #}
+                            <label>
+                                <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}"
+                                       value="Live" {{ form.PLATFORM_MODE.vars.data == 'Live' ? 'checked' : '' }}>
+                                Live
+                            </label>
+                        </div>
+                    {% endif %}
+
+                    {% if setting.vars.name in ['EMAIL_VERIFICATION'] %}
+                        <div class="flex items-center space-x-2 mt-5">
+                            {# Render "ON" Radio Input #}
+                            <label>
+                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}"
+                                       value="ON" {{ form.EMAIL_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }}>
+                                On
+                            </label>
+
+                            {# Render "OFF" Radio Input #}
+                            <label>
+                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}"
+                                       value="OFF" {{ form.EMAIL_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }}>
+                                Off
+                            </label>
                         </div>
                     {% endif %}
 
