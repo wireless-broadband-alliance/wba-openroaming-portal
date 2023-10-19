@@ -243,11 +243,17 @@ class AdminController extends AbstractController
      * @param User $user
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param UserPasswordHasherInterface $passwordHasher
+     * @param $id
+     * @param EntityManagerInterface $em
+     * @param MailerInterface $mailer
      * @return Response
+     * @throws TransportExceptionInterface
+     * @throws Exception
      */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
-    public function editUsers(User $user, Request $request, UserRepository $userRepository): Response
+    public function editUsers(User $user, Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, $id, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -285,40 +291,9 @@ class AdminController extends AbstractController
 
             $userRepository->save($user, true);
             $email = $user->getEmail();
-            $this->addFlash('success_admin', sprintf('User with email "%s" updated successfully.', $email));
+            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
 
             return $this->redirectToRoute('admin_page');
-        }
-
-        return $this->render(
-            'admin/edit.html.twig',
-            [
-                'form' => $form->createView(),
-                'user' => $user,
-                'data' => $data,
-                'current_user' => $currentUser
-            ]
-        );
-    }
-
-
-    /**
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    #[Route('/dashboard/reset/{id<\d+>}', name: 'admin_reset_password')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function resetPassword(Request $request, $id, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -328,12 +303,12 @@ class AdminController extends AbstractController
             throw new NotFoundHttpException('User not found');
         }
 
-        $form = $this->createForm(ResetPasswordType::class, $user);
-        $form->handleRequest($request);
+        $formReset = $this->createForm(ResetPasswordType::class, $user);
+        $formReset->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($formReset->isSubmitted() && $formReset->isValid()) {
             // get the typed password by the admin
-            $newPassword = $form->get('password')->getData();
+            $newPassword = $formReset->get('password')->getData();
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
@@ -361,18 +336,22 @@ class AdminController extends AbstractController
                     )
                 );
             $mailer->send($email);
-            $this->addFlash('success_admin', sprintf('User with the email "%s" has had their password reset successfully.', $user->getEmail()));
+            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
             return $this->redirectToRoute('admin_page');
         }
 
-        return $this->render('admin/reset_password.html.twig', [
-            'form' => $form->createView(),
-            'user' => $user,
-            'data' => $data,
-            'current_user' => $currentUser,
-            'confirm_reset' => false,
-        ]);
+        return $this->render(
+            'admin/edit.html.twig',
+            [
+                'form' => $form->createView(),
+                'formReset' => $formReset->createView(),
+                'user' => $user,
+                'data' => $data,
+                'current_user' => $currentUser,
+            ]
+        );
     }
+
 
     /**
      * @param string $type Type of action
@@ -388,11 +367,10 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        return $this->render('admin/reset_password.html.twig', [
+        return $this->render('admin/confirm.html.twig', [
             'data' => $data,
             'type' => $type,
             'current_user' => $currentUser,
-            'confirm_reset' => true
         ]);
     }
 
