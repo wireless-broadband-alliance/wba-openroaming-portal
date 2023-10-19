@@ -128,6 +128,7 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'currentPage' => $page,
             'totalPages' => $totalPages,
+            'perPage' => $perPage,
             'searchTerm' => null,
             'data' => $data,
             'allUsersCount' => $allUsersCount,
