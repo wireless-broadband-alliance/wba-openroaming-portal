@@ -17,30 +17,33 @@
                         <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <div class="flex items-center space-x-6 cursor-default">
                                 <div class="flex items-center space-x-6 cursor-default">
-                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100">
+                                    <a href="#"
+                                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100">
                                         <h1 class="px-2">
                                             All
                                         </h1>
                                         <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
                                             {{ allUsersCount }}
                                         </div>
-                                    </div>
-                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100">
+                                    </a>
+                                    <a href="#"
+                                       class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100">
                                         <h1 class="px-2">
                                             Verified
                                         </h1>
                                         <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
                                             {{ verifiedUsersCount }}
                                         </div>
-                                    </div>
-                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-red-400 transition-all duration-100">
+                                    </a>
+                                    <a href="#"
+                                       class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100">
                                         <h1 class="px-2">
                                             Banned
                                         </h1>
                                         <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
                                             {{ bannedUsersCount }}
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
                             </div>
                             {# Right Search Bar #}
@@ -68,13 +71,13 @@
                             </form>
                         </div>
                     </div>
-                    <div class="overflow-x-auto sm:rounded-lg">
+                    <div class="overflow-x-auto -m-5 mt-3">
                         <div class="space-y-4 sm:space-y-0">
                             {# Table Content #}
                             <table class="w-full items-start">
-                                <thead class="text-sm text-gray-700 bg-veryLightGreen/50">
+                                <thead class="text-sm text-gray-700 bg-veryLightGreen">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-12 py-3">
                                         <div class="flex flex-row justify-between">
                                             <h1>UUID</h1>
                                         </div>
