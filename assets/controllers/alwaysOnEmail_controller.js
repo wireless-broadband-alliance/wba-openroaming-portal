@@ -2,26 +2,46 @@ import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
 	connect() {
-		const platformMode = document.getElementById("status_PLATFORM_MODE");
-		const emailVerification = document.getElementById("status_EMAIL_VERIFICATION");
+		// Show/hide icon on each radio button
+		function initializeRadioButtons(onLabel, offLabel, onCustomRadio, offCustomRadio) {
+			// Check which radio button is selected
+			const onRadio = document.getElementById('onRadio');
+			const offRadio = document.getElementById('offRadio');
 
-		// Initial update based on setting_PLATFORM_MODE value
-		this.updateForm(platformMode, emailVerification);
+			if (onRadio && offRadio && onCustomRadio && offCustomRadio) {
+				if (onRadio.checked) {
+					onCustomRadio.classList.remove("hidden");
+					offCustomRadio.classList.add("hidden");
+				} else if (offRadio.checked) {
+					offCustomRadio.classList.remove("hidden");
+					onCustomRadio.classList.add("hidden");
+				}
 
-		// Add an event listener to setting_PLATFORM_MODE input to check the forms in real time
-		platformMode.addEventListener("change", () => {
-			this.updateForm(platformMode, emailVerification);
-		});
-	}
+				onRadio.addEventListener("change", function () {
+					onCustomRadio.classList.remove("hidden");
+					offCustomRadio.classList.add("hidden");
+				});
 
-	updateForm(platformMode, emailVerification) {
-		if (platformMode.value === 'Live') {
-			emailVerification.value = 'ON';
-			emailVerification.disabled = true;
-			emailVerification.classList.add("cursor-not-allowed");
-		} else {
-			emailVerification.disabled = false;
-			emailVerification.classList.remove('cursor-not-allowed');
+				offRadio.addEventListener("change", function () {
+					offCustomRadio.classList.remove("hidden");
+					onCustomRadio.classList.add("hidden");
+				});
+			}
 		}
+
+		document.addEventListener("DOMContentLoaded", function () {
+			const radioSets = document.querySelectorAll('[name="statusCards"]');
+
+			radioSets.forEach(function (radioSet) {
+				// Check if it's the first set of radio buttons
+				const onLabel = radioSet.querySelector('[name="onLabel"]');
+				const offLabel = radioSet.querySelector('[name="offLabel"]');
+				const onCustomRadio = radioSet.querySelector('[name="onCustomRadio"]');
+				const offCustomRadio = radioSet.querySelector('[name="offCustomRadio"]');
+
+				initializeRadioButtons(onLabel, offLabel, onCustomRadio, offCustomRadio);
+			});
+		});
+
 	}
 }

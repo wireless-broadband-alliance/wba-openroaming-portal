@@ -30,37 +30,75 @@
                     {% endif %}
 
                     {% if setting.vars.name in ['PLATFORM_MODE'] %}
-                        <div class="flex items-center space-x-2 mt-5">
+                        <div class="flex flex-col items-center space-y-2 mt-5">
                             {# Render "Demo" Radio Input #}
-                            <label>
-                                <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}"
-                                       value="Demo" {{ form.PLATFORM_MODE.vars.data == 'Demo' ? 'checked' : '' }}>
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="onLabel">
                                 Demo
+                                <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}" id="onRadio"
+                                       value="Demo"
+                                       class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Demo' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
                             </label>
 
                             {# Render "Live" Radio Input #}
-                            <label>
-                                <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}"
-                                       value="Live" {{ form.PLATFORM_MODE.vars.data == 'Live' ? 'checked' : '' }}>
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="offLabel">
                                 Live
+                                <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}" id="offRadio"
+                                       value="Live"
+                                       class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Live' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
                             </label>
                         </div>
                     {% endif %}
 
                     {% if setting.vars.name in ['EMAIL_VERIFICATION'] %}
-                        <div class="flex items-center space-x-2 mt-5">
+                        <div class="flex flex-col items-center space-y-2 mt-5">
                             {# Render "ON" Radio Input #}
-                            <label>
-                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}"
-                                       value="ON" {{ form.EMAIL_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }}>
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="onLabelEmail">
                                 On
+                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}" id="onRadioEmail"
+                                       value="ON" {{ form.EMAIL_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioEmail">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
                             </label>
 
                             {# Render "OFF" Radio Input #}
-                            <label>
-                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}"
-                                       value="OFF" {{ form.EMAIL_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }}>
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="offLabelEmail">
                                 Off
+                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}" id="offRadioEmail"
+                                       value="OFF" {{ form.EMAIL_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioEmail">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
                             </label>
                         </div>
                     {% endif %}
