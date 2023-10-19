@@ -266,11 +266,14 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
-        $form = $this->createForm(UserUpdateType::class, $user);
+        if (!$user = $this->userRepository->find($id)) {
+            throw new NotFoundHttpException('User not found');
+        }
 
         // Store the initial bannedAt value before form submission
         $initialBannedAtValue = $user->getBannedAt();
 
+        $form = $this->createForm(UserUpdateType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
@@ -298,10 +301,6 @@ class AdminController extends AbstractController
 
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
-
-        if (!$user = $this->userRepository->find($id)) {
-            throw new NotFoundHttpException('User not found');
-        }
 
         $formReset = $this->createForm(ResetPasswordType::class, $user);
         $formReset->handleRequest($request);
