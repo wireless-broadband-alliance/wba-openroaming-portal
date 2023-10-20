@@ -81,7 +81,7 @@ export default class extends Controller {
 		document.addEventListener("DOMContentLoaded", function () {
 			const platformModeRadios = document.querySelectorAll('[name="status[PLATFORM_MODE]"]');
 			const emailVerificationCard = document.getElementById("EMAIL_VERIFICATION");
-			console.log(platformModeRadios)
+			const statusMessage = document.getElementById('statusMessage');
 
 			function updateEmailVerificationCard() {
 				let selectedValue = null;
@@ -98,15 +98,16 @@ export default class extends Controller {
 					formElements.forEach(function (element) {
 						element.disabled = true;
 					});
+					statusMessage.classList.remove('hidden');
 				} else {
 					// Enable all form elements
 					formElements.forEach(function (element) {
 						element.disabled = false;
 					});
+					statusMessage.classList.add('hidden');
 				}
 			}
-
-
+			
 			updateEmailVerificationCard();
 
 			platformModeRadios.forEach(function (radio) {
