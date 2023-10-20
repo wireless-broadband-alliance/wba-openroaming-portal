@@ -5,8 +5,10 @@ export default class extends Controller {
 		// Show/hide icon on each radio button
 		function initializeRadioButtons(onLabel, offLabel, onCustomRadio, offCustomRadio) {
 			// Check which radio button is selected
-			const onRadio = document.getElementById('onRadio');
-			const offRadio = document.getElementById('offRadio');
+			const onRadio = onLabel.parentElement.querySelector('input[type="radio"][value="Demo"]');
+			const offRadio = offLabel.parentElement.querySelector('input[type="radio"][value="Live"]');
+			const onRadioEmail = onLabel.parentElement.querySelector('input[type="radio"][value="ON"]');
+			const offRadioEmail = offLabel.parentElement.querySelector('input[type="radio"][value="OFF"]');
 
 			if (onRadio && offRadio && onCustomRadio && offCustomRadio) {
 				if (onRadio.checked) {
@@ -27,10 +29,30 @@ export default class extends Controller {
 					onCustomRadio.classList.add("hidden");
 				});
 			}
+
+			if (onRadioEmail && offRadioEmail && onCustomRadio && offCustomRadio) {
+				if (onRadioEmail.checked) {
+					onCustomRadio.classList.remove("hidden");
+					offCustomRadio.classList.add("hidden");
+				} else if (offRadioEmail.checked) {
+					offCustomRadio.classList.remove("hidden");
+					onCustomRadio.classList.add("hidden");
+				}
+
+				onRadioEmail.addEventListener("change", function () {
+					onCustomRadio.classList.remove("hidden");
+					offCustomRadio.classList.add("hidden");
+				});
+
+				offRadioEmail.addEventListener("change", function () {
+					offCustomRadio.classList.remove("hidden");
+					onCustomRadio.classList.add("hidden");
+				});
+			}
 		}
 
 		document.addEventListener("DOMContentLoaded", function () {
-			const radioSets = document.querySelectorAll('[name="statusCards"]');
+			const radioSets = document.querySelectorAll('[id="PLATFORM_MODE"]');
 
 			radioSets.forEach(function (radioSet) {
 				// Check if it's the first set of radio buttons
@@ -43,5 +65,17 @@ export default class extends Controller {
 			});
 		});
 
+		document.addEventListener("DOMContentLoaded", function () {
+			const radioSetsEmail = document.querySelectorAll('[id="EMAIL_VERIFICATION"]');
+
+			radioSetsEmail.forEach(function (radioSet) {
+				const onLabelEmail = radioSet.querySelector('[name="onLabelEmail"]');
+				const offLabelEmail = radioSet.querySelector('[name="offLabelEmail"]');
+				const onCustomRadioEmail = radioSet.querySelector('[name="onCustomRadioEmail"]');
+				const offCustomRadioEmail = radioSet.querySelector('[name="offCustomRadioEmail"]');
+
+				initializeRadioButtons(onLabelEmail, offLabelEmail, onCustomRadioEmail, offCustomRadioEmail);
+			});
+		});
 	}
 }

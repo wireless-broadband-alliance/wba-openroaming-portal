@@ -5,7 +5,8 @@
             {# Display only the platform and the email verification settings #}
             {% if setting.vars.name in ['PLATFORM_MODE', 'EMAIL_VERIFICATION'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                     name="statusCards">
+                     name="statusCards"
+                     id="{{ setting.vars.name }}">
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -73,8 +74,10 @@
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="onLabelEmail">
                                 On
-                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}" id="onRadioEmail"
-                                       value="ON" {{ form.EMAIL_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }}>
+                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}"
+                                       id="onRadioEmail"
+                                       value="ON"
+                                       class="radio-input hidden" {{ form.EMAIL_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }}>
                                 <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioEmail">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
@@ -89,8 +92,10 @@
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="offLabelEmail">
                                 Off
-                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}" id="offRadioEmail"
-                                       value="OFF" {{ form.EMAIL_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }}>
+                                <input type="radio" name="{{ form.EMAIL_VERIFICATION.vars.full_name }}"
+                                       id="offRadioEmail"
+                                       value="OFF"
+                                       class="radio-input hidden" {{ form.EMAIL_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }}>
                                 <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioEmail">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
