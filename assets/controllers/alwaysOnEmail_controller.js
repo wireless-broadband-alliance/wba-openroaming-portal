@@ -107,7 +107,7 @@ export default class extends Controller {
 					statusMessage.classList.add('hidden');
 				}
 			}
-			
+
 			updateEmailVerificationCard();
 
 			platformModeRadios.forEach(function (radio) {

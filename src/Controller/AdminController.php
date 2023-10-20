@@ -278,6 +278,13 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
 
+            // Verifies if the isVerified is removed to the logged account
+            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() == 0) {
+                $user->isVerified();
+                $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
+                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+            }
+
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value on the db
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 // Check if the admin is trying to ban himself
