@@ -91,24 +91,27 @@ export default class extends Controller {
 					}
 				});
 
+				const formElements = emailVerificationCard.querySelectorAll("input, select, textarea");
+
 				if (selectedValue === "Live") {
-					emailVerificationCard.classList.add("hidden");
-					emailVerificationCard.classList.remove("block");
+					// Disable all form elements
+					formElements.forEach(function (element) {
+						element.disabled = true;
+					});
 				} else {
-					emailVerificationCard.classList.remove("hidden");
-					emailVerificationCard.classList.add("block");
+					// Enable all form elements
+					formElements.forEach(function (element) {
+						element.disabled = false;
+					});
 				}
 			}
 
-			// Initially update the card
+
 			updateEmailVerificationCard();
 
-			// Listen for changes in any "PLATFORM_MODE" radio button
 			platformModeRadios.forEach(function (radio) {
 				radio.addEventListener("change", updateEmailVerificationCard);
 			});
 		});
-
-
 	}
 }
