@@ -77,5 +77,38 @@ export default class extends Controller {
 				initializeRadioButtons(onLabelEmail, offLabelEmail, onCustomRadioEmail, offCustomRadioEmail);
 			});
 		});
+
+		document.addEventListener("DOMContentLoaded", function () {
+			const platformModeRadios = document.querySelectorAll('[name="status[PLATFORM_MODE]"]');
+			const emailVerificationCard = document.getElementById("EMAIL_VERIFICATION");
+			console.log(platformModeRadios)
+
+			function updateEmailVerificationCard() {
+				let selectedValue = null;
+				platformModeRadios.forEach(function (radio) {
+					if (radio.checked) {
+						selectedValue = radio.value;
+					}
+				});
+
+				if (selectedValue === "Live") {
+					emailVerificationCard.classList.add("hidden");
+					emailVerificationCard.classList.remove("block");
+				} else {
+					emailVerificationCard.classList.remove("hidden");
+					emailVerificationCard.classList.add("block");
+				}
+			}
+
+			// Initially update the card
+			updateEmailVerificationCard();
+
+			// Listen for changes in any "PLATFORM_MODE" radio button
+			platformModeRadios.forEach(function (radio) {
+				radio.addEventListener("change", updateEmailVerificationCard);
+			});
+		});
+
+
 	}
 }
