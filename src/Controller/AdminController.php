@@ -155,25 +155,28 @@ class AdminController extends AbstractController
         $page = $request->query->getInt('page', 1);
         $perPage = 15;
 
-        $users = $userRepository->findExcludingAdminWithSearch($searchTerm);
+        $filter = $request->query->get('filter', 'all'); // Default filter
 
-        // Only let the user type more of 3 and less than 320 letters on the search bar
-        if (empty($searchTerm) || strlen($searchTerm) < 3) {
-            $this->addFlash('error_admin', 'Please enter at least 3 characters to search.');
-
-            return $this->redirectToRoute('admin_page');
+        // Define the filter with a default of 'all'
+        if (empty($searchTerm) && $filter !== 'all') {
+            // If the search is not provided, but it has a filter selected, show content based on the selected filter
+            $users = $userRepository->searchWithFilter($filter);
+        } elseif (!empty($searchTerm)) {
+            // If a search is provided, filter based on the query
+            $users = $userRepository->searchWithQuery($searchTerm);
+        } else {
+            // If no filter is selected and no search query is provided, get all users
+            $users = $userRepository->searchWithFilter('all');
         }
+
         if (strlen($searchTerm) > 320) {
             $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
             return $this->redirectToRoute('admin_page');
         }
 
         $totalUsers = count($users);
-
         $totalPages = ceil($totalUsers / $perPage);
-
         $offset = ($page - 1) * $perPage;
-
         $users = array_slice($users, $offset, $perPage);
 
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
@@ -199,6 +202,7 @@ class AdminController extends AbstractController
             'allUsersCount' => $allUsersCount,
             'verifiedUsersCount' => $verifiedUsersCount,
             'bannedUsersCount' => $bannedUsersCount,
+            'activeFilter' => $filter,
         ]);
     }
 

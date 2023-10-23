@@ -17,7 +17,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <div class="flex items-center space-x-6 cursor-default">
                                 <div class="flex items-center space-x-6 cursor-default">
-                                    <a href="#"
+                                    <a href="{{ path('admin_search', {'filter': 'all'}) }}"
                                        class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100">
                                         <h1 class="px-2">
                                             All
@@ -26,7 +26,7 @@
                                             {{ allUsersCount }}
                                         </div>
                                     </a>
-                                    <a href="#"
+                                    <a href="{{ path('admin_search', {'filter': 'verified'}) }}"
                                        class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100">
                                         <h1 class="px-2">
                                             Verified
@@ -35,7 +35,7 @@
                                             {{ verifiedUsersCount }}
                                         </div>
                                     </a>
-                                    <a href="#"
+                                    <a href="{{ path('admin_search', {'filter': 'banned'}) }}"
                                        class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100">
                                         <h1 class="px-2">
                                             Banned
