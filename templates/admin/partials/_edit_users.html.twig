@@ -91,10 +91,10 @@
                 <div class="mb-4 mt-1 flex-grow">
                     <div class="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 justify-center items-center">
                         {{ form_label(form.isVerified) }}
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            {{ form_widget(form.isVerified, {'attr': {'class': 'toggle-checkbox-green absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer', 'id': 'toggle'}}) }}
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">  
+                            {{ form_widget(form.isVerified, {'attr': {'class': 'toggle-checkbox-green absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer', 'id': 'toggle'}}) }}
                             <label for="toggle"
-                                   class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                                   class="toggle-label block overflow-hidden h-6 p-2 rounded-full bg-gray-300 cursor-pointer"></label>
                         </div>
                         {{ form_errors(form.isVerified) }}
                     </div>
@@ -103,7 +103,7 @@
                     <div class="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 justify-center items-center">
                         {{ form_label(form.bannedAt) }}
                         <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            {{ form_widget(form.bannedAt, {'attr': {'class': 'toggle-checkbox-red absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer', 'id': 'toggle'}}) }}
+                            {{ form_widget(form.bannedAt, {'attr': {'class': 'toggle-checkbox-red absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer', 'id': 'toggle'}}) }}
                             <label for="toggle"
                                    class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                         </div>
