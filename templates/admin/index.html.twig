@@ -129,11 +129,7 @@
                     </div>
                     <div class="m-8">
                         <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                        {% if searchTerm != null %}
-                            {% include '/admin/partials/_pagination.html.twig' %}
-                        {% else %}
-                            {% include 'admin/partials/_pagination_search.twig' %}
-                        {% endif %}
+                        {% include '/admin/partials/_pagination.html.twig' %}
                     </div>
                 </div>
             </div>

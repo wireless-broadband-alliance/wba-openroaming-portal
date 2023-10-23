@@ -101,6 +101,8 @@ class AdminController extends AbstractController
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
 
+        $filter = $request->query->get('filter', 'all'); // Default filter
+
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
 
@@ -134,6 +136,7 @@ class AdminController extends AbstractController
             'allUsersCount' => $allUsersCount,
             'verifiedUsersCount' => $verifiedUsersCount,
             'bannedUsersCount' => $bannedUsersCount,
+            'activeFilter' => $filter,
         ]);
     }
 
