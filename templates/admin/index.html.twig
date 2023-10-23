@@ -66,6 +66,9 @@
                                                name="u"
                                                value="{{ app.request.query.get('u', '') }}">
                                     </label>
+                                    {# Hidden Filter Input #}
+                                    <input type="hidden" name="filter"
+                                           value="{{ app.request.query.get('filter', 'all') }}">
                                 </div>
                             </form>
                         </div>
