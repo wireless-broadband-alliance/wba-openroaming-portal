@@ -132,7 +132,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         } elseif ($filter === 'banned') {
             // Filter for banned users
             $qb->andWhere('u.bannedAt IS NOT NULL');
-        } // You can add more filter conditions as needed
+        }
 
         if ($searchTerm) {
             // Apply the search term filtering
@@ -140,8 +140,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 $qb->expr()->orX(
                     'u.uuid LIKE :searchTerm',
                     'u.email LIKE :searchTerm',
-                    'u.firstName LIKE :searchTerm',
-                    'u.lastName LIKE :searchTerm'
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm'
                 )
             )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
