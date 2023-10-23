@@ -18,7 +18,7 @@
                             <div class="flex items-center space-x-6 cursor-default">
                                 <div class="flex items-center space-x-6 cursor-default">
                                     <a href="{{ path('admin_search', {'filter': 'all'}) }}"
-                                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100">
+                                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                                         <h1 class="px-2">
                                             All
                                         </h1>
@@ -27,7 +27,7 @@
                                         </div>
                                     </a>
                                     <a href="{{ path('admin_search', {'filter': 'verified'}) }}"
-                                       class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100">
+                                       class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                                         <h1 class="px-2">
                                             Verified
                                         </h1>
@@ -36,7 +36,7 @@
                                         </div>
                                     </a>
                                     <a href="{{ path('admin_search', {'filter': 'banned'}) }}"
-                                       class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100">
+                                       class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                                         <h1 class="px-2">
                                             Banned
                                         </h1>
