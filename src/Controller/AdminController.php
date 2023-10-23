@@ -157,17 +157,8 @@ class AdminController extends AbstractController
 
         $filter = $request->query->get('filter', 'all'); // Default filter
 
-        // Define the filter with a default of 'all'
-        if (empty($searchTerm) && $filter !== 'all') {
-            // If the search is not provided, but it has a filter selected, show content based on the selected filter
-            $users = $userRepository->searchWithFilter($filter);
-        } elseif (!empty($searchTerm)) {
-            // If a search is provided, filter based on the query
-            $users = $userRepository->searchWithQuery($searchTerm);
-        } else {
-            // If no filter is selected and no search query is provided, get all users
-            $users = $userRepository->searchWithFilter('all');
-        }
+        // Use the updated searchWithFilter method to handle both filter and search term
+        $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         if (strlen($searchTerm) > 320) {
             $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');

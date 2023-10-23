@@ -126,16 +126,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb = $this->createQueryBuilder('u');
 
         if ($filter === 'verified') {
-            // Filter for verified users
             $qb->andWhere('u.isVerified = :verified')
                 ->setParameter('verified', true);
         } elseif ($filter === 'banned') {
-            // Filter for banned users
             $qb->andWhere('u.bannedAt IS NOT NULL');
-        }
+        } // You can add more filter conditions as needed
 
         if ($searchTerm) {
-            // Apply the search term filtering
             $qb->andWhere(
                 $qb->expr()->orX(
                     'u.uuid LIKE :searchTerm',
@@ -151,10 +148,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    public function searchWithQuery(string $searchTerm): array
-    {
-        return $this->searchWithFilter('all', $searchTerm);
-    }
 
     /**
      * @throws NonUniqueResultException
