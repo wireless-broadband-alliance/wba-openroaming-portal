@@ -18,7 +18,7 @@
                             <div class="flex items-center space-x-6 cursor-default">
                                 <div class="flex items-center space-x-6 cursor-default">
                                     <a href="{{ path('admin_search', {'filter': 'all'}) }}"
-                                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                                         <h1 class="px-2">
                                             All
                                         </h1>
