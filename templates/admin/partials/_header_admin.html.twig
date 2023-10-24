@@ -75,6 +75,13 @@
                   d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"></path>
         </svg>
         <h1 class="text-2xl font-semibold p-5">User Engagement</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
+        <svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
+        </svg>
+        <h1 class="text-2xl font-semibold p-5">Portal Statistics</h1>
     {% endif %}
 </div>
 

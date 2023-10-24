@@ -1138,16 +1138,14 @@ class AdminController extends AbstractController
 
     /**
      * @param ChartBuilderInterface $chartBuilder
-     * @param Request $request
-     * @param RequestStack $requestStack
      * @return Response
      * @throws \JsonException
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(ChartBuilderInterface $chartBuilder, Request $request, RequestStack $requestStack): Response
+    public function statisticsData(ChartBuilderInterface $chartBuilder): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
 
         $fetchChart = $this->fetchChartData();

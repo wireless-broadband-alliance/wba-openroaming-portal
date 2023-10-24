@@ -3,23 +3,18 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block body %}
-    {# This file it's not being used yet, I still fixing another stuff before start working with chart.js #}
-    <div class="container mx-auto px-4">
-        {% include 'admin/partials/_header_admin.html.twig' %}
-
-        {# Return Button #}
-        <div class="flex flex-col items-center md:flex-row md:space-x-6">
-            {% include 'admin/partials/_options_dropdown.html.twig' %}
-
-            <a href="{{ path('admin_page') }}"
-               class="flex md:w-auto whitespace-nowrap rounded bg-blue-500 px-6 pb-2 pt-2.5 mt-4 md:mt-0 font-medium leading-normal text-white transition duration-150 ease-in-out hover:shadow-md motion-reduce:transition-none hover:transform hover:scale-105"
-            >
-                Return Dashboard
-            </a>
+    <section class="flex text-veryDarkPurple" data-controller="sidebar">
+        {% include 'admin/partials/_sidebar.html.twig' %}
+        <div class="p-7 w-full bg-lightGray">
+            {# Header section #}
+            <div class="flex items-center justify-between pb-10" id="header_page">
+                {# Header - Title and Buttons #}
+                {% include 'admin/partials/_header_admin.html.twig' %}
+            </div>
+            {# MainContent of the page #}
+            <div>
+                {% include 'admin/partials/_statistics.html.twig' %}
+            </div>
         </div>
-
-        <div class="my-6 p-6 md:w-full" data-chart-data="{{ chartDataJson }}">
-            {{ render_chart(chart) }}
-        </div>
-    </div>
+    </section>
 {% endblock %}
