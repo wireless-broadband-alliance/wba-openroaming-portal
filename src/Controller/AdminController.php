@@ -223,13 +223,10 @@ class AdminController extends AbstractController
         }
         $email = $user->getEmail();
 
-        // Remove associated UserRadiusProfile entities
-        foreach ($user->getUserRadiusProfiles() as $userRadiusProfile) {
-            $em->remove($userRadiusProfile);
-        }
+        $user->setDeletedAt(new DateTime());
+        $this->disableProfiles($user);
 
-        // Now, remove the user
-        $em->remove($user);
+        $em->persist($user);
         $em->flush();
 
         $this->addFlash('success_admin', sprintf('User with the email "%s" deleted successfully.', $email));
