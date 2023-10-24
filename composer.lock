@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "133a8087c09c8a8ed835019a23477481",
+    "content-hash": "fa63e1cd84d66bd1189aaa98777c0514",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -8867,7 +8867,7 @@
         },
         {
             "name": "symfony/ux-chartjs",
-            "version": "v2.11.1",
+            "version": "v2.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/ux-chartjs.git",
@@ -8927,7 +8927,7 @@
                 "symfony-ux"
             ],
             "support": {
-                "source": "https://github.com/symfony/ux-chartjs/tree/v2.11.1"
+                "source": "https://github.com/symfony/ux-chartjs/tree/v2.12.0"
             },
             "funding": [
                 {
