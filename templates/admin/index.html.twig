@@ -11,70 +11,75 @@
                 {# Header - Title and Buttons #}
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
-            <div class="p-5 text-left space-y-3 rounded bg-white">
+            <div class="p-5 text-left space-y-3 rounded-xl  bg-white">
                 <div class="w-full mx-auto">
                     <div class="sm:w-auto p-4">
                         <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <div class="flex items-center space-x-6 cursor-default">
                                 <div class="flex items-center space-x-6 cursor-default">
-                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100">
+                                    <a href="{{ path('admin_search', {'filter': 'all'}) }}"
+                                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                                         <h1 class="px-2">
                                             All
                                         </h1>
-                                        <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                                        <div class="w-6 h-6 mb-1 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
                                             {{ allUsersCount }}
                                         </div>
-                                    </div>
-                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100">
+                                    </a>
+                                    <a href="{{ path('admin_search', {'filter': 'verified'}) }}"
+                                       class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                                         <h1 class="px-2">
                                             Verified
                                         </h1>
-                                        <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
+                                        <div class="w-6 h-6 mb-1 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
                                             {{ verifiedUsersCount }}
                                         </div>
-                                    </div>
-                                    <div class="flex flex-row group hover:border-b-2 hover:border-y-red-400 transition-all duration-100">
+                                    </a>
+                                    <a href="{{ path('admin_search', {'filter': 'banned'}) }}"
+                                       class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                                         <h1 class="px-2">
                                             Banned
                                         </h1>
-                                        <div class="w-6 h-6 mb-1 bg-gray-100/50 group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
+                                        <div class="w-6 h-6 mb-1 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
                                             {{ bannedUsersCount }}
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
                             </div>
                             {# Right Search Bar #}
                             <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-4/6">
-                                <div class="flex flex-row items-center bg-white border rounded-md">
+                                <div class="flex flex-row items-center border rounded-md">
                                     {# Search Icon #}
                                     <button type="submit">
                                         <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
                                              stroke-width="1.5"
-                                             viewBox="0 0 24 24"
-                                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                   d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
                                         </svg>
                                     </button>
                                     {# Search Input #}
-                                    <label>
+                                    <label class="w-full">
                                         <input type="text"
                                                class="w-full p-2 bg-transparent border-none outline-none"
                                                placeholder="Search Users ..."
                                                name="u"
                                                value="{{ app.request.query.get('u', '') }}">
                                     </label>
+                                    {# Hidden Filter Input #}
+                                    <input type="hidden" name="filter"
+                                           value="{{ app.request.query.get('filter', 'all') }}">
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <div class="overflow-x-auto sm:rounded-lg">
+                    <div class="overflow-x-auto -m-5 mt-3">
                         <div class="space-y-4 sm:space-y-0">
                             {# Table Content #}
                             <table class="w-full items-start">
-                                <thead class="text-sm text-gray-700 bg-veryLightGreen/50">
+                                <thead class="text-sm text-gray-700 bg-veryLightGreen">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-12 py-3">
                                         <div class="flex flex-row justify-between">
                                             <h1>UUID</h1>
                                         </div>
@@ -124,70 +129,7 @@
                     </div>
                     <div class="m-8">
                         <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                        {% if searchTerm != null %}{# The conditional statement in this comment prevents the main page from displaying all existing users with pagination. This is done to prevent potential issues with loading excessive amounts of data. #}
-                            {% if totalPages > 1 %}
-                                <div class="flex space-x-2 justify-end mt-5">
-                                    <div class="flex flex-row text-base cursor-default">
-                                        <div class="flex space-x-2 mr-4">
-                                            {# Display the range of user numbers on the current page #}
-                                            <span class="text-veryDarkPurple">{{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, allUsersCount) }}</span>
-                                            <span class="text-veryDarkPurple"> of {{ allUsersCount }} </span>
-                                        </div>
-                                        <div class="flex space-x-2.5">
-                                            {# Previous page navigation #}
-                                            {% if currentPage > 1 %}
-                                                <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage - 1}) }}"
-                                                   class="hover:shadow-md p-1 rounded-lg">
-                                                    <svg class="text-veryDarkButton w-4 cursor-pointer"
-                                                         fill="none"
-                                                         stroke="currentColor" stroke-width="1.5"
-                                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                                                         aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              d="M15.75 19.5L8.25 12l7.5-7.5"></path>
-                                                    </svg>
-                                                </a>
-                                            {% else %}
-                                                <a class="p-1">
-                                                    {# Left limit pagination #}
-                                                    <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
-                                                         stroke="currentColor" stroke-width="1.5"
-                                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                                                         aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              d="M15.75 19.5L8.25 12l7.5-7.5"></path>
-                                                    </svg>
-                                                </a>
-                                            {% endif %}
-                                            {# Next page navigation #}
-                                            {% if currentPage < totalPages %}
-                                                <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage + 1}) }}"
-                                                   class="hover:shadow-md p-1 rounded-lg">
-                                                    <svg class="w-4 cursor-pointer"
-                                                         fill="none"
-                                                         stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
-                                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-                                                    </svg>
-                                                </a>
-                                            {% else %}
-                                                <a class="p-1">
-                                                    {# Right limit pagination #}
-                                                    <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
-                                                         stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
-                                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-                                                    </svg>
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endif %}
-
+                        {% include '/admin/partials/_pagination.html.twig' %}
                     </div>
                 </div>
             </div>

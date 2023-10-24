@@ -28,6 +28,7 @@ class TermsType extends AbstractType
             $formFieldOptions = [
                 'attr' => [
                     'data-controller' => 'descriptionCard',
+                    'autocomplete' => 'off',
                 ],
                 'required' => false,
             ];

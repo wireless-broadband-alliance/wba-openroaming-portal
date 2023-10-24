@@ -42,7 +42,6 @@ class AdminUserFixture extends Fixture
         $event_2->setUser($admin);
         $manager->persist($event_2);
 
-
         $manager->flush();
     }
 }

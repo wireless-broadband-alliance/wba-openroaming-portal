@@ -7,6 +7,7 @@ export default class extends Controller {
 		const dropdownButton = document.getElementById('adminActionsDropdownButton');
 		const optionsSidebarButton = document.getElementById('optionsDropdownButton');
 		const customCards = document.getElementsByName('customCards');
+		const bodyElement = document.body; // Get the body element
 
 		const alertElement = document.getElementById('alert-2');
 		if (alertElement) {
@@ -18,6 +19,12 @@ export default class extends Controller {
 		sidebarBtnElement.addEventListener('click', () => {
 			sidebarBtnElement.classList.toggle('open');
 			sidebarElement.classList.toggle('hidden');
+
+			if (sidebarElement.classList.contains('hidden')) {
+				bodyElement.classList.remove('overflow-hidden');
+			} else {
+				bodyElement.classList.add('overflow-hidden');
+			}
 		});
 
 
