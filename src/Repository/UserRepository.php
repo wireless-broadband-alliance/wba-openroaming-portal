@@ -130,7 +130,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 ->setParameter('verified', true);
         } elseif ($filter === 'banned') {
             $qb->andWhere('u.bannedAt IS NOT NULL');
-        } // You can add more filter conditions as needed
+        }
 
         if ($searchTerm) {
             $qb->andWhere(
