@@ -92,8 +92,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function findExcludingAdmin(): array
     {
+        $qb = $this->createQueryBuilder('u');
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
         return $this->createQueryBuilder('u')
             ->where('u.roles NOT LIKE :role')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%')
             ->getQuery()
