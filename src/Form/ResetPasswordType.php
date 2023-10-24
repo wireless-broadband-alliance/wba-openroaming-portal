@@ -17,7 +17,7 @@ class ResetPasswordType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'New Password',
                 'attr' => [
-                    'placeholder' => 'Enter your new password',
+                    'placeholder' => 'Enter New password',
                 ],
                 /*
                 'constraints' => [

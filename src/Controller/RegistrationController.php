@@ -77,17 +77,17 @@ class RegistrationController extends AbstractController
      * @throws Exception
      */
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, RequestStack $requestStack, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository, $request, $requestStack);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data['PLATFORM_MODE'] === true) {
-            $this->addFlash('error', 'This portal it\'s in Demo mode. It is impossible use this authentication method.');
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['REGISTER_ENABLED'] !== true) {
+        if ($data['REGISTER_ENABLED']['value'] !== true) {
             $this->addFlash('error', 'This authentication method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
         }
@@ -100,7 +100,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash('warning', 'User with the same email already exists.');
-            } else if ($data['EMAIL_VERIFICATION'] === EmailConfirmationStrategy::EMAIL) {
+            } else if ($data['EMAIL_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -202,7 +202,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
                 $eventRepository->save($event, true);
 
-                $this->addFlash('success', 'Your account has been verified, thank you for your time!');
+                $this->addFlash('success', 'Your account has been verified, please click below to download the profile!');
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {

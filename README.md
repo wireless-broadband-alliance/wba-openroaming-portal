@@ -297,34 +297,37 @@ The Same uuid may result in conflicts between different portals, resulting in pr
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
 certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
-9. `DEMO_MODE`: Enable or disable demo mode. When enabled, only "demo login" is displayed, and SAML and other login
+9. `PLATFORM_MODE`: Live || Demo.
+   When demo, only "demo login" is displayed, and SAML and other login
    methods are disabled regardless of other settings. A demo warning will also be displayed.
-10. `PAGE_TITLE`: The title displayed on the webpage.
-11. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
-12. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-13. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-14. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-15. `CONTACT_EMAIL`: The email address for contact inquiries.
-16. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-17. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
-18. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
-19. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
-20. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-21. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-22. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
-23. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
-24. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
-25. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-26. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-27. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-28. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-29. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-30. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory. The placeholder `@ID` is replaced with
+10. `EMAIL_VERIFICATION`: ON || OFF. When it\'s ON it activates the email verification system. This system requires all the users to verify is own account before they download any profile.
+11. `PAGE_TITLE`: The title displayed on the webpage.
+12. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
+13. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+14. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+15. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+16. `CONTACT_EMAIL`: The email address for contact inquiries.
+17. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
+18. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
+19. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
+20. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
+21. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
+22. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+23. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
+24. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
+25. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
+26. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+27. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+28. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+29. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+30. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+31. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+    The placeholder `@ID` is replaced with
     the user's ID.
-31. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-32. `DEMO_WHITE_LABEL`: Removes everything about the demo layout.
+32. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
 33. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
     with a google account login
+34.  `ADDITIONAL_LABEL`: Additional label displayed on the landing page for more, if necessary, information.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

@@ -217,7 +217,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         return $this->first_name;
     }
 
-    public function setFirstName(string $first_name): self
+    public function setFirstName(?string $first_name): self
     {
         $this->first_name = $first_name;
 

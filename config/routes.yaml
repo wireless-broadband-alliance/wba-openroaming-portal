@@ -5,3 +5,8 @@ controllers:
     type: attribute
 nbgrp_saml:
         resource: "@NbgrpOneloginSamlBundle/Resources/config/routes.php"
+
+api_v1:
+    prefix: /api/v1
+    resource: '../src/Api/V1/Controller/'
+    type: annotation
