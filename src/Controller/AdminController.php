@@ -806,8 +806,8 @@ class AdminController extends AbstractController
                 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
             ];
 
-            $dumb = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
-            if ($submittedData['PAYLOAD_IDENTIFIER'] === $dumb) {
+            $static_value = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
+            if ($submittedData['PAYLOAD_IDENTIFIER'] === $static_value) {
                 $this->addFlash('error_admin', 'Please do not use the default value from the Payload Identifier card.');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
