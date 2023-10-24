@@ -28,29 +28,41 @@
                         </label>
                     </div>
                     {% if setting.vars.name in ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'] %}
-                        <div class="image-container flex flex-row justify-center items-center space-x-20 space-y-2 mt-5">
-                            {# Image Path #}
-                            {% set imagePaths = {
-                                'CUSTOMER_LOGO': asset(data.customerLogoName.value),
-                                'OPENROAMING_LOGO': asset(data.openroamingLogoName.value),
-                                'WALLPAPER_IMAGE': asset(data.wallpaperImageName.value)
-                            } %}
-                            <img data-image-preview src="{{ imagePaths[setting.vars.name] ?? '' }}"
-                                 alt="CustomizationImages" class="w-24 h-24 shadow rounded-full object-cover">
+                        <div class="image-container flex xl:flex-row flex-col justify-center items-center xl:space-x-8 space-x-0 xl:space-y-0 space-y-4 xl:mt-5 mt-8">
+                            <div>
 
-                            {# Button Upload #}
-                            <label class="flex justify-center items-center bg-lightGray rounded-lg text-center text-gray-500 p-3 relative z-0 cursor-pointer"
-                                   data-image-input>
-                                {{ form_widget(setting, {'attr': {'class': 'w-full h-full opacity-0 absolute top-0 left-0 '}}) }}
-                                <div class="w-28 h-12 rounded-lg bg-lightGray flex flex-col justify-center items-center space-y-2 cursor-pointer font-semibold">
-                                    <svg class="w-5" fill="none" stroke="currentColor" stroke-width="3"
-                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path>
-                                    </svg>
-                                    <h1 class="text-center whitespace-nowrap">Upload Image</h1>
-                                </div>
-                            </label>
+                                {# Image Path #}
+                                {% set imagePaths = {
+                                    'CUSTOMER_LOGO': asset(data.customerLogoName.value),
+                                    'OPENROAMING_LOGO': asset(data.openroamingLogoName.value),
+                                    'WALLPAPER_IMAGE': asset(data.wallpaperImageName.value)
+                                } %}
+                                {% if setting.vars.name in ['WALLPAPER_IMAGE'] %}
+                                    <img data-image-preview src="{{ imagePaths[setting.vars.name] ?? '' }}"
+                                         alt="CustomizationImages" class="w-36 h-24 shadow rounded-lg object-fill">
+                                {% else %}
+                                    <img data-image-preview src="{{ imagePaths[setting.vars.name] ?? '' }}"
+                                         alt="CustomizationImages"
+                                         class="p-2 w-36 h-24 shadow rounded-lg object-contain">
+                                {% endif %}
+                            </div>
+                            <div>
+
+                                {# Button Upload #}
+                                <label class="flex justify-center items-center bg-lightGray rounded-lg p-3 relative z-0 cursor-pointer"
+                                       data-image-input>
+                                    {{ form_widget(setting, {'attr': {'class': 'w-full h-full opacity-0 absolute top-0 left-0 '}}) }}
+                                    <div class="xl:w-28 xl:h-12 w-1/2 h-12 rounded-lg bg-lightGray flex flex-col justify-center items-center space-y-2 cursor-pointer font-semibold">
+                                        <svg class="w-5" fill="none" stroke="currentColor" stroke-width="3"
+                                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path>
+                                        </svg>
+                                        <h1 class="xl:text-base text-sm text-gray-500 text-center whitespace-nowrap">
+                                            Upload Image</h1>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                     {% else %}
                         <div class="flex items-center space-x-2 mt-5">
@@ -81,7 +93,7 @@
             Reset
         </a>
 
-        <button class="text-sm hover:bg-veryDarkButton hover:text-white font-bold p-3 rounded-lg transition ease-in duration-300"
+        <button class="text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200"
                 onclick="return confirm('Are you sure you want to apply this new changes?')"
                 type="submit">Save Changes
         </button>

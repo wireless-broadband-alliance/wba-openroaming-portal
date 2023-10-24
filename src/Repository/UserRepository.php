@@ -121,6 +121,34 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
+    public function searchWithFilter(string $filter, ?string $searchTerm = null): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        if ($filter === 'verified') {
+            $qb->andWhere('u.isVerified = :verified')
+                ->setParameter('verified', true);
+        } elseif ($filter === 'banned') {
+            $qb->andWhere('u.bannedAt IS NOT NULL');
+        }
+
+        if ($searchTerm) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.uuid LIKE :searchTerm',
+                    'u.email LIKE :searchTerm',
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm'
+                )
+            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        return $qb->orderBy('u.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
     /**
      * @throws NonUniqueResultException
      */

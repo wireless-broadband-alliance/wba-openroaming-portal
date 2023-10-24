@@ -6,7 +6,6 @@ use App\Enum\Profile_Type;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -42,10 +41,10 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
             ],
             'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => [
-                'type' => TextareaType::class,
+                'type' => TextType::class,
             ],
             'PAYLOAD_IDENTIFIER' => [
-                'type' => TextareaType::class,
+                'type' => TextType::class,
             ],
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => [
                 'type' => ChoiceType::class,
@@ -73,6 +72,7 @@ class RadiusType extends AbstractType
             $formFieldOptions = [
                 'attr' => [
                     'data-controller' => 'descriptionCard',
+                    'autocomplete' => 'off',
                 ],
                 'required' => false,
             ];

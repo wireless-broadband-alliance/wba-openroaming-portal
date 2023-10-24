@@ -1,0 +1,61 @@
+{% if totalPages > 1 %}
+    <div class="flex space-x-2 justify-end mt-5">
+        <div class="flex flex-row text-base cursor-default">
+            <div class="flex space-x-2 mr-4">
+                {# Display the range of user numbers on the current page #}
+                <span class="text-veryDarkPurple">{{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, allUsersCount) }}</span>
+                <span class="text-veryDarkPurple"> of {{ allUsersCount }} </span>
+            </div>
+            <div class="flex space-x-2.5">
+                {# Previous page navigation #}
+                {% if currentPage > 1 %}
+                    <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage - 1, 'filter': activeFilter}) }}"
+                       class="hover:shadow-md p-1 rounded-lg">
+                        <svg class="text-veryDarkButton w-4 cursor-pointer"
+                             fill="none"
+                             stroke="currentColor" stroke-width="1.5"
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15.75 19.5L8.25 12l7.5-7.5"></path>
+                        </svg>
+                    </a>
+                {% else %}
+                    <a class="p-1">
+                        {# Left limit pagination #}
+                        <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
+                             stroke="currentColor" stroke-width="1.5"
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15.75 19.5L8.25 12l7.5-7.5"></path>
+                        </svg>
+                    </a>
+                {% endif %}
+                {# Next page navigation #}
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage + 1, 'filter': activeFilter}) }}"
+                       class="hover:shadow-md p-1 rounded-lg">
+                        <svg class="w-4 cursor-pointer"
+                             fill="none"
+                             stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
+                    </a>
+                {% else %}
+                    <a class="p-1">
+                        {# Right limit pagination #}
+                        <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
+                             stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        </svg>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
