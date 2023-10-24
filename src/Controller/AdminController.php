@@ -221,6 +221,12 @@ class AdminController extends AbstractController
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
+
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
+        }
+
         $email = $user->getEmail();
 
         $user->setDeletedAt(new DateTime());
@@ -265,6 +271,11 @@ class AdminController extends AbstractController
             throw new NotFoundHttpException('User not found');
         }
 
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
+        }
+        
         // Store the initial bannedAt value before form submission
         $initialBannedAtValue = $user->getBannedAt();
 
