@@ -1194,14 +1194,12 @@ class AdminController extends AbstractController
             }
         }
 
-        // Define all profile types regardless of count
-        $labels = ['Android', 'Windows', 'Mac', 'iOS'];
+        $labels = array_keys($profileCounts);
         $datasets = [];
-        $maxValue = max($profileCounts); // Get the maximum count
 
         foreach ($labels as $profileType) {
             $dataValue = $profileCounts[$profileType];
-            $brightness = round(($dataValue / $maxValue) * 99); // Calculate brightness relative to the max count
+            $brightness = round(($dataValue / max($profileCounts)) * 99); // Calculate brightness relative to the max count
 
             // Create a dataset for each profile type
             $datasets[] = [
