@@ -17,7 +17,12 @@
                     Statistics
                 </h1>
                 <div>
-                    Data filter goes here
+                    <form action="{{ path('admin_dashboard_statistics') }}" method="post">
+                        <input type="date" name="selected_date" id="selected_date">
+                        <div>
+                            <button type="submit">Generate Chart</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="m-3">

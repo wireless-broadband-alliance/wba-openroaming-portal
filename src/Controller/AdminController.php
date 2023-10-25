@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
@@ -57,6 +58,7 @@ class AdminController extends AbstractController
     private ParameterBagInterface $parameterBag;
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
+    private EntityManagerInterface $entityManager;
 
     /**
      * @param MailerInterface $mailer
@@ -65,14 +67,16 @@ class AdminController extends AbstractController
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
+     * @param EntityManagerInterface $entityManager
      */
     public function __construct(
-        MailerInterface       $mailer,
-        UserRepository        $userRepository,
-        ProfileManager        $profileManager,
-        ParameterBagInterface $parameterBag,
-        GetSettings           $getSettings,
-        SettingRepository     $settingRepository,
+        MailerInterface        $mailer,
+        UserRepository         $userRepository,
+        ProfileManager         $profileManager,
+        ParameterBagInterface  $parameterBag,
+        GetSettings            $getSettings,
+        SettingRepository      $settingRepository,
+        EntityManagerInterface $entityManager,
     )
     {
         $this->mailer = $mailer;
@@ -81,6 +85,7 @@ class AdminController extends AbstractController
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -1148,50 +1153,54 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
 
-        // Create a Chart object and set the data
+        // Create a Chart object and set the data based on the updated logic
         $fetchChartDevices = $this->fetchChartDevices();
-        $devices = $chartBuilder->createChart(Chart::TYPE_BAR); // This declares the type of graphic used
+        $devices = $chartBuilder->createChart(Chart::TYPE_BAR);
         $devices->setData($fetchChartDevices);
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'devices' => $devices, // Pass the Chart object to the template
+            'devices' => $devices,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
         ]);
     }
 
     private function fetchChartDevices(): JsonResponse|array
     {
-        // This is fake data just for testing
-        return [
-            'labels' => ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            'datasets' => [
-                [
-                    'label' => 'Mac',
-                    'backgroundColor' => 'rgb(255, 99, 132, .4)',
-                    'borderColor' => 'rgb(255, 99, 132)',
-                    'data' => [2, 10, 5, 18, 20, 30, 45],
-                ],
-                [
-                    'label' => 'iOS️',
-                    'backgroundColor' => 'rgba(45, 220, 126, .4)',
-                    'borderColor' => 'rgba(45, 220, 126)',
-                    'data' => [10, 15, 4, 3, 25, 41, 25],
-                ],
-                [
-                    'label' => 'Android',
-                    'backgroundColor' => 'rgba(45, 220, 126, .4)',
-                    'borderColor' => 'rgba(45, 220, 126)',
-                    'data' => [10, 15, 4, 3, 25, 41, 25],
-                ],
-                [
-                    'label' => 'Windows',
-                    'backgroundColor' => 'rgba(45, 220, 126, .4)',
-                    'borderColor' => 'rgba(45, 220, 126)',
-                    'data' => [10, 15, 4, 3, 25, 41, 25],
-                ],
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Query the database to get events with "event_name" == "DOWNLOAD_PROFILE"
+        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
+
+        $profileCounts = [];
+
+        // Loop through the events and count profile types
+        foreach ($events as $event) {
+            $eventMetadata = $event->getEventMetadata();
+
+            if (isset($eventMetadata['type'])) {
+                $profileType = $eventMetadata['type'];
+                if (!isset($profileCounts[$profileType])) {
+                    $profileCounts[$profileType] = 0;
+                }
+                $profileCounts[$profileType]++;
+            }
+        }
+
+        $labels = array_keys($profileCounts);
+        $datasets = [
+            [
+                'label' => 'Profile Types',
+                'backgroundColor' => 'rgb(255, 99, 132, .4)',
+                'borderColor' => 'rgb(255, 99, 132)',
+                'data' => array_values($profileCounts),
             ],
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
         ];
     }
 
