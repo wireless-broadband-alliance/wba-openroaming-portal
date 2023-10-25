@@ -1173,7 +1173,12 @@ class AdminController extends AbstractController
         // Query the database to get events with "event_name" == "DOWNLOAD_PROFILE"
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
-        $profileCounts = [];
+        $profileCounts = [
+            'Android' => 0,
+            'Windows' => 0,
+            'Mac' => 0,
+            'iOS' => 0,
+        ];
 
         // Loop through the events and count profile types
         foreach ($events as $event) {
@@ -1181,22 +1186,31 @@ class AdminController extends AbstractController
 
             if (isset($eventMetadata['type'])) {
                 $profileType = $eventMetadata['type'];
-                if (!isset($profileCounts[$profileType])) {
-                    $profileCounts[$profileType] = 0;
+
+                // Check the profile type and update the corresponding count
+                if (isset($profileCounts[$profileType])) {
+                    $profileCounts[$profileType]++;
                 }
-                $profileCounts[$profileType]++;
             }
         }
 
-        $labels = array_keys($profileCounts);
-        $datasets = [
-            [
-                'label' => 'Profile Types',
-                'backgroundColor' => 'rgb(255, 99, 132, .4)',
-                'borderColor' => 'rgb(255, 99, 132)',
-                'data' => array_values($profileCounts),
-            ],
-        ];
+        // Define all profile types regardless of count
+        $labels = ['Android', 'Windows', 'Mac', 'iOS'];
+        $datasets = [];
+        $maxValue = max($profileCounts); // Get the maximum count
+
+        foreach ($labels as $profileType) {
+            $dataValue = $profileCounts[$profileType];
+            $brightness = round(($dataValue / $maxValue) * 99); // Calculate brightness relative to the max count
+
+            // Create a dataset for each profile type
+            $datasets[] = [
+                'label' => $profileType,
+                'backgroundColor' => "rgba(78, 164, 116, .{$brightness})", // Shades of green
+                'borderColor' => "rgb(78, 164, 116)",
+                'data' => [$dataValue],
+            ];
+        }
 
         return [
             'labels' => $labels,
