@@ -12,8 +12,17 @@
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
             {# MainContent of the page #}
-            <div>
+            <div class="flex flex-row font-bold justify-between m-5 mt-0">
+                <h1 class="text-xl">
+                    Statistics
+                </h1>
+                <div>
+                    Data filter goes here
+                </div>
+            </div>
+            <div class="m-3">
                 {% include 'admin/partials/_statistics.html.twig' %}
+                <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
             </div>
         </div>
     </section>
