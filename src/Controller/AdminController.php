@@ -43,7 +43,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 
 
 /**
@@ -1141,13 +1140,12 @@ class AdminController extends AbstractController
 
 
     /**
-     * @param ChartBuilderInterface $chartBuilder
      * @return Response
      * @throws \JsonException
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(ChartBuilderInterface $chartBuilder): Response
+    public function statisticsData(): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
@@ -1155,6 +1153,7 @@ class AdminController extends AbstractController
         $fetchChartDevices = $this->fetchChartDevices();
         $fetchChartAuthentication = $this->fetchChartAuthentication();
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus();
+        $fetchChartUserVerified = $this->fetchChartUserVerified();
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
@@ -1162,6 +1161,7 @@ class AdminController extends AbstractController
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
+            'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
         ]);
     }
 
@@ -1235,7 +1235,7 @@ class AdminController extends AbstractController
             'Demo' => 0,
         ];
 
-        // Loop through the events and count profile types
+        // Loop through the events and count the status of the user when created
         foreach ($events as $event) {
             $eventMetadata = $event->getEventMetadata();
 
@@ -1250,6 +1250,39 @@ class AdminController extends AbstractController
         }
 
         return $this->generateDatasets($statusCounts);
+    }
+
+    private function fetchChartUserVerified(): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(User::class);
+
+        $users = $repository->findAll();
+
+        $userCounts = [
+            'isVerified' => 0,
+            'needVerification' => 0,
+            'Banned' => 0,
+        ];
+
+        // Loop through the users and categorize them based on saml_identifier and google_id
+        foreach ($users as $user) {
+            $verification = $user->isVerified();
+            $ban = $user->getBannedAt();
+
+            if ($verification) {
+                $userCounts['isVerified']++;
+            } else {
+                $userCounts['needVerification']++;
+            }
+
+            if ($ban) {
+                $userCounts['Banned']++;
+            }
+
+        }
+
+        dd($userCounts);
+        return $this->generateDatasets($userCounts);
     }
 
     private function generateDatasets(array $counts): array
