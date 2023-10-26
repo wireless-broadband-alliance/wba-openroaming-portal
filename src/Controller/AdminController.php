@@ -1154,10 +1154,20 @@ class AdminController extends AbstractController
         $user = $this->getUser();
 
         // Create a Chart object and set the data based on the updated logic
+        // Devices
         $fetchChartDevices = $this->fetchChartDevices();
         $devices = $chartBuilder->createChart(Chart::TYPE_BAR);
         $devices->setData($fetchChartDevices);
         $devices->setOptions(['plugins' => [
+            'legend' => [
+                'display' => false,
+            ],
+        ]]);
+
+        $fetchChartAuthentication = $this->fetchChartAuthentication();
+        $authentication = $chartBuilder->createChart(Chart::TYPE_BAR);
+        $authentication->setData($fetchChartAuthentication);
+        $authentication->setOptions(['plugins' => [
             'legend' => [
                 'display' => false,
             ],
@@ -1168,6 +1178,8 @@ class AdminController extends AbstractController
             'current_user' => $user,
             'devices' => $devices,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
+            'authentication' => $authentication,
+            'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
         ]);
     }
 
@@ -1208,6 +1220,59 @@ class AdminController extends AbstractController
         $colors = [];
 
         foreach ($labels as $index => $profileType) {
+            $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+            $data[] = $dataValues[$index];
+            $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+        }
+
+        $datasets[] = [
+            'data' => $data,
+            'backgroundColor' => $colors,
+            'borderColor' => "rgb(78, 164, 116)",
+            'borderRadius' => "15",
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+    private function fetchChartAuthentication(): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(User::class);
+
+        $users = $repository->findAll();
+
+        $userCounts = [
+            'SAML' => 0,
+            'Google' => 0,
+            'Portal' => 0,
+        ];
+
+        // Loop through the users and categorize them based on saml_identifier and google_id
+        foreach ($users as $user) {
+            $samlIdentifier = $user->getSamlIdentifier();
+            $googleId = $user->getGoogleId();
+
+            if ($samlIdentifier) {
+                $userCounts['SAML']++;
+            } else if ($googleId) {
+                $userCounts['Google']++;
+            } else {
+                $userCounts['Portal']++;
+            }
+        }
+
+        // Create an array to store the datasets
+        $datasets = [];
+        $labels = array_keys($userCounts);
+        $dataValues = array_values($userCounts);
+
+        $data = [];
+        $colors = [];
+
+        foreach ($labels as $index => $userType) {
             $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
             $data[] = $dataValues[$index];
             $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
