@@ -1143,6 +1143,7 @@ class AdminController extends AbstractController
     /**
      * @param ChartBuilderInterface $chartBuilder
      * @return Response
+     * @throws \JsonException
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1153,12 +1154,14 @@ class AdminController extends AbstractController
 
         $fetchChartDevices = $this->fetchChartDevices();
         $fetchChartAuthentication = $this->fetchChartAuthentication();
+        $fetchChartPlatformStatus = $this->fetchChartPlatformStatus();
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
+            'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
         ]);
     }
 
@@ -1198,10 +1201,12 @@ class AdminController extends AbstractController
         $data = [];
         $colors = [];
 
-        foreach ($labels as $index => $profileType) {
-            $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
-            $data[] = $dataValues[$index];
-            $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+            foreach ($labels as $index => $profileType) {
+                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+                $data[] = $dataValues[$index];
+                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+            }
         }
 
         $datasets[] = [
@@ -1251,10 +1256,12 @@ class AdminController extends AbstractController
         $data = [];
         $colors = [];
 
-        foreach ($labels as $index => $userType) {
-            $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
-            $data[] = $dataValues[$index];
-            $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+            foreach ($labels as $index => $userType) {
+                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+                $data[] = $dataValues[$index];
+                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+            }
         }
 
         $datasets[] = [
@@ -1270,6 +1277,60 @@ class AdminController extends AbstractController
         ];
     }
 
+    private function fetchChartPlatformStatus(): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Query the database to get events with "event_name" == "USER_CREATION"
+        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
+
+        $statusCounts = [
+            'Live' => 0,
+            'Demo' => 0,
+        ];
+
+        // Loop through the events and count profile types
+        foreach ($events as $event) {
+            $eventMetadata = $event->getEventMetadata();
+
+            if (isset($eventMetadata['platform'])) {
+                $statusType = $eventMetadata['platform'];
+
+                // Check the profile type and update the corresponding count
+                if (isset($statusCounts[$statusType])) {
+                    $statusCounts[$statusType]++;
+                }
+            }
+        }
+
+        // Create an array to store the datasets
+        $datasets = [];
+        $labels = array_keys($statusCounts);
+        $dataValues = array_values($statusCounts);
+
+        $data = [];
+        $colors = [];
+
+        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+            foreach ($labels as $index => $statusType) {
+                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+                $data[] = $dataValues[$index];
+                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+            }
+        }
+
+        $datasets[] = [
+            'data' => $data,
+            'backgroundColor' => $colors,
+            'borderColor' => "rgb(78, 164, 116)",
+            'borderRadius' => "15",
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
 
     /**
      * @param Request $request

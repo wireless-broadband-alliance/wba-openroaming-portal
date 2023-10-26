@@ -1,20 +1,34 @@
 <div class="grid gap-4 lg:grid-cols-2 p-2 mt-10 z-0" data-controller="descriptionCard statistics">
-    <div class="bg-white rounded-md p-6 w-full" name="statisticsCards">
-        {# Title and Icon #}
+    <div class="bg-white rounded-md p-6 w-full">
+        {# Title #}
         <div class="flex flex-row justify-between">
             <div class="text-base font-medium text-center break-normal md:break-all">
                 <h1 class="text-base md:text-lg whitespace-nowrap">Devices</h1>
             </div>
         </div>
+        {# Devices Graphic #}
         <canvas class="my-6 w-full" id="devicesChart" data-devices data-chart-data="{{ devicesDataJson }}"></canvas>
     </div>
-    <div class="bg-white rounded-md p-6 w-full" name="statisticsCards">
+    <div class="bg-white rounded-md p-6 w-full">
+        {# Title #}
         <div class="flex flex-row justify-between">
             <div class="text-base font-medium text-center break-normal md:break-all">
                 <h1 class="text-base md:text-lg whitespace-nowrap">Authentication</h1>
             </div>
         </div>
+        {# Authentication Graphic #}
         <canvas class="my-6 w-full" id="authenticationChart" data-authentication
                 data-chart-data="{{ authenticationDataJson }}"></canvas>
+    </div>
+    <div class="bg-white rounded-md p-6 w-full">
+        {# Title #}
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">Platform Mode</h1>
+            </div>
+        </div>
+        {# Platform Status Graphic #}
+        <canvas class="my-6 w-full" id="platformStatusChart" data-platformStatus
+                data-chart-data="{{ platformStatusDataJson }}"></canvas>
     </div>
 </div>
