@@ -11,6 +11,7 @@
             <div class="text-base font-medium text-center break-normal md:break-all">
                 <h1 class="text-base md:text-lg whitespace-nowrap">Devices</h1>
             </div>
+            {#
             <label class="flex items-center bg-opacity-40"
             >
                 <img class="w-6 cursor-pointer"
@@ -18,17 +19,18 @@
                      src="{{ asset('resources/logos/info_icon.svg') }}"
                      alt="info_icon"/>
             </label>
+            #}
         </div>
-        <div class="my-6 w-full" data-chart-data="{{ devicesDataJson }}">
-            {{ render_chart(devices) }}
-        </div>
-
-        {# Description Statistics #}
+        {# Description Statistics
         <div class="flex justify-center items-center">
             <div class="bg-indigo-400 rounded-lg p-2 m-2 md:w-3/12 text-center text-white duration-300 absolute hidden"
                  name="description">
                 Downloaded Profiles
             </div>
+        </div>
+        #}
+        <div class="my-6 w-full" data-chart-data="{{ devicesDataJson }}">
+            {{ render_chart(devices) }}
         </div>
     </div>
     <div class="bg-white rounded-md p-6 w-full"
