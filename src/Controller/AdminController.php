@@ -1168,8 +1168,6 @@ class AdminController extends AbstractController
     private function fetchChartDevices(): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(Event::class);
-
-        // Query the database to get events with "event_name" == "DOWNLOAD_PROFILE"
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
@@ -1193,33 +1191,7 @@ class AdminController extends AbstractController
             }
         }
 
-        // Create an array to store the datasets
-        $datasets = [];
-        $labels = array_keys($profileCounts);
-        $dataValues = array_values($profileCounts);
-
-        $data = [];
-        $colors = [];
-
-        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
-            foreach ($labels as $index => $profileType) {
-                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
-                $data[] = $dataValues[$index];
-                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
-            }
-        }
-
-        $datasets[] = [
-            'data' => $data,
-            'backgroundColor' => $colors,
-            'borderColor' => "rgb(78, 164, 116)",
-            'borderRadius' => "15",
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
+        return $this->generateDatasets($profileCounts);
     }
 
     private function fetchChartAuthentication(): JsonResponse|array
@@ -1248,33 +1220,7 @@ class AdminController extends AbstractController
             }
         }
 
-        // Create an array to store the datasets
-        $datasets = [];
-        $labels = array_keys($userCounts);
-        $dataValues = array_values($userCounts);
-
-        $data = [];
-        $colors = [];
-
-        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
-            foreach ($labels as $index => $userType) {
-                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
-                $data[] = $dataValues[$index];
-                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
-            }
-        }
-
-        $datasets[] = [
-            'data' => $data,
-            'backgroundColor' => $colors,
-            'borderColor' => "rgb(78, 164, 116)",
-            'borderRadius' => "15",
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
+        return $this->generateDatasets($userCounts);
     }
 
     private function fetchChartPlatformStatus(): JsonResponse|array
@@ -1303,16 +1249,20 @@ class AdminController extends AbstractController
             }
         }
 
-        // Create an array to store the datasets
+        return $this->generateDatasets($statusCounts);
+    }
+
+    private function generateDatasets(array $counts): array
+    {
         $datasets = [];
-        $labels = array_keys($statusCounts);
-        $dataValues = array_values($statusCounts);
+        $labels = array_keys($counts);
+        $dataValues = array_values($counts);
 
         $data = [];
         $colors = [];
 
         if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
-            foreach ($labels as $index => $statusType) {
+            foreach ($labels as $index => $type) {
                 $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
                 $data[] = $dataValues[$index];
                 $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
@@ -1331,6 +1281,7 @@ class AdminController extends AbstractController
             'datasets' => $datasets,
         ];
     }
+
 
     /**
      * @param Request $request
