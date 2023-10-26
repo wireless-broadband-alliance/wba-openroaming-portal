@@ -50,6 +50,7 @@ export default class extends Controller {
 								display: false,
 							},
 						},
+						indexAxis: 'y',
 					}
 				});
 			}
