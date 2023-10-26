@@ -1197,30 +1197,28 @@ class AdminController extends AbstractController
         // Create an array to store the datasets
         $datasets = [];
         $labels = array_keys($profileCounts);
-
         $dataValues = array_values($profileCounts);
 
         $data = [];
+        $colors = [];
 
         foreach ($labels as $index => $profileType) {
             $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
-            $data[] = [
-                'x' => $profileType,
-                'y' => $dataValues[$index],
-            ];
+            $data[] = $dataValues[$index];
+            $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
         }
 
         $datasets[] = [
             'data' => $data,
-            'backgroundColor' => "rgba(78, 164, 116, .{$brightness})", // Shades of green
+            'backgroundColor' => $colors,
             'borderColor' => "rgb(78, 164, 116)",
+            'borderRadius' => "15",
         ];
 
         return [
-            'labels' => array_keys($profileCounts),
+            'labels' => $labels,
             'datasets' => $datasets,
         ];
-
     }
 
 
