@@ -44,7 +44,6 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
-use Symfony\UX\Chartjs\Model\Chart;
 
 
 /**
@@ -1144,7 +1143,6 @@ class AdminController extends AbstractController
     /**
      * @param ChartBuilderInterface $chartBuilder
      * @return Response
-     * @throws \JsonException
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1153,32 +1151,13 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
 
-        // Create a Chart object and set the data based on the updated logic
-        // Devices
         $fetchChartDevices = $this->fetchChartDevices();
-        $devices = $chartBuilder->createChart(Chart::TYPE_BAR);
-        $devices->setData($fetchChartDevices);
-        $devices->setOptions(['plugins' => [
-            'legend' => [
-                'display' => false,
-            ],
-        ]]);
-
         $fetchChartAuthentication = $this->fetchChartAuthentication();
-        $authentication = $chartBuilder->createChart(Chart::TYPE_BAR);
-        $authentication->setData($fetchChartAuthentication);
-        $authentication->setOptions(['plugins' => [
-            'legend' => [
-                'display' => false,
-            ],
-        ]]);
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'devices' => $devices,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
-            'authentication' => $authentication,
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
         ]);
     }
