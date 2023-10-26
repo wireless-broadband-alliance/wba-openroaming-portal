@@ -1157,6 +1157,11 @@ class AdminController extends AbstractController
         $fetchChartDevices = $this->fetchChartDevices();
         $devices = $chartBuilder->createChart(Chart::TYPE_BAR);
         $devices->setData($fetchChartDevices);
+        $devices->setOptions(['plugins' => [
+            'legend' => [
+                'display' => false,
+            ],
+        ]]);
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
