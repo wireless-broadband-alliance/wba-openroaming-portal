@@ -1173,7 +1173,7 @@ class AdminController extends AbstractController
         $profileCounts = [
             'Android' => 0,
             'Windows' => 0,
-            'Mac' => 0,
+            'macOS' => 0,
             'iOS' => 0,
         ];
 
