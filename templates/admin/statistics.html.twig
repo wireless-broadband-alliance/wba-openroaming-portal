@@ -17,9 +17,10 @@
                     Statistics
                 </h1>
                 <div>
-                    <form action="{{ path('admin_dashboard_statistics') }}" method="post">
-                        <input type="datetime-local" name="selected_date" id="selected_date">
-                        <button type="submit">Generate Chart</button>
+                    <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics') }}" method="post">
+                        <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate">
+                        <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate">
+                        <button type="submit">Filter</button>
                     </form>
                 </div>
             </div>
