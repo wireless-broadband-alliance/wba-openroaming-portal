@@ -24,11 +24,22 @@
         {# Title #}
         <div class="flex flex-row justify-between">
             <div class="text-base font-medium text-center break-normal md:break-all">
-                <h1 class="text-base md:text-lg whitespace-nowrap">Platform Mode</h1>
+                <h1 class="text-base md:text-lg whitespace-nowrap">User created in</h1>
             </div>
         </div>
         {# Platform Status Graphic #}
         <canvas class="my-6 w-full" id="platformStatusChart" data-platformStatus
                 data-chart-data="{{ platformStatusDataJson }}"></canvas>
+    </div>
+    <div class="bg-white rounded-md p-6 w-full">
+        {# Title #}
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">Users Management</h1>
+            </div>
+        </div>
+        {# Platform Status Graphic #}
+        <canvas class="my-6 w-full" id="userVerifiedChart" data-platformStatus
+                data-chart-data="{{ usersVerifiedDataJson }}"></canvas>
     </div>
 </div>

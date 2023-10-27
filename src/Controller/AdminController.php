@@ -1259,8 +1259,8 @@ class AdminController extends AbstractController
         $users = $repository->findAll();
 
         $userCounts = [
-            'isVerified' => 0,
-            'needVerification' => 0,
+            'Verified' => 0,
+            'Need Verification' => 0,
             'Banned' => 0,
         ];
 
@@ -1270,9 +1270,9 @@ class AdminController extends AbstractController
             $ban = $user->getBannedAt();
 
             if ($verification) {
-                $userCounts['isVerified']++;
+                $userCounts['Verified']++;
             } else {
-                $userCounts['needVerification']++;
+                $userCounts['Need Verification']++;
             }
 
             if ($ban) {
@@ -1281,7 +1281,6 @@ class AdminController extends AbstractController
 
         }
 
-        dd($userCounts);
         return $this->generateDatasets($userCounts);
     }
 

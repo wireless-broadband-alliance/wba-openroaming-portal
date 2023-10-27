@@ -8,13 +8,15 @@ export default class extends Controller {
 			const devicesChartElement = document.getElementById('devicesChart');
 			const authenticationChartElement = document.getElementById('authenticationChart');
 			const platformStatusChartElement = document.getElementById('platformStatusChart');
+			const userVerifiedChartElement = document.getElementById('userVerifiedChart');
 
 
-			if (devicesChartElement && authenticationChartElement && platformStatusChartElement) {
+			if (devicesChartElement && authenticationChartElement && platformStatusChartElement && userVerifiedChartElement) {
 				// Get the chart data from the data attributes on the elements
 				const devicesData = JSON.parse(devicesChartElement.getAttribute('data-chart-data'));
 				const authenticationData = JSON.parse(authenticationChartElement.getAttribute('data-chart-data'));
 				const platformStatusData = JSON.parse(platformStatusChartElement.getAttribute('data-chart-data'));
+				const userVerifiedData = JSON.parse(userVerifiedChartElement.getAttribute('data-chart-data'));
 
 				// Create the Chart.js charts with the fetched data for devices and authentication
 				const devicesChart = new Chart(devicesChartElement, {
@@ -44,6 +46,19 @@ export default class extends Controller {
 				const platformStatusChart = new Chart(platformStatusChartElement, {
 					type: 'bar',
 					data: platformStatusData,
+					options: {
+						plugins: {
+							legend: {
+								display: false,
+							},
+						},
+						indexAxis: 'y',
+					}
+				});
+
+				const userVerifiedChart = new Chart(userVerifiedChartElement, {
+					type: 'bar',
+					data: userVerifiedData,
 					options: {
 						plugins: {
 							legend: {
