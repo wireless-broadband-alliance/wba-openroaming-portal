@@ -1142,15 +1142,24 @@ class AdminController extends AbstractController
     /**
      * @return Response
      * @throws \JsonException
+     * @throws Exception
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(): Response
+    public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
 
-        $fetchChartDevices = $this->fetchChartDevices();
+        // Get the submitted start and end dates from the form
+        $startDateString = $request->request->get('startDate');
+        $endDateString = $request->request->get('endDate');
+
+        // Convert the date strings to DateTime objects
+        $startDate = $startDateString ? new DateTime($startDateString) : null;
+        $endDate = $endDateString ? new DateTime($endDateString) : null;
+
+        $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $this->fetchChartAuthentication();
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus();
         $fetchChartUserVerified = $this->fetchChartUserVerified();
@@ -1165,10 +1174,30 @@ class AdminController extends AbstractController
         ]);
     }
 
-    private function fetchChartDevices(): JsonResponse|array
+    /**
+     * @throws Exception
+     */
+    private function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(Event::class);
-        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
+
+        // Define the criteria for filtering based on event_name
+        $criteria = [
+            'event_name' => 'DOWNLOAD_PROFILE',
+        ];
+
+        // If both start and end dates are provided, add date range filtering
+        if ($startDate && $endDate) {
+            $startDateStr = $startDate->format('Y-m-d H:i:s');
+            $endDateStr = $endDate->format('Y-m-d H:i:s');
+
+            $criteria['event_datetime'] = [
+                'between' => ["$startDateStr", "$endDateStr"],
+            ];
+        }
+
+        // Fetch events based on the criteria
+        $events = $repository->findBy($criteria);
 
         $profileCounts = [
             'Android' => 0,
