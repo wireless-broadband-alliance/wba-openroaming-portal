@@ -1171,6 +1171,8 @@ class AdminController extends AbstractController
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
+            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
+            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
     }
 
