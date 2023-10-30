@@ -1181,23 +1181,8 @@ class AdminController extends AbstractController
     {
         $repository = $this->entityManager->getRepository(Event::class);
 
-        // Define the criteria for filtering based on event_name
-        $criteria = [
-            'event_name' => 'DOWNLOAD_PROFILE',
-        ];
-
-        // If both start and end dates are provided, add date range filtering
-        if ($startDate && $endDate) {
-            $startDateStr = $startDate->format('Y-m-d H:i:s');
-            $endDateStr = $endDate->format('Y-m-d H:i:s');
-
-            $criteria['event_datetime'] = [
-                'between' => ["$startDateStr", "$endDateStr"],
-            ];
-        }
-
-        // Fetch events based on the criteria
-        $events = $repository->findBy($criteria);
+        // Fetch all data without date filtering
+        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
             'Android' => 0,
@@ -1206,16 +1191,27 @@ class AdminController extends AbstractController
             'iOS' => 0,
         ];
 
-        // Loop through the events and count profile types
+        // Filter and count profile types based on the date criteria
         foreach ($events as $event) {
-            $eventMetadata = $event->getEventMetadata();
+            $eventDateTime = $event->getEventDatetime();
 
-            if (isset($eventMetadata['type'])) {
-                $profileType = $eventMetadata['type'];
+            if (!$eventDateTime) {
+                continue; // Skip events with missing dates
+            }
 
-                // Check the profile type and update the corresponding count
-                if (isset($profileCounts[$profileType])) {
-                    $profileCounts[$profileType]++;
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
+
+                if (isset($eventMetadata['type'])) {
+                    $profileType = $eventMetadata['type'];
+
+                    // Check the profile type and update the corresponding count
+                    if (isset($profileCounts[$profileType])) {
+                        $profileCounts[$profileType]++;
+                    }
                 }
             }
         }
