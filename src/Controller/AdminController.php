@@ -1223,7 +1223,7 @@ class AdminController extends AbstractController
     {
         $repository = $this->entityManager->getRepository(User::class);
 
-        $users = $repository->findAll();
+        $users = $repository->findExcludingAdmin();
 
         $userCounts = [
             'SAML' => 0,
