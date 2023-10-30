@@ -12,19 +12,32 @@
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
             {# MainContent of the page #}
-            <div class="flex flex-row font-bold justify-between m-5 mt-0">
-                <h1 class="text-xl">
+            <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 font-bold justify-between items-center m-5 mt-0">
+                <h1 class="text-2xl text-center lg:text-left">
                     Statistics
                 </h1>
-                <div>
-                    <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics') }}" method="post">
-                        <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate">
-                        <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate">
-                        <button type="submit">Filter</button>
+                <div class="bg-white rounded-lg">
+                    <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics') }}" method="post"
+                          class="flex flex-col sm:flex-row items-center gap-3 p-3">
+                        <div class="flex sm:space-x-3 space-x-2 w-full sm:w-auto">
+                            <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate"
+                                   lang="en"
+                                   class="rounded p-1 text-sm py-1 px-2 border-none focus:ring-0 w-full sm:w-auto">
+                            <div class="sm:flex hidden items-center"> <!-- Added a flex container for "to" -->
+                                <p class="mx-2">to</p>
+                            </div>
+                            <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate"
+                                   lang="en"
+                                   class="rounded p-1 text-sm py-1 px-2 border-none focus:ring-0 w-full sm:w-auto">
+                        </div>
+                        <button type="submit"
+                                class="p-3 text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold hover:shadow-lg rounded-lg duration-200 w-full sm:w-auto">
+                            Filter
+                        </button>
                     </form>
                 </div>
             </div>
-            <div class="m-3">
+            <div class="m-3 -mb-10">
                 {% include 'admin/partials/_statistics.html.twig' %}
                 <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
             </div>
