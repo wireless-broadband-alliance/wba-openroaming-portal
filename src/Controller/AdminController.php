@@ -1162,7 +1162,7 @@ class AdminController extends AbstractController
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
-        $fetchChartUserVerified = $this->fetchChartUserVerified();
+        $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
@@ -1235,7 +1235,7 @@ class AdminController extends AbstractController
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
-            if (!$createdAt){
+            if (!$createdAt) {
                 continue; // Skip events with missing dates, same as the previous function
             }
             if (
@@ -1275,7 +1275,7 @@ class AdminController extends AbstractController
             $eventDateTime = $event->getEventDatetime();
 
             if (!$eventDateTime) {
-                continue; // Skip events with missing dates
+                continue;
             }
             if (
                 (!$startDate || $eventDateTime >= $startDate) &&
@@ -1297,7 +1297,7 @@ class AdminController extends AbstractController
         return $this->generateDatasets($statusCounts);
     }
 
-    private function fetchChartUserVerified(): JsonResponse|array
+    private function fetchChartUserVerified(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
 
@@ -1311,19 +1311,29 @@ class AdminController extends AbstractController
 
         // Loop through the users and categorize them based on saml_identifier and google_id
         foreach ($users as $user) {
-            $verification = $user->isVerified();
-            $ban = $user->getBannedAt();
+            $createdAt = $user->getCreatedAt();
 
-            if ($verification) {
-                $userCounts['Verified']++;
-            } else {
-                $userCounts['Need Verification']++;
+            if (!$createdAt) {
+                continue;
             }
 
-            if ($ban) {
-                $userCounts['Banned']++;
-            }
+            if (
+                (!$startDate || $createdAt >= $startDate) &&
+                (!$endDate || $createdAt <= $endDate)
+            ) {
+                $verification = $user->isVerified();
+                $ban = $user->getBannedAt();
 
+                if ($verification) {
+                    $userCounts['Verified']++;
+                } else {
+                    $userCounts['Need Verification']++;
+                }
+
+                if ($ban) {
+                    $userCounts['Banned']++;
+                }
+            }
         }
 
         return $this->generateDatasets($userCounts);
