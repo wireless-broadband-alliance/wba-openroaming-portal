@@ -51,7 +51,6 @@ class AdminUserFixture extends Fixture
             $user->setUuid('user' . $i . '@example.com');
             $user->setEmail('user' . $i . '@example.com');
             $user->setPassword($this->userPasswordHashed->hashPassword($user, 'password123')); // Set a default password
-            $user->setRoles(['ROLE_USER']);
             $user->setIsVerified(true);
             $user->setCreatedAt(new DateTime());
             $manager->persist($user);

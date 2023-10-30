@@ -1160,7 +1160,7 @@ class AdminController extends AbstractController
         $endDate = $endDateString ? new DateTime($endDateString) : null;
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
-        $fetchChartAuthentication = $this->fetchChartAuthentication();
+        $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus();
         $fetchChartUserVerified = $this->fetchChartUserVerified();
 
@@ -1219,7 +1219,7 @@ class AdminController extends AbstractController
         return $this->generateDatasets($profileCounts);
     }
 
-    private function fetchChartAuthentication(): JsonResponse|array
+    private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
 
@@ -1233,15 +1233,25 @@ class AdminController extends AbstractController
 
         // Loop through the users and categorize them based on saml_identifier and google_id
         foreach ($users as $user) {
-            $samlIdentifier = $user->getSamlIdentifier();
-            $googleId = $user->getGoogleId();
+            $createdAt = $user->getCreatedAt();
 
-            if ($samlIdentifier) {
-                $userCounts['SAML']++;
-            } else if ($googleId) {
-                $userCounts['Google']++;
-            } else {
-                $userCounts['Portal']++;
+            if (!$createdAt){
+                continue; // Skip events with missing dates, same as the previous function
+            }
+            if (
+                (!$startDate || $createdAt >= $startDate) &&
+                (!$endDate || $createdAt <= $endDate)
+            ) {
+                $samlIdentifier = $user->getSamlIdentifier();
+                $googleId = $user->getGoogleId();
+
+                if ($samlIdentifier) {
+                    $userCounts['SAML']++;
+                } else if ($googleId) {
+                    $userCounts['Google']++;
+                } else {
+                    $userCounts['Portal']++;
+                }
             }
         }
 
