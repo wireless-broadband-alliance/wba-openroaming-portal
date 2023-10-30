@@ -1237,9 +1237,6 @@ class AdminController extends AbstractController
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
-            if (!$createdAt) {
-                continue; // Skip events with missing dates, same as the previous function
-            }
             if (
                 (!$startDate || $createdAt >= $startDate) &&
                 (!$endDate || $createdAt <= $endDate)
@@ -1288,7 +1285,7 @@ class AdminController extends AbstractController
                 if (isset($eventMetadata['platform'])) {
                     $statusType = $eventMetadata['platform'];
 
-                    // Check the profile type and update the corresponding count
+                    // Check the status type and update the corresponding count
                     if (isset($statusCounts[$statusType])) {
                         $statusCounts[$statusType]++;
                     }
@@ -1311,13 +1308,9 @@ class AdminController extends AbstractController
             'Banned' => 0,
         ];
 
-        // Loop through the users and categorize them based on saml_identifier and google_id
+        // Loop through the users and categorize them based on isVerified and bannedAt
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
-
-            if (!$createdAt) {
-                continue;
-            }
 
             if (
                 (!$startDate || $createdAt >= $startDate) &&
