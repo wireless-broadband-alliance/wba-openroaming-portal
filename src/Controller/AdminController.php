@@ -1161,7 +1161,7 @@ class AdminController extends AbstractController
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
-        $fetchChartPlatformStatus = $this->fetchChartPlatformStatus();
+        $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
         $fetchChartUserVerified = $this->fetchChartUserVerified();
 
         return $this->render('admin/statistics.html.twig', [
@@ -1258,7 +1258,7 @@ class AdminController extends AbstractController
         return $this->generateDatasets($userCounts);
     }
 
-    private function fetchChartPlatformStatus(): JsonResponse|array
+    private function fetchChartPlatformStatus(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(Event::class);
 
@@ -1272,14 +1272,24 @@ class AdminController extends AbstractController
 
         // Loop through the events and count the status of the user when created
         foreach ($events as $event) {
-            $eventMetadata = $event->getEventMetadata();
+            $eventDateTime = $event->getEventDatetime();
 
-            if (isset($eventMetadata['platform'])) {
-                $statusType = $eventMetadata['platform'];
+            if (!$eventDateTime) {
+                continue; // Skip events with missing dates
+            }
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
 
-                // Check the profile type and update the corresponding count
-                if (isset($statusCounts[$statusType])) {
-                    $statusCounts[$statusType]++;
+                if (isset($eventMetadata['platform'])) {
+                    $statusType = $eventMetadata['platform'];
+
+                    // Check the profile type and update the corresponding count
+                    if (isset($statusCounts[$statusType])) {
+                        $statusCounts[$statusType]++;
+                    }
                 }
             }
         }
