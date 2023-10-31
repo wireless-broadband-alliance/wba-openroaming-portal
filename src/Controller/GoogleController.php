@@ -7,6 +7,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -169,7 +170,7 @@ class GoogleController extends AbstractController
     /**
      * @throws Exception
      */
-    private function findOrCreateGoogleUser(string $googleUserId, string $email, string $firstname, string $lastname): ?User
+    private function findOrCreateGoogleUser(string $googleUserId, string $email, ?string $firstname, ?string $lastname): ?User
     {
         // Check if a user with the given Google user ID exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
@@ -192,7 +193,7 @@ class GoogleController extends AbstractController
             ->setEmail($email)
             ->setFirstName($firstname)
             ->setLastName($lastname)
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
             ->setUuid($email);
 
         $event_create = new Event();
@@ -201,12 +202,12 @@ class GoogleController extends AbstractController
         $event_create->setEventMetadata([
             'platform' => PlatformMode::Live,
         ]);
-        $event_create->setEventDatetime(new \DateTime());
+        $event_create->setEventDatetime(new DateTime());
 
         $event_verify = new Event();
         $event_verify->setUser($user);
         $event_verify->setEventName(AnalyticalEventType::USER_VERIFICATION);
-        $event_verify->setEventDatetime(new \DateTime());
+        $event_verify->setEventDatetime(new DateTime());
 
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
