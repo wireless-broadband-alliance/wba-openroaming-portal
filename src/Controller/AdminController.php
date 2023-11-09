@@ -1212,7 +1212,7 @@ class AdminController extends AbstractController
     {
         $repository = $this->entityManager->getRepository(User::class);
 
-        /** @var User $users */
+        /* @phpstan-ignore-next-line */
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
