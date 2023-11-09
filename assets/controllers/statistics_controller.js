@@ -28,6 +28,13 @@ export default class extends Controller {
 								display: false, // Hide the legend (labels at the top)
 							},
 						},
+						scales: {
+							y: {
+								ticks: {
+									precision: 0
+								}
+							}
+						}
 					}
 				});
 
@@ -40,6 +47,13 @@ export default class extends Controller {
 								display: false,
 							},
 						},
+						scales: {
+							y: {
+								ticks: {
+									precision: 0
+								}
+							}
+						}
 					}
 				});
 
