@@ -33,9 +33,7 @@ class AdminUserFixture extends Fixture
         $event = new Event();
         $event->setEventName(AnalyticalEventType::USER_CREATION);
         $event->setEventDatetime(new DateTime());
-        $event->setEventMetadata([
-            'platform' => 'Live',
-        ]);
+
         $event->setUser($admin);
         $manager->persist($event);
 

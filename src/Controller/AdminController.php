@@ -1288,7 +1288,8 @@ class AdminController extends AbstractController
     {
         $repository = $this->entityManager->getRepository(User::class);
 
-        $users = $repository->findAll();
+        /* @phpstan-ignore-next-line */
+        $users = $repository->findExcludingAdmin();
 
         $userCounts = [
             'Verified' => 0,
