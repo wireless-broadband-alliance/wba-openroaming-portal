@@ -66,6 +66,13 @@ export default class extends Controller {
 								display: false,
 							},
 						},
+						scales: {
+							x: {
+								ticks: {
+									precision: 0
+								}
+							}
+						},
 						indexAxis: 'y',
 					}
 				});
@@ -78,6 +85,13 @@ export default class extends Controller {
 							legend: {
 								display: false,
 							},
+						},
+						scales: {
+							x: {
+								ticks: {
+									precision: 0
+								}
+							}
 						},
 						indexAxis: 'y',
 					}
