@@ -1130,8 +1130,21 @@ class AdminController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        $startDate = $startDateString ? new DateTime($startDateString) : null;
-        $endDate = $endDateString ? new DateTime($endDateString) : null;
+        if ($startDateString){
+            $startDate = new DateTime($startDateString);
+        } else if ($startDateString === "") {
+            $startDate = null;
+        } else {
+            $startDate = (new DateTime())->modify('-1 month');
+        }
+
+        if ($endDateString){
+            $endDate = new DateTime($endDateString);
+        } else if ($endDateString === "") {
+            $endDate = null;
+        } else {
+            $endDate = new DateTime();
+        }
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
