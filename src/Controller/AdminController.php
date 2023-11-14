@@ -221,15 +221,18 @@ class AdminController extends AbstractController
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
-        $email = $user->getEmail();
 
-        // Remove associated UserRadiusProfile entities
-        foreach ($user->getUserRadiusProfiles() as $userRadiusProfile) {
-            $em->remove($userRadiusProfile);
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
         }
 
-        // Now, remove the user
-        $em->remove($user);
+        $email = $user->getEmail();
+
+        $user->setDeletedAt(new DateTime());
+        $this->disableProfiles($user);
+
+        $em->persist($user);
         $em->flush();
 
         $this->addFlash('success_admin', sprintf('User with the email "%s" deleted successfully.', $email));
@@ -268,6 +271,11 @@ class AdminController extends AbstractController
             throw new NotFoundHttpException('User not found');
         }
 
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
+        }
+        
         // Store the initial bannedAt value before form submission
         $initialBannedAtValue = $user->getBannedAt();
 

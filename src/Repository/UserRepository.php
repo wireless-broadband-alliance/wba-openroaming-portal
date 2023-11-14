@@ -90,31 +90,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    public function findExcludingAdminWithSearch(string $searchTerm): array
-    {
-        return $this->createQueryBuilder('u')
-            ->where('u.roles NOT LIKE :role')
-            ->andWhere(
-                $this->createQueryBuilder('u')
-                    ->expr()
-                    ->orX(
-                        'u.uuid LIKE :searchTerm',
-                        'u.email LIKE :searchTerm',
-                        'u.first_name LIKE :searchTerm',
-                        'u.last_name LIKE :searchTerm'
-                    )
-            )
-            ->orderBy('u.createdAt', 'DESC')
-            ->setParameter('role', '%ROLE_ADMIN%')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%')
-            ->getQuery()
-            ->getResult();
-    }
-
     public function findExcludingAdmin(): array
     {
+        $qb = $this->createQueryBuilder('u');
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
         return $this->createQueryBuilder('u')
             ->where('u.roles NOT LIKE :role')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%')
             ->getQuery()
@@ -131,6 +114,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         } elseif ($filter === 'banned') {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
+
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
 
         if ($searchTerm) {
             $qb->andWhere(
@@ -174,9 +159,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function countAllUsersExcludingAdmin(): int
     {
+        $qb = $this->createQueryBuilder('u');
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
         return $this->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.roles NOT LIKE :adminRole')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->setParameter('adminRole', '%ROLE_ADMIN%')
             ->getQuery()
             ->getSingleScalarResult();
@@ -188,10 +177,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function countVerifiedUsers(): int
     {
+        $qb = $this->createQueryBuilder('u');
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
         return $this->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.isVerified = :verified')
             ->andWhere('u.roles NOT LIKE :adminRole')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->setParameter('verified', true)
             ->setParameter('adminRole', '%ROLE_ADMIN%')
             ->getQuery()
@@ -204,9 +197,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function countBannedUsers(): int
     {
+        $qb = $this->createQueryBuilder('u');
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
         return $this->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->where('u.bannedAt IS NOT NULL')
+            ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->getQuery()
             ->getSingleScalarResult();
     }
