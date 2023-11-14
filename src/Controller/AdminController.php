@@ -233,7 +233,9 @@ class AdminController extends AbstractController
         }
 
         $email = $user->getEmail();
-
+        foreach ($user->getEvent() as $event) {
+            $em->remove($event);
+        }
         $user->setDeletedAt(new DateTime());
         $this->disableProfiles($user);
 
