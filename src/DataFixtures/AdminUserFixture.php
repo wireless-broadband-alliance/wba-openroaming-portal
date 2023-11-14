@@ -33,6 +33,7 @@ class AdminUserFixture extends Fixture
         $event = new Event();
         $event->setEventName(AnalyticalEventType::USER_CREATION);
         $event->setEventDatetime(new DateTime());
+
         $event->setUser($admin);
         $manager->persist($event);
 
@@ -41,6 +42,7 @@ class AdminUserFixture extends Fixture
         $event_2->setEventDatetime(new DateTime());
         $event_2->setUser($admin);
         $manager->persist($event_2);
+
 
         $manager->flush();
     }

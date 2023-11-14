@@ -37,10 +37,13 @@
             </div>
         </a>
 
+        {% set portalSettingsRoutes = [ "admin_dashboard_settings_status","admin_dashboard_settings_terms","admin_dashboard_settings_radius","admin_dashboard_settings_LDAP","admin_dashboard_settings_auth","admin_dashboard_settings_capport"] %}
+
         {# SideBar - Portal Settings - Dropdown #}
-        <div class="relative" id="PortalDropdownButton">
-            <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-                        hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_settings' or app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' or app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' or app.request.attributes.get('_route') == 'admin_dashboard_settings_status' or app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' or app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' or app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}">
+        <div class="relative">
+            <div id="PortalDropdownButton" class="duration-300 rounded p-2 flex flex-row 
+                justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen 
+                {% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                          viewBox="0 0 24 24"
@@ -58,7 +61,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
                 </svg>
             </div>
-            <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
+            <div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
+                style="display: {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'block' : 'none' }};"
                  id="PortalDropDown">
                 <ul class="mx-2">
                     <li>
@@ -124,9 +128,10 @@
                 </ul>
             </div>
         </div>
+
         {# SideBar Button - Page Style - Button #}
         <a href="{{ path('admin_dashboard_customize') }}">
-            <div id="UserButton"
+            <div id="pageStyle"
                  class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-4" fill="none" stroke="currentColor"
@@ -136,6 +141,26 @@
                               d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
                     </svg>
                     Page Style
+                </div>
+                <svg class="w-4" fill="none" stroke="currentColor"
+                     stroke-width="1.5"
+                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                </svg>
+            </div>
+        </a>
+        {# SideBar Button - Portal Statistics - Button #}
+        <a href="{{ path('admin_dashboard_statistics') }}">
+            <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
+                    </svg>
+                    Portal Statistics
                 </div>
                 <svg class="w-4" fill="none" stroke="currentColor"
                      stroke-width="1.5"

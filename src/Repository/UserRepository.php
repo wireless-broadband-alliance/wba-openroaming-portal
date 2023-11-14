@@ -108,6 +108,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $qb = $this->createQueryBuilder('u');
 
+        $qb->where('u.roles NOT LIKE :role')
+            ->setParameter('role', '%ROLE_ADMIN%');
+
         if ($filter === 'verified') {
             $qb->andWhere('u.isVerified = :verified')
                 ->setParameter('verified', true);
