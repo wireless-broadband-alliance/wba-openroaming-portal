@@ -26,6 +26,6 @@ final class Version20231024115857 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE User DROP deletedAt, CHANGE email email VARCHAR(255) DEFAULT NULL, CHANGE createdAt createdAt DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, CHANGE bannedAt bannedAt DATETIME DEFAULT CURRENT_TIMESTAMP');
+        $this->addSql('ALTER TABLE User DROP deletedAt');
     }
 }
