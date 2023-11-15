@@ -541,6 +541,21 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The authentication settings has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
+
+            if ($type === 'settingSMS') {
+                $command = 'php bin/console reset:smsSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_sms');
+            }
         }
 
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
@@ -633,6 +648,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
+        }
+
+        if ($type === 'settingSMS') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingSMS']);
         }
 
         return $this->redirectToRoute('admin_page');
