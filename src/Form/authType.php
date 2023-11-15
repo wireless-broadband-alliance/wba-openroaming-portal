@@ -62,6 +62,16 @@ class authType extends AbstractType
                 'type' => TextType::class,
             ],
 
+            'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
+                'type' => ChoiceType::class,
+            ],
+            'AUTH_METHOD_SMS_REGISTER_LABEL' => [
+                'type' => TextType::class,
+            ],
+            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => [
+                'type' => TextType::class,
+            ],
+
             'AUTH_METHOD_SMS_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
             ],

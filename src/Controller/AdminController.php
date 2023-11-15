@@ -1021,6 +1021,10 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
 
+                'AUTH_METHOD_SMS_REGISTER_ENABLED',
+                'AUTH_METHOD_SMS_REGISTER_LABEL',
+                'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+
                 'AUTH_METHOD_SMS_LOGIN_ENABLED',
                 'AUTH_METHOD_SMS_LOGIN_LABEL',
                 'AUTH_METHOD_SMS_LOGIN_DESCRIPTION',

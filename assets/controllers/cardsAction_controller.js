@@ -112,6 +112,19 @@ export default class extends Controller {
 		];
 		CardsActions(loginRadioButtons, loginTextInputs, loginCards);
 
+		// EMAIL REGISTER
+		const SMSregisterRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_SMS_REGISTER_ENABLED]"]');
+		const SMSregisterTextInputs = [
+			document.querySelector('[name="auth[AUTH_METHOD_SMS_REGISTER_LABEL]"]'),
+			document.querySelector('[name="auth[AUTH_METHOD_SMS_REGISTER_DESCRIPTION]"]'),
+		];
+		const SMSregisterCards = [
+			document.getElementById('AUTH_METHOD_SMS_REGISTER_LABEL'),
+			document.getElementById('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
+
+		];
+		CardsActions(SMSregisterRadioButtons, SMSregisterTextInputs, SMSregisterCards);
+
 		// SMS LOGIN
 		const smsloginRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_SMS_LOGIN_ENABLED]"]');
 		const smsloginTextInputs = [

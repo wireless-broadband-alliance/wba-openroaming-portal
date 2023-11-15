@@ -347,9 +347,11 @@ class GetSettings
             'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => 'The label for Login authentication button on the login page',
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => 'The description for Login authentication on the login page',
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => 'Enable or disable authentication register with the phone number',
+            'AUTH_METHOD_SMS_REGISTER_LABEL' => 'The label for authentication with the phone number, on button of the login page',
+            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
             'AUTH_METHOD_SMS_LOGIN_ENABLED' => 'Enable or disable authentication login with the phone number',
-            'AUTH_METHOD_SMS_LABEL' => 'The label for authentication with the phone number, on button of the login page',
-            'AUTH_METHOD_SMS_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
+            'AUTH_METHOD_SMS_LOGIN_LABEL' => 'The label for authentication with the phone number, on button of the login page',
+            'AUTH_METHOD_SMS_LOGIN_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
 
             'SYNC_LDAP_ENABLED' => 'Enable or disable synchronization with LDAP',
             'SYNC_LDAP_SERVER' => 'The LDAP server\'s URL',

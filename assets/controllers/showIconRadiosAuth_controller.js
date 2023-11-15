@@ -82,7 +82,6 @@ export default class extends Controller {
 			});
 		});
 
-		// Looks for the specific name fourth name element
 		document.addEventListener("DOMContentLoaded", function () {
 			const SMSLoginRadioSets = document.querySelectorAll('[name="SMSLoginCards"]');
 			SMSLoginRadioSets.forEach(function (radioSet) {
@@ -92,6 +91,18 @@ export default class extends Controller {
 				const SMSoffCustomRadioLogin = radioSet.querySelector('[name="SMSoffCustomRadioLogin"]');
 
 				initializeRadioButtons(SMSonLabelLogin, SMSoffLabelLogin, SMSonCustomRadioLogin, SMSoffCustomRadioLogin);
+			});
+		});
+
+		document.addEventListener("DOMContentLoaded", function () {
+			const SMSRegisterRadioSets = document.querySelectorAll('[name="SMSRegisterCards"]');
+			SMSRegisterRadioSets.forEach(function (radioSet) {
+				const SMSonLabelRegister = radioSet.querySelector('[name="SMSonLabelRegister"]');
+				const SMSoffLabelRegister = radioSet.querySelector('[name="SMSoffLabelRegister"]');
+				const SMSonCustomRadioRegister = radioSet.querySelector('[name="SMSonCustomRadioRegister"]');
+				const SMSoffCustomRadioRegister = radioSet.querySelector('[name="SMSoffCustomRadioRegister"]');
+
+				initializeRadioButtons(SMSonLabelRegister, SMSoffLabelRegister, SMSonCustomRadioRegister, SMSoffCustomRadioRegister);
 			});
 		});
 	}
