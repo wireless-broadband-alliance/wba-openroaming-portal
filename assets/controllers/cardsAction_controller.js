@@ -115,12 +115,12 @@ export default class extends Controller {
 		// SMS LOGIN
 		const smsloginRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_SMS_LOGIN_ENABLED]"]');
 		const smsloginTextInputs = [
-			document.querySelector('[name="auth[AUTH_METHOD_SMS_LABEL]"]'),
-			document.querySelector('[name="auth[AUTH_METHOD_SMS_DESCRIPTION]"]'),
+			document.querySelector('[name="auth[AUTH_METHOD_SMS_LOGIN_LABEL]"]'),
+			document.querySelector('[name="auth[AUTH_METHOD_SMS_LOGIN_DESCRIPTION]"]'),
 		];
 		const smsloginCards = [
-			document.getElementById('AUTH_METHOD_SMS_LABEL'),
-			document.getElementById('AUTH_METHOD_SMS_DESCRIPTION'),
+			document.getElementById('AUTH_METHOD_SMS_LOGIN_LABEL'),
+			document.getElementById('AUTH_METHOD_SMS_LOGIN_DESCRIPTION'),
 
 		];
 		CardsActions(smsloginRadioButtons, smsloginTextInputs, smsloginCards);

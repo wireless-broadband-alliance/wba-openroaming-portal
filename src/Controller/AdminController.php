@@ -1022,8 +1022,8 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
 
                 'AUTH_METHOD_SMS_LOGIN_ENABLED',
-                'AUTH_METHOD_SMS_LABEL',
-                'AUTH_METHOD_SMS_DESCRIPTION',
+                'AUTH_METHOD_SMS_LOGIN_LABEL',
+                'AUTH_METHOD_SMS_LOGIN_DESCRIPTION',
             ];
 
             foreach ($settingsToUpdate as $settingName) {

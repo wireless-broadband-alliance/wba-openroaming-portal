@@ -232,19 +232,29 @@ class GetSettings
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
+        $data['AUTH_METHOD_SMS_REGISTER_LABEL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
+        ];
+
+        $data['AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
+        ];
+
         $data['AUTH_METHOD_SMS_LOGIN_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LOGIN_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LOGIN_ENABLED'),
         ];
 
-        $data['AUTH_METHOD_SMS_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LABEL'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LABEL'),
+        $data['AUTH_METHOD_SMS_LOGIN_LABEL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LOGIN_LABEL'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LOGIN_LABEL'),
         ];
 
-        $data['AUTH_METHOD_SMS_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_DESCRIPTION'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_DESCRIPTION'),
+        $data['AUTH_METHOD_SMS_LOGIN_DESCRIPTION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LOGIN_DESCRIPTION'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LOGIN_DESCRIPTION'),
         ];
 
         $data['TOS_LINK'] = [
