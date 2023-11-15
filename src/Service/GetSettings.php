@@ -233,13 +233,13 @@ class GetSettings
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL'])->getValue() === 'true',
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_LABEL'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'])->getValue() === 'true',
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_LOGIN_ENABLED'] = [

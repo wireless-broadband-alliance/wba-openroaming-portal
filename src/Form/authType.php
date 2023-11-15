@@ -92,6 +92,7 @@ class authType extends AbstractType
                         $settingName === 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' ||
                         $settingName === 'AUTH_METHOD_REGISTER_ENABLED' ||
                         $settingName === 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' ||
+                        $settingName === 'AUTH_METHOD_SMS_REGISTER_ENABLED' ||
                         $settingName === 'AUTH_METHOD_SMS_LOGIN_ENABLED'
                     ) {
                         $formFieldOptions['choices'] = [
