@@ -62,6 +62,12 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
+            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
+            ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => 'AUTH_METHOD_SMS_LOGIN_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SMS_LOGIN_LABEL', 'value' => 'Login with Phone Number'],
+            ['name' => 'AUTH_METHOD_SMS_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your phone number'],
         ];
 
         // Begin a database transaction to ensure data consistency
