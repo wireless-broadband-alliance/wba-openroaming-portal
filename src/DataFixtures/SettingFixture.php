@@ -44,8 +44,9 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
-            ['name' => 'AUTH_METHOD_SMS_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SMS_LABEL', 'value' => 'Login with Number'],
+            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SMS_LOGIN_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SMS_LABEL', 'value' => 'Login with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_DESCRIPTION', 'value' => 'Authenticate with your phone number'],
 
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
