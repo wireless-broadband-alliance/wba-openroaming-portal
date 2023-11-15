@@ -1130,6 +1130,30 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_sms(GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+        ]);
+    }
 
     /**
      * @return Response
@@ -1148,7 +1172,7 @@ class AdminController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        if ($startDateString){
+        if ($startDateString) {
             $startDate = new DateTime($startDateString);
         } else if ($startDateString === "") {
             $startDate = null;
@@ -1156,7 +1180,7 @@ class AdminController extends AbstractController
             $startDate = (new DateTime())->modify('-1 month');
         }
 
-        if ($endDateString){
+        if ($endDateString) {
             $endDate = new DateTime($endDateString);
         } else if ($endDateString === "") {
             $endDate = null;
