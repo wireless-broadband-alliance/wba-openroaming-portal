@@ -227,6 +227,21 @@ class GetSettings
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
+        $data['AUTH_METHOD_SMS_ENABLED'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_ENABLED'])->getValue() === 'true',
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_ENABLED'),
+        ];
+
+        $data['AUTH_METHOD_SMS_LABEL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LABEL'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LABEL'),
+        ];
+
+        $data['AUTH_METHOD_SMS_DESCRIPTION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_DESCRIPTION'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_DESCRIPTION'),
+        ];
+
         $data['TOS_LINK'] = [
             'value' => $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue(),
             'description' => $this->getSettingDescription('TOS_LINK'),
@@ -260,6 +275,21 @@ class GetSettings
         $data['CAPPORT_VENUE_INFO_URL'] = [
             'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_VENUE_INFO_URL'])->getValue(),
             'description' => $this->getSettingDescription('CAPPORT_VENUE_INFO_URL'),
+        ];
+
+        $data['SMS_USERNAME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SMS_USERNAME'])->getValue(),
+            'description' => $this->getSettingDescription('SMS_USERNAME'),
+        ];
+
+        $data['SMS_USER_ID'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SMS_USER_ID'])->getValue(),
+            'description' => $this->getSettingDescription('SMS_USER_ID'),
+        ];
+
+        $data['SMS_HANDLE'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SMS_HANDLE'])->getValue(),
+            'description' => $this->getSettingDescription('SMS_HANDLE'),
         ];
 
         return $data;
@@ -301,6 +331,9 @@ class GetSettings
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => 'Enable or disable Login authentication method',
             'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => 'The label for Login authentication button on the login page',
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => 'The description for Login authentication on the login page',
+            'AUTH_METHOD_SMS_ENABLED' => 'Enable or disable authentication with the phone number',
+            'AUTH_METHOD_SMS_LABEL' => 'The label for authentication with the phone number, on button of the login page',
+            'AUTH_METHOD_SMS_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
 
             'SYNC_LDAP_ENABLED' => 'Enable or disable synchronization with LDAP',
             'SYNC_LDAP_SERVER' => 'The LDAP server\'s URL',
@@ -317,6 +350,10 @@ class GetSettings
             'CAPPORT_ENABLED' => 'Enable or disable Capport DHCP configuration',
             'CAPPORT_PORTAL_URL' => 'Domain that is from the entity hosting the service',
             'CAPPORT_VENUE_INFO_URL' => 'Domain where the user is redirected after clicking the DHCP notification',
+
+            'SMS_USERNAME' => 'Budget SMS Username',
+            'SMS_USER_ID' => 'Budget SMS User ID',
+            'SMS_HANDLE' => 'Budget SMS Handle hash',
         ];
 
         return $descriptions[$settingName] ?? '';

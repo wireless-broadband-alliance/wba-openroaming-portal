@@ -44,6 +44,9 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
+            ['name' => 'AUTH_METHOD_SMS_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SMS_LABEL', 'value' => 'Login with Number'],
+            ['name' => 'AUTH_METHOD_SMS_DESCRIPTION', 'value' => 'Authenticate with your phone number'],
 
             ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
             ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
@@ -60,6 +63,10 @@ class SettingFixture extends Fixture
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
             ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
             ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://openroaming.org/'],
+
+            ['name' => 'SMS_USERNAME', 'value' => ''],
+            ['name' => 'SMS_USER_ID', 'value' => ''],
+            ['name' => 'SMS_HANDLE', 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {
