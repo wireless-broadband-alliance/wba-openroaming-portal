@@ -13,6 +13,7 @@ use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
+use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
@@ -1131,12 +1132,14 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
      * @param GetSettings $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_sms(GetSettings $getSettings): Response
+    public function settings_sms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1148,10 +1151,52 @@ class AdminController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(SMSType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'SMS_USERNAME',
+                'SMS_USER_ID',
+                'SMS_HANDLE',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New SMS configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_sms');
+        }
+
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
+            'form' => $form->createView(),
         ]);
     }
 
