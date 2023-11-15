@@ -61,6 +61,16 @@ class authType extends AbstractType
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => [
                 'type' => TextType::class,
             ],
+
+            'AUTH_METHOD_SMS_LOGIN_ENABLED' => [
+                'type' => ChoiceType::class,
+            ],
+            'AUTH_METHOD_SMS_LABEL' => [
+                'type' => TextType::class,
+            ],
+            'AUTH_METHOD_SMS_DESCRIPTION' => [
+                'type' => TextType::class,
+            ],
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
@@ -71,7 +81,8 @@ class authType extends AbstractType
                     if ($settingName === 'AUTH_METHOD_SAML_ENABLED' ||
                         $settingName === 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' ||
                         $settingName === 'AUTH_METHOD_REGISTER_ENABLED' ||
-                        $settingName === 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                        $settingName === 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' ||
+                        $settingName === 'AUTH_METHOD_SMS_LOGIN_ENABLED'
                     ) {
                         $formFieldOptions['choices'] = [
                             EmailConfirmationStrategy::EMAIL => 'true',

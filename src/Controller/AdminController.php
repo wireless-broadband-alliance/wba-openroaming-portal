@@ -282,7 +282,7 @@ class AdminController extends AbstractController
             $this->addFlash('error_admin', 'This user has already been deleted.');
             return $this->redirectToRoute('admin_page');
         }
-        
+
         // Store the initial bannedAt value before form submission
         $initialBannedAtValue = $user->getBannedAt();
 
@@ -1021,7 +1021,6 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
 
-                'AUTH_METHOD_SMS_REGISTER_ENABLED',
                 'AUTH_METHOD_SMS_LOGIN_ENABLED',
                 'AUTH_METHOD_SMS_LABEL',
                 'AUTH_METHOD_SMS_DESCRIPTION',
