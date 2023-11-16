@@ -37,7 +37,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
     #[Assert\Email]
     private ?string $email = null;
 

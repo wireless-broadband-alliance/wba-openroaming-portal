@@ -5,27 +5,28 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RegistrationFormSMSType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('phoneNumber', NumberType::class, [
+            ->add('phoneNumber', TextType::class, [
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Phone number should not be blank.',
-                    ]),
                     new Length([
-                        'min' => 10,
+                        'min' => 8,
                         'max' => 15,
                         'minMessage' => 'Phone number should be at least {{ limit }} characters long.',
                         'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
+                    ]),
+                    new Regex([
+                        'pattern' => '/^\d+$/',
+                        'message' => 'Phone number should contain only digits.',
                     ]),
                 ],
                 'attr' => [
