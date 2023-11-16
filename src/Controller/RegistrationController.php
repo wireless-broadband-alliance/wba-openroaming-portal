@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -97,7 +98,61 @@ class RegistrationController extends AbstractController
             $this->addFlash('error', 'This authentication method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
         } else {
-            // make registration with sms logic here
+            $user = new User();
+            $event = new Event();
+            $form = $this->createForm(RegistrationFormSMSType::class, $user);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                /*
+                if ($this->userRepository->findOneBy(['phoneNumber' => $user->getEmail()])) {
+                    $this->addFlash('warning', 'User with the same email already exists.');
+                } else if ($data['EMAIL_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
+                    // Generate a random password
+                    $randomPassword = bin2hex(random_bytes(4));
+
+                    // Hash the password
+                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+
+                    // Set the hashed password for the user
+                    $user->setPassword($hashedPassword);
+                    $user->setUuid($user->getEmail());
+                    $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
+                    $user->setCreatedAt(new DateTime());
+                    $entityManager->persist($user);
+
+                    // Defines the Event to the table
+                    $event->setUser($user);
+                    $event->setEventDatetime(new DateTime());
+                    $event->setEventName(AnalyticalEventType::USER_CREATION);
+                    $event->setEventMetadata([
+                        'platform' => PlatformMode::Live,
+                    ]);
+                    $entityManager->persist($event);
+                    $entityManager->flush();
+
+                    $emailSender = $this->parameterBag->get('app.email_address');
+                    $nameSender = $this->parameterBag->get('app.sender_name');
+
+                    // Send email to the user with the verification code
+                    $email = (new TemplatedEmail())
+                        ->from(new Address($emailSender, $nameSender))
+                        ->to($user->getEmail())
+                        ->subject('Your OpenRoaming Registration Details')
+                        ->htmlTemplate('email_activation/email_template_password.html.twig')
+                        ->context([
+                            'uuid' => $user->getUuid(),
+                            'verificationCode' => $user->getVerificationCode(),
+                            'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
+                            'password' => $randomPassword,
+                        ]);
+
+                    $this->addFlash('success', 'We have sent an email with your account password and verification code');
+                    $mailer->send($email);
+
+                }
+                */
+            }
         }
 
 

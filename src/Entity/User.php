@@ -77,6 +77,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $phoneNumber = null;
+
 
     public function __construct()
     {
@@ -393,6 +396,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setDeletedAt(?\DateTimeInterface $deletedAt): static
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): static
+    {
+        $this->phoneNumber = $phoneNumber;
 
         return $this;
     }
