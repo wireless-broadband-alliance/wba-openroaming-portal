@@ -51,14 +51,14 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {{ form_start(registrationSMSForm) }}
-
                 {# Form errors #}
-                {% if form_errors(registrationSMSForm) %}
+                {% if form_errors(registrationSMSForm.phoneNumber) %}
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">
-                        {{ form_errors(registrationSMSForm) }}
+                        {{ form_errors(registrationSMSForm.phoneNumber) }}
                     </div>
                 {% endif %}
+
+                {{ form_start(registrationSMSForm) }}
 
                 {# Phone Number #}
                 <div class="relative mt-10 lg:mt-6 xl:mt-12">
