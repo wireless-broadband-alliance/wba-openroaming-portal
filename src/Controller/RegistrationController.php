@@ -154,11 +154,10 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws Exception
      */
     #[Route('/register/sms', name: 'app_register_sms')]
-    public function registerSMS(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function registerSMS(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -181,8 +180,8 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
-                $this->addFlash('warning', 'User with the same email already exists.');
-            } else if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] === true) {
+                $this->addFlash('warning', 'User with the same phone number already exists.');
+            } else {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -192,7 +191,6 @@ class RegistrationController extends AbstractController
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getPhoneNumber());
-                $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
                 $user->setCreatedAt(new DateTime());
                 $entityManager->persist($user);
 
@@ -206,8 +204,8 @@ class RegistrationController extends AbstractController
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
-
-                dd('Make the rest of the register with Facha :D');
+                dd('Need to rework this register with Facha to send verification sms with codes :D');
+                $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
             }
         }
 
