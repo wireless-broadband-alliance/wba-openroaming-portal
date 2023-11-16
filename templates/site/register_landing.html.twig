@@ -96,7 +96,7 @@
                         </a>
                     {% endif %}
                 </div>
-                {% if data.LOGIN_TRADITIONAL_ENABLED %}
+                {% if data.LOGIN_TRADITIONAL_ENABLED.value == true %}
                     <p class="text-sm font-thin text-gray-800 mt-2 text-center">You already have one account? <a
                                 href="{{ path('app_login') }}"
                                 class="text-lg font-thin text-[#3F474D] hover:underline mt-2 inline-block hover:text-[#7DB928] text-center">Login</a>

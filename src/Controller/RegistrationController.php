@@ -78,7 +78,12 @@ class RegistrationController extends AbstractController
      * @throws Exception
      */
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function register(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer
+    ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -122,6 +127,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_CREATION);
                 $event->setEventMetadata([
                     'platform' => PlatformMode::Live,
+                    'sms' => false,
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
@@ -157,7 +163,11 @@ class RegistrationController extends AbstractController
      * @throws Exception
      */
     #[Route('/register/sms', name: 'app_register_sms')]
-    public function registerSMS(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function registerSMS(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager
+    ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
