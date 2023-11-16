@@ -197,7 +197,7 @@ class GetSettings
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'),
         ];
 
-        $data['REGISTER_ENABLED'] = [
+        $data['EMAIL_REGISTER_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_REGISTER_ENABLED'),
         ];

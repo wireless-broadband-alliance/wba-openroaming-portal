@@ -24,13 +24,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class RegistrationController extends AbstractController
@@ -76,21 +76,30 @@ class RegistrationController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    #[Route('/register/{sms}', name: 'app_register')]
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer, $sms = null): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
-            return $this->redirectToRoute('app_landing');
-        }
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if (!$sms) {
+            if ($data['PLATFORM_MODE']['value'] === true) {
+                $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
+                return $this->redirectToRoute('app_landing');
+            }
 
-        if ($data['REGISTER_ENABLED']['value'] !== true) {
+            if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
+                $this->addFlash('error', 'This authentication method it\'s not enabled!');
+                return $this->redirectToRoute('app_landing');
+            }
+        } else if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
             $this->addFlash('error', 'This authentication method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
+        } else {
+            // make registration with sms logic here
         }
+
 
         $user = new User();
         $event = new Event();
