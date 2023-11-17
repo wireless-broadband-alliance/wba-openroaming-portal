@@ -6,7 +6,15 @@
     </th>
     {# Email #}
     <td class="px-6 py-4">
-        {{ user.email is defined ? user.email : 'No information' }}
+        {% if user.email is not null %}
+            {{ user.email }}
+        {% else %}
+            <p class="font-semibold p-1">
+                <span class="p-1.5 text-red-400 bg-red-100/50 rounded-full">
+                    No Information
+                </span>
+            </p>
+        {% endif %}
     </td>
     {# User Verification #}
     <td class="px-4 py-4 ">
