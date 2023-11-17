@@ -76,7 +76,7 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
+        if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
             // Check if the user is logged in
             if ($this->getUser()) {
                 /** @var User $currentUser */
@@ -124,10 +124,10 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
-                    if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }

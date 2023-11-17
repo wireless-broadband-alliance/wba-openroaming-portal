@@ -890,10 +890,10 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'PLATFORM_MODE' and 'EMAIL_VERIFICATION' settings
+            // Update the 'PLATFORM_MODE' and 'USER_VERIFICATION' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
-            // Update the 'EMAIL_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['EMAIL_VERIFICATION'] ?? null;
+            // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
+            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {
@@ -901,7 +901,7 @@ class AdminController extends AbstractController
                 $em->persist($platformModeSetting);
             }
 
-            $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+            $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'USER_VERIFICATION']);
             if ($emailVerificationSetting) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $em->persist($emailVerificationSetting);

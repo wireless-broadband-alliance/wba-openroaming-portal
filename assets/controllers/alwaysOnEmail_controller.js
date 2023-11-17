@@ -66,7 +66,7 @@ export default class extends Controller {
 		});
 
 		document.addEventListener("DOMContentLoaded", function () {
-			const radioSetsEmail = document.querySelectorAll('[id="EMAIL_VERIFICATION"]');
+			const radioSetsEmail = document.querySelectorAll('[id="USER_VERIFICATION"]');
 
 			radioSetsEmail.forEach(function (radioSet) {
 				const onLabelEmail = radioSet.querySelector('[name="onLabelEmail"]');
@@ -80,7 +80,7 @@ export default class extends Controller {
 
 		document.addEventListener("DOMContentLoaded", function () {
 			const platformModeRadios = document.querySelectorAll('[name="status[PLATFORM_MODE]"]');
-			const emailVerificationCard = document.getElementById("EMAIL_VERIFICATION");
+			const emailVerificationCard = document.getElementById("USER_VERIFICATION");
 			const statusMessage = document.getElementById('statusMessage');
 
 			function updateEmailVerificationCard() {

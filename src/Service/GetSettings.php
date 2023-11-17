@@ -159,11 +159,11 @@ class GetSettings
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
-        $email_verification = $settingRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
-        if ($email_verification !== null) {
-            $data['EMAIL_VERIFICATION'] = [
-                'value' => $email_verification->getValue(),
-                'description' => $this->getSettingDescription('EMAIL_VERIFICATION'),
+        $user_verification = $settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
+        if ($user_verification !== null) {
+            $data['USER_VERIFICATION'] = [
+                'value' => $user_verification->getValue(),
+                'description' => $this->getSettingDescription('USER_VERIFICATION'),
             ];
         }
 
@@ -309,7 +309,7 @@ class GetSettings
             'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => 'The SHA1 hash of your RADIUS server\'s trusted root CA (Defaults to LetsEncrypt CA)',
 
             'PLATFORM_MODE' => 'Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.',
-            'EMAIL_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the email verification system. This system requires all the users to verify is own account before they download any profile',
+            'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system. This system requires all the users to verify is own account before they download any profile',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO' => 'The resource path or URL to the customer\'s logo image',
