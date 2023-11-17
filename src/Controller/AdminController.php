@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
@@ -12,7 +13,6 @@ use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
-use App\Form\SettingType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
@@ -29,6 +29,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -55,6 +56,7 @@ class AdminController extends AbstractController
     private ParameterBagInterface $parameterBag;
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
+    private EntityManagerInterface $entityManager;
 
     /**
      * @param MailerInterface $mailer
@@ -63,14 +65,16 @@ class AdminController extends AbstractController
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
+     * @param EntityManagerInterface $entityManager
      */
     public function __construct(
-        MailerInterface       $mailer,
-        UserRepository        $userRepository,
-        ProfileManager        $profileManager,
-        ParameterBagInterface $parameterBag,
-        GetSettings           $getSettings,
-        SettingRepository     $settingRepository,
+        MailerInterface        $mailer,
+        UserRepository         $userRepository,
+        ProfileManager         $profileManager,
+        ParameterBagInterface  $parameterBag,
+        GetSettings            $getSettings,
+        SettingRepository      $settingRepository,
+        EntityManagerInterface $entityManager,
     )
     {
         $this->mailer = $mailer;
@@ -79,6 +83,7 @@ class AdminController extends AbstractController
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -221,15 +226,18 @@ class AdminController extends AbstractController
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
-        $email = $user->getEmail();
 
-        // Remove associated UserRadiusProfile entities
-        foreach ($user->getUserRadiusProfiles() as $userRadiusProfile) {
-            $em->remove($userRadiusProfile);
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
         }
 
-        // Now, remove the user
-        $em->remove($user);
+        $email = $user->getEmail();
+
+        $user->setDeletedAt(new DateTime());
+        $this->disableProfiles($user);
+
+        $em->persist($user);
         $em->flush();
 
         $this->addFlash('success_admin', sprintf('User with the email "%s" deleted successfully.', $email));
@@ -268,6 +276,11 @@ class AdminController extends AbstractController
             throw new NotFoundHttpException('User not found');
         }
 
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
+        }
+        
         // Store the initial bannedAt value before form submission
         $initialBannedAtValue = $user->getBannedAt();
 
@@ -660,32 +673,6 @@ class AdminController extends AbstractController
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
             ]);
-    }
-
-    /**
-     * @param GetSettings $getSettings
-     * @return Response
-     */
-    #[Route('/dashboard/settings/reset', name: 'admin_dashboard_settings_reset')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settings_reset(GetSettings $getSettings): Response
-    {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-
-        return $this->render('admin/settings.html.twig', [
-            'data' => $data,
-            'getSettings' => $getSettings,
-        ]);
     }
 
     /**
@@ -1133,28 +1120,248 @@ class AdminController extends AbstractController
         ]);
     }
 
-    /*This route it's in development, again I need to fix and check for another stuff first
+
+    /**
+     * @return Response
+     * @throws \JsonException
+     * @throws Exception
+     */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(EntityManagerInterface $em): JsonResponse
+    public function statisticsData(Request $request): Response
     {
-        // Fetch data from your database, for example:
-        $data = $em->getRepository(Event::class)->findAll(); // Adjust YourEntity
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $user = $this->getUser();
 
-        $formattedData = [];
-        dd($formattedData, $data);
+        // Get the submitted start and end dates from the form
+        $startDateString = $request->request->get('startDate');
+        $endDateString = $request->request->get('endDate');
 
-        foreach ($data as $item) {
-            $formattedData[] = [
-                'label' => $item->getLabel(),
-                'date' => $item->getDate()->format('Y-m-d'), // Adjust the date format as needed
-                'count' => $item->getCount(),
-            ];
+        // Convert the date strings to DateTime objects
+        if ($startDateString){
+            $startDate = new DateTime($startDateString);
+        } else if ($startDateString === "") {
+            $startDate = null;
+        } else {
+            $startDate = (new DateTime())->modify('-1 month');
         }
-        return $this->json($formattedData);
+
+        if ($endDateString){
+            $endDate = new DateTime($endDateString);
+        } else if ($endDateString === "") {
+            $endDate = null;
+        } else {
+            $endDate = new DateTime();
+        }
+
+        $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
+        $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
+        $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
+        $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
+
+        return $this->render('admin/statistics.html.twig', [
+            'data' => $data,
+            'current_user' => $user,
+            'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
+            'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
+            'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
+            'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
+            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
+            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+        ]);
     }
 
-    */
+    /**
+     * @throws Exception
+     */
+    private function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Fetch all data without date filtering
+        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
+
+        $profileCounts = [
+            'Android' => 0,
+            'Windows' => 0,
+            'macOS' => 0,
+            'iOS' => 0,
+        ];
+
+        // Filter and count profile types based on the date criteria
+        foreach ($events as $event) {
+            $eventDateTime = $event->getEventDatetime();
+
+            if (!$eventDateTime) {
+                continue; // Skip events with missing dates
+            }
+
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
+
+                if (isset($eventMetadata['type'])) {
+                    $profileType = $eventMetadata['type'];
+
+                    // Check the profile type and update the corresponding count
+                    if (isset($profileCounts[$profileType])) {
+                        $profileCounts[$profileType]++;
+                    }
+                }
+            }
+        }
+
+        return $this->generateDatasets($profileCounts);
+    }
+
+    private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(User::class);
+
+        /* @phpstan-ignore-next-line */
+        $users = $repository->findExcludingAdmin();
+
+        $userCounts = [
+            'SAML' => 0,
+            'Google' => 0,
+            'Portal' => 0,
+        ];
+
+        // Loop through the users and categorize them based on saml_identifier and google_id
+        foreach ($users as $user) {
+            $createdAt = $user->getCreatedAt();
+
+            if (
+                (!$startDate || $createdAt >= $startDate) &&
+                (!$endDate || $createdAt <= $endDate)
+            ) {
+                $samlIdentifier = $user->getSamlIdentifier();
+                $googleId = $user->getGoogleId();
+
+                if ($samlIdentifier) {
+                    $userCounts['SAML']++;
+                } else if ($googleId) {
+                    $userCounts['Google']++;
+                } else {
+                    $userCounts['Portal']++;
+                }
+            }
+        }
+
+        return $this->generateDatasets($userCounts);
+    }
+
+    private function fetchChartPlatformStatus(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Query the database to get events with "event_name" == "USER_CREATION"
+        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
+
+        $statusCounts = [
+            'Live' => 0,
+            'Demo' => 0,
+        ];
+
+        // Loop through the events and count the status of the user when created
+        foreach ($events as $event) {
+            $eventDateTime = $event->getEventDatetime();
+
+            if (!$eventDateTime) {
+                continue;
+            }
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
+
+                if (isset($eventMetadata['platform'])) {
+                    $statusType = $eventMetadata['platform'];
+
+                    // Check the status type and update the corresponding count
+                    if (isset($statusCounts[$statusType])) {
+                        $statusCounts[$statusType]++;
+                    }
+                }
+            }
+        }
+
+        return $this->generateDatasets($statusCounts);
+    }
+
+    private function fetchChartUserVerified(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(User::class);
+
+        /* @phpstan-ignore-next-line */
+        $users = $repository->findExcludingAdmin();
+
+        $userCounts = [
+            'Verified' => 0,
+            'Need Verification' => 0,
+            'Banned' => 0,
+        ];
+
+        // Loop through the users and categorize them based on isVerified and bannedAt
+        foreach ($users as $user) {
+            $createdAt = $user->getCreatedAt();
+
+            if (
+                (!$startDate || $createdAt >= $startDate) &&
+                (!$endDate || $createdAt <= $endDate)
+            ) {
+                $verification = $user->isVerified();
+                $ban = $user->getBannedAt();
+
+                if ($verification) {
+                    $userCounts['Verified']++;
+                } else {
+                    $userCounts['Need Verification']++;
+                }
+
+                if ($ban) {
+                    $userCounts['Banned']++;
+                }
+            }
+        }
+
+        return $this->generateDatasets($userCounts);
+    }
+
+    private function generateDatasets(array $counts): array
+    {
+        $datasets = [];
+        $labels = array_keys($counts);
+        $dataValues = array_values($counts);
+
+        $data = [];
+        $colors = [];
+
+        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+            foreach ($labels as $index => $type) {
+                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+                $data[] = $dataValues[$index];
+                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+            }
+        }
+
+        $datasets[] = [
+            'data' => $data,
+            'backgroundColor' => $colors,
+            'borderColor' => "rgb(78, 164, 116)",
+            'borderRadius' => "15",
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+
     /**
      * @param Request $request
      * @param EntityManagerInterface $em

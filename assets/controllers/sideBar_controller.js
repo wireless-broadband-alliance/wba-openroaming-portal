@@ -103,13 +103,6 @@ export default class extends Controller {
 					dropdownMenuSelect.style.display = 'block';
 				}
 			});
-
-			// Close the dropdown when clicking outside it
-			document.addEventListener('click', (event) => {
-				if (!dropdownButtonSelect.contains(event.target) && !dropdownMenuSelect.contains(event.target)) {
-					dropdownMenuSelect.style.display = 'none';
-				}
-			});
 		}
 
 		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');

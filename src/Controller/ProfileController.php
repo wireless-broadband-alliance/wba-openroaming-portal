@@ -56,6 +56,12 @@ class ProfileController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if ($currentUser->getDeletedAt()) {
+            $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if ($currentUser->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
@@ -102,7 +108,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
-    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
+    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository, Request $request): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -112,6 +118,11 @@ class ProfileController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        if ($currentUser->getDeletedAt()) {
+            $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if ($currentUser->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
@@ -188,10 +199,20 @@ class ProfileController extends AbstractController
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
         $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
-        $event->setEventMetadata([
-            'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::IOS
-        ]);
+        $userAgent = $request->headers->get('User-Agent');
+
+        if (stripos($userAgent, 'iPhone') !== false || stripos($userAgent, 'iPad') !== false) {
+            $event->setEventMetadata([
+                'platform' => $this->settings['PLATFORM_MODE'],
+                'type' => OSTypes::IOS,
+            ]);
+        } elseif (stripos($userAgent, 'Mac OS') !== false) {
+            $event->setEventMetadata([
+                'platform' => $this->settings['PLATFORM_MODE'],
+                'type' => OSTypes::MACOS,
+            ]);
+        }
+
         $eventRepository->save($event, true);
         return $response;
     }
@@ -207,6 +228,11 @@ class ProfileController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        if ($currentUser->getDeletedAt()) {
+            $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if ($currentUser->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');

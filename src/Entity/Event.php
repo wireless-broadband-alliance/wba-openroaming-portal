@@ -56,7 +56,7 @@ class Event
         return $this;
     }
 
-    public function getEventMetadata(): array
+    public function getEventMetadata(): ?array
     {
         return $this->event_metadata;
     }
