@@ -201,6 +201,7 @@ class RegistrationController extends AbstractController
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getPhoneNumber());
+                $user->setVerificationCode($this->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
                 $entityManager->persist($user);
 

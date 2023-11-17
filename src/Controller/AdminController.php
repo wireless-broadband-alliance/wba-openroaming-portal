@@ -1048,10 +1048,6 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_SMS_REGISTER_ENABLED',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
                 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
-
-                'AUTH_METHOD_SMS_LOGIN_ENABLED',
-                'AUTH_METHOD_SMS_LOGIN_LABEL',
-                'AUTH_METHOD_SMS_LOGIN_DESCRIPTION',
             ];
 
             foreach ($settingsToUpdate as $settingName) {
@@ -1072,7 +1068,7 @@ class AdminController extends AbstractController
             // Flush the changes to the database
             $em->flush();
 
-            $this->addFlash('success_admin', 'New autheticaition configuration have been applied successfully.');
+            $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
 

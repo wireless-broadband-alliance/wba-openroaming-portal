@@ -242,20 +242,6 @@ class GetSettings
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
         ];
 
-        $data['AUTH_METHOD_SMS_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LOGIN_ENABLED'])->getValue() === 'true',
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LOGIN_ENABLED'),
-        ];
-
-        $data['AUTH_METHOD_SMS_LOGIN_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LOGIN_LABEL'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LOGIN_LABEL'),
-        ];
-
-        $data['AUTH_METHOD_SMS_LOGIN_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_LOGIN_DESCRIPTION'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_LOGIN_DESCRIPTION'),
-        ];
 
         $data['TOS_LINK'] = [
             'value' => $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue(),
@@ -343,15 +329,12 @@ class GetSettings
             'AUTH_METHOD_REGISTER_ENABLED' => 'Enable or disable Register authentication method',
             'AUTH_METHOD_REGISTER_LABEL' => 'The label for Register authentication button on the login page',
             'AUTH_METHOD_REGISTER_DESCRIPTION' => 'The description for Register authentication on the login page',
-            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => 'Enable or disable Login authentication method',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => 'Enable or disable Login with phone Number or Email',
             'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => 'The label for Login authentication button on the login page',
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => 'The description for Login authentication on the login page',
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => 'Enable or disable authentication register with the phone number',
             'AUTH_METHOD_SMS_REGISTER_LABEL' => 'The label for authentication with the phone number, on button of the login page',
             'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
-            'AUTH_METHOD_SMS_LOGIN_ENABLED' => 'Enable or disable authentication login with the phone number',
-            'AUTH_METHOD_SMS_LOGIN_LABEL' => 'The label for authentication with the phone number, on button of the login page',
-            'AUTH_METHOD_SMS_LOGIN_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
 
             'SYNC_LDAP_ENABLED' => 'Enable or disable synchronization with LDAP',
             'SYNC_LDAP_SERVER' => 'The LDAP server\'s URL',

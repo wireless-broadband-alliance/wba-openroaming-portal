@@ -81,19 +81,7 @@ export default class extends Controller {
 				initializeRadioButtons(onLabelLogin, offLabelLogin, onCustomRadioLogin, offCustomRadioLogin);
 			});
 		});
-
-		document.addEventListener("DOMContentLoaded", function () {
-			const SMSLoginRadioSets = document.querySelectorAll('[name="SMSLoginCards"]');
-			SMSLoginRadioSets.forEach(function (radioSet) {
-				const SMSonLabelLogin = radioSet.querySelector('[name="SMSonLabelLogin"]');
-				const SMSoffLabelLogin = radioSet.querySelector('[name="SMSoffLabelLogin"]');
-				const SMSonCustomRadioLogin = radioSet.querySelector('[name="SMSonCustomRadioLogin"]');
-				const SMSoffCustomRadioLogin = radioSet.querySelector('[name="SMSoffCustomRadioLogin"]');
-
-				initializeRadioButtons(SMSonLabelLogin, SMSoffLabelLogin, SMSonCustomRadioLogin, SMSoffCustomRadioLogin);
-			});
-		});
-
+		
 		document.addEventListener("DOMContentLoaded", function () {
 			const SMSRegisterRadioSets = document.querySelectorAll('[name="SMSRegisterCards"]');
 			SMSRegisterRadioSets.forEach(function (radioSet) {

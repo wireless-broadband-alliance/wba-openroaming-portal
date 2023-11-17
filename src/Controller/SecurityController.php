@@ -81,45 +81,8 @@ class SecurityController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
-            'sms' => false
         ]);
     }
-
-    /**
-     * @throws NonUniqueResultException
-     */
-    #[Route('/login/sms', name: 'app_login_sms')]
-    public function loginSMS(Request $request, AuthenticationUtils $authenticationUtils): Response
-    {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $error = $authenticationUtils->getLastAuthenticationError();
-
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        // Check if there's a UUID parameter in the URL
-        $uuid = $request->query->get('uuid');
-        if ($uuid) {
-            // Try to find the user by UUID excluding admins
-            $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-            if ($user) {
-                // If the user is found, set their phone number as the last username to pre-fill the phone number field
-                $lastUsername = $user->getPhoneNumber();
-            }
-        }
-
-        if ($error instanceof AuthenticationException) {
-            $this->addFlash('error', 'Wrong credentials');
-        }
-
-        return $this->render('site/login_landing.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-            'data' => $data,
-            'sms' => true
-        ]);
-    }
-
 
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
