@@ -466,7 +466,7 @@
 
                         {% if AUTH_METHOD_SMS_LOGIN_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
-                                <a href="#"
+                                <a href="{{ path('app_login_sms') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
                                     {{ AUTH_METHOD_SMS_LOGIN_LABEL.value }}
                                 </a>

@@ -214,7 +214,7 @@ class RegistrationController extends AbstractController
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
-                dd('Need to rework this register with Facha to send verification sms with codes :D');
+                dd($user, $randomPassword, 'Need to rework this register with Facha to send verification sms with code :D');
                 $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
             }
         }
