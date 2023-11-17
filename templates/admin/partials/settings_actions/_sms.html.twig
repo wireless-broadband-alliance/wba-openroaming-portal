@@ -45,9 +45,7 @@
             {% endif %}
         {% endfor %}
     </div>
-    {# maybe put this message on the sms page
-    <div id="capportMessage"
-         class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full lg:w-3/4">
+    <div class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full lg:w-3/4">
         <div class="flex bg-infoBgColor/50 rounded-lg p-4 mb-4 text-xs md:text-sm text-infoTextColor" role="alert">
             <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
                  xmlns="http://www.w3.org/2000/svg">
@@ -56,11 +54,12 @@
                       clip-rule="evenodd"></path>
             </svg>
             <div>
-                <span class="font-medium">To activate CAPPORT you must activate Option 114 on your DHCP server with the value of: <strong>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/api/v1/capport/json</strong></span>
+                <span class="font-medium">Please make sure to insert the three forms to proceed. for more details about this settings please consult this <a
+                            class="font-semibold hover:font-bold"
+                            href="https://www.budgetsms.net/downloads/SMS-Gateway-HTTP-api.pdf" target="_blank">Page</a> and consult the page number 8.</span>
             </div>
         </div>
     </div>
-    #}
     <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
     <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingSMS'}) }}"
