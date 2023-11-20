@@ -165,6 +165,7 @@ class RegistrationController extends AbstractController
 
     /**
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
@@ -221,7 +222,9 @@ class RegistrationController extends AbstractController
                 $entityManager->flush();
 
                 // Send SMS
-                $this->sendSMS->sendSms($user->getPhoneNumber(), 'Your password: ' . $randomPassword);
+                $verificationCode = $user->getVerificationCode();
+                $message = 'Your password is: ' . $randomPassword . '. Verification code is: ' . $verificationCode;
+                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
 
                 $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
             }

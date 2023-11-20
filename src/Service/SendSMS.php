@@ -7,7 +7,6 @@ use App\Repository\UserRepository;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -38,7 +37,6 @@ class SendSMS
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      */
     public function sendSms(string $recipient, string $message): void
@@ -69,6 +67,6 @@ class SendSMS
         $statusCode = $response->getStatusCode();
         // $content = $response->toArray();
 
-        dd($statusCode, $username, $userId, $handle);
+        dd($statusCode, $username, $userId, $handle, $recipient, $message);
     }
 }
