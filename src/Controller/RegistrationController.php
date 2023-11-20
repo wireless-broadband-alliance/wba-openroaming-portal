@@ -13,6 +13,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -40,20 +41,23 @@ class RegistrationController extends AbstractController
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
     private ParameterBagInterface $parameterBag;
+    private SendSMS $sendSMS;
 
     /**
-     * SiteController constructor.
+     * Registration constructor.
      *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param SendSMS $sendSMS Calls the sendSMS service
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag, SendSMS $sendSMS)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
+        $this->sendSMS = $sendSMS;
     }
 
     /**
@@ -215,7 +219,10 @@ class RegistrationController extends AbstractController
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
-                dd($user, $randomPassword, 'Need to rework this register with Facha to send verification sms with code :D');
+
+                // Send SMS
+                $this->sendSMS->sendSms($user->getPhoneNumber(), 'Your password: ' . $randomPassword);
+
                 $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
             }
         }
