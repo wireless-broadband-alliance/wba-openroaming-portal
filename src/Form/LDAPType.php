@@ -65,6 +65,7 @@ class LDAPType extends AbstractType
                 'attr' => [
                     'data-controller' => 'descriptionCard cardsAction showInfoMessage showIconRadios',
                     'autocomplete' => 'off',
+                    'required' => true
                 ],
                 'required' => false,
             ];
