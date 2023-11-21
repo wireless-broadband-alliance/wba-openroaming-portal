@@ -1256,6 +1256,7 @@ class AdminController extends AbstractController
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
         $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
+        $fetchChartSMSEmail = $this->fetchChartSMSEmail($startDate, $endDate);
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
@@ -1264,6 +1265,7 @@ class AdminController extends AbstractController
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
+            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
@@ -1427,6 +1429,49 @@ class AdminController extends AbstractController
         }
 
         return $this->generateDatasets($userCounts);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Fetch all data without date filtering
+        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
+
+        $PortalUsersCounts = [
+            'Phone Number' => 0,
+            'Email' => 0,
+        ];
+
+        // Filter and count users created with email or phone number based on the event USER_CREATION
+        foreach ($events as $event) {
+            $eventDateTime = $event->getEventDatetime();
+
+            if (!$eventDateTime) {
+                continue; // Skip events with missing dates
+            }
+
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
+
+                if (isset($eventMetadata['sms'])) {
+                    // When 'sms' is true, increment sms
+                    if ($eventMetadata['sms'] === true) {
+                        $PortalUsersCounts['Phone Number']++;
+                    } else {
+                        $PortalUsersCounts['Email']++;
+                    }
+                }
+            }
+        }
+
+        return $this->generateDatasets($PortalUsersCounts);
     }
 
     private function generateDatasets(array $counts): array

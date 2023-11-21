@@ -1,4 +1,4 @@
-<div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-2 max-w-3xl" data-controller="descriptionCard statistics">
+<div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard statistics">
     {# Devices #}
     <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left">Devices</h1>
@@ -10,6 +10,12 @@
         <h1 class="text-lg font-medium text-left">Authentication</h1>
         <canvas class="max-w-full" id="authenticationChart" data-authentication
                 data-chart-data="{{ authenticationDataJson }}"></canvas>
+    </div>
+    {# SMS & Email #}
+    <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <h1 class="text-lg font-medium text-left">Portal with SMS or Email</h1>
+        <canvas class="max-w-full" id="SMSEmailChart" data-SMSEmail
+                data-chart-data="{{ SMSEmailDataJson }}"></canvas>
     </div>
     {# Platform Status #}
     <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
