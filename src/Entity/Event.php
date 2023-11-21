@@ -27,6 +27,9 @@ class Event
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $verification_attempt_sms = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +79,18 @@ class Event
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getVerificationAttemptSms(): ?int
+    {
+        return $this->verification_attempt_sms;
+    }
+
+    public function setVerificationAttemptSms(?int $verification_attempt_sms): static
+    {
+        $this->verification_attempt_sms = $verification_attempt_sms;
 
         return $this;
     }

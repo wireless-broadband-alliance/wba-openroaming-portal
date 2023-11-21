@@ -370,4 +370,27 @@ class SiteController extends AbstractController
         $this->addFlash('error', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('app_email_code');
     }
+
+
+    /**
+     * Regenerate the verification code for the user and send a new sms
+     *
+     * @return RedirectResponse A redirect response.
+     * @throws Exception
+     */
+    #[Route('/sms/regenerate', name: 'app_regenerate_sms_code')]
+    #[IsGranted('ROLE_USER')]
+    public function regenerateCodeSMS(): RedirectResponse
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $isVerified = $currentUser->isVerified();
+
+        if (!$isVerified) {
+
+        }
+
+        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getPhoneNumber());
+        return $this->redirectToRoute('app_landing');
+    }
 }
