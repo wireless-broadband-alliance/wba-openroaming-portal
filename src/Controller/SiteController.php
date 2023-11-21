@@ -76,19 +76,18 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
-            // Check if the user is logged in
-            if ($this->getUser()) {
-                /** @var User $currentUser */
-                $currentUser = $this->getUser();
-                $verification = $currentUser->isVerified();
-                // Check if the user is verified
-                if (!$verification) {
-                    $this->addFlash('error', 'Your account is not verified to download a profile!');
-                    return $this->redirectToRoute('app_email_code');
-                }
+        // Check if the user is logged in
+        if (($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) && $this->getUser()) {
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            $verification = $currentUser->isVerified();
+            // Check if the user is verified
+            if (!$verification) {
+                $this->addFlash('error', 'Your account is not verified to download a profile!');
+                return $this->redirectToRoute('app_email_code');
             }
         }
+
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
         if ($data['PLATFORM_MODE']['value']) {
@@ -373,24 +372,46 @@ class SiteController extends AbstractController
 
 
     /**
-     * Regenerate the verification code for the user and send a new sms
+     * Regenerate the verification code for the user and send a new SMS.
      *
      * @return RedirectResponse A redirect response.
      * @throws Exception
      */
     #[Route('/sms/regenerate', name: 'app_regenerate_sms_code')]
     #[IsGranted('ROLE_USER')]
-    public function regenerateCodeSMS(): RedirectResponse
+    public function regenerateCodeSMS(EventRepository $eventRepository): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
 
-        if (!$isVerified) {
+        // Fetch the latest 'USER_SMS_ATTEMPT' event for the user
+        $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
 
+        if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
+            if (!$latestEvent) {
+                // If no previous attempt, set attempts to 1
+                $attempts = 1;
+                $latestEvent = new Event();
+                $latestEvent->setUser($currentUser);
+                $latestEvent->setEventDatetime(new DateTime());
+                $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
+                $latestEvent->setEventMetadata([
+                    'platform' => PlatformMode::Live,
+                    'phoneNumber' => $currentUser->getPhoneNumber(),
+                ]);
+            } else {
+                // Increment the attempts
+                $attempts = $latestEvent->getVerificationAttemptSms() + 1;
+            }
+
+            $latestEvent->setVerificationAttemptSms($attempts);
+            $eventRepository->save($latestEvent, true);
+            $attemptsLeft = 3 - $latestEvent->getVerificationAttemptSms();
+            $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
+            $this->addFlash('success', $message);
+            return $this->redirectToRoute('app_landing');
         }
-
-        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getPhoneNumber());
+        $this->addFlash('error', 'This number ' . $currentUser->getPhoneNumber() . ' has exceeded the limit of tries, please contact the support team.');
         return $this->redirectToRoute('app_landing');
     }
 }

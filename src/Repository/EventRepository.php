@@ -3,7 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Event;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,6 +40,26 @@ class EventRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * Find the latest 'USER_SMS_ATTEMPT' event for the given user.
+     *
+     * @param User $user
+     * @return Event|null
+     * @throws NonUniqueResultException
+     */
+    public function findLatestSmsAttemptEvent(User $user): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', AnalyticalEventType::USER_SMS_ATTEMPT)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 //    /**
