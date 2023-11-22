@@ -68,6 +68,7 @@ class SettingFixture extends Fixture
             ['name' => 'SMS_USER_ID', 'value' => ''],
             ['name' => 'SMS_HANDLE', 'value' => ''],
             ['name' => 'SMS_FROM', 'value' => 'OR_PROVISIONING'],
+            ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
         ];
 
         foreach ($settings as $settingData) {

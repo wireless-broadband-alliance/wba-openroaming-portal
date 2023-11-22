@@ -298,6 +298,11 @@ class GetSettings
             'description' => $this->getSettingDescription('SMS_FROM'),
         ];
 
+        $data['SMS_TIMER_RESEND'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SMS_TIMER_RESEND'])->getValue(),
+            'description' => $this->getSettingDescription('SMS_TIMER_RESEND'),
+        ];
+
         return $data;
     }
 
@@ -361,6 +366,7 @@ class GetSettings
             'SMS_USER_ID' => 'Budget SMS User ID',
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
+            'SMS_TIMER_RESEND' => 'Timer in minutes to make the user wait to resend a new SMS'
         ];
 
         return $descriptions[$settingName] ?? '';

@@ -115,16 +115,7 @@ class SendSMS
         $latestEvent = $eventRepository->findLatestSmsAttemptEvent($user);
 
         // Check the number of attempts
-        if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
-            $minInterval = new DateInterval('PT5M'); // 5-minutes interval - need to make a settings of this later
-            $currentTime = new DateTime();
-
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() && $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
-                return true;
-            }
-        }
-
-        return false;
+        return !$latestEvent || $latestEvent->getVerificationAttemptSms() < 3;
     }
 
     /**
@@ -142,10 +133,11 @@ class SendSMS
      */
     public function regenerateSmsCode(User $user): bool
     {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
         if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
-            $minInterval = new DateInterval('PT5M'); // 5-minutes interval - need to make a settings of this later
+            $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
             if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() && $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {

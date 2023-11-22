@@ -384,6 +384,9 @@ class SiteController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function regenerateCodeSMS(EventRepository $eventRepository, SendSMS $sendSmsService): RedirectResponse
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
@@ -402,7 +405,7 @@ class SiteController extends AbstractController
                 }
             } else {
                 // If regeneration failed, show an appropriate error message
-                $this->addFlash('error', 'Failed to regenerate SMS code. Please, wait 5 minutes before generating a new code.');
+                $this->addFlash('error', 'Failed to regenerate SMS code. Please, wait ' . $data['SMS_TIMER_RESEND']['value'] . ' minute(s) before generating a new code.');
             }
         } catch (\RuntimeException $e) {
             // Handle generic exception and display a message to the user
