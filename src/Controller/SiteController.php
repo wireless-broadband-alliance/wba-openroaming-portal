@@ -13,7 +13,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\GetSettings;
-use DateInterval;
+use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -378,54 +378,35 @@ class SiteController extends AbstractController
      *
      * @return RedirectResponse A redirect response.
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/sms/regenerate', name: 'app_regenerate_sms_code')]
     #[IsGranted('ROLE_USER')]
-    public function regenerateCodeSMS(EventRepository $eventRepository): RedirectResponse
+    public function regenerateCodeSMS(EventRepository $eventRepository, SendSMS $sendSmsService): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Fetch the latest 'USER_SMS_ATTEMPT' event for the user
-        $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
+        try {
+            $result = $sendSmsService->regenerateSmsCode($currentUser);
 
-        if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
-            // Check last verification code time
-            $minInterval = new DateInterval('PT5M'); // 5 minutes interval
-            $currentTime = new DateTime();
+            if ($result) {
+                // If he gets true from the service, show the attempts left with a message
+                $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
 
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() && $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
-                if (!$latestEvent) {
-                    // If no previous attempt, set attempts to 1
-                    $attempts = 1;
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($currentUser);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
-                    $latestEvent->setEventMetadata([
-                        'platform' => PlatformMode::Live,
-                        'phoneNumber' => $currentUser->getPhoneNumber(),
-                    ]);
-                } else {
-                    // Increment the attempts
-                    $attempts = $latestEvent->getVerificationAttemptSms() + 1;
+                // Check if $latestEvent to avoid null conflicts
+                if ($latestEvent) {
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttemptSms();
+                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
+                    $this->addFlash('success', $message);
                 }
-
-                $latestEvent->setVerificationAttemptSms($attempts);
-                $latestEvent->setLastVerificationCodeTimeSms($currentTime); // save the current time for then check again after 5 minutes
-                $eventRepository->save($latestEvent, true);
-
-                $attemptsLeft = 3 - $latestEvent->getVerificationAttemptSms(); // count try left to resent code
-                $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
-                $this->addFlash('success', $message);
-
-                // Add the logic to resend code here
-
-                return $this->redirectToRoute('app_landing');
+            } else {
+                // If regeneration failed, show an appropriate error message
+                $this->addFlash('error', 'Failed to regenerate SMS code. Please, wait 5 minutes before generating a new code.');
             }
-            $this->addFlash('error', 'You can regenerate a new code only once every 5 minutes. Please wait before trying again.');
-        } else {
-            $this->addFlash('error', 'This number ' . $currentUser->getPhoneNumber() . ' has exceeded the limit of tries, please contact the support team.');
+        } catch (Exception) {
+            // Handle exceptions thrown by the service (e.g., network issues, API errors)
+            $this->addFlash('error', 'An error occurred while regenerating the SMS code. Please try again later.');
         }
 
         return $this->redirectToRoute('app_landing');
