@@ -2,15 +2,14 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CapportType extends AbstractType
+class SMSType extends AbstractType
 {
     private GetSettings $getSettings;
 
@@ -22,14 +21,26 @@ class CapportType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'CAPPORT_ENABLED' => [
-                'type' => ChoiceType::class,
-            ],
-            'CAPPORT_PORTAL_URL' => [
+            'SMS_USERNAME' => [
                 'type' => TextType::class,
             ],
-            'CAPPORT_VENUE_INFO_URL' => [
+            'SMS_USER_ID' => [
                 'type' => TextType::class,
+            ],
+            'SMS_HANDLE' => [
+                'type' => TextType::class,
+            ],
+            'SMS_FROM' => [
+                'type' => TextType::class,
+                'options' => [
+                    'max_length' => 15,
+                ],
+            ],
+            'SMS_TIMER_RESEND' => [
+                'type' => IntegerType::class,
+                'options' => [
+                    'maxlength' => 3,
+                ],
             ],
         ];
 
@@ -38,14 +49,6 @@ class CapportType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'CAPPORT_ENABLED') {
-                        $formFieldOptions['choices'] = [
-                            EmailConfirmationStrategy::EMAIL => 'true',
-                            EmailConfirmationStrategy::NO_EMAIL => 'false',
-                        ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
-                        $formFieldOptions['required'] = true;
-                    }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
@@ -53,10 +56,10 @@ class CapportType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showInfoMessage showIconRadios',
+                    'data-controller' => 'descriptionCard cardsAction showIconRadios',
                     'autocomplete' => 'off',
                 ],
-                'required' => false,
+                'required' => true,
             ];
         }
     }

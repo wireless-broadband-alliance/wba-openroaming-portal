@@ -14,10 +14,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:authSettings',
-    description: 'Reset Authentication Settings',
+    name: 'reset:smsSettings',
+    description: 'Reset SMS Configuration Settings',
 )]
-class ResetAuthSettingsCommand extends Command
+class ResetSMSSettingsCommand extends Command
 {
     private EntityManagerInterface $entityManager;
 
@@ -31,8 +31,8 @@ class ResetAuthSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:authSettings')
-            ->setDescription('Reset Authentication Settings')
+            ->setName('reset:smsSettings')
+            ->setDescription('Reset SMS Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -41,7 +41,7 @@ class ResetAuthSettingsCommand extends Command
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the authentication settings. [y/N] ', false);
+            $question = new ConfirmationQuestion('This action will reset the sms configuration settings. [y/N] ', false);
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -50,21 +50,11 @@ class ResetAuthSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account'],
-            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => 'SMS_USERNAME', 'value' => ''],
+            ['name' => 'SMS_USER_ID', 'value' => ''],
+            ['name' => 'SMS_HANDLE', 'value' => ''],
+            ['name' => 'SMS_FROM', 'value' => 'OR_PROVISIONING'],
+            ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
         ];
 
         // Begin a database transaction to ensure data consistency
@@ -97,7 +87,7 @@ class ResetAuthSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> All the authentication settings have been set to the default values.
+<info>Success:</info> All the sms configuration settings have been set to the default values.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;

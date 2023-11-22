@@ -9,6 +9,7 @@ export default class extends Controller {
 			const authenticationChartElement = document.getElementById('authenticationChart');
 			const platformStatusChartElement = document.getElementById('platformStatusChart');
 			const userVerifiedChartElement = document.getElementById('userVerifiedChart');
+			const SMSEmailChartElement = document.getElementById('SMSEmailChart');
 
 
 			if (devicesChartElement && authenticationChartElement && platformStatusChartElement && userVerifiedChartElement) {
@@ -17,6 +18,7 @@ export default class extends Controller {
 				const authenticationData = JSON.parse(authenticationChartElement.getAttribute('data-chart-data'));
 				const platformStatusData = JSON.parse(platformStatusChartElement.getAttribute('data-chart-data'));
 				const userVerifiedData = JSON.parse(userVerifiedChartElement.getAttribute('data-chart-data'));
+				const SMSEmailChartData = JSON.parse(SMSEmailChartElement.getAttribute('data-chart-data'));
 
 				// Create the Chart.js charts with the fetched data for devices and authentication
 				const devicesChart = new Chart(devicesChartElement, {
@@ -94,6 +96,26 @@ export default class extends Controller {
 							}
 						},
 						indexAxis: 'y',
+					}
+				});
+
+				const SMSEmailChart = new Chart(SMSEmailChartElement, {
+					type: 'bar',
+					data: SMSEmailChartData,
+					options: {
+						plugins: {
+							legend: {
+								display: false,
+							},
+						},
+						scales: {
+							y: {
+								ticks: {
+									precision: 0
+								}
+							}
+						},
+						indexAxis: 'x',
 					}
 				});
 			}

@@ -50,7 +50,7 @@ class ResetPlatformStatusSettingsCommand extends Command
 
         $settings = [
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
-            ['name' => 'EMAIL_VERIFICATION', 'value' => 'OFF'],
+            ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
         ];
 
         $this->entityManager->beginTransaction();

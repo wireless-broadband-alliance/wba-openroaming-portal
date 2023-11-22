@@ -86,7 +86,7 @@ export default class extends Controller {
 		];
 		CardsActions(googleRadioButtons, googleTextInputs, googleCards);
 
-		// REGISTER
+		// EMAIL REGISTER
 		const registerRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_REGISTER_ENABLED]"]');
 		const registerTextInputs = [
 			document.querySelector('[name="auth[AUTH_METHOD_REGISTER_LABEL]"]'),
@@ -99,7 +99,7 @@ export default class extends Controller {
 		];
 		CardsActions(registerRadioButtons, registerTextInputs, registerCards);
 
-		// LOGIN TRADITIONAL
+		// EMAIL LOGIN
 		const loginRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED]"]');
 		const loginTextInputs = [
 			document.querySelector('[name="auth[AUTH_METHOD_LOGIN_TRADITIONAL_LABEL]"]'),
@@ -111,5 +111,19 @@ export default class extends Controller {
 
 		];
 		CardsActions(loginRadioButtons, loginTextInputs, loginCards);
+
+		// SMS REGISTER
+		const SMSregisterRadioButtons = document.querySelectorAll('[name="auth[AUTH_METHOD_SMS_REGISTER_ENABLED]"]');
+		const SMSregisterTextInputs = [
+			document.querySelector('[name="auth[AUTH_METHOD_SMS_REGISTER_LABEL]"]'),
+			document.querySelector('[name="auth[AUTH_METHOD_SMS_REGISTER_DESCRIPTION]"]'),
+		];
+		const SMSregisterCards = [
+			document.getElementById('AUTH_METHOD_SMS_REGISTER_LABEL'),
+			document.getElementById('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
+
+		];
+		CardsActions(SMSregisterRadioButtons, SMSregisterTextInputs, SMSregisterCards);
+		
 	}
 }

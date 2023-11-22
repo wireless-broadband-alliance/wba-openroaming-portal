@@ -13,6 +13,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\GetSettings;
+use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -76,19 +77,18 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
-            // Check if the user is logged in
-            if ($this->getUser()) {
-                /** @var User $currentUser */
-                $currentUser = $this->getUser();
-                $verification = $currentUser->isVerified();
-                // Check if the user is verified
-                if (!$verification) {
-                    $this->addFlash('error', 'Your account is not verified to download a profile!');
-                    return $this->redirectToRoute('app_email_code');
-                }
+        // Check if the user is logged in
+        if (($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) && $this->getUser()) {
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+            $verification = $currentUser->isVerified();
+            // Check if the user is verified
+            if (!$verification) {
+                $this->addFlash('error', 'Your account is not verified to download a profile!');
+                return $this->redirectToRoute('app_email_code');
             }
         }
+
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
         if ($data['PLATFORM_MODE']['value']) {
@@ -115,6 +115,7 @@ class SiteController extends AbstractController
                     $event->setEventName(AnalyticalEventType::USER_CREATION);
                     $event->setEventMetadata([
                         'platform' => PlatformMode::Demo,
+                        'sms' => false,
                     ]);
                     $entityManager->persist($event);
 
@@ -124,10 +125,10 @@ class SiteController extends AbstractController
                         $authenticator,
                         $request
                     );
-                    if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
-                    if ($data["EMAIL_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -369,5 +370,50 @@ class SiteController extends AbstractController
         // Code is incorrect, display error message and redirect again to the check email page
         $this->addFlash('error', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('app_email_code');
+    }
+
+
+    /**
+     * Regenerate the verification code for the user and send a new SMS.
+     *
+     * @return RedirectResponse A redirect response.
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/sms/regenerate', name: 'app_regenerate_sms_code')]
+    #[IsGranted('ROLE_USER')]
+    public function regenerateCodeSMS(EventRepository $eventRepository, SendSMS $sendSmsService): RedirectResponse
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        try {
+            $result = $sendSmsService->regenerateSmsCode($currentUser);
+
+            if ($result) {
+                // If he gets true from the service, show the attempts left with a message
+                $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
+
+                // Check if $latestEvent to avoid null conflicts
+                if ($latestEvent) {
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttemptSms();
+                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
+                    $this->addFlash('success', $message);
+                }
+            } else {
+                // If regeneration failed, show an appropriate error message
+                $this->addFlash('error', 'Failed to regenerate SMS code. Please, wait ' . $data['SMS_TIMER_RESEND']['value'] . ' minute(s) before generating a new code.');
+            }
+        } catch (\RuntimeException $e) {
+            // Handle generic exception and display a message to the user
+            $this->addFlash('error', $e->getMessage());
+        } catch (Exception) {
+            // Handle exceptions thrown by the service (e.g., network issues, API errors)
+            $this->addFlash('error', 'An error occurred while regenerating the SMS code. Please try again later.');
+        }
+        return $this->redirectToRoute('app_landing');
     }
 }
