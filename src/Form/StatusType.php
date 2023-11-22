@@ -27,8 +27,8 @@ class StatusType extends AbstractType
             $settingValue = $setting->getValue();
             $description = $this->getSettings->getSettingDescription($settingName);
 
-            if ($settingName === 'EMAIL_VERIFICATION') {
-                $builder->add('EMAIL_VERIFICATION', ChoiceType::class, [
+            if ($settingName === 'USER_VERIFICATION') {
+                $builder->add('USER_VERIFICATION', ChoiceType::class, [
                     'choices' => [
                         EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,

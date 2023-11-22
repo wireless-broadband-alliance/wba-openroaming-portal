@@ -66,11 +66,11 @@
                 {% endfor %}
 
                 {% if PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
-                    <div class="{% if EMAIL_VERIFICATION.value != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
+                    <div class="{% if USER_VERIFICATION.value != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
-                        {% elseif  EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                        {% elseif  USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
                         {% endif %}
@@ -171,7 +171,7 @@
                                 {% endif %}
                             </form>
                         {% else %}
-                            {% if EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            {% if USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 {% if not app.user.isVerified %}
                                     {% include 'email_activation/index.html.twig' %}
                                 {% endif %}
@@ -329,7 +329,7 @@
                                 </form>
                             </div>
                         {% else %}
-                            {% if EMAIL_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            {% if USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 {% include 'email_activation/index.html.twig' %}
                             {% else %}
                                 <div class="mt-10">
@@ -405,6 +405,16 @@
                                 Please select one of the following authentication methods to obtain a profile: </p>
                         </div>
 
+                        {% if LOGIN_TRADITIONAL_ENABLED.value %}
+                            <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
+                                <a href="{{ path('app_login') }}"
+                                   class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
+                                    {{ LOGIN_TRADITIONAL_LABEL.value }}
+                                </a>
+                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+                            </div>
+                        {% endif %}
+
                         {% if GOOGLE_LOGIN_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('connect_google') }}"
@@ -433,7 +443,7 @@
                             </div>
                         {% endif %}
 
-                        {% if REGISTER_ENABLED.value %}
+                        {% if EMAIL_REGISTER_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('app_register') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
@@ -443,14 +453,13 @@
                             </div>
                         {% endif %}
 
-
-                        {% if LOGIN_TRADITIONAL_ENABLED.value %}
+                        {% if AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
-                                <a href="{{ path('app_login') }}"
+                                <a href="{{ path('app_register_sms') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ LOGIN_TRADITIONAL_LABEL.value }}
+                                    {{ AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                                 </a>
-                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+                                <p>{{ AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 

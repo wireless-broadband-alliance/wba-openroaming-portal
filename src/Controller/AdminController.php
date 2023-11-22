@@ -13,6 +13,7 @@ use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
+use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
@@ -233,7 +234,9 @@ class AdminController extends AbstractController
         }
 
         $email = $user->getEmail();
-
+        foreach ($user->getEvent() as $event) {
+            $em->remove($event);
+        }
         $user->setDeletedAt(new DateTime());
         $this->disableProfiles($user);
 
@@ -280,7 +283,7 @@ class AdminController extends AbstractController
             $this->addFlash('error_admin', 'This user has already been deleted.');
             return $this->redirectToRoute('admin_page');
         }
-        
+
         // Store the initial bannedAt value before form submission
         $initialBannedAtValue = $user->getBannedAt();
 
@@ -538,6 +541,21 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The authentication settings has been reseted successfully');
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
+
+            if ($type === 'settingSMS') {
+                $command = 'php bin/console reset:smsSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully');
+                return $this->redirectToRoute('admin_dashboard_settings_sms');
+            }
         }
 
         $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
@@ -630,6 +648,14 @@ class AdminController extends AbstractController
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
+        }
+
+        if ($type === 'settingSMS') {
+            // Regenerate the verification code for the admin to reset settings
+            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingSMS']);
         }
 
         return $this->redirectToRoute('admin_page');
@@ -864,10 +890,10 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'PLATFORM_MODE' and 'EMAIL_VERIFICATION' settings
+            // Update the 'PLATFORM_MODE' and 'USER_VERIFICATION' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
-            // Update the 'EMAIL_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['EMAIL_VERIFICATION'] ?? null;
+            // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
+            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {
@@ -875,7 +901,7 @@ class AdminController extends AbstractController
                 $em->persist($platformModeSetting);
             }
 
-            $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'EMAIL_VERIFICATION']);
+            $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'USER_VERIFICATION']);
             if ($emailVerificationSetting) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $em->persist($emailVerificationSetting);
@@ -1018,6 +1044,10 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+
+                'AUTH_METHOD_SMS_REGISTER_ENABLED',
+                'AUTH_METHOD_SMS_REGISTER_LABEL',
+                'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
             ];
 
             foreach ($settingsToUpdate as $settingName) {
@@ -1038,7 +1068,7 @@ class AdminController extends AbstractController
             // Flush the changes to the database
             $em->flush();
 
-            $this->addFlash('success_admin', 'New autheticaition configuration have been applied successfully.');
+            $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
 
@@ -1120,6 +1150,76 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param GetSettings $getSettings
+     * @return Response
+     */
+    #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settings_sms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(SMSType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'SMS_USERNAME',
+                'SMS_USER_ID',
+                'SMS_HANDLE',
+                'SMS_FROM',
+                'SMS_TIMER_RESEND'
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            // Flush the changes to the database
+            $em->flush();
+
+            $this->addFlash('success_admin', 'New SMS configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_sms');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'form' => $form->createView(),
+        ]);
+    }
 
     /**
      * @return Response
@@ -1138,7 +1238,7 @@ class AdminController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        if ($startDateString){
+        if ($startDateString) {
             $startDate = new DateTime($startDateString);
         } else if ($startDateString === "") {
             $startDate = null;
@@ -1146,7 +1246,7 @@ class AdminController extends AbstractController
             $startDate = (new DateTime())->modify('-1 month');
         }
 
-        if ($endDateString){
+        if ($endDateString) {
             $endDate = new DateTime($endDateString);
         } else if ($endDateString === "") {
             $endDate = null;
@@ -1158,6 +1258,7 @@ class AdminController extends AbstractController
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
         $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
+        $fetchChartSMSEmail = $this->fetchChartSMSEmail($startDate, $endDate);
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
@@ -1166,6 +1267,7 @@ class AdminController extends AbstractController
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
+            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
@@ -1329,6 +1431,49 @@ class AdminController extends AbstractController
         }
 
         return $this->generateDatasets($userCounts);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Fetch all data without date filtering
+        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
+
+        $PortalUsersCounts = [
+            'Phone Number' => 0,
+            'Email' => 0,
+        ];
+
+        // Filter and count users created with email or phone number based on the event USER_CREATION
+        foreach ($events as $event) {
+            $eventDateTime = $event->getEventDatetime();
+
+            if (!$eventDateTime) {
+                continue; // Skip events with missing dates
+            }
+
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
+
+                if (isset($eventMetadata['sms'])) {
+                    // When 'sms' is true, increment sms
+                    if ($eventMetadata['sms'] === true) {
+                        $PortalUsersCounts['Phone Number']++;
+                    } else {
+                        $PortalUsersCounts['Email']++;
+                    }
+                }
+            }
+        }
+
+        return $this->generateDatasets($PortalUsersCounts);
     }
 
     private function generateDatasets(array $counts): array

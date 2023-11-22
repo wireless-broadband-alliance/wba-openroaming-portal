@@ -7,11 +7,13 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -24,13 +26,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class RegistrationController extends AbstractController
@@ -39,20 +41,23 @@ class RegistrationController extends AbstractController
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
     private ParameterBagInterface $parameterBag;
+    private SendSMS $sendSMS;
 
     /**
-     * SiteController constructor.
+     * Registration constructor.
      *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param SendSMS $sendSMS Calls the sendSMS service
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag, SendSMS $sendSMS)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
+        $this->sendSMS = $sendSMS;
     }
 
     /**
@@ -77,17 +82,23 @@ class RegistrationController extends AbstractController
      * @throws Exception
      */
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function register(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer
+    ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['REGISTER_ENABLED']['value'] !== true) {
+        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
             $this->addFlash('error', 'This authentication method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
         }
@@ -100,7 +111,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash('warning', 'User with the same email already exists.');
-            } else if ($data['EMAIL_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
+            } else if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -120,6 +131,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_CREATION);
                 $event->setEventMetadata([
                     'platform' => PlatformMode::Live,
+                    'sms' => false,
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
@@ -147,6 +159,79 @@ class RegistrationController extends AbstractController
 
         return $this->render('site/register_landing.html.twig', [
             'registrationForm' => $form->createView(),
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/register/sms', name: 'app_register_sms')]
+    public function registerSMS(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager
+    ): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $user = new User();
+        $event = new Event();
+        $form = $this->createForm(RegistrationFormSMSType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
+                $this->addFlash('warning', 'User with the same phone number already exists.');
+            } else {
+                // Generate a random password
+                $randomPassword = bin2hex(random_bytes(4));
+
+                // Hash the password
+                $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+
+                // Set the hashed password for the user
+                $user->setPassword($hashedPassword);
+                $user->setUuid($user->getPhoneNumber());
+                $user->setVerificationCode($this->generateVerificationCode($user));
+                $user->setCreatedAt(new DateTime());
+                $entityManager->persist($user);
+
+                // Defines the Event to the table
+                $event->setUser($user);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::USER_CREATION);
+                $event->setEventMetadata([
+                    'platform' => PlatformMode::Live,
+                    'sms' => true,
+                ]);
+                $entityManager->persist($event);
+                $entityManager->flush();
+
+                // Send SMS
+                $verificationCode = $user->getVerificationCode();
+                $message = 'Your password is: ' . $randomPassword . '. Verification code is: ' . $verificationCode;
+                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+
+                $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
+            }
+        }
+
+        return $this->render('site/register_landing_sms.html.twig', [
+            'registrationSMSForm' => $form->createView(),
             'data' => $data,
         ]);
     }

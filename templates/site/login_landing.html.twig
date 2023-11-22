@@ -46,17 +46,16 @@
                 {% endfor %}
 
                 <form method="POST" action="{{ path('app_login') }}">
-                    {# Email #}
+                    {# Email && Phone Number #}
                     <div class="relative mt-10 lg:mt-6 xl:mt-12">
                         <label for="uuid"
-                               class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Email</label>
+                               class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">UUID</label>
                         <input id="uuid"
                                name="uuid"
-                               type="email"
+                               type="text"
                                value="{{ last_username }}"
                                class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
-                               placeholder="Enter your email"
-                               autocomplete="uuid"
+                               placeholder="Enter your email or phone number"
                                required
                                autofocus/>
                     </div>
@@ -87,12 +86,22 @@
                             </a>
                         {% endif %}
                     </div>
-                    {% if not data.PLATFORM_MODE %}
-                        <p class="text-sm font-thin text-gray-800 mt-2">You don't have an account? <a
-                                    href="{{ path('app_register') }}"
-                                    class="text-lg font-thin text-[#3F474D] hover:underline mt-2 inline-block hover:text-[#7DB928] text-center">Register</a>
-                            here!</p>
-                    {% endif %}
+                    <div class="text-center">
+                        {% if data.EMAIL_REGISTER_ENABLED.value == true or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == true %}
+                            {% if data.EMAIL_REGISTER_ENABLED.value == true %}
+                                <p class="text-sm font-thin text-gray-800 mt-2">You don't have an account? <a
+                                            href="{{ path('app_register') }}"
+                                            class="text-lg font-thin text-[#3F474D] hover:underline mt-2 inline-block hover:text-[#7DB928] text-center">Register</a>
+                                    here with your <strong class="text-base">email</strong>!</p>
+                            {% endif %}
+                            {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == true %}
+                                <p class="text-sm font-thin text-gray-800 mt-2">You don't have an account? <a
+                                            href="{{ path('app_register_sms') }}"
+                                            class="text-lg font-thin text-[#3F474D] hover:underline mt-2 inline-block hover:text-[#7DB928] text-center">Register</a>
+                                    here with your <strong class="text-base">phone number</strong>!</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </form>
             </div>
         </div>
