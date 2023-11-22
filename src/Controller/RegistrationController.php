@@ -170,6 +170,7 @@ class RegistrationController extends AbstractController
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
         Request                     $request,
+        RequestStack                $requestStack,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface      $entityManager
     ): Response
@@ -221,11 +222,14 @@ class RegistrationController extends AbstractController
                 $entityManager->persist($event);
                 $entityManager->flush();
 
-                // Send SMS
                 $verificationCode = $user->getVerificationCode();
-                $message = 'Your password is: ' . $randomPassword . '. Verification code is: ' . $verificationCode;
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                $uuid = $user->getUuid();
+                $uuid = urlencode($uuid);
+                $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
 
+                // Send SMS
+                $message = "Your password is: " . $randomPassword . "\nVerification code is: " . $verificationCode . "\nPlease login " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
             }
         }
