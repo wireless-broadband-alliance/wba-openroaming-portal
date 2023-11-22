@@ -1186,7 +1186,8 @@ class AdminController extends AbstractController
                 'SMS_USERNAME',
                 'SMS_USER_ID',
                 'SMS_HANDLE',
-                'SMS_FROM'
+                'SMS_FROM',
+                'SMS_TIMER_RESEND'
             ];
 
             foreach ($settingsToUpdate as $settingName) {

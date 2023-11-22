@@ -3,7 +3,7 @@
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
         {% for setting in form %}
             {# Display only the capport settings #}
-            {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_FROM'] %}
+            {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_FROM', 'SMS_TIMER_RESEND'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="Cards"
                      id="{{ setting.vars.name }}">
@@ -14,7 +14,8 @@
                                 'SMS_USERNAME': 'Username',
                                 'SMS_USER_ID': 'User Id',
                                 'SMS_HANDLE': 'Handle',
-                                'SMS_FROM': 'From'
+                                'SMS_FROM': 'From',
+                                'SMS_TIMER_RESEND' : 'Time to Resend'
                             }[setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                         </div>
@@ -26,7 +27,7 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE'] %}
+                    {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_TIMER_RESEND'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>
@@ -37,6 +38,7 @@
                             {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm', 'maxlength': 15}}) }}
                         </div>
                     {% endif %}
+                    
                     {# Description Setting #}
                     <div class="flex justify-center items-center">
                         <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"

@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -35,6 +36,12 @@ class SMSType extends AbstractType
                     'max_length' => 15,
                 ],
             ],
+            'SMS_TIMER_RESEND' => [
+                'type' => IntegerType::class,
+                'options' => [
+                    'maxlength' => 3,
+                ],
+            ],
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
@@ -50,7 +57,7 @@ class SMSType extends AbstractType
             $formFieldOptions = [
                 'attr' => [
                     'data-controller' => 'descriptionCard cardsAction showIconRadios',
-                    'autocomplete' => 'off'
+                    'autocomplete' => 'off',
                 ],
                 'required' => true,
             ];
