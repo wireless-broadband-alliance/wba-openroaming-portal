@@ -29,6 +29,12 @@ class SMSType extends AbstractType
             'SMS_HANDLE' => [
                 'type' => TextType::class,
             ],
+            'SMS_FROM' => [
+                'type' => TextType::class,
+                'options' => [
+                    'max_length' => 15,
+                ],
+            ],
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {

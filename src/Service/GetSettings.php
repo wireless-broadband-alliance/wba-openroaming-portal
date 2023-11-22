@@ -293,6 +293,11 @@ class GetSettings
             'description' => $this->getSettingDescription('SMS_HANDLE'),
         ];
 
+        $data['SMS_FROM'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'SMS_FROM'])->getValue(),
+            'description' => $this->getSettingDescription('SMS_FROM'),
+        ];
+
         return $data;
     }
 
@@ -355,6 +360,7 @@ class GetSettings
             'SMS_USERNAME' => 'Budget SMS Username',
             'SMS_USER_ID' => 'Budget SMS User ID',
             'SMS_HANDLE' => 'Budget SMS Handle hash',
+            'SMS_FROM' => 'Entity sending the SMS for the users',
         ];
 
         return $descriptions[$settingName] ?? '';

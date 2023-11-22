@@ -3,7 +3,7 @@
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
         {% for setting in form %}
             {# Display only the capport settings #}
-            {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE'] %}
+            {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_FROM'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="Cards"
                      id="{{ setting.vars.name }}">
@@ -14,6 +14,7 @@
                                 'SMS_USERNAME': 'Username',
                                 'SMS_USER_ID': 'User Id',
                                 'SMS_HANDLE': 'Handle',
+                                'SMS_FROM': 'From'
                             }[setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                         </div>
@@ -28,6 +29,12 @@
                     {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                        </div>
+                    {% endif %}
+
+                    {% if setting.vars.name in ['SMS_FROM'] %}
+                        <div class="flex items-center space-x-2 mt-5">
+                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm', 'maxlength': 15}}) }}
                         </div>
                     {% endif %}
                     {# Description Setting #}
@@ -55,8 +62,9 @@
             </svg>
             <div>
                 <span class="font-medium">Please ensure you fill out all three forms to proceed. For additional details about these settings, refer to this <a
-                class="font-semibold hover:font-bold"
-                href="https://www.budgetsms.net/downloads/SMS-Gateway-HTTP-api.pdf" target="_blank">document</a>, specifically on page 8.</span>
+                            class="font-semibold hover:font-bold"
+                            href="https://www.budgetsms.net/downloads/SMS-Gateway-HTTP-api.pdf"
+                            target="_blank">document</a>, specifically on page 8.</span>
             </div>
 
         </div>

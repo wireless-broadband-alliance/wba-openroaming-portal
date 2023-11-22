@@ -48,15 +48,18 @@ class SendSMS
         $username = $data['SMS_USERNAME']['value'];
         $userId = $data['SMS_USER_ID']['value'];
         $handle = $data['SMS_HANDLE']['value'];
+        $from = $data['SMS_FROM']['value'];
 
         $client = HttpClient::create();
 
         // Adjust the API endpoint and parameters based on the Budget SMS documentation
-        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=OR_TEST&msg=$message";
+        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
         $response = $client->request('GET', $apiUrl);
 
         // Handle the API response as needed
         // $statusCode = $response->getStatusCode();
         // $content = $response->getContent();
+
+        // dd($response, $statusCode, $content, $username, $userId, $handle, $apiUrl);
     }
 }
