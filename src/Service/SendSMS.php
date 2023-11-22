@@ -140,7 +140,8 @@ class SendSMS
             $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() && $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
+            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() instanceof DateTime &&
+                    $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
                     $attempts = 1;
