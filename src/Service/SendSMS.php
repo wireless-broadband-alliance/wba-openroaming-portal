@@ -52,21 +52,11 @@ class SendSMS
         $client = HttpClient::create();
 
         // Adjust the API endpoint and parameters based on the Budget SMS documentation
-        $response = $client->request('GET', $apiUrl, [
-            'body' => [
-                'username' => $username,
-                'userId' => $userId,
-                'handle' => $handle,
-                'to' => $recipient,
-                'text' => $message,
-                'from' => 'Pancakes_Master'
-            ],
-        ]);
+        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=OR_TEST&msg=$message";
+        $response = $client->request('GET', $apiUrl);
 
         // Handle the API response as needed
-        $statusCode = $response->getStatusCode();
-        // $content = $response->toArray();
-
-        dd($statusCode, $username, $userId, $handle, $recipient, $message);
+        // $statusCode = $response->getStatusCode();
+        // $content = $response->getContent();
     }
 }
