@@ -12,6 +12,7 @@ use App\Repository\UserRepository;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
+use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -118,6 +119,7 @@ class SendSMS
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws \RuntimeException
      */
     public function regenerateSmsCode(User $user): bool
     {
@@ -154,8 +156,11 @@ class SendSMS
                 $this->sendSms($user->getPhoneNumber(), $message);
                 return true;
             }
+
+            return false;
         }
-        return false;
+
+        // Throw a generic exception when max attempts are exceeded
+        throw new RuntimeException('SMS regeneration failed. You have exceed the limits for regeneration. Please content your support for help.');
     }
-    
 }

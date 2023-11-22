@@ -404,11 +404,13 @@ class SiteController extends AbstractController
                 // If regeneration failed, show an appropriate error message
                 $this->addFlash('error', 'Failed to regenerate SMS code. Please, wait 5 minutes before generating a new code.');
             }
+        } catch (\RuntimeException $e) {
+            // Handle generic exception and display a message to the user
+            $this->addFlash('error', $e->getMessage());
         } catch (Exception) {
             // Handle exceptions thrown by the service (e.g., network issues, API errors)
             $this->addFlash('error', 'An error occurred while regenerating the SMS code. Please try again later.');
         }
-
         return $this->redirectToRoute('app_landing');
     }
 }
