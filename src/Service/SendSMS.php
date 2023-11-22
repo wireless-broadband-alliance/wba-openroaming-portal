@@ -12,6 +12,7 @@ use App\Repository\UserRepository;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -50,6 +51,23 @@ class SendSMS
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
+    }
+
+    /**
+     * Generate a new verification code for the user.
+     *
+     * @param User $user The user for whom the verification code is generated.
+     * @return int The generated verification code.
+     * @throws Exception
+     */
+    protected function generateVerificationCode(User $user): int
+    {
+        // Generate a random verification code with 6 digits
+        $verificationCode = random_int(100000, 999999);
+        $user->setVerificationCode($verificationCode);
+        $this->userRepository->save($user, true);
+
+        return $verificationCode;
     }
 
     /**
@@ -120,13 +138,14 @@ class SendSMS
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws \RuntimeException
+     * @throws Exception
      */
     public function regenerateSmsCode(User $user): bool
     {
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
         if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
-            $minInterval = new DateInterval('PT10S'); // 5-minutes interval - need to make a settings of this later
+            $minInterval = new DateInterval('PT5M'); // 5-minutes interval - need to make a settings of this later
             $currentTime = new DateTime();
 
             if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() && $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
@@ -150,8 +169,8 @@ class SendSMS
                 $latestEvent->setLastVerificationCodeTimeSms($currentTime);
                 $this->eventRepository->save($latestEvent, true);
 
-                // Resend the SMS code
-                $verificationCode = $user->getVerificationCode();
+                // Generate a new verification code and resend the SMS
+                $verificationCode = $this->generateVerificationCode($user);
                 $message = 'Your new verification code is: ' . $verificationCode;
                 $this->sendSms($user->getPhoneNumber(), $message);
                 return true;
