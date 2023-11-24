@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -42,6 +43,7 @@ class RegistrationController extends AbstractController
     private GetSettings $getSettings;
     private ParameterBagInterface $parameterBag;
     private SendSMS $sendSMS;
+    private TokenStorageInterface $tokenStorage;
 
     /**
      * Registration constructor.
@@ -50,14 +52,16 @@ class RegistrationController extends AbstractController
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param SendSMS $sendSMS Calls the sendSMS service
+     * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag, SendSMS $sendSMS)
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag, SendSMS $sendSMS, TokenStorageInterface $tokenStorage)
     {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
         $this->sendSMS = $sendSMS;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -170,9 +174,9 @@ class RegistrationController extends AbstractController
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
         Request                     $request,
-        RequestStack                $requestStack,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface      $entityManager
+        EntityManagerInterface      $entityManager,
+        SessionInterface            $session
     ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -180,12 +184,12 @@ class RegistrationController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
+            $this->addFlash('error', 'This portal is in Demo mode. It is impossible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
         if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            $this->addFlash('error', 'This authentication method is not enabled!');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -223,14 +227,21 @@ class RegistrationController extends AbstractController
                 $entityManager->flush();
 
                 $verificationCode = $user->getVerificationCode();
-                $uuid = $user->getUuid();
-                $uuid = urlencode($uuid);
-                $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
 
                 // Send SMS
-                $message = "Your password is: " . $randomPassword . "\nVerification code is: " . $verificationCode . "\nPlease login " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                $message = "Your account password is: " . $randomPassword . "\nVerification code is: " . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
-                $this->addFlash('success', 'We have sent an message to your phone with your password and verification code');
+                $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
+
+                // Authenticate the user
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                $this->tokenStorage->setToken($token);
+
+                // Store the authentication token in the session
+                $session->set('_security_main', serialize($token));
+
+                // Redirect the user after successful registration
+                return $this->redirectToRoute('app_landing');
             }
         }
 
