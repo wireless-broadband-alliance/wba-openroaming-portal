@@ -32,7 +32,7 @@ export default class extends Controller {
 			imageInput.addEventListener('change', (e) => {
 				this.handleImageChange(e, imagePreview);
 			});
-			const uploadButton = container.querySelector('.w-28.h-12');
+			const uploadButton = container.querySelector('.upload-button');
 			uploadButton.addEventListener('click', () => {
 				imageInput.click();
 			});
