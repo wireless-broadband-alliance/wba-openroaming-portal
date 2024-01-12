@@ -249,20 +249,18 @@ class AdminController extends AbstractController
 
 
     /**
-     * @param User $user
      * @param Request $request
      * @param UserRepository $userRepository
      * @param UserPasswordHasherInterface $passwordHasher
-     * @param $id
      * @param EntityManagerInterface $em
      * @param MailerInterface $mailer
+     * @param $id
      * @return Response
      * @throws TransportExceptionInterface
-     * @throws Exception
      */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
-    public function editUsers(User $user, Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, $id, EntityManagerInterface $em, MailerInterface $mailer): Response
+    public function editUsers(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, MailerInterface $mailer, $id): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -276,7 +274,10 @@ class AdminController extends AbstractController
         }
 
         if (!$user = $this->userRepository->find($id)) {
-            throw new NotFoundHttpException('User not found');
+            // Get the 'id' parameter from the route URL
+            $urlId = $request->attributes->get('id');
+            $this->addFlash('error_admin', 'The user with id' . $urlId . ' does not exist.');
+            return $this->redirectToRoute('admin_page');
         }
 
         if ($user->getDeletedAt() !== null) {
