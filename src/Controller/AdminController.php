@@ -1275,6 +1275,50 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @return Response
+     * @throws \JsonException
+     * @throws Exception
+     */
+    #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function freeradiusStatisticsData(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $user = $this->getUser();
+
+        // Get the submitted start and end dates from the form
+        $startDateString = $request->request->get('startDate');
+        $endDateString = $request->request->get('endDate');
+
+        // Convert the date strings to DateTime objects
+        if ($startDateString) {
+            $startDate = new DateTime($startDateString);
+        } else if ($startDateString === "") {
+            $startDate = null;
+        } else {
+            $startDate = (new DateTime())->modify('-1 month');
+        }
+
+        if ($endDateString) {
+            $endDate = new DateTime($endDateString);
+        } else if ($endDateString === "") {
+            $endDate = null;
+        } else {
+            $endDate = new DateTime();
+        }
+
+        $fetchChartAuthenticationFreeradius = $this->fetchChartAuthenticationFreeradius($startDate, $endDate);
+
+        return $this->render('admin/freeradius_statistics.html.twig', [
+            'data' => $data,
+            'current_user' => $user,
+            'devicesDataJson' => json_encode($fetchChartAuthenticationFreeradius, JSON_THROW_ON_ERROR),
+            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
+            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+        ]);
+    }
+
+    /**
      * @throws Exception
      */
     private function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
@@ -1475,6 +1519,51 @@ class AdminController extends AbstractController
         }
 
         return $this->generateDatasets($PortalUsersCounts);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function fetchChartAuthenticationFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(Event::class);
+
+        // Fetch all data without date filtering
+        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
+
+        $profileCounts = [
+            'Android' => 0,
+            'Windows' => 0,
+            'macOS' => 0,
+            'iOS' => 0,
+        ];
+
+        // Filter and count profile types based on the date criteria
+        foreach ($events as $event) {
+            $eventDateTime = $event->getEventDatetime();
+
+            if (!$eventDateTime) {
+                continue; // Skip events with missing dates
+            }
+
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $eventMetadata = $event->getEventMetadata();
+
+                if (isset($eventMetadata['type'])) {
+                    $profileType = $eventMetadata['type'];
+
+                    // Check the profile type and update the corresponding count
+                    if (isset($profileCounts[$profileType])) {
+                        $profileCounts[$profileType]++;
+                    }
+                }
+            }
+        }
+
+        return $this->generateDatasets($profileCounts);
     }
 
     private function generateDatasets(array $counts): array
