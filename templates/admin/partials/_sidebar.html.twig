@@ -49,9 +49,8 @@
 
 		{# SideBar - Portal Settings - Dropdown #}
 		<div class="relative">
-			<div id="PortalDropdownButton" class="duration-300 rounded p-2 flex flex-row
-										                justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-										                {% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}">
+			<div id="PortalDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+				{% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}">
 				<div class="flex items-center space-x-2">
 					<svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"></path>
@@ -123,7 +122,7 @@
 
 		{# SideBar - Portal Statistics - Dropdown #}
 		<div class="relative">
-			<div id="PortalStatisticsDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+			<div id="StatisticsDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
 				{% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}">
 				<div class="flex items-center space-x-2">
 					<svg class="w-5 mr-2" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -135,40 +134,24 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
 				</svg>
 			</div>
-			<div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" style="display: {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'block' : 'none' }};" id="PortalStatisticsDropDown">
+			<div id="StatisticsDropdown" class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" style="display: {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'block' : 'none' }};">
 				<ul class="mx-2">
 					<li>
 						{# SideBar Button - Portal Statistics - Button #}
-						<a href="{{ path('admin_dashboard_statistics') }}">
-							<div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}">
-								<div class="flex items-center space-x-2">
-									<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
-										<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
-									</svg>
-									Portal Statistics
-								</div>
-								<svg class="w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-								</svg>
-							</div>
-						</a>
+						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}" href="{{ path('admin_dashboard_statistics') }}">
+							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
+							</svg>
+							Portal Statistics</a>
 					</li>
 					<li>
 						{# SideBar Button - Freeradius Statistics - Button #}
-						<a href="{{ path('admin_dashboard_statistics_freeradius') }}">
-							<div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}">
-								<div class="flex items-center space-x-2">
-									<svg class="w-5 mr-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"></path>
-									</svg>
-									Freeradius Statistics
-								</div>
-								<svg class="w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-								</svg>
-							</div>
-						</a>
+						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}" href="{{ path('admin_dashboard_statistics_freeradius') }}">
+							<svg class="w-5 mr-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z"></path>
+							</svg>
+							Freeradius Statistics</a>
 					</li>
 				</ul>
 			</div>
@@ -176,8 +159,7 @@
 
 		{# SideBar - Options - Dropdown (only shows on lower resolutions) #}
 		<div class="hidden" id="optionsDropdownButton">
-			<div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer
-										                        hover:shadow hover:text-lightGreen">
+			<div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
 				<div class="flex items-center space-x-2">
 					<svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>

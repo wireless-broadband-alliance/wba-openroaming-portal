@@ -104,9 +104,9 @@ export default class extends Controller {
 				}
 			});
 		}
-
+	
 		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
-		initializeDropdown_Select('PortalStatisticsDropdownButton', 'PortalStatisticsDropDown');
+		initializeDropdown_Select('StatisticsDropdownButton', 'StatisticsDropDown');
 		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
 
 		function initializeDropdown_ActionItems(buttonName, menuName) {
