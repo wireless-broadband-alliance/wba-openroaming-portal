@@ -44,7 +44,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
-
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  *
@@ -76,8 +77,7 @@ class AdminController extends AbstractController
         GetSettings            $getSettings,
         SettingRepository      $settingRepository,
         EntityManagerInterface $entityManager,
-    )
-    {
+    ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
@@ -144,6 +144,92 @@ class AdminController extends AbstractController
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportUsers(Request $request, UserRepository $userRepository): Response
+    {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser->IsVerified()) {
+            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
+        }
+
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Fetch all users excluding admins
+        $users = $userRepository->findExcludingAdmin();
+
+        // Create a PHPSpreadsheet object
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Define each respective header for the User table
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'UUID');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Phone Number');
+        $sheet->setCellValue('E1', 'First Name');
+        $sheet->setCellValue('F1', 'Last Name');
+        $sheet->setCellValue('G1', 'Verification');
+        $sheet->setCellValue('H1', 'Provider');
+        $sheet->setCellValue('I1', 'Banned At');
+        $sheet->setCellValue('J1', 'Created At');
+
+
+        // Apply the data
+        $row = 2;
+        foreach ($users as $user) {
+            $sheet->setCellValue('A' . $row, $user->getId());
+            $sheet->setCellValue('B' . $row, $user->getUuid());
+            $sheet->setCellValue('C' . $row, $user->getEmail());
+            $sheet->setCellValue('D' . $row, $user->getPhoneNumber());
+            $sheet->setCellValue('E' . $row, $user->getFirstName());
+            $sheet->setCellValue('F' . $row, $user->getLastName());
+            $sheet->setCellValue('G' . $row, $user->isVerified() ? 'Verified' : 'Not Verified');
+            // Determine User Provider
+            $userProvider = $this->getUserProvider($user);
+            $sheet->setCellValue('H' . $row, $userProvider);
+            // Check if the user is Banned
+            $sheet->setCellValue('I' . $row, $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned');
+            $sheet->setCellValue('J' . $row, $user->getCreatedAt());
+
+
+            $row++;
+        }
+
+        // Create a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'users');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        // Return the file as a response
+        $response = $this->file($tempFile, 'users.xlsx');
+
+        return $response;
+    }
+
+    // Determine user provider
+    protected function getUserProvider(User $user): string
+    {
+        if ($user->getGoogleId() !== null) {
+            return 'Google Account';
+        } elseif ($user->getSamlIdentifier() !== null) {
+            return 'SAML';
+        } else {
+            return 'Portal Account';
+        }
     }
 
     /**
@@ -1575,7 +1661,7 @@ class AdminController extends AbstractController
         $data = [];
         $colors = [];
 
-        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+        if (!empty(array_filter($dataValues, static fn ($value) => $value !== 0))) {
             foreach ($labels as $index => $type) {
                 $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
                 $data[] = $dataValues[$index];
@@ -1713,5 +1799,4 @@ class AdminController extends AbstractController
     {
         $this->profileManager->enableProfiles($user);
     }
-
 }
