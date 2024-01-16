@@ -184,8 +184,8 @@ class AdminController extends AbstractController
         $sheet->setCellValue('F1', 'Last Name');
         $sheet->setCellValue('G1', 'Verification');
         $sheet->setCellValue('H1', 'Provider');
-        $sheet->setCellValue('I1', 'Create At');
-        $sheet->setCellValue('J1', 'Banned At');
+        $sheet->setCellValue('I1', 'Banned At');
+        $sheet->setCellValue('J1', 'Created At');
 
 
         // Apply the data
@@ -201,12 +201,10 @@ class AdminController extends AbstractController
             // Determine User Provider
             $userProvider = $this->getUserProvider($user);
             $sheet->setCellValue('H' . $row, $userProvider);
-            $sheet->setCellValue('I' . $row, $user->getCreatedAt());
             // Check if the user is Banned
-            $sheet->setCellValue('JH' . $row, $user->getBannedAt() !== null ? 'Banned' : 'Not Banned');
-            // Add information about the time of the ban
-            $bannedAt = $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'N/A';
-            $sheet->setCellValue('JI' . $row, $bannedAt);
+            $sheet->setCellValue('I' . $row, $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned');
+            $sheet->setCellValue('J' . $row, $user->getCreatedAt());
+
 
             $row++;
         }
