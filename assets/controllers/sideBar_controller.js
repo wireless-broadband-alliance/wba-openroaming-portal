@@ -28,7 +28,7 @@ export default class extends Controller {
 		});
 
 
-		const mediaQuery = window.matchMedia('(max-width: 768px)');
+		const mediaQuery = window.matchMedia('(max-width: 1536px)');
 
 		// Function to handle changes in resolution
 		function handleResolutionChange(mediaQuery) {
