@@ -142,7 +142,7 @@
 	</div>
 
 	{# User Info #}
-	<div class="2xl:absolute top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden 2xl:block">
+	<div class="top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden 2xl:block 2xl:absolute ">
 		{% if current_user.firstName == null and current_user.lastName == null %}
 			Admin ORPortal
 		{% else %}
@@ -150,16 +150,14 @@
 			{{ current_user.lastName }}
 		{% endif %}
 	</div>
-	<div class="2xl:absolute top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden 2xl:block">
+	<div class="top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden 2xl:block 2xl:absolute">
 		Admin
 	</div>
 </div>
 
-<div>
 	{# Header - Button - Hamburger (only used in lower resolutions - Opens sidebar) #}
 	<button id="sidebarButton" data-controller="sideBar" class="block hamburger 2xl:hidden focus:outline-none mt-3">
 		<span class="hamburger-top"></span>
 		<span class="hamburger-middle"></span>
 		<span class="hamburger-bottom"></span>
 	</button>
-</div>
