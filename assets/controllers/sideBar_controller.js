@@ -152,6 +152,27 @@ export default class extends Controller {
 		}
 
 		remove_element('errorDisplay');
-		remove_element('successDisplay');			
+		remove_element('successDisplay');
+
+		function confirmDeletePost(userId, userUuid) {
+			if (confirm('Are you sure you want to delete the user with UUID ' + userUuid + '?')) {
+			document.getElementById('deleteForm' + userId).submit();
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const deleteButtons = document.querySelectorAll('.delete-users-button');
+
+			deleteButtons.forEach(button => {
+				button.addEventListener('click', () => {
+					const userId = button.getAttribute('data-user-id');
+					const userUuid = button.getAttribute('data-user-uuid');
+
+					if (confirm(`Are you sure you want to delete the user with UUID ${userUuid}?`)) {
+						document.getElementById('deleteForm' + userId).submit();
+					}
+				});
+			});
+		});
 	}
 }
