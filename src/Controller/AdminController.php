@@ -325,7 +325,7 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $email = $user->getEmail();
+        $uuid = $user->getUUID();
         foreach ($user->getEvent() as $event) {
             $em->remove($event);
         }
@@ -335,7 +335,7 @@ class AdminController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success_admin', sprintf('User with the email "%s" deleted successfully.', $email));
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
         return $this->redirectToRoute('admin_page');
     }
 

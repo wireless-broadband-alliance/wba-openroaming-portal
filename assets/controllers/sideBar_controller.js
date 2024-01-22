@@ -152,12 +152,6 @@ export default class extends Controller {
 		}
 
 		remove_element('errorDisplay');
-		remove_element('successDisplay');
-
-		function confirmDeletePost(userId) {
-			if (confirm('Are you sure you want to delete the user?')) {
-				document.getElementById('deleteForm' + userId).submit();
-			}
-			}
+		remove_element('successDisplay');			
 	}
 }
