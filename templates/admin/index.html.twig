@@ -75,7 +75,7 @@
 						<div
 							class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
 							{# Table Content #}
-							<table class="w-full items-start">
+							<table class="w-full items-start" data-controller="sideBar">
 								<thead class="text-sm text-gray-700 bg-veryLightGreen">
 									<tr>
 										<th scope="col" id="uuidColumn" class="flex items-center px-12 py-3">
@@ -86,25 +86,6 @@
 												</svg>
 											</div>
 										</th>
-										<script>
-										document.getElementById('uuidColumn').addEventListener('click', function() {
-											// Retrieve the current URL
-											var currentUrl = window.location.href;
-
-											// Check if there's already a sorting parameter
-											if (currentUrl.includes('?sort=')) {
-												// If yes, toggle the sorting order
-												var newUrl = currentUrl.includes('asc') ? currentUrl.replace('asc', 'desc') : currentUrl.replace('desc', 'asc');
-											} else {
-												// If not, add the sorting parameter with the default order (e.g., ascending)
-												var newUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'sort=uuid&order=asc';
-											}
-
-											// Redirect to the new URL
-											window.location.href = newUrl;
-										});
-										</script>
-
 										<th scope="col" class="px-4 py-3 -ml-4">
 											<h1 class="mr-2">Email</h1>
 										</th>

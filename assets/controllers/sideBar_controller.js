@@ -174,5 +174,22 @@ export default class extends Controller {
 				});
 			});
 		});
+
+		document.getElementById('uuidColumn').addEventListener('click', function() {
+			// Retrieve the current URL
+			var currentUrl = window.location.href;
+
+			// Check if there's already a sorting parameter
+			if (currentUrl.includes('?sort=')) {
+				// If yes, toggle the sorting order
+				var newUrl = currentUrl.includes('asc') ? currentUrl.replace('asc', 'desc') : currentUrl.replace('desc', 'asc');
+			} else {
+				// If not, add the sorting parameter with the default order (e.g., ascending)
+				var newUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'sort=uuid&order=asc';
+			}
+
+			// Redirect to the new URL
+			window.location.href = newUrl;
+		});
 	}
 }
