@@ -175,21 +175,36 @@ export default class extends Controller {
 			});
 		});
 
-		document.getElementById('uuidColumn').addEventListener('click', function() {
-			// Retrieve the current URL
-			var currentUrl = window.location.href;
-
-			// Check if there's already a sorting parameter
-			if (currentUrl.includes('?sort=')) {
-				// If yes, toggle the sorting order
-				var newUrl = currentUrl.includes('asc') ? currentUrl.replace('asc', 'desc') : currentUrl.replace('desc', 'asc');
-			} else {
-				// If not, add the sorting parameter with the default order (e.g., ascending)
-				var newUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'sort=uuid&order=asc';
+		function addSortingClickListener(columnName) {
+			var columnElement = document.getElementById(columnName + 'Column'); // Look for all the columns with the id "somethingColumn"
+		
+			if (columnElement) {
+				columnElement.addEventListener('click', function() {
+					// Retrieve the current URL
+					var currentUrl = window.location.href;
+		
+					// Parse the URL parameters into an object
+					var urlParams = new URLSearchParams(window.location.search);
+		
+					// Check if the 'sort' parameter is present and matches the current column
+					if (urlParams.has('sort') && urlParams.get('sort') === columnName) {
+						// If yes, toggle the sorting order
+						var newOrder = urlParams.get('order') === 'asc' ? 'desc' : 'asc';
+						urlParams.set('order', newOrder);
+					} else {
+						// If not, set the sorting parameters for the current column
+						urlParams.set('sort', columnName);
+						urlParams.set('order', 'asc');
+					}
+		
+					// Update the URL with the new parameters
+					var newUrl = currentUrl.split('?')[0] + '?' + urlParams.toString();
+					window.location.href = newUrl;
+				});
 			}
-
-			// Redirect to the new URL
-			window.location.href = newUrl;
-		});
+		}
+		
+		addSortingClickListener('uuid');
+		addSortingClickListener('createdAt');				
 	}
 }
