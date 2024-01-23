@@ -159,6 +159,8 @@ class AdminController extends AbstractController
             'verifiedUsersCount' => $verifiedUsersCount,
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
+            'activeSort' => $sort,
+            'activeOrder' => $order
         ]);
     }
 
@@ -268,8 +270,23 @@ class AdminController extends AbstractController
 
         $filter = $request->query->get('filter', 'all'); // Default filter
 
+        $sort = $request->query->get('sort', 'createdAt'); // Default sort by user creation date
+        $order = $request->query->get('order', 'desc'); // Default order: descending
+
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
+
+        // Sort the users based on the specified column and order
+        usort($users, function ($user1, $user2) use ($sort, $order) {
+            $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
+            $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
+
+            if ($order === 'asc') {
+                return $value1 <=> $value2;
+            } else {
+                return $value2 <=> $value1;
+            }
+        });
 
         if (strlen($searchTerm) > 320) {
             $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
@@ -305,6 +322,8 @@ class AdminController extends AbstractController
             'verifiedUsersCount' => $verifiedUsersCount,
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
+            'activeSort' => $sort,
+            'activeOrder' => $order,
         ]);
     }
 

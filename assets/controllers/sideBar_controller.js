@@ -175,16 +175,16 @@ export default class extends Controller {
 			});
 		});
 
-		function addSortingClickListener(columnName) {
-			var columnElement = document.getElementById(columnName + 'Column'); // Look for all the columns with the id "somethingColumn"
+		function addSortingClickListener(columnName, activeSort, activeOrder) {
+			var columnElement = document.getElementById(columnName + 'Column');
 		
 			if (columnElement) {
-				columnElement.addEventListener('click', function() {
+				columnElement.addEventListener('click', function () {
 					// Retrieve the current URL
-					var currentUrl = window.location.href;
+					var currentUrl = new URL(window.location.href);
 		
 					// Parse the URL parameters into an object
-					var urlParams = new URLSearchParams(window.location.search);
+					var urlParams = new URLSearchParams(currentUrl.search);
 		
 					// Check if the 'sort' parameter is present and matches the current column
 					if (urlParams.has('sort') && urlParams.get('sort') === columnName) {
@@ -198,13 +198,23 @@ export default class extends Controller {
 					}
 		
 					// Update the URL with the new parameters
-					var newUrl = currentUrl.split('?')[0] + '?' + urlParams.toString();
-					window.location.href = newUrl;
+					currentUrl.search = '?' + urlParams.toString();
+		
+					// Redirect to the new URL
+					window.location.href = currentUrl.toString();
 				});
+				
+				// Add a class to indicate the active sort column
+				if (activeSort === columnName) {
+					columnElement.classList.add('active-sort');
+					// Optionally, add a class for the active sort order (asc/desc)
+					columnElement.classList.toggle('asc', activeOrder === 'asc');
+					columnElement.classList.toggle('desc', activeOrder === 'desc');
+				}
 			}
 		}
 		
-		addSortingClickListener('uuid');
-		addSortingClickListener('createdAt');				
+		addSortingClickListener('uuid', '{{ activeSort }}', '{{ activeOrder }}');
+		addSortingClickListener('createdAt', '{{ activeSort }}', '{{ activeOrder }}');					
 	}
 }
