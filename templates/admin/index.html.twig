@@ -72,19 +72,39 @@
 						</div>
 					</div>
 					<div class="overflow-x-auto max-w-full -m-5 mt-3">
-						<div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+						<div
+							class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
 							{# Table Content #}
 							<table class="w-full items-start">
 								<thead class="text-sm text-gray-700 bg-veryLightGreen">
 									<tr>
-										<th scope="col" class="flex flew-row items-center px-12 py-3">
+										<th scope="col" id="uuidColumn" class="flex items-center px-12 py-3">
 											<h1 class="mr-2">UUID</h1>
 											<div class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-												<svg class="w-4 " data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+												<svg class="w-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 													<path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"></path>
 												</svg>
 											</div>
 										</th>
+										<script>
+										document.getElementById('uuidColumn').addEventListener('click', function() {
+											// Retrieve the current URL
+											var currentUrl = window.location.href;
+
+											// Check if there's already a sorting parameter
+											if (currentUrl.includes('?sort=')) {
+												// If yes, toggle the sorting order
+												var newUrl = currentUrl.includes('asc') ? currentUrl.replace('asc', 'desc') : currentUrl.replace('desc', 'asc');
+											} else {
+												// If not, add the sorting parameter with the default order (e.g., ascending)
+												var newUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'sort=uuid&order=asc';
+											}
+
+											// Redirect to the new URL
+											window.location.href = newUrl;
+										});
+										</script>
+
 										<th scope="col" class="px-4 py-3 -ml-4">
 											<h1 class="mr-2">Email</h1>
 										</th>
