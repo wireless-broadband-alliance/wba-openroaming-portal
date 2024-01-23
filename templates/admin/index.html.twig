@@ -17,7 +17,8 @@
 			<div class="p-5 text-left space-y-3 rounded-xl bg-white">
 				<div class="w-full mx-auto">
 					<div class="sm:w-auto p-4">
-						<div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
+						<div
+							class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
 							{# Left Search Filters #}
 							<div class="flex items-center space-x-6 cursor-default">
 								<a href="{{ path('admin_search', {'filter': 'all'}) }}" class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
@@ -76,11 +77,16 @@
 							<table class="w-full items-start">
 								<thead class="text-sm text-gray-700 bg-veryLightGreen">
 									<tr>
-										<th scope="col" class="px-12 py-3">
-											UUID
+										<th scope="col" class="flex flew-row items-center px-12 py-3">
+											<h1 class="mr-2">UUID</h1>
+											<div class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+												<svg class="w-4 " data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+													<path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"></path>
+												</svg>
+											</div>
 										</th>
 										<th scope="col" class="px-4 py-3 -ml-4">
-											Email
+											<h1 class="mr-2">Email</h1>
 										</th>
 										<th scope="col" class="px-6 py-3 -ml-2">
 											Provider
