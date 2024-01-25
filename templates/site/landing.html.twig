@@ -8,7 +8,7 @@
 
 	<div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
 		{# First Column #}
-		<div class="object-cover w-full lg:w-1/2 bg-landing bg-no-repeat bg-center p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]" style="background-image: url('{{ wallpaperImageName.value }}');">
+		<div class="object-cover  w-[100%] lg:w-1/2 bg-landing bg-center bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]" style="background-image: url('{{ wallpaperImageName.value }}');">
 			<div class="h-full w-full flex flex-col justify-between">
 				<img class="mt-16 lg:mt-36 w-96" src="{{ openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
 
@@ -25,7 +25,7 @@
 						<h2>DEMO MODE</h2>
 						<p class="text-xs lg:text-base mt-5 ">
 							This portal is for testing purposes only and should not be used for production purposes, and
-							                    cannot be used for production or commercial purposes.
+														                    cannot be used for production or commercial purposes.
 						</p>
 						<p class="text-xs lg:text-base">
 							Users created via this portal can be revoked at any time without notice.
