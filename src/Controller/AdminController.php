@@ -239,7 +239,7 @@ class AdminController extends AbstractController
     }
 
     // Determine user provider
-    protected function getUserProvider(User $user): string
+    public function getUserProvider(User $user): string
     {
         if ($user->getGoogleId() !== null) {
             return 'Google Account';
