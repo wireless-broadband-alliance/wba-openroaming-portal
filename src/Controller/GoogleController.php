@@ -36,6 +36,7 @@ class GoogleController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
+    private AdminController $adminController;
 
     /**
      * @param ClientRegistry $clientRegistry
@@ -44,6 +45,7 @@ class GoogleController extends AbstractController
      * @param TokenStorageInterface $tokenStorage
      * @param RequestStack $requestStack
      * @param EventDispatcherInterface $eventDispatcher
+     * @param AdminController $adminController
      */
     public function __construct(
         ClientRegistry              $clientRegistry,
@@ -51,15 +53,16 @@ class GoogleController extends AbstractController
         UserPasswordHasherInterface $passwordEncoder,
         TokenStorageInterface       $tokenStorage,
         RequestStack                $requestStack,
-        EventDispatcherInterface    $eventDispatcher
-    )
-    {
+        EventDispatcherInterface    $eventDispatcher,
+        AdminController             $adminController,
+    ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
+        $this->adminController = $adminController;
     }
 
     /**
@@ -181,9 +184,18 @@ class GoogleController extends AbstractController
 
         // Check if a user with the given email exists
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
-        if ($userWithEmail && $userWithEmail->getGoogleId() !== null) {
-            // Return the existing user with the matching Google ID
-            return $userWithEmail;
+
+        if ($userWithEmail) {
+            // If the existing user doesn't have a Google ID, determine the provider
+            $existingProvider = $this->adminController->getUserProvider($userWithEmail);
+        
+            if ($userWithEmail->getGoogleId() === null) {
+                $this->addFlash('error', sprintf('Email already in use. Please use the correct provider: %s', $existingProvider));
+                return null;
+            } else {
+                // Return the correct user to authenticate
+                return $userWithEmail;
+            }
         }
 
         // If no user exists, create a new user with a new set of Events
