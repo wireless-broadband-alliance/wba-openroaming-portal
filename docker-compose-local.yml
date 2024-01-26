@@ -13,6 +13,7 @@ services:
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
     ports:
       - "80:80"
+
   mysql:
     image: mysql:8.0
     environment:
@@ -24,6 +25,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql:/var/lib/mysql
+
   memcached:
     image: memcached
 
@@ -33,6 +35,24 @@ services:
       - '1080:1080'
       - '1025:1025'
 
+  freeradius:
+    build:
+      context: .
+      dockerfile: Dockerfile-freeradius
+    environment:
+      RADIUS_LISTEN_IP: '*'
+      RADIUS_CLIENTS: radius@cc-openroaming-provisioning-web_mysql_1
+      RADIUS_SQL: 'true'
+      RADIUS_DB_HOST: mysql
+      RADIUS_DB_NAME: radius
+      RADIUS_DB_USERNAME: radius
+      RADIUS_DB_PASSWORD: radpass
+      RADIUS_ROOT_SECRET: radius
+    volumes:
+      - freeradius-data:/path/to/freeradius/data
+
 volumes:
   mysql:
+    driver: local
+  freeradius-data:
     driver: local
