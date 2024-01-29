@@ -1,4 +1,8 @@
 version: '3'
+
+networks:
+  mysql-freeradius-network:
+
 services:
   web:
     build:
@@ -13,6 +17,8 @@ services:
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
     ports:
       - "80:80"
+    networks:
+      - mysql-freeradius-network
 
   mysql:
     image: mysql:8.0
@@ -21,19 +27,23 @@ services:
       MYSQL_DATABASE: openroaming
       MYSQL_USER: openroaming
       MYSQL_PASSWORD: openroaming
-    ports:
-      - "3306:3306"
     volumes:
       - mysql:/var/lib/mysql
+    networks:
+      - mysql-freeradius-network
 
   memcached:
     image: memcached
+    networks:
+      - mysql-freeradius-network
 
   mailcatcher:
     image: schickling/mailcatcher
     ports:
       - '1080:1080'
       - '1025:1025'
+    networks:
+      - mysql-freeradius-network
 
   freeradius:
     build:
@@ -50,6 +60,8 @@ services:
       RADIUS_ROOT_SECRET: radius
     volumes:
       - freeradius-data:/path/to/freeradius/data
+    networks:
+      - mysql-freeradius-network
 
 volumes:
   mysql:
