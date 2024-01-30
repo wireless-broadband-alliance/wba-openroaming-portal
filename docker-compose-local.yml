@@ -50,16 +50,18 @@ services:
       context: .
       dockerfile: Dockerfile-freeradius
     environment:
-      RADIUS_LISTEN_IP: '*'
-      RADIUS_CLIENTS: radius@cc-openroaming-provisioning-web_mysql_1
+      RADIUS_LISTEN_IP: 127.0.0.1
+      RADIUS_CLIENTS: radius@mysql
       RADIUS_SQL: 'true'
       RADIUS_DB_HOST: mysql
       RADIUS_DB_NAME: radius
       RADIUS_DB_USERNAME: radius
       RADIUS_DB_PASSWORD: radpass
-      RADIUS_ROOT_SECRET: radius
     volumes:
-      - freeradius-data:/path/to/freeradius/data
+      - freeradius-data:/etc/freeradius/3.0/data/
+    ports:
+      - "1812:1812/udp"
+      - "1813:1813/udp"
     networks:
       - mysql-freeradius-network
 
