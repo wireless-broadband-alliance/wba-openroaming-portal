@@ -23,6 +23,9 @@ RUN ln -s /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-enable
 # Copy client configuration file
 COPY freeradius_conf/clients.conf /etc/freeradius/3.0/clients.conf
 
+# Copy default file to accept all realms to authenticate
+COPY freeradius_conf/default /etc/freeradius/3.0/sites-enabled/default
+
 # Generate a new CA key and certificate
 RUN openssl genpkey -algorithm RSA -out /etc/freeradius/3.0/certs/ca.key
 RUN openssl req -new -key /etc/freeradius/3.0/certs/ca.key -out /etc/freeradius/3.0/certs/ca.csr -subj "/CN=freeradius-ca"
@@ -32,11 +35,6 @@ RUN openssl x509 -req -days 365 -in /etc/freeradius/3.0/certs/ca.csr -signkey /e
 RUN openssl req -newkey rsa:2048 -nodes -keyout /etc/freeradius/3.0/certs/server.key -out /etc/freeradius/3.0/certs/server.csr -subj "/CN=freeradius-server" && \
     openssl x509 -req -days 365 -in /etc/freeradius/3.0/certs/server.csr -CA /etc/freeradius/3.0/certs/ca.pem -CAkey /etc/freeradius/3.0/certs/ca.key -CAcreateserial -out /etc/freeradius/3.0/certs/server.pem
 
-# Create the directory for realm configuration - Still in testing
-RUN mkdir -p /etc/freeradius/3.0/mods-config/realm
-
-# Configure realm to accept any realm - Still in testing
-RUN echo 'realm NULL { format = "suffix" }' > /etc/freeradius/3.0/mods-config/realm/null
 
 # Expose the default RADIUS ports
 EXPOSE 1812/udp 1813/udp
