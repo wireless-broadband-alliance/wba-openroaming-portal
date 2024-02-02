@@ -484,12 +484,11 @@ authorize {
 	Autz-Type New-TLS-Connection {
 		  ok
 	}
-    if (&User-Name =~ /@.*$/) {
-    update control {
-        Auth-Type := Accept
-    }
-}
-
+	if (&User-Name =~ /@.*$/) {
+		update control {
+				Auth-Type := Accept
+		}
+	}
 }
 
 
