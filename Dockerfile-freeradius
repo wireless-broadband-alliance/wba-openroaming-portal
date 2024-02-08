@@ -26,15 +26,8 @@ COPY freeradius_conf/clients.conf /etc/freeradius/3.0/clients.conf
 # Copy default file to accept all realms to authenticate
 COPY freeradius_conf/default /etc/freeradius/3.0/sites-enabled/default
 
-# Generate a new CA key and certificate
-RUN openssl genpkey -algorithm RSA -out /etc/freeradius/3.0/certs/ca.key
-RUN openssl req -new -key /etc/freeradius/3.0/certs/ca.key -out /etc/freeradius/3.0/certs/ca.csr -subj "/CN=freeradius-ca"
-RUN openssl x509 -req -days 365 -in /etc/freeradius/3.0/certs/ca.csr -signkey /etc/freeradius/3.0/certs/ca.key -out /etc/freeradius/3.0/certs/ca.pem
-
-# Generate server key and certificate
-RUN openssl req -newkey rsa:2048 -nodes -keyout /etc/freeradius/3.0/certs/server.key -out /etc/freeradius/3.0/certs/server.csr -subj "/CN=freeradius-server" && \
-    openssl x509 -req -days 365 -in /etc/freeradius/3.0/certs/server.csr -CA /etc/freeradius/3.0/certs/ca.pem -CAkey /etc/freeradius/3.0/certs/ca.key -CAcreateserial -out /etc/freeradius/3.0/certs/server.pem
-
+# Copy the existing ca file
+COPY signing-keys/ca.pem /etc/freeradius/3.0/certs/ca.pem
 
 # Expose the default RADIUS ports
 EXPOSE 1812/udp 1813/udp
