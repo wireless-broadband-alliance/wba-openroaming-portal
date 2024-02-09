@@ -174,7 +174,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportUsers(Request $request, UserRepository $userRepository): Response
+    public function exportUsers(UserRepository $userRepository): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
