@@ -104,7 +104,7 @@ class AdminController extends AbstractController
         $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 15; // Number of users to display per page
 
-        
+
         $sort = $request->query->get('sort', 'createdAt');  // Default sort by user creation date
         $order = $request->query->get('order', 'desc'); // Default order: descending
 
@@ -170,6 +170,7 @@ class AdminController extends AbstractController
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
@@ -182,9 +183,6 @@ class AdminController extends AbstractController
             $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
@@ -233,9 +231,7 @@ class AdminController extends AbstractController
         $writer->save($tempFile);
 
         // Return the file as a response
-        $response = $this->file($tempFile, 'users.xlsx');
-
-        return $response;
+        return $this->file($tempFile, 'users.xlsx');
     }
 
     // Determine user provider
@@ -243,11 +239,13 @@ class AdminController extends AbstractController
     {
         if ($user->getGoogleId() !== null) {
             return 'Google Account';
-        } elseif ($user->getSamlIdentifier() !== null) {
-            return 'SAML';
-        } else {
-            return 'Portal Account';
         }
+
+        if ($user->getSamlIdentifier() !== null) {
+            return 'SAML';
+        }
+
+        return 'Portal Account';
     }
 
     /**
