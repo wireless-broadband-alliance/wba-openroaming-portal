@@ -26,6 +26,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,8 +46,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  *
@@ -77,7 +77,8 @@ class AdminController extends AbstractController
         GetSettings            $getSettings,
         SettingRepository      $settingRepository,
         EntityManagerInterface $entityManager,
-    ) {
+    )
+    {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
@@ -165,11 +166,8 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
      * @param UserRepository $userRepository
      * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
@@ -1699,7 +1697,7 @@ class AdminController extends AbstractController
         $data = [];
         $colors = [];
 
-        if (!empty(array_filter($dataValues, static fn ($value) => $value !== 0))) {
+        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
             foreach ($labels as $index => $type) {
                 $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
                 $data[] = $dataValues[$index];
