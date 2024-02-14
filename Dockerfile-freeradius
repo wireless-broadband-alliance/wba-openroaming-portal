@@ -14,10 +14,16 @@ RUN echo "UTC" >> /etc/timezone \
 
 # Install FreeRADIUS and its dependencies
 RUN apt-get install -y freeradius freeradius-mysql
+RUN apt-get install -y freeradius-utils
+
+# Remove the existing SQL configuration
+RUN rm -f /etc/freeradius/3.0/mods-enabled/sql
 
 # Copy FreeRADIUS configuration files
 COPY freeradius_conf/radius.conf /etc/freeradius/3.0/mods-available/sql
 COPY freeradius_conf/sql.conf /etc/freeradius/3.0/mods-available/sql
+
+# Symlink to the new SQL configuration
 RUN ln -s /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-enabled/sql
 
 # Copy client configuration file
