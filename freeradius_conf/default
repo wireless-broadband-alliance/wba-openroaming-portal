@@ -489,6 +489,11 @@ authorize {
 				Auth-Type := Accept
 		}
 	}
+	# if (&User-Password) {
+    #        update control {
+    #            Auth-Type := ntlm_auth
+    #        }
+    # }
 	suffix
 }
 

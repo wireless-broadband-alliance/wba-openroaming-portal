@@ -16,33 +16,32 @@ RUN echo "UTC" >> /etc/timezone \
 RUN apt-get install -y freeradius freeradius-mysql
 RUN apt-get install -y freeradius-utils
 
-# Remove the existing SQL configuration
+# Remove the existing unnecessary configuration
 RUN rm -f /etc/freeradius/3.0/mods-enabled/radius
-RUN rm -f /etc/freeradius/3.0/mods-enabled/sql
 RUN rm -f /etc/freeradius/3.0/sites-available/tls
+RUN rm -f /etc/freeradius/3.0/mods-available/sql
 
 # Copy FreeRADIUS configuration files
 COPY freeradius_conf/radius.conf /etc/freeradius/3.0/mods-available/radius
 COPY freeradius_conf/sql.conf /etc/freeradius/3.0/mods-available/sql
 COPY freeradius_conf/tls.conf /etc/freeradius/3.0/sites-available/tls
 
+# Enable maximum debugging
+RUN sed -i 's/auth = yes/auth = yes\n\t\ndebug {\n\t\tauth = yes\n\t}/' /etc/freeradius/3.0/sites-enabled/default
+
 # Enable threading for TLS
 RUN sed -i 's/threading = no/threading = yes/' /etc/freeradius/3.0/radiusd.conf
-
-# Symlink to the new SQL configuration
-RUN ln -s /etc/freeradius/3.0/mods-available/radius /etc/freeradius/3.0/mods-enabled/radius
-RUN ln -s /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-enabled/sql
-
-# Copy client configuration file
-COPY freeradius_conf/clients.conf /etc/freeradius/3.0/clients.conf
 
 # Copy default file to accept all realms to authenticate
 COPY freeradius_conf/default /etc/freeradius/3.0/sites-enabled/default
 
 # Copy the existing ca file
-COPY signing-keys/WBA_OpenRoaming_Root.pem /etc/freeradius/3.0/certs/WBA_OpenRoaming_Root.pem
+COPY signing-keys/ca.pem /etc/freeradius/3.0/certs/ca.pem
 COPY signing-keys/cert-chain.pem /etc/freeradius/3.0/certs/cert-chain.pem
 COPY signing-keys/private_key.pem /etc/freeradius/3.0/certs/private_key.pem
+
+# Copy client configuration file
+COPY freeradius_conf/clients.conf /etc/freeradius/3.0/clients.conf
 
 # Expose the default RADIUS ports
 EXPOSE 1812/udp 1813/udp
