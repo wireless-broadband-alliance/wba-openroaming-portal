@@ -20,10 +20,12 @@ RUN apt-get install -y freeradius-utils
 RUN rm -f /etc/freeradius/3.0/mods-enabled/radius
 RUN rm -f /etc/freeradius/3.0/sites-available/tls
 RUN rm -f /etc/freeradius/3.0/mods-available/sql
+RUN rm -f /etc/freeradius/3.0/mods-available/eap
 
 # Copy FreeRADIUS configuration files
 COPY freeradius_conf/radius.conf /etc/freeradius/3.0/mods-available/radius
 COPY freeradius_conf/sql.conf /etc/freeradius/3.0/mods-available/sql
+COPY freeradius_conf/eap.conf /etc/freeradius/3.0/mods-available/eap
 COPY freeradius_conf/tls.conf /etc/freeradius/3.0/sites-available/tls
 
 # Enable maximum debugging
