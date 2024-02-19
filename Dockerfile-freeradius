@@ -37,13 +37,17 @@ RUN sed -i 's/threading = no/threading = yes/' /etc/freeradius/3.0/radiusd.conf
 # Copy default file to accept all realms to authenticate
 COPY freeradius_conf/default /etc/freeradius/3.0/sites-enabled/default
 
-# Copy the existing ca file
+# Copy the existing certificates file
 COPY signing-keys/ca.pem /etc/freeradius/3.0/certs/ca.pem
-COPY signing-keys/cert-chain.pem /etc/freeradius/3.0/certs/cert-chain.pem
-COPY signing-keys/private_key.pem /etc/freeradius/3.0/certs/private_key.pem
+COPY signing-keys/cert.pem /etc/freeradius/3.0/certs/cert.pem
+COPY signing-keys/privkey.pem /etc/freeradius/3.0/certs/privkey.pem
 
 # Copy client configuration file
 COPY freeradius_conf/clients.conf /etc/freeradius/3.0/clients.conf
+
+# Set permissions for the FreeRADIUS files and directories
+RUN chown -R freerad:freerad /etc/freeradius
+RUN chmod -R 600 /etc/freeradius/3.0/certs/privkey.pem
 
 # Expose the default RADIUS ports
 EXPOSE 1812/udp 1813/udp
