@@ -1,14 +1,18 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV COMPOSER_ALLOW_SUPERUSER=1
+
 RUN apt-get update \
   && apt-get -y install apt-utils \
   && apt-get -y upgrade \
   && apt-get -y install wget curl nano zip unzip git openssl sqlite3 build-essential software-properties-common cron supervisor gnupg tzdata
 
+RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt
+RUN cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
 RUN echo "UTC" >> /etc/timezone \
   && dpkg-reconfigure -f noninteractive tzdata
-
 
 RUN add-apt-repository ppa:ondrej/php \
     && apt-get update \
