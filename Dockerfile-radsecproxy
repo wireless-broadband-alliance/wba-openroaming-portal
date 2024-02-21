@@ -58,9 +58,6 @@ RUN chmod u+x /root/start.sh
 RUN mkdir /var/log/radsecproxy
 RUN mkdir -p /etc/radsecproxy/certs
 
-# Export volumes
-VOLUME /var/log/radsecproxy
-
 # Make Radsecproxy's ports available
 EXPOSE 1812
 EXPOSE 1813
@@ -68,6 +65,11 @@ EXPOSE 1813
 # Set Tini entrypoint
 ENTRYPOINT ["/sbin/tini", "--"]
 COPY radsecproxy_conf/naptr-openroaming.sh /etc/radsecproxy/naptr-openroaming.sh
+COPY radsecproxy_conf/radsecproxy.conf /etc/radsecproxy.conf
+COPY signing-keys/ca.pem etc/radsecproxy/certs
+COPY signing-keys/cert.pem etc/radsecproxy/certs
+COPY signing-keys/privkey.pem etc/radsecproxy/certs
+
 RUN chmod +x /etc/radsecproxy/naptr-openroaming.sh
 # Start Radsecproxy
 CMD ["/root/start.sh"]
