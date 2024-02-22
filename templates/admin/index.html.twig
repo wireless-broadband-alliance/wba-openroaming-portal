@@ -76,7 +76,7 @@
                             <div class="flex items-center space-x-6">
                                 <a href="{{ path('admin_page_export_users') }}"
                                    class="text-xs text-center bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200">
-                                    Export Everthing
+                                    Export Everything
                                 </a>
                             </div>
                         </div>
@@ -138,7 +138,15 @@
                                         <td colspan="7">
                                             <div class="flex md:justify-center justify-start md:items-center items-start md:text-center text-center md:p-1 p-8">
                                                 <div class="bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold md:text-xs text-sm">
-                                                    No users found with "{{ searchTerm }}"
+                                                    {% if searchTerm %}
+                                                        No users found with "{{ searchTerm }}"
+                                                    {% elseif app.request.query.get('filter') == 'verified' %}
+                                                        There are no verified users in the system
+                                                    {% elseif app.request.query.get('filter') == 'banned' %}
+                                                        There are no banned users in the system
+                                                    {% else %}
+                                                        There are no users in the system
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </td>
