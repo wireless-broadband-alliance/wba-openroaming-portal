@@ -328,9 +328,9 @@ class AdminController extends AbstractController
      * @param EntityManagerInterface $em
      * @return Response
      */
-    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete')]
+    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers($id, EntityManagerInterface $em, Request $request): Response
+    public function deleteUsers($id, EntityManagerInterface $em): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -338,12 +338,6 @@ class AdminController extends AbstractController
         if (!$currentUser->IsVerified()) {
             $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
-        // Prevent users from tying on the URL
-        if (!$request->isMethod('POST')) {
-            $this->addFlash('error_admin', 'Please do not use the URL to perform operations!');
-            return $this->redirectToRoute('admin_page');
         }
 
         $user = $this->userRepository->find($id);
