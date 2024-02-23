@@ -143,10 +143,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -174,14 +170,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(UserRepository $userRepository): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
 
@@ -301,10 +289,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->isVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -332,14 +316,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers($id, EntityManagerInterface $em): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $user = $this->userRepository->find($id);
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -385,10 +361,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
@@ -535,23 +507,6 @@ class AdminController extends AbstractController
                 $em->flush();
                 $this->addFlash('success_admin', 'Your password has been reseted successfully');
                 return $this->redirectToRoute('admin_page');
-            }
-
-            if ($type === 'settingMain') {
-                $command = 'php bin/console reset:mainSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                // Run the command
-                $process->run();
-                // Check if the command executed
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reseted successfully');
-                return $this->redirectToRoute('admin_dashboard_settings');
             }
 
             if ($type === 'settingCustom') {
@@ -703,14 +658,6 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
-        if ($type === 'settingMain') {
-            // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingMain']);
-        }
-
         if ($type === 'settingCustom') {
             // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail(), false);
@@ -831,10 +778,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -905,10 +848,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -987,11 +926,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1054,11 +988,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1126,11 +1055,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1211,11 +1135,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1280,11 +1199,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
