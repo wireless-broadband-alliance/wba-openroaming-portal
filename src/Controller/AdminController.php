@@ -143,10 +143,9 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
+
+        // Check if the export users operation is enabled
+        $export_users = $this->parameterBag->get('app.export_users');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -161,7 +160,8 @@ class AdminController extends AbstractController
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
             'activeSort' => $sort,
-            'activeOrder' => $order
+            'activeOrder' => $order,
+            'export_users' => $export_users
         ]);
     }
 
@@ -174,14 +174,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(UserRepository $userRepository): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
 
@@ -301,10 +293,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->isVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -328,24 +316,10 @@ class AdminController extends AbstractController
      * @param EntityManagerInterface $em
      * @return Response
      */
-    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete')]
+    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers($id, EntityManagerInterface $em, Request $request): Response
+    public function deleteUsers($id, EntityManagerInterface $em): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
-        // Prevent users from tying on the URL
-        if (!$request->isMethod('POST')) {
-            $this->addFlash('error_admin', 'Please do not use the URL to perform operations!');
-            return $this->redirectToRoute('admin_page');
-        }
-
         $user = $this->userRepository->find($id);
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -391,10 +365,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
@@ -454,16 +424,16 @@ class AdminController extends AbstractController
             $newPassword = $formReset->get('password')->getData();
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                $verificationCode = $this->generateVerificationCode($user);
-                // Removes the admin access until he confirms his new password
-                $user->setVerificationCode($verificationCode);
-                $user->setPassword($hashedPassword);
-                $user->setIsVerified(0);
-                $em->persist($user);
-                $em->flush();
-                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
-            }
+//            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+//                $verificationCode = $this->generateVerificationCode($user);
+//                // Removes the admin access until he confirms his new password
+//                $user->setVerificationCode($verificationCode);
+//                $user->setPassword($hashedPassword);
+//                $user->setIsVerified(0);
+//                $em->persist($user);
+//                $em->flush();
+//                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
+//            }
             $user->setPassword($hashedPassword);
             $em->flush();
 
@@ -541,23 +511,6 @@ class AdminController extends AbstractController
                 $em->flush();
                 $this->addFlash('success_admin', 'Your password has been reseted successfully');
                 return $this->redirectToRoute('admin_page');
-            }
-
-            if ($type === 'settingMain') {
-                $command = 'php bin/console reset:mainSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                // Run the command
-                $process->run();
-                // Check if the command executed
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reseted successfully');
-                return $this->redirectToRoute('admin_dashboard_settings');
             }
 
             if ($type === 'settingCustom') {
@@ -709,14 +662,6 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
         }
 
-        if ($type === 'settingMain') {
-            // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingMain']);
-        }
-
         if ($type === 'settingCustom') {
             // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail(), false);
@@ -837,10 +782,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -911,10 +852,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -993,11 +930,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1060,11 +992,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1132,11 +1059,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1217,11 +1139,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1286,11 +1203,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1396,49 +1308,49 @@ class AdminController extends AbstractController
         ]);
     }
 
-    /**
-     * @return Response
-     * @throws \JsonException
-     * @throws Exception
-     */
-    #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function freeradiusStatisticsData(Request $request): Response
-    {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $user = $this->getUser();
-
-        // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
-
-        // Convert the date strings to DateTime objects
-        if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else if ($startDateString === "") {
-            $startDate = null;
-        } else {
-            $startDate = (new DateTime())->modify('-1 month');
-        }
-
-        if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else if ($endDateString === "") {
-            $endDate = null;
-        } else {
-            $endDate = new DateTime();
-        }
-
-        $fetchChartAuthenticationFreeradius = $this->fetchChartAuthenticationFreeradius($startDate, $endDate);
-
-        return $this->render('admin/freeradius_statistics.html.twig', [
-            'data' => $data,
-            'current_user' => $user,
-            'devicesDataJson' => json_encode($fetchChartAuthenticationFreeradius, JSON_THROW_ON_ERROR),
-            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
-            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
-        ]);
-    }
+//    /**
+//     * @return Response
+//     * @throws \JsonException
+//     * @throws Exception
+//     */
+//    #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
+//    #[IsGranted('ROLE_ADMIN')]
+//    public function freeradiusStatisticsData(Request $request): Response
+//    {
+//        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+//        $user = $this->getUser();
+//
+//        // Get the submitted start and end dates from the form
+//        $startDateString = $request->request->get('startDate');
+//        $endDateString = $request->request->get('endDate');
+//
+//        // Convert the date strings to DateTime objects
+//        if ($startDateString) {
+//            $startDate = new DateTime($startDateString);
+//        } else if ($startDateString === "") {
+//            $startDate = null;
+//        } else {
+//            $startDate = (new DateTime())->modify('-1 month');
+//        }
+//
+//        if ($endDateString) {
+//            $endDate = new DateTime($endDateString);
+//        } else if ($endDateString === "") {
+//            $endDate = null;
+//        } else {
+//            $endDate = new DateTime();
+//        }
+//
+//        $fetchChartAuthenticationFreeradius = $this->fetchChartAuthenticationFreeradius($startDate, $endDate);
+//
+//        return $this->render('admin/freeradius_statistics.html.twig', [
+//            'data' => $data,
+//            'current_user' => $user,
+//            'devicesDataJson' => json_encode($fetchChartAuthenticationFreeradius, JSON_THROW_ON_ERROR),
+//            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
+//            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+//        ]);
+//    }
 
     /**
      * @throws Exception
@@ -1732,11 +1644,6 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser->IsVerified()) {
-            $this->addFlash('error_admin', 'Your account is not verified. Please check your email.');
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
-
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 

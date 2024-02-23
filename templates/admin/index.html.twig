@@ -73,12 +73,14 @@
                                            value="{{ app.request.query.get('filter', 'all') }}">
                                 </div>
                             </form>
-                            <div class="flex items-center space-x-6">
-                                <a href="{{ path('admin_page_export_users') }}"
-                                   class="text-xs text-center bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200">
-                                    Export Everything
-                                </a>
-                            </div>
+                            {% if export_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                                <div class="flex items-center space-x-6">
+                                    <a href="{{ path('admin_page_export_users') }}"
+                                       class="text-xs text-center bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200">
+                                        Export Everything
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="overflow-x-auto max-w-full -m-5 mt-3">
