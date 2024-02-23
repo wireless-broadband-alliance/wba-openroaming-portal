@@ -31,6 +31,9 @@ COPY freeradius_conf/radius.conf /etc/freeradius/3.0/mods-available/radius
 COPY freeradius_conf/sql.conf /etc/freeradius/3.0/mods-available/sql
 COPY freeradius_conf/eap.conf /etc/freeradius/3.0/mods-available/eap
 COPY freeradius_conf/tls.conf /etc/freeradius/3.0/sites-available/tls
+COPY freeradius_conf/authorize /etc/freeradius/3.0/mods-config/files/authorize
+# Copy default file to accept all realms to authenticate
+COPY freeradius_conf/default /etc/freeradius/3.0/sites-enabled/default
 
 # Enable maximum debugging
 RUN sed -i 's/auth = yes/auth = yes\n\t\ndebug {\n\t\tauth = yes\n\t}/' /etc/freeradius/3.0/sites-enabled/default
@@ -38,8 +41,6 @@ RUN sed -i 's/auth = yes/auth = yes\n\t\ndebug {\n\t\tauth = yes\n\t}/' /etc/fre
 # Enable threading for TLS
 RUN sed -i 's/threading = no/threading = yes/' /etc/freeradius/3.0/radiusd.conf
 
-# Copy default file to accept all realms to authenticate
-COPY freeradius_conf/default /etc/freeradius/3.0/sites-enabled/default
 
 # Copy the existing certificates file
 COPY signing-keys/ca.pem /etc/freeradius/3.0/certs/ca.pem
