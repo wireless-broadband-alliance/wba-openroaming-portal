@@ -266,13 +266,16 @@ class AdminController extends AbstractController
 
         // Sort the users based on the specified column and order
         usort($users, function ($user1, $user2) use ($sort, $order) {
+            // This function is used to sort the arrays uuid and created_at
+            // and compares them with the associated users with the highest number to the lowest id from both arrays
             $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
             $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
 
-            if ($order === 'asc') {
-                return $value1 <=> $value2;
+            if ($order === 'asc') { // Check if the order is "asc" or "desc"
+                //and returns the correct result between arrays
+                return $value1 <=> $value2; // -1
             } else {
-                return $value2 <=> $value1;
+                return $value2 <=> $value1; // +1
             }
         });
 
