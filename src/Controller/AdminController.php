@@ -420,16 +420,16 @@ class AdminController extends AbstractController
             $newPassword = $formReset->get('password')->getData();
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-                $verificationCode = $this->generateVerificationCode($user);
-                // Removes the admin access until he confirms his new password
-                $user->setVerificationCode($verificationCode);
-                $user->setPassword($hashedPassword);
-                $user->setIsVerified(0);
-                $em->persist($user);
-                $em->flush();
-                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
-            }
+//            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+//                $verificationCode = $this->generateVerificationCode($user);
+//                // Removes the admin access until he confirms his new password
+//                $user->setVerificationCode($verificationCode);
+//                $user->setPassword($hashedPassword);
+//                $user->setIsVerified(0);
+//                $em->persist($user);
+//                $em->flush();
+//                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
+//            }
             $user->setPassword($hashedPassword);
             $em->flush();
 
