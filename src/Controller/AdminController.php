@@ -144,6 +144,9 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        // Check if the export users operation is enabled
+        $export_users = $this->parameterBag->get('app.export_users');
+
         return $this->render('admin/index.html.twig', [
             'users' => $users,
             'current_user' => $currentUser,
@@ -157,7 +160,8 @@ class AdminController extends AbstractController
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
             'activeSort' => $sort,
-            'activeOrder' => $order
+            'activeOrder' => $order,
+            'export_users' => $export_users
         ]);
     }
 
