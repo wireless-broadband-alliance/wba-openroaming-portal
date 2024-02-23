@@ -186,16 +186,14 @@ class GoogleController extends AbstractController
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail) {
-            // If the existing user doesn't have a Google ID, determine the provider
-            $existingProvider = $this->adminController->getUserProvider($userWithEmail);
-        
+
             if ($userWithEmail->getGoogleId() === null) {
-                $this->addFlash('error', sprintf('Email already in use. Please use the correct provider: %s', $existingProvider));
+                $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;
-            } else {
-                // Return the correct user to authenticate
-                return $userWithEmail;
             }
+
+            // Return the correct user to authenticate
+            return $userWithEmail;
         }
 
         // If no user exists, create a new user with a new set of Events
