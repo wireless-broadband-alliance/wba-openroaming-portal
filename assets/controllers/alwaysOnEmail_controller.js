@@ -80,7 +80,7 @@ export default class extends Controller {
 
 		document.addEventListener("DOMContentLoaded", function () {
 			const platformModeRadios = document.querySelectorAll('[name="status[PLATFORM_MODE]"]');
-			const emailVerificationCard = document.getElementById("USER_VERIFICATION");
+			const userVerificationCard = document.getElementById("USER_VERIFICATION");
 			const statusMessage = document.getElementById('statusMessage');
 
 			function updateEmailVerificationCard() {
@@ -91,19 +91,23 @@ export default class extends Controller {
 					}
 				});
 
-				const formElements = emailVerificationCard.querySelectorAll("input, select, textarea");
+				const formElements = userVerificationCard.querySelectorAll("input, select, textarea");
 
 				if (selectedValue === "Live") {
 					// Disable all form elements
 					formElements.forEach(function (element) {
 						element.disabled = true;
 					});
+					userVerificationCard.classList.remove('bg-white');
+					userVerificationCard.classList.add('bg-disableCardsColor');
 					statusMessage.classList.remove('hidden');
 				} else {
 					// Enable all form elements
 					formElements.forEach(function (element) {
 						element.disabled = false;
 					});
+					userVerificationCard.classList.add('bg-white');
+					userVerificationCard.classList.remove('bg-disableCardsColor');
 					statusMessage.classList.add('hidden');
 				}
 			}
@@ -114,5 +118,16 @@ export default class extends Controller {
 				radio.addEventListener("change", updateEmailVerificationCard);
 			});
 		});
+
+		// document.addEventListener('DOMContentLoaded', function () {
+		// 	let checkbox = document.getElementById('checkbox-save-export');
+		// 	let submitButtonContainer = document.getElementById('saveExport');
+		//
+		// 	submitButtonContainer.style.display = 'none';
+		//
+		// 	checkbox.addEventListener('change', function() {
+		// 		submitButtonContainer.style.display = this.checked ? 'flex' : 'none';
+		// 	});
+		// });
 	}
 }

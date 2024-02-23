@@ -28,7 +28,7 @@ export default class extends Controller {
 		});
 
 
-		const mediaQuery = window.matchMedia('(max-width: 768px)');
+		const mediaQuery = window.matchMedia('(max-width: 1536px)');
 
 		// Function to handle changes in resolution
 		function handleResolutionChange(mediaQuery) {
@@ -104,8 +104,9 @@ export default class extends Controller {
 				}
 			});
 		}
-
+	
 		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
+		initializeDropdown_Select('StatisticsDropdownButton', 'StatisticsDropDown');
 		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
 
 		function initializeDropdown_ActionItems(buttonName, menuName) {
@@ -152,5 +153,68 @@ export default class extends Controller {
 
 		remove_element('errorDisplay');
 		remove_element('successDisplay');
+
+		function confirmDeletePost(userId, userUuid) {
+			if (confirm('Are you sure you want to delete the user with UUID ' + userUuid + '?')) {
+			document.getElementById('deleteForm' + userId).submit();
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const deleteButtons = document.querySelectorAll('.delete-users-button');
+
+			deleteButtons.forEach(button => {
+				button.addEventListener('click', () => {
+					const userId = button.getAttribute('data-user-id');
+					const userUuid = button.getAttribute('data-user-uuid');
+
+					if (confirm(`Are you sure you want to delete the user with UUID ${userUuid}?`)) {
+						document.getElementById('deleteForm' + userId).submit();
+					}
+				});
+			});
+		});
+
+		function addSortingClickListener(columnName, activeSort, activeOrder) {
+			var columnElement = document.getElementById(columnName + 'Column');
+		
+			if (columnElement) {
+				columnElement.addEventListener('click', function () {
+					// Retrieve the current URL
+					var currentUrl = new URL(window.location.href);
+		
+					// Parse the URL parameters into an object
+					var urlParams = new URLSearchParams(currentUrl.search);
+		
+					// Check if the 'sort' parameter is present and matches the current column
+					if (urlParams.has('sort') && urlParams.get('sort') === columnName) {
+						// If yes, toggle the sorting order
+						var newOrder = urlParams.get('order') === 'asc' ? 'desc' : 'asc';
+						urlParams.set('order', newOrder);
+					} else {
+						// If not, set the sorting parameters for the current column
+						urlParams.set('sort', columnName);
+						urlParams.set('order', 'asc');
+					}
+		
+					// Update the URL with the new parameters
+					currentUrl.search = '?' + urlParams.toString();
+		
+					// Redirect to the new URL
+					window.location.href = currentUrl.toString();
+				});
+				
+				// Add a class to indicate the active sort column
+				if (activeSort === columnName) {
+					columnElement.classList.add('active-sort');
+					// Optionally, add a class for the active sort order (asc/desc)
+					columnElement.classList.toggle('asc', activeOrder === 'asc');
+					columnElement.classList.toggle('desc', activeOrder === 'desc');
+				}
+			}
+		}
+		
+		addSortingClickListener('uuid', '{{ activeSort }}', '{{ activeOrder }}');
+		addSortingClickListener('createdAt', '{{ activeSort }}', '{{ activeOrder }}');					
 	}
 }
