@@ -119,15 +119,15 @@ export default class extends Controller {
 			});
 		});
 
-		document.addEventListener('DOMContentLoaded', function () {
-			let checkbox = document.getElementById('checkbox-save-export');
-			let submitButtonContainer = document.getElementById('saveExport');
-
-			submitButtonContainer.style.display = 'none';
-
-			checkbox.addEventListener('change', function() {
-				submitButtonContainer.style.display = this.checked ? 'flex' : 'none';
-			});
-		});
+		// document.addEventListener('DOMContentLoaded', function () {
+		// 	let checkbox = document.getElementById('checkbox-save-export');
+		// 	let submitButtonContainer = document.getElementById('saveExport');
+		//
+		// 	submitButtonContainer.style.display = 'none';
+		//
+		// 	checkbox.addEventListener('change', function() {
+		// 		submitButtonContainer.style.display = this.checked ? 'flex' : 'none';
+		// 	});
+		// });
 	}
 }

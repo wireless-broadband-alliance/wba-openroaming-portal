@@ -293,22 +293,22 @@
                                             </button>
                                         </div>
 
-                                        <div class="flex-col mt-10" data-controller="alwaysOnEmail">
-                                            {# Accept or Refuse to Share Information #}
-                                            <div class="flex justify-center items-center">
-                                                <input id="checkbox-save-export" type="checkbox"  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
-                                                <label for="checkbox-save-export" class="ms-2 text-sm font-medium text-[#B4B4B4]">I agree to share my information for <span class="font-bold">marketing uses.</span></label>
-                                            </div>
-                                            <div>
-                                                {# Submit button #}
-                                                <div class="flex items-center justify-center" id="saveExport" style="display: none;">
-                                                    <button type="submit"
-                                                            class="animate-pulse rounded-lg bg-[#7DB928] mt-5 px-4 py-2 text-center text-white font-medium text-sm lg:text-lg">
-                                                        Save
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+{#                                        <div class="flex-col mt-10" data-controller="alwaysOnEmail">#}
+{#                                            #}{# Accept or Refuse to Share Information #}
+{#                                            <div class="flex justify-center items-center">#}
+{#                                                <input id="checkbox-save-export" type="checkbox"  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">#}
+{#                                                <label for="checkbox-save-export" class="ms-2 text-sm font-medium text-[#B4B4B4]">I agree to share my information for <span class="font-bold">marketing uses.</span></label>#}
+{#                                            </div>#}
+{#                                            <div>#}
+{#                                                #}{# Submit button #}
+{#                                                <div class="flex items-center justify-center" id="saveExport" style="display: none;">#}
+{#                                                    <button type="submit"#}
+{#                                                            class="animate-pulse rounded-lg bg-[#7DB928] mt-5 px-4 py-2 text-center text-white font-medium text-sm lg:text-lg">#}
+{#                                                        Save#}
+{#                                                    </button>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div> #}
                                     </div>
 
                                     {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
