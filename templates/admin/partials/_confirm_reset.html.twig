@@ -1,6 +1,5 @@
 <div class="w-full lg:w-1/2 bg-white rounded-md p-4">
-    <form {% if type == 'password' %} action="{{ path('admin_confirm_checker', {'type': 'password'}) }}"{% endif %}
-            {% if type == 'settingMain' %} action="{{ path('admin_confirm_checker', {'type': 'settingMain'}) }}"{% endif %}
+    <form {% if type == 'settingMain' %} action="{{ path('admin_confirm_checker', {'type': 'settingMain'}) }}"{% endif %}
             {% if type == 'settingCustom' %} action="{{ path('admin_confirm_checker', {'type': 'settingCustom'}) }}"{% endif %}
             {% if type == 'settingTerms' %} action="{{ path('admin_confirm_checker', {'type': 'settingTerms'}) }}"{% endif %}
             {% if type == 'settingRadius' %} action="{{ path('admin_confirm_checker', {'type': 'settingRadius'}) }}"{% endif %}
@@ -19,8 +18,7 @@
         <div class="flex flex-col md:flex-row justify-center md:justify-between space-x-2 space-y-2 mt-4">
             <div class="flex justify-start items-end pb-2">
                 <p>Click
-                    <a {% if type == 'password' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'password'}) }}"{% endif %}
-                            {% if type == 'settingMain' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingMain'}) }}"{% endif %}
+                    <a {% if type == 'settingMain' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingMain'}) }}"{% endif %}
                             {% if type == 'settingCustom' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCustom'}) }}"{% endif %}
                             {% if type == 'settingTerms' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingTerms'}) }}"{% endif %}
                             {% if type == 'settingRadius' %}href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingRadius'}) }}"{% endif %}

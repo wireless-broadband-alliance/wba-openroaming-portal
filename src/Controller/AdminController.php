@@ -7,6 +7,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\authType;
 use App\Form\CapportType;
 use App\Form\CustomType;
@@ -113,15 +114,18 @@ class AdminController extends AbstractController
         $users = $userRepository->findExcludingAdmin();
 
         // Sort the users based on the specified column and order
-        usort($users, function ($user1, $user2) use ($sort, $order) {
+        usort($users, static function ($user1, $user2) use ($sort, $order) {
+            // This function is used to sort the arrays uuid and created_at
+            // and compares them with the associated users with the highest number to the lowest id from both arrays
             $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
             $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
 
-            if ($order === 'asc') {
-                return $value1 <=> $value2;
-            } else {
-                return $value2 <=> $value1;
+            if ($order === 'asc') { // Check if the order is "asc" or "desc"
+                //and returns the correct result between arrays
+                return $value1 <=> $value2; // -1
             }
+
+            return $value2 <=> $value1; // +1
         });
 
         $filter = $request->query->get('filter', 'all'); // Default filter
@@ -228,14 +232,14 @@ class AdminController extends AbstractController
     public function getUserProvider(User $user): string
     {
         if ($user->getGoogleId() !== null) {
-            return 'Google Account';
+            return UserProvider::Google_Account;
         }
 
         if ($user->getSamlIdentifier() !== null) {
-            return 'SAML';
+            return UserProvider::SAML;
         }
 
-        return 'Portal Account';
+        return UserProvider::Portal_Account;
     }
 
     /**
@@ -265,7 +269,7 @@ class AdminController extends AbstractController
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Sort the users based on the specified column and order
-        usort($users, function ($user1, $user2) use ($sort, $order) {
+        usort($users, static function ($user1, $user2) use ($sort, $order) {
             // This function is used to sort the arrays uuid and created_at
             // and compares them with the associated users with the highest number to the lowest id from both arrays
             $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
@@ -274,9 +278,9 @@ class AdminController extends AbstractController
             if ($order === 'asc') { // Check if the order is "asc" or "desc"
                 //and returns the correct result between arrays
                 return $value1 <=> $value2; // -1
-            } else {
-                return $value2 <=> $value1; // +1
             }
+
+            return $value2 <=> $value1; // +1
         });
 
         if (strlen($searchTerm) > 320) {
@@ -478,7 +482,7 @@ class AdminController extends AbstractController
      * Render a confirmation password form
      * @return Response
      */
-    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
+    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function confirmReset(string $type): Response
     {
@@ -502,7 +506,7 @@ class AdminController extends AbstractController
      * Check if the code and then return the correct action
      * @throws Exception
      */
-    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
+    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function checkPassword(RequestStack $requestStack, EntityManagerInterface $em, string $type): Response
     {
@@ -511,15 +515,6 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if ($enteredCode === $currentUser->getVerificationCode()) {
-            if ($type === 'password') {
-                // Removes the admin access until he confirms his new password
-                $currentUser->setIsVerified(1);
-                $em->persist($currentUser);
-                $em->flush();
-                $this->addFlash('success_admin', 'Your password has been reseted successfully');
-                return $this->redirectToRoute('admin_page');
-            }
-
             if ($type === 'settingCustom') {
                 $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
@@ -531,7 +526,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reseted successfully');
+                $this->addFlash('success_admin', 'The setting has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
@@ -546,7 +541,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reseted successfully');
+                $this->addFlash('success_admin', 'The setting has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
@@ -561,7 +556,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The Radius configurations has been reseted successfully');
+                $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
@@ -576,7 +571,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The platform mode status has been reseted successfully');
+                $this->addFlash('success_admin', 'The platform mode status has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
@@ -591,7 +586,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The LDAP settings has been reseted successfully');
+                $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
@@ -606,7 +601,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The CAPPORT settings has been reseted successfully');
+                $this->addFlash('success_admin', 'The CAPPORT settings has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
@@ -621,7 +616,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The authentication settings has been reseted successfully');
+                $this->addFlash('success_admin', 'The authentication settings has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
@@ -636,7 +631,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully');
+                $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
             }
         }
@@ -653,25 +648,16 @@ class AdminController extends AbstractController
      * @throws Exception
      * @throws TransportExceptionInterface
      */
-    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
+    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function regenerateCode(string $type): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
-
-        if (!$isVerified && $type === 'password') {
-            // Regenerate the verification code for the admin to reset password
-            $email = $this->createEmailAdmin($currentUser->getEmail(), true);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'password']);
-        }
 
         if ($type === 'settingCustom') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
@@ -679,7 +665,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingTerms') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTerms']);
@@ -687,7 +673,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingRadius') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingRadius']);
@@ -695,7 +681,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingStatus') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
@@ -703,7 +689,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingLDAP') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
@@ -711,7 +697,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingCAPPORT') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
@@ -719,7 +705,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingAUTH') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
@@ -727,7 +713,7 @@ class AdminController extends AbstractController
 
         if ($type === 'settingSMS') {
             // Regenerate the verification code for the admin to reset settings
-            $email = $this->createEmailAdmin($currentUser->getEmail(), false);
+            $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingSMS']);
@@ -743,7 +729,7 @@ class AdminController extends AbstractController
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailAdmin(string $email, bool $password): Email
+    protected function createEmailAdmin(string $email): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -754,17 +740,6 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         $verificationCode = $this->generateVerificationCode($currentUser);
 
-        if ($password) {
-            return (new TemplatedEmail())
-                ->from(new Address($emailSender, $nameSender))
-                ->to($email)
-                ->subject('Your Password Reset Details')
-                ->htmlTemplate('email_activation/email_template_admin.html.twig')
-                ->context([
-                    'verificationCode' => $verificationCode,
-                    'resetPassword' => true
-                ]);
-        }
         return (new TemplatedEmail())
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
@@ -1264,6 +1239,7 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @param Request $request
      * @return Response
      * @throws \JsonException
      * @throws Exception
