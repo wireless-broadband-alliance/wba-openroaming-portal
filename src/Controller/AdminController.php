@@ -8,7 +8,7 @@ use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
-use App\Form\authType;
+use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\CustomType;
 use App\Form\LDAPType;
@@ -1046,7 +1046,7 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(authType::class, null, [
+        $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
         ]);
 
