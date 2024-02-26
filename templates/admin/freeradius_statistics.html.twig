@@ -11,10 +11,10 @@
                 {# Header - Title and Buttons #}
                 {% include 'admin/partials/_header_admin.html.twig' %}
             </div>
-            {# Portal Statistics #}
+            {# Freeradius Statistics #}
             <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-between items-center mb-10">
                 <h2 class="text-2xl font-semibold text-center lg:text-left ">
-                    Portal Statistics
+                    Freeradius Statistics
                 </h2>
                 <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics') }}" method="post"
                     class="flex flex-col sm:flex-row items-center gap-2">
@@ -29,7 +29,7 @@
                         onchange="this.form.submit()">
                 </form>
             </div>
-            {% include 'admin/partials/_statistics.html.twig' %}
+            {% include 'admin/partials/_freeradius_statistics.html.twig' %}
             <hr class="mb-8 mt-16 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
         </div>
     </section>

@@ -36,6 +36,7 @@ class GoogleController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
+    private AdminController $adminController;
 
     /**
      * @param ClientRegistry $clientRegistry
@@ -44,6 +45,7 @@ class GoogleController extends AbstractController
      * @param TokenStorageInterface $tokenStorage
      * @param RequestStack $requestStack
      * @param EventDispatcherInterface $eventDispatcher
+     * @param AdminController $adminController
      */
     public function __construct(
         ClientRegistry              $clientRegistry,
@@ -51,15 +53,16 @@ class GoogleController extends AbstractController
         UserPasswordHasherInterface $passwordEncoder,
         TokenStorageInterface       $tokenStorage,
         RequestStack                $requestStack,
-        EventDispatcherInterface    $eventDispatcher
-    )
-    {
+        EventDispatcherInterface    $eventDispatcher,
+        AdminController             $adminController,
+    ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
+        $this->adminController = $adminController;
     }
 
     /**
@@ -181,8 +184,15 @@ class GoogleController extends AbstractController
 
         // Check if a user with the given email exists
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
-        if ($userWithEmail && $userWithEmail->getGoogleId() !== null) {
-            // Return the existing user with the matching Google ID
+
+        if ($userWithEmail) {
+
+            if ($userWithEmail->getGoogleId() === null) {
+                $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
+                return null;
+            }
+
+            // Return the correct user to authenticate
             return $userWithEmail;
         }
 

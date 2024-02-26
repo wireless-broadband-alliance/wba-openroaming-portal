@@ -7,6 +7,7 @@ parameters:
   app.email_address: '%env(EMAIL_ADDRESS)%'
   app.sender_name: '%env(SENDER_NAME)%'
   app.budget_api_url: '%env(BUDGETSMS_API_URL)%'
+  app.export_users: '%env(EXPORT_USERS)%'
 services:
   App\Form\Transformer\BooleanToDateTimeTransformer: ~
   #Things to make the login with Google work

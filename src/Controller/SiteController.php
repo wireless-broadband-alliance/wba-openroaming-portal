@@ -77,8 +77,10 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        // Check if the user is logged in
-        if (($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) && $this->getUser()) {
+        // Check if the user is logged in and verification of the user
+        if (isset($data["USER_VERIFICATION"]["value"]) &&
+            $data["USER_VERIFICATION"]["value"] === EmailConfirmationStrategy::EMAIL &&
+            $this->getUser()) {
             /** @var User $currentUser */
             $currentUser = $this->getUser();
             $verification = $currentUser->isVerified();

@@ -1,48 +1,48 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ title.value }}{% endblock %}
+{% block title %}
+    {{ title.value }}
+{% endblock %}
 
 {% block body %}
 
     <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
-        <div class="w-[100%] lg:w-1/2 bg-landing bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
+        <div class="object-cover  w-[100%] lg:w-1/2 bg-landing bg-center bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
              style="background-image: url('{{ wallpaperImageName.value }}');">
-            <div class="h-[100%] w-[100%] flex flex-col justify-between">
-                <img class="mt-16 lg:mt-36 w-96"
-                     src="{{ openroamingLogoName.value }}"
-                     alt="OpenRoaming Logo"/>
+            <div class="h-full w-full flex flex-col justify-between">
+                <img class="mt-16 lg:mt-36 w-96" src="{{ openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
 
                 <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ welcomeText.value }}</h1>
 
                 <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ welcomeDescription.value }}</p>
 
-                <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any
-                    questions, please contact
+                <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any questions, please
+                    contact
                     <a href="mailto:{{ contactEmail.value }}"
                        class="font-semibold underline">{{ contactEmail.value }}</a>
                 </p>
+
                 {% if PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
                     <div class="bg-red-600 text-white font-bold p-3 text-center">
                         <h2>DEMO MODE</h2>
                         <p class="text-xs lg:text-base mt-5 ">
-                            This portal is for testing purposes only and should not be used for production purposes,
-                            and
-                            cannot be used for production or commercial purposes. </p>
+                            This portal is for testing purposes only and should not be used for production purposes, and
+                            cannot be used for production or commercial purposes.
+                        </p>
                         <p class="text-xs lg:text-base">
-                            Users created via this portal can be revoked at any time without a notice.</p>
+                            Users created via this portal can be revoked at any time without notice.
+                        </p>
                     </div>
                 {% endif %}
             </div>
         </div>
 
+
         {# Form Column #}
-        <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
-                {{ stimulus_controller('visibility') }}>
+        <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]" {{ stimulus_controller('visibility') }}>
             <div>
-                <img class="mt-8 lg:mt-0"
-                     src="{{ customerLogoName.value }}"
-                     alt="Logo"/>
+                <img class="mt-8 lg:mt-0" src="{{ customerLogoName.value }}" alt="Logo"/>
 
                 <div class="space-y-4 mt-10 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
                     <p class="text-[#757575] font-medium text-sm lg:text-lg">On this portal you are able to download and
@@ -69,39 +69,38 @@
                     <div class="{% if USER_VERIFICATION.value != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
                         {% if USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
-                                DEMO MODE - <b>UNCONFIRMED</b> EMAIL SYSTEM</h3>
+                                DEMO MODE -
+                                <b>UNCONFIRMED</b>
+                                EMAIL SYSTEM</h3>
                         {% elseif  USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
-                                DEMO MODE - <b>CONFIRMED</b> EMAIL SYSTEM</h3>
+                                DEMO MODE -
+                                <b>CONFIRMED</b>
+                                EMAIL SYSTEM</h3>
                         {% endif %}
                         {% if not app.user %}
-                            <form method="post">
+                            <form
+                                    method="post">
                                 {# Email #}
                                 <div class="relative mt-10 lg:mt-6 xl:mt-12">
                                     <label for="email"
                                            class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Email</label>
-                                    <input id="email"
-                                           name="email"
-                                           type="email"
+                                    <input id="email" name="email" type="email"
                                            class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
                                            placeholder="Add your email here"/>
                                 </div>
 
                                 {# Checkbox: Terms #}
                                 <div class="flex flex-row justify-start items-center mt-3 space-x-2">
-                                    <input id="terms"
-                                           name="terms"
-                                           type="checkbox"
+                                    <input id="terms" name="terms" type="checkbox"
                                            class="border p-2 text-[#656565] rounded border-[#757575] checked:bg-[#7db928] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
                                            required/>
 
-                                    <span class="text-[#656565] font-light text-xs lg:text-base">I accept the <a
-                                                href="{{ TOS_LINK.value }}"
-                                                target="_blank"
-                                                class="underline font-base">terms & conditions of use</a> and <a
-                                                href="{{ PRIVACY_POLICY_LINK.value }}"
-                                                target="_blank"
-                                                class="underline font-base">privacy policy</a>.</span>
+                                    <span class="text-[#656565] font-light text-xs lg:text-base">I accept the
+										<a href="{{ TOS_LINK.value }}" target="_blank" class="underline font-base">terms & conditions of use</a>
+										and
+										<a href="{{ PRIVACY_POLICY_LINK.value }}" target="_blank"
+                                           class="underline font-base">privacy policy</a>.</span>
                                 </div>
                                 {# OS #}
                                 <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
@@ -113,11 +112,8 @@
                                     <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
                                         {% for key, item in os.items %}
                                             <div>
-                                                <input type="radio"
-                                                       id="radio-os-{{ key }}"
-                                                       name="radio-os"
-                                                       value="{{ key }}"
-                                                       class="hidden peer"/>
+                                                <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                                                       value="{{ key }}" class="hidden peer"/>
 
                                                 <label for="radio-os-{{ key }}"
                                                        class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
@@ -131,15 +127,11 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <input type="hidden"
-                                       id="detected-os"
-                                       name="detected-os"
-                                       value="{{ os.selected }}"/>
+                                <input type="hidden" id="detected-os" name="detected-os" value="{{ os.selected }}"/>
 
                                 {# Submit button #}
                                 <div class="flex flex-row justify-center">
-                                    <button
-                                            type="submit"
+                                    <button type="submit"
                                             class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
                                         Download
                                         and
@@ -153,14 +145,15 @@
                                 </div>
 
                                 {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-                                    <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                    <div
+                                            class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                         {# Profile selector  #}
                                         <button type="button"
                                                 class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
-                                            <img class="w-20"
-                                                 src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                            <img class="w-20" src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
                                                  alt="Windows Logo"/>
-                                            <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                            <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
+												<b>{{ os.selected }}</b>.</span>
                                         </button>
 
                                         <button type="button"
@@ -191,7 +184,8 @@
                                 </div>
                             </div>
                             {% if app.request.attributes.get('_route') != 'app_email_code' %}
-                                <form method="post">
+                                <form
+                                        method="post">
                                     {# OS #}
                                     <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
                                         <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
@@ -202,11 +196,8 @@
                                         <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
                                             {% for key, item in os.items %}
                                                 <div>
-                                                    <input type="radio"
-                                                           id="radio-os-{{ key }}"
-                                                           name="radio-os"
-                                                           value="{{ key }}"
-                                                           class="hidden peer"/>
+                                                    <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                                                           value="{{ key }}" class="hidden peer"/>
 
                                                     <label for="radio-os-{{ key }}"
                                                            class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
@@ -220,15 +211,11 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <input type="hidden"
-                                           id="detected-os"
-                                           name="detected-os"
-                                           value="{{ os.selected }}"/>
+                                    <input type="hidden" id="detected-os" name="detected-os" value="{{ os.selected }}"/>
 
                                     {# Submit button #}
                                     <div class="flex flex-row justify-center">
-                                        <button
-                                                type="submit"
+                                        <button type="submit"
                                                 class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
                                             Download
                                             and
@@ -242,14 +229,16 @@
                                     </div>
 
                                     {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-                                        <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                        <div
+                                                class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                             {# Profile selector  #}
                                             <button type="button"
                                                     class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
                                                 <img class="w-20"
                                                      src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
                                                      alt="Windows Logo"/>
-                                                <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                                <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
+													<b>{{ os.selected }}</b>.</span>
                                             </button>
 
                                             <button type="button"
@@ -276,11 +265,8 @@
                                         <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
                                             {% for key, item in os.items %}
                                                 <div>
-                                                    <input type="radio"
-                                                           id="radio-os-{{ key }}"
-                                                           name="radio-os"
-                                                           value="{{ key }}"
-                                                           class="hidden peer"/>
+                                                    <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                                                           value="{{ key }}" class="hidden peer"/>
 
                                                     <label for="radio-os-{{ key }}"
                                                            class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
@@ -294,30 +280,48 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <input type="hidden"
-                                           id="detected-os"
-                                           name="detected-os"
-                                           value="{{ os.selected }}"/>
+                                    <input type="hidden" id="detected-os" name="detected-os" value="{{ os.selected }}"/>
 
-                                    {# Submit button #}
-                                    <div class="flex flex-row justify-center">
-                                        <button type="submit"
-                                                class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
-                                            Download
-                                            and
-                                            Install Profile
-                                        </button>
+                                    <div class="flex-col">
+                                        {# Submit button #}
+                                        <div class="flex flex-row justify-center">
+                                            <button type="submit"
+                                                    class="rounded-lg bg-[#7DB928] mt-10 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                                Download
+                                                and
+                                                Install Profile
+                                            </button>
+                                        </div>
+
+{#                                        <div class="flex-col mt-10" data-controller="alwaysOnEmail">#}
+{#                                            #}{# Accept or Refuse to Share Information #}
+{#                                            <div class="flex justify-center items-center">#}
+{#                                                <input id="checkbox-save-export" type="checkbox"  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">#}
+{#                                                <label for="checkbox-save-export" class="ms-2 text-sm font-medium text-[#B4B4B4]">I agree to share my information for <span class="font-bold">marketing uses.</span></label>#}
+{#                                            </div>#}
+{#                                            <div>#}
+{#                                                #}{# Submit button #}
+{#                                                <div class="flex items-center justify-center" id="saveExport" style="display: none;">#}
+{#                                                    <button type="submit"#}
+{#                                                            class="animate-pulse rounded-lg bg-[#7DB928] mt-5 px-4 py-2 text-center text-white font-medium text-sm lg:text-lg">#}
+{#                                                        Save#}
+{#                                                    </button>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div> #}
                                     </div>
 
                                     {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-                                        <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                        <div
+                                                class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                             {# Profile selector  #}
                                             <button type="button"
                                                     class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
                                                 <img class="w-20"
                                                      src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
                                                      alt="Windows Logo"/>
-                                                <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                                <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
+													<b>{{ os.selected }}</b>.</span>
                                             </button>
 
                                             <button type="button"
@@ -343,11 +347,8 @@
                                             <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
                                                 {% for key, item in os.items %}
                                                     <div>
-                                                        <input type="radio"
-                                                               id="radio-os-{{ key }}"
-                                                               name="radio-os"
-                                                               value="{{ key }}"
-                                                               class="hidden peer"/>
+                                                        <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                                                               value="{{ key }}" class="hidden peer"/>
 
                                                         <label for="radio-os-{{ key }}"
                                                                class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
@@ -361,9 +362,7 @@
                                                 {% endfor %}
                                             </div>
                                         </div>
-                                        <input type="hidden"
-                                               id="detected-os"
-                                               name="detected-os"
+                                        <input type="hidden" id="detected-os" name="detected-os"
                                                value="{{ os.selected }}"/>
 
                                         {# Submit button #}
@@ -377,14 +376,16 @@
                                         </div>
 
                                         {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-                                            <div class="mt-24" {{ stimulus_target('visibility', 'second') }}>
+                                            <div
+                                                    class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                                 {# Profile selector  #}
                                                 <button type="button"
                                                         class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
                                                     <img class="w-20"
                                                          src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
                                                          alt="Windows Logo"/>
-                                                    <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running <b>{{ os.selected }}</b>.</span>
+                                                    <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
+														<b>{{ os.selected }}</b>.</span>
                                                 </button>
 
                                                 <button type="button"
@@ -402,7 +403,8 @@
 
                         <div class="mt-10">
                             <p class="text-center">
-                                Please select one of the following authentication methods to obtain a profile: </p>
+                                Please select one of the following authentication methods to obtain a profile:
+                            </p>
                         </div>
 
                         {% if LOGIN_TRADITIONAL_ENABLED.value %}
@@ -419,11 +421,9 @@
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('connect_google') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    <svg class="mr-2 -ml-1 w-4 h-4 lg:w-6 lg:h-6" aria-hidden="true"
-                                         focusable="false"
+                                    <svg class="mr-2 -ml-1 w-4 h-4 lg:w-6 lg:h-6" aria-hidden="true" focusable="false"
                                          data-prefix="fab" data-icon="google" role="img"
-                                         xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 488 512">
+                                         xmlns="http://www.w3.org/2000/svg" viewbox="0 0 488 512">
                                         <path fill="currentColor"
                                               d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
                                     </svg>
