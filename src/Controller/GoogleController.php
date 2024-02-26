@@ -36,7 +36,6 @@ class GoogleController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
-    private AdminController $adminController;
 
     /**
      * @param ClientRegistry $clientRegistry
@@ -45,7 +44,6 @@ class GoogleController extends AbstractController
      * @param TokenStorageInterface $tokenStorage
      * @param RequestStack $requestStack
      * @param EventDispatcherInterface $eventDispatcher
-     * @param AdminController $adminController
      */
     public function __construct(
         ClientRegistry              $clientRegistry,
@@ -54,7 +52,6 @@ class GoogleController extends AbstractController
         TokenStorageInterface       $tokenStorage,
         RequestStack                $requestStack,
         EventDispatcherInterface    $eventDispatcher,
-        AdminController             $adminController,
     ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
@@ -62,7 +59,6 @@ class GoogleController extends AbstractController
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
-        $this->adminController = $adminController;
     }
 
     /**
