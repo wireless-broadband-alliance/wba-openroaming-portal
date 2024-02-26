@@ -1063,6 +1063,7 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'VALID_DOMAINS_GOOGLE_LOGIN',
 
                 'AUTH_METHOD_REGISTER_ENABLED',
                 'AUTH_METHOD_REGISTER_LABEL',

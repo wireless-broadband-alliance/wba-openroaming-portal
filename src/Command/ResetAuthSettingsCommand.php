@@ -56,6 +56,7 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
+            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account'],
             ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
