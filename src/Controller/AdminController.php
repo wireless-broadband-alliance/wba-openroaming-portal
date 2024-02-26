@@ -7,6 +7,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\authType;
 use App\Form\CapportType;
 use App\Form\CustomType;
@@ -231,14 +232,14 @@ class AdminController extends AbstractController
     public function getUserProvider(User $user): string
     {
         if ($user->getGoogleId() !== null) {
-            return 'Google Account';
+            return UserProvider::Google_Account;
         }
 
         if ($user->getSamlIdentifier() !== null) {
-            return 'SAML';
+            return UserProvider::SAML;
         }
 
-        return 'Portal Account';
+        return UserProvider::Portal_Account;
     }
 
     /**
