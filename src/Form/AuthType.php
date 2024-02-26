@@ -10,7 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class authType extends AbstractType
+class AuthType extends AbstractType
 {
     private GetSettings $getSettings;
 
