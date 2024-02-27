@@ -178,6 +178,13 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(UserRepository $userRepository): Response
     {
+        // Check if the export users operation is enabled
+        $export_users = $this->parameterBag->get('app.export_users');
+        if ($export_users === EmailConfirmationStrategy::NO_EMAIL){
+            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
+            return $this->redirectToRoute('admin_page');
+        }
+
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
 
