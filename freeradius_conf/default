@@ -283,6 +283,7 @@ listen {
 #  Make *sure* that 'preprocess' comes before any realm if you
 #  need to setup hints for the remote radius server
 authorize {
+	accept
 	#
 	#  Take a User-Name, and perform some checks on it, for spaces and other
 	#  invalid characters.  If the User-Name appears invalid, reject the
@@ -307,7 +308,7 @@ authorize {
 	#  attributes in the request, and turning them into attributes
 	#  which are more standard.
 	#
-	#  It takes care of processing the 'raddb/mods-config/preprocess/hints' 
+	#  It takes care of processing the 'raddb/mods-config/preprocess/hints'
 	#  and the 'raddb/mods-config/preprocess/huntgroups' files.
 	preprocess
 
@@ -355,7 +356,7 @@ authorize {
 	#  here means that it will fix the Calling-Station-Id attribute to
 	#  the normal format as specified in RFC 3580 Section 3.21.
 	#
-	#  If you are using WiMAX 2.1 (LTE) then un-commenting will allow 
+	#  If you are using WiMAX 2.1 (LTE) then un-commenting will allow
 	#  the module to handle SQN resyncronisation. Prior to calling the
 	#  module it is necessary to populate the following attributes
 	#  with the relevant keys:
@@ -608,7 +609,7 @@ authenticate {
 #
 preacct {
 	preprocess
-
+    handled
 	#
 	#  Merge Acct-[Input|Output]-Gigawords and Acct-[Input-Output]-Octets
 	#  into a single 64bit counter Acct-[Input|Output]-Octets64.
