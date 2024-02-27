@@ -178,6 +178,13 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(UserRepository $userRepository): Response
     {
+        // Check if the export users operation is enabled
+        $export_users = $this->parameterBag->get('app.export_users');
+        if ($export_users === EmailConfirmationStrategy::NO_EMAIL){
+            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
+            return $this->redirectToRoute('admin_page');
+        }
+
         // Fetch all users excluding admins
         $users = $userRepository->findExcludingAdmin();
 
@@ -482,7 +489,7 @@ class AdminController extends AbstractController
      * Render a confirmation password form
      * @return Response
      */
-    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset', methods: ['POST'])]
+    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
     public function confirmReset(string $type): Response
     {
@@ -506,7 +513,7 @@ class AdminController extends AbstractController
      * Check if the code and then return the correct action
      * @throws Exception
      */
-    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker', methods: ['POST'])]
+    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
     public function checkPassword(RequestStack $requestStack, EntityManagerInterface $em, string $type): Response
     {
@@ -648,7 +655,7 @@ class AdminController extends AbstractController
      * @throws Exception
      * @throws TransportExceptionInterface
      */
-    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin', methods: ['POST'])]
+    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
     public function regenerateCode(string $type): RedirectResponse
     {
@@ -1063,6 +1070,7 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'VALID_DOMAINS_GOOGLE_LOGIN',
 
                 'AUTH_METHOD_REGISTER_ENABLED',
                 'AUTH_METHOD_REGISTER_LABEL',
