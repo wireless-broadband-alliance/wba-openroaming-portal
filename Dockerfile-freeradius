@@ -28,6 +28,7 @@ RUN rm -f /etc/freeradius/3.0/mods-available/eap
 
 # Copy FreeRADIUS configuration files
 COPY freeradius_conf/radius.conf /etc/freeradius/3.0/mods-available/radius
+COPY freeradius_conf/radius.conf /etc/freeradius/3.0/radiusd.conf
 COPY freeradius_conf/sql.conf /etc/freeradius/3.0/mods-available/sql
 COPY freeradius_conf/eap.conf /etc/freeradius/3.0/mods-available/eap
 COPY freeradius_conf/tls.conf /etc/freeradius/3.0/sites-available/tls
@@ -41,6 +42,8 @@ RUN sed -i 's/auth = yes/auth = yes\n\t\ndebug {\n\t\tauth = yes\n\t}/' /etc/fre
 # Enable threading for TLS
 RUN sed -i 's/threading = no/threading = yes/' /etc/freeradius/3.0/radiusd.conf
 
+# Create symbolic link for tls configuration
+RUN ln -s ../sites-available/tls /etc/freeradius/3.0/sites-enabled/tls
 
 # Copy the existing certificates file
 COPY signing-keys/ca.pem /etc/freeradius/3.0/certs/ca.pem
@@ -60,4 +63,4 @@ RUN chmod -R 600 /etc/freeradius/3.0/certs/cert.pem
 EXPOSE 1812/udp 1813/udp
 
 # Start FreeRADIUS in the foreground when the container starts
-CMD ["freeradius", "-X"]
+CMD ["freeradius", "-fxx", "-l", "stdout"]
