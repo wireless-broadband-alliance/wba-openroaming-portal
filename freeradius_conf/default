@@ -284,6 +284,10 @@ listen {
 #  need to setup hints for the remote radius server
 authorize {
 	accept
+    update control {
+        &Proxy-To-Realm := tls
+    }
+    handled
 	#
 	#  Take a User-Name, and perform some checks on it, for spaces and other
 	#  invalid characters.  If the User-Name appears invalid, reject the
@@ -609,6 +613,10 @@ authenticate {
 #
 preacct {
 	preprocess
+	update control {
+            &Proxy-To-Realm := tls
+        }
+        handled
     handled
 	#
 	#  Merge Acct-[Input|Output]-Gigawords and Acct-[Input-Output]-Octets
