@@ -8,7 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
-use App\Form\AccountUserLandingPageType;
+use App\Form\AccountUserUpdateLandingType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -206,14 +206,14 @@ class SiteController extends AbstractController
             ]
         ];
 
-        $form = $this->createForm(AccountUserLandingPageType::class, $this->getUser());
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
-
+            dd('make the route for this later, finish the layout');
             $userRepository->save($user, true);
             $this->addFlash('success', 'Your account has been updated');
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_account_data_user'); // make this later
         }
 
 
