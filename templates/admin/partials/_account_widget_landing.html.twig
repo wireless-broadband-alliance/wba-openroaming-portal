@@ -1,9 +1,10 @@
-<div class="rounded-lg p-5 flex flex-col justify-center items-center h-20 bg-[#7DB928] text-white">
-    <h1 class="text-2xl font-semibold">Account Data</h1>
-    <p>Here you can change your own information</p>
+<div class="rounded-lg font-semibold p-5 flex flex-col justify-center items-center h-20 bg-[#7DB928] text-white">
+    <h1 class="text-lg md:text-2xl font-semibold">Account Data</h1>
+    <p class="md:text-normal text-sm">Here you can change your own information</p>
 </div>
 
-<div class="mt-2 p-6 -pb2 mx-auto bg-white rounded-lg">
+<h1 class="text-xl text-left font-semibold mb-2 mt-6">Personal Data</h1>
+<div class="mt-2 p-5 -pb2 mx-auto bg-white rounded-lg">
     {{ form_start(form) }}
     <div>
         {{ form_errors(form) }}
@@ -52,7 +53,4 @@
     </button>
 </div>
 
-<script>
-
-</script>
 {{ form_end(form) }}
