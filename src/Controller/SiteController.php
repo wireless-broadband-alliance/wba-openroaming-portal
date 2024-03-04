@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Form\AccountUserLandingPageType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -204,7 +205,21 @@ class SiteController extends AbstractController
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
         ];
-        return $this->render('site/landing.html.twig', $data);
+
+        $form = $this->createForm(AccountUserLandingPageType::class, $this->getUser());
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+
+            $userRepository->save($user, true);
+            $this->addFlash('success', 'Your account has been updated');
+            return $this->redirectToRoute('app_landing');
+        }
+
+
+        return $this->render('site/landing.html.twig', [
+                'form' => $form->createView(),
+            ] + $data);
     }
 
     /**
@@ -416,27 +431,6 @@ class SiteController extends AbstractController
             // Handle exceptions thrown by the service (e.g., network issues, API errors)
             $this->addFlash('error', 'An error occurred while regenerating the SMS code. Please try again later.');
         }
-        return $this->redirectToRoute('app_landing');
-    }
-
-    /**
-     * Account widget about setting of the user
-     *
-     * @return RedirectResponse
-     * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     */
-    #[Route('/account/user', name: 'app_site_accountuser')]
-    #[IsGranted('ROLE_USER')]
-    public function accountUser(): RedirectResponse
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-
         return $this->redirectToRoute('app_landing');
     }
 }

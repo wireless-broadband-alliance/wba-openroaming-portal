@@ -17,8 +17,8 @@ class AccountUserLandingPageType extends AbstractType
         $builder
             ->add('email', EmailType::class)
             ->add('phoneNumber', TextType::class)
-            ->add('first_name', TextType::class)
-            ->add('last_name', TextType::class)
+            ->add('firstName', TextType::class)
+            ->add('lastName', TextType::class)
             ->add('password', PasswordType::class, [
                 'label' => 'New Password',
                 'attr' => [
