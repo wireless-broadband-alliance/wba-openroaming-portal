@@ -418,4 +418,25 @@ class SiteController extends AbstractController
         }
         return $this->redirectToRoute('app_landing');
     }
+
+    /**
+     * Account widget about setting of the user
+     *
+     * @return RedirectResponse
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/account/user', name: 'app_site_accountuser')]
+    #[IsGranted('ROLE_USER')]
+    public function accountUser(): RedirectResponse
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+
+        return $this->redirectToRoute('app_landing');
+    }
 }
