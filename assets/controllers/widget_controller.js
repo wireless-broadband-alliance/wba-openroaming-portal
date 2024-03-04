@@ -2,30 +2,27 @@ import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
 	connect() {
-		function showWidgets(buttonName, menuName) {
-			const dropdownButtonItems = document.getElementsByName(buttonName);
-			const dropdownMenuItems = document.getElementsByName(menuName);
+		function showWidgets(buttonId, menuId) {
+			const widgetButton = document.getElementById(buttonId);
+			const widgetItem = document.getElementById(menuId);
 
-			// Loop through all elements with the given name and attach event listeners
-			dropdownButtonItems.forEach((button, index) => {
-				button.addEventListener('click', () => {
-					const dropdownMenu = dropdownMenuItems[index];
-					if (dropdownMenu.style.display === 'block') {
-						dropdownMenu.style.display = 'none';
-					} else {
-						dropdownMenu.style.display = 'block';
-					}
-				});
+			widgetButton.addEventListener('click', () => {
+				// Toggle the display of the widgetItem
+				if (widgetItem.style.display === 'block') {
+					widgetItem.style.display = 'none';
+					widgetButton.classList.remove('focus:bg-[#7DB928]', 'focus:text-white');
+				} else {
+					widgetItem.style.display = 'block';
+					widgetButton.classList.add('focus:bg-[#7DB928]', 'focus:text-white');
+				}
 			});
 
-			// Close the dropdown when clicking outside it
+			// Close the widget when clicking outside it
 			document.addEventListener('click', (event) => {
-				dropdownButtonItems.forEach((button, index) => {
-					const dropdownMenu = dropdownMenuItems[index];
-					if (!button.contains(event.target) && !dropdownMenu.contains(event.target)) {
-						dropdownMenu.style.display = 'none';
-					}
-				});
+				// Check if the click is outside the button and the widgetItem
+				if (!widgetButton.contains(event.target) && !widgetItem.contains(event.target)) {
+					widgetItem.style.display = 'none';
+				}
 			});
 		}
 
