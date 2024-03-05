@@ -226,8 +226,7 @@ class SiteController extends AbstractController
     public function accountUser(Request $request, EntityManagerInterface $em): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $userAgent = $request->headers->get('User-Agent');
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);;
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);
@@ -238,7 +237,7 @@ class SiteController extends AbstractController
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success', 'Your account has been updated');
+            $this->addFlash('success', 'Your account information has been updated');
 
             // Redirect the user upon successful form submission
             return $this->redirectToRoute('app_landing');
