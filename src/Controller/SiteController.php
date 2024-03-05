@@ -9,7 +9,7 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
-use App\Form\NewPasswordSetupType;
+use App\Form\NewPasswordAccountType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -208,7 +208,7 @@ class SiteController extends AbstractController
         ];
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
-        $formPassword = $this->createForm(NewPasswordSetupType::class, $this->getUser());
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
                 'form' => $form->createView(),
@@ -226,10 +226,11 @@ class SiteController extends AbstractController
      */
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     public function accountUser(
-        Request $request,
-        EntityManagerInterface $em,
+        Request                     $request,
+        EntityManagerInterface      $em,
         UserPasswordHasherInterface $passwordHasher,
-    ): Response {
+    ): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -249,16 +250,17 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $formPassword = $this->createForm(NewPasswordSetupType::class, $this->getUser());
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formPassword->handleRequest($request);
 
-        if ($formPassword->isSubmitted()) {
+        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
             /** @var User $user */
             $user = $this->getUser();
 
-            $currentPassword = $formPassword->get('password')->getData();
+            $typedPassword = $formPassword->get('password')->getData();
             $newPassword = $formPassword->get('newPassword')->getData();
             $confirmPassword = $formPassword->get('confirmPassword')->getData();
+            $currentPassword = $user->getPassword();
 
             // Check if the new password and confirm password match
             if ($newPassword !== $confirmPassword) {
@@ -268,16 +270,15 @@ class SiteController extends AbstractController
 
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
 
-            $user->setPassword($hashedPassword);
-            dd($currentPassword, $newPassword, $confirmPassword);
+            $em->persist($user);
+            dd($typedPassword, $currentPassword, $newPassword, $confirmPassword);
 
             $em->flush();
 
             $this->addFlash('success', 'Your password has been updated successfully!');
             return $this->redirectToRoute('app_landing');
         }
-
-        dd('This form is not valid');
+        dd($form->getErrors(), 'This form is not valid');
         return $this->redirectToRoute('app_landing');
     }
 

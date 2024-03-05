@@ -54,6 +54,7 @@
             >Apply Changes
             </button>
         </div>
+        {{ form_rest(form) }}
         {{ form_end(form) }}
     </form>
     <hr class="w-80% m-5 h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
@@ -123,6 +124,7 @@
             >Reset Password
             </button>
         </div>
-        {{ form_end(form) }}
+        {{ form_rest(formPassword) }}
+        {{ form_end(formPassword) }}
     </form>
 </div>
