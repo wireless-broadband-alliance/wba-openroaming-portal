@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Form\AccountUserUpdateLandingType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -204,8 +205,51 @@ class SiteController extends AbstractController
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
         ];
-        return $this->render('site/landing.html.twig', $data);
+
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+
+        return $this->render('site/landing.html.twig', [
+                'form' => $form->createView(),
+            ] + $data);
     }
+
+
+    /**
+     * Account widget about setting of the user
+     *
+     * @return RedirectResponse
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/account/user', name: 'app_site_account_user')]
+    #[IsGranted('ROLE_USER')]
+    public function accountUser(Request $request, EntityManagerInterface $em): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);;
+
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Your account information has been updated');
+
+            // Redirect the user upon successful form submission
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Render the form with errors if the form is submitted but not valid
+        return $this->render('site/account_user.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data
+        ]);
+    }
+
 
     /**
      * @param $userAgent
