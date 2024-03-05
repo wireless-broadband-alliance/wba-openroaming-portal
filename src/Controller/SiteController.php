@@ -221,12 +221,12 @@ class SiteController extends AbstractController
      * @throws Exception
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    #[Route('/account/user', name: 'app_site_account_user')]
+    #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function accountUser(Request $request, EntityManagerInterface $em): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);;
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);
