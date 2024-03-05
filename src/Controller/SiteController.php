@@ -252,7 +252,7 @@ class SiteController extends AbstractController
         $formPassword = $this->createForm(NewPasswordSetupType::class, $this->getUser());
         $formPassword->handleRequest($request);
 
-        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
+        if ($formPassword->isSubmitted()) {
             /** @var User $user */
             $user = $this->getUser();
 
@@ -266,21 +266,18 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
 
-            // Verify if the current password matches the user's actual password
-            if (!$passwordEncoder->isPasswordValid($user, $currentPassword)) {
-                $this->addFlash('error', 'Current password incorrect!');
-                return $this->redirectToRoute('app_landing');
-            }
-            $hashedPassword = "";
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
 
             $user->setPassword($hashedPassword);
+            dd($currentPassword, $newPassword, $confirmPassword);
+
             $em->flush();
 
             $this->addFlash('success', 'Your password has been updated successfully!');
             return $this->redirectToRoute('app_landing');
         }
 
+        dd('This form is not valid');
         return $this->redirectToRoute('app_landing');
     }
 
