@@ -5,7 +5,6 @@
 <form method="POST" action="{{ path('app_site_account_user') }}">
     <h1 class="text-xl text-left font-semibold mb-2 mt-6">Personal Data</h1>
     <div class="mt-2 p-5 -pb2 mx-auto bg-white rounded-lg">
-
         {{ form_start(form) }}
         <div>
             {{ form_errors(form) }}
@@ -17,6 +16,7 @@
                         'attr': {
                             'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
                             'placeholder': ' ',
+                            'name': 'AccountInput',
                         }
                     }) }}
                     {{ form_label(form.firstName, 'First Name', {
@@ -33,6 +33,7 @@
                         'attr': {
                             'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
                             'placeholder': ' ',
+                            'name': 'AccountInput',
                         }
                     }) }}
                     {{ form_label(form.lastName, 'Last Name', {
@@ -46,12 +47,81 @@
         </div>
 
     </div>
-    <div class="flex md:w-full justify-center mt-4">
+    <div class="flex md:w-full justify-end mt-4">
         <button id="widgetConfirmAccount"
-                class="bg-[#7DB928] cursor-not-allowed text-white text-sm font-semibold p-3 rounded-lg"
+                class="bg-[#7DB928] cursor-not-allowed text-white text-sm font-semibold p-2 rounded-lg"
                 type="submit"
                 disabled
         >Apply Changes
+        </button>
+    </div>
+    {{ form_end(form) }}
+</form>
+
+<form method="POST" action="{{ path('app_site_account_user') }}">
+    <h1 class="text-xl text-left font-semibold mb-2 mt-2">New Password</h1>
+    <div class="mt-2 p-5 -pb2 mx-auto bg-white rounded-lg">
+
+        {{ form_start(formPassword) }}
+        <div>
+            {{ form_errors(formPassword) }}
+        </div>
+            <div class="mb-4 mt-1">
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(formPassword.password, {
+                        'attr': {
+                            'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(formPassword.password, 'Current Password', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(formPassword.password) }}
+                </div>
+            </div>
+        <div class="flex flex-col md:flex-row space-x-0 md:space-x-2">
+            <div class="mb-4 mt-1">
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(formPassword.newPassword, {
+                        'attr': {
+                            'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(formPassword.newPassword, 'New Password', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(formPassword.newPassword) }}
+                </div>
+            </div>
+            <div class="mb-4 mt-1">
+                <div class="relative h-10 w-full min-w-[200px]">
+                    {{ form_widget(formPassword.confirmPassword, {
+                        'attr': {
+                            'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
+                            'placeholder': ' ',
+                        }
+                    }) }}
+                    {{ form_label(formPassword.confirmPassword, 'Confirm Password', {
+                        'label_attr': {
+                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
+                        }
+                    }) }}
+                    {{ form_errors(formPassword.confirmPassword) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex md:w-full justify-end mt-4">
+        <button id="c"
+                class="bg-[#7DB928] text-white text-sm font-semibold p-2 rounded-lg"
+                type="submit"
+        >Reset Password
         </button>
     </div>
     {{ form_end(form) }}

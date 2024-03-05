@@ -28,10 +28,10 @@ export default class extends Controller {
 
 		showWidgets('widgetUserButton', 'widgetUser');
 
-		function checkInputsEnableButtons(buttonId) {
+		function checkInputsEnableButtons(buttonId, inputsName) {
 			document.addEventListener("DOMContentLoaded", function () {
 				const button = document.getElementById(buttonId);
-				const inputs = document.querySelectorAll("input");
+				const inputs = document.getElementsByName(inputsName);
 
 				// Store the initial values each input
 				const initialValues = {};
@@ -62,7 +62,6 @@ export default class extends Controller {
 				});
 			});
 		}
-		checkInputsEnableButtons('widgetConfirmAccount');
-
+		checkInputsEnableButtons('widgetConfirmAccount', 'AccountInput');
 	}
 }

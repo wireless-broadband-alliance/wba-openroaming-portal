@@ -9,6 +9,7 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
+use App\Form\NewPasswordSetupType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -207,9 +208,11 @@ class SiteController extends AbstractController
         ];
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $formPassword = $this->createForm(NewPasswordSetupType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
                 'form' => $form->createView(),
+                'formPassword' => $formPassword->createView()
             ] + $data);
     }
 
@@ -223,7 +226,7 @@ class SiteController extends AbstractController
      */
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function accountUser(Request $request, EntityManagerInterface $em): Response
+    public function accountUser(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $passwordEncoder): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -241,6 +244,37 @@ class SiteController extends AbstractController
 
             // Redirect the user upon successful form submission
             return $this->redirectToRoute('app_landing');
+        }
+
+        $formPassword = $this->createForm(NewPasswordSetupType::class, $this->getUser());
+        $formPassword->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $this->getUser();
+
+            $currentPassword = $form->get('password')->getData();
+            $newPassword = $form->get('newPassword')->getData();
+            $confirmPassword = $form->get('confirmPassword')->getData();
+
+            // Verify if the current password matches the user's actual password
+            if (!$passwordEncoder->isPasswordValid($user, $currentPassword)) {
+                $this->addFlash('error', 'Current password incorrect!');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            // Check if the new password and confirm password match
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error', 'Please make sure to type the correct password on both fields!');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            // Encode and set the new password
+            $encodedPassword = $passwordEncoder->encodePassword($user, $newPassword);
+            $user->setPassword($encodedPassword);
+
+            // Persist the updated user entity
+            $this->getDoctrine()->getManager()->flush();
+            $this->addFlash('success', 'Your password has been updated succefully');
+
         }
 
         // Render the form with errors if the form is submitted but not valid

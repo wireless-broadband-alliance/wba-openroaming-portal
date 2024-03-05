@@ -485,7 +485,7 @@
                                 </a>
 
                                 <button id="widgetUserButton" data-controller="widget"
-                                        class="duration-300 cursor-pointer rounded-full bg-inputGray text-veryDarkButton focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-20">
+                                        class="duration-300 cursor-pointer rounded-full bg-inputGray text-veryDarkButton focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
                                     <svg class="w-6" fill="none" stroke="currentColor" stroke-width="1.5"
                                          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -496,7 +496,8 @@
                                 </button>
                             </div>
                             {# Widget User Settings #}
-                            <div id="widgetUser" class="hidden fixed top-1/4 bg-lightGray text-veryDarkButton rounded-lg shadow-xl p-6 transition-all duration-300 z-10">
+                            <div id="widgetUser"
+                                 class="hidden fixed mt-5 top-0 bg-lightGray text-veryDarkButton rounded-lg shadow-xl p-6 transition-all duration-300 z-10">
                                 {{ include('admin/partials/_account_widget_landing.html.twig') }}
                             </div>
                         </div>
