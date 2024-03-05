@@ -15,16 +15,16 @@ class NewPasswordSetupType extends AbstractType
         $builder
             ->add('password', PasswordType::class, [
                 'label' => 'Current Password',
-                'required' => false,
+                'required' => true,
             ])
             ->add('newPassword', PasswordType::class, [
                 'label' => 'New Password',
-                'required' => false,
+                'required' => true,
                 'mapped' => false,
             ])
             ->add('confirmPassword', PasswordType::class, [
                 'label' => 'Confirm New Password',
-                'required' => false,
+                'required' => true,
                 'mapped' => false,
             ]);
     }

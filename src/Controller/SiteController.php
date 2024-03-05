@@ -225,9 +225,11 @@ class SiteController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function accountUser(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $passwordEncoder): Response
-    {
+    public function accountUser(
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher,
+    ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -235,7 +237,8 @@ class SiteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
+            /** @var User $user */
+            $user = $this->getUser();
 
             $em->persist($user);
             $em->flush();
@@ -248,40 +251,37 @@ class SiteController extends AbstractController
 
         $formPassword = $this->createForm(NewPasswordSetupType::class, $this->getUser());
         $formPassword->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
+            /** @var User $user */
             $user = $this->getUser();
 
-            $currentPassword = $form->get('password')->getData();
-            $newPassword = $form->get('newPassword')->getData();
-            $confirmPassword = $form->get('confirmPassword')->getData();
+            $currentPassword = $formPassword->get('password')->getData();
+            $newPassword = $formPassword->get('newPassword')->getData();
+            $confirmPassword = $formPassword->get('confirmPassword')->getData();
+
+            // Check if the new password and confirm password match
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error', 'Please make sure to type the same password on both fields!');
+                return $this->redirectToRoute('app_landing');
+            }
 
             // Verify if the current password matches the user's actual password
             if (!$passwordEncoder->isPasswordValid($user, $currentPassword)) {
                 $this->addFlash('error', 'Current password incorrect!');
                 return $this->redirectToRoute('app_landing');
             }
+            $hashedPassword = "";
+            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
 
-            // Check if the new password and confirm password match
-            if ($newPassword !== $confirmPassword) {
-                $this->addFlash('error', 'Please make sure to type the correct password on both fields!');
-                return $this->redirectToRoute('app_landing');
-            }
+            $user->setPassword($hashedPassword);
+            $em->flush();
 
-            // Encode and set the new password
-            $encodedPassword = $passwordEncoder->encodePassword($user, $newPassword);
-            $user->setPassword($encodedPassword);
-
-            // Persist the updated user entity
-            $this->getDoctrine()->getManager()->flush();
-            $this->addFlash('success', 'Your password has been updated succefully');
-
+            $this->addFlash('success', 'Your password has been updated successfully!');
+            return $this->redirectToRoute('app_landing');
         }
 
-        // Render the form with errors if the form is submitted but not valid
-        return $this->render('site/account_user.html.twig', [
-            'form' => $form->createView(),
-            'data' => $data
-        ]);
+        return $this->redirectToRoute('app_landing');
     }
 
 
