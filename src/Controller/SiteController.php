@@ -207,20 +207,50 @@ class SiteController extends AbstractController
         ];
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
-            dd('make the route for this later, finish the layout');
-            $userRepository->save($user, true);
-            $this->addFlash('success', 'Your account has been updated');
-            return $this->redirectToRoute('app_account_data_user'); // make this later
-        }
-
 
         return $this->render('site/landing.html.twig', [
                 'form' => $form->createView(),
             ] + $data);
     }
+
+
+    /**
+     * Account widget about setting of the user
+     *
+     * @return RedirectResponse
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/account/user', name: 'app_site_account_user')]
+    #[IsGranted('ROLE_USER')]
+    public function accountUser(Request $request, EntityManagerInterface $em): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $userAgent = $request->headers->get('User-Agent');
+
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Your account has been updated');
+
+            // Redirect the user upon successful form submission
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Render the form with errors if the form is submitted but not valid
+        return $this->render('site/account_user.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data
+        ]);
+    }
+
 
     /**
      * @param $userAgent
