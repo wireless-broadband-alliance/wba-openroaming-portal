@@ -218,7 +218,7 @@ class SiteController extends AbstractController
 
 
     /**
-     * Account widget about setting of the user
+     * Widget with data about the aacout of the user / upload new password
      *
      * @return RedirectResponse
      * @throws Exception
@@ -257,28 +257,33 @@ class SiteController extends AbstractController
             /** @var User $user */
             $user = $this->getUser();
 
-            $typedPassword = $formPassword->get('password')->getData();
+            $oldTypedPassword = $formPassword->get('password')->getData();
             $newPassword = $formPassword->get('newPassword')->getData();
             $confirmPassword = $formPassword->get('confirmPassword')->getData();
             $currentPassword = $user->getPassword();
 
+            if ($oldTypedPassword != $currentPassword) {
+                dd($oldTypedPassword, $currentPassword, 'The old password does not match the typed one');
+                $this->addFlash('error', 'Please make sure to type the current password correctly!');
+                return $this->redirectToRoute('app_landing');
+            }
+
             // Check if the new password and confirm password match
             if ($newPassword !== $confirmPassword) {
+                dd($newPassword, $confirmPassword, 'Both fields are diferent');
                 $this->addFlash('error', 'Please make sure to type the same password on both fields!');
                 return $this->redirectToRoute('app_landing');
             }
 
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashedPassword);
 
             $em->persist($user);
-            dd($typedPassword, $currentPassword, $newPassword, $confirmPassword);
-
             $em->flush();
 
             $this->addFlash('success', 'Your password has been updated successfully!');
-            return $this->redirectToRoute('app_landing');
         }
-        dd($form->getErrors(), 'This form is not valid');
+
         return $this->redirectToRoute('app_landing');
     }
 
