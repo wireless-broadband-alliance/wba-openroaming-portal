@@ -9,6 +9,7 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
+use App\Form\NewPasswordAccountType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -207,32 +208,38 @@ class SiteController extends AbstractController
         ];
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
                 'form' => $form->createView(),
+                'formPassword' => $formPassword->createView()
             ] + $data);
     }
 
 
     /**
-     * Account widget about setting of the user
+     * Widget with data about the account of the user / upload new password
      *
      * @return RedirectResponse
      * @throws Exception
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    #[Route('/account/user', name: 'app_site_account_user')]
-    #[IsGranted('ROLE_USER')]
-    public function accountUser(Request $request, EntityManagerInterface $em): Response
+    #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
+    public function accountUser(
+        Request                     $request,
+        EntityManagerInterface      $em,
+        UserPasswordHasherInterface $passwordHasher,
+    ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);;
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
+            /** @var User $user */
+            $user = $this->getUser();
 
             $em->persist($user);
             $em->flush();
@@ -243,11 +250,36 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Render the form with errors if the form is submitted but not valid
-        return $this->render('site/account_user.html.twig', [
-            'form' => $form->createView(),
-            'data' => $data
-        ]);
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $formPassword->handleRequest($request);
+
+        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $currentPasswordDB = $user->getPassword();
+            $typedPassword = $formPassword->get('password')->getData();
+
+            // Compare the typed password with the hashed password from the database
+            if (!password_verify($typedPassword, $currentPasswordDB)) {
+                $this->addFlash('error', 'Invalid password. Please try again.');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
+                $this->addFlash('error', 'Something went wrong please try again. If the problem keep occurring contact our support!');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Your password has been updated successfully!');
+        }
+
+        return $this->redirectToRoute('app_landing');
     }
 
 
