@@ -16,6 +16,7 @@ class NewPasswordAccountType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'Current Password',
                 'required' => true,
+                'mapped' => false,
             ])
             ->add('newPassword', PasswordType::class, [
                 'label' => 'New Password',

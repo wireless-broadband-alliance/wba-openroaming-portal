@@ -218,7 +218,7 @@ class SiteController extends AbstractController
 
 
     /**
-     * Widget with data about the aacout of the user / upload new password
+     * Widget with data about the account of the user / upload new password
      *
      * @return RedirectResponse
      * @throws Exception
@@ -257,26 +257,21 @@ class SiteController extends AbstractController
             /** @var User $user */
             $user = $this->getUser();
 
-            $oldTypedPassword = $formPassword->get('password')->getData();
-            $newPassword = $formPassword->get('newPassword')->getData();
-            $confirmPassword = $formPassword->get('confirmPassword')->getData();
-            $currentPassword = $user->getPassword();
+            $currentPasswordDB = $user->getPassword();
+            $typedPassword = $formPassword->get('password')->getData();
 
-            if ($oldTypedPassword != $currentPassword) {
-                dd($oldTypedPassword, $currentPassword, 'The old password does not match the typed one');
-                $this->addFlash('error', 'Please make sure to type the current password correctly!');
+            // Compare the typed password with the hashed password from the database
+            if (!password_verify($typedPassword, $currentPasswordDB)) {
+                $this->addFlash('error', 'Invalid password. Please try again.');
                 return $this->redirectToRoute('app_landing');
             }
 
-            // Check if the new password and confirm password match
-            if ($newPassword !== $confirmPassword) {
-                dd($newPassword, $confirmPassword, 'Both fields are diferent');
-                $this->addFlash('error', 'Please make sure to type the same password on both fields!');
+            if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
+                $this->addFlash('error', 'Something went wrong please try again. If the problem keep occurring contact our support!');
                 return $this->redirectToRoute('app_landing');
             }
 
-            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-            $user->setPassword($hashedPassword);
+            $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
 
             $em->persist($user);
             $em->flush();
