@@ -169,20 +169,6 @@
                                     {% include 'email_activation/index.html.twig' %}
                                 {% endif %}
                             {% endif %}
-                            <div class="flex flex-col items-center justify-center text-center">
-                                <div class="space-y-2 mt-4 pr-2">
-                                    <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
-                                        authenticated as
-                                        <span class="font-bold">{{ app.user.uuid }}</span>
-                                    </p>
-                                </div>
-                                <div class="space-y-2 mt-6 mb-6 pr-2">
-                                    <a href="{{ path('saml_logout') }}"
-                                       class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
-                                        Logout
-                                    </a>
-                                </div>
-                            </div>
                             {% if app.request.attributes.get('_route') != 'app_email_code' %}
                                 <form
                                         method="post">
@@ -249,6 +235,20 @@
                                     {% endif %}
                                 </form>
                             {% endif %}
+                            <div class="flex flex-col items-center justify-center text-center">
+                                <div class="space-y-2 mt-4 pr-2">
+                                    <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You are currently
+                                        authenticated as
+                                        <span class="font-bold">{{ app.user.uuid }}</span>
+                                    </p>
+                                </div>
+                                <div class="space-y-2 mt-6 mb-6 pr-2">
+                                    <a href="{{ path('saml_logout') }}"
+                                       class="rounded-lg bg-red-500 px-8 py-3 text-white font-medium text-sm lg:text-lg">
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
                         {% endif %}
                     </div>
                 {% else %}
