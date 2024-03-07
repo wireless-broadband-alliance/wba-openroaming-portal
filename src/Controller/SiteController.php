@@ -233,15 +233,35 @@ class SiteController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $user */
+        $user = $this->getUser();
+        $oldFirstName = $user->getFirstName();
+        $oldLastName = $user->getLastName();
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var User $user */
-            $user = $this->getUser();
+            $event = new Event();
 
+            $event->setUser($user);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE);
+            $event->setEventMetadata([
+                'platform' => PlatformMode::Live,
+                'Old data' => [
+                    'First Name' => $oldFirstName,
+                    'Last Name' => $oldLastName,
+                ],
+                'New data' => [
+                    'First Name' => $user->getFirstName(),
+                    'Last Name' => $user->getLastName(),
+                ],
+            ]);
+
+            $em->persist($event);
             $em->persist($user);
+
             $em->flush();
 
             $this->addFlash('success', 'Your account information has been updated');
@@ -272,7 +292,15 @@ class SiteController extends AbstractController
             }
 
             $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+            $event = new Event();
+            $event->setUser($user);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD);
+            $event->setEventMetadata([
+                'platform' => PlatformMode::Live,
+            ]);
 
+            $em->persist($event);
             $em->persist($user);
             $em->flush();
 
