@@ -15,6 +15,7 @@ services:
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
+      - freeradius-logs:/var/log/freeradius
     ports:
       - "80:80"
     networks:
@@ -82,6 +83,7 @@ services:
       - mysql
     volumes:
       - freeradius-data:/etc/freeradius/3.0/data/
+      - freeradius-logs:/var/log/freeradius
     ports:
       - "1812:1812/udp"
       - "1813:1813/udp"
@@ -94,4 +96,6 @@ volumes:
   freeradius-data:
     driver: local
   radsecproxy-data:
+    driver: local
+  freeradius-logs:
     driver: local

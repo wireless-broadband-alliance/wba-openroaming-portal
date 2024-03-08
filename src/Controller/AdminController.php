@@ -47,7 +47,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\HttpFoundation\StreamedResponse;
 /**
  *
  */
@@ -1341,6 +1341,31 @@ class AdminController extends AbstractController
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
+    }
+
+    /**
+     * @return Response
+     * @throws \JsonException
+     * @throws Exception
+     */
+    #[Route('/radius-logs', name: 'radius_logs')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function radius_logs(Request $request): Response
+    {
+        $logFile = $this->getParameter('kernel.logs_dir') . '/radius.log';
+
+        $response = new StreamedResponse(function () use ($logFile) {
+            $fp = fopen($logFile, 'r');
+            while (true) {
+                echo fread($fp, 4096);
+                flush();
+                usleep(100000); // sleep for 100ms
+            }
+        });
+
+        $response->headers->set('Content-Type', 'text/plain');
+
+        return $response;
     }
 
     /**
