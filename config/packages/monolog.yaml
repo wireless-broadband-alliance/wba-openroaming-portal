@@ -36,6 +36,10 @@ when@test:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
+            radius_log:
+              type: rotating_file
+              path: "%kernel.logs_dir%/radius.log"
+              max_files: 10
 
 when@prod:
     monolog:
@@ -51,6 +55,10 @@ when@prod:
                 path: php://stderr
                 level: debug
                 formatter: monolog.formatter.json
+            radius_log:
+              type: rotating_file
+              path: "%kernel.logs_dir%/radius.log"
+              max_files: 10
             console:
                 type: console
                 process_psr_3_messages: false
