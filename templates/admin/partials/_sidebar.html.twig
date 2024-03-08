@@ -1,199 +1,258 @@
-<div class="bg-lightGray hidden 2xl:sticky top-0 h-screen p-4 pt-4 w-10/12 sm:w-8/12 md:w-5/12 lg:w-4/12 2xl:w-3/12 duration-300 border-r border-gray-300/50 z-10 overflow-y-auto" id="sidebar">
-	{# SideBar Container #}
-	<div id="sideHeader" class="flex flex-col justify-center items-center">
-		{# SideBar Header #}
-		<h1 class="pt-4 font-semibold text-2xl font-break">
-			OpenRoaming Admin
-		</h1>
-		<a href="{{ path('admin_page') }}">
-			<img src="{{ data.customerLogoName.value }}" class="w-2/5 pt-3 mx-auto mt-auto mb-6" alt="customer_logo">
-		</a>
-		<hr class="w-full m-5 mx-4 h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-	</div>
+<div class="bg-lightGray hidden 2xl:sticky top-0 h-screen p-4 pt-4 w-10/12 sm:w-8/12 md:w-5/12 lg:w-4/12 2xl:w-3/12 duration-300 border-r border-gray-300/50 z-10 overflow-y-auto"
+     id="sidebar">
+    {# SideBar Container #}
+    <div id="sideHeader" class="flex flex-col justify-center items-center">
+        {# SideBar Header #}
+        <h1 class="pt-4 font-semibold text-2xl font-break">
+            OpenRoaming Admin
+        </h1>
+        <a href="{{ path('admin_page') }}">
+            <img src="{{ data.customerLogoName.value }}" class="w-2/5 pt-3 mx-auto mt-auto mb-6" alt="customer_logo">
+        </a>
+        <hr class="w-full m-5 mx-4 h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+    </div>
 
-	{# SideBar Buttons #}
-	<div id="selectAction" class="py-4 flex flex-col space-y-2 font-medium">
+    {# SideBar Buttons #}
+    <div id="selectAction" class="py-4 flex flex-col space-y-2 font-medium">
 
-		{# SideBar Button - User - Button #}
-		<a href="{{ path('admin_page') }}">
-			<div id="UserButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_search' %}selected{% endif %}">
-				<div class="flex items-center space-x-2">
-					<svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
-					</svg>
-					<h1>Users Management</h1>
-				</div>
-				<svg class="w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-				</svg>
-			</div>
-		</a>
+        {# SideBar Button - User - Button #}
+        <a href="{{ path('admin_page') }}">
+            <div id="UserButton"
+                 class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_search' %}selected{% endif %}">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+                    </svg>
+                    <h1>Users Management</h1>
+                </div>
+                <svg class="w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                </svg>
+            </div>
+        </a>
 
         {# SideBar Button - Page Style - Button #}
-		<a href="{{ path('admin_dashboard_customize') }}">
-			<div id="pageStyle" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}selected{% endif %}">
-				<div class="flex items-center space-x-2">
-					<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
-					</svg>
-					Page Style
-				</div>
-				<svg class="w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-				</svg>
-			</div>
-		</a>
+        <a href="{{ path('admin_dashboard_customize') }}">
+            <div id="pageStyle"
+                 class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}selected{% endif %}">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
+                    </svg>
+                    Page Style
+                </div>
+                <svg class="w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                </svg>
+            </div>
+        </a>
 
-		{% set portalSettingsRoutes = [ "admin_dashboard_settings_status","admin_dashboard_settings_terms","admin_dashboard_settings_radius","admin_dashboard_settings_LDAP","admin_dashboard_settings_auth","admin_dashboard_settings_capport", "admin_dashboard_settings_sms"] %}
+        {% set portalSettingsRoutes = [ "admin_dashboard_settings_status","admin_dashboard_settings_terms","admin_dashboard_settings_radius","admin_dashboard_settings_LDAP","admin_dashboard_settings_auth","admin_dashboard_settings_capport", "admin_dashboard_settings_sms"] %}
 
-		{# SideBar - Portal Settings - Dropdown #}
-		<div class="relative">
-			<div id="PortalDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+        {# SideBar - Portal Settings - Dropdown #}
+        <div class="relative">
+            <div id="PortalDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
 				{% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}">
-				<div class="flex items-center space-x-2">
-					<svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"></path>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-					</svg>
-					<h1>Portal Settings</h1>
-				</div>
-				<svg id="selectArrow" class="w-4 duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-				</svg>
-			</div>
-			<div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" style="display: {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'block' : 'none' }};" id="PortalDropDown">
-				<ul class="mx-2">
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_status') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path>
-							</svg>
-							Platform Status</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_terms') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12"></path>
-							</svg>
-							Terms and Policies</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_radius') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
-							</svg>
-							Radius Configuration</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_LDAP') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path>
-							</svg>
-							LDAP Synchronization</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_auth') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"></path>
-							</svg>
-							Authentication Methods</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_capport') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"></path>
-							</svg>
-							User Engagement</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}" href="{{ path('admin_dashboard_settings_sms') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"></path>
-							</svg>
-							SMS Configuration</a>
-					</li>
-				</ul>
-			</div>
-		</div>
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <h1>Portal Settings</h1>
+                </div>
+                <svg id="selectArrow" class="w-4 duration-300" fill="none" stroke="currentColor" stroke-width="1.5"
+                     viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                </svg>
+            </div>
+            <div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
+                 style="display: {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'block' : 'none' }};"
+                 id="PortalDropDown">
+                <ul class="mx-2">
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_status') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path>
+                            </svg>
+                            Platform Status</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_terms') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12"></path>
+                            </svg>
+                            Terms and Policies</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_radius') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
+                            </svg>
+                            Radius Configuration</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_LDAP') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path>
+                            </svg>
+                            LDAP Synchronization</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_auth') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round"
+                                      d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"></path>
+                            </svg>
+                            Authentication Methods</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_capport') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"></path>
+                            </svg>
+                            User Engagement</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_sms') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"></path>
+                            </svg>
+                            SMS Configuration</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
 
-		{% set portalStatisticsRoutes = [ "admin_dashboard_statistics","admin_dashboard_statistics_freeradius"] %}
+        {% set portalStatisticsRoutes = [ "admin_dashboard_statistics","admin_dashboard_statistics_freeradius"] %}
 
-		{# SideBar - Portal Statistics - Dropdown #}
-		<div class="relative">
-			<div id="StatisticsDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+        {# SideBar - Portal Statistics - Dropdown #}
+        <div class="relative">
+            <div id="StatisticsDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
 				{% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}">
-				<div class="flex items-center space-x-2">
-					<svg class="w-5 mr-2" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"></path>
-					</svg>
-					<h1>Statistics</h1>
-				</div>
-				<svg id="selectArrow" class="w-4 duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-				</svg>
-			</div>
-			<div id="StatisticsDropDown" class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" style="display: {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'block' : 'none' }};">
-				<ul class="mx-2">
-					<li>
-						{# SideBar Button - Portal Statistics - Button #}
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}" href="{{ path('admin_dashboard_statistics') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
-								<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
-							</svg>
-							Portal Statistics</a>
-					</li>
-{#					<li>#}
-{#						#}{# SideBar Button - Freeradius Statistics - Button #}
-{#						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}" href="{{ path('admin_dashboard_statistics_freeradius') }}">#}
-{#							<svg class="w-5 mr-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">#}
-{#								<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z"></path>#}
-{#							</svg>#}
-{#							Connectivity Statistics</a>#}
-{#					</li>#}
-				</ul>
-			</div>
-		</div>
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-2" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
+                         viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"></path>
+                    </svg>
+                    <h1>Statistics</h1>
+                </div>
+                <svg id="selectArrow" class="w-4 duration-300" fill="none" stroke="currentColor" stroke-width="1.5"
+                     viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                </svg>
+            </div>
+            <div id="StatisticsDropDown" class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
+                 style="display: {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'block' : 'none' }};">
+                <ul class="mx-2">
+                    <li>
+                        {# SideBar Button - Portal Statistics - Button #}
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_statistics') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
+                            </svg>
+                            Portal Statistics</a>
+                    </li>
+                    <li>
+                        {#  SideBar Button - Freeradius Statistics - Button #}
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_statistics_freeradius') }}">
+                            <svg class="w-5 mr-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z"></path>
+                            </svg>
+                            Connectivity Statistics</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-		{# SideBar - Options - Dropdown (only shows on lower resolutions) #}
-		<div class="hidden" id="optionsDropdownButton">
-			<div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
-				<div class="flex items-center space-x-2">
-					<svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
-					</svg>
-					<h1>Options</h1>
-				</div>
-				<svg id="selectArrow" class="w-4  duration-300" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-				</svg>
-			</div>
-			<div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" id="optionsDropdown">
-				<ul class="mx-2">
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300" href="{{ path('admin_update', {id : current_user.id}) }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
-							</svg>
-							Account Settings</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300" href="{{ path('app_landing') }}">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
-							</svg>
-							Download Profile</a>
-					</li>
-					<li>
-						<a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300" href="{{ path('saml_logout') }}" onclick="return confirm('Are you sure you to leave?')">
-							<svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
-							</svg>
-							Logout</a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
+        {# SideBar - Options - Dropdown (only shows on lower resolutions) #}
+        <div class="hidden" id="optionsDropdownButton">
+            <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+                    </svg>
+                    <h1>Options</h1>
+                </div>
+                <svg id="selectArrow" class="w-4  duration-300" fill="none" stroke="currentColor" stroke-width="1.5"
+                     viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                </svg>
+            </div>
+            <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" id="optionsDropdown">
+                <ul class="mx-2">
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
+                           href="{{ path('admin_update', {id : current_user.id}) }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Account Settings</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
+                           href="{{ path('app_landing') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
+                            </svg>
+                            Download Profile</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
+                           href="{{ path('saml_logout') }}" onclick="return confirm('Are you sure you to leave?')">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
+                            </svg>
+                            Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
