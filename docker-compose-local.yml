@@ -17,8 +17,6 @@ services:
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
     ports:
       - "80:80"
-    networks:
-      - mysql-freeradius-network
 
   mysql:
     image: mysql:8.0
@@ -31,67 +29,16 @@ services:
       MYSQL_PASSWORD: openroaming
     volumes:
       - mysql:/var/lib/mysql
-    networks:
-      - mysql-freeradius-network
 
   memcached:
     image: memcached
-    networks:
-      - mysql-freeradius-network
 
   mailcatcher:
     image: schickling/mailcatcher
     ports:
       - '1080:1080'
       - '1025:1025'
-    networks:
-      - mysql-freeradius-network
-
-  radsecproxy:
-    build:
-      context: .
-      dockerfile: Dockerfile-radsecproxy
-    volumes:
-      - radsecproxy-data:/etc/radsecproxy/data/
-    environment:
-      - RUN_IN_BACKGROUND=false
-    ports:
-      - "11812:11812/tcp"
-      - "11812:11812/udp"
-      - "11813:11813/tcp"
-      - "11813:11813/udp"
-      - "2083:2083/udp"
-      - "2083:2083/tcp"
-    networks:
-      - mysql-freeradius-network
-
-  freeradius:
-    build:
-      context: .
-      dockerfile: Dockerfile-freeradius
-    environment:
-      RADIUS_LISTEN_IP: localhost
-      RADIUS_CLIENTS: radius@mysql
-      RADIUS_SQL: 'true'
-      RADIUS_DB_HOST: mysql
-      RADIUS_DB_NAME: radius
-      RADIUS_DB_USERNAME: radius
-      RADIUS_DB_PASSWORD: radpass
-    depends_on:
-      - radsecproxy
-      - mysql
-    volumes:
-      - freeradius-data:/etc/freeradius/3.0/data/
-    ports:
-      - "1812:1812/udp"
-      - "1813:1813/udp"
-    networks:
-      - mysql-freeradius-network
 
 volumes:
   mysql:
-    driver: local
-  freeradius-data:
-    driver: local
-  radsecproxy-data:
     driver: local
