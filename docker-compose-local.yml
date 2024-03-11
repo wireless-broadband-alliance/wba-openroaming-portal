@@ -1,8 +1,4 @@
 version: '3'
-
-networks:
-  mysql-freeradius-network:
-
 services:
   web:
     build:
@@ -17,7 +13,6 @@ services:
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
     ports:
       - "80:80"
-
   mysql:
     image: mysql:8.0
     ports:
@@ -29,10 +24,8 @@ services:
       MYSQL_PASSWORD: openroaming
     volumes:
       - mysql:/var/lib/mysql
-
   memcached:
     image: memcached
-
   mailcatcher:
     image: schickling/mailcatcher
     ports:
