@@ -210,7 +210,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         $this->email = $attributes['email'][0];
         $this->saml_identifier = $attributes['sAMAccountName'][0];
         $this->first_name = $attributes['givenName'][0];
-        $this->last_name = $attributes['surname'][0];
+        $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
         $this->uuid = $attributes['sAMAccountName'][0];
         $this->password = 'notused'; //invalid hash so won't ever authenticate
         $this->isVerified = 1;
