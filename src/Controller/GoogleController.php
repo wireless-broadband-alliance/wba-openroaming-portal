@@ -81,7 +81,7 @@ class GoogleController extends AbstractController
      * @throws IdentityProviderException
      * @throws Exception
      */
-    #[Route('/connect/google/check', name: 'connect_google_check')]
+    #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
     public function connectCheckAction(Request $request): RedirectResponse
     {
         // Retrieve the "google" client
