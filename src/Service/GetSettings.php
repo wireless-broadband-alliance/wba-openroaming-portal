@@ -311,7 +311,7 @@ class GetSettings
         $descriptions = [
             'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
             'DISPLAY_NAME' => 'The name used on the profiles',
-            'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles',
+            'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles. This is only used to create iOS/macOS profiles.',
             'OPERATOR_NAME' => 'The operator name used on the profiles',
             'DOMAIN_NAME' => 'The domain name used for the service',
             'RADIUS_TLS_NAME' => 'The hostname of your RADIUS server used for TLS',
