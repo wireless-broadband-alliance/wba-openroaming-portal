@@ -48,21 +48,18 @@ class ProfileController extends AbstractController
             throw new RuntimeException("CA.pem is missing");
         }
 
+        /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        if ($currentUser->getDeletedAt()) {
+        if ($user->getDeletedAt()) {
             $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($currentUser->getBannedAt()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
@@ -110,20 +107,18 @@ class ProfileController extends AbstractController
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository, Request $request): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if ($currentUser->getDeletedAt()) {
+        if ($user->getDeletedAt()) {
             $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($currentUser->getBannedAt()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
@@ -220,20 +215,18 @@ class ProfileController extends AbstractController
     #[Route('/profile/windows', name: 'profile_windows')]
     public function profileWindows(RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if ($currentUser->getDeletedAt()) {
+        if ($user->getDeletedAt()) {
             $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($currentUser->getBannedAt()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
