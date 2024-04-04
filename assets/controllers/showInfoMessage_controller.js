@@ -33,6 +33,5 @@ export default class extends Controller {
 
 		// Call Info Message with the appropriate parameters
 		showInfoMessage('capport[CAPPORT_ENABLED]', 'capportMessage');
-		showInfoMessage('ldap[SYNC_LDAP_ENABLED]', 'ldapMessage');
 	}
 }

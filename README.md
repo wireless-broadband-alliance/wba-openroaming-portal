@@ -151,7 +151,8 @@ This number is needed to validate the RADIUS server's certificate. If you use a 
 must replace this value with the SHA1 hash of your CA's root certificate. **Connections errors** can happen if the right
 SHA1 hash is not provided.
 
-Make sure to check the `SettingFixture.php` file for any reference about the default data and check the migrations about
+Make sure to check the `src/DataFixtures/SettingFixture.php` file for any reference about the default data and check the
+migrations about
 the database on the migrations folder of the project.
 
 ### 🛑 Important Security Notice after Installation 🛑
@@ -216,25 +217,26 @@ Your suggestions and questions will help us improve the platform's usability and
 
 Now we will show how the project looks, and give you some base information about how it works.
 
-## Production Mode && Demo Mode
+## Platform Mode Demo or Live
 
-The project provides two modes: demo mode set to **TRUE** or **FALSE**, each serving to different needs.
+The project provides two modes: Platform mode set to **DEMO** or **LIVE**, each serving to different needs.
 
-- **Demo Mode (TRUE)**: When demo mode is set to TRUE, the system generates demo profiles based on the submitted email.
+- **Platform Mode (Demo)**: When platform mode is set to DEMO, the system generates demo profiles based on the submitted
+  email.
   This allows users to explore and test the portal's functionality without the need to create a user account. In demo
   mode, only "demo login" is displayed, and SAML and other login methods are disabled, regardless of other settings. A
   demo warning is also displayed, indicating that the system is in demo mode. **PLEASE DO NOT USE THIS IN PRODUCTION.**
-  This mode can't be used because of legal specification in this type of environments.
+  This mode can't be used because of legal specification in this type of environment.
 
-When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
-again, because it's a new demo account being generated on the portal.
+When this mode is activated, **it's not required** to verify the user account several times.
 
-- **Production Mode (FALSE)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on
+- **Platform Mode (Live)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on
   individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted
   to the interests and needs of each user. Users can set up accounts in production mode and use all available login
   methods, including SAML and Google authentication.
 
-When this mode is activated, **it's not required** to verify the user account several times.
+When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
+again, because it's a new demo account being generated on the portal.
 
 ## 🔧 Environment Variables
 
@@ -259,6 +261,25 @@ Below is an overview of the different variables and their functions:
     # Example 2: Using the default email transport (using PHP's mail() function)
     MAILER_DSN=mail://default
     ```
+- `EMAIL_ADDRESS`: Entity of sends the emails to the users
+- `SENDER_NAME`: Entity sender name
+- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
+  legal and security reasons.
+- `BUDGETSMS_API_URL`: This env manages the budget SMS link of the API, is not necessary to change this env.
+
+### Google Authenticator Credentials
+
+These credentials can be found on the Google Cloud Platform
+by creating a new client_id & secret on the **credentials section**.
+Follow this link for more instructions for how to get does items:
+https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+
+Finally, these last two envs are for debugging purposes,
+they only should be used to control and manage reports from the portal.
+`SENTRY_DSN`& `TRUSTED_PROXIES`.
 
 ### 🔒 SAML Specific Settings
 
@@ -290,8 +311,9 @@ individual needs. Here's a rundown of several important variables and their func
 This number is important since it is needed
 to validate the RADIUS server's certificate.
 
-Missing Values: Please check that all crucial fields are fully filled if any values are missing.
-Pay attention to the UUID field, it's critical to provide a unique UUID that differs from the default.
+**Missing Values:** Please check that all crucial fields are fully filled if any values are missing.
+Pay attention to the UUID field (domain of your portal).
+It's critical to provide a unique UUID that differs from the default.
 The Same uuid may result in conflicts between different portals, resulting in profile overrides.
 
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
@@ -300,7 +322,10 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 9. `PLATFORM_MODE`: Live || Demo.
    When demo, only "demo login" is displayed, and SAML and other login
    methods are disabled regardless of other settings. A demo warning will also be displayed.
-10. `EMAIL_VERIFICATION`: ON || OFF. When it\'s ON it activates the email verification system. This system requires all the users to verify is own account before they download any profile.
+10. `USER_VERIFICATION`: ON || OFF.
+    When it\'s ON it activates the email verification system.
+    This system requires all
+    the users to verify its own account before they download any profile.
 11. `PAGE_TITLE`: The title displayed on the webpage.
 12. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
 13. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
@@ -327,7 +352,16 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 32. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
 33. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
     with a google account login
-34.  `ADDITIONAL_LABEL`: Additional label displayed on the landing page for more, if necessary, information.
+34. `ADDITIONAL_LABEL`: Additional label displayed on the landing page for more, if necessary, information.
+35. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+36. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+37. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+38. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+39. `SMS_USERNAME`: Budget SMS Username.
+40. `SMS_USER_ID`: Budget SMS User ID.
+41. `SMS_HANDLE`: Budget SMS Handle hash.
+42. `SMS_FROM`: Entity sending the SMS for the users.
+43. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
@@ -335,11 +369,11 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 ## Main Page
 
-### 1. Main Page Overview - Demo Mode - False
+### 1. Main Page Overview - Live Mode
 
 ![Main_Page_Demo_False](assets/wba_screenshots/main_page_demo_false.png)
 
-The main page in production mode (demo mode set to **FALSE**) provides a user-friendly interface for users with
+The main page in platform mode (**Live**) provides a user-friendly interface for users with
 individual accounts.
 The page welcomes visitors with a customisable banner that includes the company logo, welcome text,
 and a brief summary of the portal's features.
@@ -349,11 +383,11 @@ SAML, Google, and Register authentication.
 The main page provides a smooth and customized experience, allowing users to
 safely and quickly connect to Wi-Fi networks.
 
-### 1.2 Main Page Overview - Demo Mode - True
+### 1.2 Main Page Overview - Demo Mode
 
 ![Main_Page_Demo_True](assets/wba_screenshots/main_page_demo_true.png)
 
-The main page in demo mode (demo mode set to **TRUE**) displays the platform's possibilities for users who want to
+The main page in platform mode (**Demo**) displays the platform's possibilities for users who want to
 browse the portal without creating individual accounts.
 The demo mode displays only the option for "demo login" on the
 page, providing a simplified appearance.
@@ -367,11 +401,12 @@ Users are informed via a demo warning that the system is now in demo mode.
 ![Verification_Step](assets/wba_screenshots/verification_step.png)
 
 The platform begins the verification procedure to validate the user after registration or when in demo mode. The
-verification system sends an email to the user's provided email address. This email contains an unique verification link
-and code that the user must click in order to complete the verification procedure.
+verification system sends an email or sms to the user's provided email or phone number address.
+This procedure contains a unique verification link
+or code that the user must click to complete the verification process.
 
-The verification phase is a critical security defend that validates the user's identity and makes sure their email
-address is valid.
+The verification phase is a critical to validate the user's identity and makes sure their email or phone number
+address is valid on the portal.
 The user validates ownership of the email account and shows permission to use the OpenRoaming
 Provisioning Portal by clicking the verification link or by submitting the code given on the email. This procedure
 improves the platform's security by preventing unwanted access.
@@ -380,20 +415,19 @@ improves the platform's security by preventing unwanted access.
 
 ![After_Verification](assets/wba_screenshots/after_verification.png)
 
-After successfully completing the verification process by clicking the verification link or submitting the verification
-code, the user will be directed to this page.
+After successfully completing the verification process, the user will be directed to this page.
 The actions taken during the verification process depend on the mode in
 which the user created their account.
 
-#### 3.1 Production Mode
+#### 3.1 Live Mode
 
-If the user created an account in production mode (demo mode set to **FALSE**), they will receive an email with
+If the user created an account in live mode (platform mode set to **Live**), they will receive an email with
 essential account information. The email includes a link to return to the verified portal, a verification code, and a
 randomly generated password. With this information, the user can log in securely to the OpenRoaming Provisioning Portal.
 
 #### 3.2 Demo Mode
 
-Users who registered an account in demo mode (demo mode set to TRUE) can access the verified portal instantly.
+Users who registered an account in demo mode (platform mode set to **Demo**) can access the verified portal instantly.
 Because
 demo mode allows users to explore the site without registering individual accounts, the verification procedure makes
 sure that the user's session is safe.
@@ -412,7 +446,7 @@ information.
 This profile is designed to improve the Wi-Fi experience by providing smooth connectivity and increased
 security.
 
-The downloaded profile includes all of the essential settings and variables to make connecting to Wi-Fi networks easier.
+The downloaded profile includes all the essential settings and variables to make connecting to Wi-Fi networks easier.
 The OpenRoaming Provisioning Portal improves Wi-Fi connectivity by giving a user-specific profile, making it easier and
 more convenient for consumers and companies.
 
@@ -446,12 +480,5 @@ Administrators are presented with the dashboard overview after successfully logg
 Administrators may quickly
 access/search information about the users on the portal, the system customization, the current applied settings and
 other essential data.
-
-### 3. Options
-
-![Options](assets/wba_screenshots/options.png)
-
-The "Options" button is a feature that offers users a simple dropdown menu with various important actions and
-capabilities.
-For authorized users, the button provides access to improving the experience on the OpenRoaming
-Provisioning Portal.
+And if needed, they can check all the statistics of the portal.
+Statistics like, profiles downloaded in which device, what method of authentication the users used, etc...

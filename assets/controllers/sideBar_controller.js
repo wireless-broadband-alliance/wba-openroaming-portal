@@ -104,7 +104,7 @@ export default class extends Controller {
 				}
 			});
 		}
-	
+
 		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
 		initializeDropdown_Select('StatisticsDropdownButton', 'StatisticsDropDown');
 		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
@@ -137,6 +137,7 @@ export default class extends Controller {
 		}
 
 		initializeDropdown_ActionItems('itemsDropDownButton', 'itemsDropDown');
+		initializeDropdown_ActionItems('widgetUserButton', 'widgetUser');
 
 		function remove_element(elementId) {
 			setTimeout(function () {
@@ -154,12 +155,6 @@ export default class extends Controller {
 		remove_element('errorDisplay');
 		remove_element('successDisplay');
 
-		function confirmDeletePost(userId, userUuid) {
-			if (confirm('Are you sure you want to delete the user with UUID ' + userUuid + '?')) {
-			document.getElementById('deleteForm' + userId).submit();
-			}
-		}
-
 		document.addEventListener('DOMContentLoaded', function () {
 			const deleteButtons = document.querySelectorAll('.delete-users-button');
 
@@ -176,34 +171,34 @@ export default class extends Controller {
 		});
 
 		function addSortingClickListener(columnName, activeSort, activeOrder) {
-			var columnElement = document.getElementById(columnName + 'Column');
-		
+			let  columnElement = document.getElementById(columnName + 'Column');
+
 			if (columnElement) {
 				columnElement.addEventListener('click', function () {
 					// Retrieve the current URL
-					var currentUrl = new URL(window.location.href);
-		
+					let currentUrl = new URL(window.location.href);
+
 					// Parse the URL parameters into an object
-					var urlParams = new URLSearchParams(currentUrl.search);
-		
+					let urlParams = new URLSearchParams(currentUrl.search);
+
 					// Check if the 'sort' parameter is present and matches the current column
 					if (urlParams.has('sort') && urlParams.get('sort') === columnName) {
 						// If yes, toggle the sorting order
-						var newOrder = urlParams.get('order') === 'asc' ? 'desc' : 'asc';
+						let newOrder = urlParams.get('order') === 'asc' ? 'desc' : 'asc';
 						urlParams.set('order', newOrder);
 					} else {
 						// If not, set the sorting parameters for the current column
 						urlParams.set('sort', columnName);
 						urlParams.set('order', 'asc');
 					}
-		
+
 					// Update the URL with the new parameters
 					currentUrl.search = '?' + urlParams.toString();
-		
+
 					// Redirect to the new URL
 					window.location.href = currentUrl.toString();
 				});
-				
+
 				// Add a class to indicate the active sort column
 				if (activeSort === columnName) {
 					columnElement.classList.add('active-sort');
@@ -213,8 +208,8 @@ export default class extends Controller {
 				}
 			}
 		}
-		
+
 		addSortingClickListener('uuid', '{{ activeSort }}', '{{ activeOrder }}');
-		addSortingClickListener('createdAt', '{{ activeSort }}', '{{ activeOrder }}');					
+		addSortingClickListener('createdAt', '{{ activeSort }}', '{{ activeOrder }}');
 	}
 }
