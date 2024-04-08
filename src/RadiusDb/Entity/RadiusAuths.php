@@ -21,7 +21,7 @@ class RadiusAuths
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
-    private string $password;
+    private string $pass;
 
     #[ORM\Column( length: 255)]
     private ?string $reply = null;
@@ -51,12 +51,12 @@ class RadiusAuths
 
     public function getPassword(): ?string
     {
-        return $this->password;
+        return $this->pass;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(string $pass): self
     {
-        $this->password = $password;
+        $this->$pass = $pass;
 
         return $this;
     }

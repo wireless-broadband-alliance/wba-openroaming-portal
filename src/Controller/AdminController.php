@@ -19,6 +19,7 @@ use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Entity\RadiusAuths;
+use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -48,6 +49,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
+
 /**
  *
  */
@@ -61,6 +63,8 @@ class AdminController extends AbstractController
     private SettingRepository $settingRepository;
     private EntityManagerInterface $entityManager;
 
+    private RadiusAuthsRepository $radiusAuthsRepository;
+
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
@@ -69,6 +73,7 @@ class AdminController extends AbstractController
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
      * @param EntityManagerInterface $entityManager
+     * @param RadiusAuthsRepository $radiusAuthsRepository
      */
     public function __construct(
         MailerInterface        $mailer,
@@ -78,6 +83,7 @@ class AdminController extends AbstractController
         GetSettings            $getSettings,
         SettingRepository      $settingRepository,
         EntityManagerInterface $entityManager,
+        RadiusAuthsRepository  $radiusAuthsRepository
     )
     {
         $this->mailer = $mailer;
@@ -87,6 +93,7 @@ class AdminController extends AbstractController
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
         $this->entityManager = $entityManager;
+        $this->radiusAuthsRepository = $radiusAuthsRepository;
     }
 
     /**
@@ -180,7 +187,7 @@ class AdminController extends AbstractController
     {
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
-        if ($export_users === EmailConfirmationStrategy::NO_EMAIL){
+        if ($export_users === EmailConfirmationStrategy::NO_EMAIL) {
             $this->addFlash('error_admin', 'This operation is disabled for security reasons');
             return $this->redirectToRoute('admin_page');
         }
@@ -1551,7 +1558,8 @@ class AdminController extends AbstractController
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        $repository = $this->entityManager->getRepository(RadiusAuths::class);
+        $repository = $this->radiusAuthsRepository->findAll();
+        dd($repository);
 
         // Fetch all data without date filtering
         $events = $repository->findBy(['reply' => 'Access-Accept']);
