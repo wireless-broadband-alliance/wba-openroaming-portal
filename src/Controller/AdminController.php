@@ -18,6 +18,7 @@ use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
+use App\RadiusDb\Entity\RadiusAuths;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -1331,12 +1332,12 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
-        $fetchChartAuthenticationFreeradius = $this->fetchChartAuthenticationFreeradius($startDate, $endDate);
-
+        $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        dd($fetchChartAuthenticationsFreeradius);
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'devicesDataJson' => json_encode($fetchChartAuthenticationFreeradius, JSON_THROW_ON_ERROR),
+            'devicesDataJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
@@ -1548,23 +1549,21 @@ class AdminController extends AbstractController
     /**
      * @throws Exception
      */
-    private function fetchChartAuthenticationFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        $repository = $this->entityManager->getRepository(Event::class);
+        $repository = $this->entityManager->getRepository(RadiusAuths::class);
 
         // Fetch all data without date filtering
-        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
+        $events = $repository->findBy(['reply' => 'Access-Accept']);
 
-        $profileCounts = [
-            'Android' => 0,
-            'Windows' => 0,
-            'macOS' => 0,
-            'iOS' => 0,
+        $authsCounts = [
+            'Sucess' => 0,
+            'Failed' => 0,
         ];
 
-        // Filter and count profile types based on the date criteria
+        // Filter and count authenticates types based on the date criteria
         foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
+            $eventDateTime = $event->getAuthdate();
 
             if (!$eventDateTime) {
                 continue; // Skip events with missing dates
@@ -1574,20 +1573,20 @@ class AdminController extends AbstractController
                 (!$startDate || $eventDateTime >= $startDate) &&
                 (!$endDate || $eventDateTime <= $endDate)
             ) {
-                $eventMetadata = $event->getEventMetadata();
+                $eventMetadata = $event->getAuthdate();
 
                 if (isset($eventMetadata['type'])) {
-                    $profileType = $eventMetadata['type'];
+                    $authType = $eventMetadata['type'];
 
                     // Check the profile type and update the corresponding count
-                    if (isset($profileCounts[$profileType])) {
-                        $profileCounts[$profileType]++;
+                    if (isset($authsCounts[$authType])) {
+                        $authsCounts[$authType]++;
                     }
                 }
             }
         }
 
-        return $this->generateDatasets($profileCounts);
+        return $this->generateDatasets($authsCounts);
     }
 
     private function generateDatasets(array $counts): array
