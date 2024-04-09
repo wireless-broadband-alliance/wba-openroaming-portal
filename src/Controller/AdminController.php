@@ -1340,9 +1340,16 @@ class AdminController extends AbstractController
 
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
 
+        // Extract the counts from the returned data
+        $authCounts = [
+            'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
+            'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
+        ];
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
+            'authCounts' => $authCounts,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
