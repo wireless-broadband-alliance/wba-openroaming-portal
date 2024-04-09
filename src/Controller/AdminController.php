@@ -18,7 +18,6 @@ use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
-use App\RadiusDb\Entity\RadiusAuths;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -1340,11 +1339,11 @@ class AdminController extends AbstractController
         }
 
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
-        dd($fetchChartAuthenticationsFreeradius);
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'devicesDataJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
+            'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
@@ -1558,38 +1557,35 @@ class AdminController extends AbstractController
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        $repository = $this->radiusAuthsRepository->findAll();
-        dd($repository);
-
-        // Fetch all data without date filtering
-        $events = $repository->findBy(['reply' => 'Access-Accept']);
+        // Fetch all data with date filtering
+        $events = $this->radiusAuthsRepository->findBy(['reply' => ['Access-Accept', 'Access-Reject']]);
 
         $authsCounts = [
-            'Sucess' => 0,
-            'Failed' => 0,
+            'Accepted' => 0,
+            'Rejected' => 0,
         ];
 
         // Filter and count authenticates types based on the date criteria
         foreach ($events as $event) {
-            $eventDateTime = $event->getAuthdate();
+            // Convert event date string to DateTime object
+            $eventDateTime = new DateTime($event->getAuthdate());
 
+            // Skip events with missing dates
             if (!$eventDateTime) {
-                continue; // Skip events with missing dates
+                continue;
             }
 
+            // Check if the event date falls within the specified date range
             if (
                 (!$startDate || $eventDateTime >= $startDate) &&
                 (!$endDate || $eventDateTime <= $endDate)
             ) {
-                $eventMetadata = $event->getAuthdate();
+                $reply = $event->getReply();
 
-                if (isset($eventMetadata['type'])) {
-                    $authType = $eventMetadata['type'];
-
-                    // Check the profile type and update the corresponding count
-                    if (isset($authsCounts[$authType])) {
-                        $authsCounts[$authType]++;
-                    }
+                if ($reply === 'Access-Accept') {
+                    $authsCounts['Accepted']++;
+                } elseif ($reply === 'Access-Reject') {
+                    $authsCounts['Rejected']++;
                 }
             }
         }
