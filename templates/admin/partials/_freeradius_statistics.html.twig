@@ -2,7 +2,27 @@
     {# Authentications Attempts #}
     <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left">Authentication Attempts</h1>
-        <canvas class="max-w-full" id="authAttemptsChart" data-devices
-                data-chart-data="{{ authAttemptsJson }}"></canvas>
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2">
+                    Accepted
+                </h1>
+                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                    <span class="inline-block w-6 h-6 sm:w-auto sm:h-auto sm:px-1 sm:py-0">10000</span>
+                </div>
+            </a>
+            <a class="cursor-default flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400/50 transition-all duration-100">
+                <h1 class="px-2">
+                    Rejected
+                </h1>
+                <div class="w-6 h-6 mb-1 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
+                    10
+                </div>
+            </a>
+        </div>
+        <div class="flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="authAttemptsChart" data-devices
+                    data-chart-data="{{ authAttemptsJson }}"></canvas>
+        </div>
     </div>
 </div>

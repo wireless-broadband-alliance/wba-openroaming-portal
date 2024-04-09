@@ -1590,7 +1590,8 @@ class AdminController extends AbstractController
             }
         }
 
-        return $this->generateDatasets($authsCounts);
+        // Return an array containing both the generated datasets and the counts
+        return $this->generateDatasetsAuths($authsCounts);
     }
 
     private function generateDatasets(array $counts): array
@@ -1614,6 +1615,32 @@ class AdminController extends AbstractController
             'data' => $data,
             'backgroundColor' => $colors,
             'borderColor' => "rgb(78, 164, 116)",
+            'borderRadius' => "15",
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+    private function generateDatasetsAuths(array $counts): array
+    {
+        $datasets = [];
+        $labels = array_keys($counts);
+        $dataValues = array_values($counts);
+
+        $colors = [];
+
+        // Determine the color for each data point based on the type
+        foreach ($labels as $type) {
+            $color = $type === 'Accepted' ? '#7DB928' : '#FE4068';
+            $colors[] = $color;
+        }
+
+        $datasets[] = [
+            'data' => $dataValues,
+            'backgroundColor' => $colors,
             'borderRadius' => "15",
         ];
 

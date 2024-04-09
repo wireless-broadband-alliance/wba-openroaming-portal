@@ -13,22 +13,29 @@ export default class extends Controller {
 
 				// Create the Chart.js charts with the fetched data about the freeradius content
 				const authAttemptsChart = new Chart(authenticationAttempts, {
-					type: 'bar',
+					type: 'pie',
 					data: authAttemptsData,
 					options: {
+						responsive: true,
 						plugins: {
 							legend: {
 								display: false, // Hide the legend (labels at the top)
 							},
 						},
 						scales: {
+							x: {
+								display: false, // Hide the x-axis
+							},
 							y: {
-								ticks: {
-									precision: 0
-								}
-							}
+								display: false, // Hide the y-axis
+							},
+						},
+						radius: '75%', // Set the radius to make the Doughnut chart smaller
+						animation: {
+							animateRotate: true,
+							animateScale: true,
 						}
-					}
+					},
 				});
 			}
 		});
