@@ -3,6 +3,7 @@
 namespace App\RadiusDb\Entity;
 
 use App\RadiusDb\Repository\RadiusAccountingRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RadiusAccountingRepository::class)]
@@ -11,38 +12,38 @@ class RadiusAccounting
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'bigint', name: 'radacctid')]
+    #[ORM\Column(name: 'radacctid', type: 'bigint')]
     private ?int $radAcctId = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: false)]
+    #[ORM\Column(length: 32, nullable: false)]
     private ?string $acctSessionId = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: false)]
+    #[ORM\Column(length: 32, nullable: false)]
     private ?string $acctUniqueId = null;
 
-    #[ORM\Column(type: 'varchar', length: 64, nullable: false)]
+    #[ORM\Column(length: 64, nullable: false)]
     private ?string $username = null;
 
-    #[ORM\Column(type: 'varchar', length: 64, nullable: true)]
+    #[ORM\Column(length: 64, nullable: true)]
     private ?string $realm = null;
 
-    #[ORM\Column(type: 'varchar', length: 15, nullable: false)]
+    #[ORM\Column(length: 15, nullable: false)]
     private ?string $nasIpAddress = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: true)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $nasPortId = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: true)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $nasPortType = null;
 
     #[ORM\Column(type: 'datetime', name: 'acctstarttime', nullable: true)]
-    private ?\DateTimeInterface $acctStartTime = null;
+    private ?DateTimeInterface $acctStartTime = null;
 
     #[ORM\Column(type: 'datetime', name: 'acctupdatetime', nullable: true)]
-    private ?\DateTimeInterface $acctUpdateTime = null;
+    private ?DateTimeInterface $acctUpdateTime = null;
 
     #[ORM\Column(type: 'datetime', name: 'acctstoptime', nullable: true)]
-    private ?\DateTimeInterface $acctStopTime = null;
+    private ?DateTimeInterface $acctStopTime = null;
 
     #[ORM\Column(type: 'integer', name: 'acctinterval', nullable: true)]
     private ?int $acctInterval = null;
@@ -50,49 +51,49 @@ class RadiusAccounting
     #[ORM\Column(type: 'integer', name: 'acctsessiontime', nullable: true)]
     private ?int $acctSessionTime = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: true)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $acctAuthentic = null;
 
-    #[ORM\Column(type: 'varchar', length: 128, nullable: true)]
+    #[ORM\Column(length: 128, nullable: true)]
     private ?string $connectInfo_start = null;
 
-    #[ORM\Column(type: 'varchar', length: 128, nullable: true)]
+    #[ORM\Column(length: 128, nullable: true)]
     private ?string $connectInfo_stop = null;
 
-    #[ORM\Column(type: 'bigint', nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?int $acctInputOctets = null;
 
-    #[ORM\Column(type: 'bigint', nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?int $acctOutputOctets = null;
 
-    #[ORM\Column(type: 'varchar', length: 50, nullable: false)]
+    #[ORM\Column(length: 50, nullable: false)]
     private ?string $calledStationId = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: false)]
+    #[ORM\Column(length: 32, nullable: false)]
     private ?string $acctTerminateCause = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: true)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $serviceType = null;
 
-    #[ORM\Column(type: 'varchar', length: 32, nullable: true)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $framedProtocol = null;
 
-    #[ORM\Column(type: 'varchar', length: 15, nullable: false)]
+    #[ORM\Column(length: 15, nullable: false)]
     private ?string $framedIpAddress = null;
 
-    #[ORM\Column(type: 'varchar', length: 45, nullable: false)]
+    #[ORM\Column(length: 45, nullable: false)]
     private ?string $framedIpv6Address = null;
 
-    #[ORM\Column(type: 'varchar', length: 45, nullable: false)]
+    #[ORM\Column(length: 45, nullable: false)]
     private ?string $framedIpv6Prefix = null;
 
-    #[ORM\Column(type: 'varchar', length: 44, nullable: false)]
+    #[ORM\Column(length: 44, nullable: false)]
     private ?string $framedInterfaceId = null;
 
-    #[ORM\Column(type: 'varchar', length: 45, nullable: false)]
+    #[ORM\Column(length: 45, nullable: false)]
     private ?string $delegatedIpv6Prefix = null;
 
-    #[ORM\Column(type: 'varchar', length: 64, nullable: true)]
+    #[ORM\Column(length: 64, nullable: true)]
     private ?string $class = null;
 
     public function getRadAcctId(): ?int
@@ -191,36 +192,36 @@ class RadiusAccounting
         return $this;
     }
 
-    public function getAcctStartTime(): ?\DateTimeInterface
+    public function getAcctStartTime(): ?DateTimeInterface
     {
         return $this->acctStartTime;
     }
 
-    public function setAcctStartTime(?\DateTimeInterface $acctStartTime): self
+    public function setAcctStartTime(?DateTimeInterface $acctStartTime): self
     {
         $this->acctStartTime = $acctStartTime;
 
         return $this;
     }
 
-    public function getAcctUpdateTime(): ?\DateTimeInterface
+    public function getAcctUpdateTime(): ?DateTimeInterface
     {
         return $this->acctUpdateTime;
     }
 
-    public function setAcctUpdateTime(?\DateTimeInterface $acctUpdateTime): self
+    public function setAcctUpdateTime(?DateTimeInterface $acctUpdateTime): self
     {
         $this->acctUpdateTime = $acctUpdateTime;
 
         return $this;
     }
 
-    public function getAcctStopTime(): ?\DateTimeInterface
+    public function getAcctStopTime(): ?DateTimeInterface
     {
         return $this->acctStopTime;
     }
 
-    public function setAcctStopTime(?\DateTimeInterface $acctStopTime): self
+    public function setAcctStopTime(?DateTimeInterface $acctStopTime): self
     {
         $this->acctStopTime = $acctStopTime;
 

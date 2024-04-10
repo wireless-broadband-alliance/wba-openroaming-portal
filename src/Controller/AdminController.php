@@ -18,6 +18,7 @@ use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
+use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -61,8 +62,8 @@ class AdminController extends AbstractController
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
     private EntityManagerInterface $entityManager;
-
     private RadiusAuthsRepository $radiusAuthsRepository;
+    private RadiusAccountingRepository $radiusAccountingRepository;
 
     /**
      * @param MailerInterface $mailer
@@ -73,16 +74,18 @@ class AdminController extends AbstractController
      * @param SettingRepository $settingRepository
      * @param EntityManagerInterface $entityManager
      * @param RadiusAuthsRepository $radiusAuthsRepository
+     * @param RadiusAccountingRepository $radiusAccountingRepository
      */
     public function __construct(
-        MailerInterface        $mailer,
-        UserRepository         $userRepository,
-        ProfileManager         $profileManager,
-        ParameterBagInterface  $parameterBag,
-        GetSettings            $getSettings,
-        SettingRepository      $settingRepository,
-        EntityManagerInterface $entityManager,
-        RadiusAuthsRepository  $radiusAuthsRepository
+        MailerInterface            $mailer,
+        UserRepository             $userRepository,
+        ProfileManager             $profileManager,
+        ParameterBagInterface      $parameterBag,
+        GetSettings                $getSettings,
+        SettingRepository          $settingRepository,
+        EntityManagerInterface     $entityManager,
+        RadiusAuthsRepository      $radiusAuthsRepository,
+        RadiusAccountingRepository $radiusAccountingRepository
     )
     {
         $this->mailer = $mailer;
@@ -93,6 +96,7 @@ class AdminController extends AbstractController
         $this->settingRepository = $settingRepository;
         $this->entityManager = $entityManager;
         $this->radiusAuthsRepository = $radiusAuthsRepository;
+        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
 
     /**
@@ -1339,6 +1343,8 @@ class AdminController extends AbstractController
         }
 
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
+
 
         // Extract the counts from the returned data
         $authCounts = [
@@ -1351,6 +1357,7 @@ class AdminController extends AbstractController
             'current_user' => $user,
             'authCounts' => $authCounts,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
+            'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
@@ -1599,6 +1606,42 @@ class AdminController extends AbstractController
 
         // Return an array containing both the generated datasets and the counts
         return $this->generateDatasetsAuths($authsCounts);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        // Fetch all data with date filtering
+        $events = $this->radiusAccountingRepository->findBy([]);
+
+        // Initialize an array to store the counts of each realm
+        $realmCounts = [];
+
+        // Count the occurrences of each realm
+        foreach ($events as $event) {
+            // Get the realm of the event
+            $realm = $event->getRealm();
+
+            // Skip if realm is null or empty
+            if (!$realm) {
+                continue;
+            }
+
+            // Increment the count for the realm
+            if (!isset($realmCounts[$realm])) {
+                $realmCounts[$realm] = 1;
+            } else {
+                $realmCounts[$realm]++;
+            }
+        }
+
+        // Sort the realm counts in descending order
+        arsort($realmCounts);
+
+        // Return the counts of each realm
+        return $this->generateDatasets($realmCounts);
     }
 
     private function generateDatasets(array $counts): array
