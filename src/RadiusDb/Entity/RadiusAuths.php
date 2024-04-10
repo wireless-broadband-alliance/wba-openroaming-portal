@@ -14,7 +14,7 @@ class RadiusAuths
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column( length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $username = null;
 
     /**
@@ -23,13 +23,13 @@ class RadiusAuths
     #[ORM\Column(length: 255)]
     private string $pass;
 
-    #[ORM\Column( length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $reply = null;
 
-    #[ORM\Column( length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $authdate = null;
 
-    #[ORM\Column( length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $class = null;
 
     public function getId(): ?int
