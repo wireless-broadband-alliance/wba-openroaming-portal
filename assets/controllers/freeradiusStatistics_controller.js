@@ -42,7 +42,7 @@ export default class extends Controller {
 
 				// Create the Chart.js charts with the fetched data about the freeradius content
 				const realmsCountingChart = new Chart(realmsCounting, {
-					type: 'pie',
+					type: 'doughnut',
 					data: realmsCountingData,
 					options: {
 						responsive: true,

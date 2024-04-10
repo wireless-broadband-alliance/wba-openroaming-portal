@@ -1345,17 +1345,20 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
 
+        // Extract the most used realm name
+        $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
 
         // Extract the counts from the returned data
         $authCounts = [
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
-
+        
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
             'authCounts' => $authCounts,
+            'mostUsedRealm' => $mostUsedRealm,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
@@ -1641,7 +1644,7 @@ class AdminController extends AbstractController
         arsort($realmCounts);
 
         // Return the counts of each realm
-        return $this->generateDatasets($realmCounts);
+        return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
     private function generateDatasets(array $counts): array
@@ -1700,6 +1703,34 @@ class AdminController extends AbstractController
         ];
     }
 
+    private function generateDatasetsRealmsCounting(array $counts): array
+    {
+        $datasets = [];
+        $labels = array_keys($counts);
+        $dataValues = array_values($counts);
+
+        $colors = [];
+
+        // Assign a specific color to the first most used realm
+        $colors[] = '#7DB928';
+
+        // Generate random colors for the rest of the realms
+        for ($i = 1; $i < count($labels); $i++) {
+            $color = '#' . substr(md5(mt_rand()), 0, 6); // Generate a random hexadecimal color code
+            $colors[] = $color;
+        }
+
+        $datasets[] = [
+            'data' => $dataValues,
+            'backgroundColor' => $colors,
+            'borderRadius' => "15",
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
 
     /**
      * @param Request $request
