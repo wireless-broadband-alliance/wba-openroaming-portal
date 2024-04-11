@@ -1,22 +1,22 @@
 <div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Authentications Attempts #}
-    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow lg:col-span-1">
-        <h1 class="text-lg font-medium text-center sm:pt-2 pt-10">Authentication Attempts</h1>
+    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <h1 class="text-lg font-medium text-left sm:pt-2 pt-10">Authentication Attempts</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
-                <h1 class="px-2">
+                <h1 class="px-2 text-base sm:text-lg">
                     Accepted
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2 sm:w-auto sm:h-auto sm:px-1 sm:py-0">{{ authCounts['Accepted'] }}</span>
+                    <span class="w-auto h-6 mb-1 px-2 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ authCounts['Accepted'] }}</span>
                 </div>
             </a>
             <a class="cursor-default flex flex-row group hover:text-[#FE4068] hover:border-b-2 hover:border-y-[#FE4068]/50 transition-all duration-100">
-                <h1 class="px-2">
+                <h1 class="px-2 text-base sm:text-lg">
                     Rejected
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#FE4068] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2 sm:w-auto sm:h-auto sm:px-1 sm:py-0">{{ authCounts['Rejected'] }}</span>
+                    <span class="w-auto h-6 mb-1 px-2 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ authCounts['Rejected'] }}</span>
                 </div>
             </a>
         </div>
@@ -27,53 +27,28 @@
     </div>
 
     {# Realms Counting #}
-    <div class="max-w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow lg:col-span-2">
-        <div class="flex flex-col md:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
-            <div>
-                <h1 class="text-lg font-medium text-center sm:pt-2 pt-10 ">Most Used Realms</h1>
-                <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
-                    <a class="pt-3 cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
-                        <h1 class="px-2">Most Used Realm:</h1>
-                        <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                            <span class="w-auto h-6 mb-1 px-3 sm:w-auto sm:h-auto sm:px-1 sm:py-0">{{ mostUsedRealm }}</span>
-                        </div>
-                    </a>
+    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <h1 class="text-lg font-medium text-left sm:pt-2 pt-10">Most Used Realms</h1>
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+            <a class="text-base text-center sm:text-lg pt-2 sm:pt-0  flex flex-col sm:flex-row cursor-default group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2">Most Used Realm:</h1>
+                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                    <span class="w-auto h-6 mb-1 px-3 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ mostUsedRealm }}</span>
                 </div>
-                <div class="flex flex-col gap-6 animate-fadeIn">
-                    <canvas class="max-w-full" id="realmsCountingChart" data-devices
-                            data-chart-data="{{ realmsCountingJson }}"></canvas>
-                </div>
-            </div>
-            <div>
-                <h1 class="text-lg font-medium text-center">Realms List</h1>
-                <div class="max-w-full flex flex-col items-center justify-center pt-12 gap-6 animate-fadeIn">
-                    <div class=" items-start md:mx-auto space-y-4 sm:space-y-0 overflow-x-auto">
-                        <table>
-                            <thead class="text-sm text-gray-700 bg-veryLightGreen">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 -ml-4">
-                                    <h1 class="mr-2">Usage</h1>
-                                </th>
-                                <th scope="col" class="px-6 py-3 -ml-2">
-                                    Name
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                {# Usage #}
-                                <td class="px-4 py-4 text-left">
-                                    100
-                                </td>
-                                {# Names #}
-                                <td class="px-4 py-4 text-left">
-                                    marcelina.tetrapi.org.açores
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            </a>
+        </div>
+        <div class="flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="realmsCountingChart" data-devices
+                    data-chart-data="{{ realmsCountingJson }}"></canvas>
+        </div>
+    </div>
+
+    {# Realms Counting #}
+    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <h1 class="text-lg font-medium text-left sm:pt-2 pt-10">Realms List</h1>
+        <div class="flex flex-col gap-6 animate-fadeIn">
+            <div class="w-full rounded-2xl bg-red-500 lg:text-left text-center">
+            Testing Stuff here
             </div>
         </div>
     </div>
