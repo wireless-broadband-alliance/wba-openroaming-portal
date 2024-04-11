@@ -1353,7 +1353,7 @@ class AdminController extends AbstractController
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
-        
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
@@ -1582,6 +1582,8 @@ class AdminController extends AbstractController
             'Rejected' => 0,
         ];
 
+        $uniqueSeconds = []; // Keep track of unique seconds
+
         // Filter and count authenticates types based on the date criteria
         foreach ($events as $event) {
             // Convert event date string to DateTime object
@@ -1598,11 +1600,18 @@ class AdminController extends AbstractController
                 (!$endDate || $eventDateTime <= $endDate)
             ) {
                 $reply = $event->getReply();
+                $second = $eventDateTime->format('Y-m-d H:i:s'); // Get the second part of the date
 
-                if ($reply === 'Access-Accept') {
-                    $authsCounts['Accepted']++;
-                } elseif ($reply === 'Access-Reject') {
-                    $authsCounts['Rejected']++;
+                // Check if this second has already been counted
+                if (!in_array($second, $uniqueSeconds)) {
+                    if ($reply === 'Access-Accept') {
+                        $authsCounts['Accepted']++;
+                    } elseif ($reply === 'Access-Reject') {
+                        $authsCounts['Rejected']++;
+                    }
+
+                    // Add the second to the list of counted seconds
+                    $uniqueSeconds[] = $second;
                 }
             }
         }
