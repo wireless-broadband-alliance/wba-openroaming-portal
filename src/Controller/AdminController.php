@@ -1359,6 +1359,8 @@ class AdminController extends AbstractController
             'current_user' => $user,
             'authCounts' => $authCounts,
             'mostUsedRealm' => $mostUsedRealm,
+            'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
+            'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',

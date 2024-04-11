@@ -1,14 +1,14 @@
 <div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Authentications Attempts #}
     <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2 pt-10">Authentication Attempts</h1>
+        <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                 <h1 class="px-2 text-base sm:text-lg">
                     Accepted
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ authCounts['Accepted'] }}</span>
+                    <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Accepted'] }}</span>
                 </div>
             </a>
             <a class="cursor-default flex flex-row group hover:text-[#FE4068] hover:border-b-2 hover:border-y-[#FE4068]/50 transition-all duration-100">
@@ -16,7 +16,7 @@
                     Rejected
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#FE4068] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ authCounts['Rejected'] }}</span>
+                    <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Rejected'] }}</span>
                 </div>
             </a>
         </div>
@@ -28,7 +28,7 @@
 
     {# Realms Counting #}
     <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2 pt-10">Most Used Realms</h1>
+        <h1 class="text-lg font-medium text-left sm:pt-2">Most Used Realms</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="text-base text-center sm:text-lg pt-2 sm:pt-0  flex flex-col sm:flex-row cursor-default group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                 <h1 class="px-2">Most Used Realm:</h1>
@@ -43,12 +43,43 @@
         </div>
     </div>
 
-    {# Realms Counting #}
+    {# Realms List #}
     <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2 pt-10">Realms List</h1>
-        <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="w-full rounded-2xl bg-red-500 lg:text-left text-center">
-            Testing Stuff here
+        <h1 class="text-lg font-medium text-left sm:pt-2">Realms List</h1>
+        <div class="w-full overflow-x-auto h-full flex flex-col gap-6 animate-fadeIn">
+            <div class="mx-auto max-w-md overflow-y-auto overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 flex flex-col justify-center items-center">
+                    <thead class="bg-veryLightGreen text-gray-700 rounded-t-md">
+                    <tr>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Usage
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Realm Name
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                    {% for index, label in labelsRealmList %}
+                        <tr class="cursor-default group duration-300">
+                            <td class="px-6 py-4 whitespace-nowrap  hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] transition-all duration-100">
+                                <div class="px-2 text-base sm:text-lg">
+                                    {{ label }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="mb-1 bg-veryLightGreen group-hover:bg-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] rounded-md group-hover:text-white text-center transition-all duration-100">
+                                            <span class="w-auto h-6 mb-1 px-2">
+                                                {{ datasetsRealmList[0]['data'][index] }}
+                                            </span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
