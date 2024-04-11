@@ -42,23 +42,9 @@ class RadiusAuths
         return $this->username;
     }
 
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-
-        return $this;
-    }
-
     public function getPassword(): ?string
     {
         return $this->pass;
-    }
-
-    public function setPassword(string $pass): self
-    {
-        $this->$pass = $pass;
-
-        return $this;
     }
 
     public function getReply(): ?string
@@ -66,23 +52,9 @@ class RadiusAuths
         return $this->reply;
     }
 
-    public function setReply(string $reply): self
-    {
-        $this->reply = $reply;
-
-        return $this;
-    }
-
     public function getAuthdate(): ?string
     {
         return $this->authdate;
-    }
-
-    public function setAuthdate(string $authdate): self
-    {
-        $this->authdate = $authdate;
-
-        return $this;
     }
 
     public function getClass(): ?string
@@ -90,10 +62,4 @@ class RadiusAuths
         return $this->class;
     }
 
-    public function setClass(string $class): self
-    {
-        $this->class = $class;
-
-        return $this;
-    }
 }
