@@ -32,7 +32,7 @@ export default class extends Controller {
 								display: false, // Hide the y-axis
 							},
 						},
-						radius: '75%', // Set the radius to make the Doughnut chart smaller
+						radius: '75%', // Set the radius to make the pie chart smaller
 						animation: {
 							animateRotate: true,
 							animateScale: true,

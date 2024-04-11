@@ -48,8 +48,8 @@
         <h1 class="text-lg font-medium text-left sm:pt-2">Realms List</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="overflow-x-auto max-w-full relative">
-                <table class="h-4/5 overflow-y-auto divide-y divide-gray-200">
-                    <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
+                <table class="w-full h-auto overflow-y-auto divide-y divide-gray-200 table-fixed">
+                <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -61,7 +61,7 @@
                         </th>
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 break-all">
+                    <tbody class="divide-y divide-gray-200">
                     {% for index, label in labelsRealmList %}
                         <tr class="cursor-default group hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}]">
                             <td class="px-8 py-6">
