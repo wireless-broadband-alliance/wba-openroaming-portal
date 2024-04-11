@@ -1723,9 +1723,12 @@ class AdminController extends AbstractController
         // Assign a specific color to the first most used realm
         $colors[] = '#7DB928';
 
-        // Generate random colors for the rest of the realms
-        for ($i = 1; $i < count($labels); $i++) {
-            $color = '#' . substr(md5(mt_rand()), 0, 6); // Generate a random hexadecimal color code
+        // Generate colors based on the realm names
+        foreach ($labels as $realm) {
+            // Generate a color based on the realm name
+            $color = $this->generateColorFromRealmName($realm);
+
+            // Add the color to the list
             $colors[] = $color;
         }
 
@@ -1739,6 +1742,22 @@ class AdminController extends AbstractController
             'labels' => $labels,
             'datasets' => $datasets,
         ];
+    }
+
+    private function generateColorFromRealmName(string $realm): string
+    {
+        // Generate a hash based on the realm name
+        $hash = md5($realm);
+
+        // Extract RGB values from the hash
+        $red = hexdec(substr($hash, 0, 2));
+        $green = hexdec(substr($hash, 2, 2));
+        $blue = hexdec(substr($hash, 4, 2));
+
+        // Format the RGB values into a CSS color string
+        $color = sprintf('#%02x%02x%02x', $red, $green, $blue);
+
+        return $color;
     }
 
     /**
