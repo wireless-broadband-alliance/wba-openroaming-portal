@@ -52,7 +52,7 @@
                 <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            class="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Usage
                         </th>
                         <th scope="col"
@@ -64,15 +64,15 @@
                     <tbody class="divide-y divide-gray-200">
                     {% for index, label in labelsRealmList %}
                         <tr class="cursor-default group hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}]">
-                            <td class="px-8 py-6">
-                                <div class="mb-1 bg-veryLightGreen group-hover:bg-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] rounded-md group-hover:text-white text-center transition-all duration-200">
-                                            <span class="w-auto h-6 mb-1 px-2">
-                                                {{ datasetsRealmList[0]['data'][index] }}
-                                            </span>
+                            <td class="w-full px-8 py-6">
+                                <div class="w-full mb-1 bg-veryLightGreen group-hover:bg-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] rounded-md group-hover:text-white flex justify-center items-center transition-all duration-200">
+                    <span class="w-auto h-6 px-2">
+                        {{ datasetsRealmList[0]['data'][index] }}
+                    </span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap group-hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] transition-all duration-200">
-                                <div class="px-2 text-base sm:text-lg">
+                            <td class="w-full px-6 py-4 whitespace-nowrap group-hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] transition-all duration-200">
+                                <div class="text-center text-base sm:text-lg">
                                     {{ label }}
                                 </div>
                             </td>
