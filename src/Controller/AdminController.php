@@ -169,7 +169,7 @@ class AdminController extends AbstractController
             'perPage' => $perPage,
             'searchTerm' => null,
             'data' => $data,
-            'allUsersCount' => $allUsersCount,
+            'allRowsCount' => $allUsersCount,
             'verifiedUsersCount' => $verifiedUsersCount,
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
@@ -1348,6 +1348,27 @@ class AdminController extends AbstractController
         // Extract the most used realm name
         $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
 
+        // Extract all realms names
+        $realmsNames = $fetchChartRealmsFreeradius['labels'];
+
+        $currentPage = $request->query->getInt('page', 1);
+        $perPage = 5;
+
+        // Get the total number of realms
+        $totalRealms = count($realmsNames);
+
+        // Calculate the total number of pages
+        $totalPages = ceil($totalRealms / $perPage);
+
+        // Get the current page from the query parameter
+        $currentPage = $request->query->getInt('page', 1);
+
+        // Calculate the offset for slicing the realms
+        $offset = ($currentPage - 1) * $perPage;
+
+        // Slice the list of realms based on the offset and the number of realms per page
+        $realmsPerPage = array_slice($realmsNames, $offset, $perPage);
+
         // Extract the counts from the returned data
         $authCounts = [
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
@@ -1357,8 +1378,14 @@ class AdminController extends AbstractController
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
+            'totalPages' => $totalPages,
+            'currentPage' => $currentPage,
+            'perPage' => $perPage,
+            'realmsPerPage' => $realmsPerPage,
+            'allRowsCount' => $totalRealms,
             'authCounts' => $authCounts,
             'mostUsedRealm' => $mostUsedRealm,
+            'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
@@ -1756,8 +1783,8 @@ class AdminController extends AbstractController
         $green = hexdec(substr($hash, 2, 2));
         $blue = hexdec(substr($hash, 4, 2));
 
-        // Format the RGB values into a CSS color string
-        $color = sprintf('#%02x%02x%02x', $red, $green, $blue);
+        // Format the RGB values into a CSS color string and convert to uppercase
+        $color = strtoupper(sprintf('#%02x%02x%02x', $red, $green, $blue));
 
         return $color;
     }

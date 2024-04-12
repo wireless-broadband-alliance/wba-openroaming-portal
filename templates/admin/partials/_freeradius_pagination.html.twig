@@ -33,7 +33,7 @@
                     </a>
                 {% endif %}
                 {# Next page navigation #}
-                {% if currentPage < totalPages %}
+                {#{% if currentPage < totalPages %}
                     <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage + 1, 'filter': activeFilter}) }}"
                        class="hover:shadow-md p-1 rounded-lg">
                         <svg class="w-4 cursor-pointer"
@@ -46,7 +46,7 @@
                     </a>
                 {% else %}
                     <a class="p-1">
-                        {# Right limit pagination #}
+                        #}{# Right limit pagination #}{#
                         <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
                              stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
                              xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -54,7 +54,7 @@
                                   d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
                         </svg>
                     </a>
-                {% endif %}
+                {% endif %}#}
             </div>
         </div>
     </div>
