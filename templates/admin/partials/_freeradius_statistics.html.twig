@@ -71,16 +71,18 @@
                     <tbody class="divide-y divide-gray-200 cursor-default">
                     {% for index, label in realmsPerPage %}
                         <tr name="{{ label }}"
-                            class="group hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}]">
+                            onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ datasetsRealmList[0]['backgroundColor'][index] }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
+                            onmouseout="this.childNodes[1].childNodes[1].style.backgroundColor='#f1f8f4'; this.childNodes[1].childNodes[1].style.color='#594B60';"
+                        >
                             <td class="w-full px-8 py-2">
-                                <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen group-hover:bg-[{{ datasetsRealmList[0]['backgroundColor'][index] }}]  rounded-full group-hover:text-white flex justify-center items-center transition-all duration-200">
-                                    <span>
-                                        {{ datasetsRealmList[0]['data'][index] }}
-                                    </span>
+                                <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
+            <span>
+                {{ datasetsRealmList[0]['data'][index] }}
+            </span>
                                 </div>
                             </td>
-
-                            <td class="w-full px-6 py-2 whitespace-nowrap group-hover:text-[{{ datasetsRealmList[0]['backgroundColor'][index] }}] transition-all duration-200">
+                            <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200"
+                            >
                                 <div class="text-left text-base sm:text-lg">
                                     {{ label }}
                                 </div>
