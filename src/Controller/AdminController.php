@@ -1770,37 +1770,10 @@ class AdminController extends AbstractController
         // Extract unique colors
         $uniqueColors = array_unique($colors);
 
-        // Dynamically generate Tailwind CSS classes for each unique color
-        $this->generateTailwindClasses($uniqueColors);
-
         return [
             'labels' => $labels,
             'datasets' => $datasets,
         ];
-    }
-
-    private function generateTailwindClasses(array $colors): void
-    {
-        $tailwindConfigPath = '../assets/styles/randomRealmsColors.css';
-
-        // Read the existing Tailwind configuration file
-        $configFileContent = file_get_contents($tailwindConfigPath);
-
-        // Iterate over the colors to generate Tailwind classes
-        foreach ($colors as $color) {
-            // Define the class name with square brackets
-            $className = $color;
-
-            // Check if the class already exists in the configuration
-            if (strpos($configFileContent, $className) === false) {
-                // If the class does not exist, add it to the configuration
-                $class = $className . ' { color: ' . $color . '; }';
-                $configFileContent .= $class . PHP_EOL;
-            }
-        }
-
-        // Save the updated Tailwind configuration file
-        file_put_contents($tailwindConfigPath, $configFileContent);
     }
 
     private function generateColorFromRealmName(string $realm): string
