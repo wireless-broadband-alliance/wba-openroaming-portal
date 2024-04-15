@@ -1344,6 +1344,7 @@ class AdminController extends AbstractController
 
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
 
         // Extract the most used realm name
         $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
@@ -1389,6 +1390,7 @@ class AdminController extends AbstractController
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
+            'currentAuthsJson' => json_encode($fetchChartCurrentAuthFreeradius, JSON_THROW_ON_ERROR),
             'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
@@ -1682,6 +1684,24 @@ class AdminController extends AbstractController
         arsort($realmCounts);
 
         // Return the counts of each realm
+        return $this->generateDatasetsRealmsCounting($realmCounts);
+    }
+
+    private function fetchChartCurrentAuthFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        // Get the active sessions using the findActiveSessions query
+        $query = $this->radiusAccountingRepository->findActiveSessions();
+        $activeSessions = $query->getResult();
+
+        // Convert the results into the expected format
+        $realmCounts = [];
+        foreach ($activeSessions as $session) {
+            $realm = $session['realm'];
+            $numUsers = $session['num_users'];
+            $realmCounts[$realm] = $numUsers;
+        }
+
+        // Return the counts per realm
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 

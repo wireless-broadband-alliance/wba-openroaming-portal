@@ -28,13 +28,15 @@
 
     {# Current Authenticated Users #}
     <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Current Authenticated Users</h1>
+        <h1 class="text-lg font-medium text-left sm:pt-2">Current Authenticated Per Realm</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="overflow-x-auto max-w-full relative">
-                Give me Pancakes
+            <div class="flex flex-col gap-6 animate-fadeIn">
+                <canvas class="max-w-full" id="currentAuthsChart" data-devices
+                        data-chart-data="{{ currentAuthsJson }}"></canvas>
             </div>
         </div>
     </div>
+
 </div>
 
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">

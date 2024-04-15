@@ -5,6 +5,7 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAccounting;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query;
 
 /**
  * @extends ServiceEntityRepository<RadiusAccounting>
@@ -39,4 +40,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         }
     }
 
+    public function findActiveSessions(): Query
+    {
+        return $this->createQueryBuilder('ra')
+            ->select('ra.realm, COUNT(ra) AS num_users')
+            ->where('ra.acctStopTime IS NULL')
+            ->groupBy('ra.realm')
+            ->getQuery();
+    }
 }
