@@ -1,4 +1,5 @@
 @import 'custom.css';
+@import 'randomRealmsColors.css';
 
 @tailwind base;
 @tailwind components;

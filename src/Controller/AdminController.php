@@ -1767,10 +1767,43 @@ class AdminController extends AbstractController
             'borderRadius' => "15",
         ];
 
+        // Extract unique colors
+        $uniqueColors = array_unique($colors);
+
+        // Dynamically generate Tailwind CSS classes for each unique color
+        $this->generateTailwindClasses($uniqueColors);
+
         return [
             'labels' => $labels,
             'datasets' => $datasets,
         ];
+    }
+
+    private function generateTailwindClasses(array $colors): void
+    {
+        $tailwindConfigPath = '../assets/styles/randomRealmsColors.css';
+
+        // Read the existing Tailwind configuration file
+        $configFileContent = file_get_contents($tailwindConfigPath);
+
+        // Decode the existing Tailwind configuration content
+        $tailwindConfig = json_decode($configFileContent, true);
+
+        // Add colors to the Tailwind configuration
+        if (!isset($tailwindConfig['theme']['extend']['colors'])) {
+            $tailwindConfig['theme']['extend']['colors'] = [];
+        }
+
+        foreach ($colors as $color) {
+            // Check if the color already exists in the configuration
+            if (!isset($tailwindConfig['theme']['extend']['colors'][$color])) {
+                // Add the color hash with an empty array as its value
+                $tailwindConfig['theme']['extend']['colors'][$color] = [$color];
+            }
+        }
+
+        // Save the updated Tailwind configuration file
+        file_put_contents($tailwindConfigPath, json_encode($tailwindConfig, JSON_PRETTY_PRINT));
     }
 
     private function generateColorFromRealmName(string $realm): string
