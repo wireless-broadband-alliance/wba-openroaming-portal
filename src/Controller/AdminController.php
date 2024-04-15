@@ -1786,24 +1786,21 @@ class AdminController extends AbstractController
         // Read the existing Tailwind configuration file
         $configFileContent = file_get_contents($tailwindConfigPath);
 
-        // Decode the existing Tailwind configuration content
-        $tailwindConfig = json_decode($configFileContent, true);
-
-        // Add colors to the Tailwind configuration
-        if (!isset($tailwindConfig['theme']['extend']['colors'])) {
-            $tailwindConfig['theme']['extend']['colors'] = [];
-        }
-
+        // Iterate over the colors to generate Tailwind classes
         foreach ($colors as $color) {
-            // Check if the color already exists in the configuration
-            if (!isset($tailwindConfig['theme']['extend']['colors'][$color])) {
-                // Add the color hash with an empty array as its value
-                $tailwindConfig['theme']['extend']['colors'][$color] = [$color];
+            // Define the class name with square brackets
+            $className = $color;
+
+            // Check if the class already exists in the configuration
+            if (strpos($configFileContent, $className) === false) {
+                // If the class does not exist, add it to the configuration
+                $class = $className . ' { color: ' . $color . '; }';
+                $configFileContent .= $class . PHP_EOL;
             }
         }
 
         // Save the updated Tailwind configuration file
-        file_put_contents($tailwindConfigPath, json_encode($tailwindConfig, JSON_PRETTY_PRINT));
+        file_put_contents($tailwindConfigPath, $configFileContent);
     }
 
     private function generateColorFromRealmName(string $realm): string

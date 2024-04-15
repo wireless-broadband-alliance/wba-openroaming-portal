@@ -33,7 +33,4 @@ module.exports = {
 			}
 		},
 	},
-	plugins: [
-		require('/assets/styles/randomRealmsColors.css'),
-	],
 }
