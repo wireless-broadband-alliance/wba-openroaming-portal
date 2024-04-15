@@ -1,6 +1,6 @@
 <div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Authentications Attempts #}
-    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
@@ -26,14 +26,17 @@
         </div>
     </div>
 
-    {# Another Graphic #}
-    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Another Graphic</h1>
-    </div>
-    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Another Graphic</h1>
+    {# Current Authenticated Users #}
+    <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <h1 class="text-lg font-medium text-left sm:pt-2">Current Authenticated Users</h1>
+        <div class="flex flex-col gap-6 animate-fadeIn">
+            <div class="overflow-x-auto max-w-full relative">
+                Give me Pancakes
+            </div>
+        </div>
     </div>
 </div>
+
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Realms Counting #}
     <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
