@@ -1391,6 +1391,13 @@ class AdminController extends AbstractController
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
 
+        // Sum all the current authentication
+        $totalCurrentAuths = 0;
+        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
+            // Sum the data points in the current dataset
+            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        }
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
@@ -1403,6 +1410,7 @@ class AdminController extends AbstractController
             'mostUsedRealm' => $mostUsedRealm,
             'mostCurrentAuthsRealm' => $mostCurrentAuthRealm,
             'currentAuthsRealmsNames' => $currentAuthRealmsNames,
+            'totalCurrentAuths' => $totalCurrentAuths,
             'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
