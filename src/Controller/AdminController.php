@@ -1346,7 +1346,6 @@ class AdminController extends AbstractController
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
 
-        // Check if data is available in $fetchChartRealmsFreeradius
         if (!empty($fetchChartRealmsFreeradius['labels'])) {
             // Extract the most used realm name
             $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
@@ -1364,6 +1363,9 @@ class AdminController extends AbstractController
 
         // Extract all realms names
         $realmsNames = $fetchChartRealmsFreeradius['labels'];
+
+        // Extract all current authenticated realms names
+        $currentAuthRealmsNames = $fetchChartCurrentAuthFreeradius['labels'];
 
         $currentPage = $request->query->getInt('page', 1);
         $perPage = 5;
@@ -1400,9 +1402,11 @@ class AdminController extends AbstractController
             'authCounts' => $authCounts,
             'mostUsedRealm' => $mostUsedRealm,
             'mostCurrentAuthsRealm' => $mostCurrentAuthRealm,
+            'currentAuthsRealmsNames' => $currentAuthRealmsNames,
             'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
+            'datasetsCurrentAuthRealmList' => $fetchChartCurrentAuthFreeradius['datasets'],
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'currentAuthsJson' => json_encode($fetchChartCurrentAuthFreeradius, JSON_THROW_ON_ERROR),
             'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
