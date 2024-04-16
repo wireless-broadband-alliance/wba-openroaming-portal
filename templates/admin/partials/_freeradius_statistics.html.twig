@@ -26,12 +26,19 @@
         </div>
     </div>
 
-    {# Current Authenticated Users #}
-    <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Current Authenticated Per Realm</h1>
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+            <a class="text-base text-center sm:text-lg pt-2 sm:pt-0 flex flex-col cursor-default group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2">Most Authenticated Realm</h1>
+                <div class="my-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-full group-hover:text-white text-center transition-all duration-100">
+                    <span class="w-auto h-6 mb-1 px-3 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ mostCurrentAuthsRealm }}</span>
+                </div>
+            </a>
+        </div>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="currentAuthsChart" data-devices
+                <canvas class="max-w-full h-64" id="currentAuthsChart" data-devices
                         data-chart-data="{{ currentAuthsJson }}"></canvas>
             </div>
         </div>
@@ -65,7 +72,7 @@
                 <table class="w-full h-1/2 divide-y divide-gray-200 table-fixed">
                     <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
-                        <th scope="col" class="w-2/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="md:w-2/12 w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
                             Usage
                         </th>
                         <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
@@ -73,27 +80,36 @@
                         </th>
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 cursor-default">
-                    {% for index, label in realmsPerPage %}
-                        <tr name="{{ label }}"
-                            onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ datasetsRealmList[0]['backgroundColor'][index] }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
-                            onmouseout="this.childNodes[1].childNodes[1].style.backgroundColor='#f1f8f4'; this.childNodes[1].childNodes[1].style.color='#594B60';"
-                        >
-                            <td class="w-full px-8 py-2">
-                                <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
-            <span>
-                {{ datasetsRealmList[0]['data'][index] }}
-            </span>
-                                </div>
-                            </td>
-                            <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200"
-                            >
-                                <div class="text-left text-base sm:text-lg">
-                                    {{ label }}
+                    <tbody>
+                    {% if realmsPerPage is empty %}
+                        <tr >
+                            <td colspan="2">
+                                <div class="p-4 m-4 bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold text-center md:text-base text-sm">
+                                    No Data Available
                                 </div>
                             </td>
                         </tr>
-                    {% endfor %}
+                    {% else %}
+                        {% for index, label in realmsPerPage %}
+                            <tr name="{{ label }}"
+                                onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ datasetsRealmList[0]['backgroundColor'][index] }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
+                                onmouseout="this.childNodes[1].childNodes[1].style.backgroundColor='#f1f8f4'; this.childNodes[1].childNodes[1].style.color='#594B60';"
+                            >
+                                <td class="w-full px-8 py-2">
+                                    <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
+                        <span>
+                            {{ datasetsRealmList[0]['data'][index] }}
+                        </span>
+                                    </div>
+                                </td>
+                                <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200">
+                                    <div class="text-left text-base sm:text-lg">
+                                        {{ label }}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
                     </tbody>
                 </table>
             </div>

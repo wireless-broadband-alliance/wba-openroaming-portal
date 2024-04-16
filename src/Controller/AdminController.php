@@ -1346,8 +1346,21 @@ class AdminController extends AbstractController
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
 
-        // Extract the most used realm name
-        $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
+        // Check if data is available in $fetchChartRealmsFreeradius
+        if (!empty($fetchChartRealmsFreeradius['labels'])) {
+            // Extract the most used realm name
+            $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
+        } else {
+            $mostUsedRealm = "No data available";
+        }
+
+        if (!empty($fetchChartCurrentAuthFreeradius['labels'])) {
+            // Extract the most current authenticated realm name
+            $realmIndexWithMaxAuth = array_search(max($fetchChartCurrentAuthFreeradius['labels']), $fetchChartCurrentAuthFreeradius['labels']);
+            $mostCurrentAuthRealm = $fetchChartCurrentAuthFreeradius['labels'][$realmIndexWithMaxAuth] ?? "No data available";
+        } else {
+            $mostCurrentAuthRealm = "No data available";
+        }
 
         // Extract all realms names
         $realmsNames = $fetchChartRealmsFreeradius['labels'];
@@ -1386,6 +1399,7 @@ class AdminController extends AbstractController
             'allRowsCount' => $totalRealms,
             'authCounts' => $authCounts,
             'mostUsedRealm' => $mostUsedRealm,
+            'mostCurrentAuthsRealm' => $mostCurrentAuthRealm,
             'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
