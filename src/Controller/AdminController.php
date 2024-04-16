@@ -1678,19 +1678,26 @@ class AdminController extends AbstractController
 
         // Count the occurrences of each realm
         foreach ($events as $event) {
-            // Get the realm of the event
-            $realm = $event->getRealm();
+            $eventDateTime = $event->getAcctStartTime();
 
-            // Skip if realm is null or empty
-            if (!$realm) {
-                continue;
-            }
+            // Check if the event date falls within the specified date range
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
+                $realm = $event->getRealm();
 
-            // Increment the count for the realm
-            if (!isset($realmCounts[$realm])) {
-                $realmCounts[$realm] = 1;
-            } else {
-                $realmCounts[$realm]++;
+                // Skip if realm is null or empty
+                if (!$realm) {
+                    continue;
+                }
+
+                // Increment the count for the realm
+                if (!isset($realmCounts[$realm])) {
+                    $realmCounts[$realm] = 1;
+                } else {
+                    $realmCounts[$realm]++;
+                }
             }
         }
 

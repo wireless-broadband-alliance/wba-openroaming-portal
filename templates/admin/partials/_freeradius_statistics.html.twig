@@ -26,11 +26,11 @@
         </div>
     </div>
 
-    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Current Authenticated Per Realm</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="text-base text-center sm:text-lg pt-2 sm:pt-0 flex flex-col cursor-default group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
-                <h1 class="px-2">Most Authenticated Realm</h1>
+                <h1 class="px-2 mt-4">Most Current Authenticated Realm</h1>
                 <div class="my-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-full group-hover:text-white text-center transition-all duration-100">
                     <span class="w-auto h-6 mb-1 px-3 sm:w-auto sm:h-auto sm:px-2 sm:py-0">{{ mostCurrentAuthsRealm }}</span>
                 </div>
@@ -38,12 +38,24 @@
         </div>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full h-64" id="currentAuthsChart" data-devices
+                <canvas class="max-w-full" id="currentAuthsChart" data-devices
                         data-chart-data="{{ currentAuthsJson }}"></canvas>
             </div>
         </div>
+        <div class="z-0 text-base font-semibold w-full">
+            <div class="flex bg-infoBgColor/50 rounded-lg p-4 -mt-4 text-sm text-infoTextColor" role="alert">
+                <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <span class="font-medium">The displayed data is independent of the date filtering.</span>
+                </div>
+            </div>
+        </div>
     </div>
-
 </div>
 
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
@@ -72,7 +84,8 @@
                 <table class="w-full h-1/2 divide-y divide-gray-200 table-fixed">
                     <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
-                        <th scope="col" class="md:w-2/12 w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                        <th scope="col"
+                            class="md:w-2/12 w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
                             Usage
                         </th>
                         <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
@@ -82,9 +95,9 @@
                     </thead>
                     <tbody>
                     {% if realmsPerPage is empty %}
-                        <tr >
+                        <tr>
                             <td colspan="2">
-                                <div class="p-4 m-4 bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold text-center md:text-base text-sm">
+                                <div class="bg-red-500/50 rounded-full m-4 p-1 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
                                     No Data Available
                                 </div>
                             </td>
