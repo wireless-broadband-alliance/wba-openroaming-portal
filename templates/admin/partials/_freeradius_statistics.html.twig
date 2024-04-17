@@ -201,12 +201,17 @@
         </div>
     </div>
 
-    {# Current Authenticated Realms List #}
-    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Total Of Current Authentications</h1>
-        <div class="flex flex-col gap-6 animate-fadeIn text-center">
-        Total of Authentications: {{ totalCurrentAuths }}
-        </div>
+    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
+        <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
+        {% if totalCurrentAuths >= 1 %}
+            <div class="flex items-center justify-center bg-[#7DB928] text-white rounded-full w-24 h-24 text-4xl font-bold">
+                {{ totalCurrentAuths }}
+            </div>
+        {% else %}
+            <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                No Data Available
+            </div>
+        {% endif %}
     </div>
 </div>
 
