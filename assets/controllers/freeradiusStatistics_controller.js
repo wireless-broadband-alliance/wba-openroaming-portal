@@ -107,18 +107,11 @@ export default class extends Controller {
 								display: false,
 							},
 						},
-						scales: {
-							y: {
-								ticks: {
-									precision: 0
-								}
-							}
-						},
-						radius: '75%', // Set the radius to make the pie chart smaller
 						animation: {
 							animateRotate: true,
 							animateScale: true,
-						}
+						},
+						indexAxis: 'y',
 					},
 				});
 			}

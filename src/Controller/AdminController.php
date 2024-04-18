@@ -1876,16 +1876,18 @@ class AdminController extends AbstractController
 
         $datasets[] = [
             'data' => $dataValuesInput,
-            'label' => 'Total Input',
+            'label' => 'Uploaded',
             'backgroundColor' => $colors,
             'borderWidth' => 1,
+            'borderRadius' => "15",
         ];
 
         $datasets[] = [
             'data' => $dataValuesOutput,
-            'label' => 'Total Output',
+            'label' => 'Downloaded',
             'backgroundColor' => $colors,
             'borderWidth' => 1,
+            'borderRadius' => "15",
         ];
 
         return [
