@@ -1,6 +1,6 @@
 <div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Authentications Attempts #}
-    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
@@ -25,7 +25,7 @@
                     data-chart-data="{{ authAttemptsJson }}"></canvas>
         </div>
     </div>
-    <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Data Something</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="overflow-x-auto max-w-full relative">
@@ -39,33 +39,53 @@
 
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Show All Traffic #}
-    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
-        <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
-        {% set numberTraffic = 10001 %} {# Change this value to the actual traffic Number #}
-        {% if numberTraffic >= 1 %}
-            {% set sizeClass = 'w-24 h-24' %}
-            {% if numberTraffic >= 10000 %}
-                {% set sizeClass = 'w-32 h-32' %}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
+        <h1 class="text-lg font-medium text-center">Total of Traffic</h1>
+        <div class="flex md:flex-row flex-col bg-red-500 md:space-x-6 space-x-0 md:space-y-0 space-y-6">
+            {% if totalTrafficFreeradius['total_input'] >= 0.1 %}
+                {% set sizeClass = 'w-24 h-24' %}
+                {% if totalTrafficFreeradius['total_input'] >= 1000 %}
+                    {% set sizeClass = 'w-32 h-32' %}
+                {% endif %}
+                {% if totalTrafficFreeradius['total_input'] >= 10000 %}
+                    {% set sizeClass = 'w-36 h-36' %}
+                {% endif %}
+                {% if totalTrafficFreeradius['total_input'] >= 100000 %}
+                    {% set sizeClass = 'w-40 h-40' %}
+                {% endif %}
+                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+                    {{ totalTrafficFreeradius['total_input'] }}
+                </div>
+            {% else %}
+                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                    No Data Available
+                </div>
             {% endif %}
-            {% if numberTraffic >= 100000 %}
-                {% set sizeClass = 'w-36 h-36' %}
+
+            {% if totalTrafficFreeradius['total_output'] >= 0.1 %}
+                {% set sizeClass = 'w-24 h-24' %}
+                {% if totalTrafficFreeradius['total_output'] >= 1000 %}
+                    {% set sizeClass = 'w-32 h-32' %}
+                {% endif %}
+                {% if totalTrafficFreeradius['total_output'] >= 10000 %}
+                    {% set sizeClass = 'w-36 h-36' %}
+                {% endif %}
+                {% if totalTrafficFreeradius['total_output'] >= 100000 %}
+                    {% set sizeClass = 'w-40 h-40' %}
+                {% endif %}
+                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+                    {{ totalTrafficFreeradius['total_output'] }}
+                </div>
+            {% else %}
+                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                    No Data Available
+                </div>
             {% endif %}
-            {% if numberTraffic >= 1000000 %}
-                {% set sizeClass = 'w-40 h-40' %}
-            {% endif %}
-            <!-- Add more conditions as needed -->
-            <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                {{ numberTraffic }}
-            </div>
-        {% else %}
-            <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                No Data Available
-            </div>
-        {% endif %}
+        </div>
     </div>
 
     {# Show Traffic per Realm #}
-    <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Per Realm</h1>
         <h2 class="md:text-base text-sm font-medium text-center">This data is in GigaBytes (Gbs)</h2>
         <div class="flex flex-col gap-6 animate-fadeIn">
@@ -77,9 +97,9 @@
     </div>
 </div>
 
-<div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
+<div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Realms Counting #}
-    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Most Used Realms</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="text-base text-center sm:text-lg pt-2 sm:pt-0 flex flex-col cursor-default group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
@@ -96,7 +116,7 @@
     </div>
 
     {# Realms List #}
-    <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+    <div class="col-span-3 md:col-span-2 xl:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Realms List</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="overflow-x-auto max-w-full relative">
@@ -152,6 +172,7 @@
         </div>
     </div>
 </div>
+
 <hr class="mb-8 mt-16 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
 <div class="z-0 text-base font-semibold w-full">
     <div class="flex bg-infoBgColor/50 rounded-lg p-4 mt-8 text-sm text-infoTextColor" role="alert">
@@ -166,6 +187,7 @@
         </div>
     </div>
 </div>
+
 {# No need data filter cards #}
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Counting Current Authentications #}
