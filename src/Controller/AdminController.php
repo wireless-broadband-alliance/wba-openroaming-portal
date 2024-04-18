@@ -1399,6 +1399,27 @@ class AdminController extends AbstractController
             $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
         }
 
+        $totalTraffic = [
+            'total_input' => 0,
+            'total_output' => 0,
+        ];
+
+        // Sum all the traffic based on the fetch
+        foreach ($fetchChartTrafficPerRealmFreeradius['datasets'] as $dataset) {
+            // Check if the dataset is for input or output
+            if ($dataset['label'] === 'Uploaded') {
+                // Sum the data for total input
+                foreach ($dataset['data'] as $sum) {
+                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
+                }
+            } elseif ($dataset['label'] === 'Downloaded') {
+                // Sum the data for total output
+                foreach ($dataset['data'] as $sum) {
+                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_input'];
+                }
+            }
+        }
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
@@ -1412,6 +1433,7 @@ class AdminController extends AbstractController
             'mostCurrentAuthsRealm' => $mostCurrentAuthRealm,
             'currentAuthsRealmsNames' => $currentAuthRealmsNames,
             'totalCurrentAuths' => $totalCurrentAuths,
+            'totalTrafficFreeradius' => $totalTraffic,
             'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
@@ -1751,8 +1773,8 @@ class AdminController extends AbstractController
         foreach ($trafficData as $data) {
             $realm = $data['realm'];
             // Conver the data to GigaBytes
-            $totalInput = $data['total_input'] / (1024 * 1024 * 1024);
-            $totalOutput = $data['total_output'] / (1024 * 1024 * 1024);
+            $totalInput = number_format($data['total_input'] / (1024 * 1024 * 1024), 1);
+            $totalOutput = number_format($data['total_output'] / (1024 * 1024 * 1024), 1);
 
             // Sum the total input and output for each realm
             $realmTraffic[$realm] = [
