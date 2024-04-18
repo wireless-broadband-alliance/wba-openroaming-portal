@@ -39,49 +39,58 @@
 
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Show All Traffic #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
-        <h1 class="text-lg font-medium text-center">Total of Traffic</h1>
-        <div class="flex md:flex-row flex-col bg-red-500 md:space-x-6 space-x-0 md:space-y-0 space-y-6">
-            {% if totalTrafficFreeradius['total_input'] >= 0.1 %}
-                {% set sizeClass = 'w-24 h-24' %}
-                {% if totalTrafficFreeradius['total_input'] >= 1000 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                {% endif %}
-                {% if totalTrafficFreeradius['total_input'] >= 10000 %}
-                    {% set sizeClass = 'w-36 h-36' %}
-                {% endif %}
-                {% if totalTrafficFreeradius['total_input'] >= 100000 %}
-                    {% set sizeClass = 'w-40 h-40' %}
-                {% endif %}
-                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                    {{ totalTrafficFreeradius['total_input'] }}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 gap-4 shadow-md">
+        <h1 class="text-lg font-medium text-left sm:pt-2">Traffic (GigaBytes)</h1>
+            <div class="mx-8 md:mt-32 flex md:flex-row flex-col justify-between place-items-center md:space-x-6 space-x-0">
+                <div class="flex flex-col">
+                    <h1 class="text-center font-semibold">
+                        Uploads
+                    </h1>
+                    {% if totalTrafficFreeradius['total_input'] >= 0.1 %}
+                        {% set sizeClass = 'w-24 h-24' %}
+                        {% if totalTrafficFreeradius['total_input'] >= 1000 %}
+                            {% set sizeClass = 'w-32 h-32' %}
+                        {% endif %}
+                        {% if totalTrafficFreeradius['total_input'] >= 10000 %}
+                            {% set sizeClass = 'w-36 h-36' %}
+                        {% endif %}
+                        {% if totalTrafficFreeradius['total_input'] >= 100000 %}
+                            {% set sizeClass = 'w-40 h-40' %}
+                        {% endif %}
+                        <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+                            {{ totalTrafficFreeradius['total_input'] }}
+                        </div>
+                    {% else %}
+                        <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                            No Data Available
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                    No Data Available
+                <div class="mt-8 md:mt-0 flex flex-col">
+                    <h1 class="text-center font-semibold">
+                        Downloads
+                    </h1>
+                    {% if totalTrafficFreeradius['total_output'] >= 0.1 %}
+                        {% set sizeClass = 'w-24 h-24' %}
+                        {% if totalTrafficFreeradius['total_output'] >= 1000 %}
+                            {% set sizeClass = 'w-32 h-32' %}
+                        {% endif %}
+                        {% if totalTrafficFreeradius['total_output'] >= 10000 %}
+                            {% set sizeClass = 'w-36 h-36' %}
+                        {% endif %}
+                        {% if totalTrafficFreeradius['total_output'] >= 100000 %}
+                            {% set sizeClass = 'w-40 h-40' %}
+                        {% endif %}
+                        <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+                            {{ totalTrafficFreeradius['total_output'] }}
+                        </div>
+                    {% else %}
+                        <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                            No Data Available
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
-
-            {% if totalTrafficFreeradius['total_output'] >= 0.1 %}
-                {% set sizeClass = 'w-24 h-24' %}
-                {% if totalTrafficFreeradius['total_output'] >= 1000 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                {% endif %}
-                {% if totalTrafficFreeradius['total_output'] >= 10000 %}
-                    {% set sizeClass = 'w-36 h-36' %}
-                {% endif %}
-                {% if totalTrafficFreeradius['total_output'] >= 100000 %}
-                    {% set sizeClass = 'w-40 h-40' %}
-                {% endif %}
-                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                    {{ totalTrafficFreeradius['total_output'] }}
-                </div>
-            {% else %}
-                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                    No Data Available
-                </div>
-            {% endif %}
-        </div>
+            </div>
     </div>
 
     {# Show Traffic per Realm #}
