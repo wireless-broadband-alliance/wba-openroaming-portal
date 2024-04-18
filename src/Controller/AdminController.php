@@ -1345,6 +1345,7 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
+        $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
 
         if (!empty($fetchChartRealmsFreeradius['labels'])) {
             // Extract the most used realm name
@@ -1418,6 +1419,7 @@ class AdminController extends AbstractController
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'currentAuthsJson' => json_encode($fetchChartCurrentAuthFreeradius, JSON_THROW_ON_ERROR),
             'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
+            'trafficPerRealmFreeradius' => json_encode($fetchChartTrafficPerRealmFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);
@@ -1736,6 +1738,26 @@ class AdminController extends AbstractController
 
         // Return the counts per realm
         return $this->generateDatasetsRealmsCounting($realmCounts);
+    }
+
+    private function fetchChartTrafficPerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        // Get the traffic using the findTrafficPerRealm query
+        $query = $this->radiusAccountingRepository->findTrafficPerRealm();
+        $trafficData = $query->getResult();
+
+        $totalTraffic = [
+            'total_input' => 0,
+            'total_output' => 0,
+        ];
+
+        foreach ($trafficData as $data) {
+            $totalTraffic['total_input'] += $data['total_input'];
+            $totalTraffic['total_output'] += $data['total_output'];
+        }
+
+        // Return the counts of each realm
+        return $this->generateDatasetsRealmsCounting($totalTraffic);
     }
 
     private function generateDatasets(array $counts): array

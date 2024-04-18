@@ -29,18 +29,19 @@
         <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Data Something</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="overflow-x-auto max-w-full relative">
-                Still in dev
+                Pass time on each session per realm -
+                pass a media, like realm1 media of use is 5 hours connect.
+                Same of other realms, make a media
             </div>
         </div>
     </div>
-
 </div>
 
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Show All Traffic #}
     <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
         <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
-        {% set numberTraffic = 10001 %}
+        {% set numberTraffic = 10001 %} {# Change this value to the actual traffic Number #}
         {% if numberTraffic >= 1 %}
             {% set sizeClass = 'w-24 h-24' %}
             {% if numberTraffic >= 10000 %}
@@ -53,7 +54,7 @@
                 {% set sizeClass = 'w-40 h-40' %}
             {% endif %}
             <!-- Add more conditions as needed -->
-            <div class="md:mt-10 mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+            <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
                 {{ numberTraffic }}
             </div>
         {% else %}
@@ -67,8 +68,9 @@
     <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Per Realm</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="overflow-x-auto max-w-full relative">
-                Still in dev
+            <div class="flex flex-col gap-6 animate-fadeIn">
+                <canvas class="max-w-full" id="trafficPerRealmFreeradiusChart" data-devices
+                        data-chart-data="{{ trafficPerRealmFreeradius }}"></canvas>
             </div>
         </div>
     </div>
@@ -251,7 +253,7 @@
                 {% set sizeClass = 'w-40 h-40' %}
             {% endif %}
             <!-- Add more conditions as needed -->
-            <div class="md:mt-10 mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+            <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
                 {{ totalCurrentAuths }}
             </div>
         {% else %}

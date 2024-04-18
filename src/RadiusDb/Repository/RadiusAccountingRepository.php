@@ -48,4 +48,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->groupBy('ra.realm')
             ->getQuery();
     }
+
+    public function findTrafficPerRealm(): Query
+    {
+        return $this->createQueryBuilder('ra')
+            ->select('ra.realm, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output')
+            ->groupBy('ra.realm')
+            ->getQuery();
+    }
 }
