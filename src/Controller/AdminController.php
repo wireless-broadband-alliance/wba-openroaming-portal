@@ -1746,18 +1746,23 @@ class AdminController extends AbstractController
         $query = $this->radiusAccountingRepository->findTrafficPerRealm();
         $trafficData = $query->getResult();
 
-        $totalTraffic = [
-            'total_input' => 0,
-            'total_output' => 0,
-        ];
-
+        // Convert the results into the expected format
+        $realmTraffic = [];
         foreach ($trafficData as $data) {
-            $totalTraffic['total_input'] += $data['total_input'];
-            $totalTraffic['total_output'] += $data['total_output'];
+            $realm = $data['realm'];
+            // Conver the data to GigaBytes
+            $totalInput = $data['total_input'] / (1024 * 1024 * 1024);
+            $totalOutput = $data['total_output'] / (1024 * 1024 * 1024);
+
+            // Sum the total input and output for each realm
+            $realmTraffic[$realm] = [
+                'total_input' => $totalInput,
+                'total_output' => $totalOutput,
+            ];
         }
 
-        // Return the counts of each realm
-        return $this->generateDatasetsRealmsCounting($totalTraffic);
+        // Return the sums traffic of each realm
+        return $this->generateDatasetsRealmsTraffic($realmTraffic);
     }
 
     private function generateDatasets(array $counts): array
@@ -1844,6 +1849,44 @@ class AdminController extends AbstractController
 
         // Extract unique colors
         $uniqueColors = array_unique($colors);
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+    private function generateDatasetsRealmsTraffic(array $trafficData): array
+    {
+        $datasets = [];
+        $labels = [];
+        $dataValuesInput = [];
+        $dataValuesOutput = [];
+        $colors = [];
+
+        // Assign a specific color to the first realm
+        $colors[] = '#7DB928';
+
+        foreach ($trafficData as $realm => $traffic) {
+            $labels[] = $realm;
+            $dataValuesInput[] = $traffic['total_input'];
+            $dataValuesOutput[] = $traffic['total_output'];
+            $colors[] = $this->generateColorFromRealmName($realm); // Generate color based on realm name
+        }
+
+        $datasets[] = [
+            'data' => $dataValuesInput,
+            'label' => 'Total Input',
+            'backgroundColor' => $colors,
+            'borderWidth' => 1,
+        ];
+
+        $datasets[] = [
+            'data' => $dataValuesOutput,
+            'label' => 'Total Output',
+            'backgroundColor' => $colors,
+            'borderWidth' => 1,
+        ];
 
         return [
             'labels' => $labels,

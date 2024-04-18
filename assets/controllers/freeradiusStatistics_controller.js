@@ -8,12 +8,14 @@ export default class extends Controller {
 			const authenticationAttempts = document.getElementById('authAttemptsChart');
 			const realmsCounting = document.getElementById('realmsCountingChart');
 			const currentAuths = document.getElementById('currentAuthsChart');
+			const trafficPerRealmFreeradius = document.getElementById('trafficPerRealmFreeradiusChart');
 
-			if (authenticationAttempts && realmsCounting) {
+			if (authenticationAttempts && realmsCounting && currentAuths && trafficPerRealmFreeradius) {
 				// Get the chart data from the data attributes on the elements
 				const authAttemptsData = JSON.parse(authenticationAttempts.getAttribute('data-chart-data'));
 				const realmsCountingData = JSON.parse(realmsCounting.getAttribute('data-chart-data'));
 				const currentAuthsData = JSON.parse(currentAuths.getAttribute('data-chart-data'));
+				const trafficPerRealmFreeradiusData = JSON.parse(trafficPerRealmFreeradius.getAttribute('data-chart-data'));
 
 				// Create the Chart.js charts with the fetched data about the freeradius content
 
@@ -69,7 +71,7 @@ export default class extends Controller {
 					},
 				});
 
-				const currentAuthsChat = new Chart(currentAuths, {
+				const currentAuthsChart = new Chart(currentAuths, {
 					type: 'pie',
 					data: currentAuthsData,
 					options: {
@@ -95,6 +97,30 @@ export default class extends Controller {
 					},
 				});
 
+				const trafficPerRealmFreeradiusChart = new Chart(trafficPerRealmFreeradius, {
+					type: 'bar',
+					data: trafficPerRealmFreeradiusData,
+					options: {
+						responsive: true,
+						plugins: {
+							legend: {
+								display: false,
+							},
+						},
+						scales: {
+							y: {
+								ticks: {
+									precision: 0
+								}
+							}
+						},
+						radius: '75%', // Set the radius to make the pie chart smaller
+						animation: {
+							animateRotate: true,
+							animateScale: true,
+						}
+					},
+				});
 			}
 		});
 	}
