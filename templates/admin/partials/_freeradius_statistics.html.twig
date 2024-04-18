@@ -37,6 +37,26 @@
 </div>
 
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
+    {# Show All Traffic #}
+    <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
+        <h1 class="text-lg font-medium text-center">All Traffic Passed</h1>
+            <div class="flex items-center justify-center bg-[#7DB928] text-white rounded-full w-24 h-24 text-4xl font-bold">
+                10
+            </div>
+    </div>
+
+    {# Show Traffic per Realm #}
+    <div class="col-span-3 sm:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Per Realm</h1>
+        <div class="flex flex-col gap-6 animate-fadeIn">
+            <div class="overflow-x-auto max-w-full relative">
+                Still in dev
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Realms Counting #}
     <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Most Used Realms</h1>
@@ -112,6 +132,19 @@
     </div>
 </div>
 <hr class="mb-8 mt-16 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+<div class="z-0 text-base font-semibold w-full">
+    <div class="flex bg-infoBgColor/50 rounded-lg p-4 mt-8 text-sm text-infoTextColor" role="alert">
+        <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
+             xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"></path>
+        </svg>
+        <div>
+            <span class="font-medium">The displayed data is independent of the date filtering.</span>
+        </div>
+    </div>
+</div>
 {# No need data filter cards #}
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Counting Current Authentications #}
@@ -131,21 +164,6 @@
                         data-chart-data="{{ currentAuthsJson }}"></canvas>
             </div>
         </div>
-        {% if mostCurrentAuthRealm is defined %}
-            <div class="z-0 text-base font-semibold w-full">
-                <div class="flex bg-infoBgColor/50 rounded-lg p-4 -mt-4 text-sm text-infoTextColor" role="alert">
-                    <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                              clip-rule="evenodd"></path>
-                    </svg>
-                    <div>
-                        <span class="font-medium">The displayed data is independent of the date filtering.</span>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
     </div>
 
     {# Current Authenticated Realms List #}
@@ -204,7 +222,7 @@
     <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
         <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
         {% if totalCurrentAuths >= 1 %}
-            <div class="flex items-center justify-center bg-[#7DB928] text-white rounded-full w-24 h-24 text-4xl font-bold">
+            <div class="flex items-center justify-center text-white rounded-full text-4xl font-bold" style="background-color: #7DB928; width: {{ totalCurrentAuths / 1000 }}rem; height: {{ totalCurrentAuths / 1000 }}rem;">
                 {{ totalCurrentAuths }}
             </div>
         {% else %}
@@ -214,4 +232,3 @@
         {% endif %}
     </div>
 </div>
-
