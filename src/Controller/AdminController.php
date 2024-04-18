@@ -1415,7 +1415,7 @@ class AdminController extends AbstractController
             } elseif ($dataset['label'] === 'Downloaded') {
                 // Sum the data for total output
                 foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_input'];
+                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
                 }
             }
         }
