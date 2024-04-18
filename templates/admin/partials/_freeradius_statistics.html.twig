@@ -39,10 +39,28 @@
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Show All Traffic #}
     <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
-        <h1 class="text-lg font-medium text-center">All Traffic Passed</h1>
-            <div class="flex items-center justify-center bg-[#7DB928] text-white rounded-full w-24 h-24 text-4xl font-bold">
-                10
+        <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
+        {% set numberTraffic = 10001 %}
+        {% if numberTraffic >= 1 %}
+            {% set sizeClass = 'w-24 h-24' %}
+            {% if numberTraffic >= 10000 %}
+                {% set sizeClass = 'w-32 h-32' %}
+            {% endif %}
+            {% if numberTraffic >= 100000 %}
+                {% set sizeClass = 'w-36 h-36' %}
+            {% endif %}
+            {% if numberTraffic >= 1000000 %}
+                {% set sizeClass = 'w-40 h-40' %}
+            {% endif %}
+            <!-- Add more conditions as needed -->
+            <div class="md:mt-10 mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+                {{ numberTraffic }}
             </div>
+        {% else %}
+            <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                No Data Available
+            </div>
+        {% endif %}
     </div>
 
     {# Show Traffic per Realm #}
@@ -222,7 +240,18 @@
     <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
         <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
         {% if totalCurrentAuths >= 1 %}
-            <div class="flex items-center justify-center text-white rounded-full text-4xl font-bold" style="background-color: #7DB928; width: {{ totalCurrentAuths / 1000 }}rem; height: {{ totalCurrentAuths / 1000 }}rem;">
+            {% set sizeClass = 'w-24 h-24' %}
+            {% if totalCurrentAuths >= 10000 %}
+                {% set sizeClass = 'w-32 h-32' %}
+            {% endif %}
+            {% if totalCurrentAuths >= 100000 %}
+                {% set sizeClass = 'w-36 h-36' %}
+            {% endif %}
+            {% if totalCurrentAuths >= 1000000 %}
+                {% set sizeClass = 'w-40 h-40' %}
+            {% endif %}
+            <!-- Add more conditions as needed -->
+            <div class="md:mt-10 mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
                 {{ totalCurrentAuths }}
             </div>
         {% else %}
