@@ -56,4 +56,15 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->groupBy('ra.realm')
             ->getQuery();
     }
+
+    /**
+     * @return array
+     */
+    public function findDistinctRealms(): array
+    {
+        return $this->createQueryBuilder('ra')
+            ->select('DISTINCT ra.realm, ra.acctStartTime')
+            ->getQuery()
+            ->getResult();
+    }
 }

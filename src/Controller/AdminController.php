@@ -1342,6 +1342,7 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
+        // Fetch all the graphics content
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
@@ -1368,22 +1369,13 @@ class AdminController extends AbstractController
         // Extract all current authenticated realms names
         $currentAuthRealmsNames = $fetchChartCurrentAuthFreeradius['labels'];
 
+        // Pagination for the realms names tables. works the same has the one on the Users Management Page
         $currentPage = $request->query->getInt('page', 1);
         $perPage = 5;
-
-        // Get the total number of realms
         $totalRealms = count($realmsNames);
-
-        // Calculate the total number of pages
         $totalPages = ceil($totalRealms / $perPage);
-
-        // Get the current page from the query parameter
         $currentPage = $request->query->getInt('page', 1);
-
-        // Calculate the offset for slicing the realms
         $offset = ($currentPage - 1) * $perPage;
-
-        // Slice the list of realms based on the offset and the number of realms per page
         $realmsPerPage = array_slice($realmsNames, $offset, $perPage);
 
         // Extract the counts from the returned data
@@ -1707,21 +1699,21 @@ class AdminController extends AbstractController
     private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Fetch all data with date filtering
-        $events = $this->radiusAccountingRepository->findBy([]);
+        $events = $this->radiusAccountingRepository->findDistinctRealms();
 
         // Initialize an array to store the counts of each realm
         $realmCounts = [];
 
         // Count the occurrences of each realm
         foreach ($events as $event) {
-            $eventDateTime = $event->getAcctStartTime();
+            $eventDateTime = $event['acctStartTime'];
 
             // Check if the event date falls within the specified date range
             if (
                 (!$startDate || $eventDateTime >= $startDate) &&
                 (!$endDate || $eventDateTime <= $endDate)
             ) {
-                $realm = $event->getRealm();
+                $realm = $event['realm'];
 
                 // Skip if realm is null or empty
                 if (!$realm) {
