@@ -1347,6 +1347,7 @@ class AdminController extends AbstractController
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
         $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartSessionTimePerRealmFreeradius = $this->fetchChartSessionTimePerRealmFreeradius($startDate, $endDate);
 
         if (!empty($fetchChartRealmsFreeradius['labels'])) {
             // Extract the most used realm name
@@ -1739,8 +1740,7 @@ class AdminController extends AbstractController
     private function fetchChartCurrentAuthFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the active sessions using the findActiveSessions query
-        $query = $this->radiusAccountingRepository->findActiveSessions();
-        $activeSessions = $query->getResult();
+        $activeSessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
 
         // Convert the results into the expected format
         $realmCounts = [];
@@ -1757,8 +1757,7 @@ class AdminController extends AbstractController
     private function fetchChartTrafficPerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the traffic using the findTrafficPerRealm query
-        $query = $this->radiusAccountingRepository->findTrafficPerRealm();
-        $trafficData = $query->getResult();
+        $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm()->getResult();
 
         // Convert the results into the expected format
         $realmTraffic = [];
@@ -1777,6 +1776,29 @@ class AdminController extends AbstractController
 
         // Return the sums traffic of each realm
         return $this->generateDatasetsRealmsTraffic($realmTraffic);
+    }
+
+    private function fetchChartSessionTimePerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms();
+
+        $realmSessionTime = [];
+
+        // Sum the session time for each realm
+        foreach ($events as $event) {
+            $realm = $event['realm'];
+            $sessionTime = $event['acctSessionTime'];
+
+            // Add the session time to the total for the realm
+            if (!isset($realmSessionTime[$realm])) {
+                $realmSessionTime[$realm] = $sessionTime;
+            } else {
+                $realmSessionTime[$realm] = $sessionTime + $realmSessionTime[$realm];
+            }
+        }
+
+        // Return the sums of session time for each realm
+        return $this->generateDatasetsRealmsCounting($realmSessionTime);
     }
 
     private function generateDatasets(array $counts): array

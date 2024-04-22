@@ -67,4 +67,15 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return array
+     */
+    public function findSessionTimeRealms(): array
+    {
+        return $this->createQueryBuilder('ra')
+            ->select('DISTINCT ra.realm, ra.acctSessionTime')
+            ->getQuery()
+            ->getResult();
+    }
 }
