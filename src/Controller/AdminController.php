@@ -1435,6 +1435,7 @@ class AdminController extends AbstractController
             'currentAuthsJson' => json_encode($fetchChartCurrentAuthFreeradius, JSON_THROW_ON_ERROR),
             'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
             'trafficPerRealmFreeradius' => json_encode($fetchChartTrafficPerRealmFreeradius, JSON_THROW_ON_ERROR),
+            'sessionTimePerRealmFreeradius' => json_encode($fetchChartSessionTimePerRealmFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
         ]);

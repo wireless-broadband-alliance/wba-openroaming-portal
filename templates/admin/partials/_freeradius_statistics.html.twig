@@ -26,12 +26,13 @@
         </div>
     </div>
     <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Data Something</h1>
+        <h1 class="text-lg font-medium text-left sm:pt-2">Session Time Per Realm</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="overflow-x-auto max-w-full relative">
-                Pass time on each session per realm -
-                pass a media, like realm1 media of use is 5 hours connect.
-                Same of other realms, make a media
+                <div class="flex flex-col gap-6 animate-fadeIn">
+                    <canvas class="max-w-full" id="sessionTimePerRealmFreeradiusChart" data-devices
+                            data-chart-data="{{ sessionTimePerRealmFreeradius }}"></canvas>
+                </div>
             </div>
         </div>
     </div>

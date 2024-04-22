@@ -9,13 +9,15 @@ export default class extends Controller {
 			const realmsCounting = document.getElementById('realmsCountingChart');
 			const currentAuths = document.getElementById('currentAuthsChart');
 			const trafficPerRealmFreeradius = document.getElementById('trafficPerRealmFreeradiusChart');
+			const sessionTimePerRealmFreeradius = document.getElementById('sessionTimePerRealmFreeradiusChart');
 
-			if (authenticationAttempts && realmsCounting && currentAuths && trafficPerRealmFreeradius) {
+			if (authenticationAttempts && realmsCounting && currentAuths && trafficPerRealmFreeradius && sessionTimePerRealmFreeradius) {
 				// Get the chart data from the data attributes on the elements
 				const authAttemptsData = JSON.parse(authenticationAttempts.getAttribute('data-chart-data'));
 				const realmsCountingData = JSON.parse(realmsCounting.getAttribute('data-chart-data'));
 				const currentAuthsData = JSON.parse(currentAuths.getAttribute('data-chart-data'));
 				const trafficPerRealmFreeradiusData = JSON.parse(trafficPerRealmFreeradius.getAttribute('data-chart-data'));
+				const sessionTimePerRealmFreeradiusData = JSON.parse(sessionTimePerRealmFreeradius.getAttribute('data-chart-data'));
 
 				// Create the Chart.js charts with the fetched data about the freeradius content
 
@@ -112,6 +114,24 @@ export default class extends Controller {
 							animateScale: true,
 						},
 						indexAxis: 'y',
+					},
+				});
+
+				const sessionTimePerRealmFreeradiusChart = new Chart(sessionTimePerRealmFreeradius, {
+					type: 'bar',
+					data: sessionTimePerRealmFreeradiusData,
+					options: {
+						responsive: true,
+						plugins: {
+							legend: {
+								display: false,
+							},
+						},
+						animation: {
+							animateRotate: true,
+							animateScale: true,
+						},
+						indexAxis: 'x',
 					},
 				});
 			}
