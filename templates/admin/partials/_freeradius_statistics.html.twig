@@ -26,7 +26,10 @@
         </div>
     </div>
     <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Session Time Per Realm</h1>
+        <div class="flex flex-row justify-between sm:pt-2 font-medium">
+            <h1 class="text-lg text-left">Session Time Per Realm</h1>
+            <span class="text-xs text-gray-500 text-right">(in seconds)</span>
+        </div>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="overflow-x-auto max-w-full relative">
                 <div class="flex flex-col gap-6 animate-fadeIn">
@@ -41,7 +44,10 @@
 <div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="descriptionCard freeradiusStatistics">
     {# Show All Traffic #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 gap-4 shadow-md">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Traffic (GigaBytes)</h1>
+        <div class="flex flex-row justify-between sm:pt-2 font-medium">
+            <h1 class="text-lg text-left">Total of Traffic</h1>
+            <span class="text-xs text-gray-500 text-right">(in GigaBytes)</span>
+        </div>
             <div class="mx-8 md:mt-32 flex md:flex-row flex-col justify-between place-items-center md:space-x-6 space-x-0">
                 <div class="flex flex-col">
                     <h1 class="text-center font-semibold">
@@ -96,8 +102,10 @@
 
     {# Show Traffic per Realm #}
     <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Traffic Per Realm</h1>
-        <h2 class="md:text-base text-sm font-medium text-center">This data is in GigaBytes (Gbs)</h2>
+        <div class="flex flex-row justify-between sm:pt-2 font-medium">
+            <h1 class="text-lg text-left">Traffic per Realm</h1>
+            <span class="text-xs text-gray-500 text-right">(in GigaBytes)</span>
+        </div>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="flex flex-col gap-6 animate-fadeIn">
                 <canvas class="max-w-full" id="trafficPerRealmFreeradiusChart" data-devices

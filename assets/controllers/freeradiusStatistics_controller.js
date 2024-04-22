@@ -132,6 +132,18 @@ export default class extends Controller {
 							animateScale: true,
 						},
 						indexAxis: 'x',
+						scales: {
+							y: {
+								ticks: {
+									callback: function(value, index, values) {
+										// Convert the value to HH:MM format
+										const hours = Math.floor(value / 60);
+										const minutes = value % 60;
+										return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+									}
+								}
+							}
+						}
 					},
 				});
 			}
