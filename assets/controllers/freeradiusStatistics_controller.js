@@ -136,10 +136,10 @@ export default class extends Controller {
 							y: {
 								ticks: {
 									callback: function(value, index, values) {
-										// Convert the value to HH:MM format
-										const hours = Math.floor(value / 60);
-										const minutes = value % 60;
-										return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+										// Convert the value to MM:SS format
+										const minutes = Math.floor(value / 60);
+										const seconds = value % 60;
+										return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 									}
 								}
 							}
