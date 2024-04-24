@@ -1320,6 +1320,7 @@ class AdminController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
+        $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1438,6 +1439,7 @@ class AdminController extends AbstractController
             'sessionTimePerRealmFreeradius' => json_encode($fetchChartSessionTimePerRealmFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+            'exportFreeradiusStatistics' => $export_freeradius_statistics,
         ]);
     }
 
