@@ -1524,7 +1524,27 @@ class AdminController extends AbstractController
             ];
         }
 
-// Set the titles and their respective content
+        // Realms names and their respective traffic data
+        $realmsTraffic = $fetchChartTrafficPerRealmFreeradius['labels'] ?? [];
+
+        // Combine realm names and their respective traffic data
+        $combinedRealmTrafficData = [];
+        foreach ($realmsTraffic as $index => $realm) {
+            $uploads = $fetchChartTrafficPerRealmFreeradius['datasets'][0]['data'][$index] ?? [];
+            $downloads = $fetchChartTrafficPerRealmFreeradius['datasets'][1]['data'][$index] ?? [];
+
+            // Create the combined realm traffic data array
+            $combinedRealmTrafficData[] = [
+                'Realm Name' => $realm,
+                'Data' => [
+                    'Uploads' => $uploads,
+                    'Downloads' => $downloads,
+                ],
+            ];
+        }
+        dd($combinedRealmTrafficData);
+
+        // Set the titles and their respective content
         $titlesAndContent = [
             'Authentication Attempts' => [
                 'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0] ?? 'No data available',
@@ -1540,11 +1560,11 @@ class AdminController extends AbstractController
             'Total Of Current Authentications' => $totalCurrentAuths ?? 'No data available',
         ];
 
-// Convert string values to arrays if they are not already arrays
+        // Convert string values to arrays if they are not already arrays
         $titlesAndContent['Realms List'] = (array)$titlesAndContent['Realms List'];
         $titlesAndContent['Current Authenticated per Realm'] = (array)$titlesAndContent['Current Authenticated per Realm'];
 
-// Populate data in the spreadsheet
+        // Populate data in the spreadsheet
         $pageOne->setCellValue('A1', 'Authentication Attempts');
         $pageOne->setCellValue('B1', "Accepted: {$titlesAndContent['Authentication Attempts']['Accepted']}");
         $pageOne->setCellValue('B2', "Rejected: {$titlesAndContent['Authentication Attempts']['Rejected']}");
