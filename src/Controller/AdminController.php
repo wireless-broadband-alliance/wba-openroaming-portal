@@ -1781,7 +1781,7 @@ class AdminController extends AbstractController
 
     private function fetchChartSessionTimePerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        $events = $this->radiusAccountingRepository->findSessionTimeRealms();
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
         $realmSessionTime = [];
 

@@ -3,6 +3,7 @@
 namespace App\RadiusDb\Repository;
 
 use App\RadiusDb\Entity\RadiusAccounting;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
@@ -69,12 +70,25 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
      * @return array
      */
-    public function findSessionTimeRealms(): array
+    public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
-        return $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctSessionTime')
+        $queryBuilder = $this->createQueryBuilder('ra')
+            ->select('DISTINCT ra.realm, ra.acctSessionTime');
+
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $queryBuilder
+                ->where('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        }
+
+        return $queryBuilder
             ->getQuery()
             ->getResult();
     }
