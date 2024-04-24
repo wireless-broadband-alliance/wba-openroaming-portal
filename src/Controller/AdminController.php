@@ -1442,6 +1442,146 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @return Response
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportFreeradius(Request $request): Response
+    {
+        // Get the submitted start and end dates from the form
+        $startDateString = $request->request->get('startDate');
+        $endDateString = $request->request->get('endDate');
+
+        // Convert the date strings to DateTime objects
+        if ($startDateString) {
+            $startDate = new DateTime($startDateString);
+        } else if ($startDateString === "") {
+            $startDate = null;
+        } else {
+            $startDate = (new DateTime())->modify('-1 month');
+        }
+
+        if ($endDateString) {
+            $endDate = new DateTime($endDateString);
+        } else if ($endDateString === "") {
+            $endDate = null;
+        } else {
+            $endDate = new DateTime();
+        }
+
+        // Fetch all the graphics content
+        $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
+        $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartSessionTimePerRealmFreeradius = $this->fetchChartSessionTimePerRealmFreeradius($startDate, $endDate);
+
+        // Sum all the current authentication
+        $totalCurrentAuths = 0;
+        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
+            // Sum the data points in the current dataset
+            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        }
+
+        $totalTraffic = [
+            'total_input' => 0,
+            'total_output' => 0,
+        ];
+
+        // Sum all the traffic based on the fetch
+        foreach ($fetchChartTrafficPerRealmFreeradius['datasets'] as $dataset) {
+            // Check if the dataset is for input or output
+            if ($dataset['label'] === 'Uploaded') {
+                // Sum the data for total input
+                foreach ($dataset['data'] as $sum) {
+                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
+                }
+            } elseif ($dataset['label'] === 'Downloaded') {
+                // Sum the data for total output
+                foreach ($dataset['data'] as $sum) {
+                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
+                }
+            }
+        }
+
+        // Create a new PhpSpreadsheet Spreadsheet object
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set the header row
+        $sheet->fromArray(['Authentication Attempts', 'Session Time Per Realm', 'Total of Traffic', 'Traffic Per Realm', 'Realms List', 'Current Authenticated per Realm', 'Total Of Current Authentications'], NULL, 'A1');
+
+        // Realm names and session time data
+        $realmsSession = $fetchChartSessionTimePerRealmFreeradius['labels'] ?? [];
+        $sessionTimeData = $fetchChartSessionTimePerRealmFreeradius['datasets'][0]['data'] ?? [];
+
+        // Combine realm names and their respective session time
+        $combinedRealmSessionTime = [];
+        foreach ($realmsSession as $index => $realm) {
+            $combinedRealmSessionTime[] = [
+                'Realm Name' => $realm,
+                'Session Time (seconds)' => $sessionTimeData[$index] ?? 'No data available',
+            ];
+        }
+
+        // Realm names and traffic data
+        $realmsTraffic = $fetchChartTrafficPerRealmFreeradius['labels'] ?? [];
+        $trafficData = $fetchChartTrafficPerRealmFreeradius['datasets'][0]['data'] ?? [];
+
+        // Combine realm names and their respective traffic data (uploaded and downloaded)
+        $combinedRealmTraffic = [];
+        foreach ($realmsTraffic as $index => $realm) {
+            $combinedRealmTraffic[] = [
+                'Realm Name' => $realm,
+                'Uploaded' => $trafficData[$index][0] ?? 'No data available',
+                'Downloaded' => $trafficData[$index][1] ?? 'No data available',
+            ];
+        }
+
+        // Populate the data rows
+        $rowData = [
+            [
+                json_encode([
+                    'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
+                    'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
+                ]),
+                json_encode([
+                    'Session Time per Realm' => $combinedRealmSessionTime,
+                ]),
+                json_encode([
+                    'Uploaded' => $totalTraffic['total_input'],
+                    'Downloaded' => $totalTraffic['total_output'],
+                ]),
+                json_encode([
+                    'Traffic Time per Realm' => $combinedRealmTraffic,
+                ]),
+                json_encode($fetchChartAuthenticationsFreeradius['datasets'] ?? 'No data available'),
+                json_encode([
+                    'Traffic Time per Realm' => $combinedRealmSessionTime,
+                ]),
+                json_encode($fetchChartRealmsFreeradius['labels'] ?? 'No data available'),
+                json_encode($fetchChartCurrentAuthFreeradius['labels'] ?? 'No data available'),
+                $totalCurrentAuths,
+            ],
+        ];
+
+        // Add the data to the spreadsheet
+        foreach ($rowData as $row => $data) {
+            $rowData[$row] = array_map('strval', $data); // Convert all elements to strings
+            $sheet->fromArray($rowData[$row], NULL, 'A' . ($row + 2));
+        }
+
+        // Save the spreadsheet to a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        // Return the file as a response
+        return $this->file($tempFile, 'freeradiusStatistics.xlsx');
+    }
+
+    /**
      * @throws Exception
      */
     private function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array

@@ -32,6 +32,7 @@
 
                 <div class="flex items-center space-x-6">
                     <a href="{{ path('admin_page_export_freeradius') }}"
+                       onclick="return confirm('Are you sure you want to export data from {{ selectedStartDate }} to {{ selectedEndDate }}?')"
                        class="text-xs text-center bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200">
                         Export Statistics
                     </a>
