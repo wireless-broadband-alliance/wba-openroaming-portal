@@ -1507,16 +1507,13 @@ class AdminController extends AbstractController
 
         // Create a new PhpSpreadsheet Spreadsheet object
         $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Set the header row
-        $sheet->fromArray(['Authentication Attempts', 'Session Time Per Realm', 'Total of Traffic', 'Traffic Per Realm', 'Realms List', 'Current Authenticated per Realm', 'Total Of Current Authentications'], NULL, 'A1');
+        $pageOne = $spreadsheet->getActiveSheet();
 
         // Realm names and session time data
         $realmsSession = $fetchChartSessionTimePerRealmFreeradius['labels'] ?? [];
         $sessionTimeData = $fetchChartSessionTimePerRealmFreeradius['datasets'][0]['data'] ?? [];
 
-        // Combine realm names and their respective session time
+// Combine realm names and their respective session time
         $combinedRealmSessionTime = [];
         foreach ($realmsSession as $index => $realm) {
             $combinedRealmSessionTime[] = [
@@ -1525,51 +1522,44 @@ class AdminController extends AbstractController
             ];
         }
 
-        // Realm names and traffic data
-        $realmsTraffic = $fetchChartTrafficPerRealmFreeradius['labels'] ?? [];
-        $trafficData = $fetchChartTrafficPerRealmFreeradius['datasets'][0]['data'] ?? [];
-
-        // Combine realm names and their respective traffic data (uploaded and downloaded)
-        $combinedRealmTraffic = [];
-        foreach ($realmsTraffic as $index => $realm) {
-            $combinedRealmTraffic[] = [
-                'Realm Name' => $realm,
-                'Uploaded' => $trafficData[$index][0] ?? 'No data available',
-                'Downloaded' => $trafficData[$index][1] ?? 'No data available',
-            ];
-        }
-
-        // Populate the data rows
-        $rowData = [
-            [
-                json_encode([
-                    'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
-                    'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
-                ]),
-                json_encode([
-                    'Session Time per Realm' => $combinedRealmSessionTime,
-                ]),
-                json_encode([
-                    'Uploaded' => $totalTraffic['total_input'],
-                    'Downloaded' => $totalTraffic['total_output'],
-                ]),
-                json_encode([
-                    'Traffic Time per Realm' => $combinedRealmTraffic,
-                ]),
-                json_encode($fetchChartAuthenticationsFreeradius['datasets'] ?? 'No data available'),
-                json_encode([
-                    'Traffic Time per Realm' => $combinedRealmSessionTime,
-                ]),
-                json_encode($fetchChartRealmsFreeradius['labels'] ?? 'No data available'),
-                json_encode($fetchChartCurrentAuthFreeradius['labels'] ?? 'No data available'),
-                $totalCurrentAuths,
+// Set the titles and their respective content
+        $titlesAndContent = [
+            'Authentication Attempts' => [
+                'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0] ?? 'No data available',
+                'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1] ?? 'No data available',
             ],
+            'Session Time Per Realm' => $combinedRealmSessionTime,
+            'Total of Traffic' => [
+                'Uploaded' => $totalTraffic['total_input'],
+                'Downloaded' => $totalTraffic['total_output'],
+            ],
+            'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? 'No data available',
+            'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? 'No data available',
+            'Total Of Current Authentications' => $totalCurrentAuths ?? 'No data available',
         ];
 
-        // Add the data to the spreadsheet
-        foreach ($rowData as $row => $data) {
-            $rowData[$row] = array_map('strval', $data); // Convert all elements to strings
-            $sheet->fromArray($rowData[$row], NULL, 'A' . ($row + 2));
+// Convert string values to arrays if they are not already arrays
+        $titlesAndContent['Realms List'] = (array) $titlesAndContent['Realms List'];
+        $titlesAndContent['Current Authenticated per Realm'] = (array) $titlesAndContent['Current Authenticated per Realm'];
+
+// Populate data in the spreadsheet
+        $row = 1;
+        foreach ($titlesAndContent as $title => $content) {
+            $pageOne->setCellValue('A' . $row, $title);
+            if ($title === 'Session Time Per Realm') {
+                foreach ($content as $item) {
+                    $row++;
+                    foreach ($item as $key => $value) {
+                        $pageOne->setCellValueByColumnAndRow(2, $row, "$key: $value");
+                        $row++;
+                    }
+                }
+            } else {
+                foreach ($content as $key => $value) {
+                    $row++;
+                    $pageOne->setCellValue('B' . $row, "$key: $value");
+                }
+            }
         }
 
         // Save the spreadsheet to a temporary file
