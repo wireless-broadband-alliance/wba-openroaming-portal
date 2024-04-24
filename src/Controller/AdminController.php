@@ -1513,7 +1513,7 @@ class AdminController extends AbstractController
         $realmsSession = $fetchChartSessionTimePerRealmFreeradius['labels'] ?? [];
         $sessionTimeData = $fetchChartSessionTimePerRealmFreeradius['datasets'][0]['data'] ?? [];
 
-// Combine realm names and their respective session time
+        // Combine realm names and their respective session time
         $combinedRealmSessionTime = [];
         foreach ($realmsSession as $index => $realm) {
             $combinedRealmSessionTime[] = [
@@ -1533,34 +1533,44 @@ class AdminController extends AbstractController
                 'Uploaded' => $totalTraffic['total_input'],
                 'Downloaded' => $totalTraffic['total_output'],
             ],
-            'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? 'No data available',
-            'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? 'No data available',
+            'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? [],
+            'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? [],
             'Total Of Current Authentications' => $totalCurrentAuths ?? 'No data available',
         ];
 
 // Convert string values to arrays if they are not already arrays
-        $titlesAndContent['Realms List'] = (array) $titlesAndContent['Realms List'];
-        $titlesAndContent['Current Authenticated per Realm'] = (array) $titlesAndContent['Current Authenticated per Realm'];
+        $titlesAndContent['Realms List'] = (array)$titlesAndContent['Realms List'];
+        $titlesAndContent['Current Authenticated per Realm'] = (array)$titlesAndContent['Current Authenticated per Realm'];
 
 // Populate data in the spreadsheet
-        $row = 1;
-        foreach ($titlesAndContent as $title => $content) {
-            $pageOne->setCellValue('A' . $row, $title);
-            if ($title === 'Session Time Per Realm') {
-                foreach ($content as $item) {
-                    $row++;
-                    foreach ($item as $key => $value) {
-                        $pageOne->setCellValueByColumnAndRow(2, $row, "$key: $value");
-                        $row++;
-                    }
-                }
-            } else {
-                foreach ($content as $key => $value) {
-                    $row++;
-                    $pageOne->setCellValue('B' . $row, "$key: $value");
-                }
-            }
+        $pageOne->setCellValue('A1', 'Authentication Attempts');
+        $pageOne->setCellValue('B1', "Accepted: {$titlesAndContent['Authentication Attempts']['Accepted']}");
+        $pageOne->setCellValue('B2', "Rejected: {$titlesAndContent['Authentication Attempts']['Rejected']}");
+
+        $pageOne->setCellValue('A3', 'Session Time Per Realm');
+        $row = 4;
+        foreach ($titlesAndContent['Session Time Per Realm'] as $item) {
+            $pageOne->setCellValue('B' . $row, "Realm Name: {$item['Realm Name']}");
+            $pageOne->setCellValue('C' . $row, "Session Time (seconds): {$item['Session Time (seconds)']}");
+            $row++;
         }
+
+        $pageOne->setCellValue('A' . ($row + 1), 'Total of Traffic');
+        $pageOne->setCellValue('B' . ($row + 1), "Uploaded: {$titlesAndContent['Total of Traffic']['Uploaded']}");
+        $pageOne->setCellValue('B' . ($row + 2), "Downloaded: {$titlesAndContent['Total of Traffic']['Downloaded']}");
+
+        $pageOne->setCellValue('A' . ($row + 4), 'Realms List');
+        foreach ($titlesAndContent['Realms List'] as $index => $realm) {
+            $pageOne->setCellValue('B' . ($row + 4 + $index), $realm);
+        }
+
+        $pageOne->setCellValue('A' . ($row + 4 + count($titlesAndContent['Realms List']) + 1), 'Current Authenticated per Realm');
+        foreach ($titlesAndContent['Current Authenticated per Realm'] as $index => $realm) {
+            $pageOne->setCellValue('B' . ($row + 4 + count($titlesAndContent['Realms List']) + 1 + $index), $realm);
+        }
+
+        $pageOne->setCellValue('A' . ($row + 4 + count($titlesAndContent['Realms List']) + 1 + count($titlesAndContent['Current Authenticated per Realm']) + 1), 'Total Of Current Authentications');
+        $pageOne->setCellValue('B' . ($row + 4 + count($titlesAndContent['Realms List']) + 1 + count($titlesAndContent['Current Authenticated per Realm']) + 1), $titlesAndContent['Total Of Current Authentications']);
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
