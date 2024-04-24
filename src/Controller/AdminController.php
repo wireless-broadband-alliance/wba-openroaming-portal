@@ -1701,33 +1701,25 @@ class AdminController extends AbstractController
     private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Fetch all data with date filtering
-        $events = $this->radiusAccountingRepository->findDistinctRealms();
+        $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
 
         // Initialize an array to store the counts of each realm
         $realmCounts = [];
 
         // Count the occurrences of each realm
         foreach ($events as $event) {
-            $eventDateTime = $event['acctStartTime'];
+            $realm = $event['realm'];
 
-            // Check if the event date falls within the specified date range
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $realm = $event['realm'];
+            // Skip if realm is null or empty
+            if (!$realm) {
+                continue;
+            }
 
-                // Skip if realm is null or empty
-                if (!$realm) {
-                    continue;
-                }
-
-                // Increment the count for the realm
-                if (!isset($realmCounts[$realm])) {
-                    $realmCounts[$realm] = 1;
-                } else {
-                    $realmCounts[$realm]++;
-                }
+            // Increment the count for the realm
+            if (!isset($realmCounts[$realm])) {
+                $realmCounts[$realm] = 1;
+            } else {
+                $realmCounts[$realm]++;
             }
         }
 
@@ -1758,7 +1750,7 @@ class AdminController extends AbstractController
     private function fetchChartTrafficPerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the traffic using the findTrafficPerRealm query
-        $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm()->getResult();
+        $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
 
         // Convert the results into the expected format
         $realmTraffic = [];

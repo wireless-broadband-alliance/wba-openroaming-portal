@@ -50,21 +50,64 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getQuery();
     }
 
-    public function findTrafficPerRealm(): Query
+    public function findTrafficPerRealm(?DateTime $startDate, ?DateTime $endDate): Query
     {
-        return $this->createQueryBuilder('ra')
+        $queryBuilder = $this->createQueryBuilder('ra')
             ->select('ra.realm, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output')
-            ->groupBy('ra.realm')
-            ->getQuery();
+            ->groupBy('ra.realm');
+
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        } elseif ($startDate) {
+            // If only start date is provided, search from start date to now
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->setParameter('startDate', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, search from end date to the past
+            $queryBuilder
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('endDate', $endDate);
+        }
+
+        return $queryBuilder->getQuery();
     }
 
     /**
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
      * @return array
      */
-    public function findDistinctRealms(): array
+    public function findDistinctRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
-        return $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctStartTime')
+        $queryBuilder = $this->createQueryBuilder('ra')
+            ->select('DISTINCT ra.realm, ra.acctStartTime');
+
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        } elseif ($startDate) {
+            // If only start date is provided, search from start date to now
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->setParameter('startDate', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, search from end date to the past
+            $queryBuilder
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('endDate', $endDate);
+        }
+
+        return $queryBuilder
             ->getQuery()
             ->getResult();
     }
@@ -82,9 +125,19 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         // Apply date filters if provided
         if ($startDate && $endDate) {
             $queryBuilder
-                ->where('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStartTime >= :startDate')
                 ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        } elseif ($startDate) {
+            // If only start date is provided, search from start date to now
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->setParameter('startDate', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, search from end date to the past
+            $queryBuilder
+                ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('endDate', $endDate);
         }
 
