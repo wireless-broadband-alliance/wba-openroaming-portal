@@ -8,6 +8,8 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Form\AccountUserUpdateLandingType;
+use App\Form\NewPasswordAccountType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -204,8 +206,110 @@ class SiteController extends AbstractController
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
         ];
-        return $this->render('site/landing.html.twig', $data);
+
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+
+        return $this->render('site/landing.html.twig', [
+                'form' => $form->createView(),
+                'formPassword' => $formPassword->createView()
+            ] + $data);
     }
+
+
+    /**
+     * Widget with data about the account of the user / upload new password
+     *
+     * @return RedirectResponse
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
+    public function accountUser(
+        Request                     $request,
+        EntityManagerInterface      $em,
+        UserPasswordHasherInterface $passwordHasher,
+    ): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $user */
+        $user = $this->getUser();
+        $oldFirstName = $user->getFirstName();
+        $oldLastName = $user->getLastName();
+
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $event = new Event();
+
+            $event->setUser($user);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE);
+            $event->setEventMetadata([
+                'platform' => PlatformMode::Live,
+                'Old data' => [
+                    'First Name' => $oldFirstName,
+                    'Last Name' => $oldLastName,
+                ],
+                'New data' => [
+                    'First Name' => $user->getFirstName(),
+                    'Last Name' => $user->getLastName(),
+                ],
+            ]);
+
+            $em->persist($event);
+            $em->persist($user);
+
+            $em->flush();
+
+            $this->addFlash('success', 'Your account information has been updated');
+
+            // Redirect the user upon successful form submission
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $formPassword->handleRequest($request);
+
+        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $currentPasswordDB = $user->getPassword();
+            $typedPassword = $formPassword->get('password')->getData();
+
+            // Compare the typed password with the hashed password from the database
+            if (!password_verify($typedPassword, $currentPasswordDB)) {
+                $this->addFlash('error', 'Invalid password. Please try again.');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
+                $this->addFlash('error', 'Something went wrong please try again. If the problem keep occurring contact our support!');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+            $event = new Event();
+            $event->setUser($user);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD);
+            $event->setEventMetadata([
+                'platform' => PlatformMode::Live,
+            ]);
+
+            $em->persist($event);
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Your password has been updated successfully!');
+        }
+
+        return $this->redirectToRoute('app_landing');
+    }
+
 
     /**
      * @param $userAgent

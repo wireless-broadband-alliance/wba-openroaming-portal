@@ -311,7 +311,7 @@ class GetSettings
         $descriptions = [
             'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
             'DISPLAY_NAME' => 'The name used on the profiles',
-            'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles',
+            'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles. This is only used to create iOS/macOS profiles.',
             'OPERATOR_NAME' => 'The operator name used on the profiles',
             'DOMAIN_NAME' => 'The domain name used for the service',
             'RADIUS_TLS_NAME' => 'The hostname of your RADIUS server used for TLS',
@@ -355,7 +355,7 @@ class GetSettings
 
             'TOS_LINK' => 'Terms and Conditions URL',
             'PRIVACY_POLICY_LINK' => 'Privacy policy URL',
-            'VALID_DOMAINS_GOOGLE_LOGIN' => 'Valid domains to authenticate with google, if you let this options empty',
+            'VALID_DOMAINS_GOOGLE_LOGIN' => 'When this is empty, it allows all the domains to authenticate. Please only type the domains you want to be able to authenticate',
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => 'Type of encryption defined for the creation of the profiles',
 
             'CAPPORT_ENABLED' => 'Enable or disable Capport DHCP configuration',

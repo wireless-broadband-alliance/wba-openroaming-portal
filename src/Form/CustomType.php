@@ -29,6 +29,7 @@ class CustomType extends AbstractType
             'WELCOME_TEXT' => TextareaType::class,
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => TextType::class,
+            'ADDITIONAL_LABEL' => TextType::class,
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Enum\PlatformMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -48,8 +49,9 @@ class SecurityController extends AbstractController
             if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('admin_page');
             }
+            $platformMode = $data['PLATFORM_MODE']['value'];
             $traditionalLoginEnabled = $data['LOGIN_TRADITIONAL_ENABLED']['value'];
-            if (!$traditionalLoginEnabled) {
+            if ($platformMode === PlatformMode::Demo || !$traditionalLoginEnabled) {
                 return $this->redirectToRoute('saml_logout');
             }
             return $this->redirectToRoute('app_landing');

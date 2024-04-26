@@ -41,6 +41,9 @@ class AuthType extends AbstractType
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => [
                 'type' => TextType::class,
             ],
+            'VALID_DOMAINS_GOOGLE_LOGIN' => [
+                'type' => TextType::class,
+            ],
 
             'AUTH_METHOD_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,

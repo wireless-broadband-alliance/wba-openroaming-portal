@@ -73,3 +73,17 @@
 	@apply: bg-red-400;
 	background-color: #f87171; /* Use the appropriate red color code */
 }
+
+/* Animation for the donut graphic in the freeradius statistics page */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.animate-fadeIn {
+	animation: fadeIn 0.5s ease-in-out forwards;
+}

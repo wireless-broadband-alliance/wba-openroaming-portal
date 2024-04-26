@@ -28,7 +28,9 @@ module.exports = {
 				sans: ["Inter var, sans-serif"],
 				roboto: ["Roboto, mono"],
 			},
+			animation: {
+				'spin-slow': 'spin 3s linear infinite',
+			}
 		},
 	},
-	plugins: [],
 }

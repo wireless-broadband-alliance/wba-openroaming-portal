@@ -22,13 +22,10 @@ services:
       MYSQL_DATABASE: openroaming
       MYSQL_USER: openroaming
       MYSQL_PASSWORD: openroaming
-    ports:
-      - "3306:3306"
     volumes:
       - mysql:/var/lib/mysql
   memcached:
     image: memcached
-
   mailcatcher:
     image: schickling/mailcatcher
     ports:

@@ -78,11 +78,12 @@ export default class extends Controller {
 		const googleTextInputs = [
 			document.querySelector('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_LABEL]"]'),
 			document.querySelector('[name="auth[AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION]"]'),
+			document.querySelector('[name="auth[VALID_DOMAINS_GOOGLE_LOGIN]"]'),
 		];
 		const googleCards = [
 			document.getElementById('AUTH_METHOD_GOOGLE_LOGIN_LABEL'),
 			document.getElementById('AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'),
-
+			document.getElementById('VALID_DOMAINS_GOOGLE_LOGIN'),
 		];
 		CardsActions(googleRadioButtons, googleTextInputs, googleCards);
 

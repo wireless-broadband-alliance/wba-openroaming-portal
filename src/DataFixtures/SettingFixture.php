@@ -30,7 +30,7 @@ class SettingFixture extends Fixture
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'duck-ops@example.com'],
+            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
