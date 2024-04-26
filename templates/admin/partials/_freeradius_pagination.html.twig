@@ -9,7 +9,7 @@
             <div class="flex space-x-2.5">
                 {# Previous page navigation #}
                 {% if currentPage > 1 %}
-                    <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage - 1, 'filter': activeFilter}) }}"
+                    <a href="{{ path('admin_dashboard_statistics_freeradius', {'page': currentPage - 1}) }}"
                        class="hover:shadow-md p-1 rounded-lg">
                         <svg class="text-veryDarkButton w-4 cursor-pointer"
                              fill="none"
@@ -34,24 +34,16 @@
                 {% endif %}
                 {# Next page navigation #}
                 {% if currentPage < totalPages %}
-                    <a href="{{ path('admin_search', {'u': searchTerm, 'page': currentPage + 1, 'filter': activeFilter}) }}"
-                       class="hover:shadow-md p-1 rounded-lg">
-                        <svg class="w-4 cursor-pointer"
-                             fill="none"
-                             stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
-                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                    <a href="{{ path('admin_dashboard_statistics_freeradius', {'page': currentPage + 1}) }}" class="hover:shadow-md p-1 rounded-lg">
+                        <svg class="w-4 cursor-pointer" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
                         </svg>
                     </a>
                 {% else %}
                     <a class="p-1">
                         {# Right limit pagination #}
-                        <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none"
-                             stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
-                             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+                        <svg class="text-gray-400 w-4 cursor-not-allowed" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
                         </svg>
                     </a>
                 {% endif %}
