@@ -1544,7 +1544,7 @@ class AdminController extends AbstractController
                 'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1] ?? [],
             ],
             'Session Time Per Realm' => $combinedRealmSessionTime,
-            //'Traffic Per Realm' => $combinedRealmTrafficData,
+            'Traffic Per Realm' => $combinedRealmTrafficData,
             'Total of Traffic' => [
                 'Uploaded' => $totalTraffic['total_input'],
                 'Downloaded' => $totalTraffic['total_output'],
@@ -1554,7 +1554,7 @@ class AdminController extends AbstractController
             'Total Of Current Authentications' => $totalCurrentAuths ?? 'No data available',
         ];
 
-        // Define row counter
+
         $row = 1;
 
         // Iterate over each title and its content
@@ -1569,7 +1569,7 @@ class AdminController extends AbstractController
                     // Check if the value is an array
                     if (is_array($value)) {
                         // If the value is an array, convert it to a string representation
-                        $formattedValue = implode(", ", $value);
+                        $formattedValue = json_encode($value);
                     } else {
                         // If the value is not an array, use it directly
                         $formattedValue = $value;
