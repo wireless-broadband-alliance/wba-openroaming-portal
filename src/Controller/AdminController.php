@@ -1350,54 +1350,19 @@ class AdminController extends AbstractController
         $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
         $fetchChartSessionTimePerRealmFreeradius = $this->fetchChartSessionTimePerRealmFreeradius($startDate, $endDate);
 
-        if (!empty($fetchChartRealmsFreeradius['labels'])) {
-            // Extract the most used realm name
-            $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
-        } else {
-            $mostUsedRealm = "No data available";
-        }
-
-        if (!empty($fetchChartCurrentAuthFreeradius['labels'])) {
-            // Extract the most current authenticated realm name
-            $realmIndexWithMaxAuth = array_search(max($fetchChartCurrentAuthFreeradius['labels']), $fetchChartCurrentAuthFreeradius['labels']);
-            $mostCurrentAuthRealm = $fetchChartCurrentAuthFreeradius['labels'][$realmIndexWithMaxAuth] ?? "No data available";
-        } else {
-            $mostCurrentAuthRealm = "No data available";
-        }
-
-        // Extract all realms names
-        $realmsNames = $fetchChartRealmsFreeradius['labels'];
-
-        // Extract all current authenticated realms names
-        $currentAuthRealmsNames = $fetchChartCurrentAuthFreeradius['labels'];
-
-        // Pagination for the realms names tables. works the same has the one on the Users Management Page
-        $currentPage = $request->query->getInt('page', 1);
-        $perPage = 5;
-        $totalRealms = count($realmsNames);
-        $totalPages = ceil($totalRealms / $perPage);
-        $currentPage = $request->query->getInt('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-        $realmsPerPage = array_slice($realmsNames, $offset, $perPage);
-
         // Extract the counts from the returned data
         $authCounts = [
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
 
-        // Sum all the current authentication
-        $totalCurrentAuths = 0;
-        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
-            // Sum the data points in the current dataset
-            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
-        }
+        // Session Time media logic goes here
+
 
         $totalTraffic = [
             'total_input' => 0,
             'total_output' => 0,
         ];
-
         // Sum all the traffic based on the fetch
         foreach ($fetchChartTrafficPerRealmFreeradius['datasets'] as $dataset) {
             // Check if the dataset is for input or output
@@ -1414,29 +1379,26 @@ class AdminController extends AbstractController
             }
         }
 
+        // Extract all realms names
+        $realmsNames = $fetchChartRealmsFreeradius['labels'];
+
+        // Sum all the current authentication
+        $totalCurrentAuths = 0;
+        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
+            // Sum the data points in the current dataset
+            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        }
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'totalPages' => $totalPages,
-            'currentPage' => $currentPage,
-            'perPage' => $perPage,
-            'realmsPerPage' => $realmsPerPage,
-            'allRowsCount' => $totalRealms,
+            'realmsUsage' => $realmsNames,
             'authCounts' => $authCounts,
-            'mostUsedRealm' => $mostUsedRealm,
-            'mostCurrentAuthsRealm' => $mostCurrentAuthRealm,
-            'currentAuthsRealmsNames' => $currentAuthRealmsNames,
             'totalCurrentAuths' => $totalCurrentAuths,
             'totalTrafficFreeradius' => $totalTraffic,
-            'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
-            'datasetsCurrentAuthRealmList' => $fetchChartCurrentAuthFreeradius['datasets'],
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
-            'currentAuthsJson' => json_encode($fetchChartCurrentAuthFreeradius, JSON_THROW_ON_ERROR),
-            'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
-            'trafficPerRealmFreeradius' => json_encode($fetchChartTrafficPerRealmFreeradius, JSON_THROW_ON_ERROR),
-            'sessionTimePerRealmFreeradius' => json_encode($fetchChartSessionTimePerRealmFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
