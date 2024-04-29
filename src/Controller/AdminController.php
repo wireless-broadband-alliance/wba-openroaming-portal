@@ -1447,7 +1447,7 @@ class AdminController extends AbstractController
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
         $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
-        $fetchChartSessionTimePerRealmFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
+        $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
         // Sum all the current authentication
         $totalCurrentAuths = 0;
@@ -1482,28 +1482,13 @@ class AdminController extends AbstractController
         $pageOne = $spreadsheet->getActiveSheet();
 
         // Realm names and session time data to export
-        $realmsSession = $fetchChartSessionTimePerRealmFreeradius['labels'] ?? [];
+        $realmsSession = $fetchChartSessionTimeFreeradius['labels'] ?? [];
         $combinedRealmSessionTime = [];
         foreach ($realmsSession as $index => $realm) {
-            $sessionTimeData = $fetchChartSessionTimePerRealmFreeradius['datasets'][0]['data'] ?? [];
+            $sessionTimeData = $fetchChartSessionTimeFreeradius['datasets'][0]['data'] ?? [];
             $combinedRealmSessionTime[] = [
                 'Realm Name' => $realm,
                 'Session Time (seconds)' => $sessionTimeData[$index] ?? 'No data available',
-            ];
-        }
-
-        // Realms names and their respective traffic data to export
-        $realmsTraffic = $fetchChartTrafficPerRealmFreeradius['labels'] ?? [];
-        $combinedRealmTrafficData = [];
-        foreach ($realmsTraffic as $index => $realm) {
-            $uploads = $fetchChartTrafficPerRealmFreeradius['datasets'][0]['data'][$index] ?? [];
-            $downloads = $fetchChartTrafficPerRealmFreeradius['datasets'][1]['data'][$index] ?? [];
-            $combinedRealmTrafficData[] = [
-                'Realm Name' => $realm,
-                'Data' => [
-                    'Uploads' => $uploads,
-                    'Downloads' => $downloads,
-                ],
             ];
         }
 
@@ -1513,8 +1498,7 @@ class AdminController extends AbstractController
                 'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0] ?? [],
                 'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1] ?? [],
             ],
-            'Session Time Per Realm' => $combinedRealmSessionTime,
-            'Traffic Per Realm' => $combinedRealmTrafficData,
+            'Session Time' => $combinedRealmSessionTime,
             'Total of Traffic' => [
                 'Uploaded' => $totalTraffic['total_input'],
                 'Downloaded' => $totalTraffic['total_output'],
@@ -1526,7 +1510,6 @@ class AdminController extends AbstractController
 
 
         $row = 1;
-
         // Iterate over each title and its content
         foreach ($titlesAndContent as $title => $content) {
             // Set the title in column A
