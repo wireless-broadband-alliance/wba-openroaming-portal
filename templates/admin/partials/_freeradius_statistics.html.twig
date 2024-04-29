@@ -30,10 +30,24 @@
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
         <div class="flex flex-row justify-between sm:pt-2 font-medium">
             <h1 class="text-lg text-left">Session Time</h1>
-            <span class="text-xs text-gray-500 text-right">(in GigaBytes)</span>
         </div>
-        <div class="mt-4">
-            {{ sessionTimeAvarege }}
+        <div class="md:mt-14 flex items-center justify-center">
+            {% if sessionTimeAveregeSeconds >= 0 %}
+                {% set sizeClass = 'w-32 h-32' %}
+                {% if totalTrafficFreeradius['total_input'] >= 1000 %}
+                    {% set sizeClass = 'w-36 h-36' %}
+                {% endif %}
+                {% if totalTrafficFreeradius['total_input'] >= 10000 %}
+                    {% set sizeClass = 'w-40 h-40' %}
+                {% endif %}
+                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
+                    {{ sessionTimeAvarege }}
+                </div>
+            {% else %}
+                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                    No Data Available
+                </div>
+            {% endif %}
         </div>
     </div>
 

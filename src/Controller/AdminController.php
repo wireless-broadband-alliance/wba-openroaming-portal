@@ -1357,13 +1357,13 @@ class AdminController extends AbstractController
         ];
 
         // Extract the avarege session time
-        $sessionTimeAvarege = $fetchChartSessionTimeFreeradius['datasets'][0]['data'][0];
+        $sessionTimeAveregeSeconds = $fetchChartSessionTimeFreeradius['datasets'][0]['data'][0];
         // Calculate the hours
-        $hours = floor($sessionTimeAvarege / 3600);
+        $hours = floor($sessionTimeAveregeSeconds / 3600);
         // Calculate the remaining seconds
-        $minutes = floor(($sessionTimeAvarege % 3600) / 60);
+        $minutes = floor(($sessionTimeAveregeSeconds % 3600) / 60);
         // Format the average session time as a single string
-        $averageSessionTime = sprintf('%dh %dm', $hours, $minutes);
+        $sessionAverageTime = sprintf('%dh %dm', $hours, $minutes);
 
         $totalTraffic = [
             'total_input' => 0,
@@ -1404,7 +1404,8 @@ class AdminController extends AbstractController
             'totalTrafficFreeradius' => $totalTraffic,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
-            'sessionTimeAvarege' => $averageSessionTime,
+            'sessionTimeAvarege' => $sessionAverageTime,
+            'sessionTimeAveregeSeconds' => $sessionTimeAveregeSeconds,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
