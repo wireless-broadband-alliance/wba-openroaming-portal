@@ -31,13 +31,16 @@
         <div class="flex flex-row justify-between sm:pt-2 font-medium">
             <h1 class="text-lg text-left">Session Time</h1>
         </div>
-        <div class="md:mt-14 flex items-center justify-center">
-            {% if sessionTimeAveregeSeconds >= 0 %}
+        <div class="md:mt-14 flex flex-col items-center justify-center">
+            <h1 class="text-center font-semibold">
+                In Hours
+            </h1>
+            {% if sessionTimeAveregeSeconds > 0 %}
                 {% set sizeClass = 'w-32 h-32' %}
-                {% if totalTrafficFreeradius['total_input'] >= 1000 %}
+                {% if sessionTimeAveregeSeconds >= 1000 %}
                     {% set sizeClass = 'w-36 h-36' %}
                 {% endif %}
-                {% if totalTrafficFreeradius['total_input'] >= 10000 %}
+                {% if sessionTimeAveregeSeconds >= 10000 %}
                     {% set sizeClass = 'w-40 h-40' %}
                 {% endif %}
                 <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">

@@ -1357,7 +1357,7 @@ class AdminController extends AbstractController
         ];
 
         // Extract the avarege session time
-        $sessionTimeAveregeSeconds = $fetchChartSessionTimeFreeradius['datasets'][0]['data'][0];
+        $sessionTimeAveregeSeconds = $fetchChartSessionTimeFreeradius['datasets'][0]['data'][0] ?? 0;
         // Calculate the hours
         $hours = floor($sessionTimeAveregeSeconds / 3600);
         // Calculate the remaining seconds
