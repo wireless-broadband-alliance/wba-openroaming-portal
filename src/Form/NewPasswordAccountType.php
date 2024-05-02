@@ -28,8 +28,7 @@ class NewPasswordAccountType extends AbstractType
                 'label' => 'Confirm New Password',
                 'required' => true,
                 'mapped' => false,
-            ])
-            ->add('security', TurnstileType::class, ['attr' => ['data-action' => 'contact', 'data-theme' => 'dark'], 'label' => false]);
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

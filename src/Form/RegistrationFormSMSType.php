@@ -37,8 +37,7 @@ class RegistrationFormSMSType extends AbstractType
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'label' => 'I agree to the terms',
-            ])
-            ->add('security', TurnstileType::class, ['attr' => ['data-action' => 'contact', 'data-theme' => 'dark'], 'label' => false]);
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
