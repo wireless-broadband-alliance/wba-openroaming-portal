@@ -50,6 +50,18 @@ class StatusType extends AbstractType
                         'description' => $description,
                     ],
                 ]);
+            } elseif ($settingName === 'CLOUD_FLARE_CHECKER') {
+                $builder->add('CLOUD_FLARE_CHECKER', ChoiceType::class, [
+                    'choices' => [
+                        EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
+                        EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
+                    ],
+                    'attr' => [
+                        'data-controller' => 'alwaysOnEmail descriptionCard',
+                        'description' => $description,
+                    ],
+                    'data' => $settingValue,
+                ]);
             }
         }
     }

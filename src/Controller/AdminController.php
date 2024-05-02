@@ -937,8 +937,9 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'PLATFORM_MODE' and 'USER_VERIFICATION' settings
+            // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'CLOUD_FLARE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
+            $cloudFlareChecker = $submittedData['CLOUD_FLARE_CHECKER'] ?? null;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
@@ -952,6 +953,12 @@ class AdminController extends AbstractController
             if ($emailVerificationSetting) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $em->persist($emailVerificationSetting);
+            }
+
+            $cloudFlareCheckerSetting = $settingsRepository->findOneBy(['name' => 'CLOUD_FLARE_CHECKER']);
+            if ($cloudFlareCheckerSetting) {
+                $cloudFlareCheckerSetting->setValue($cloudFlareChecker);
+                $em->persist($cloudFlareCheckerSetting);
             }
 
             // Flush the changes to the database

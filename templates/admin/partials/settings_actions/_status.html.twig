@@ -3,7 +3,7 @@
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0">
         {% for setting in form %}
             {# Display only the platform and the email verification settings #}
-            {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION'] %}
+            {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'CLOUD_FLARE_CHECKER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="statusCards"
                      id="{{ setting.vars.name }}">
@@ -13,6 +13,7 @@
                             {% set displayName = {
                                 'PLATFORM_MODE': 'Platform Mode',
                                 'USER_VERIFICATION': 'User Verification',
+                                'CLOUD_FLARE_CHECKER': 'Cloud Flare Checker'
                             }[setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                         </div>
@@ -24,7 +25,7 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION'] %}
+                    {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'CLOUD_FLARE_CHECKER'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>
@@ -97,6 +98,46 @@
                                        value="OFF"
                                        class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }}>
                                 <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioEmail">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
+                            </label>
+                        </div>
+                    {% endif %}
+
+                    {% if setting.vars.name in ['CLOUD_FLARE_CHECKER'] %}
+                        <div class="flex flex-col items-center space-y-2 mt-5">
+                            {# Render "ON" Radio Input #}
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="onLabelCloudFlare">
+                                On
+                                <input type="radio" name="{{ form.CLOUD_FLARE_CHECKER.vars.full_name }}"
+                                       id="onRadioCloudFlare"
+                                       value="ON"
+                                       class="radio-input hidden" {{ form.CLOUD_FLARE_CHECKER.vars.data == 'ON' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioCloudFlare">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
+                            </label>
+
+                            {# Render "OFF" Radio Input #}
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="offLabelCloudFlare">
+                                Off
+                                <input type="radio" name="{{ form.CLOUD_FLARE_CHECKER.vars.full_name }}"
+                                       id="offRadioCloudFlare"
+                                       value="OFF"
+                                       class="radio-input hidden" {{ form.CLOUD_FLARE_CHECKER.vars.data == 'OFF' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioCloudFlare">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
