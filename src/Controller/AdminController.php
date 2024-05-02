@@ -671,9 +671,9 @@ class AdminController extends AbstractController
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        // Regenerate the verification code for the admin to reset settings
 
         if ($type === 'settingCustom') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -681,7 +681,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingTerms') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -689,7 +688,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingRadius') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -697,7 +695,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingStatus') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -705,7 +702,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingLDAP') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -713,7 +709,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingCAPPORT') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -721,7 +716,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingAUTH') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -729,7 +723,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingSMS') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -1343,14 +1336,14 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
-        // Fetch all the graphics content
+        // Fetch all the required data, graphics etc...
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
         $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
-        // Extract the counts from the returned data
+        // Extract the connection attempts
         $authCounts = [
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
@@ -1365,12 +1358,12 @@ class AdminController extends AbstractController
         // Format the average session time as a single string
         $sessionAverageTime = sprintf('%dh %dm', $hours, $minutes);
 
+        // Sum all the traffic from the Accounting table
         $totalTraffic = [
             'total_input' => 0,
             'total_output' => 0,
         ];
-        // Sum all the traffic based on the fetch
-        foreach ($fetchChartTrafficPerRealmFreeradius['datasets'] as $dataset) {
+        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
             // Check if the dataset is for input or output
             if ($dataset['label'] === 'Uploaded') {
                 // Sum the data for total input
@@ -1442,11 +1435,11 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
-        // Fetch all the graphics content
+        // Fetch all the required data, graphics etc...
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
         $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
         // Sum all the current authentication
@@ -1460,9 +1453,8 @@ class AdminController extends AbstractController
             'total_input' => 0,
             'total_output' => 0,
         ];
-
-        // Sum all the traffic based on the fetch
-        foreach ($fetchChartTrafficPerRealmFreeradius['datasets'] as $dataset) {
+        // Sum all the traffic from the Accounting table
+        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
             // Check if the dataset is for input or output
             if ($dataset['label'] === 'Uploaded') {
                 // Sum the data for total input
@@ -1481,7 +1473,7 @@ class AdminController extends AbstractController
         $spreadsheet = new Spreadsheet();
         $pageOne = $spreadsheet->getActiveSheet();
 
-        // Realm names and session time data to export
+        // Return realms names and session time to export
         $realmsSession = $fetchChartSessionTimeFreeradius['labels'] ?? [];
         $combinedRealmSessionTime = [];
         foreach ($realmsSession as $index => $realm) {
@@ -1549,7 +1541,6 @@ class AdminController extends AbstractController
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        // Return the file as a response
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
 
