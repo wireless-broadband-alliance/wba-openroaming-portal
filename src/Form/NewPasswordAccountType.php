@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,7 +28,8 @@ class NewPasswordAccountType extends AbstractType
                 'label' => 'Confirm New Password',
                 'required' => true,
                 'mapped' => false,
-            ]);
+            ])
+            ->add('security', TurnstileType::class, ['attr' => ['data-action' => 'contact', 'data-theme' => 'dark'], 'label' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

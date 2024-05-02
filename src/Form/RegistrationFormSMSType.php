@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -36,7 +37,8 @@ class RegistrationFormSMSType extends AbstractType
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'label' => 'I agree to the terms',
-            ]);
+            ])
+            ->add('security', TurnstileType::class, ['attr' => ['data-action' => 'contact', 'data-theme' => 'dark'], 'label' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
