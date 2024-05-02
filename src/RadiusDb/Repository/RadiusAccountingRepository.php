@@ -46,6 +46,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('ra')
             ->select('ra.realm, COUNT(ra) AS num_users')
             ->where('ra.acctStopTime IS NULL')
+            ->orWhere('ra.connectInfo_stop IS NULL OR ra.connectInfo_stop = \'\'')
             ->groupBy('ra.realm')
             ->getQuery();
     }
