@@ -24,6 +24,11 @@
         <!-- Gmail SHOULD NOT be used on production, use it in development only. -->
         <!-- MAILER_DSN=gmail://USERNAME:PASSWORD@default -->
         <!-- ###- symfony/google-mailer ### -->
+
+        <!-- ###+ pixelopen/cloudflare-turnstile-bundle ### -->
+        <env name="TURNSTILE_KEY" value="3x00000000000000000000FF"/>
+        <env name="TURNSTILE_SECRET" value="1x0000000000000000000000000000000AA"/>
+        <!-- ###- pixelopen/cloudflare-turnstile-bundle ### -->
     </php>
 
     <testsuites>

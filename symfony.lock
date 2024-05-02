@@ -100,6 +100,18 @@
             "tests/bootstrap.php"
         ]
     },
+    "pixelopen/cloudflare-turnstile-bundle": {
+        "version": "0.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "6173b9aff0056dd99ca70a2caa940cc7bcac0b4b"
+        },
+        "files": [
+            "config/packages/pixel_open_cloudflare_turnstile.yaml"
+        ]
+    },
     "sensio/framework-extra-bundle": {
         "version": "6.2",
         "recipe": {
