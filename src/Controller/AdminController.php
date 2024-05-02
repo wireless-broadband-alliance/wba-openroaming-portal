@@ -169,7 +169,7 @@ class AdminController extends AbstractController
             'perPage' => $perPage,
             'searchTerm' => null,
             'data' => $data,
-            'allRowsCount' => $allUsersCount,
+            'allUsersCount' => $allUsersCount,
             'verifiedUsersCount' => $verifiedUsersCount,
             'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
