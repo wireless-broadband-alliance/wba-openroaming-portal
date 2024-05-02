@@ -1497,9 +1497,8 @@ class AdminController extends AbstractController
             ],
             'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? [],
             'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? [],
-            'Total Of Current Authentications' => $totalCurrentAuths ?? 'No data available',
+            'Total Of Current Authentications' => $totalCurrentAuths,
         ];
-
 
         $row = 1;
         // Iterate over each title and its content
