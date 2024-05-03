@@ -30,27 +30,51 @@
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
         <div class="flex flex-row justify-between sm:pt-2 font-medium">
             <h1 class="text-lg text-left">Session Time</h1>
+            <span class="text-base text-gray-500 text-left">(in Hours)</span>
         </div>
-        <div class="md:mt-14 flex flex-col items-center justify-center">
-            <h1 class="text-center font-semibold">
-                In Hours
-            </h1>
-            {% if sessionTimeAveregeSeconds > 0 %}
-                {% set sizeClass = 'w-32 h-32' %}
-                {% if sessionTimeAveregeSeconds >= 1000 %}
-                    {% set sizeClass = 'w-36 h-36' %}
+        <div class="mx-8 mt-10 flex md:flex-row flex-col justify-center md:justify-between items-center md:space-x-6 space-x-0">
+            <div class="flex flex-col">
+                <h1 class="text-center font-semibold">
+                    Average
+                </h1>
+                {% if sessionTimeAverageSeconds > 0 %}
+                    {% set sizeClass = 'w-32 h-32' %}
+                    {% if sessionTimeAverageSeconds >= 1000 %}
+                        {% set sizeClass = 'w-36 h-36' %}
+                    {% endif %}
+                    {% if sessionTimeAverageSeconds >= 10000 %}
+                        {% set sizeClass = 'w-40 h-40' %}
+                    {% endif %}
+                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
+                        {{ sessionTimeAverage }}
+                    </div>
+                {% else %}
+                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                        No Data Available
+                    </div>
                 {% endif %}
-                {% if sessionTimeAveregeSeconds >= 10000 %}
-                    {% set sizeClass = 'w-40 h-40' %}
+            </div>
+            <div class="mt-8 md:mt-0 flex flex-col">
+                <h1 class="text-center font-semibold">
+                    Total
+                </h1>
+                {% if sessionTimeTotalSeconds > 0 %}
+                    {% set sizeClass = 'w-32 h-32' %}
+                    {% if sessionTimeTotalSeconds >= 1000 %}
+                        {% set sizeClass = 'w-36 h-36' %}
+                    {% endif %}
+                    {% if sessionTimeTotalSeconds >= 10000 %}
+                        {% set sizeClass = 'w-40 h-40' %}
+                    {% endif %}
+                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
+                        {{ sessionTimeTotal }}
+                    </div>
+                {% else %}
+                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                        No Data Available
+                    </div>
                 {% endif %}
-                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                    {{ sessionTimeAvarege }}
-                </div>
-            {% else %}
-                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                    No Data Available
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 
@@ -58,7 +82,7 @@
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
         <div class="flex flex-row justify-between sm:pt-2 font-medium">
             <h1 class="text-lg text-left">Total of Traffic</h1>
-            <span class="text-xs text-gray-500 text-right">(in GigaBytes)</span>
+            <span class="text-base text-gray-500 text-left">(in GigaBytes)</span>
         </div>
         <div class="mx-8 md:mt-14 flex md:flex-row flex-col justify-center md:justify-between items-center md:space-x-6 space-x-0">
             <div class="flex flex-col">
