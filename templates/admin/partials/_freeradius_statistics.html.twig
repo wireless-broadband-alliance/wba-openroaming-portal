@@ -37,16 +37,16 @@
                 <h1 class="text-center font-semibold">
                     Average
                 </h1>
-                {% if sessionTimeAveregeSeconds > 0 %}
+                {% if sessionTimeAverageSeconds > 0 %}
                     {% set sizeClass = 'w-32 h-32' %}
-                    {% if sessionTimeAveregeSeconds >= 1000 %}
+                    {% if sessionTimeAverageSeconds >= 1000 %}
                         {% set sizeClass = 'w-36 h-36' %}
                     {% endif %}
-                    {% if sessionTimeAveregeSeconds >= 10000 %}
+                    {% if sessionTimeAverageSeconds >= 10000 %}
                         {% set sizeClass = 'w-40 h-40' %}
                     {% endif %}
                     <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
-                        {{ sessionTimeAvarege }}
+                        {{ sessionTimeAverage }}
                     </div>
                 {% else %}
                     <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
@@ -58,16 +58,16 @@
                 <h1 class="text-center font-semibold">
                     Total
                 </h1>
-                {% if sessionTimeAveregeSeconds > 0 %}
+                {% if sessionTimeTotalSeconds > 0 %}
                     {% set sizeClass = 'w-32 h-32' %}
-                    {% if sessionTimeAveregeSeconds >= 1000 %}
+                    {% if sessionTimeTotalSeconds >= 1000 %}
                         {% set sizeClass = 'w-36 h-36' %}
                     {% endif %}
-                    {% if sessionTimeAveregeSeconds >= 10000 %}
+                    {% if sessionTimeTotalSeconds >= 10000 %}
                         {% set sizeClass = 'w-40 h-40' %}
                     {% endif %}
                     <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
-                        {{ sessionTimeAvarege }}
+                        {{ sessionTimeTotal }}
                     </div>
                 {% else %}
                     <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
