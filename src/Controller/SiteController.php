@@ -287,7 +287,7 @@ class SiteController extends AbstractController
             }
 
             if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
-                $this->addFlash('error', 'Something went wrong please try again. If the problem keep occurring contact our support!');
+                $this->addFlash('error', 'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!');
                 return $this->redirectToRoute('app_landing');
             }
 

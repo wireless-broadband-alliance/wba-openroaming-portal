@@ -51,7 +51,7 @@ class RegistrationFormType extends AbstractType
                 'label' => 'I agree to the terms',
             ]);
 
-        // Check if CLOUD_FLARE_CHECKER value is EMAIL
+        // Check if CLOUD_FLARE_CHECKER value is ON
         if ($cloudFlareCheckerValue === EmailConfirmationStrategy::EMAIL) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => ['data-action' => 'contact'],
