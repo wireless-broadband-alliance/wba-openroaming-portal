@@ -3,8 +3,8 @@
         <div class="flex flex-row text-base cursor-default">
             <div class="flex space-x-2 mr-4">
                 {# Display the range of user numbers on the current page #}
-                <span class="text-veryDarkPurple">{{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, allRowsCount) }}</span>
-                <span class="text-veryDarkPurple"> of {{ allRowsCount }} </span>
+                <span class="text-veryDarkPurple">{{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, allUsersCount) }}</span>
+                <span class="text-veryDarkPurple"> of {{ allUsersCount }} </span>
             </div>
             <div class="flex space-x-2.5">
                 {# Previous page navigation #}
