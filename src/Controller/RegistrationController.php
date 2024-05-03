@@ -159,8 +159,6 @@ class RegistrationController extends AbstractController
                 $this->addFlash('success', 'We have sent an email with your account password and verification code');
                 $mailer->send($email);
             }
-        } else if ($data['CLOUD_FLARE_CHECKER']['value'] === EmailConfirmationStrategy::EMAIL) {
-            $this->addFlash('warning', 'Please complete the Cloudflare check before proceeding.');
         }
 
         return $this->render('site/register_landing.html.twig', [
