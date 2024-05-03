@@ -1485,16 +1485,19 @@ class AdminController extends AbstractController
         $pageOne = $spreadsheet->getActiveSheet();
 
         // Return realms names and session time to export
-        $realmsSession = $fetchChartSessionTimeFreeradius['labels'] ?? [];
         $combinedRealmSessionTime = [];
-        foreach ($realmsSession as $index => $realm) {
-            $sessionTimeData = $fetchChartSessionTimeFreeradius['datasets'][0]['data'] ?? [];
+        foreach ($fetchChartSessionTimeFreeradius as $session) {
+            $realm = $session['realm'];
+            $totalSessionTime = $session['totalSessionTime'];
+            $averageSessionTime = $session['averageSessionTime'];
+
             $combinedRealmSessionTime[] = [
                 'Realm Name' => $realm,
-                'Session Time (seconds)' => $sessionTimeData[$index] ?? 'No data available',
+                'Total Session Time (seconds)' => $totalSessionTime,
+                'Average Session Time (seconds)' => $averageSessionTime,
             ];
         }
-
+        
         // Set the titles and their respective content
         $titlesAndContent = [
             'Authentication Attempts' => [
