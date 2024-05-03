@@ -43,10 +43,13 @@ class RadiusAccountingRepository extends ServiceEntityRepository
 
     public function findActiveSessions(): Query
     {
+        $twentyFourHoursAgo = new DateTime('-24 hours');
+
         return $this->createQueryBuilder('ra')
             ->select('ra.realm, COUNT(ra) AS num_users')
             ->where('ra.acctStopTime IS NULL')
-            ->orWhere('ra.connectInfo_stop IS NULL OR ra.connectInfo_stop = \'\'')
+            ->andWhere('ra.acctStartTime >= :twentyFourHoursAgo')
+            ->setParameter('twentyFourHoursAgo', $twentyFourHoursAgo)
             ->groupBy('ra.realm')
             ->getQuery();
     }

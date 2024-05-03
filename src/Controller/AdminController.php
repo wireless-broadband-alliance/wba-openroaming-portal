@@ -1347,7 +1347,7 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
         // Extract the connection attempts
@@ -1356,14 +1356,23 @@ class AdminController extends AbstractController
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
 
-        // Extract the avarege session time
-        $sessionTimeAveregeSeconds = $fetchChartSessionTimeFreeradius['datasets'][0]['data'][0] ?? 0;
-        // Calculate the hours
-        $hours = floor($sessionTimeAveregeSeconds / 3600);
-        // Calculate the remaining seconds
-        $minutes = floor(($sessionTimeAveregeSeconds % 3600) / 60);
-        // Format the average session time as a single string
-        $sessionAverageTime = sprintf('%dh %dm', $hours, $minutes);
+        $totalSessionTimeSeconds = 0;
+        $averageSessionTimeSeconds = 0;
+        // Iterate over the session data to calculate total and average session times
+        foreach ($fetchChartSessionTimeFreeradius as $session) {
+            $totalSessionTimeSeconds = $session['totalSessionTime'] + $totalSessionTimeSeconds;
+            $averageSessionTimeSeconds = $session['averageSessionTime'] + $averageSessionTimeSeconds;
+        }
+
+        // Format total session time
+        $totalHours = floor($totalSessionTimeSeconds / 3600);
+        $totalMinutes = floor(($totalSessionTimeSeconds % 3600) / 60);
+        $sessionTotalTime = sprintf('%dh %dm', $totalHours, $totalMinutes);
+
+        // Format average session time
+        $averageHours = floor($averageSessionTimeSeconds / 3600);
+        $averageMinutes = floor(($averageSessionTimeSeconds % 3600) / 60);
+        $sessionAverageTime = sprintf('%dh %dm', $averageHours, $averageMinutes);
 
         // Sum all the traffic from the Accounting table
         $totalTraffic = [
@@ -1404,8 +1413,10 @@ class AdminController extends AbstractController
             'totalTrafficFreeradius' => $totalTraffic,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
-            'sessionTimeAvarege' => $sessionAverageTime,
-            'sessionTimeAveregeSeconds' => $sessionTimeAveregeSeconds,
+            'sessionTimeAverage' => $sessionAverageTime,
+            'sessionTimeAverageSeconds' => $averageSessionTimeSeconds,
+            'sessionTimeTotal' => $sessionTotalTime,
+            'sessionTimeTotalSeconds' => $totalSessionTimeSeconds,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
@@ -1446,7 +1457,7 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
         // Sum all the current authentication
@@ -1481,16 +1492,19 @@ class AdminController extends AbstractController
         $pageOne = $spreadsheet->getActiveSheet();
 
         // Return realms names and session time to export
-        $realmsSession = $fetchChartSessionTimeFreeradius['labels'] ?? [];
         $combinedRealmSessionTime = [];
-        foreach ($realmsSession as $index => $realm) {
-            $sessionTimeData = $fetchChartSessionTimeFreeradius['datasets'][0]['data'] ?? [];
+        foreach ($fetchChartSessionTimeFreeradius as $session) {
+            $realm = $session['realm'];
+            $totalSessionTime = $session['totalSessionTime'];
+            $averageSessionTime = $session['averageSessionTime'];
+
             $combinedRealmSessionTime[] = [
                 'Realm Name' => $realm,
-                'Session Time (seconds)' => $sessionTimeData[$index] ?? 'No data available',
+                'Total Session Time (seconds)' => $totalSessionTime,
+                'Average Session Time (seconds)' => $averageSessionTime,
             ];
         }
-
+        
         // Set the titles and their respective content
         $titlesAndContent = [
             'Authentication Attempts' => [
@@ -1856,7 +1870,7 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
-    private function fetchChartTrafficPerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the traffic using the findTrafficPerRealm query
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
@@ -1884,7 +1898,7 @@ class AdminController extends AbstractController
     {
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
-        $realmSessionTime = [];
+        $realmSessionTotalTime = [];
         $realmSessionCount = [];
 
         // Sum the session time and count the sessions
@@ -1893,23 +1907,28 @@ class AdminController extends AbstractController
             $sessionTime = $event['acctSessionTime'];
 
             // Add the session time to the total
-            if (!isset($realmSessionTime[$realm])) {
-                $realmSessionTime[$realm] = $sessionTime;
+            if (!isset($realmSessionTotalTime[$realm])) {
+                $realmSessionTotalTime[$realm] = $sessionTime;
                 $realmSessionCount[$realm] = 1;
             } else {
-                $realmSessionTime[$realm] = $sessionTime + $realmSessionTime[$realm] ;
+                $realmSessionTotalTime[$realm] += $sessionTime; // Update total session time
                 $realmSessionCount[$realm]++;
             }
         }
 
-        // Calculate the average session time
-        $averageSessionTime = [];
-        foreach ($realmSessionTime as $realm => $totalSessionTime) {
+        // Calculate the average session time and return both total and average session time
+        $result = [];
+        foreach ($realmSessionTotalTime as $realm => $totalSessionTime) {
             $count = $realmSessionCount[$realm];
-            $averageSessionTime[$realm] = $count > 0 ? $totalSessionTime / $count : 0;
+            $averageSessionTime = $count > 0 ? $totalSessionTime / $count : 0;
+            $result[] = [
+                'realm' => $realm,
+                'totalSessionTime' => $totalSessionTime,
+                'averageSessionTime' => $averageSessionTime
+            ];
         }
 
-        return $this->generateDatasetsRealmsCounting($averageSessionTime);
+        return $result;
     }
 
     private function generateDatasets(array $counts): array
