@@ -1340,7 +1340,7 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
         // Extract the connection attempts
@@ -1439,7 +1439,7 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
         // Sum all the current authentication
@@ -1849,7 +1849,7 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
-    private function fetchChartTrafficPerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the traffic using the findTrafficPerRealm query
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
