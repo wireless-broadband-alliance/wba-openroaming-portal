@@ -10,6 +10,7 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\NewPasswordAccountType;
+use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -100,35 +101,36 @@ class SiteController extends AbstractController
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select OS');
-                } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
-                    $this->addFlash('error', 'Please a enter a valid email');
-                } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
-                    $this->addFlash('error', 'Please agree to the Terms of Service');
                 } else if ($this->getUser() === null) {
                     $user = new User();
                     $event = new Event();
+                    $form = $this->createForm(RegistrationFormType::class, $user);
+                    $form->handleRequest($request);
+                    if ($form->isSubmitted() && $form->isValid()) {
+                        $user = $form->getData();
 
-                    $user->setEmail($payload['email']);
-                    $user->setCreatedAt(new \DateTime());
-                    $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
-                    $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                    $entityManager->persist($user);
+                        $user->setEmail($user->getEmail());
+                        $user->setCreatedAt(new \DateTime());
+                        $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                        $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
+                        $entityManager->persist($user);
 
-                    $event->setUser($user);
-                    $event->setEventDatetime(new DateTime());
-                    $event->setEventName(AnalyticalEventType::USER_CREATION);
-                    $event->setEventMetadata([
-                        'platform' => PlatformMode::Demo,
-                        'sms' => false,
-                    ]);
-                    $entityManager->persist($event);
+                        $event->setUser($user);
+                        $event->setEventDatetime(new DateTime());
+                        $event->setEventName(AnalyticalEventType::USER_CREATION);
+                        $event->setEventMetadata([
+                            'platform' => PlatformMode::Demo,
+                            'sms' => false,
+                        ]);
+                        $entityManager->persist($event);
+                        $entityManager->flush();
+                        $userAuthenticator->authenticateUser(
+                            $user,
+                            $authenticator,
+                            $request
+                        );
+                    }
 
-                    $entityManager->flush();
-                    $userAuthenticator->authenticateUser(
-                        $user,
-                        $authenticator,
-                        $request
-                    );
                     if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
@@ -209,10 +211,12 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
                 'form' => $form->createView(),
-                'formPassword' => $formPassword->createView()
+                'formPassword' => $formPassword->createView(),
+                'registrationFormDemo' => $formResgistrationDemo->createView()
             ] + $data);
     }
 
