@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegistrationFormType extends AbstractType
 {
@@ -55,7 +56,10 @@ class RegistrationFormType extends AbstractType
         if ($cloudFlareCheckerValue === EmailConfirmationStrategy::EMAIL) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => ['data-action' => 'contact'],
-                'label' => false
+                'label' => false,
+                'constraints' => [
+                    new NotBlank(['message' => 'The security field is required.']),
+                ],
             ]);
         }
     }
