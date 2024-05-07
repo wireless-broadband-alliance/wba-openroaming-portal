@@ -19,6 +19,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -35,6 +36,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -81,9 +85,17 @@ class RegistrationController extends AbstractController
         return $verificationCode;
     }
 
+    /*
+    * Handle the email registration.
+    */
     /**
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param EntityManagerInterface $entityManager
+     * @param MailerInterface $mailer
+     * @return Response
+     * @throws RandomException
      * @throws TransportExceptionInterface
-     * @throws Exception
      */
     #[Route('/register', name: 'app_register')]
     public function register(
@@ -167,8 +179,20 @@ class RegistrationController extends AbstractController
         ]);
     }
 
+    /*
+    * Handle the sms registration.
+    */
     /**
-     * @throws Exception
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param EntityManagerInterface $entityManager
+     * @param SessionInterface $session
+     * @return Response
+     * @throws NonUniqueResultException
+     * @throws RandomException
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/register/sms', name: 'app_register_sms')]
@@ -253,13 +277,14 @@ class RegistrationController extends AbstractController
 
     /*
      * Handle the email link click to verify the user account.
-     *
-     * @param RequestStack $requestStack
-     * @param UserRepository $userRepository
-     * @return Response
-     * @throws NonUniqueResultException
      */
     /**
+     * @param RequestStack $requestStack
+     * @param UserRepository $userRepository
+     * @param TokenStorageInterface $tokenStorage
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param EventRepository $eventRepository
+     * @return Response
      * @throws NonUniqueResultException
      */
     #[Route('/login/link', name: 'app_confirm_account')]
