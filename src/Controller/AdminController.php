@@ -671,9 +671,9 @@ class AdminController extends AbstractController
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        // Regenerate the verification code for the admin to reset settings
 
         if ($type === 'settingCustom') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -681,7 +681,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingTerms') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -689,7 +688,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingRadius') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -697,7 +695,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingStatus') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -705,7 +702,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingLDAP') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -713,7 +709,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingCAPPORT') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -721,7 +716,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingAUTH') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -729,7 +723,6 @@ class AdminController extends AbstractController
         }
 
         if ($type === 'settingSMS') {
-            // Regenerate the verification code for the admin to reset settings
             $email = $this->createEmailAdmin($currentUser->getEmail());
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -1320,6 +1313,7 @@ class AdminController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
+        $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1342,63 +1336,43 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
-        // Fetch all the graphics content
+        // Fetch all the required data, graphics etc...
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficPerRealmFreeradius = $this->fetchChartTrafficPerRealmFreeradius($startDate, $endDate);
-        $fetchChartSessionTimePerRealmFreeradius = $this->fetchChartSessionTimePerRealmFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
+        $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
 
-        if (!empty($fetchChartRealmsFreeradius['labels'])) {
-            // Extract the most used realm name
-            $mostUsedRealm = $fetchChartRealmsFreeradius['labels'][0];
-        } else {
-            $mostUsedRealm = "No data available";
-        }
-
-        if (!empty($fetchChartCurrentAuthFreeradius['labels'])) {
-            // Extract the most current authenticated realm name
-            $realmIndexWithMaxAuth = array_search(max($fetchChartCurrentAuthFreeradius['labels']), $fetchChartCurrentAuthFreeradius['labels']);
-            $mostCurrentAuthRealm = $fetchChartCurrentAuthFreeradius['labels'][$realmIndexWithMaxAuth] ?? "No data available";
-        } else {
-            $mostCurrentAuthRealm = "No data available";
-        }
-
-        // Extract all realms names
-        $realmsNames = $fetchChartRealmsFreeradius['labels'];
-
-        // Extract all current authenticated realms names
-        $currentAuthRealmsNames = $fetchChartCurrentAuthFreeradius['labels'];
-
-        // Pagination for the realms names tables. works the same has the one on the Users Management Page
-        $currentPage = $request->query->getInt('page', 1);
-        $perPage = 5;
-        $totalRealms = count($realmsNames);
-        $totalPages = ceil($totalRealms / $perPage);
-        $currentPage = $request->query->getInt('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-        $realmsPerPage = array_slice($realmsNames, $offset, $perPage);
-
-        // Extract the counts from the returned data
+        // Extract the connection attempts
         $authCounts = [
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
 
-        // Sum all the current authentication
-        $totalCurrentAuths = 0;
-        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
-            // Sum the data points in the current dataset
-            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        $totalSessionTimeSeconds = 0;
+        $averageSessionTimeSeconds = 0;
+        // Iterate over the session data to calculate total and average session times
+        foreach ($fetchChartSessionTimeFreeradius as $session) {
+            $totalSessionTimeSeconds = $session['totalSessionTime'] + $totalSessionTimeSeconds;
+            $averageSessionTimeSeconds = $session['averageSessionTime'] + $averageSessionTimeSeconds;
         }
 
+        // Format total session time
+        $totalHours = floor($totalSessionTimeSeconds / 3600);
+        $totalMinutes = floor(($totalSessionTimeSeconds % 3600) / 60);
+        $sessionTotalTime = sprintf('%dh %dm', $totalHours, $totalMinutes);
+
+        // Format average session time
+        $averageHours = floor($averageSessionTimeSeconds / 3600);
+        $averageMinutes = floor(($averageSessionTimeSeconds % 3600) / 60);
+        $sessionAverageTime = sprintf('%dh %dm', $averageHours, $averageMinutes);
+
+        // Sum all the traffic from the Accounting table
         $totalTraffic = [
             'total_input' => 0,
             'total_output' => 0,
         ];
-
-        // Sum all the traffic based on the fetch
-        foreach ($fetchChartTrafficPerRealmFreeradius['datasets'] as $dataset) {
+        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
             // Check if the dataset is for input or output
             if ($dataset['label'] === 'Uploaded') {
                 // Sum the data for total input
@@ -1413,32 +1387,174 @@ class AdminController extends AbstractController
             }
         }
 
+        // Extract all realms names
+        $realmsNames = $fetchChartRealmsFreeradius['labels'];
+
+        // Sum all the current authentication
+        $totalCurrentAuths = 0;
+        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
+            // Sum the data points in the current dataset
+            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        }
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'totalPages' => $totalPages,
-            'currentPage' => $currentPage,
-            'perPage' => $perPage,
-            'realmsPerPage' => $realmsPerPage,
-            'allRowsCount' => $totalRealms,
+            'realmsUsage' => $realmsNames,
             'authCounts' => $authCounts,
-            'mostUsedRealm' => $mostUsedRealm,
-            'mostCurrentAuthsRealm' => $mostCurrentAuthRealm,
-            'currentAuthsRealmsNames' => $currentAuthRealmsNames,
             'totalCurrentAuths' => $totalCurrentAuths,
             'totalTrafficFreeradius' => $totalTraffic,
-            'searchTerm' => null,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
-            'datasetsCurrentAuthRealmList' => $fetchChartCurrentAuthFreeradius['datasets'],
+            'sessionTimeAverage' => $sessionAverageTime,
+            'sessionTimeAverageSeconds' => $averageSessionTimeSeconds,
+            'sessionTimeTotal' => $sessionTotalTime,
+            'sessionTimeTotalSeconds' => $totalSessionTimeSeconds,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
-            'currentAuthsJson' => json_encode($fetchChartCurrentAuthFreeradius, JSON_THROW_ON_ERROR),
-            'realmsCountingJson' => json_encode($fetchChartRealmsFreeradius, JSON_THROW_ON_ERROR),
-            'trafficPerRealmFreeradius' => json_encode($fetchChartTrafficPerRealmFreeradius, JSON_THROW_ON_ERROR),
-            'sessionTimePerRealmFreeradius' => json_encode($fetchChartSessionTimePerRealmFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+            'exportFreeradiusStatistics' => $export_freeradius_statistics,
         ]);
+    }
+
+    /**
+     * @return Response
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportFreeradius(Request $request): Response
+    {
+        // Get the submitted start and end dates from the form
+        $startDateString = $request->request->get('startDate');
+        $endDateString = $request->request->get('endDate');
+
+        // Convert the date strings to DateTime objects
+        if ($startDateString) {
+            $startDate = new DateTime($startDateString);
+        } else if ($startDateString === "") {
+            $startDate = null;
+        } else {
+            $startDate = (new DateTime())->modify('-1 month');
+        }
+
+        if ($endDateString) {
+            $endDate = new DateTime($endDateString);
+        } else if ($endDateString === "") {
+            $endDate = null;
+        } else {
+            $endDate = new DateTime();
+        }
+
+        // Fetch all the required data, graphics etc...
+        $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
+        $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
+
+        // Sum all the current authentication
+        $totalCurrentAuths = 0;
+        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
+            // Sum the data points in the current dataset
+            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        }
+
+        $totalTraffic = [
+            'total_input' => 0,
+            'total_output' => 0,
+        ];
+        // Sum all the traffic from the Accounting table
+        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
+            // Check if the dataset is for input or output
+            if ($dataset['label'] === 'Uploaded') {
+                // Sum the data for total input
+                foreach ($dataset['data'] as $sum) {
+                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
+                }
+            } elseif ($dataset['label'] === 'Downloaded') {
+                // Sum the data for total output
+                foreach ($dataset['data'] as $sum) {
+                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
+                }
+            }
+        }
+
+        // Create a new PhpSpreadsheet Spreadsheet object
+        $spreadsheet = new Spreadsheet();
+        $pageOne = $spreadsheet->getActiveSheet();
+
+        // Return realms names and session time to export
+        $combinedRealmSessionTime = [];
+        foreach ($fetchChartSessionTimeFreeradius as $session) {
+            $realm = $session['realm'];
+            $totalSessionTime = $session['totalSessionTime'];
+            $averageSessionTime = $session['averageSessionTime'];
+
+            $combinedRealmSessionTime[] = [
+                'Realm Name' => $realm,
+                'Total Session Time (seconds)' => $totalSessionTime,
+                'Average Session Time (seconds)' => $averageSessionTime,
+            ];
+        }
+        
+        // Set the titles and their respective content
+        $titlesAndContent = [
+            'Authentication Attempts' => [
+                'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0] ?? [],
+                'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1] ?? [],
+            ],
+            'Session Time' => $combinedRealmSessionTime,
+            'Total of Traffic' => [
+                'Uploaded' => $totalTraffic['total_input'],
+                'Downloaded' => $totalTraffic['total_output'],
+            ],
+            'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? [],
+            'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? [],
+            'Total Of Current Authentications' => $totalCurrentAuths,
+        ];
+
+        $row = 1;
+        // Iterate over each title and its content
+        foreach ($titlesAndContent as $title => $content) {
+            // Set the title in column A
+            $pageOne->setCellValue('A' . $row, $title);
+
+            // Check if the content is an array
+            if (is_array($content)) {
+                // Iterate over the content
+                foreach ($content as $key => $value) {
+                    // Check if the value is an array
+                    if (is_array($value)) {
+                        // If the value is an array, convert it to a string representation
+                        $formattedValue = json_encode($value);
+                    } else {
+                        // If the value is not an array, use it directly
+                        $formattedValue = $value;
+                    }
+
+                    // Set the key and formatted value in columns B and C
+                    $pageOne->setCellValue('B' . $row, $key);
+                    $pageOne->setCellValue('C' . $row, $formattedValue);
+
+                    // Increment row counter
+                    $row++;
+                }
+            } else {
+                // If the content is not an array, set it in column B
+                $pageOne->setCellValue('B' . $row, $content);
+
+                // Increment row counter
+                $row++;
+            }
+        }
+
+        // Save the spreadsheet to a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
 
     /**
@@ -1747,7 +1863,7 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
-    private function fetchChartTrafficPerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the traffic using the findTrafficPerRealm query
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
@@ -1771,27 +1887,41 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsTraffic($realmTraffic);
     }
 
-    private function fetchChartSessionTimePerRealmFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartSessionTimeFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
-        $realmSessionTime = [];
+        $realmSessionTotalTime = [];
+        $realmSessionCount = [];
 
-        // Sum the session time for each realm
+        // Sum the session time and count the sessions
         foreach ($events as $event) {
             $realm = $event['realm'];
             $sessionTime = $event['acctSessionTime'];
 
-            // Add the session time to the total for the realm
-            if (!isset($realmSessionTime[$realm])) {
-                $realmSessionTime[$realm] = $sessionTime;
+            // Add the session time to the total
+            if (!isset($realmSessionTotalTime[$realm])) {
+                $realmSessionTotalTime[$realm] = $sessionTime;
+                $realmSessionCount[$realm] = 1;
             } else {
-                $realmSessionTime[$realm] = $sessionTime + $realmSessionTime[$realm];
+                $realmSessionTotalTime[$realm] += $sessionTime; // Update total session time
+                $realmSessionCount[$realm]++;
             }
         }
 
-        // Return the sums of session time for each realm
-        return $this->generateDatasetsRealmsCounting($realmSessionTime);
+        // Calculate the average session time and return both total and average session time
+        $result = [];
+        foreach ($realmSessionTotalTime as $realm => $totalSessionTime) {
+            $count = $realmSessionCount[$realm];
+            $averageSessionTime = $count > 0 ? $totalSessionTime / $count : 0;
+            $result[] = [
+                'realm' => $realm,
+                'totalSessionTime' => $totalSessionTime,
+                'averageSessionTime' => $averageSessionTime
+            ];
+        }
+
+        return $result;
     }
 
     private function generateDatasets(array $counts): array

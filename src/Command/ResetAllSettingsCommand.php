@@ -63,7 +63,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
-            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_20th_logo.png'],
+            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
