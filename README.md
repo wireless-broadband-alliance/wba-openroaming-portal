@@ -371,7 +371,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 ### 1. Main Page Overview - Live Mode
 
-![Main_Page_Demo_False](assets/wba_screenshots/main_page_demo_false.png)
+![Main_Page_Demo_False](assets/wba_screenshots/main_page_live_mode.png)
 
 The main page in platform mode (**Live**) provides a user-friendly interface for users with
 individual accounts.
@@ -385,7 +385,7 @@ safely and quickly connect to Wi-Fi networks.
 
 ### 1.2 Main Page Overview - Demo Mode
 
-![Main_Page_Demo_True](assets/wba_screenshots/main_page_demo_true.png)
+![Main_Page_Demo_True](assets/wba_screenshots/main_page_demo_mode.png)
 
 The main page in platform mode (**Demo**) displays the platform's possibilities for users who want to
 browse the portal without creating individual accounts.
