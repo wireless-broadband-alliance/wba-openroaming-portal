@@ -47,3 +47,7 @@ release-package/release.zip
 
 public/resources/uploaded/*
 !upload/.gitkeep
+
+assets/styles/randomRealmsColors.css
+
+Dockerfile-dev
