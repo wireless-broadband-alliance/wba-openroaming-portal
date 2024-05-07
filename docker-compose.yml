@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:1.2.2
+    image: registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:1.2.3
     env_file:
       - .env
     volumes:
