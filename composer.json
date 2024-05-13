@@ -1,7 +1,7 @@
 {
 	"type": "project",
 	"license": "proprietary",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"minimum-stability": "stable",
 	"prefer-stable": true,
 	"require": {
