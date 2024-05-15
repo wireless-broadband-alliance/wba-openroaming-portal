@@ -87,8 +87,12 @@ class GoogleController extends AbstractController
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
 
-        // Get the authorization code from the query parameters
+        // Check if the 'code' parameter is present in the request
         $code = $request->query->get('code');
+        if ($code === null) {
+            $this->addFlash('error', 'Authentication process cancelled.');
+            return $this->redirectToRoute('app_landing');
+        }
 
         // Exchange the authorization code for an access token
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
