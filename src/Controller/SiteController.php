@@ -17,6 +17,7 @@ use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
+use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -34,6 +35,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\LogicException;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 /**
@@ -46,6 +48,7 @@ class SiteController extends AbstractController
     private ParameterBagInterface $parameterBag;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
+    private EventRepository $eventRepository;
 
     /**
      * SiteController constructor.
@@ -55,14 +58,16 @@ class SiteController extends AbstractController
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      */
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings)
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings, EventRepository $eventRepository)
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->parameterBag = $parameterBag;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
+        $this->eventRepository = $eventRepository;
     }
 
     /**
@@ -286,7 +291,7 @@ class SiteController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (!password_verify($typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Invalid password. Please try again.');
+                $this->addFlash('error', 'Current password Invalid. Please try again.');
                 return $this->redirectToRoute('app_landing');
             }
 
@@ -399,24 +404,66 @@ class SiteController extends AbstractController
     /**
      * Regenerate the verification code for the user and send a new email.
      *
+     * @param EventRepository $eventRepository
+     * @param MailerInterface $mailer
      * @return RedirectResponse A redirect response.
      * @throws Exception
      * @throws TransportExceptionInterface
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function regenerateCode(): RedirectResponse
+    public function regenerateCode(EventRepository $eventRepository, MailerInterface $mailer): RedirectResponse
     {
-        /** @var User $currentUser */
         $currentUser = $this->getUser();
         $isVerified = $currentUser->isVerified();
 
         if (!$isVerified) {
-            // Regenerate the verification code for the user
-            $email = $this->createEmailCode($currentUser->getEmail());
-            $this->mailer->send($email);
+            $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser);
+
+            // Check if the user has not exceeded the attempt limit
+            if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+                $minInterval = new DateInterval('PT1M');
+                $currentTime = new DateTime();
+
+                // Check if enough time has passed since the last attempt
+                if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                        $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+
+                    // Increment the attempt count
+                    $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+
+                    $email = $this->createEmailCode($currentUser->getEmail());
+                    $mailer->send($email);
+
+                    // Save event with attempt count and current time
+                    if (!$latestEvent) {
+                        $latestEvent = new Event();
+                        $latestEvent->setUser($currentUser);
+                        $latestEvent->setEventDatetime(new DateTime());
+                        $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
+                        $latestEvent->setEventMetadata([
+                            'platform' => PlatformMode::Live,
+                            'email' => $currentUser->getEmail(),
+                        ]);
+                    }
+
+                    $latestEvent->setVerificationAttempts($attempts);
+                    $latestEvent->setLastVerificationCodeTime($currentTime);
+                    $eventRepository->save($latestEvent, true);
+
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getEmail(), $attemptsLeft);
+                    $this->addFlash('success', $message);
+                } else {
+                    // Inform the user to wait before trying again
+                    $this->addFlash('error', 'Please wait 5 minutes before trying again.');
+                }
+            } else {
+                // Inform the user that the attempt limit has been reached
+                $this->addFlash('error', 'You have reached the maximum number of attempts. Please try again later.');
+            }
         }
-        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
+
         return $this->redirectToRoute('app_landing');
     }
 
