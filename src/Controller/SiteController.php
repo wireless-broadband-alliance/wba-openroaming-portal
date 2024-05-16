@@ -422,7 +422,7 @@ class SiteController extends AbstractController
 
             // Check if the user has not exceeded the attempt limit
             if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
-                $minInterval = new DateInterval('PT1M');
+                $minInterval = new DateInterval('PT5M');
                 $currentTime = new DateTime();
 
                 // Check if enough time has passed since the last attempt
