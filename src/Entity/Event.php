@@ -23,7 +23,7 @@ class Event
     #[ORM\Column(type: Types::JSON)]
     private ?array $event_metadata = null;
 
-    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\ManyToOne(inversedBy: 'event')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
