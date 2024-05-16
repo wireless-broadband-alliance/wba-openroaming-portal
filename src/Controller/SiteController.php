@@ -414,6 +414,7 @@ class SiteController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function regenerateCode(EventRepository $eventRepository, MailerInterface $mailer): RedirectResponse
     {
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
         $isVerified = $currentUser->isVerified();
 
