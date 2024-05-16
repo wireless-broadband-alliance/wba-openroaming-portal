@@ -28,10 +28,10 @@ class Event
     private ?User $user = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $verification_attempt_sms = null;
+    private ?int $verification_attempts = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $last_verification_code_time_sms = null;
+    private ?\DateTimeInterface $last_verification_code_time = null;
 
     public function getId(): ?int
     {
@@ -86,26 +86,26 @@ class Event
         return $this;
     }
 
-    public function getVerificationAttemptSms(): ?int
+    public function getVerificationAttempts(): ?int
     {
-        return $this->verification_attempt_sms;
+        return $this->verification_attempts;
     }
 
-    public function setVerificationAttemptSms(?int $verification_attempt_sms): static
+    public function setVerificationAttempts(?int $verification_attempts): static
     {
-        $this->verification_attempt_sms = $verification_attempt_sms;
+        $this->verification_attempts = $verification_attempts;
 
         return $this;
     }
 
-    public function getLastVerificationCodeTimeSms(): ?\DateTimeInterface
+    public function getLastVerificationCodeTime(): ?\DateTimeInterface
     {
-        return $this->last_verification_code_time_sms;
+        return $this->last_verification_code_time;
     }
 
-    public function setLastVerificationCodeTimeSms(?\DateTimeInterface $last_verification_code_time_sms): static
+    public function setLastVerificationCodeTime(?\DateTimeInterface $last_verification_code_time): static
     {
-        $this->last_verification_code_time_sms = $last_verification_code_time_sms;
+        $this->last_verification_code_time = $last_verification_code_time;
 
         return $this;
     }

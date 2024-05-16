@@ -509,7 +509,7 @@ class SiteController extends AbstractController
 
                 // Check if $latestEvent to avoid null conflicts
                 if ($latestEvent) {
-                    $attemptsLeft = 3 - $latestEvent->getVerificationAttemptSms();
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
                     $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
                     $this->addFlash('success', $message);
                 }

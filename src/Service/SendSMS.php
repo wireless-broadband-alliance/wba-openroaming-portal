@@ -115,7 +115,7 @@ class SendSMS
         $latestEvent = $eventRepository->findLatestSmsAttemptEvent($user);
 
         // Check the number of attempts
-        return !$latestEvent || $latestEvent->getVerificationAttemptSms() < 3;
+        return !$latestEvent || $latestEvent->getVerificationAttempts() < 3;
     }
 
     /**
@@ -136,12 +136,12 @@ class SendSMS
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
-        if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
+        if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
             $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
+            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
                     $attempts = 1;
@@ -155,11 +155,11 @@ class SendSMS
                     ]);
                 } else {
                     // Increment the attempts
-                    $attempts = $latestEvent->getVerificationAttemptSms() + 1;
+                    $attempts = $latestEvent->getVerificationAttempts() + 1;
                 }
 
-                $latestEvent->setVerificationAttemptSms($attempts);
-                $latestEvent->setLastVerificationCodeTimeSms($currentTime);
+                $latestEvent->setVerificationAttempts($attempts);
+                $latestEvent->setLastVerificationCodeTime($currentTime);
                 $this->eventRepository->save($latestEvent, true);
 
                 // Generate a new verification code and resend the SMS
