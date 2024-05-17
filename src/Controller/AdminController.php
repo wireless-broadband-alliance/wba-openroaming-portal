@@ -937,9 +937,9 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'CLOUD_FLARE_CHECKER' settings
+            // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
-            $cloudFlareChecker = $submittedData['CLOUD_FLARE_CHECKER'] ?? null;
+            $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
@@ -955,10 +955,10 @@ class AdminController extends AbstractController
                 $em->persist($emailVerificationSetting);
             }
 
-            $cloudFlareCheckerSetting = $settingsRepository->findOneBy(['name' => 'CLOUD_FLARE_CHECKER']);
-            if ($cloudFlareCheckerSetting) {
-                $cloudFlareCheckerSetting->setValue($cloudFlareChecker);
-                $em->persist($cloudFlareCheckerSetting);
+            $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+            if ($turnstileCheckerSetting) {
+                $turnstileCheckerSetting->setValue($turnstileChecker);
+                $em->persist($turnstileCheckerSetting);
             }
 
             // Flush the changes to the database
@@ -1504,7 +1504,7 @@ class AdminController extends AbstractController
                 'Average Session Time (seconds)' => $averageSessionTime,
             ];
         }
-        
+
         // Set the titles and their respective content
         $titlesAndContent = [
             'Authentication Attempts' => [

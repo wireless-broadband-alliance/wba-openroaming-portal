@@ -3,7 +3,7 @@
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0">
         {% for setting in form %}
             {# Display only the platform and the email verification settings #}
-            {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'CLOUD_FLARE_CHECKER'] %}
+            {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="statusCards"
                      id="{{ setting.vars.name }}">
@@ -13,7 +13,7 @@
                             {% set displayName = {
                                 'PLATFORM_MODE': 'Platform Mode',
                                 'USER_VERIFICATION': 'User Verification',
-                                'CLOUD_FLARE_CHECKER': 'Cloud Flare Checker'
+                                'TURNSTILE_CHECKER': 'Turnstile Checker'
                             }[setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                         </div>
@@ -25,7 +25,7 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'CLOUD_FLARE_CHECKER'] %}
+                    {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                         </div>
@@ -109,17 +109,17 @@
                         </div>
                     {% endif %}
 
-                    {% if setting.vars.name in ['CLOUD_FLARE_CHECKER'] %}
+                    {% if setting.vars.name in ['TURNSTILE_CHECKER'] %}
                         <div class="flex flex-col items-center space-y-2 mt-5">
                             {# Render "ON" Radio Input #}
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                   name="onLabelCloudFlare">
+                                   name="onLabelTurnstile">
                                 On
-                                <input type="radio" name="{{ form.CLOUD_FLARE_CHECKER.vars.full_name }}"
-                                       id="onRadioCloudFlare"
+                                <input type="radio" name="{{ form.TURNSTILE_CHECKER.vars.full_name }}"
+                                       id="onRadioTurnstile"
                                        value="ON"
-                                       class="radio-input hidden" {{ form.CLOUD_FLARE_CHECKER.vars.data == 'ON' ? 'checked' : '' }}>
-                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioCloudFlare">
+                                       class="radio-input hidden" {{ form.TURNSTILE_CHECKER.vars.data == 'ON' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioTurnstile">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
@@ -131,13 +131,13 @@
 
                             {# Render "OFF" Radio Input #}
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                   name="offLabelCloudFlare">
+                                   name="offLabelTurnstile">
                                 Off
-                                <input type="radio" name="{{ form.CLOUD_FLARE_CHECKER.vars.full_name }}"
-                                       id="offRadioCloudFlare"
+                                <input type="radio" name="{{ form.TURNSTILE_CHECKER.vars.full_name }}"
+                                       id="offRadioTurnstile"
                                        value="OFF"
-                                       class="radio-input hidden" {{ form.CLOUD_FLARE_CHECKER.vars.data == 'OFF' ? 'checked' : '' }}>
-                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioCloudFlare">
+                                       class="radio-input hidden" {{ form.TURNSTILE_CHECKER.vars.data == 'OFF' ? 'checked' : '' }}>
+                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioTurnstile">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"

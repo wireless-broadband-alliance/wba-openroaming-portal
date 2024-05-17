@@ -38,7 +38,7 @@ class RegistrationFormSMSType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $cloudFlareCheckerValue = $data['CLOUD_FLARE_CHECKER']['value'];
+        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
             ->add('phoneNumber', TextType::class, [
@@ -63,8 +63,8 @@ class RegistrationFormSMSType extends AbstractType
                 'label' => 'I agree to the terms',
             ]);
 
-        // Check if CLOUD_FLARE_CHECKER value is ON
-        if ($cloudFlareCheckerValue === EmailConfirmationStrategy::EMAIL) {
+        // Check if TURNSTILE_CHECKER value is ON
+        if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => ['data-action' => 'contact'],
                 'label' => false

@@ -51,7 +51,7 @@ class ResetPlatformStatusSettingsCommand extends Command
         $settings = [
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
-            ['name' => 'CLOUD_FLARE_CHECKER', 'value' => 'OFF'],
+            ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
         ];
 
         $this->entityManager->beginTransaction();

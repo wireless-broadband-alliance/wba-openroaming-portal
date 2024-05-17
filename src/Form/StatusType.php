@@ -34,7 +34,7 @@ class StatusType extends AbstractType
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
                     ],
                     'attr' => [
-                        'data-controller' => 'alwaysOnEmail descriptionCard',
+                        'data-controller' => 'alwaysOnEmail descriptionCard_',
                         'description' => $description,
                     ],
                     'data' => $settingValue,
@@ -50,8 +50,8 @@ class StatusType extends AbstractType
                         'description' => $description,
                     ],
                 ]);
-            } elseif ($settingName === 'CLOUD_FLARE_CHECKER') {
-                $builder->add('CLOUD_FLARE_CHECKER', ChoiceType::class, [
+            } elseif ($settingName === 'TURNSTILE_CHECKER') {
+                $builder->add('TURNSTILE_CHECKER', ChoiceType::class, [
                     'choices' => [
                         EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,

@@ -79,15 +79,15 @@ export default class extends Controller {
 		});
 
 		document.addEventListener("DOMContentLoaded", function () {
-			const radioSetsCloudFlare = document.querySelectorAll('[id="CLOUD_FLARE_CHECKER"]');
+			const radioSetsTurnstile = document.querySelectorAll('[id="TURNSTILE_CHECKER"]');
 
-			radioSetsCloudFlare.forEach(function (radioSet) {
-				const onLabelCloudFlare = radioSet.querySelector('[name="onLabelCloudFlare"]');
-				const offLabelCloudFlare = radioSet.querySelector('[name="offLabelCloudFlare"]');
-				const onCustomRadioCloudFlare = radioSet.querySelector('[name="onCustomRadioCloudFlare"]');
-				const offCustomRadioCloudFlare = radioSet.querySelector('[name="offCustomRadioCloudFlare"]');
+			radioSetsTurnstile.forEach(function (radioSet) {
+				const onLabelTurnstile = radioSet.querySelector('[name="onLabelTurnstile"]');
+				const offLabelTurnstile = radioSet.querySelector('[name="offLabelTurnstile"]');
+				const onCustomRadioTurnstile = radioSet.querySelector('[name="onCustomRadioTurnstile"]');
+				const offCustomRadioTurnstile = radioSet.querySelector('[name="offCustomRadioTurnstile"]');
 
-				initializeRadioButtons(onLabelCloudFlare, offLabelCloudFlare, onCustomRadioCloudFlare, offCustomRadioCloudFlare);
+				initializeRadioButtons(onLabelTurnstile, offLabelTurnstile, onCustomRadioTurnstile, offCustomRadioTurnstile);
 			});
 		});
 

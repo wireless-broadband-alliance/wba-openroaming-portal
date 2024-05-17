@@ -83,8 +83,8 @@
                     </label>
                 </div>
 
-                {# CloudFlare Checker #}
-                {% if data.CLOUD_FLARE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                {# Turnstile Checker #}
+                {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                     <div class="relative mt-2 lg:mt-4 xl:mt-8 flex justify-center items-center">
                         {{ form_widget(registrationForm.security) }}
                     </div>

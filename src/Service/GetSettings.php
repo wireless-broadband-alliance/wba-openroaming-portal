@@ -159,11 +159,11 @@ class GetSettings
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
-        $cloud_flare_checker = $settingRepository->findOneBy(['name' => 'CLOUD_FLARE_CHECKER']);
-        if ($cloud_flare_checker !== null) {
-            $data['CLOUD_FLARE_CHECKER'] = [
-                'value' => $cloud_flare_checker->getValue(),
-                'description' => $this->getSettingDescription('CLOUD_FLARE_CHECKER'),
+        $turnstile_checker = $settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        if ($turnstile_checker !== null) {
+            $data['TURNSTILE_CHECKER'] = [
+                'value' => $turnstile_checker->getValue(),
+                'description' => $this->getSettingDescription('TURNSTILE_CHECKER'),
             ];
         }
 
@@ -328,7 +328,7 @@ class GetSettings
 
             'PLATFORM_MODE' => 'Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.',
             'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system. This system requires all the users to verify is own account before they download any profile',
-            'CLOUD_FLARE_CHECKER' => 'The Cloudflare Checker is a validation step to differentiate between genuine users and bots. This can be used in Live or Demo modes.',
+            'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to differentiate between genuine users and bots. This can be used in Live or Demo modes.',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO' => 'The resource path or URL to the customer\'s logo image',
