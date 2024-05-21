@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class TermsType extends AbstractType
 {
@@ -30,7 +31,10 @@ class TermsType extends AbstractType
                     'data-controller' => 'descriptionCard',
                     'autocomplete' => 'off',
                 ],
-                'required' => false,
+                'required' => true,
+                'constraints' => [
+                    new Assert\Url(),
+                ],
             ];
 
             // Get the corresponding Setting entity and set its value
@@ -44,15 +48,9 @@ class TermsType extends AbstractType
             // GetSettings service retrieves each description
             $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
-            /*
-            $formFieldOptions['constraints'] = [
-                new NoSpecialCharacters(),
-            ];
-            */
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
     }
-
 
     public function configureOptions(OptionsResolver $resolver): void
     {
