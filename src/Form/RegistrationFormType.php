@@ -54,7 +54,10 @@ class RegistrationFormType extends AbstractType
         // Check if TURNSTILE_CHECKER value is ON
         if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
             $builder->add('security', TurnstileType::class, [
-                'attr' => ['data-action' => 'contact'],
+                'attr' => [
+                    'data-action' => 'contact',
+                    'data-theme' => 'light'
+                ],
                 'label' => false
             ]);
         }

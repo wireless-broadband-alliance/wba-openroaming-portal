@@ -22,16 +22,16 @@ class RadiusType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'RADIUS_REALM_NAME' => [
-                'type' => TextType::class,
-            ],
             'DISPLAY_NAME' => [
                 'type' => TextType::class,
             ],
-            'OPERATOR_NAME' => [
+            'RADIUS_REALM_NAME' => [
                 'type' => TextType::class,
             ],
             'DOMAIN_NAME' => [
+                'type' => TextType::class,
+            ],
+            'OPERATOR_NAME' => [
                 'type' => TextType::class,
             ],
             'RADIUS_TLS_NAME' => [
