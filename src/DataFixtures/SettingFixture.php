@@ -22,6 +22,8 @@ class SettingFixture extends Fixture
 
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
+            ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
+
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],

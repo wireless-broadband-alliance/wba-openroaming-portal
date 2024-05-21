@@ -62,28 +62,23 @@ class EventRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-//    /**
-//     * @return Event[] Returns an array of Event objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Event
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Find the latest 'USER_EMAIL_ATTEMPT' event for the given user.
+     *
+     * @param User $user
+     * @return Event|null
+     * @throws NonUniqueResultException
+     */
+    public function findLatestEmailAttemptEvent(User $user): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', AnalyticalEventType::USER_EMAIL_ATTEMPT)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

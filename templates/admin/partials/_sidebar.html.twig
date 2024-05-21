@@ -109,16 +109,6 @@
                             Radius Configuration</a>
                     </li>
                     <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
-                           href="{{ path('admin_dashboard_settings_LDAP') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path>
-                            </svg>
-                            LDAP Synchronization</a>
-                    </li>
-                    <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_auth') }}">
                             <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -127,6 +117,16 @@
                                       d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"></path>
                             </svg>
                             Authentication Methods</a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_LDAP') }}">
+                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path>
+                            </svg>
+                            LDAP Synchronization</a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}"

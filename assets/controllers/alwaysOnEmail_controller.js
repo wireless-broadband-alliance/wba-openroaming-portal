@@ -79,6 +79,19 @@ export default class extends Controller {
 		});
 
 		document.addEventListener("DOMContentLoaded", function () {
+			const radioSetsTurnstile = document.querySelectorAll('[id="TURNSTILE_CHECKER"]');
+
+			radioSetsTurnstile.forEach(function (radioSet) {
+				const onLabelTurnstile = radioSet.querySelector('[name="onLabelTurnstile"]');
+				const offLabelTurnstile = radioSet.querySelector('[name="offLabelTurnstile"]');
+				const onCustomRadioTurnstile = radioSet.querySelector('[name="onCustomRadioTurnstile"]');
+				const offCustomRadioTurnstile = radioSet.querySelector('[name="offCustomRadioTurnstile"]');
+
+				initializeRadioButtons(onLabelTurnstile, offLabelTurnstile, onCustomRadioTurnstile, offCustomRadioTurnstile);
+			});
+		});
+
+		document.addEventListener("DOMContentLoaded", function () {
 			const platformModeRadios = document.querySelectorAll('[name="status[PLATFORM_MODE]"]');
 			const userVerificationCard = document.getElementById("USER_VERIFICATION");
 			const statusMessage = document.getElementById('statusMessage');
@@ -119,15 +132,5 @@ export default class extends Controller {
 			});
 		});
 
-		// document.addEventListener('DOMContentLoaded', function () {
-		// 	let checkbox = document.getElementById('checkbox-save-export');
-		// 	let submitButtonContainer = document.getElementById('saveExport');
-		//
-		// 	submitButtonContainer.style.display = 'none';
-		//
-		// 	checkbox.addEventListener('change', function() {
-		// 		submitButtonContainer.style.display = this.checked ? 'flex' : 'none';
-		// 	});
-		// });
 	}
 }

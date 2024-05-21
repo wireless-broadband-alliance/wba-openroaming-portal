@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Service\GetSettings;
 use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -30,6 +31,7 @@ class CustomType extends AbstractType
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => TextType::class,
             'ADDITIONAL_LABEL' => TextType::class,
+            'CONTACT_EMAIL'=> EmailType::class
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
