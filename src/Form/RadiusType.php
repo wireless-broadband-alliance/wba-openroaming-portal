@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RadiusType extends AbstractType
 {
@@ -27,18 +28,31 @@ class RadiusType extends AbstractType
             ],
             'RADIUS_REALM_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Assert\Url(), // validates if the value is a valid domain (URL || IP)
+                    // according to the URL specification
+                ],
             ],
             'DOMAIN_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Assert\Url(),
+                ],
             ],
             'OPERATOR_NAME' => [
                 'type' => TextType::class,
             ],
             'RADIUS_TLS_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Assert\Url(),
+                ],
             ],
             'NAI_REALM' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Assert\Url(),
+                ],
             ],
             'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => [
                 'type' => TextType::class,
@@ -65,6 +79,9 @@ class RadiusType extends AbstractType
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    if (isset($config['constraints'])) {
+                        $formFieldOptions['constraints'] = $config['constraints'];
+                    }
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
@@ -73,6 +90,7 @@ class RadiusType extends AbstractType
                 'attr' => [
                     'data-controller' => 'descriptionCard',
                     'autocomplete' => 'off',
+                    'required' => true,
                 ],
                 'required' => false,
             ];
