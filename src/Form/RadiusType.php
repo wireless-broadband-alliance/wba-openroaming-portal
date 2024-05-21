@@ -29,14 +29,19 @@ class RadiusType extends AbstractType
             'RADIUS_REALM_NAME' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url(), // validates if the value is a valid domain (URL || IP)
-                    // according to the URL specification
+                    new Assert\Url([ // validates if the value is a valid domain (URL || IP)
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'], // Only allow these protocols
+                    ]),
                 ],
             ],
             'DOMAIN_NAME' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url(),
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
                 ],
             ],
             'OPERATOR_NAME' => [
@@ -45,13 +50,19 @@ class RadiusType extends AbstractType
             'RADIUS_TLS_NAME' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url(),
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
                 ],
             ],
             'NAI_REALM' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url(),
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
                 ],
             ],
             'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => [
