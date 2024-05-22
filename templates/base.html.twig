@@ -32,6 +32,10 @@
 </head>
 
 <body class="bg-lightGray">
+<ul class="flex flex-row ">
+    <li><a href="{{ path('change_locale', { 'locale': 'en' }) }}">English</a></li>
+    <li><a href="{{ path('change_locale', { 'locale': 'pt' }) }}">Portuguese</a></li>
+</ul>
 {% block body %}{% endblock %}
 {% include 'admin/partials/_app_version.html.twig' %}
 </body>
