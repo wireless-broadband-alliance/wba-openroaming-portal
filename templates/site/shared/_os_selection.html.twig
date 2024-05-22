@@ -1,0 +1,55 @@
+<form method="post" novalidate>
+    <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+        <p>Choose your operating system, so you can download and install the profile:</p>
+
+        <div class="grid gap-8 auto-rows-max grid-cols-3 mt-16 mb-6">
+            {% for key, item in data.os.items %}
+                <div>
+                    <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                           value="{{ key }}" class="hidden peer"/>
+
+                    <label for="radio-os-{{ key }}"
+                           class="inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
+                        <img class="w-9 peer-checked:opacity-50"
+                             src="{{ asset('resources/logos/'~key~'.svg') }}"
+                             alt="{{ item.alt }}"/>
+                    </label>
+
+                    <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
+
+
+    {% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+        <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
+
+            {# Profile selector  #}
+            <div class="w-[100%] rounded-[1px] shadow-xl bg-[#F9F9F9] px-[25px] py-[30px] flex flex-row items-center justify-end text-[#3F474D] space-x-6">
+
+                <div class="mr-auto flex flex-row items-center justify-start space-x-6">
+
+                    <img class="w-6" src="{{ asset('resources/logos/'~data.os.selected~'.svg') }}"
+                         alt="{{ data.os.selected }} Logo"/>
+
+                    <span class="font-medium">Device identified as running: {{ data.os.selected }}</span>
+                </div>
+
+                {# Download profile button #}
+                <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                    Download and Install Profile
+                </button>
+            </div>
+
+            <p class="text-sm mt-[15px] mb-[40px]"> Is this Wrong?
+                <button type="button"
+                        class="text-primary font-semibold underline" {{ stimulus_action('visibility', 'toggle') }}>
+                    Click here to select your OS.
+                </button>
+            </p>
+        </div>
+    {% endif %}
+</form>
