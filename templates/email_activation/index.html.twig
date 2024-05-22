@@ -1,63 +1,37 @@
+{% set title = "Phone Number" %}
+{% set label = "phone number" %}
+{% set code_path = path('app_regenerate_sms_code') %}
+
 {% if app.user and app.user.email is defined and app.user.email is not empty %}
-	<div class="flex flex-col items-center mt-8">
-		<h1 class="text-2xl font-bold mb-3">Email Activation</h1>
-		<p>An authentication code has been sent to your email.</p>
-		<div class="mt-4 flex items-center justify-center">
-			<form action="{{ path('app_check_email_code') }}" method="post">
-				<div class="flex flex-col items-center justify-center">
-					<label for="code" class="block mb-2">Enter the code:</label>
-					<input type="number" id="code" name="code" class="border border-gray-300 px-4 py-2 rounded-lg mb-2" oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6">
-					<button type="submit" class="border-solid border-2 border-green-500 rounded-lg px-4 py-2 bg-[#7DB928] text-white mb-5">
-						Verify
-					</button>
-				</div>
-			</form>
-		</div>
-		<p>Click
-			<a href="{{ path("app_regenerate_email_code") }}" class="font-bold mt-5">here</a>
-			to generate a new email with a new code
-		</p>
-		<div class="mt-4">
-			{# Flash success message #}
-			{% for message in app.session.flashbag.get('success') %}
-				<div class="text-white text-base bg-[#7DB928] border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
-			{% endfor %}
-			{# Flash error message  #}
-			{% for message in app.session.flashbag.get('error') %}
-				<div class="text-white text-base bg-red-600 border-red-600 mt-1 rounded-md p-2 text-center">{{ message }}</div>
-			{% endfor %}
-		</div>
-		<p class="mb-5">Please type the correct code from your email.</p>
-	</div>
-{% else %}
-	<div class="flex flex-col items-center mt-12">
-		<h1 class="text-2xl font-bold mb-3">Phone Number Activation</h1>
-		<p>An authentication code has been sent to your phone number.</p>
-		<div class="mt-4 flex flex-col items-center justify-center">
-			<form action="{{ path('app_check_email_code') }}" method="post">
-				<div class="flex flex-col items-center justify-center">
-					<label for="code" class="block mb-2">Enter the code:</label>
-					<input type="number" id="code" name="code" class="border border-gray-300 px-4 py-2 rounded-lg mb-2" oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6">
-					<button type="submit" class="border-solid border-2 border-green-500 rounded-lg px-4 py-2 bg-[#7DB928] text-white mb-5">
-						Verify
-					</button>
-				</div>
-			</form>
-		</div>
-        <p>Click
-				<a href="{{ path('app_regenerate_sms_code') }}" class="font-bold mt-5">here</a>
-				to generate a new
-																                message with a new code</p>
-		<div class="mt-4">
-			{# Flash success message #}
-			{% for message in app.session.flashbag.get('success') %}
-				<div class="text-white text-base bg-[#7DB928] border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
-			{% endfor %}
-			{# Flash error message  #}
-			{% for message in app.session.flashbag.get('error') %}
-				<div class="text-white text-base bg-red-600 border-red-600 mt-1 rounded-md p-2 text-center">{{ message }}</div>
-			{% endfor %}
-		</div>
-		<p class="mb-5">Please type the correct code from your phone number.</p>
-	</div>
+    {% set title = "Email" %}
+    {% set label = "email" %}
+    {% set code_path = path('app_regenerate_email_code') %}
 {% endif %}
+
+{# Divider #}
+<div class="my-[25px] divider"></div>
+
+<div class="leading-7">
+    <p class="font-bold text-lg">{{ title }} Activation</p>
+    <p>A code has been sent to your {{ label }}. Please enter the code or generate a new one.</p>
+</div>
+
+<form action="{{ path('app_check_email_code') }}" method="post">
+    <div class="mt-10 relative">
+        <label for="code" class="form-label">Enter the code:</label>
+        <input type="number" id="code" name="code" class="form-widget"
+               oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+               maxlength="6">
+
+
+        <div class="my-[30px] flex justify-start gap-4">
+            <button type="submit" class="w-[220px] btn-primary">
+                Verify
+            </button>
+
+            <a href="{{ code_path }}" class="w-[220px] btn-secondary">
+                Resend Code
+            </a>
+        </div>
+    </div>
+</form>

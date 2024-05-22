@@ -485,7 +485,7 @@ class SiteController extends AbstractController
         if (!$currentUser->isVerified()) {
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
-                ...$data,
+                'data' => $data,
             ]);
         }
 
