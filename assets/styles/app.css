@@ -34,3 +34,7 @@
 .btn-secondary {
 	@apply h-[50px] border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
 }
+
+.btn-logout {
+	@apply h-[50px] border border-[#E33D40] rounded-[5px] bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
+}
