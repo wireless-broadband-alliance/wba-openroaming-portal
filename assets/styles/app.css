@@ -10,11 +10,11 @@
 }
 
 .toast-success {
-	@apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] pl-[25px] py-[16px];
+	@apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
 .toast-warning {
-	@apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] pl-[25px] py-[16px];
+	@apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
 /* Form */
