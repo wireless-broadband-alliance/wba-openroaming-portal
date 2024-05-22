@@ -9,12 +9,12 @@
 
     {# Flash success message  #}
     {% for message in app.session.flashbag.get('success') %}
-        <div class="toast-success">{{ message }}</div>
+        {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
     {% endfor %}
 
     {# Flash error message  #}
     {% for message in app.session.flashbag.get('error') %}
-        <div class="toast-warning">{{ message }}</div>
+        {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
     {% endfor %}
 
     <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>

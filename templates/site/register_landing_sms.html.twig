@@ -6,14 +6,15 @@
 
 {% block second_col %}
     {# Form Column #}
+
     {# Flash success message #}
     {% for message in app.session.flashbag.get('success') %}
-        <div class="toast-success">{{ message }}</div>
+        {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
     {% endfor %}
 
     {# Flash warning message #}
     {% for message in app.session.flashbag.get('warning') %}
-        <div class="toast-warning">{{ message }}</div>
+        {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
     {% endfor %}
 
     {# Form errors #}

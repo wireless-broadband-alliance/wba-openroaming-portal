@@ -1,5 +1,5 @@
 <div {{ stimulus_controller('toast') }} {{ stimulus_target('toast', 'toast') }}>
-<div class="{{ toast_type }}">{{ message|default('success toast.') }}
+<div class="{{ toast_type }}">{{ message }}
 
 	<button class="ml-auto" {{ stimulus_action('toast', 'close') }}>
 
