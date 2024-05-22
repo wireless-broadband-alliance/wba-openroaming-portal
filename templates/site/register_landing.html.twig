@@ -74,13 +74,21 @@
                     </div>
                     <label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-[#7db928] text-xs">
                         I agree to the
-                        <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline font-base">terms & conditions of
+                        <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline font-base">terms &
+                            conditions of
                             use</a>
                         and
                         <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank" class="underline font-base">privacy
                             policy</a>.
                     </label>
                 </div>
+
+                {# Turnstile Checker #}
+                {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                    <div class="relative mt-2 lg:mt-4 xl:mt-8 flex justify-center items-center">
+                        {{ form_widget(registrationForm.security) }}
+                    </div>
+                {% endif %}
 
                 {# Button Submit #}
                 {{ form_row(registrationForm._token) }}

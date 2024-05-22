@@ -10,12 +10,14 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\NewPasswordAccountType;
+use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
+use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -33,6 +35,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\LogicException;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 /**
@@ -45,6 +48,7 @@ class SiteController extends AbstractController
     private ParameterBagInterface $parameterBag;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
+    private EventRepository $eventRepository;
 
     /**
      * SiteController constructor.
@@ -54,14 +58,16 @@ class SiteController extends AbstractController
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      */
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings)
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings, EventRepository $eventRepository)
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->parameterBag = $parameterBag;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
+        $this->eventRepository = $eventRepository;
     }
 
     /**
@@ -100,35 +106,36 @@ class SiteController extends AbstractController
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select OS');
-                } else if (!$this->getUser() && (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL))) {
-                    $this->addFlash('error', 'Please a enter a valid email');
-                } else if (!$this->getUser() && (empty($payload['terms']) || $payload['terms'] !== 'on')) {
-                    $this->addFlash('error', 'Please agree to the Terms of Service');
                 } else if ($this->getUser() === null) {
                     $user = new User();
                     $event = new Event();
+                    $form = $this->createForm(RegistrationFormType::class, $user);
+                    $form->handleRequest($request);
+                    if ($form->isSubmitted() && $form->isValid()) {
+                        $user = $form->getData();
 
-                    $user->setEmail($payload['email']);
-                    $user->setCreatedAt(new \DateTime());
-                    $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
-                    $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                    $entityManager->persist($user);
+                        $user->setEmail($user->getEmail());
+                        $user->setCreatedAt(new \DateTime());
+                        $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                        $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
+                        $entityManager->persist($user);
 
-                    $event->setUser($user);
-                    $event->setEventDatetime(new DateTime());
-                    $event->setEventName(AnalyticalEventType::USER_CREATION);
-                    $event->setEventMetadata([
-                        'platform' => PlatformMode::Demo,
-                        'sms' => false,
-                    ]);
-                    $entityManager->persist($event);
+                        $event->setUser($user);
+                        $event->setEventDatetime(new DateTime());
+                        $event->setEventName(AnalyticalEventType::USER_CREATION);
+                        $event->setEventMetadata([
+                            'platform' => PlatformMode::Demo,
+                            'sms' => false,
+                        ]);
+                        $entityManager->persist($event);
+                        $entityManager->flush();
+                        $userAuthenticator->authenticateUser(
+                            $user,
+                            $authenticator,
+                            $request
+                        );
+                    }
 
-                    $entityManager->flush();
-                    $userAuthenticator->authenticateUser(
-                        $user,
-                        $authenticator,
-                        $request
-                    );
                     if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
@@ -209,10 +216,12 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
                 'form' => $form->createView(),
-                'formPassword' => $formPassword->createView()
+                'formPassword' => $formPassword->createView(),
+                'registrationFormDemo' => $formResgistrationDemo->createView()
             ] + $data);
     }
 
@@ -282,12 +291,12 @@ class SiteController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (!password_verify($typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Invalid password. Please try again.');
+                $this->addFlash('error', 'Current password Invalid. Please try again.');
                 return $this->redirectToRoute('app_landing');
             }
 
             if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
-                $this->addFlash('error', 'Something went wrong please try again. If the problem keep occurring contact our support!');
+                $this->addFlash('error', 'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!');
                 return $this->redirectToRoute('app_landing');
             }
 
@@ -395,24 +404,67 @@ class SiteController extends AbstractController
     /**
      * Regenerate the verification code for the user and send a new email.
      *
+     * @param EventRepository $eventRepository
+     * @param MailerInterface $mailer
      * @return RedirectResponse A redirect response.
      * @throws Exception
      * @throws TransportExceptionInterface
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function regenerateCode(): RedirectResponse
+    public function regenerateCode(EventRepository $eventRepository, MailerInterface $mailer): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $isVerified = $currentUser->isVerified();
 
         if (!$isVerified) {
-            // Regenerate the verification code for the user
-            $email = $this->createEmailCode($currentUser->getEmail());
-            $this->mailer->send($email);
+            $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser);
+
+            // Check if the user has not exceeded the attempt limit
+            if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+                $minInterval = new DateInterval('PT5M');
+                $currentTime = new DateTime();
+
+                // Check if enough time has passed since the last attempt
+                if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                        $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+
+                    // Increment the attempt count
+                    $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+
+                    $email = $this->createEmailCode($currentUser->getEmail());
+                    $mailer->send($email);
+
+                    // Save event with attempt count and current time
+                    if (!$latestEvent) {
+                        $latestEvent = new Event();
+                        $latestEvent->setUser($currentUser);
+                        $latestEvent->setEventDatetime(new DateTime());
+                        $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
+                        $latestEvent->setEventMetadata([
+                            'platform' => PlatformMode::Live,
+                            'email' => $currentUser->getEmail(),
+                        ]);
+                    }
+
+                    $latestEvent->setVerificationAttempts($attempts);
+                    $latestEvent->setLastVerificationCodeTime($currentTime);
+                    $eventRepository->save($latestEvent, true);
+
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getEmail(), $attemptsLeft);
+                    $this->addFlash('success', $message);
+                } else {
+                    // Inform the user to wait before trying again
+                    $this->addFlash('error', 'Please wait 5 minutes before trying again.');
+                }
+            } else {
+                // Inform the user that the attempt limit has been reached
+                $this->addFlash('error', 'You have reached the maximum number of attempts. Please try again later.');
+            }
         }
-        $this->addFlash('success', 'We have send to you a new code to: ' . $currentUser->getEmail());
+
         return $this->redirectToRoute('app_landing');
     }
 
@@ -505,7 +557,7 @@ class SiteController extends AbstractController
 
                 // Check if $latestEvent to avoid null conflicts
                 if ($latestEvent) {
-                    $attemptsLeft = 3 - $latestEvent->getVerificationAttemptSms();
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
                     $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
                     $this->addFlash('success', $message);
                 }

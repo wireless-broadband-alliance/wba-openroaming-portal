@@ -558,7 +558,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reset successfully!');
+                $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
@@ -845,7 +845,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -859,45 +859,42 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            $settingsToUpdate = [
-                'RADIUS_REALM_NAME',
-                'DISPLAY_NAME',
-                'PAYLOAD_IDENTIFIER',
-                'OPERATOR_NAME',
-                'DOMAIN_NAME',
-                'RADIUS_TLS_NAME',
-                'NAI_REALM',
-                'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
-                'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
-            ];
-
             $staticValue = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
             if ($submittedData['PAYLOAD_IDENTIFIER'] === $staticValue) {
                 $this->addFlash('error_admin', 'Please do not use the default value from the Payload Identifier card.');
+            } else {
+                $settingsToUpdate = [
+                    'RADIUS_REALM_NAME',
+                    'DISPLAY_NAME',
+                    'PAYLOAD_IDENTIFIER',
+                    'OPERATOR_NAME',
+                    'DOMAIN_NAME',
+                    'RADIUS_TLS_NAME',
+                    'NAI_REALM',
+                    'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                    'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
+                ];
+
+                foreach ($settingsToUpdate as $settingName) {
+                    $value = $submittedData[$settingName] ?? null;
+
+                    if ($value === null) {
+                        $value = "";
+                    }
+
+                    $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                    if ($setting) {
+                        $setting->setValue($value);
+                        $em->persist($setting);
+                    }
+                }
+
+                // Flush the changes to the database
+                $em->flush();
+
+                $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
-
-            foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
-
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
-                }
-
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
-                    $setting->setValue($value);
-                    $em->persist($setting);
-                }
-            }
-
-
-            // Flush the changes to the database
-            $em->flush();
-
-            $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
-            return $this->redirectToRoute('admin_dashboard_settings_radius');
         }
 
         return $this->render('admin/settings_actions.html.twig', [
@@ -937,8 +934,9 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'PLATFORM_MODE' and 'USER_VERIFICATION' settings
+            // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
+            $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
@@ -952,6 +950,12 @@ class AdminController extends AbstractController
             if ($emailVerificationSetting) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $em->persist($emailVerificationSetting);
+            }
+
+            $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+            if ($turnstileCheckerSetting) {
+                $turnstileCheckerSetting->setValue($turnstileChecker);
+                $em->persist($turnstileCheckerSetting);
             }
 
             // Flush the changes to the database
@@ -1497,7 +1501,7 @@ class AdminController extends AbstractController
                 'Average Session Time (seconds)' => $averageSessionTime,
             ];
         }
-        
+
         // Set the titles and their respective content
         $titlesAndContent = [
             'Authentication Attempts' => [
@@ -1934,10 +1938,16 @@ class AdminController extends AbstractController
         $colors = [];
 
         if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+            $maxValue = max($dataValues);
+            $minOpacity = 0.4; // Minimum opacity to ensure visibility
+            $maxOpacity = 1; // Maximum opacity for the most vibrant color
+
             foreach ($labels as $index => $type) {
-                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+                // Calculate the brightness relative to the max count, scaled to the opacity range
+                $opacity = $minOpacity + ($dataValues[$index] / $maxValue) * ($maxOpacity - $minOpacity);
+                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
                 $data[] = $dataValues[$index];
-                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+                $colors[] = "rgba(78, 164, 116, {$opacity})"; // Generate a different color for each data point
             }
         }
 
@@ -2106,7 +2116,7 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL'])) {
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL'])) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 

@@ -20,7 +20,8 @@
     { 'name': 'PAGE_TITLE', 'displayName': 'Page Title'},
     { 'name': 'WELCOME_TEXT', 'displayName': 'Welcome Text'},
     { 'name': 'WELCOME_DESCRIPTION', 'displayName': 'Welcome Description'},
-    { 'name': 'ADDITIONAL_LABEL', 'displayName': 'Additional Label'}
+    { 'name': 'ADDITIONAL_LABEL', 'displayName': 'Additional Label'},
+    { 'name': 'CONTACT_EMAIL', 'displayName': 'Contact Email'}
 ] %}
 
 <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
@@ -35,7 +36,7 @@
             {% endfor %}
         </div>
         {# Text Settings #}
-        <div class="flex flex-col lg:flex-row gap-8 lg:gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for textSetting in textSettings %}
                 {% include 'admin/partials/settings_actions/_card.html.twig' with {
                     ...textSetting, settingType: 'text'
