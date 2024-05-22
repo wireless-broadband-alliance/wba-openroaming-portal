@@ -28,9 +28,9 @@
         <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
                 {{ stimulus_controller('visibility') }}>
             <div>
-                <img class="mt-8 lg:mt-0"
-                     src="{{ data.customerLogoName.value }}"
-                     alt="Logo"/>
+                {% if data.customerLogoNameEnabled.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                    <img class="mt-8 lg:mt-0" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+                {% endif %}
 
                 <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
                     <p class="text-[#757575] font-medium text-2xl lg:text-4xl">Create your Profile</p>
