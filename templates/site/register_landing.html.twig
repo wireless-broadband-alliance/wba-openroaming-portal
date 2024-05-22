@@ -20,18 +20,17 @@
     <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
 
     <div class="pt-[28px] leading-7">
-        <p class="font-bold text-lg">Create your Profile</p>
-        <p>This will enable you to access and download your profile onto your device.</p>
-        <p>Once you download your profile you can connect anywhere to enjoy a seamless experience with
+        <p class="font-bold text-xl">Create your Profile</p>
+        <p class="text-lg">This will enable you to access and download your profile onto your device.</p>
+        <p class="text-lg">Once you download your profile you can connect anywhere to enjoy a seamless experience with
             OpenRoaming.</p>
     </div>
-
 
     {{ form_start(registrationForm) }}
 
     {# Email #}
     <div class="relative mt-[32px]">
-        {{ form_label(registrationForm.email, null) }}
+        {{ form_label(registrationForm.email, null, { 'label_attr': {'class': 'form-label'} }) }}
         {{ form_widget(registrationForm.email, {
             'attr': {
                 'class': 'form-widget',
@@ -88,7 +87,6 @@
             <a href="{{ path('app_register') }}" class="font-semibold text-primary underline">Login</a>
             here!
         </p>
-
     {% endif %}
 
     {{ form_end(registrationForm) }}

@@ -12,11 +12,11 @@
             <div class="h-full w-full flex flex-col">
                 <img class="w-96" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
 
-                <h1 class="text-4xl font-segoe text-white mt-[45px] font-bold">{{ data.welcomeText.value }}</h1>
+                <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold">{{ data.welcomeText.value }}</h1>
 
-                <p class="text-white text-xl mt-[30px] leading-7">{{ data.welcomeDescription.value }}</p>
+                <p class="text-white text-2xl mt-[45px] leading-7">{{ data.welcomeDescription.value }}</p>
 
-                <p class="text-white lg:text-base mt-[45px] mb-6">Should you have any questions or require assistance,
+                <p class="text-white text-lg mt-[55px] mb-6">Should you have any questions or require assistance,
                     please contact us at
                     <a href="mailto:{{ data.contactEmail.value }}"
                        class="font-semibold underline text-primary">{{ data.contactEmail.value }}</a>
@@ -25,7 +25,7 @@
         </div>
 
         {# Form Column #}
-        <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[75px]" {{ stimulus_controller('visibility') }}>
+        <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[80px]" {{ stimulus_controller('visibility') }}>
             {% block second_col %}
             {% endblock %}
         </div>
