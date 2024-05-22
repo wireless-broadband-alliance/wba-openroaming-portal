@@ -40,7 +40,9 @@ class RegistrationFormType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
-            ->add('email', EmailType::class)
+            ->add('email', EmailType::class, [
+                'label_attr' => ['class' => 'form-label'],
+            ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'constraints' => [

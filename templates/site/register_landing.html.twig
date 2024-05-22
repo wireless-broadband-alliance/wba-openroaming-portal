@@ -8,9 +8,9 @@
     {# Form Column #}
 
     {# Flash success message #}
-    {# for message in app.session.flashbag.get('success') #}
-        <div class="toast-success">{{ message|default('This is a success toast.') }}</div>
-    {# endfor #}
+    {% for message in app.session.flashbag.get('success') %}
+        <div class="toast-success">{{ message }}</div>
+    {% endfor %}
 
     {# Flash warning message #}
     {% for message in app.session.flashbag.get('warning') %}
