@@ -87,7 +87,6 @@ class GoogleController extends AbstractController
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
 
-        // Check if the 'code' parameter is present in the request
         $code = $request->query->get('code');
         if ($code === null) {
             $this->addFlash('error', 'Authentication process cancelled.');

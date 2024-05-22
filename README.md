@@ -263,9 +263,13 @@ Below is an overview of the different variables and their functions:
     ```
 - `EMAIL_ADDRESS`: Entity of sends the emails to the users
 - `SENDER_NAME`: Entity sender name
-- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
-  legal and security reasons.
 - `BUDGETSMS_API_URL`: This env manages the budget SMS link of the API, is not necessary to change this env.
+- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
+    legal and security reasons.
+- `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
+
+These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
+`SENTRY_DSN`& `TRUSTED_PROXIES`.
 
 ### Google Authenticator Credentials
 
@@ -277,10 +281,6 @@ https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
-Finally, these last two envs are for debugging purposes,
-they only should be used to control and manage reports from the portal.
-`SENTRY_DSN`& `TRUSTED_PROXIES`.
-
 ### 🔒 SAML Specific Settings
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
@@ -291,6 +291,14 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
 - `SAML_SP_ENTITY_ID`: This is the entity ID (URI) of the SP.
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
   the IdP.
+
+### 👾 Turnstile Integration
+These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
+
+- `TURNSTILE_KEY`: Stores the public key for Cloudflare Turnstile integration.
+- `TURNSTILE_SECRET`: Holds the secret key for Cloudflare Turnstile integration.
+
+For testing purposes with Cloudflare Turnstile, please use this link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 
 ### 🛠️ Settings Table
 
@@ -326,8 +334,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     When it\'s ON it activates the email verification system.
     This system requires all
     the users to verify its own account before they download any profile.
-11. `CLOUD_FLARE_CHECKER`: ON || OFF.
-        When it\'s ON it activates the cloud flare verification system.
+11. `TURNSTILE_CHECKER`: ON || OFF.
+        When it\'s ON, it activates the turnslide verification system.
         This system requires all
         the users to check and verify is session before creating an account.
         To prevent bots.
