@@ -1,137 +1,100 @@
-<div class="rounded-lg font-semibold p-5 flex flex-col justify-center items-center h-20 bg-[#7DB928] text-white z-10">
-    <h1 class="text-lg md:text-2xl font-semibold">Account Data</h1>
-    <p class="md:text-normal text-sm">Here you can change your own information</p>
-</div>
-<div class="no-scrollbar overflow-auto  max-h-[calc(100vh-200px)] z-10]">
+<div class="bg-white rounded-lg transition-all duration-300 px-10 py-[35px] h-[calc(90%)] lg:h-[calc(69%)] w-[810px] overflow-auto">
+
+    <div class="flex flex-row justify-start items-center">
+        <h1 class="text-primary text-xl font-semibold">Account Info</h1>
+        <button type="button"
+                class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('widget', 'close') }}>
+            <span>Close</span>
+
+            <svg class="fill-current" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">
+                <g transform="translate(-1339 -73)">
+                    <g transform="translate(-13)">
+                        <path d="M11,2a9,9,0,1,0,9,9,9.01,9.01,0,0,0-9-9m0-2A11,11,0,1,1,0,11,11,11,0,0,1,11,0Z"
+                              transform="translate(1352 73)"/>
+                        <g transform="translate(371.077 -88.924)">
+                            <path d="M0,7.847a1,1,0,0,1-.707-.293,1,1,0,0,1,0-1.414L6.14-.707a1,1,0,0,1,1.414,0,1,1,0,0,1,0,1.414L.707,7.554A1,1,0,0,1,0,7.847Z"
+                                  transform="translate(988.5 169.5)"/>
+                            <path d="M6.847,7.847a1,1,0,0,1-.707-.293L-.707.707a1,1,0,0,1,0-1.414,1,1,0,0,1,1.414,0L7.554,6.14a1,1,0,0,1-.707,1.707Z"
+                                  transform="translate(988.5 169.5)"/>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </button>
+    </div>
+
     <form method="POST" action="{{ path('app_site_account_user') }}">
-        <h1 class="text-xl text-left font-semibold mb-2 mt-6">Personal Data</h1>
-        <div class="mt-2 p-5 -pb2 mx-auto bg-white rounded-lg">
-            {{ form_start(form) }}
-            <div>
-                {{ form_errors(form) }}
-            </div>
-            <div class="flex flex-col md:flex-row space-x-0 md:space-x-2">
-                <div class="mb-4 mt-1">
-                    <div class="relative h-10 w-full min-w-[200px]">
-                        {{ form_widget(form.firstName, {
-                            'attr': {
-                                'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
-                                'placeholder': ' ',
-                            }
-                        }) }}
-                        {{ form_label(form.firstName, 'First Name', {
-                            'label_attr': {
-                                'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
-                            }
-                        }) }}
-                        {{ form_errors(form.firstName) }}
-                    </div>
-                </div>
-                <div class="mb-4 mt-1">
-                    <div class="relative h-10 w-full min-w-[200px]">
-                        {{ form_widget(form.lastName, {
-                            'attr': {
-                                'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
-                                'placeholder': ' ',
-                            }
-                        }) }}
-                        {{ form_label(form.lastName, 'Last Name', {
-                            'label_attr': {
-                                'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
-                            }
-                        }) }}
-                        {{ form_errors(form.lastName) }}
-                    </div>
-                </div>
+        <h1 class="text-lg mb-8 mt-10">Personal Data</h1>
+
+        {{ form_start(form) }}
+        {{ form_errors(form) }}
+
+        <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+            <div class="relative w-full">
+                {{ form_label(form.firstName, 'First Name', {'label_attr': { 'class': "form-label"}}) }}
+                {{ form_widget(form.firstName, {'attr': {'class': 'form-widget'}}) }}
+                {{ form_errors(form.firstName) }}
             </div>
 
+            <div class="relative w-full">
+                {{ form_widget(form.lastName, {'attr': {'class': 'form-widget'}}) }}
+                {{ form_label(form.lastName, 'Last Name', {'label_attr': { 'class': "form-label"}}) }}
+                {{ form_errors(form.lastName) }}
+            </div>
         </div>
-        <div class="flex md:w-full justify-center md:justify-end mt-4">
-            <button id="widgetConfirmAccount"
-                    class="bg-[#7DB928] cursor-not-allowed text-white text-sm font-semibold p-2 rounded-lg"
-                    type="submit"
-                    disabled
-            >Apply Changes
-            </button>
-        </div>
+
+        <button id="widgetConfirmAccount" class="mt-6 w-[180px] btn-primary" type="submit" disabled>Apply Changes
+        </button>
+
         {{ form_rest(form) }}
         {{ form_end(form) }}
     </form>
-    <hr class="w-80% m-5 h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-    <form method="POST" action="{{ path('app_site_account_user') }}">
-        <h1 class="text-xl text-left font-semibold mb-2 mt-2">New Password</h1>
-        <div class="mt-2 p-5 -pb2 mx-auto bg-white rounded-lg">
 
-            {{ form_start(formPassword) }}
-            <div>
-                {{ form_errors(formPassword) }}
-            </div>
-            <div class="mb-4 mt-1">
-                <div class="relative h-10 w-full min-w-[200px]">
-                    {{ form_widget(formPassword.password, {
-                        'attr': {
-                            'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
-                            'placeholder': ' ',
-                        }
-                    }) }}
-                    {{ form_label(formPassword.password, 'Current Password', {
-                        'label_attr': {
-                            'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
-                        }
-                    }) }}
+    {# divider #}
+    <div class="divider my-8"></div>
+
+    <form method="POST" action="{{ path('app_site_account_user') }}">
+        <h1 class="text-lg mb-8">New Password</h1>
+
+        {{ form_start(formPassword) }}
+        {{ form_errors(formPassword) }}
+
+        <div class="flex flex-col gap-x-6 gap-y-8">
+            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                <div class="relative w-full">
+                    {{ form_label(formPassword.password, 'Current Password', {'label_attr': { 'class': "form-label"}}) }}
+                    {{ form_widget(formPassword.password, {'attr': {'class': 'form-widget'}}) }}
                     {{ form_errors(formPassword.password) }}
                 </div>
+
+                <div class="hidden lg:flex w-full"></div>
             </div>
-            <div class="flex flex-col md:flex-row space-x-0 md:space-x-2">
-                <div class="mb-4 mt-1">
-                    <div class="relative h-10 w-full min-w-[200px]">
-                        {{ form_widget(formPassword.newPassword, {
-                            'attr': {
-                                'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
-                                'placeholder': ' ',
-                                'minlength': 7
-                            }
-                        }) }}
-                        {{ form_label(formPassword.newPassword, 'New Password', {
-                            'label_attr': {
-                                'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
-                            }
-                        }) }}
-                        {{ form_errors(formPassword.newPassword) }}
-                    </div>
+
+            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                <div class="relative w-full">
+                    {{ form_label(formPassword.newPassword, 'New Password', {'label_attr': { 'class': "form-label"}}) }}
+                    {{ form_widget(formPassword.newPassword, {'attr': { 'class': 'form-widget', 'minlength': 7 }}) }}
+                    {{ form_errors(formPassword.newPassword) }}
                 </div>
-                <div class="mb-4 mt-1">
-                    <div class="relative h-10 w-full min-w-[200px]">
-                        {{ form_widget(formPassword.confirmPassword, {
-                            'attr': {
-                                'class': 'text-center md:text-left peer h-full w-full rounded-[7px] border border-inputGray border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-inputGray placeholder-shown:border-t-inputGray focus:border-2 focus:border-lightGreen focus:border-t-transparent focus:border-lightGreen focus:outline-0 disabled:border-0',
-                                'placeholder': ' ',
-                                'minlength': 7
-                            }
-                        }) }}
-                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {
-                            'label_attr': {
-                                'class': 'before:content[" "] after:content[" "] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-veryDarkButton transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t-veryDarkButton before:border-l-veryDarkButton before:border-veryDarkButton before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t-veryDarkButton after:border-r-veryDarkButton after:border-veryDarkButton after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-veryDarkPurple peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-lightGreen peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-lightGreen peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-lightGreen peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-veryDarkButton'
-                            }
-                        }) }}
-                        {{ form_errors(formPassword.confirmPassword) }}
-                    </div>
+
+                <div class="relative w-full">
+                    {{ form_label(formPassword.confirmPassword, 'Confirm Password', {'label_attr': { 'class': "form-label"}}) }}
+                    {{ form_widget(formPassword.confirmPassword, {'attr': { 'class': 'form-widget', 'minlength': 7 }}) }}
+                    {{ form_errors(formPassword.confirmPassword) }}
                 </div>
             </div>
-            {# Turnstile Checker #}
-            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
-                <div class="relative mt-2 flex justify-center items-center">
-                    {{ form_widget(formPassword.security) }}
-                </div>
-            {% endif %}
         </div>
-        <div class="flex md:w-full justify-center md:justify-end mt-4">
-            <button id="submitPassword"
-                    class="bg-[#7DB928] text-white text-sm font-semibold p-2 rounded-lg"
-                    type="submit"
-            >Reset Password
-            </button>
-        </div>
+
+        {# Turnstile Checker #}
+        {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            <div class="ml-3 mt-5">
+                {{ form_widget(formPassword.security) }}
+            </div>
+        {% endif %}
+
+        <button id="submitPassword" class="mt-6 w-[180px] btn-primary" type="submit" disabled>Reset Password
+        </button>
+
         {{ form_rest(formPassword) }}
         {{ form_end(formPassword) }}
     </form>
