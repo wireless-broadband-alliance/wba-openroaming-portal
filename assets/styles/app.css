@@ -9,6 +9,14 @@
 	@apply w-full border-t border-dashed;
 }
 
+.toast-success {
+	@apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] pl-[25px] py-[16px];
+}
+
+.toast-warning {
+	@apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] pl-[25px] py-[16px];
+}
+
 /* Form */
 .form-label {
 	@apply absolute left-[10px] -top-[13px] z-10 pl-[7px] pr-[12px] font-bold bg-white;
