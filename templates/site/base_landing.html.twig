@@ -7,10 +7,10 @@
 {% block body %}
     <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
-        <div class="object-cover w-[100%] lg:w-1/2 p-8 lg:pl-[113px] lg:pr-[130px] lg:pt-[80px] bg-landing bg-center bg-no-repeat bg-cover bg-scroll"
+        <div class="object-cover w-[100%] lg:w-1/2 p-8 lg:pl-[113px] lg:pr-[130px] lg:pt-[170px] bg-landing bg-center bg-no-repeat bg-cover bg-scroll"
              style="background-image: url('{{ data.wallpaperImageName.value }}');">
             <div class="h-full w-full flex flex-col">
-                <img class="mt-16 lg:mt-36 w-96"
+                <img class="w-96"
                      src="{{ data.openroamingLogoName.value }}"
                      alt="OpenRoaming Logo"/>
 
@@ -26,7 +26,7 @@
         </div>
 
         {# Form Column #}
-        <div class="w-[100%] lg:w-1/2 p-8 lg:pl-[81px] lg:pr-[61px] lg:py-[3%]" {{ stimulus_controller('visibility') }}>
+        <div class="w-[100%] lg:w-1/2 p-8 lg:pl-[81px] lg:pr-[61px] lg:pt-[120px]" {{ stimulus_controller('visibility') }}>
             {% block second_col %}
             {% endblock %}
         </div>
