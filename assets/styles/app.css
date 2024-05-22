@@ -9,3 +9,11 @@
 	@apply w-full border-t border-dashed;
 }
 
+/* Form */
+.form-label {
+	@apply absolute left-[10px] -top-[13px] z-10 pl-[7px] pr-[12px] font-bold bg-white;
+}
+
+.form-widget {
+	@apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
+}
