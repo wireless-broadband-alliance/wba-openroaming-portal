@@ -7,18 +7,17 @@
 {% block body %}
     <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
-        <div class="object-cover w-[100%] lg:w-1/2 p-8 lg:pl-[113px] lg:pr-[130px] lg:pt-[170px] bg-landing bg-center bg-no-repeat bg-cover bg-scroll"
+        <div class="w-full lg:w-1/2 p-8 lg:pl-[130px] lg:pr-[150px] lg:pt-[210px] bg-center bg-no-repeat bg-cover bg-scroll bg-[#000000]"
              style="background-image: url('{{ data.wallpaperImageName.value }}');">
             <div class="h-full w-full flex flex-col">
-                <img class="w-96"
-                     src="{{ data.openroamingLogoName.value }}"
-                     alt="OpenRoaming Logo"/>
+                <img class="w-96" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
 
-                <h1 class="text-4xl font-segoe text-white mt-[36px] font-bold">{{ data.welcomeText.value }}</h1>
+                <h1 class="text-4xl font-segoe text-white mt-[45px] font-bold">{{ data.welcomeText.value }}</h1>
 
                 <p class="text-white text-xl mt-[30px] lg:pr-12 xl:pr-24">{{ data.welcomeDescription.value }}</p>
 
-                <p class="text-white lg:text-base mt-[45px] mb-6">Should you have any questions or require assistance, please contact us at
+                <p class="text-white lg:text-base mt-[45px] mb-6">Should you have any questions or require assistance,
+                    please contact us at
                     <a href="mailto:{{ data.contactEmail.value }}"
                        class="font-semibold underline text-primary">{{ data.contactEmail.value }}</a>
                 </p>
@@ -26,10 +25,9 @@
         </div>
 
         {# Form Column #}
-        <div class="w-[100%] lg:w-1/2 p-8 lg:pl-[81px] lg:pr-[61px] lg:pt-[120px]" {{ stimulus_controller('visibility') }}>
+        <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[120px]" {{ stimulus_controller('visibility') }}>
             {% block second_col %}
             {% endblock %}
         </div>
     </div>
-
 {% endblock %}
