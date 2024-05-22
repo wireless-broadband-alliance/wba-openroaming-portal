@@ -12,7 +12,7 @@ module.exports = {
 					100: '#F5F5F5',
 				},
 
-				primary: '#A0C66B',
+				primary: '#7BBA29',
 				veryDarkPurple: '#594B60',
 				veryDarkButton: '#232B35',
 				lightGreen: '#57a475',
@@ -25,8 +25,9 @@ module.exports = {
 			},
 
 			fontFamily: {
-				sans: ["Inter var, sans-serif"],
-				roboto: ["Roboto, mono"],
+				sans: ["Asap", "Inter var", "sans-serif"],
+				roboto: ["Roboto", "mono"],
+				segoe: ["Segoe UI", "sans-serif"]
 			},
 			animation: {
 				'spin-slow': 'spin 3s linear infinite',
