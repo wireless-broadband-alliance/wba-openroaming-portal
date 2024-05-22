@@ -7,15 +7,17 @@
 {% block second_col %}
     {# Form Column #}
 
-    {# Flash success message #}
-    {% for message in app.session.flashbag.get('success') %}
-        {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
-    {% endfor %}
+    {# Toasts  #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {% for message in app.session.flashbag.get('success') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
+        {% endfor %}
 
-    {# Flash warning message #}
-    {% for message in app.session.flashbag.get('warning') %}
-        {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-    {% endfor %}
+        {# Flash warning message  #}
+        {% for message in app.session.flashbag.get('warning') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
 
     <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
 
