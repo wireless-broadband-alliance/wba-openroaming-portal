@@ -3,3 +3,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Css elements */
+.divider {
+	@apply w-full border-t border-dashed;
+}
+
