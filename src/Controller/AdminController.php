@@ -2116,7 +2116,7 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL'])) {
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL', 'CUSTOMER_LOGO_ENABLED'])) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 

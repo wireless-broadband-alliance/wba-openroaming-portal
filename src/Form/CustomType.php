@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
 use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
@@ -34,7 +35,7 @@ class CustomType extends AbstractType
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => TextType::class,
             'ADDITIONAL_LABEL' => TextType::class,
-            'CONTACT_EMAIL'=> EmailType::class
+            'CONTACT_EMAIL' => EmailType::class
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
@@ -62,11 +63,16 @@ class CustomType extends AbstractType
             // GetSettings service retrieves each description
             $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
-            /*
-            $formFieldOptions['constraints'] = [
-                new NoSpecialCharacters(),
-            ];
-            */
+            // Specific logic for CUSTOMER_LOGO_ENABLED
+            if ($settingName === 'CUSTOMER_LOGO_ENABLED') {
+                $formFieldOptions['choices'] = [
+                    EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
+                    EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
+                ];
+                $formFieldOptions['placeholder'] = 'Select an option';
+                $formFieldOptions['required'] = true;
+            }
+
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
     }
