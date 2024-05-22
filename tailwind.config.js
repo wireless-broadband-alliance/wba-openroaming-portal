@@ -13,7 +13,7 @@ module.exports = {
 				gray: {
 					100: '#F5F5F5',
 				},
-				
+
 
 				primary: '#7BBA29',
 				veryDarkPurple: '#594B60',
@@ -36,5 +36,6 @@ module.exports = {
 				'spin-slow': 'spin 3s linear infinite',
 			}
 		},
+		plugins: [require("@tailwindcss/forms")],
 	},
 }

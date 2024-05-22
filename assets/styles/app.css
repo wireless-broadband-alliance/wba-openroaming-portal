@@ -20,9 +20,9 @@
 
 /* buttons */
 .btn-primary {
-	@apply w-[200px] h-[45px] rounded-[5px] bg-primary hover:bg-[#7DB928]/90 inline-flex items-center justify-center text-white font-semibold;
+	@apply w-[200px] h-[45px] rounded-[5px] bg-primary hover:bg-[#6AA123] inline-flex items-center justify-center text-white font-semibold;
 }
 
 .btn-secondary {
-	@apply w-[200px] h-[45px] border border-primary rounded-[5px] bg-transparent hover:bg-[#E1E4E6]/90 inline-flex items-center justify-center text-primary font-semibold;
+	@apply w-[200px] h-[45px] border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 inline-flex items-center justify-center text-primary font-semibold;
 }
