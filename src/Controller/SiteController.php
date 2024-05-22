@@ -219,10 +219,11 @@ class SiteController extends AbstractController
         $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
-                'form' => $form->createView(),
-                'formPassword' => $formPassword->createView(),
-                'registrationFormDemo' => $formResgistrationDemo->createView()
-            ] + $data);
+            'form' => $form->createView(),
+            'formPassword' => $formPassword->createView(),
+            'registrationFormDemo' => $formResgistrationDemo->createView(),
+            'data' => $data
+        ]);
     }
 
 

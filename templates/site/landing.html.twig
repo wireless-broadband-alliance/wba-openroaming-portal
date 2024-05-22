@@ -1,29 +1,30 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ title.value }}
+    {{ data.title.value }}
 {% endblock %}
 
 {% block body %}
-
     <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
         {# First Column #}
         <div class="object-cover w-[100%] lg:w-1/2 bg-landing bg-center bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
-             style="background-image: url('{{ wallpaperImageName.value }}');">
+             style="background-image: url('{{ data.wallpaperImageName.value }}');">
             <div class="h-full w-full flex flex-col justify-between">
-                <img class="mt-16 lg:mt-36 w-96" src="{{ openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
+                <img class="mt-16 lg:mt-36 w-96"
+                     src="{{ data.openroamingLogoName.value }}"
+                     alt="OpenRoaming Logo"/>
 
-                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ welcomeText.value }}</h1>
+                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ data.welcomeText.value }}</h1>
 
-                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ welcomeDescription.value }}</p>
+                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ data.welcomeDescription.value }}</p>
 
                 <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any questions, please
                     contact
-                    <a href="mailto:{{ contactEmail.value }}"
-                       class="font-semibold underline">{{ contactEmail.value }}</a>
+                    <a href="mailto:{{ data.contactEmail.value }}"
+                       class="font-semibold underline">{{ data.contactEmail.value }}</a>
                 </p>
 
-                {% if PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
+                {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
                     <div class="bg-red-600 text-white font-bold p-3 text-center">
                         <h2>DEMO MODE</h2>
                         <p class="text-xs lg:text-base mt-5 ">
@@ -42,7 +43,7 @@
         {# Form Column #}
         <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]" {{ stimulus_controller('visibility') }}>
             <div>
-                <img class="mt-8 lg:mt-0" src="{{ customerLogoName.value }}" alt="Logo"/>
+                <img class="mt-8 lg:mt-0" src="{{ data.customerLogoName.value }}" alt="Logo"/>
 
                 <div class="space-y-4 mt-10 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
                     <p class="text-[#757575] font-medium text-sm lg:text-lg">On this portal you are able to download and
@@ -65,14 +66,14 @@
                     <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
                 {% endfor %}
 
-                {% if PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
-                    <div class="{% if USER_VERIFICATION.value != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
-                        {% if USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
+                {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::Demo') %}
+                    <div class="{% if data.USER_VERIFICATION.value != null %} border-red-600 border-dashed border-2 p-3 mt-8{% else %}p-3 mt-1{% endif %}">
+                        {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE -
                                 <b>UNCONFIRMED</b>
                                 EMAIL SYSTEM</h3>
-                        {% elseif  USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                        {% elseif data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                             <h3 class="text-red-600 mt-3 text-center">
                                 DEMO MODE -
                                 <b>CONFIRMED</b>
@@ -100,33 +101,35 @@
                                 <div class="mr-2">
                                     {{ form_widget(registrationFormDemo.agreeTerms) }}
                                 </div>
-                                <label for="{{ registrationFormDemo.agreeTerms.vars.id }}" class="text-[#7db928] text-xs">
+                                <label for="{{ registrationFormDemo.agreeTerms.vars.id }}"
+                                       class="text-[#7db928] text-xs">
                                     I agree to the
-                                    <a href="{{ TOS_LINK.value }}" target="_blank" class="underline font-base">terms &
+                                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline font-base">terms &
                                         conditions of
                                         use</a>
                                     and
-                                    <a href="{{ PRIVACY_POLICY_LINK.value }}" target="_blank" class="underline font-base">privacy
+                                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                                       class="underline font-base">privacy
                                         policy</a>.
                                 </label>
                             </div>
 
                             {# Turnstile Checker #}
-                            {% if TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 <div class="relative mt-2 lg:mt-4 xl:mt-8 flex justify-center items-center">
                                     {{ form_widget(registrationFormDemo.security) }}
                                 </div>
                             {% endif %}
 
                             {# OS #}
-                            <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
+                            <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
                                 <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
                                     operating
                                     system, so you can
                                     download and install the profile:</p>
 
                                 <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
-                                    {% for key, item in os.items %}
+                                    {% for key, item in data.os.items %}
                                         <div>
                                             <input type="radio" id="radio-os-{{ key }}" name="radio-os"
                                                    value="{{ key }}" class="hidden peer"/>
@@ -156,7 +159,7 @@
                             </div>
                             {{ form_end(registrationFormDemo) }}
                         {% else %}
-                            {% if USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                            {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                                 {% if not app.user.isVerified %}
                                     {% include 'email_activation/index.html.twig' %}
                                 {% endif %}
@@ -165,14 +168,14 @@
                                 <form
                                         method="post">
                                     {# OS #}
-                                    <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
+                                    <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-12" {{ stimulus_target('visibility', 'first') }}>
                                         <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
                                             operating
                                             system, so you can
                                             download and install the profile:</p>
 
                                         <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
-                                            {% for key, item in os.items %}
+                                            {% for key, item in data.os.items %}
                                                 <div>
                                                     <input type="radio" id="radio-os-{{ key }}" name="radio-os"
                                                            value="{{ key }}" class="hidden peer"/>
@@ -189,7 +192,7 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <input type="hidden" id="detected-os" name="detected-os" value="{{ os.selected }}"/>
+                                    <input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
 
                                     {# Submit button #}
                                     <div class="flex flex-row justify-center">
@@ -203,20 +206,20 @@
 
                                     {# ADDITIONAL_LABEL - PLATFORM_MODE - Demo #}
                                     <div class=" mt-5 text-center items-center">
-                                        {{ ADDITIONAL_LABEL.value }}
+                                        {{ data.ADDITIONAL_LABEL.value }}
                                     </div>
 
-                                    {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+                                    {% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
                                         <div
                                                 class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                             {# Profile selector  #}
                                             <button type="button"
                                                     class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
                                                 <img class="w-20"
-                                                     src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                                     src="{{ asset('resources/logos/'~data.os.selected~'.svg') }}"
                                                      alt="Windows Logo"/>
                                                 <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
-													<b>{{ os.selected }}</b>.</span>
+													<b>{{ data.os.selected }}</b>.</span>
                                             </button>
 
                                             <button type="button"
@@ -248,14 +251,14 @@
                         {% if app.user.isVerified %}
                             <div class="mt-10">
                                 <form method="post" novalidate>
-                                    <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+                                    <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
                                         <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
                                             operating
                                             system, so you can
                                             download and install the profile:</p>
 
                                         <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
-                                            {% for key, item in os.items %}
+                                            {% for key, item in data.os.items %}
                                                 <div>
                                                     <input type="radio" id="radio-os-{{ key }}" name="radio-os"
                                                            value="{{ key }}" class="hidden peer"/>
@@ -272,7 +275,7 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <input type="hidden" id="detected-os" name="detected-os" value="{{ os.selected }}"/>
+                                    <input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
 
                                     <div class="flex-col">
                                         {# Submit button #}
@@ -286,17 +289,17 @@
                                         </div>
                                     </div>
 
-                                    {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+                                    {% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
                                         <div
                                                 class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                             {# Profile selector  #}
                                             <button type="button"
                                                     class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
                                                 <img class="w-20"
-                                                     src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                                     src="{{ asset('resources/logos/'~data.os.selected~'.svg') }}"
                                                      alt="Windows Logo"/>
                                                 <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
-													<b>{{ os.selected }}</b>.</span>
+													<b>{{ data.os.selected }}</b>.</span>
                                             </button>
 
                                             <button type="button"
@@ -313,14 +316,14 @@
                             {% else %}
                                 <div class="mt-10">
                                     <form method="post" novalidate>
-                                        <div class="{{ os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+                                        <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
                                             <p class="text-[#414141] font-base lg:pr-20 text-sm lg:text-lg">Choose your
                                                 operating
                                                 system, so you can
                                                 download and install the profile:</p>
 
                                             <div class="grid gap-8 auto-rows-max grid-cols-3 mt-8 lg:mt-16">
-                                                {% for key, item in os.items %}
+                                                {% for key, item in data.os.items %}
                                                     <div>
                                                         <input type="radio" id="radio-os-{{ key }}" name="radio-os"
                                                                value="{{ key }}" class="hidden peer"/>
@@ -338,7 +341,7 @@
                                             </div>
                                         </div>
                                         <input type="hidden" id="detected-os" name="detected-os"
-                                               value="{{ os.selected }}"/>
+                                               value="{{ data.os.selected }}"/>
 
                                         {# Submit button #}
                                         <div class="flex flex-row justify-center">
@@ -350,17 +353,17 @@
                                             </button>
                                         </div>
 
-                                        {% if os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+                                        {% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
                                             <div
                                                     class="mt-24" {{ stimulus_target('visibility', 'second') }}>
                                                 {# Profile selector  #}
                                                 <button type="button"
                                                         class="w-[100%] xl:w-11/12 rounded-lg bg-[#e1e4e6] px-12 py-8 flex flex-row items-center text-[#3F474D] space-x-6">
                                                     <img class="w-20"
-                                                         src="{{ asset('resources/logos/'~os.selected~'.svg') }}"
+                                                         src="{{ asset('resources/logos/'~data.os.selected~'.svg') }}"
                                                          alt="Windows Logo"/>
                                                     <span class="text-left font-medium text-base lg:text-xl pr-8">Device identified as running
-														<b>{{ os.selected }}</b>.</span>
+														<b>{{ data.os.selected }}</b>.</span>
                                                 </button>
 
                                                 <button type="button"
@@ -382,17 +385,17 @@
                             </p>
                         </div>
 
-                        {% if LOGIN_TRADITIONAL_ENABLED.value %}
+                        {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('app_login') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ LOGIN_TRADITIONAL_LABEL.value }}
+                                    {{ data.LOGIN_TRADITIONAL_LABEL.value }}
                                 </a>
-                                <p>{{ LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+                                <p>{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
-                        {% if GOOGLE_LOGIN_ENABLED.value %}
+                        {% if data.GOOGLE_LOGIN_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('connect_google') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
@@ -402,45 +405,45 @@
                                         <path fill="currentColor"
                                               d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
                                     </svg>
-                                    {{ GOOGLE_LOGIN_LABEL.value }}
+                                    {{ data.GOOGLE_LOGIN_LABEL.value }}
                                 </a>
-                                <p>{{ GOOGLE_LOGIN_DESCRIPTION.value }}</p>
+                                <p>{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
-                        {% if SAML_ENABLED.value %}
+                        {% if data.SAML_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="/saml/login"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ SAML_LABEL.value }}
+                                    {{ data.SAML_LABEL.value }}
                                 </a>
-                                <p>{{ SAML_DESCRIPTION.value }}</p>
+                                <p>{{ data.SAML_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
-                        {% if EMAIL_REGISTER_ENABLED.value %}
+                        {% if data.EMAIL_REGISTER_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('app_register') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ REGISTER_LABEL.value }}
+                                    {{ data.REGISTER_LABEL.value }}
                                 </a>
-                                <p>{{ REGISTER_DESCRIPTION.value }}</p>
+                                <p>{{ data.REGISTER_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
-                        {% if AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                        {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
                             <div class="mb-10 mt-10 text-center grid grid-rows-1 grid-cols-2 gap-x-10 items-center">
                                 <a href="{{ path('app_register_sms') }}"
                                    class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-8 py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                    {{ AUTH_METHOD_SMS_REGISTER_LABEL.value }}
+                                    {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                                 </a>
-                                <p>{{ AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
+                                <p>{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
                             </div>
                         {% endif %}
 
                         {# ADDITIONAL_LABEL - PLATFORM_MODE - Live #}
                         <div class=" mt-5 text-center items-center">
-                            {{ ADDITIONAL_LABEL.value }}
+                            {{ data.ADDITIONAL_LABEL.value }}
                         </div>
                     {% endif %}
                     {% if app.user %}
