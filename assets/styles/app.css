@@ -28,9 +28,9 @@
 
 /* buttons */
 .btn-primary {
-	@apply w-[200px] h-[45px] rounded-[5px] bg-primary hover:bg-[#6AA123] inline-flex items-center justify-center text-white font-semibold;
+	@apply h-[50px] rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center text-center items-center text-white font-semibold text-center;
 }
 
 .btn-secondary {
-	@apply w-[200px] h-[45px] border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 inline-flex items-center justify-center text-primary font-semibold;
+	@apply h-[50px] border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
 }

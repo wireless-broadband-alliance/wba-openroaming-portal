@@ -69,11 +69,11 @@
     {{ form_row(registrationForm._token) }}
 
     <div class="my-[32px] flex justify-start gap-4">
-        <button type="submit" class="btn-primary">
+        <button type="submit" class="w-[220px] btn-primary">
             Create Account
         </button>
         {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::Demo') %}
-            <a href="{{ path('app_landing') }}" class="btn-secondary">
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
                 Choose Another
             </a>
         {% endif %}
