@@ -31,9 +31,9 @@ class SettingFixture extends Fixture
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This portal allows you to download and install the OpenRoaming profile tailored to your device, as part of the WBA OpenRoaming demo program.'],
+            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.'],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
+            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming@wballiance.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
