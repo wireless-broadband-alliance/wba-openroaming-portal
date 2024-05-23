@@ -50,6 +50,7 @@ class ResetCustomSettingsCommand extends Command
 
         $settings = [
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
+            ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],

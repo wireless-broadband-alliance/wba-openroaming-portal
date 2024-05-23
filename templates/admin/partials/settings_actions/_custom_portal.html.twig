@@ -24,11 +24,23 @@
     { 'name': 'CONTACT_EMAIL', 'displayName': 'Contact Email'}
 ] %}
 
+{% set choiceSettings = [
+    {
+        'name': 'CUSTOMER_LOGO_ENABLED',
+        'displayName': 'Show Customer Logo',
+    },
+] %}
+
 <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
     <div class="flex flex-col gap-8 z-0 justify-start">
-        {# Image Settings #}
-        <div class="flex flex-col lg:flex-row gap-8 lg:gap-4 max-w-sm lg:max-w-4xl">
+        {# Choice and Images Settings #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for choiceSetting in choiceSettings %}
+                {% include 'admin/partials/settings_actions/_card.html.twig' with {
+                    ...choiceSetting, settingType: 'choice'
+                } %}
+            {% endfor %}
             {% for imgSetting in imageSettings %}
                 {% include 'admin/partials/settings_actions/_card.html.twig' with {
                     ...imgSetting, settingType: 'image',

@@ -119,6 +119,11 @@ class GetSettings
             'description' => $this->getSettingDescription('PAGE_TITLE'),
         ];
 
+        $data['customerLogoNameEnabled'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO_ENABLED'])->getValue(),
+            'description' => $this->getSettingDescription('CUSTOMER_LOGO_ENABLED'),
+        ];
+
         $data['customerLogoName'] = [
             'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue(),
             'description' => $this->getSettingDescription('CUSTOMER_LOGO'),
@@ -331,9 +336,10 @@ class GetSettings
             'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to differentiate between genuine users and bots. This can be used in Live or Demo modes.',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
+            'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',
             'CUSTOMER_LOGO' => 'The resource path or URL to the customer\'s logo image',
             'OPENROAMING_LOGO' => 'The resource path or URL to the OpenRoaming logo image',
-            'WALLPAPER_IMAGE' => 'The resource path or URL to the wallpaper image',
+            'WALLPAPER_IMAGE' => 'The resource path or URL to the wallpaper image. Is recommended to use an image with a ratio of 13 : 14',
             'WELCOME_TEXT' => 'The welcome text displayed on the user interface',
             'WELCOME_DESCRIPTION' => 'The description text displayed under the welcome text',
             'ADDITIONAL_LABEL' => 'Additional label displayed on the landing page for more, if necessary, information',

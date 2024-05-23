@@ -2,9 +2,12 @@
 
 namespace App\Form;
 
+use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
 use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -24,6 +27,7 @@ class CustomType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowedSettings = [
+            'CUSTOMER_LOGO_ENABLED' => ChoiceType::class,
             'CUSTOMER_LOGO' => FileType::class,
             'OPENROAMING_LOGO' => FileType::class,
             'WALLPAPER_IMAGE' => FileType::class,
@@ -31,14 +35,14 @@ class CustomType extends AbstractType
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => TextType::class,
             'ADDITIONAL_LABEL' => TextType::class,
-            'CONTACT_EMAIL'=> EmailType::class
+            'CONTACT_EMAIL' => EmailType::class
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
             $formFieldOptions = [
                 'data' => null, // Set data to null for FileType fields
                 'attr' => [
-                    'data-controller' => 'descriptionCard',
+                    'data-controller' => 'alwaysOnEmail descriptionCard',
                 ],
             ];
 
@@ -59,11 +63,18 @@ class CustomType extends AbstractType
             // GetSettings service retrieves each description
             $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
-            /*
-            $formFieldOptions['constraints'] = [
-                new NoSpecialCharacters(),
-            ];
-            */
+            // Specific logic for CUSTOMER_LOGO_ENABLED
+            if ($settingName === 'CUSTOMER_LOGO_ENABLED') {
+                $formFieldOptions['choices'] = [
+                    EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
+                    EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
+                ];
+                $formFieldOptions['placeholder'] = 'Select an option';
+                $formFieldOptions['required'] = true;
+                $formFieldOptions['expanded'] = true;
+                $formFieldOptions['multiple'] = false;
+            }
+
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
     }

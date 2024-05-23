@@ -30,11 +30,14 @@
                         Upload Image
                     </label>
                 </div>
-
             </button>
         </div>
 
     {% elseif settingType == 'text' %}
+        <div class="mt-5 mb-1">
+            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+        </div>
+    {% elseif settingType == 'choice' %}
         <div class="mt-5 mb-1">
             {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
         </div>

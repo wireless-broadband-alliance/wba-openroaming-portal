@@ -263,9 +263,13 @@ Below is an overview of the different variables and their functions:
     ```
 - `EMAIL_ADDRESS`: Entity of sends the emails to the users
 - `SENDER_NAME`: Entity sender name
-- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
-  legal and security reasons.
 - `BUDGETSMS_API_URL`: This env manages the budget SMS link of the API, is not necessary to change this env.
+- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
+    legal and security reasons.
+- `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
+
+These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
+`SENTRY_DSN`& `TRUSTED_PROXIES`.
 
 ### Google Authenticator Credentials
 
@@ -277,10 +281,6 @@ https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
-Finally, these last two envs are for debugging purposes,
-they only should be used to control and manage reports from the portal.
-`SENTRY_DSN`& `TRUSTED_PROXIES`.
-
 ### 🔒 SAML Specific Settings
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
@@ -291,6 +291,14 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
 - `SAML_SP_ENTITY_ID`: This is the entity ID (URI) of the SP.
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
   the IdP.
+
+### 👾 Turnstile Integration
+These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
+
+- `TURNSTILE_KEY`: Stores the public key for Cloudflare Turnstile integration.
+- `TURNSTILE_SECRET`: Holds the secret key for Cloudflare Turnstile integration.
+
+For testing purposes with Cloudflare Turnstile, please use this link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 
 ### 🛠️ Settings Table
 
@@ -326,59 +334,60 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     When it\'s ON it activates the email verification system.
     This system requires all
     the users to verify its own account before they download any profile.
-11. `CLOUD_FLARE_CHECKER`: ON || OFF.
-        When it\'s ON it activates the cloud flare verification system.
+11. `TURNSTILE_CHECKER`: ON || OFF.
+        When it\'s ON, it activates the turnslide verification system.
         This system requires all
         the users to check and verify is session before creating an account.
         To prevent bots.
 
 12. `PAGE_TITLE`: The title displayed on the webpage.
-13. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
-14. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-15. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-16. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-17. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-18. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
+13. `CUSTOMER_LOGO_ENABLED` Shows the customer logo on the landing page.
+14. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
+15. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+16. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+17. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+18. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+19. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
         with a google account login
-19. `CONTACT_EMAIL`: The email address for contact inquiries.
+20. `CONTACT_EMAIL`: The email address for contact inquiries.
 
-20. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-21. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
-22. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
-23. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
-24. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-25. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-26. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
-27. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
-28. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
-29. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
-30. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
-31. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-32. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
-33. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
-34. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
+21. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
+22. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
+23. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
+24. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
+25. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
+26. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+27. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
+28. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
+29. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
+30. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
+31. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
+32. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
+33. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
+34. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
+35. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
 
-35. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-36. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-37. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-38. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-39. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-40. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+36. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+37. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+38. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+39. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+40. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+41. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
     The placeholder `@ID` is replaced with
     the user's ID.
 
-41. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-42. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-43. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-44. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-45. `SMS_USERNAME`: Budget SMS Username.
-46. `SMS_USER_ID`: Budget SMS User ID.
-47. `SMS_HANDLE`: Budget SMS Handle hash.
-48. `SMS_FROM`: Entity sending the SMS for the users.
-49. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+42. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+43. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+44. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+45. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+46. `SMS_USERNAME`: Budget SMS Username.
+47. `SMS_USER_ID`: Budget SMS User ID.
+48. `SMS_HANDLE`: Budget SMS Handle hash.
+49. `SMS_FROM`: Entity sending the SMS for the users.
+50. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-50. `TOS_LINK`: Terms and Conditions URL
-51. `PRIVACY_POLICY_LINK`: Privacy and Policy URL
+51. `TOS_LINK`: Terms and Conditions URL
+52. `PRIVACY_POLICY_LINK`: Privacy and Policy URL
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
