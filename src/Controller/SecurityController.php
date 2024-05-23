@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Enum\PlatformMode;
+use App\Entity\User;
+use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -44,6 +45,10 @@ class SecurityController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $user_sigin = new User();
+        $form = $this->createForm(LoginFormType::class, $user_sigin);
+        $form->handleRequest($request);
+
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
             if ($this->isGranted('ROLE_ADMIN')) {
@@ -82,6 +87,7 @@ class SecurityController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
+            'form' => $form,
         ]);
     }
 

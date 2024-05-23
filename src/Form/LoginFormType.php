@@ -41,23 +41,19 @@ class LoginFormType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('uuid', TextType::class, [
-                'label' => 'Enter your email our phone number',
-                'required' => true,
-            ])
+            'label' => 'Enter your email or phone number',
+            'attr' => [
+                'placeholder' => 'Enter your email or phone number',
+                'name' => 'uuid'
+            ],
+            'required' => true,
+        ])
             ->add('password', PasswordType::class, [
                 'label' => 'Enter your password',
                 'attr' => [
                     'placeholder' => 'Enter your password',
+                    'name' => 'password'
                 ],
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
-                'label' => 'I agree to the terms',
             ]);
 
         if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
