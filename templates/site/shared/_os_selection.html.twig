@@ -15,7 +15,7 @@
                              alt="{{ item.alt }}"/>
                     </label>
 
-                    <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key }}</p>
+                    <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key == constant('App\\Enum\\OSTypes::IOS') or key == constant('App\\Enum\\OSTypes::MACOS') ? 'macOS/iOS' : key }}</p>
                 </div>
             {% endfor %}
         </div>
