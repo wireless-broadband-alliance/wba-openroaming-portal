@@ -31,7 +31,7 @@ class SettingFixture extends Fixture
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
+            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This portal allows you to download and install the OpenRoaming profile tailored to your device, as part of the WBA OpenRoaming demo program.'],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
 

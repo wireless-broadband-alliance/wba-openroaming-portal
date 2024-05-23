@@ -219,10 +219,11 @@ class SiteController extends AbstractController
         $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
-                'form' => $form->createView(),
-                'formPassword' => $formPassword->createView(),
-                'registrationFormDemo' => $formResgistrationDemo->createView()
-            ] + $data);
+            'form' => $form->createView(),
+            'formPassword' => $formPassword->createView(),
+            'registrationFormDemo' => $formResgistrationDemo->createView(),
+            'data' => $data
+        ]);
     }
 
 
@@ -484,7 +485,7 @@ class SiteController extends AbstractController
         if (!$currentUser->isVerified()) {
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
-                ...$data,
+                'data' => $data,
             ]);
         }
 

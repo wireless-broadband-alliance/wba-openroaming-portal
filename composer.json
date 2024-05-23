@@ -52,6 +52,8 @@
 		"symfony/translation": "6.4.*",
 		"symfony/twig-bundle": "6.4.*",
 		"symfony/ux-chartjs": "^2.12",
+		"symfony/ux-icons": "^2.17",
+		"symfony/ux-twig-component": "^2.17",
 		"symfony/validator": "6.4.*",
 		"symfony/web-link": "6.4.*",
 		"symfony/webpack-encore-bundle": "^1.16",

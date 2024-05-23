@@ -1,0 +1,23 @@
+<div {{ stimulus_controller('toast') }} {{ stimulus_target('toast', 'toast') }}>
+<div class="{{ toast_type }}">{{ message }}
+
+	<button class="ml-auto" {{ stimulus_action('toast', 'close') }}>
+
+	<svg class="fill-current" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+		 viewBox="0 0 22 22">
+		<g transform="translate(-1339 -73)">
+			<g transform="translate(-13)">
+				<path d="M11,2a9,9,0,1,0,9,9,9.01,9.01,0,0,0-9-9m0-2A11,11,0,1,1,0,11,11,11,0,0,1,11,0Z"
+					  transform="translate(1352 73)"/>
+				<g transform="translate(371.077 -88.924)">
+					<path d="M0,7.847a1,1,0,0,1-.707-.293,1,1,0,0,1,0-1.414L6.14-.707a1,1,0,0,1,1.414,0,1,1,0,0,1,0,1.414L.707,7.554A1,1,0,0,1,0,7.847Z"
+						  transform="translate(988.5 169.5)"/>
+					<path d="M6.847,7.847a1,1,0,0,1-.707-.293L-.707.707a1,1,0,0,1,0-1.414,1,1,0,0,1,1.414,0L7.554,6.14a1,1,0,0,1-.707,1.707Z"
+						  transform="translate(988.5 169.5)"/>
+				</g>
+			</g>
+		</g>
+	</svg>
+	</button>
+</div>
+</div>
