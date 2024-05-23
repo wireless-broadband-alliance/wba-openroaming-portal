@@ -31,8 +31,9 @@
         {{ form_widget(form.uuid, {
             'attr': {
                 'class': 'form-widget',
-                'placeholder': 'Enter your email or phone number'
-            }
+                'placeholder': 'Enter your email or phone number',
+            },
+            'full_name' : 'uuid',
         }) }}
     </div>
 
@@ -42,24 +43,20 @@
         {{ form_widget(form.password, {
             'attr': {
                 'class': 'form-widget',
-                'placeholder': 'Enter your password'
-            }
+                'placeholder': 'Enter your password',
+            },
+            'full_name' : 'password',
         }) }}
     </div>
 
     {# Turnstile Checker #}
     {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
         <div class="ml-3 mt-5">
-            {{ form_widget(form.security, {'full_name': 'security'}) }}
+            {{ form_row(form.security, {'full_name': 'security'}) }}
         </div>
     {% endif %}
 
-    {# {{ form_row(form.uuid, {'full_name': 'uuid'}) }}
-    {{ form_row(form.password, {'full_name': 'password'}) }}
-    {{ form_row(form.security, {'full_name': 'security'}) }}
-    #}{# Button Submit #}{#
-    {{ form_row(registrationForm._token) }}
-    #}
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
     <div class="my-[32px] flex justify-start gap-4">
         <button type="submit" class="w-[220px] btn-primary">
@@ -71,7 +68,6 @@
             </a>
         {% endif %}
     </div>
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
     {{ form_rest(form) }}
     {{ form_end(form) }}
 {% endblock %}

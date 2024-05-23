@@ -44,7 +44,8 @@ class LoginFormType extends AbstractType
             'label' => 'Enter your email or phone number',
             'attr' => [
                 'placeholder' => 'Enter your email or phone number',
-                'name' => 'uuid'
+                'name' => 'uuid',
+                'full_name' => 'uuid',
             ],
             'required' => true,
         ])
@@ -52,7 +53,8 @@ class LoginFormType extends AbstractType
                 'label' => 'Enter your password',
                 'attr' => [
                     'placeholder' => 'Enter your password',
-                    'name' => 'password'
+                    'name' => 'password',
+                    'full_name' => 'password',
                 ],
             ]);
 

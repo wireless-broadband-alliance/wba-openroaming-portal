@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -55,7 +56,7 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('admin_page');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
-            if ($platformMode === true) {
+            if ($platformMode === PlatformMode::Demo) {
                 return $this->redirectToRoute('saml_logout');
             }
             return $this->redirectToRoute('app_landing');
