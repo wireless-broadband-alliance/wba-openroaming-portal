@@ -2,11 +2,15 @@
 
 namespace App\Security;
 
+use App\Entity\User;
+use App\Form\LoginFormType;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
@@ -20,14 +24,25 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
     use TargetPathTrait;
 
     public const LOGIN_ROUTE = 'app_login';
+    private UrlGeneratorInterface $urlGenerator;
+    private FormFactoryInterface $formFactory;
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
+    public function __construct(UrlGeneratorInterface $urlGenerator, FormFactoryInterface $formFactory)
     {
-
+        $this->urlGenerator = $urlGenerator;
+        $this->formFactory = $formFactory;
     }
 
     public function authenticate(Request $request): Passport
     {
+        $userSignin = new User();
+        $form = $this->formFactory->create(LoginFormType::class, $userSignin);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            throw new CustomUserMessageAuthenticationException('Invalid login data.');
+        }
+
         $uuid = $request->request->get('uuid', '');
 
         $request->getSession()->set(Security::LAST_USERNAME, $uuid);
