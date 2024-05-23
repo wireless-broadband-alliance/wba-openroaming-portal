@@ -15,5 +15,4 @@ export default class extends Controller {
 	close() {
 		this.toastTarget.classList.add('hidden');
 	}
-
 }
