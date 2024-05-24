@@ -6,6 +6,7 @@ export default class extends Controller {
 	connect() {
 		super.connect();
 
+		// Todo: What is this?
 		const alertElement = document.getElementById('alert-2');
 		if (alertElement) {
 			alertElement.addEventListener('animationend', () => {

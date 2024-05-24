@@ -9,6 +9,10 @@
 	@apply w-full border-t border-dashed;
 }
 
+.divider-solid {
+	@apply w-full h-0.5 bg-gray-300/50;
+}
+
 .toast-success {
 	@apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
