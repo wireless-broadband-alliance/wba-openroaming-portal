@@ -103,7 +103,7 @@
         {% else %}
             {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                 {% if not app.user.isVerified %}
-                    {% include 'email_activation/index.html.twig' %}
+                    {% include 'site/shared/_account_activation.html.twig' %}
                 {% endif %}
             {% endif %}
 
@@ -143,7 +143,7 @@
                 {{ include('site/shared/_os_selection.html.twig') }}
             {% else %}
                 {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
-                    {% include 'email_activation/index.html.twig' %}
+                    {% include 'site/shared/_account_activation.html.twig' %}
                 {% else %}
                     {{ include('site/shared/_os_selection.html.twig') }}
                 {% endif %}
