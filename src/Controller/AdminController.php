@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -108,17 +109,12 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 15; // Number of users to display per page
-
-
-        $sort = $request->query->get('sort', 'createdAt');  // Default sort by user creation date
-        $order = $request->query->get('order', 'desc'); // Default order: descending
 
         // Fetch users with the specified sorting
         $users = $userRepository->findExcludingAdmin();
@@ -175,7 +171,9 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
-            'export_users' => $export_users
+            'export_users' => $export_users,
+            'sort' => $sort,
+            'order' => $order
         ]);
     }
 

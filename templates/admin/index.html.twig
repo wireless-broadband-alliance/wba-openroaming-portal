@@ -2,6 +2,29 @@
 
 {% block title %}Admin Page WBA{% endblock %}
 
+{% macro sortArrow(sortName, sort, sortDirection) %}
+    {% if sort == sortName %}
+        {% if sortDirection == 'asc' %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M6 15l6 -6l6 6"></path>
+            </svg>
+        {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M6 9l6 6l6 -6"></path>
+            </svg>
+        {% endif %}
+    {% else %}
+        <!-- up and down arrow svg -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M8 9l4 -4l4 4"></path>
+            <path d="M16 15l-4 4l-4 -4"></path>
+        </svg>
+    {% endif %}
+{% endmacro %}
+
 {% block container %}
     <div class="p-5 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full mx-auto">
@@ -77,16 +100,12 @@
                     <table class="w-full items-start">
                         <thead class="text-sm text-gray-700 bg-veryLightGreen">
                         <tr>
-                            <th scope="col" id="uuidColumn" class="flex items-center px-12 py-3">
+                            <th scope="col" class="flex items-center px-12 py-3">
                                 <h1 class="mr-2">UUID</h1>
-                                <div class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                    <svg class="w-4" data-slot="icon" fill="none" stroke-width="1.5"
-                                         stroke="currentColor" viewbox="0 0 24 24"
-                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"></path>
-                                    </svg>
-                                </div>
+                                <a href="{{ path('admin_page', {...app.request.query.all, sort: 'uuid', order: sort == 'uuid' and order == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                    {{ _self.sortArrow('uuid', sort, order) }}
+                                </a>
                             </th>
                             <th scope="col" class="px-4 py-3 -ml-4">
                                 <h1 class="mr-2">Email</h1>
@@ -100,16 +119,14 @@
                             <th scope="col" class="px-6 py-3">
                                 BannedAt
                             </th>
-                            <th scope="col" id="createdAtColumn" class="flex items-center px-6 py-3">
+                            <th scope="col" class="flex items-center px-6 py-3">
                                 <h1 class="mr-2">CreatedAt</h1>
-                                <div class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                    <svg class="w-4" data-slot="icon" fill="none" stroke-width="1.5"
-                                         stroke="currentColor" viewbox="0 0 24 24"
-                                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"></path>
-                                    </svg>
-                                </div>
+                                <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: sort == 'createdAt' and order == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+
+                                    {{ _self.sortArrow('createdAt', sort, order) }}
+                                </a>
+
                             </th>
                             <th scope="col" class="px-6 py-3">
                                 <span class="none"></span>
