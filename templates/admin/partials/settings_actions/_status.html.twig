@@ -8,7 +8,7 @@
                 {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
-                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio') }} {% if setting.vars.name == 'USER_VERIFICATION'%} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -19,10 +19,8 @@
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
-                            <label class="flex items-center bg-opacity-40"
-                            >
-                                <img class="w-6 cursor-pointer"
-                                     name="descriptionIcon"
+                            <label class="flex items-center bg-opacity-40">
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
@@ -102,7 +100,7 @@
                                     <input type="radio" name="{{ form.USER_VERIFICATION.vars.full_name }}"
                                            id="offRadioEmail"
                                            value="OFF"
-                                           class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')}} {{ stimulus_target('radio-card', 'input') }}>
+                                           class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.USER_VERIFICATION.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
@@ -161,7 +159,7 @@
                         {# Description Setting #}
                         <div class="flex justify-center items-center">
                             <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                 name="description">
+                                    {{ stimulus_target('card', 'info') }}>
                                 {{ setting.vars.attr.description }}
                             </div>
                         </div>

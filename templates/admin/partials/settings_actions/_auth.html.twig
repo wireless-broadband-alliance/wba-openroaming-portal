@@ -12,7 +12,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="Cards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {% else %} {{ stimulus_controller('radio') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -25,8 +25,7 @@
                             </div>
                             <label class="flex items-center bg-opacity-40"
                             >
-                                <img class="w-6 cursor-pointer"
-                                     name="descriptionIcon"
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
@@ -80,7 +79,7 @@
                         {# Description Setting #}
                         <div class="flex justify-center items-center">
                             <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                 name="description">
+                                    {{ stimulus_target('card', 'info') }}>
                                 {{ setting.vars.attr.description }}
                             </div>
                         </div>
@@ -107,7 +106,7 @@
                     {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                              name="GoogleCards"
-                             id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }}  {% else %} {{ stimulus_controller('radio') }} {% endif %}>
+                             id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                             {# Title and Icon #}
                             <div class="flex flex-row justify-between">
                                 <div class="text-base font-medium text-center break-normal md:break-all">
@@ -120,8 +119,7 @@
                                 </div>
                                 <label class="flex items-center bg-opacity-40"
                                 >
-                                    <img class="w-6 cursor-pointer"
-                                         name="descriptionIcon"
+                                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                          src="{{ asset('resources/logos/info_icon.svg') }}"
                                          alt="info_icon"/>
                                 </label>
@@ -175,7 +173,7 @@
                             {# Description Setting #}
                             <div class="flex justify-center items-center">
                                 <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                     name="description">
+                                        {{ stimulus_target('card', 'info') }}>
                                     {{ setting.vars.attr.description }}
                                 </div>
                             </div>
@@ -201,7 +199,7 @@
                     {% if setting.vars.name in ['VALID_DOMAINS_GOOGLE_LOGIN'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                              name="GoogleSubCards"
-                             id="{{ setting.vars.name }}" {{ stimulus_target('radio-card', 'card') }}>
+                             id="{{ setting.vars.name }}" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
                             {# Title and Icon #}
                             <div class="flex flex-row justify-between">
                                 <div class="text-base font-medium text-center break-normal md:break-all">
@@ -212,8 +210,7 @@
                                 </div>
                                 <label class="flex items-center bg-opacity-40"
                                 >
-                                    <img class="w-6 cursor-pointer"
-                                         name="descriptionIcon"
+                                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                          src="{{ asset('resources/logos/info_icon.svg') }}"
                                          alt="info_icon"/>
                                 </label>
@@ -228,7 +225,7 @@
                             {# Description Setting #}
                             <div class="flex justify-center items-center">
                                 <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                     name="description">
+                                        {{ stimulus_target('card', 'info') }}>
                                     {{ setting.vars.attr.description }}
                                 </div>
                             </div>
@@ -254,7 +251,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="RegisterCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }}  {% else %} {{ stimulus_controller('radio') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -267,8 +264,7 @@
                             </div>
                             <label class="flex items-center bg-opacity-40"
                             >
-                                <img class="w-6 cursor-pointer"
-                                     name="descriptionIcon"
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
@@ -322,7 +318,7 @@
                         {# Description Setting #}
                         <div class="flex justify-center items-center">
                             <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                 name="description">
+                                    {{ stimulus_target('card', 'info') }}>
                                 {{ setting.vars.attr.description }}
                             </div>
                         </div>
@@ -347,7 +343,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="SMSRegisterCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }}  {% else %} {{ stimulus_controller('radio') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -360,8 +356,7 @@
                             </div>
                             <label class="flex items-center bg-opacity-40"
                             >
-                                <img class="w-6 cursor-pointer"
-                                     name="descriptionIcon"
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
@@ -415,7 +410,7 @@
                         {# Description Setting #}
                         <div class="flex justify-center items-center">
                             <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                 name="description">
+                                    {{ stimulus_target('card', 'info') }}>
                                 {{ setting.vars.attr.description }}
                             </div>
                         </div>
@@ -440,7 +435,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="LoginCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }}  {% else %} {{ stimulus_controller('radio') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -453,8 +448,7 @@
                             </div>
                             <label class="flex items-center bg-opacity-40"
                             >
-                                <img class="w-6 cursor-pointer"
-                                     name="descriptionIcon"
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
@@ -508,7 +502,7 @@
                         {# Description Setting #}
                         <div class="flex justify-center items-center">
                             <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                                 name="description">
+                                    {{ stimulus_target('card', 'info') }}>
                                 {{ setting.vars.attr.description }}
                             </div>
                         </div>

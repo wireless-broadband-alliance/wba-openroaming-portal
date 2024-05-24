@@ -1,11 +1,11 @@
 {% set setting = form[name] %}
 
-<div name="customCards"
+<div name="customCards" {{ stimulus_controller('card') }}
      class="bg-white w-full flex flex-col px-5 py-3 rounded-lg shadow transition hover:-translate-y-1">
     {# Title and info icon #}
     <div class="flex justify-between">
         <h1 class="text-lg font-medium">{{ displayName }}</h1>
-        <img class="w-6 cursor-pointer" name="descriptionIcon" alt="info_icon"
+        <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
              src="{{ asset('resources/logos/info_icon.svg') }}"/>
     </div>
 
@@ -45,8 +45,8 @@
 
     {# Setting Description #}
     <div class="flex justify-center items-center">
-        <div name="description"
-             class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden">
+        <div {{ stimulus_target('card', 'info') }}
+        class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden">
             {{ setting.vars.attr.description }}
         </div>
     </div>
