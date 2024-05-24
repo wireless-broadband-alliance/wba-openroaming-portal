@@ -111,9 +111,6 @@ class AuthType extends AbstractType
                 }
             }
             $formFieldOptions = [
-                'attr' => [
-                    'data-controller' => 'descriptionCard',
-                ],
                 'required' => false,
             ];
         }
