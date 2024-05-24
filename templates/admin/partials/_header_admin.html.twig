@@ -128,8 +128,8 @@
 {% endfor %}
 
 {# Main Button #}
-<div class="relative" {{ stimulus_controller('nav_dropdown') }} >
-    <button type="button" {{ stimulus_target('nav', 'hamburguer') }} {{ stimulus_target('nav_dropdown', 'button') }} {{ stimulus_action('nav_dropdown', 'toggle')|stimulus_action('nav_dropdown', 'lost_focus', 'focusout') }}
+<div class="relative" {{ stimulus_controller('nav-dropdown') }} >
+    <button type="button" {{ stimulus_target('nav-dropdown', 'button') }} {{ stimulus_action('nav-dropdown', 'toggle')|stimulus_action('nav-dropdown', 'lost_focus', 'focusout') }}
             class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300 hidden xl:relative xl:block">
         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
              aria-hidden="true">
@@ -139,7 +139,7 @@
     </button>
 
     <div class="hidden xl:block">
-        <div {{ stimulus_target('nav_dropdown', 'container') }}
+        <div {{ stimulus_target('nav-dropdown', 'container') }}
                 class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
             <ul class="py-2 text-sm" aria-labelledby="adminActionsDropdownButton">
                 {# Account Setting #}

@@ -1,115 +1,120 @@
-<form action="{{ path('admin_dashboard_settings_capport') }}" method="post" enctype="multipart/form-data">
-    <div class="p-2">
-        <h1 class="text-2xl font-semibold">CAPPORT</h1>
-    </div>
-    {{ form_row(form._token) }}
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
-        {% for setting in form %}
-            {# Display only the capport settings #}
-            {% if setting.vars.name in ['CAPPORT_ENABLED', 'CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                     name="Cards"
-                     id="{{ setting.vars.name }}">
-                    {# Title and Icon #}
-                    <div class="flex flex-row justify-between">
-                        <div class="text-base font-medium text-center break-normal md:break-all">
-                            {% set displayName = {
-                                'CAPPORT_ENABLED': 'Mode',
-                                'CAPPORT_PORTAL_URL': 'CAPPORT Portal URL',
-                                'CAPPORT_VENUE_INFO_URL': 'CAPPORT Venue Info URL',
-                            }[setting.vars.name] ?? setting.vars.name %}
-                            <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
-                        </div>
-                        <label class="flex items-center bg-opacity-40"
-                        >
-                            <img class="w-6 cursor-pointer"
-                                 name="descriptionIcon"
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
-                        </label>
-                    </div>
-                    {% if setting.vars.name in ['CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %}
-                        <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
-                        </div>
-                    {% endif %}
-                    {% if setting.vars.name in ['CAPPORT_ENABLED'] %}
-                        <div class="flex flex-col items-center space-y-2 mt-5">
-                            {# Render "ON" Radio Input #}
-                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                   name="onLabel">
-                                On
-                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" id="onRadio"
-                                       value="true"
-                                       class="radio-input hidden"{{ form.CAPPORT_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
-                                         fill="none">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
-                                              fill="#210124"/>
-                                    </svg>
-                                </div>
-                            </label>
-                            {# Render "OFF" Radio Input #}
-                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                   name="offLabel">
-                                Off
-                                <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" id="offRadio"
-                                       value="false"
-                                       class="radio-input hidden"{{ form.CAPPORT_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
-                                         fill="none">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
-                                              fill="#210124"/>
-                                    </svg>
-                                </div>
+<div {{ stimulus_controller('radio-msg') }}>
+    <form action="{{ path('admin_dashboard_settings_capport') }}" method="post" enctype="multipart/form-data">
+        <div class="p-2">
+            <h1 class="text-2xl font-semibold">CAPPORT</h1>
+        </div>
+        {{ form_row(form._token) }}
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+            {% for setting in form %}
+                {# Display only the capport settings #}
+                {% if setting.vars.name in ['CAPPORT_ENABLED', 'CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %}
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+                         name="Cards"
+                         id="{{ setting.vars.name }}">
+                        {# Title and Icon #}
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                {% set displayName = {
+                                    'CAPPORT_ENABLED': 'Mode',
+                                    'CAPPORT_PORTAL_URL': 'CAPPORT Portal URL',
+                                    'CAPPORT_VENUE_INFO_URL': 'CAPPORT Venue Info URL',
+                                }[setting.vars.name] ?? setting.vars.name %}
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40"
+                            >
+                                <img class="w-6 cursor-pointer"
+                                     name="descriptionIcon"
+                                     src="{{ asset('resources/logos/info_icon.svg') }}"
+                                     alt="info_icon"/>
                             </label>
                         </div>
-                    {% endif %}
+                        {% if setting.vars.name in ['CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %}
+                            <div class="flex items-center space-x-2 mt-5">
+                                {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            </div>
+                        {% endif %}
+                        {% if setting.vars.name in ['CAPPORT_ENABLED'] %}
+                            <div class="flex flex-col items-center space-y-2 mt-5">
+                                {# Render "ON" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="onLabel">
+                                    On
+                                    <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" id="onRadio"
+                                           value="true"
+                                           class="radio-input hidden"{{ form.CAPPORT_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio-msg', 'hide') }} {{ stimulus_target('radio-msg', 'on') }}>
+                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"/>
+                                        </svg>
+                                    </div>
+                                </label>
+                                {# Render "OFF" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="offLabel">
+                                    Off
+                                    <input type="radio" name="{{ form.CAPPORT_ENABLED.vars.full_name }}" id="offRadio"
+                                           value="false"
+                                           class="radio-input hidden"{{ form.CAPPORT_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio-msg', 'display') }}>
+                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"/>
+                                        </svg>
+                                    </div>
+                                </label>
+                            </div>
+                        {% endif %}
 
-                    {# Description Setting #}
-                    <div class="flex justify-center items-center">
-                        <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-                             name="description">
-                            {{ setting.vars.attr.description }}
+                        {# Description Setting #}
+                        <div class="flex justify-center items-center">
+                            <div class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
+                                 name="description">
+                                {{ setting.vars.attr.description }}
+                            </div>
+                        </div>
+
+                        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                            {{ form_errors(setting) }}
                         </div>
                     </div>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                        {{ form_errors(setting) }}
-                    </div>
+        <div {{ stimulus_target('radio-msg', 'msg') }}
+                class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full lg:w-3/4">
+            <div class="flex bg-infoBgColor/50 rounded-lg p-4 mb-4 text-xs md:text-sm text-infoTextColor" role="alert">
+                <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <span class="font-medium">To activate CAPPORT you must activate Option 114 on your DHCP server with the value of: <strong>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/api/v1/capport/json</strong></span>
                 </div>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <div id="capportMessage"
-         class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full lg:w-3/4">
-        <div class="flex bg-infoBgColor/50 rounded-lg p-4 mb-4 text-xs md:text-sm text-infoTextColor" role="alert">
-            <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
-                 xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clip-rule="evenodd"></path>
-            </svg>
-            <div>
-                <span class="font-medium">To activate CAPPORT you must activate Option 114 on your DHCP server with the value of: <strong>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/api/v1/capport/json</strong></span>
             </div>
         </div>
-    </div>
-    <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-    <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCAPPORT'}) }}"
-           onclick="return confirm('Are you sure you want to reset to the default settings?')"
-           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-            Reset
-        </a>
+        <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+        <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCAPPORT'}) }}"
+               onclick="return confirm('Are you sure you want to reset to the default settings?')"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                Reset
+            </a>
 
-        <button class="text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200"
-                onclick="return confirm('Are you sure you want to apply this new changes?')"
-                type="submit">Save Changes
-        </button>
-    </div>
-</form>
+            <button class="text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200"
+                    onclick="return confirm('Are you sure you want to apply this new changes?')"
+                    type="submit">Save Changes
+            </button>
+        </div>
+    </form>
+</div>
