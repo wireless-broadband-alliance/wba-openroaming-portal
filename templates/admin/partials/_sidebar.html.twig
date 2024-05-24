@@ -1,5 +1,4 @@
-<div class="bg-lightGray hidden 2xl:sticky top-0 h-screen p-4 pt-4 w-10/12 sm:w-8/12 md:w-5/12 lg:w-4/12 2xl:w-3/12 duration-300 border-r border-gray-300/50 z-10 overflow-y-auto"
-     id="sidebar">
+<div class="bg-lightGray hidden absolute xl:relative xl:block 2xl:sticky top-0 h-screen p-4 pt-4 w-10/12 sm:w-8/12 md:w-5/12 lg:w-4/12 2xl:w-3/12 duration-300 border-r border-gray-300/50 z-10 overflow-y-auto" {{ stimulus_target('nav', 'container') }}>
     {# SideBar Container #}
     <div id="sideHeader" class="flex flex-col justify-center items-center">
         {# SideBar Header #}
@@ -204,7 +203,7 @@
         </div>
 
         {# SideBar - Options - Dropdown (only shows on lower resolutions) #}
-        <div class="hidden" id="optionsDropdownButton">
+        <div class="block relative xl:hidden" id="optionsDropdownButton">
             <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"

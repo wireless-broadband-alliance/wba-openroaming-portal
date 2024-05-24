@@ -3,7 +3,7 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block body %}
-    <section class="flex text-veryDarkPurple" data-controller="sidebar">
+    <section class="flex text-veryDarkPurple" {{ stimulus_controller('nav')}}>
         {% include 'admin/partials/_sidebar.html.twig' %}
         <div class="p-7 w-full bg-lightGray">
             {# Header section #}
