@@ -42,7 +42,7 @@ class CustomType extends AbstractType
             $formFieldOptions = [
                 'data' => null, // Set data to null for FileType fields
                 'attr' => [
-                    'data-controller' => 'alwaysOnEmail descriptionCard',
+                    'data-controller' => 'descriptionCard',
                 ],
             ];
 
