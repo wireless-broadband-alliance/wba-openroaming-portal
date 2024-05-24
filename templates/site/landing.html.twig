@@ -19,9 +19,11 @@
         {% endfor %}
     </div>
 
-    <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
 
-    <div class="pt-[28px] leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]'}} leading-7">
         <p class="font-bold text-lg">Download and install an OpenRoaming profile tailored to your device, as part of the
             WBA OpenRoaming demo program.</p>
         <p class="mt-3">WBA’s profiles are proven to work across a broad range of devices, including iOS, Android,

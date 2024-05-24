@@ -119,7 +119,7 @@ class GetSettings
             'description' => $this->getSettingDescription('PAGE_TITLE'),
         ];
 
-        $data['customerLogoNameEnabled'] = [
+        $data['CUSTOMER_LOGO_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO_ENABLED'])->getValue(),
             'description' => $this->getSettingDescription('CUSTOMER_LOGO_ENABLED'),
         ];
