@@ -63,7 +63,7 @@ class LDAPType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction',
+                    'data-controller' => 'descriptionCard',
                     'autocomplete' => 'off',
                     'required' => true
                 ],

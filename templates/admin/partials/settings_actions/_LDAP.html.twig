@@ -1,13 +1,13 @@
 <form action="{{ path('admin_dashboard_settings_LDAP') }}" method="post" enctype="multipart/form-data"
       autocomplete="off">
     {{ form_row(form._token) }}
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {% for setting in form %}
             {# Display only the LDAP settings #}
             {% if setting.vars.name in ['SYNC_LDAP_ENABLED', 'SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN','SYNC_LDAP_BIND_USER_PASSWORD','SYNC_LDAP_SEARCH_BASE_DN','SYNC_LDAP_SEARCH_FILTER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="Cards"
-                     id="{{ setting.vars.name }}"  {{ stimulus_controller('radio')}}>
+                     id="{{ setting.vars.name }}" {% if setting.vars.name in ['SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN','SYNC_LDAP_BIND_USER_PASSWORD','SYNC_LDAP_SEARCH_BASE_DN','SYNC_LDAP_SEARCH_FILTER'] %} {{ stimulus_target('radio-card', 'card') }} {% else %} {{ stimulus_controller('radio') }} {% endif %}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -31,13 +31,13 @@
                     </div>
                     {% if setting.vars.name in ['SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN', 'SYNC_LDAP_SEARCH_BASE_DN','SYNC_LDAP_SEARCH_FILTER'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm', 'data-radio-card-target': 'input' }}) }}
                         </div>
                     {% endif %}
 
                     {% if setting.vars.name in ['SYNC_LDAP_BIND_USER_PASSWORD'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'value': data.SYNC_LDAP_BIND_USER_PASSWORD.value}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'value': data.SYNC_LDAP_BIND_USER_PASSWORD.value, 'data-radio-card-target': 'input' }}) }}
                         </div>
                     {% endif %}
 
@@ -49,7 +49,8 @@
                                 On
                                 <input type="radio" name="{{ form.SYNC_LDAP_ENABLED.vars.full_name }}" id="onRadio"
                                        value="true"
-                                       class="radio-input hidden"{{ form.SYNC_LDAP_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                       class="radio-input hidden"{{ form.SYNC_LDAP_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
+                                        {{ stimulus_target('radio-card', 'on') }}>
                                 <div class="custom-radio pr-3 pt-1.5 {{ form.SYNC_LDAP_ENABLED.vars.data == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
@@ -66,7 +67,7 @@
                                 <input type="radio" name="{{ form.SYNC_LDAP_ENABLED.vars.full_name }}" id="offRadio"
                                        value="false"
                                        class="radio-input hidden"
-                                        {{ form.SYNC_LDAP_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                        {{ form.SYNC_LDAP_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}>
                                 <div class="custom-radio pr-3 pt-1.5 {{ form.SYNC_LDAP_ENABLED.vars.data == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
@@ -94,6 +95,8 @@
             {% endif %}
         {% endfor %}
     </div>
+
+
     <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
     <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingLDAP'}) }}"
