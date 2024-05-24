@@ -95,11 +95,10 @@
                         </svg>
                         Edit</a>
                 </li>
-                <li>
-                    <form id="deleteForm{{ user.id }}" action="{{ path('admin_delete', {id: user.id}) }}" method="post"
-                          style="display: inline;">
+                <li {{ stimulus_controller('alert') }}>
+                    <form action="{{ path('admin_delete', {id: user.id}) }}" method="post" {{ stimulus_target('alert', 'form') }}>
                         <input type="hidden" name="_method" value="DELETE">
-                        <a data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}" href="javascript:void(0)"
+                        <a data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}" href="javascript:void(0)" {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
                            class="delete-users-button flex flex-row items-center px-2 py-2 mx-2 my-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
                             <svg class="w-5 mr-3" fill="none" stroke="currentColor" stroke-width="1.5"
                                  viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

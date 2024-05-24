@@ -12,6 +12,23 @@ export default class extends Controller {
 			});
 		}
 
+		function remove_element(elementId) {
+			setTimeout(function () {
+				let errorContainer = document.getElementById(elementId);
+				if (errorContainer) {
+					errorContainer.style.transition = 'opacity 0.5s';
+					errorContainer.style.opacity = '0';
+					setTimeout(function () {
+						errorContainer.remove();
+					}, 500); // Wait for the transition to finish and then remove the element
+				}
+			}, 5000); // set a time of five seconds and then remove the error
+		}
+
+		remove_element('errorDisplay');
+		remove_element('successDisplay');
+
+
 		function initializeDropdown_ActionItems(buttonName, menuName) {
 			const dropdownButtonItems = document.getElementsByName(buttonName);
 			const dropdownMenuItems = document.getElementsByName(menuName);
@@ -41,37 +58,6 @@ export default class extends Controller {
 
 		initializeDropdown_ActionItems('itemsDropDownButton', 'itemsDropDown');
 		initializeDropdown_ActionItems('widgetUserButton', 'widgetUser');
-
-		function remove_element(elementId) {
-			setTimeout(function () {
-				let errorContainer = document.getElementById(elementId);
-				if (errorContainer) {
-					errorContainer.style.transition = 'opacity 0.5s';
-					errorContainer.style.opacity = '0';
-					setTimeout(function () {
-						errorContainer.remove();
-					}, 500); // Wait for the transition to finish and then remove the element
-				}
-			}, 5000); // set a time of five seconds and then remove the error
-		}
-
-		remove_element('errorDisplay');
-		remove_element('successDisplay');
-
-		document.addEventListener('DOMContentLoaded', function () {
-			const deleteButtons = document.querySelectorAll('.delete-users-button');
-
-			deleteButtons.forEach(button => {
-				button.addEventListener('click', () => {
-					const userId = button.getAttribute('data-user-id');
-					const userUuid = button.getAttribute('data-user-uuid');
-
-					if (confirm(`Are you sure you want to delete the user with UUID ${userUuid}?`)) {
-						document.getElementById('deleteForm' + userId).submit();
-					}
-				});
-			});
-		});
 
 		function addSortingClickListener(columnName, activeSort, activeOrder) {
 			let columnElement = document.getElementById(columnName + 'Column');
