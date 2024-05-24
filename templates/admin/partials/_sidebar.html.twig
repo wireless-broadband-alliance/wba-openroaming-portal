@@ -55,9 +55,9 @@
         {% set portalSettingsRoutes = [ "admin_dashboard_settings_status","admin_dashboard_settings_terms","admin_dashboard_settings_radius","admin_dashboard_settings_LDAP","admin_dashboard_settings_auth","admin_dashboard_settings_capport", "admin_dashboard_settings_sms"] %}
 
         {# SideBar - Portal Settings - Dropdown #}
-        <div class="relative">
-            <div id="PortalDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-				{% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}">
+        <div class="relative" {{ stimulus_controller('nav_submenu') }}>
+            <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+				{% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}" {{ stimulus_action('nav_submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -72,10 +72,8 @@
                      viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
                 </svg>
-            </div>
-            <div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
-                 style="display: {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'block' : 'none' }};"
-                 id="PortalDropDown">
+            </button>
+            <div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav_submenu', 'container') }}>
                 <ul class="mx-2">
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}selected{% endif %}"
@@ -151,13 +149,12 @@
             </div>
         </div>
 
-
         {% set portalStatisticsRoutes = [ "admin_dashboard_statistics","admin_dashboard_statistics_freeradius"] %}
 
         {# SideBar - Portal Statistics - Dropdown #}
-        <div class="relative">
-            <div id="StatisticsDropdownButton" class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-				{% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}">
+        <div class="relative" {{ stimulus_controller('nav_submenu') }}>
+            <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+				{% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}" {{ stimulus_action('nav_submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
                          viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -170,9 +167,8 @@
                      viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
                 </svg>
-            </div>
-            <div id="StatisticsDropDown" class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow"
-                 style="display: {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'block' : 'none' }};">
+            </button>
+            <div {{ stimulus_target('nav_submenu', 'container')}} class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? '' : 'hidden' }}">
                 <ul class="mx-2">
                     <li>
                         {# SideBar Button - Portal Statistics - Button #}
@@ -203,8 +199,8 @@
         </div>
 
         {# SideBar - Options - Dropdown (only shows on lower resolutions) #}
-        <div class="block relative xl:hidden" id="optionsDropdownButton">
-            <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen">
+        <div class="block relative xl:hidden" {{ stimulus_controller('nav_submenu') }}>
+            <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen" {{ stimulus_action('nav_submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -217,8 +213,8 @@
                      viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
                 </svg>
-            </div>
-            <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" id="optionsDropdown">
+            </button>
+            <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" {{ stimulus_target('nav_submenu', 'container')}}>
                 <ul class="mx-2">
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"

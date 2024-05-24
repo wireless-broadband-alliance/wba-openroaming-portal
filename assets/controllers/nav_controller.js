@@ -12,23 +12,6 @@ export default class extends Controller {
 			});
 		}
 
-		function initializeDropdown_Select(buttonId, menuId) {
-			const dropdownButtonSelect = document.getElementById(buttonId);
-			const dropdownMenuSelect = document.getElementById(menuId);
-
-			dropdownButtonSelect.addEventListener('click', () => {
-				if (dropdownMenuSelect.style.display === 'block') {
-					dropdownMenuSelect.style.display = 'none';
-				} else {
-					dropdownMenuSelect.style.display = 'block';
-				}
-			});
-		}
-
-		initializeDropdown_Select('PortalDropdownButton', 'PortalDropDown');
-		initializeDropdown_Select('StatisticsDropdownButton', 'StatisticsDropDown');
-		initializeDropdown_Select('optionsDropdownButton', 'optionsDropdown');
-
 		function initializeDropdown_ActionItems(buttonName, menuName) {
 			const dropdownButtonItems = document.getElementsByName(buttonName);
 			const dropdownMenuItems = document.getElementsByName(menuName);
