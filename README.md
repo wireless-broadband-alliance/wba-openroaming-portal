@@ -1,4 +1,4 @@
-# 🌐︎ OpenRoaming Provisioning Portal
+# 🌐︎ FreeOpenRoaming Provisioning Portal
 
 Welcome to the OpenRoaming Provisioning Portal - Your One-Stop Solution for Automated Device Authentication on Wireless
 Networks! 🚀
