@@ -25,7 +25,6 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-            user_checker: App\Security\UserChecker
 
             custom_authenticator: App\Security\PasswordAuthenticator
                 # where to redirect after logout
