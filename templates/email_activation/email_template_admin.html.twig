@@ -4,20 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm your Password Reset</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-indigo-100">
-<div class="container mx-auto p-8">
-    <div class="bg-white rounded-lg p-6 shadow-md text-center space-y-2">
+<body class="bg-[#080D4A]">
+<div class="container mx-auto px-8 pb-8 pt-[50px]">
+    <div class="bg-white rounded-[18px] p-6 shadow-md">
+
         {% if resetPassword %}
-            <h1 class="text-3xl font-bold text-[#7DB928] mb-4">Admin Password Reset</h1>
-            <p class="text-lg">This is a step to confirm your password reset.</p>
+            <h1 class="text-3xl font-bold">Admin Password Reset</h1>
+
+            <p class="mt-6 text-lg">This is a step to confirm your password reset.</p>
         {% else %}
-            <h1 class="text-3xl font-bold text-[#7DB928] mb-4">Admin Settings Reset</h1>
-            <p class="text-lg">This is a step to confirm the settings reset.</p>
+            <h1 class="text-3xl font-bold">Admin Settings Reset</h1>
+
+            <p class="mt-6 text-lg">This is a step to confirm the settings reset.</p>
         {% endif %}
-        <p class="text-base text-gray-500">Please use the follow code to confirm the action:
-            <b>{{ verificationCode }}</b></p>
+
+        <p class="text-lg">Please use the follow code to confirm the action:<span class="font-bold">{{ verificationCode }}</span></p>
     </div>
 </div>
 </body>
