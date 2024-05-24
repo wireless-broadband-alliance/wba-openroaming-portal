@@ -56,7 +56,7 @@ class SMSType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showIconRadios',
+                    'data-controller' => 'descriptionCard cardsAction',
                     'autocomplete' => 'off',
                 ],
                 'required' => true,

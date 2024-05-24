@@ -11,7 +11,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="Cards"
-                         id="{{ setting.vars.name }}">
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio') }}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -43,8 +43,8 @@
                                     On
                                     <input type="radio" name="{{ form.AUTH_METHOD_SAML_ENABLED.vars.full_name }}"
                                            value="true"
-                                           class="radio-input hidden"{{ form.AUTH_METHOD_SAML_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_SAML_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_SAML_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -60,8 +60,8 @@
                                     Off
                                     <input type="radio" name="{{ form.AUTH_METHOD_SAML_ENABLED.vars.full_name }}"
                                            value="false"
-                                           class="radio-input hidden" {{ form.AUTH_METHOD_SAML_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                           class="radio-input hidden" {{ form.AUTH_METHOD_SAML_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_SAML_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -101,7 +101,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="GoogleCards"
-                         id="{{ setting.vars.name }}">
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio') }}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -134,8 +134,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.full_name }}"
                                            value="true"
-                                           class="radio-input hidden"{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioGoogle">
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -152,8 +152,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.full_name }}"
                                            value="false"
-                                           class="radio-input hidden"{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioGoogle">
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -183,7 +183,7 @@
         </div>
     </div>
 
-    {# Google Sub-settings#}
+    {# Google Sub-settings #}
     <div>
         <div class="p-2 mt-10">
             <h1 class="text-xl md:text-2xl font-semibold">Google Sub-Settings</h1>
@@ -245,7 +245,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="RegisterCards"
-                         id="{{ setting.vars.name }}">
+                         id="{{ setting.vars.name }}"  {{ stimulus_controller('radio') }}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -278,8 +278,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
                                            value="true"
-                                           class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioRegister">
+                                           class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -296,8 +296,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
                                            value="false"
-                                           class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioRegister">
+                                           class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -326,6 +326,7 @@
             {% endfor %}
         </div>
     </div>
+
     {# SMS REGISTER #}
     <div>
         <div class="p-2 mt-10">
@@ -337,7 +338,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="SMSRegisterCards"
-                         id="{{ setting.vars.name }}">
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio') }}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -370,8 +371,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.full_name }}"
                                            value="true"
-                                           class="radio-input hidden"{{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="SMSonCustomRadioRegister">
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -388,8 +389,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.full_name }}"
                                            value="false"
-                                           class="radio-input hidden" {{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="SMSoffCustomRadioRegister">
+                                           class="radio-input hidden" {{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_SMS_REGISTER_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -418,6 +419,7 @@
             {% endfor %}
         </div>
     </div>
+
     {# Login #}
     <div>
         <div class="p-2 mt-10">
@@ -429,7 +431,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="LoginCards"
-                         id="{{ setting.vars.name }}">
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio') }}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -462,8 +464,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.full_name }}"
                                            value="true"
-                                           class="radio-input hidden"{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="onCustomRadioLogin">
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -480,8 +482,8 @@
                                     <input type="radio"
                                            name="{{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.full_name }}"
                                            value="false"
-                                           class="radio-input hidden" {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                    <div class="custom-radio pr-3 pt-1.5" name="offCustomRadioLogin">
+                                           class="radio-input hidden" {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -510,6 +512,7 @@
             {% endfor %}
         </div>
     </div>
+
     <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
     <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingAUTH'}) }}"

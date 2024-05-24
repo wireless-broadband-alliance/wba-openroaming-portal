@@ -7,7 +7,7 @@
             {% if setting.vars.name in ['SYNC_LDAP_ENABLED', 'SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN','SYNC_LDAP_BIND_USER_PASSWORD','SYNC_LDAP_SEARCH_BASE_DN','SYNC_LDAP_SEARCH_FILTER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="Cards"
-                     id="{{ setting.vars.name }}">
+                     id="{{ setting.vars.name }}"  {{ stimulus_controller('radio')}}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -49,8 +49,8 @@
                                 On
                                 <input type="radio" name="{{ form.SYNC_LDAP_ENABLED.vars.full_name }}" id="onRadio"
                                        value="true"
-                                       class="radio-input hidden"{{ form.SYNC_LDAP_ENABLED.vars.value == "true" ? 'checked' : '' }}>
-                                <div class="custom-radio pr-3 pt-1.5" name="onCustomRadio">
+                                       class="radio-input hidden"{{ form.SYNC_LDAP_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                <div class="custom-radio pr-3 pt-1.5 {{ form.SYNC_LDAP_ENABLED.vars.data == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
@@ -66,8 +66,8 @@
                                 <input type="radio" name="{{ form.SYNC_LDAP_ENABLED.vars.full_name }}" id="offRadio"
                                        value="false"
                                        class="radio-input hidden"
-                                        {{ form.SYNC_LDAP_ENABLED.vars.value == "false" ? 'checked' : '' }}>
-                                <div class="custom-radio pr-3 pt-1.5" name="offCustomRadio">
+                                        {{ form.SYNC_LDAP_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                <div class="custom-radio pr-3 pt-1.5 {{ form.SYNC_LDAP_ENABLED.vars.data == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
