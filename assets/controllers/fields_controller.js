@@ -6,7 +6,6 @@ export default class extends Controller {
 	initial_values = [];
 
 	connect() {
-
 		const button = this.buttonTarget;
 
 		// Store the initial values each input

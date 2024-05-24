@@ -1,96 +1,16 @@
 import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
-	connect() {
-		const sidebarBtnElement = document.getElementById('sidebarButton');
-		const sidebarElement = document.getElementById('sidebar');
-		const dropdownButton = document.getElementById('adminActionsDropdownButton');
-		const optionsSidebarButton = document.getElementById('optionsDropdownButton');
-		const customCards = document.getElementsByName('customCards');
-		const bodyElement = document.body; // Get the body element
 
+	static targets = ["button", "container", "drodown", "hamburguer"];
+
+	connect() {
 		const alertElement = document.getElementById('alert-2');
 		if (alertElement) {
 			alertElement.addEventListener('animationend', () => {
 				alertElement.classList.add('hidden');
 			});
 		}
-
-		sidebarBtnElement.addEventListener('click', () => {
-			sidebarBtnElement.classList.toggle('open');
-			sidebarElement.classList.toggle('hidden');
-
-			if (sidebarElement.classList.contains('hidden')) {
-				bodyElement.classList.remove('overflow-hidden');
-			} else {
-				bodyElement.classList.add('overflow-hidden');
-			}
-		});
-
-
-		const mediaQuery = window.matchMedia('(max-width: 1536px)');
-
-		// Function to handle changes in resolution
-		function handleResolutionChange(mediaQuery) {
-			if (mediaQuery.matches) {
-				sidebarElement.classList.add('hidden');
-				sidebarElement.classList.add('absolute');
-				sidebarElement.classList.remove('relative');
-				dropdownButton.classList.remove('relative');
-				dropdownButton.classList.add('hidden');
-				optionsSidebarButton.classList.remove('hidden');
-				optionsSidebarButton.classList.add('relative');
-
-				customCards.forEach((description_target, index) => {
-					customCards[index].classList.remove('hover:-translate-y-1');
-				});
-
-			} else {
-				sidebarElement.classList.remove('hidden');
-				sidebarElement.classList.remove('absolute');
-				sidebarElement.classList.add('relative');
-				dropdownButton.classList.remove('hidden');
-				dropdownButton.classList.add('relative');
-				optionsSidebarButton.classList.remove('relative');
-				optionsSidebarButton.classList.add('hidden');
-				customCards.forEach((description_target, index) => {
-					customCards[index].classList.add('hover:-translate-y-1');
-				});
-			}
-		}
-
-		// Initial check on a page load
-		handleResolutionChange(mediaQuery);
-
-		// Listen for resolution changes
-		mediaQuery.addListener(handleResolutionChange);
-
-
-		function initializeDropdown_AdminActions(buttonId, menuId) {
-			const dropdownButton = document.getElementById(buttonId);
-			const dropdownMenu = document.getElementById(menuId);
-
-			dropdownButton.addEventListener('click', () => {
-				if (dropdownMenu.style.display === 'block') {
-					dropdownMenu.style.display = 'none';
-					dropdownButton.classList.remove('bg-veryDarkButton', 'text-white');
-				} else {
-					dropdownMenu.style.display = 'block';
-					dropdownButton.classList.add('bg-veryDarkButton', 'text-white');
-				}
-			});
-
-			// Close the dropdown when clicking outside it
-			document.addEventListener('click', (event) => {
-				if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
-					dropdownMenu.style.display = 'none';
-					dropdownButton.classList.remove('bg-veryDarkButton', 'text-white');
-				}
-			});
-		}
-
-		initializeDropdown_AdminActions('adminActionsDropdownButton', 'adminActionsDropdown');
-
 
 		function initializeDropdown_Select(buttonId, menuId) {
 			const dropdownButtonSelect = document.getElementById(buttonId);
@@ -171,7 +91,7 @@ export default class extends Controller {
 		});
 
 		function addSortingClickListener(columnName, activeSort, activeOrder) {
-			let  columnElement = document.getElementById(columnName + 'Column');
+			let columnElement = document.getElementById(columnName + 'Column');
 
 			if (columnElement) {
 				columnElement.addEventListener('click', function () {
@@ -211,5 +131,19 @@ export default class extends Controller {
 
 		addSortingClickListener('uuid', '{{ activeSort }}', '{{ activeOrder }}');
 		addSortingClickListener('createdAt', '{{ activeSort }}', '{{ activeOrder }}');
+	}
+
+	toggle() {
+		this.buttonTarget.classList.toggle('open');
+
+		this.containerTarget.classList.toggle('hidden');
+
+		// What is this used for?
+		const bodyElement = document.body;
+		if (this.containerTarget.classList.contains('hidden')) {
+			bodyElement.classList.remove('overflow-hidden');
+		} else {
+			bodyElement.classList.add('overflow-hidden');
+		}
 	}
 }
