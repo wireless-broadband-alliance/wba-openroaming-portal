@@ -71,12 +71,11 @@ class CustomType extends AbstractType
                 ];
                 $formFieldOptions['placeholder'] = 'Select an option';
                 $formFieldOptions['required'] = true;
-                $formFieldOptions['expanded'] = true;
-                $formFieldOptions['multiple'] = false;
             }
 
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void
