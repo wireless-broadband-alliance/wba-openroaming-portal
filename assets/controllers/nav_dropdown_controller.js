@@ -14,7 +14,7 @@ export default class extends Controller {
 		this.buttonTarget.classList.toggle('text-white');
 	}
 
-	close() {
+	lost_focus() {
 		this.containerTarget.classList.add('hidden');
 		this.buttonTarget.classList.remove('bg-veryDarkButton', 'text-white');
 	}
