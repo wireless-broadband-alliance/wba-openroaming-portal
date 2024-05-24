@@ -472,7 +472,7 @@ class AdminController extends AbstractController
                 ->subject('Your Password Reset Details')
                 ->html(
                     $this->renderView(
-                        'email_activation/email_template_password.html.twig',
+                        'email/user_password.html.twig',
                         ['password' => $newPassword, 'isNewUser' => false]
                     )
                 );
@@ -754,7 +754,7 @@ class AdminController extends AbstractController
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your Settings Reset Details')
-            ->htmlTemplate('email_activation/email_template_admin.html.twig')
+            ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false

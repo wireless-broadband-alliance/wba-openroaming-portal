@@ -396,7 +396,7 @@ class SiteController extends AbstractController
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->htmlTemplate('email_activation/email_template.html.twig')
+            ->htmlTemplate('email/user_code.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
             ]);

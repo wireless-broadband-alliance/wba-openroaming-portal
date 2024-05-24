@@ -148,7 +148,7 @@ class RegistrationController extends AbstractController
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your OpenRoaming Registration Details')
-                    ->htmlTemplate('email_activation/email_template_password.html.twig')
+                    ->htmlTemplate('email/user_password.html.twig')
                     ->context([
                         'uuid' => $user->getUuid(),
                         'verificationCode' => $user->getVerificationCode(),
