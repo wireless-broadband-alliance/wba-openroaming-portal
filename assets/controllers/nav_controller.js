@@ -28,7 +28,6 @@ export default class extends Controller {
 		remove_element('errorDisplay');
 		remove_element('successDisplay');
 
-
 		function initializeDropdown_ActionItems(buttonName, menuName) {
 			const dropdownButtonItems = document.getElementsByName(buttonName);
 			const dropdownMenuItems = document.getElementsByName(menuName);
@@ -58,48 +57,6 @@ export default class extends Controller {
 
 		initializeDropdown_ActionItems('itemsDropDownButton', 'itemsDropDown');
 		initializeDropdown_ActionItems('widgetUserButton', 'widgetUser');
-
-		function addSortingClickListener(columnName, activeSort, activeOrder) {
-			let columnElement = document.getElementById(columnName + 'Column');
-
-			if (columnElement) {
-				columnElement.addEventListener('click', function () {
-					// Retrieve the current URL
-					let currentUrl = new URL(window.location.href);
-
-					// Parse the URL parameters into an object
-					let urlParams = new URLSearchParams(currentUrl.search);
-
-					// Check if the 'sort' parameter is present and matches the current column
-					if (urlParams.has('sort') && urlParams.get('sort') === columnName) {
-						// If yes, toggle the sorting order
-						let newOrder = urlParams.get('order') === 'asc' ? 'desc' : 'asc';
-						urlParams.set('order', newOrder);
-					} else {
-						// If not, set the sorting parameters for the current column
-						urlParams.set('sort', columnName);
-						urlParams.set('order', 'asc');
-					}
-
-					// Update the URL with the new parameters
-					currentUrl.search = '?' + urlParams.toString();
-
-					// Redirect to the new URL
-					window.location.href = currentUrl.toString();
-				});
-
-				// Add a class to indicate the active sort column
-				if (activeSort === columnName) {
-					columnElement.classList.add('active-sort');
-					// Optionally, add a class for the active sort order (asc/desc)
-					columnElement.classList.toggle('asc', activeOrder === 'asc');
-					columnElement.classList.toggle('desc', activeOrder === 'desc');
-				}
-			}
-		}
-
-		addSortingClickListener('uuid', '{{ activeSort }}', '{{ activeOrder }}');
-		addSortingClickListener('createdAt', '{{ activeSort }}', '{{ activeOrder }}');
 	}
 
 	toggle() {
