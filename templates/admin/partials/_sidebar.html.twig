@@ -83,52 +83,42 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_radius') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
-                            </svg>
-                            Radius Configuration</a>
+                            <twig:ux:icon name="wba:file-space" class="w-5 mr-4" fill="none"/>
+
+                            Radius Configuration
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_auth') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round"
-                                      d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"></path>
-                            </svg>
-                            Authentication Methods</a>
+                            <twig:ux:icon name="wba:at" class="w-5 mr-4" fill="none"/>
+
+                            Authentication Methods
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_LDAP') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path>
-                            </svg>
-                            LDAP Synchronization</a>
+                            <twig:ux:icon name="wba:sync" class="w-5 mr-4" fill="none"/>
+
+                            LDAP Synchronization
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_capport') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"></path>
-                            </svg>
-                            User Engagement</a>
+                            <twig:ux:icon name="wba:wifi" class="w-5 mr-4" fill="none"/>
+
+                            User Engagement
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_sms') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"></path>
-                            </svg>
-                            SMS Configuration</a>
+                            <twig:ux:icon name="wba:sms" class="w-5 mr-4" fill="none"/>
+
+                            SMS Configuration
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -139,11 +129,8 @@
             <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
 				{% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
-                    <svg class="w-5 mr-2" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
-                         viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"></path>
-                    </svg>
+                    <twig:ux:icon name="wba:database" class="w-5 mr-2" fill="none"/>
+
                     Statistics
                 </div>
 
@@ -156,25 +143,19 @@
                         {# SideBar Button - Portal Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
-                            </svg>
-                            Portal Statistics</a>
+                            <twig:ux:icon name="wba:piechart" class="w-5 mr-4" fill="none"/>
+
+                            Portal Statistics
+                        </a>
                     </li>
                     <li>
                         {#  SideBar Button - Freeradius Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics_freeradius') }}">
-                            <svg class="w-5 mr-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z"></path>
-                            </svg>
-                            Connectivity Statistics</a>
+                            <twig:ux:icon name="wba:hdd" class="w-5 mr-4" fill="none"/>
+
+                            Connectivity Statistics
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -185,11 +166,8 @@
             <button type="button"
                     class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
-                    <svg class="w-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"
-                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
-                    </svg>
+                    <twig:ux:icon name="wba:cog" class="w-5 mr-2" fill="none"/>
+
                     Options
                 </div>
                 <svg id="selectArrow" class="w-4  duration-300" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -202,32 +180,26 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('admin_update', {id : current_user.id}) }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            Account Settings</a>
+                            <twig:ux:icon name="wba:user-circle" class="w-5 mr-4" fill="none"/>
+
+                            Account Settings
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('app_landing') }}">
-                            <svg class="w-5 mr-4" fill="none" stroke="currentColor" stroke-width="1.5"
-                                 viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
-                            </svg>
-
                             <twig:ux:icon name="wba:file-download" class="w-5 mr-4" fill="none"/>
 
-                            Download Profile</a>
+                            Download Profile
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('saml_logout') }}" onclick="return confirm('Are you sure you to leave?')">
                             <twig:ux:icon name="wba:logout" class="w-5 mr-4" fill="none"/>
 
-                            Logout</a>
+                            Logout
+                        </a>
                     </li>
                 </ul>
             </div>
