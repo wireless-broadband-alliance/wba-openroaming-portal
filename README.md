@@ -84,7 +84,7 @@ All the present items can be customizable:
 ### Settings Management
 
 - **Platform Status**
-- **Termns and Policies**
+- **Terms and Policies**
 - **Radius Configuration**
 - **Authentication Methods**
 - **LDAP Synchronization**
@@ -102,8 +102,13 @@ This page shows data related to the user created on the portal
 - **User Management**: Shows data about the verification (verified/banned/need verification)
 
 ### Connectivity Statistics
+This page shows data related to the hybrid machine
 - **Authentication Attempts**: Shows number of attempts (Accepted/Rejected)
-- **Session Time**: Shows the session time spent connected with a profile, of each user (Average/Total)
+- **Session Time**: Shows the session time spent connected with a profile, of each user (Average/Total in hours)
+- **Total of Traffic**: Shows the traffic passed between the freeradius and the user profile (Uploads/Downloads)
+- **Realms Usage**: Number of devices connected using the realm from the portal
+- **Total of Current Authentications** Shows the number of current users connected with a profile (This card is independent of the date filtering)
+
 ## 🛠️ Tools Used
 
 These are some of the most important tools used on the development of this project.
@@ -157,13 +162,18 @@ Please follow the instructions below, on the root folder of the project, to prep
    rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
 
 **Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
-the docker-compose.yml** file. Failure to match the credentials may result in the application being unable to connect to
+the docker-compose.yml** file.
+Failure to match the credentials will result in the application being unable to connect to
 the database.
 
 2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
 
 ```bash
 - docker-compose up -d
+```
+or, only for local usage and testing,
+```bash
+- docker-compose -f docker-compose-local.yml up -d
 ```
 
 3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
@@ -173,8 +183,9 @@ the database.
 - docker ps
 ```
 
-4. **Upload Certificates**: Upload your certificate files to the `signing-keys` directory for the portal generates
-   profiles based on your certificates.
+4. **Upload Certificates**:
+   Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles based on your certificates.
+   You can either upload the certs to this folder, inside/outside the container web, but off course before creating it.
 
 5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
    script by doing this:
@@ -194,7 +205,9 @@ the database.
 - chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
 ```
 
-**IMPORTANT**: After you load the fixtures by running the second command, you need to change the following environment
+**IMPORTANT**:
+After you load the fixtures by running the second command,
+if you are not using Let’s Encrypt CA, you need to change the following environment
 variable:
 
 `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to
@@ -210,7 +223,7 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
-### 🛑 Important Security Notice after Installation 🛑
+### 🛑 Important Security Note after Installation 🛑
 
 **It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
@@ -220,10 +233,10 @@ information and debug logs to possible attackers**, providing serious risks for 
 
 You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
 
-Now, it's time to access your fully set up portal! 🌐
+Now, it's time to access your fully set-up portal! 🌐
 
 To get started, open your favorite web browser and type the following address in the URL bar:
-http://YOUR_SERVER_IP
+http://YOUR_SERVER_IP:80
 
 Replace YOUR_SERVER_IP with your server's real IP address or domain name. If you are running the portal locally, you can
 use localhost for an IP address.
