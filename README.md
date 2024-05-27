@@ -1,23 +1,27 @@
 # 🌐︎ FreeOpenRoaming Provisioning Portal
 
-Welcome to the OpenRoaming Provisioning Portal - Your One-Stop Solution for Automated Device Authentication on Wireless
+OpenRoaming Provisioning Portal is a One-Stop Solution for Automated Device Authentication on Wireless
 Networks! 🚀
-The OpenRoaming Provisioning Portal improves the process of connecting to Wi-Fi in any area by creating a secure and
-unique profile for each user. With automatic device authentication, you can enjoy an easy and secure Wi-Fi experience.
+The Portal improves the process of connecting to Wi-Fi in any area by creating a secure and
+unique profile for each user.
+With automatic device authentication, you can enjoy an easy, seamless and secure Wi-Fi experience.
 
 ## Why it was created?
 
 This Portal was created with the objective of **simplifying Wi-Fi connectivity** and improving security for users in a
 variety of contexts. We think that **everyone should have access to secure Wi-Fi** without having to log in several
-times. Our goal is to make Wi-Fi connectivity for people and companies easier, quicker, and more user-friendly.
+times or use unsecure/open networks. Our goal is to make Wi-Fi connectivity for people and enterprises easier, quicker,
+and more user-friendly.
 
 ## How it works?
 
-OpenRoaming is an innovative technology that is changing the way people connect to Wi-Fi networks. It is an open
-standard that has been developed to **enable globally, secure, and automatic Wi-Fi connectivity**.
+By design, OpenRoaming is an open standard that has been developed to **enable globally,
+secure, and automatic Wi-Fi connectivity**.
 
-Users are able to connect to Wi-Fi networks using OpenRoaming without asking for login credentials. Instead, makes use
-of **digital certificates and secure authentication mechanisms**. This means that users can **switch quickly between
+Users are able to connect to Wi-Fi networks using OpenRoaming without being ask for login credentials.
+Instead, makes use
+of **digital certificates and secure authentication mechanisms**.
+This means that users can **switch quickly between
 Wi-Fi networks, such as public hotspots, corporate networks, and other places, without delays or several logins**.
 
 The technology ensures that each user is **provided with a unique and secure profile** that caters to their specific
@@ -51,7 +55,56 @@ You are taking an **important step** toward **improving Wi-Fi connection** for y
 Whether you're our solution aims to exceed your expectations and make Wi-Fi connectivity better. Let's embark on this
 journey together and redefine how we connect wirelessly! 🚀
 
-## 🛠️ Tools Used 🛠️
+## 📖 Features
+
+### User Management:
+
+- **List User** : View a list of all registered users in the system, can be filtered by all/only verified/ only banned
+  and sorted by creation date, etc...
+- **Edit User Data** : Edit user information: ![Edit_User_Admin](assets/wba_screenshots/edit_user_admin.png)
+- **Search User**: Find users using various searching is email/uuid.
+- **Delete User**: Remove user accounts from the system, **not permanently**.
+- **Export Users Table** Can export all the user table content, this feature is disabled by default for legal and
+  security reasons.
+
+### Portal Management
+
+All the present items can be customizable:
+
+- **Show Customer Logo**
+- **Customer Logo**
+- **Openroaming Logo**
+- **Wallpaper Image**
+- **Page Title**
+- **Welcome Text**
+- **Welcome Description**
+- **Additional Label**
+- **Contact Email**
+
+### Settings Management
+
+- **Platform Status**
+- **Termns and Policies**
+- **Radius Configuration**
+- **Authentication Methods**
+- **LDAP Synchronization**
+- **User Engagement**
+- **SMS Configuration**
+
+### Portal Statistics
+
+This page shows data related to the user created on the portal
+
+- **Devices**: Type of devices on the portal (Android, Windows, macOS, iOS)
+- **Authentication**: Type of authentications present on the portal: (SAML, Google, Portal)
+- **Portal with SMS or Email**: Shows data related to authentications on the portal (SMS & Email)
+- **User Created in**: Shows data about creation of users in demo/live mode
+- **User Management**: Shows data about the verification (verified/banned/need verification)
+
+### Connectivity Statistics
+- **Authentication Attempts**: Shows number of attempts (Accepted/Rejected)
+- **Session Time**: Shows the session time spent connected with a profile, of each user (Average/Total)
+## 🛠️ Tools Used
 
 These are some of the most important tools used on the development of this project.
 
@@ -146,6 +199,8 @@ variable:
 
 `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to
 the SHA1 hash of the LetsEncrypt CA.
+For that, you need to access the **Back Office Page**, and in the radius configuration section change the setting.
+Or just access the mysql container and update it there.
 
 This number is needed to validate the RADIUS server's certificate. If you use a different CA for your RADIUS server, you
 must replace this value with the SHA1 hash of your CA's root certificate. **Connections errors** can happen if the right
@@ -161,7 +216,7 @@ the database on the migrations folder of the project.
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
 information and debug logs to possible attackers**, providing serious risks for security.
 
-## Congratulations! 🎉
+## 🎉 Congratulations! 🎉
 
 You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
 
@@ -264,8 +319,9 @@ Below is an overview of the different variables and their functions:
 - `EMAIL_ADDRESS`: Entity of sends the emails to the users
 - `SENDER_NAME`: Entity sender name
 - `BUDGETSMS_API_URL`: This env manages the budget SMS link of the API, is not necessary to change this env.
-- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
-    legal and security reasons.
+- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default
+  for
+  legal and security reasons.
 - `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
 
 These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
@@ -293,12 +349,14 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
   the IdP.
 
 ### 👾 Turnstile Integration
+
 These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
 
 - `TURNSTILE_KEY`: Stores the public key for Cloudflare Turnstile integration.
 - `TURNSTILE_SECRET`: Holds the secret key for Cloudflare Turnstile integration.
 
-For testing purposes with Cloudflare Turnstile, please use this link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+For testing purposes with Cloudflare Turnstile, please use this
+link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 
 ### 🛠️ Settings Table
 
@@ -335,20 +393,21 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     This system requires all
     the users to verify its own account before they download any profile.
 11. `TURNSTILE_CHECKER`: ON || OFF.
-        When it\'s ON, it activates the turnslide verification system.
-        This system requires all
-        the users to check and verify is session before creating an account.
-        To prevent bots.
+    When it\'s ON, it activates the turnslide verification system.
+    This system requires all
+    the users to check and verify is session before creating an account.
+    To prevent bots.
 
 12. `PAGE_TITLE`: The title displayed on the webpage.
-13. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
-14. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-15. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-16. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-17. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-18. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
-        with a google account login
-19. `CONTACT_EMAIL`: The email address for contact inquiries.
+13. `CUSTOMER_LOGO_ENABLED` Shows the customer logo on the landing page.
+14. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
+15. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+16. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+17. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+18. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+19. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
+    with a google account login
+20. `CONTACT_EMAIL`: The email address for contact inquiries.
 
 20. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
 21. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
