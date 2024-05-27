@@ -71,14 +71,16 @@
                            href="{{ path('admin_dashboard_settings_status') }}">
                             <twig:ux:icon name="wba:barchart" class="w-5 mr-4" fill="none"/>
 
-                            Platform Status</a>
+                            Platform Status
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_terms') }}">
                             <twig:ux:icon name="wba:file-check" class="w-5 mr-4" fill="none"/>
 
-                            Terms and Policies</a>
+                            Terms and Policies
+                        </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}"
