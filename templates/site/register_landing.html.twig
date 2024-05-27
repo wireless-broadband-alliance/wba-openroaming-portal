@@ -23,10 +23,11 @@
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]'}} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Create your account</p>
         <p class="text-lg">This will enable you to access and download a profile onto your device.</p>
-        <p class="text-lg">Once you download your profile you can connect automatically to OpenRoaming Wi-Fi networks across the world.</p>
+        <p class="text-lg">Once you download your profile you can connect automatically to OpenRoaming Wi-Fi networks
+            across the world.</p>
     </div>
 
     {{ form_start(registrationForm) }}
@@ -57,13 +58,12 @@
 
         <label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-xs">
             I agree to the
-            <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">terms &
-                conditions of
-                use
+            <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
+                terms & conditions of use
             </a>
             and
-            <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank" class="underline text-primary font-semibold">privacy
-                policy
+            <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
+                privacy policy
             </a>.
         </label>
     </div>
@@ -86,7 +86,8 @@
         {# Divider #}
         <div class="my-[25px] divider"></div>
 
-        <p class="text-xs">You already have one account?
+        <p class="text-xs">
+            You already have one account?
             <a href="{{ path('app_register') }}" class="font-semibold text-primary underline">Login</a>
             here!
         </p>
