@@ -9,12 +9,10 @@ use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\IsTrue;
 
 class LoginFormType extends AbstractType
 {
@@ -41,7 +39,7 @@ class LoginFormType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('uuid', TextType::class, [
-            'label' => 'Enter your email or phone number',
+            'label' => 'Email or Phone Number',
             'attr' => [
                 'placeholder' => 'Enter your email or phone number',
                 'name' => 'uuid',
@@ -50,7 +48,7 @@ class LoginFormType extends AbstractType
             'required' => true,
         ])
             ->add('password', PasswordType::class, [
-                'label' => 'Enter your password',
+                'label' => 'Password',
                 'attr' => [
                     'placeholder' => 'Enter your password',
                     'name' => 'password',
