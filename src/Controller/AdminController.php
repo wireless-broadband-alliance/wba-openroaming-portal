@@ -103,6 +103,9 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param int $page
+     * @param string $sort
+     * @param string $order
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -171,9 +174,7 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
-            'export_users' => $export_users,
-            'sort' => $sort,
-            'order' => $order
+            'export_users' => $export_users
         ]);
     }
 
@@ -260,25 +261,24 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param int $page
+     * @param string $sort
+     * @param string $order
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository): Response
+    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
-        $page = $request->query->getInt('page', 1);
         $perPage = 15;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
-
-        $sort = $request->query->get('sort', 'createdAt'); // Default sort by user creation date
-        $order = $request->query->get('order', 'desc'); // Default order: descending
 
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);

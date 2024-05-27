@@ -5,7 +5,7 @@
             {# Display only the capport settings #}
             {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_FROM', 'SMS_TIMER_RESEND'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                     name="Cards" id="{{ setting.vars.name }}" {{ stimulus_controller('card') }}>
+                     {{ stimulus_controller('card') }}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -26,13 +26,13 @@
                     </div>
                     {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_TIMER_RESEND'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
                         </div>
                     {% endif %}
 
                     {% if setting.vars.name in ['SMS_FROM'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm', 'maxlength': 15}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 15}}) }}
                         </div>
                     {% endif %}
 
@@ -60,25 +60,27 @@
                       clip-rule="evenodd"></path>
             </svg>
             <div>
-                <span class="font-medium">This is for the  <a
-                            class="font-semibold hover:font-bold"
-                            href="https://www.budgetsms.net/"
-                            target="_blank">BudgetSMS.net</a> provider, you should create and fund an account with them.</span>
+                <span class="font-medium">This is for the
+                    <a class="font-semibold underline"
+                       href="https://www.budgetsms.net/"
+                       target="_blank">BudgetSMS.net</a>
+                    provider, you should create and fund an account with them.</span>
             </div>
 
         </div>
     </div>
-    <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-    <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
+
+    <div class="mt-8 divider-solid"></div>
+
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingSMS'}) }}"
            onclick="return confirm('Are you sure you want to clear this settings?')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             Clear
         </a>
 
-        <button class="text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200"
-                onclick="return confirm('Are you sure you want to apply this new changes?')"
-                type="submit">Save Changes
+        <button type="submit" class="btn-primary"
+                onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
         </button>
     </div>
 </form>

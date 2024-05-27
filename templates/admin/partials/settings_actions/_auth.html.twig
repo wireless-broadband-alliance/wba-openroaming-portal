@@ -11,8 +11,7 @@
                 {# Display only the authentication settings #}
                 {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                         name="Cards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -33,7 +32,7 @@
 
                         {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'data-radio-card-target': 'input'}}) }}
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
                         {% endif %}
 
@@ -126,7 +125,7 @@
                             </div>
                             {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
                                 <div class="flex items-center space-x-2 mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm', 'data-radio-card-target': 'input' }}) }}
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input' }}) }}
                                 </div>
                             {% endif %}
                             {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED'] %}
@@ -218,7 +217,7 @@
 
                             {% if setting.vars.name in ['VALID_DOMAINS_GOOGLE_LOGIN'] %}
                                 <div class="flex items-center space-x-2 mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'data-radio-card-target': 'input', 'data-radio-card-target': 'input' }}) }}
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input', 'data-radio-card-target': 'input' }}) }}
                                 </div>
                             {% endif %}
 
@@ -271,7 +270,7 @@
                         </div>
                         {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'data-radio-card-target': 'input'}}) }}
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED'] %}
@@ -363,7 +362,7 @@
                         </div>
                         {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'data-radio-card-target': 'input'}}) }}
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED'] %}
@@ -455,7 +454,7 @@
                         </div>
                         {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'data-radio-card-target': 'input'}}) }}
+                                {{ form_widget(setting, {'attr': {'class': 'form_widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'] %}

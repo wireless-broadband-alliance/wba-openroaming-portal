@@ -15,7 +15,10 @@ export default class extends Controller {
 	}
 
 	lost_focus() {
-		this.containerTarget.classList.add('hidden');
-		this.buttonTarget.classList.remove('bg-veryDarkButton', 'text-white');
+
+		if (!this.containerTarget.matches(":hover")) {
+			this.containerTarget.classList.add('hidden');
+			this.buttonTarget.classList.remove('bg-veryDarkButton', 'text-white');
+		}
 	}
 }

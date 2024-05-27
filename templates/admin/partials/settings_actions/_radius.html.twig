@@ -5,7 +5,7 @@
             {# Display only the Radius settings #}
             {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                     name="radiusCards" {{ stimulus_controller('card') }}>
+                        {{ stimulus_controller('card') }}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -30,12 +30,12 @@
                     </div>
                     {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm', 'autocomplete': 'off'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'form-widget', 'autocomplete': 'off'}}) }}
                         </div>
                     {% endif %}
                     {% if setting.vars.name in ['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'text-center  p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                            {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
                         </div>
                     {% endif %}
 
@@ -54,17 +54,18 @@
             {% endif %}
         {% endfor %}
     </div>
-    <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-    <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
+
+    <div class="mt-8 divider-solid"></div>
+
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingRadius'}) }}"
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             Reset
         </a>
 
-        <button class="text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200"
-                onclick="return confirm('Are you sure you want to apply this new changes?')"
-                type="submit">Save Changes
+        <button type="submit" class="btn-primary"
+                onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
         </button>
     </div>
 </form>

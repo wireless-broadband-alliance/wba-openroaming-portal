@@ -134,15 +134,16 @@
         </div>
     </div>
 
-    <hr class="my-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+    <div class="mt-8 divider-solid"></div>
 
-    <div class="flex justify-evenly md:justify-end items-center gap-6 mb-8">
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCustom'}) }}"
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
             Reset
         </a>
-        <button class="text-base font-semibold text-white bg-veryDarkButton hover:bg-veryDarkButton/80 hover:shadow-lg  duration-200 w-36 h-12 rounded-lg"
+
+        <button type="submit" class="btn-primary"
                 onclick="return confirm('Are you sure you want to apply this new changes?')" type="submit">
             Save Changes
         </button>

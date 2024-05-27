@@ -29,7 +29,7 @@
                         </div>
                         {% if setting.vars.name in ['CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md focus:shadow-sm', 'data-radio-card-target': 'input' }}) }}
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input' }}) }}
                             </div>
                         {% endif %}
                         {% if setting.vars.name in ['CAPPORT_ENABLED'] %}
@@ -102,17 +102,18 @@
                 </div>
             </div>
         </div>
-        <hr class="mt-8 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-        <div class="mt-6 flex flex-col md:w-full md:flex-row justify-evenly md:justify-end items-center space-x-0 md:space-x-2 space-y-2 md:space-y-0">
+
+        <div class="mt-8 divider-solid"></div>
+
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
             <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCAPPORT'}) }}"
                onclick="return confirm('Are you sure you want to reset to the default settings?')"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
                 Reset
             </a>
 
-            <button class="text-sm bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200"
-                    onclick="return confirm('Are you sure you want to apply this new changes?')"
-                    type="submit">Save Changes
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
             </button>
         </div>
     </form>
