@@ -34,7 +34,6 @@ class StatusType extends AbstractType
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
                     ],
                     'attr' => [
-                        'data-controller' => 'alwaysOnEmail descriptionCard_',
                         'description' => $description,
                     ],
                     'data' => $settingValue,
@@ -57,7 +56,6 @@ class StatusType extends AbstractType
                         EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
                     ],
                     'attr' => [
-                        'data-controller' => 'alwaysOnEmail descriptionCard',
                         'description' => $description,
                     ],
                     'data' => $settingValue,

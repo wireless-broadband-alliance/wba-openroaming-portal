@@ -1,167 +1,163 @@
-{% extends 'base.html.twig' %}
+{% extends '/admin/base.html.twig' %}
 
-{% block title %}Admin Page WBA
-{% endblock %}
+{% block title %}Admin Page WBA{% endblock %}
 
-{% block body %}
-    <section class="flex text-veryDarkPurple" data-controller="sidebar">
-        {% include 'admin/partials/_sidebar.html.twig' %}
-        <div
-                class="p-7 w-full bg-lightGray">
-            {# Header section #}
-            <div
-                    class="flex flew-row items-center justify-between pb-10" id="header_page">
-                {# Header - Title and Buttons #}
-                {% include 'admin/partials/_header_admin.html.twig' %}
-            </div>
-            <div class="p-5 text-left space-y-3 rounded-xl bg-white">
-                <div class="w-full mx-auto">
-                    <div class="sm:w-auto p-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
-                            {# Left Search Filters #}
-                            <div class="flex items-center space-x-6 cursor-default">
-                                <a href="{{ path('admin_search', {'filter': 'all'}) }}"
-                                   class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
-                                    <h1 class="px-2">
-                                        All
-                                    </h1>
-                                    <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
-                                        {{ allUsersCount }}
-                                    </div>
-                                </a>
-                                <a href="{{ path('admin_search', {'filter': 'verified'}) }}"
-                                   class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
-                                    <h1 class="px-2">
-                                        Verified
-                                    </h1>
-                                    <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
-                                        {{ verifiedUsersCount }}
-                                    </div>
-                                </a>
-                                <a href="{{ path('admin_search', {'filter': 'banned'}) }}"
-                                   class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
-                                    <h1 class="px-2">
-                                        Banned
-                                    </h1>
-                                    <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
-                                    {{ bannedUsersCount }}
-                                    </div>
-                                </a>
+{% macro sortArrow(sortName, sort, sortDirection) %}
+    {% if sort == sortName %}
+        {% if sortDirection == 'asc' %}
+            <twig:ux:icon name="wba:c-up" class="inline-block w-4 h-4" fill="none"/>
+        {% else %}
+            <twig:ux:icon name="wba:c-down" class="inline-block w-4 h-4" fill="none"/>
+        {% endif %}
+    {% else %}
+        <twig:ux:icon name="wba:up-down" class="inline-block w-4 h-4" fill="none"/>
+    {% endif %}
+{% endmacro %}
+
+{% block container %}
+    <div class="p-5 text-left space-y-3 rounded-xl bg-white">
+        <div class="w-full mx-auto">
+            <div class="sm:w-auto p-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
+                    {# Left Search Filters #}
+                    <div class="flex items-center space-x-6 cursor-default">
+                        <a href="{{ path('admin_search', {'filter': 'all'}) }}"
+                           class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                            <h1 class="px-2">
+                                All
+                            </h1>
+                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                                {{ allUsersCount }}
                             </div>
-                            {# Midle Search Bar #}
-                            <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-3/6">
-                                <div
-                                        class="flex flex-row items-center border rounded-md">
-                                    {# Search Icon #}
-                                    <button type="submit">
-                                        <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
-                                             stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                                             aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-                                        </svg>
-                                    </button>
-                                    {# Search Input #}
-                                    <label class="w-full">
-                                        <input type="text" class="w-full p-2 bg-transparent border-none outline-none"
-                                               placeholder="Search Users ..." name="u"
-                                               value="{{ app.request.query.get('u', '') }}">
-                                    </label>
-                                    {# Hidden Filter Input #}
-                                    <input type="hidden" name="filter"
-                                           value="{{ app.request.query.get('filter', 'all') }}">
-                                </div>
-                            </form>
-                            {% if export_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
-                                <div class="flex items-center space-x-6">
-                                    <a href="{{ path('admin_page_export_users') }}"
-                                       class="text-xs text-center bg-veryDarkButton hover:bg-veryDarkButton/80 text-white font-bold p-3 hover:shadow-lg rounded-lg duration-200">
-                                        Export Everything
-                                    </a>
-                                </div>
-                            {% endif %}
+                        </a>
+                        <a href="{{ path('admin_search', {'filter': 'verified'}) }}"
+                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
+                            <h1 class="px-2">
+                                Verified
+                            </h1>
+                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
+                                {{ verifiedUsersCount }}
+                            </div>
+                        </a>
+                        <a href="{{ path('admin_search', {'filter': 'banned'}) }}"
+                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
+                            <h1 class="px-2">
+                                Banned
+                            </h1>
+                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
+                                {{ bannedUsersCount }}
+                            </div>
+                        </a>
+                    </div>
+
+                    {# Midle Search Bar #}
+                    <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-3/6">
+                        <div class="flex flex-row items-center border rounded-md">
+                            {# Search Icon #}
+                            <button type="submit">
+                                <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                                     stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                     aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                                </svg>
+                            </button>
+                            {# Search Input #}
+                            <label class="w-full">
+                                <input type="text" class="form-widget w-full p-2 bg-transparent border-none outline-none"
+                                       placeholder="Search Users ..." name="u"
+                                       value="{{ app.request.query.get('u', '') }}">
+                            </label>
+                            {# Hidden Filter Input #}
+                            <input type="hidden" name="filter"
+                                   value="{{ app.request.query.get('filter', 'all') }}">
                         </div>
-                    </div>
-                    <div class="overflow-x-auto max-w-full -m-5 mt-3">
-                        <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
-                            {# Table Content #}
-                            <table class="w-full items-start">
-                                <thead class="text-sm text-gray-700 bg-veryLightGreen">
-                                <tr>
-                                    <th scope="col" id="uuidColumn" class="flex items-center px-12 py-3">
-                                        <h1 class="mr-2">UUID</h1>
-                                        <div class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                            <svg class="w-4" data-slot="icon" fill="none" stroke-width="1.5"
-                                                 stroke="currentColor" viewbox="0 0 24 24"
-                                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"></path>
-                                            </svg>
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="px-4 py-3 -ml-4">
-                                        <h1 class="mr-2">Email</h1>
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 -ml-2">
-                                        Provider
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        Verification
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        BannedAt
-                                    </th>
-                                    <th scope="col" id="createdAtColumn" class="flex items-center px-6 py-3">
-                                        <h1 class="mr-2">CreatedAt</h1>
-                                        <div class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                            <svg class="w-4" data-slot="icon" fill="none" stroke-width="1.5"
-                                                 stroke="currentColor" viewbox="0 0 24 24"
-                                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"></path>
-                                            </svg>
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="px-6 py-3">
-                                        <span class="none"></span>
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {# Show the users with the partial _users #}
-                                {% if users|length > 0 %}
-                                    {% for user in users %}
-                                        {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="7">
-                                            <div class="flex md:justify-center justify-start md:items-center items-start text-center md:p-1 p-8">
-                                                <div class="bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold md:text-xs text-sm">
-                                                    {% if searchTerm %}
-                                                        No users found with "{{ searchTerm }}"
-                                                    {% elseif app.request.query.get('filter') == 'verified' %}
-                                                        There are no verified users in the system
-                                                    {% elseif app.request.query.get('filter') == 'banned' %}
-                                                        There are no banned users in the system
-                                                    {% else %}
-                                                        There are no users in the system
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                                </tbody>
-                            </table>
+                    </form>
+
+                    {% if export_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                        <div class="flex items-center space-x-6">
+                            <a href="{{ path('admin_page_export_users') }}" class="btn-primary">
+                                Export Everything
+                            </a>
                         </div>
-                    </div>
-                    <div class="m-8">
-                        <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                        {% include '/admin/partials/_pagination.html.twig' %}
-                    </div>
+                    {% endif %}
                 </div>
             </div>
+
+            <div class="overflow-x-auto max-w-full -m-5 mt-3">
+                <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+                    {# Table Content #}
+                    <table class="w-full items-start">
+                        <thead class="text-sm text-gray-700 bg-veryLightGreen">
+                        <tr>
+                            <th scope="col" class="flex items-center px-12 py-3">
+                                <h1 class="mr-2">UUID</h1>
+                                <a href="{{ path('admin_page', {...app.request.query.all, sort: 'uuid', order: activeSort == 'uuid' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                    {{ _self.sortArrow('uuid', activeSort, activeOrder) }}
+                                </a>
+                            </th>
+                            <th scope="col" class="px-4 py-3 -ml-4">
+                                <h1 class="mr-2">Email</h1>
+                            </th>
+                            <th scope="col" class="px-6 py-3 -ml-2">
+                                Provider
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Verification
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                BannedAt
+                            </th>
+                            <th scope="col" class="flex items-center px-6 py-3">
+                                <h1 class="mr-2">CreatedAt</h1>
+                                <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+
+                                    {{ _self.sortArrow('createdAt', activeSort, activeOrder) }}
+                                </a>
+
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                <span class="none"></span>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {# Show the users with the partial _users #}
+                        {% if users|length > 0 %}
+                            {% for user in users %}
+                                {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="flex md:justify-center justify-start md:items-center items-start text-center md:p-1 p-8">
+                                        <div class="bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold md:text-xs text-sm">
+                                            {% if searchTerm %}
+                                                No users found with "{{ searchTerm }}"
+                                            {% elseif app.request.query.get('filter') == 'verified' %}
+                                                There are no verified users in the system
+                                            {% elseif app.request.query.get('filter') == 'banned' %}
+                                                There are no banned users in the system
+                                            {% else %}
+                                                There are no users in the system
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {# Pagination #}
+            <div class="m-8">
+                <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+                {% include '/admin/partials/_pagination.html.twig' %}
+            </div>
         </div>
-    </section>
+    </div>
 {% endblock %}

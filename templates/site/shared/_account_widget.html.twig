@@ -1,0 +1,94 @@
+<div class="bg-white rounded-lg transition-all duration-300 px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] overflow-auto">
+
+    <div class="flex flex-row justify-start items-center">
+        <h1 class="text-primary text-xl font-semibold">Account Info</h1>
+        <button type="button"
+                class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('widget', 'close') }}>
+            <span>Close</span>
+
+            <twig:ux:icon name="wba:cross" fill="fill-current"/>
+        </button>
+    </div>
+
+    <div {{ stimulus_controller('fields') }}>
+        <form method="POST" action="{{ path('app_site_account_user') }}">
+            <h1 class="text-lg mb-8 mt-10">Personal Data</h1>
+
+            {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                <div class="relative w-full">
+                    {{ form_label(form.firstName, 'First Name', {'label_attr': { 'class': "form-label"}}) }}
+                    {{ form_widget(form.firstName, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
+
+                <div class="relative w-full">
+                    {{ form_label(form.lastName, 'Last Name', {'label_attr': { 'class': "form-label"}}) }}
+                    {{ form_widget(form.lastName, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                    {{ form_errors(form.lastName) }}
+                </div>
+            </div>
+
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed" type="submit" disabled>
+                Apply Changes
+            </button>
+
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </form>
+    </div>
+
+    {# divider #}
+    <div class="divider my-8"></div>
+
+    <div {{ stimulus_controller('fields') }}>
+        <form method="POST" action="{{ path('app_site_account_user') }}">
+            <h1 class="text-lg mb-8">New Password</h1>
+
+            {{ form_start(formPassword) }}
+            {{ form_errors(formPassword) }}
+
+            <div class="flex flex-col gap-x-6 gap-y-8">
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.password, 'Current Password', {'label_attr': { 'class': "form-label"}}) }}
+                        {{ form_widget(formPassword.password, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                        {{ form_errors(formPassword.password) }}
+                    </div>
+
+                    <div class="hidden lg:flex w-full"></div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.newPassword, 'New Password', {'label_attr': { 'class': "form-label"}}) }}
+                        {{ form_widget(formPassword.newPassword, {'attr': { 'class': 'form-widget', 'minlength': 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                        {{ form_errors(formPassword.newPassword) }}
+                    </div>
+
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {'label_attr': { 'class': "form-label"}}) }}
+                        {{ form_widget(formPassword.confirmPassword, {'attr': { 'class': 'form-widget', 'minlength': 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'  }}) }}
+                        {{ form_errors(formPassword.confirmPassword) }}
+                    </div>
+                </div>
+            </div>
+
+            {# Turnstile Checker #}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                <div class="ml-3 mt-5">
+                    {{ form_widget(formPassword.security) }}
+                </div>
+            {% endif %}
+
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed" type="submit" disabled>
+                Reset Password
+            </button>
+
+            {{ form_rest(formPassword) }}
+            {{ form_end(formPassword) }}
+        </form>
+    </div>
+</div>

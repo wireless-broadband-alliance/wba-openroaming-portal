@@ -98,7 +98,7 @@ class RegistrationController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -148,7 +148,7 @@ class RegistrationController extends AbstractController
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your OpenRoaming Registration Details')
-                    ->htmlTemplate('email_activation/email_template_password.html.twig')
+                    ->htmlTemplate('email/user_password.html.twig')
                     ->context([
                         'uuid' => $user->getUuid(),
                         'verificationCode' => $user->getVerificationCode(),
@@ -184,7 +184,7 @@ class RegistrationController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible to use this authentication method.');
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 

@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block body %}
+    <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
+        {# First Column #}
+        <div class="w-full lg:w-1/2 bg-center bg-no-repeat bg-cover bg-scroll"
+             style="background-image: url('/resources/images/background.png');">
+            <div class="w-full h-full p-8 lg:pl-[130px] lg:pr-[150px] lg:pt-[210px] bg-center bg-no-repeat bg-contain bg-scroll"
+                 style="background-image: url('{{ data.wallpaperImageName.value }}');">
+                <div class="h-full w-full flex flex-col">
+                    <img class="w-96" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
+
+                    <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold">{{ data.welcomeText.value }}</h1>
+
+                    <p class="text-white text-2xl mt-[45px] leading-7">{{ data.welcomeDescription.value }}</p>
+
+                    <p class="text-white text-lg mt-[55px] mb-6">Should you have any questions or require assistance,
+                        please contact us at
+                        <a href="mailto:{{ data.contactEmail.value }}"
+                           class="font-semibold underline text-primary">{{ data.contactEmail.value }}</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {# Form Column #}
+        <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[74px]" {{ stimulus_controller('visibility') }}>
+            {% block second_col %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

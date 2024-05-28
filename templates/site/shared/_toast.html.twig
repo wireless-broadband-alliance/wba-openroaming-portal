@@ -1,0 +1,7 @@
+<div {{ stimulus_controller('toast') }} {{ stimulus_target('toast', 'toast') }}>
+    <div class="{{ toast_type }}">{{ message }}
+        <button class="ml-auto" {{ stimulus_action('toast', 'close') }}>
+            <twig:ux:icon name="wba:cross" fill="none"/>
+        </button>
+    </div>
+</div>

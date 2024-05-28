@@ -1,163 +1,129 @@
 {# Header - Title - left conner  #}
 <div class="flex flex-row items-center -pl-2">
-	{% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_search' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Users Management</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Page Style</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"></path>
-			<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Reset Password</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_update' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Account Settings</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Terms and Policies</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Radius Configuration</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Platform Status</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">LDAP Synchronization</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Authentication Methods</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">User Engagement</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
-			<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Portal Statistics</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}
-		<svg class="w-10 mt-0.5" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">Connectivity Statistics</h1>
-	{% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
-		<svg class="w-10 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"></path>
-		</svg>
-		<h1 class="text-2xl font-semibold p-5">SMS Configuration</h1>
-	{% endif %}
+    {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_search' %}
+        <twig:ux:icon name="wba:user" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Users Management</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
+        <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Page Style</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
+        <twig:ux:icon name="wba:cog" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Reset Password</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_update' %}
+        <twig:ux:icon name="wba:user-circle" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Account Settings</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
+        <twig:ux:icon name="wba:file-check" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Terms and Policies</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
+        <twig:ux:icon name="wba:file-space" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Radius Configuration</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
+        <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Platform Status</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
+        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">LDAP Synchronization</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
+        <twig:ux:icon name="wba:at" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Authentication Methods</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
+        <twig:ux:icon name="wba:wifi" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">User Engagement</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
+        <twig:ux:icon name="wba:piechart" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Portal Statistics</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}
+        <twig:ux:icon name="wba:hdd" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Connectivity Statistics</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
+        <twig:ux:icon name="wba:sms" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">SMS Configuration</h1>
+    {% endif %}
 </div>
 
 {# Error Message Container #}
 {% for message in app.session.flashbag.get('error_admin') %}
-	<div id="errorDisplay" class="animate-pulse mt-2 mr-2 text-red-500 text-base font-semibold">
-		<div class="flex bg-red-100/50 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
-			<svg class="w-5 h-5 inline mr-3" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-				<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-			</svg>
-			<div>
-				<span class="font-medium">{{ message }}</span>
-			</div>
-		</div>
-	</div>
+    <div class="transition duration-500 animate-pulse mt-2 mr-2 text-red-500 text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
+        <div class="flex bg-red-100/50 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
+            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3"/>
+
+            <span class="font-medium">{{ message }}</span>
+        </div>
+    </div>
 {% endfor %}
 
 {# Sucess Message Container #}
 {% for message in app.session.flashbag.get('success_admin') %}
-	<div id="successDisplay" class="animate-pulse mt-2 mr-2 text-infoTextColor text-base font-semibold">
-		<div class="flex bg-infoBgColor rounded-lg p-4 mb-4 text-sm" role="alert">
-			<svg class="w-5 h-5 inline mr-3" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-				<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-			</svg>
-			<div>
-				<span class="font-medium">{{ message }}</span>
-			</div>
-		</div>
-	</div>
+    <div class="transition duration-500 animate-pulse mt-2 mr-2 text-infoTextColor text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
+        <div class="flex bg-infoBgColor rounded-lg p-4 mb-4 text-sm" role="alert">
+            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3"/>
+
+            <span class="font-medium">{{ message }}</span>
+        </div>
+    </div>
 {% endfor %}
 
 {# Main Button #}
-<div class="relative">
-	<button data-controller="optionsDropDown" id="adminActionsDropdownButton" type="button" class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300">
-		<svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
-		</svg>
-	</button>
-	<div id="adminActionsDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
-		<ul
-			class="py-2 text-sm" aria-labelledby="adminActionsDropdownButton">
-			{# Account Setting #}
-			<li>
-				<a href="{{ path('admin_update', {id : current_user.id}) }}" class="flex items-center space-x-2 px-4 py-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
-					<svg class="w-7 pr-2 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"></path>
-					</svg>
-					Account Settings
-				</a>
-			</li>
-			{# Download Profile #}
-			<li>
-				<a href="{{ path('app_landing') }}" class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
-					<svg class="w-7 pr-2 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
-					</svg>
-					Download Profile
-				</a>
-			</li>
-			<li class="py-1">
-				<hr class="border-gray-300/50">
-			</li>
-			{# Logout #}
-			<li>
-				<a href="{{ path('saml_logout') }}" class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded" onclick="return confirm('Are you sure you to leave?')">
-					<svg class="w-7 pr-2 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
-					</svg>
-					Logout
-				</a>
-			</li>
-		</ul>
-	</div>
+<div class="relative" {{ stimulus_controller('nav-dropdown') }} >
+    <button type="button" {{ stimulus_target('nav-dropdown', 'button') }} {{ stimulus_action('nav-dropdown', 'toggle')|stimulus_action('nav-dropdown', 'lost_focus', 'focusout') }}
+            class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300 hidden xl:relative xl:block">
+        <twig:ux:icon name="wba:menu"/>
+    </button>
 
-	{# User Info #}
-	<div class="top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden 2xl:block 2xl:absolute ">
-		{% if current_user.firstName == null and current_user.lastName == null %}
-			Admin ORPortal
-		{% else %}
-			{{ current_user.firstName }}
-			{{ current_user.lastName }}
-		{% endif %}
-	</div>
-	<div class="top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden 2xl:block 2xl:absolute">
-		Admin
-	</div>
+    <div class="hidden xl:block">
+        <div {{ stimulus_target('nav-dropdown', 'container') }}
+                class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-md min-w-max absolute right-0 mt-2">
+            <ul class="py-2 text-sm" aria-labelledby="adminActionsDropdownButton">
+                <li>
+                    {# Account Setting #}
+                    <a href="{{ path('admin_update', {id : current_user.id}) }}"
+                       class="flex items-center space-x-2 px-4 py-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2" fill="none"/>
+                        Account Settings
+                    </a>
+                </li>
+                <li>
+                    {# Download Profile #}
+                    <a href="{{ path('app_landing') }}"
+                       class="flex items-center space-x-2 px-4 py-2 my-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded">
+                        <twig:ux:icon name="wba:file-download" class="w-7 pr-2 mr-2" fill="none"/>
+                        Download Profile
+                    </a>
+                </li>
+                <li>
+                    <hr class="border-gray-300/50">
+                </li>
+                <li>
+                    {# Logout #}
+                    <a href="{{ path('saml_logout') }}"
+                       class="flex items-center space-x-2 px-4 py-2 mt-2 mx-2 hover:bg-veryDarkButton hover:text-white duration-300 rounded"
+                       onclick="return confirm('Are you sure you to leave?')">
+                        <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2" fill="none"/>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {# User Info #}
+    <div class="top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden xl:block xl:absolute ">
+        {% if current_user.firstName == null and current_user.lastName == null %}
+            Admin OR Portal
+        {% else %}
+            {{ current_user.firstName }}
+            {{ current_user.lastName }}
+        {% endif %}
+    </div>
+    <div class="top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden xl:block xl:absolute">
+        Admin
+    </div>
 </div>
 
-	{# Header - Button - Hamburger (only used in lower resolutions - Opens sidebar) #}
-	<button id="sidebarButton" data-controller="sideBar" class="block hamburger 2xl:hidden focus:outline-none mt-3">
-		<span class="hamburger-top"></span>
-		<span class="hamburger-middle"></span>
-		<span class="hamburger-bottom"></span>
-	</button>
+{# Header - Button - Hamburger (only used in lower resolutions - Opens sidebar) #}
+<button {{ stimulus_target('nav', 'button') }} {{ stimulus_action('nav', 'toggle') }}
+        class="block hamburger xl:hidden focus:outline-none mt-3">
+    <span class="hamburger-top"></span>
+    <span class="hamburger-middle"></span>
+    <span class="hamburger-bottom"></span>
+</button>
