@@ -9,7 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RadiusType extends AbstractType
 {
@@ -29,18 +29,18 @@ class RadiusType extends AbstractType
             'RADIUS_REALM_NAME' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url([ // validates if the value is a valid domain (URL || IP)
-                        'message' => 'The value {{ value }} is not a valid URL.',
-                        'protocols' => ['http', 'https'], // Only allow these protocols
+                    new Regex([
+                        'pattern' => '/^[a-zA-Z0-9-\_]+\.[a-zA-Z]+?$/i',
+                        'message' => 'The value {{ value }} is not a valid top-level domain.',
                     ]),
                 ],
             ],
             'DOMAIN_NAME' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
-                        'protocols' => ['http', 'https'],
+                    new Regex([
+                        'pattern' => '/^[a-zA-Z0-9-\_]+\.[a-zA-Z]+?$/i',
+                        'message' => 'The value {{ value }} is not a valid top-level domain.',
                     ]),
                 ],
             ],
@@ -50,18 +50,18 @@ class RadiusType extends AbstractType
             'RADIUS_TLS_NAME' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
-                        'protocols' => ['http', 'https'],
+                    new Regex([
+                        'pattern' => '/^[a-zA-Z0-9-\_]+\.[a-zA-Z]+?$/i',
+                        'message' => 'The value {{ value }} is not a valid top-level domain.',
                     ]),
                 ],
             ],
             'NAI_REALM' => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
-                        'protocols' => ['http', 'https'],
+                    new Regex([
+                        'pattern' => '/^[a-zA-Z0-9-\_]+\.[a-zA-Z]+?$/i',
+                        'message' => 'The value {{ value }} is not a valid top-level domain.',
                     ]),
                 ],
             ],
@@ -75,6 +75,15 @@ class RadiusType extends AbstractType
                 'type' => ChoiceType::class,
             ],
         ];
+
+        // Explanation of the regular expression regex pattern:
+        // /                              : Start of the pattern.
+        // ^                              : Asserts the start of the string.
+        // [a-zA-Z0-9-_]+                 : Matches one or more alphanumeric characters, hyphens, or underscores.
+        // .                              : Matches any single character except newline characters.
+        // [a-zA-Z]+?                     : Matches one or more alphabetic characters lazily.
+        // $                              : Asserts the end of the string.
+        // /i                             : Case-insensitive flag.
 
         foreach ($settingsToUpdate as $settingName => $config) {
             // Get the corresponding Setting entity and set its value
