@@ -1,56 +1,55 @@
-<form method="post" novalidate>
-    <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
-        <p>Choose your operating system, so you can download and install the profile:</p>
+<div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+    <p>Choose your operating system, so you can download and install the profile:</p>
 
-        <div class="grid gap-8 auto-rows-max lg:grid-cols-1 grid-cols-3 xl:grid-cols-3 mt-16 mb-6">
-            {% for key, item in data.os.items %}
-                <div>
-                    <input type="radio" id="radio-os-{{ key }}" name="radio-os"
-                           value="{{ key }}" class="hidden peer"/>
+    <div class="grid gap-8 auto-rows-max lg:grid-cols-1 grid-cols-3 xl:grid-cols-3 mt-16 mb-6">
+        {% for key, item in data.os.items %}
+            <div>
+                <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                       value="{{ key }}" class="hidden peer"/>
 
-                    <label for="radio-os-{{ key }}"
-                           class="hover:bg-gray-300 inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
+                <label for="radio-os-{{ key }}"
+                       class="hover:bg-gray-300 inline-flex items-center justify-center w-full px-10 py-5 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
 
-                        <twig:ux:icon name="wba:{{ key|lower }}" class="w-8" fill="none"/>
-                    </label>
+                    <twig:ux:icon name="wba:{{ key|lower }}" class="w-8" fill="none"/>
+                </label>
 
-                    <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key == constant('App\\Enum\\OSTypes::IOS') or key == constant('App\\Enum\\OSTypes::MACOS') ? 'macOS/iOS' : key }}</p>
-                </div>
-            {% endfor %}
-        </div>
-
-        {# Download profile button #}
-        <button type="submit" class="my-6 w-[250px] btn-primary py-2">
-            Download and Install Profile
-        </button>
+                <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key == constant('App\\Enum\\OSTypes::IOS') or key == constant('App\\Enum\\OSTypes::MACOS') ? 'macOS/iOS' : key }}</p>
+            </div>
+        {% endfor %}
     </div>
 
-    <input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
+    {# Download profile button #}
+    <button type="submit" class="my-6 w-[250px] btn-primary py-2">
+        Download and Install Profile
+    </button>
+</div>
 
-    {% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
-        <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
+<input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
 
-            {# Profile selector  #}
-            <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] flex flex-row items-center justify-end text-[#3F474D] space-x-6">
+{% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+    <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
 
-                <div class="mr-auto flex flex-row items-center justify-start space-x-6">
-                    <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8" fill="none"/>
+        {# Profile selector  #}
+        <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] flex flex-row items-center justify-end text-[#3F474D] space-x-6">
 
-                    <span class="font-medium">Device identified as running: {{ data.os.selected }}</span>
-                </div>
+            <div class="mr-auto flex flex-row items-center justify-start space-x-6">
+                <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8" fill="none"/>
 
-                {# Download profile button #}
-                <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
-                    Download and Install Profile
-                </button>
+                <span class="font-medium">Device identified as running: {{ data.os.selected }}</span>
             </div>
 
-            <p class="text-sm mt-[15px] mb-[40px]"> Is this Wrong?
-                <button type="button"
-                        class="text-primary font-semibold underline" {{ stimulus_action('visibility', 'toggle') }}>
-                    Click here to select your OS.
-                </button>
-            </p>
+            {# Download profile button #}
+            <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                Download and Install Profile
+            </button>
         </div>
-    {% endif %}
-</form>
+
+        <p class="text-sm mt-[15px] mb-[40px]"> Is this Wrong?
+            <button type="button"
+                    class="text-primary font-semibold underline" {{ stimulus_action('visibility', 'toggle') }}>
+                Click here to select your OS.
+            </button>
+        </p>
+    </div>
+{% endif %}
+
