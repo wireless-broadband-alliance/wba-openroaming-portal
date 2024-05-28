@@ -5,23 +5,12 @@
 {% macro sortArrow(sortName, sort, sortDirection) %}
     {% if sort == sortName %}
         {% if sortDirection == 'asc' %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M6 15l6 -6l6 6"></path>
-            </svg>
+            <twig:ux:icon name="wba:c-up" class="inline-block w-4 h-4" fill="none"/>
         {% else %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M6 9l6 6l6 -6"></path>
-            </svg>
+            <twig:ux:icon name="wba:c-down" class="inline-block w-4 h-4" fill="none"/>
         {% endif %}
     {% else %}
-        <!-- up and down arrow svg -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M8 9l4 -4l4 4"></path>
-            <path d="M16 15l-4 4l-4 -4"></path>
-        </svg>
+        <twig:ux:icon name="wba:up-down" class="inline-block w-4 h-4" fill="none"/>
     {% endif %}
 {% endmacro %}
 
@@ -60,6 +49,7 @@
                             </div>
                         </a>
                     </div>
+
                     {# Midle Search Bar #}
                     <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-3/6">
                         <div class="flex flex-row items-center border rounded-md">
@@ -83,6 +73,7 @@
                                    value="{{ app.request.query.get('filter', 'all') }}">
                         </div>
                     </form>
+
                     {% if export_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                         <div class="flex items-center space-x-6">
                             <a href="{{ path('admin_page_export_users') }}" class="btn-primary">
@@ -92,6 +83,7 @@
                     {% endif %}
                 </div>
             </div>
+
             <div class="overflow-x-auto max-w-full -m-5 mt-3">
                 <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
                     {# Table Content #}
@@ -160,6 +152,8 @@
                     </table>
                 </div>
             </div>
+
+            {# Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
                 {% include '/admin/partials/_pagination.html.twig' %}
