@@ -79,10 +79,16 @@
         {% endif %}
     </div>
 
+    {# Divider #}
+    <div class="my-[25px] divider"></div>
+
+    <p class="text-xs">
+        Did you forget your password?
+        <a href="{{ path('app_site_forgot_password') }}" class="font-semibold text-primary underline">Reset it</a>
+        here!
+    </p>
 
     {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-        {# Divider #}
-        <div class="my-[25px] divider"></div>
 
         <p class="text-xs">You don't have an account? Register with
 

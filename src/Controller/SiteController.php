@@ -9,8 +9,8 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
+use App\Form\ForgotPasswordEmailType;
 use App\Form\NewPasswordAccountType;
-use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -35,7 +35,6 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\LogicException;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 /**
@@ -109,7 +108,7 @@ class SiteController extends AbstractController
                 } else if ($this->getUser() === null) {
                     $user = new User();
                     $event = new Event();
-                    $form = $this->createForm(RegistrationFormType::class, $user);
+                    $form = $this->createForm(ForgotPasswordEmailType::class, $user);
                     $form->handleRequest($request);
                     if ($form->isSubmitted() && $form->isValid()) {
                         $user = $form->getData();
@@ -216,7 +215,7 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
-        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formResgistrationDemo = $this->createForm(ForgotPasswordEmailType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
@@ -318,6 +317,51 @@ class SiteController extends AbstractController
         }
 
         return $this->redirectToRoute('app_landing');
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/forgot-password/email', name: 'app_site_forgot_password')]
+    public function forgotPasswordUser(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer
+    ): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $user = new User();
+        $event = new Event();
+        $form = $this->createForm(ForgotPasswordEmailType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
+                dd('your are here, good');
+            } else {
+                dd('your email does not exist');
+            }
+        }
+
+        return $this->render('site/forgot_password_email_landing.html.twig', [
+            'forgotPasswordEmailForm' => $form->createView(),
+            'data' => $data,
+        ]);
     }
 
 
