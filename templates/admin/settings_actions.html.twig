@@ -3,45 +3,21 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block container %}
-    {# MainContent of the page #}
     {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_custom_portal.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_terms.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_radius.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_status.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_LDAP.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_auth.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_capport.html.twig' %}
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
-        <div>
-            {% include 'admin/partials/settings_actions/_sms.html.twig' %}
-        </div>
+        {% include 'admin/partials/settings_actions/_custom_portal.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
+        {% include 'admin/partials/settings_actions/_terms.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
+        {% include 'admin/partials/settings_actions/_radius.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
+        {% include 'admin/partials/settings_actions/_status.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
+        {% include 'admin/partials/settings_actions/_LDAP.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
+        {% include 'admin/partials/settings_actions/_auth.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
+        {% include 'admin/partials/settings_actions/_capport.html.twig' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
+        {% include 'admin/partials/settings_actions/_sms.html.twig' %}
     {% endif %}
 {% endblock %}
