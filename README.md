@@ -285,7 +285,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     This system requires all
     the users to verify its own account before they download any profile.
 11. `TURNSTILE_CHECKER`: ON || OFF.
-    When it\'s ON, it activates the turnslide verification system.
+    When it\'s ON, it activates the turnstile verification system.
     This system requires all
     the users to check and verify is session before creating an account.
     To prevent bots.

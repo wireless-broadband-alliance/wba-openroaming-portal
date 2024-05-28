@@ -89,8 +89,10 @@ Now, it's time to access your fully set-up portal! 🌐
 To get started, open your favorite web browser and type the following address in the URL bar:
 http://YOUR_SERVER_IP:80
 
-Replace YOUR_SERVER_IP with your server's real IP address or domain name. If you are running the portal locally, you can
+Replace **YOUR_SERVER_IP** with your server's real IP address or domain name.
+If you are running the portal locally, you can
 use localhost for an IP address.
+And make sure to use **port 80**, it's the default port of the project.
 
 If you encounter any issues or have any questions along the way, don't hesitate to check to the [**Troubleshooting
 **](#troubleshooting) section on this README or reach out to our support team for assistance.
