@@ -81,24 +81,8 @@
 
             {{ form_end(registrationFormDemo) }}
 
-            {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                {# Divider #}
-                <div class="my-[25px] divider"></div>
-
-                <p class="text-xs">You don't have an account? Register with
-
-                    {% if data.EMAIL_REGISTER_ENABLED %}<a href="{{ path('app_register') }}"
-                                                           class="font-semibold text-primary underline">
-                            email</a>{% endif %}
-
-                    {% if data.EMAIL_REGISTER_ENABLED and data.AUTH_METHOD_SMS_REGISTER_ENABLED %}or{% endif %}
-
-                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED %}<a href="{{ path('app_register_sms') }}"
-                                                                     class="font-semibold text-primary underline">phone
-                        number</a>.{% endif %}
-
-                </p>
-            {% endif %}
+            {# Divider #}
+            <div class="my-[25px] divider"></div>
 
         {% else %}
             {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
