@@ -15,11 +15,11 @@ the database.
 2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
 
 ```bash
-- docker-compose up -d
+- docker compose up -d
 ```
 or, only for local usage and testing,
 ```bash
-- docker-compose -f docker-compose-local.yml up -d
+- docker compose -f docker-compose-local.yml up -d
 ```
 
 3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
