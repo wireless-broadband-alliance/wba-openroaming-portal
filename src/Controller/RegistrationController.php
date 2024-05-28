@@ -184,7 +184,7 @@ class RegistrationController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible to use this authentication method.');
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
