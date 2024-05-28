@@ -1,23 +1,27 @@
-# 🌐︎ OpenRoaming Provisioning Portal
+# 🌐︎ FreeOpenRoaming Provisioning Portal
 
-Welcome to the OpenRoaming Provisioning Portal - Your One-Stop Solution for Automated Device Authentication on Wireless
+OpenRoaming Provisioning Portal is a One-Stop Solution for Automated Device Authentication on Wireless
 Networks! 🚀
-The OpenRoaming Provisioning Portal improves the process of connecting to Wi-Fi in any area by creating a secure and
-unique profile for each user. With automatic device authentication, you can enjoy an easy and secure Wi-Fi experience.
+The Portal improves the process of connecting to Wi-Fi in any area by creating a secure and
+unique profile for each user.
+With automatic device authentication, you can enjoy an easy, seamless and secure Wi-Fi experience.
 
 ## Why it was created?
 
 This Portal was created with the objective of **simplifying Wi-Fi connectivity** and improving security for users in a
 variety of contexts. We think that **everyone should have access to secure Wi-Fi** without having to log in several
-times. Our goal is to make Wi-Fi connectivity for people and companies easier, quicker, and more user-friendly.
+times or use unsecure/open networks. Our goal is to make Wi-Fi connectivity for people and enterprises easier, quicker,
+and more user-friendly.
 
 ## How it works?
 
-OpenRoaming is an innovative technology that is changing the way people connect to Wi-Fi networks. It is an open
-standard that has been developed to **enable globally, secure, and automatic Wi-Fi connectivity**.
+By design, OpenRoaming is an open standard that has been developed to **enable globally,
+secure, and automatic Wi-Fi connectivity**.
 
-Users are able to connect to Wi-Fi networks using OpenRoaming without asking for login credentials. Instead, makes use
-of **digital certificates and secure authentication mechanisms**. This means that users can **switch quickly between
+Users are able to connect to Wi-Fi networks using OpenRoaming without being ask for login credentials.
+Instead, makes use
+of **digital certificates and secure authentication mechanisms**.
+This means that users can **switch quickly between
 Wi-Fi networks, such as public hotspots, corporate networks, and other places, without delays or several logins**.
 
 The technology ensures that each user is **provided with a unique and secure profile** that caters to their specific
@@ -51,7 +55,61 @@ You are taking an **important step** toward **improving Wi-Fi connection** for y
 Whether you're our solution aims to exceed your expectations and make Wi-Fi connectivity better. Let's embark on this
 journey together and redefine how we connect wirelessly! 🚀
 
-## 🛠️ Tools Used 🛠️
+## 📖 Features
+
+### User Management:
+
+- **List User** : View a list of all registered users in the system, can be filtered by all/only verified/ only banned
+  and sorted by creation date, etc...
+- **Edit User Data** : Edit user information: ![Edit_User_Admin](assets/wba_screenshots/edit_user_admin.png)
+- **Search User**: Find users using various searching is email/uuid.
+- **Delete User**: Remove user accounts from the system, **not permanently**.
+- **Export Users Table** Can export all the user table content, this feature is disabled by default for legal and
+  security reasons.
+
+### Portal Management
+
+All the present items can be customizable:
+
+- **Show Customer Logo**
+- **Customer Logo**
+- **Openroaming Logo**
+- **Wallpaper Image**
+- **Page Title**
+- **Welcome Text**
+- **Welcome Description**
+- **Additional Label**
+- **Contact Email**
+
+### Settings Management
+
+- **Platform Status**
+- **Terms and Policies**
+- **Radius Configuration**
+- **Authentication Methods**
+- **LDAP Synchronization**
+- **User Engagement**
+- **SMS Configuration**
+
+### Portal Statistics
+
+This page shows data related to the user created on the portal
+
+- **Devices**: Type of devices on the portal (Android, Windows, macOS, iOS)
+- **Authentication**: Type of authentications present on the portal: (SAML, Google, Portal)
+- **Portal with SMS or Email**: Shows data related to authentications on the portal (SMS & Email)
+- **User Created in**: Shows data about creation of users in demo/live mode
+- **User Management**: Shows data about the verification (verified/banned/need verification)
+
+### Connectivity Statistics
+This page shows data related to the hybrid machine
+- **Authentication Attempts**: Shows number of attempts (Accepted/Rejected)
+- **Session Time**: Shows the session time spent connected with a profile, of each user (Average/Total in hours)
+- **Total of Traffic**: Shows the traffic passed between the freeradius and the user profile (Uploads/Downloads)
+- **Realms Usage**: Number of devices connected using the realm from the portal
+- **Total of Current Authentications** Shows the number of current users connected with a profile (This card is independent of the date filtering)
+
+## 🛠️ Tools Used
 
 These are some of the most important tools used on the development of this project.
 
@@ -95,123 +153,8 @@ You have two options to get the project:
 - git clone <repository-url>
 ```
 
-### ⚙️ Installation
-
-Please follow the instructions below, on the root folder of the project, to prepare it:
-
-1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment
-   variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
-   rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
-
-**Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
-the docker-compose.yml** file. Failure to match the credentials may result in the application being unable to connect to
-the database.
-
-2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
-
-```bash
-- docker-compose up -d
-```
-
-3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
-   appropriately formed. The following command may be used to verify the status of each container, example:
-
-```bash
-- docker ps
-```
-
-4. **Upload Certificates**: Upload your certificate files to the `signing-keys` directory for the portal generates
-   profiles based on your certificates.
-
-5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
-   script by doing this:
-
-```bash
-- docker exec -it <web-container-id> bash
-- cd tools
-- sh generatePfxSigningKey.sh
-```
-
-6. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
-   the database schema, load is respective settings and add permissions to a specific folder to save images:
-
-```bash
-- php bin/console doctrine:migrations:migrate
-- php bin/console doctrine:fixtures:load
-- chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
-```
-
-**IMPORTANT**: After you load the fixtures by running the second command, you need to change the following environment
-variable:
-
-`RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to
-the SHA1 hash of the LetsEncrypt CA.
-
-This number is needed to validate the RADIUS server's certificate. If you use a different CA for your RADIUS server, you
-must replace this value with the SHA1 hash of your CA's root certificate. **Connections errors** can happen if the right
-SHA1 hash is not provided.
-
-Make sure to check the `src/DataFixtures/SettingFixture.php` file for any reference about the default data and check the
-migrations about
-the database on the migrations folder of the project.
-
-### 🛑 Important Security Notice after Installation 🛑
-
-**It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
-internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
-information and debug logs to possible attackers**, providing serious risks for security.
-
-## Congratulations! 🎉
-
-You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
-
-Now, it's time to access your fully set up portal! 🌐
-
-To get started, open your favorite web browser and type the following address in the URL bar:
-http://YOUR_SERVER_IP
-
-Replace YOUR_SERVER_IP with your server's real IP address or domain name. If you are running the portal locally, you can
-use localhost for an IP address.
-
-If you encounter any issues or have any questions along the way, don't hesitate to check to the [**Troubleshooting
-**](#troubleshooting) section on this README or reach out to our support team for assistance.
-
-Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier
-to connect in any location! 💻📱
-
-## 🚧 Troubleshooting
-
-Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal
-installation:
-
-1. **Missing or Incorrect Environment Variables**: Check if you don't forget to update the environment variables in
-   the `.env` file. Make sure you have carefully followed the instructions to duplicate the `.env.sample` file and
-   update the necessary variables with the correct values.
-2. **Docker Compose Errors**: Docker Compose may encounter problems if your system setup or Docker version does not meet
-   the prerequisites. Check if you have the latest Docker and Docker Compose versions installed.
-3. **Container Not Running**: If you encounter errors while checking container status with `docker ps` command, it could
-   indicate that the containers did not start correctly. Make sure you have followed the installation steps correctly
-   and have the necessary permissions to run Docker containers. Don't forget to check if you don't have any container
-   using the same ports necessary to run this project.
-4. **DevMode instead of Production**: It's essential to switch the OpenRoaming Provisioning Portal to Production Mode (
-   prod) when deploying it on the internet. Running the portal in Development Mode (dev) can lead to security
-   vulnerabilities and suboptimal performance. Again please gou check your `.env` file and change it to prod.
-5. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to
-   grant executable permissions to the script file before executing it.
-
-To solve this, use the chmod command inside the `web` container, to give the script executable rights.
-
-```bash
-- docker exec -it <web-container-id> bash
-- chmod +x tools/generatePfxSigningKey.sh
-```
-
-## 📞 Contact and Support
-
-We're here to help if you have any problems installing or using the OpenRoaming Provisioning Portal. You request
-assistance by creating an issue in this repository.
-
-Your suggestions and questions will help us improve the platform's usability and experience.
+# ⚙️ Installation Guide
+Please click this link if you want to install this project on your own. [Installation Guide](INSTALATION.md).
 
 # How it Looks and How it Works?
 
@@ -264,8 +207,9 @@ Below is an overview of the different variables and their functions:
 - `EMAIL_ADDRESS`: Entity of sends the emails to the users
 - `SENDER_NAME`: Entity sender name
 - `BUDGETSMS_API_URL`: This env manages the budget SMS link of the API, is not necessary to change this env.
-- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default for
-    legal and security reasons.
+- `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default
+  for
+  legal and security reasons.
 - `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
 
 These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
@@ -293,12 +237,18 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
   the IdP.
 
 ### 👾 Turnstile Integration
+
 These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
 
 - `TURNSTILE_KEY`: Stores the public key for Cloudflare Turnstile integration.
 - `TURNSTILE_SECRET`: Holds the secret key for Cloudflare Turnstile integration.
 
-For testing purposes with Cloudflare Turnstile, please use this link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+For **testing** purposes with Cloudflare Turnstile, please use this
+link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+
+And for any **production deployment**, please follow the
+link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
+
 
 ### 🛠️ Settings Table
 
@@ -316,7 +266,7 @@ individual needs. Here's a rundown of several important variables and their func
    CA).
 
 **IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value.
-This number is important since it is needed
+This hash is important since it is needed
 to validate the RADIUS server's certificate.
 
 **Missing Values:** Please check that all crucial fields are fully filled if any values are missing.
@@ -335,20 +285,20 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     This system requires all
     the users to verify its own account before they download any profile.
 11. `TURNSTILE_CHECKER`: ON || OFF.
-        When it\'s ON, it activates the turnslide verification system.
-        This system requires all
-        the users to check and verify is session before creating an account.
-        To prevent bots.
+    When it\'s ON, it activates the turnstile verification system.
+    This system requires all
+    the users to check and verify is session before creating an account.
+    To prevent bots.
 
 12. `PAGE_TITLE`: The title displayed on the webpage.
-13. `CUSTOMER_LOGO_ENABLED` Shows the customer logo on the landing page.
-14. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
+13. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
+14. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
 15. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
 16. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
 17. `WELCOME_TEXT`: The welcome text displayed on the user interface.
 18. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
 19. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
-        with a google account login
+    with a google account login
 20. `CONTACT_EMAIL`: The email address for contact inquiries.
 
 21. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
