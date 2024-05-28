@@ -57,6 +57,7 @@ class SMSType extends AbstractType
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    $formFieldOptions['constraints'] = $config['constraints'] ?? [];
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
