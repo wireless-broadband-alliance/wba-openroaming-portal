@@ -28,7 +28,6 @@ class TermsType extends AbstractType
         foreach ($allowedSettings as $settingName => $formFieldType) {
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard',
                     'autocomplete' => 'off',
                 ],
                 'required' => true,

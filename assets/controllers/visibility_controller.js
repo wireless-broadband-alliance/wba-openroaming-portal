@@ -30,5 +30,4 @@ export default class extends Controller {
 			this.secondTarget.classList.remove('hidden');
 		}
 	}
-
 }

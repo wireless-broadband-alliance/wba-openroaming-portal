@@ -99,7 +99,6 @@ class RadiusType extends AbstractType
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard',
                     'autocomplete' => 'off',
                     'required' => true,
                 ],

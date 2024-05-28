@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -102,23 +103,21 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param int $page
+     * @param string $sort
+     * @param string $order
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
         $perPage = 15; // Number of users to display per page
-
-
-        $sort = $request->query->get('sort', 'createdAt');  // Default sort by user creation date
-        $order = $request->query->get('order', 'desc'); // Default order: descending
 
         // Fetch users with the specified sorting
         $users = $userRepository->findExcludingAdmin();
@@ -262,25 +261,24 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param int $page
+     * @param string $sort
+     * @param string $order
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository): Response
+    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
-        $page = $request->query->getInt('page', 1);
         $perPage = 15;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
-
-        $sort = $request->query->get('sort', 'createdAt'); // Default sort by user creation date
-        $order = $request->query->get('order', 'desc'); // Default order: descending
 
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
@@ -472,7 +470,7 @@ class AdminController extends AbstractController
                 ->subject('Your Password Reset Details')
                 ->html(
                     $this->renderView(
-                        'email_activation/email_template_password.html.twig',
+                        'email/user_password.html.twig',
                         ['password' => $newPassword, 'isNewUser' => false]
                     )
                 );
@@ -754,7 +752,7 @@ class AdminController extends AbstractController
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your Settings Reset Details')
-            ->htmlTemplate('email_activation/email_template_admin.html.twig')
+            ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
@@ -2116,7 +2114,7 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL'])) {
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL', 'CUSTOMER_LOGO_ENABLED'])) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 

@@ -64,6 +64,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
+            ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
@@ -107,7 +108,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SMS_USERNAME', 'value' => ''],
             ['name' => 'SMS_USER_ID', 'value' => ''],
             ['name' => 'SMS_HANDLE', 'value' => ''],
-            ['name' => 'SMS_FROM', 'value' => 'OR_PROVISIONING'],
+            ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
         ];
 

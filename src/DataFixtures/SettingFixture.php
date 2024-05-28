@@ -26,13 +26,14 @@ class SettingFixture extends Fixture
 
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
+            ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
+            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.'],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label is used to add extra content if necessary'],
+            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming@wballiance.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
@@ -69,7 +70,7 @@ class SettingFixture extends Fixture
             ['name' => 'SMS_USERNAME', 'value' => ''],
             ['name' => 'SMS_USER_ID', 'value' => ''],
             ['name' => 'SMS_HANDLE', 'value' => ''],
-            ['name' => 'SMS_FROM', 'value' => 'OR_PROVISIONING'],
+            ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
         ];
 
