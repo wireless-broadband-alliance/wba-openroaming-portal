@@ -108,7 +108,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SMS_USERNAME', 'value' => ''],
             ['name' => 'SMS_USER_ID', 'value' => ''],
             ['name' => 'SMS_HANDLE', 'value' => ''],
-            ['name' => 'SMS_FROM', 'value' => 'OR_PROVISIONING'],
+            ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
         ];
 
