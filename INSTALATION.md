@@ -75,6 +75,11 @@ the database on the migrations folder of the project.
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
 information and debug logs to possible attackers**, providing serious risks for security.
 
+And it's **recommended** to follow standard security practices, including:
+
+- Properly configuring **firewalls** to **protect database servers** and another critical infrastructure.
+- Ensuring all **software** and **dependencies** are **up to date** with the latest security patches.
+
 ## 🎉 Congratulations! 🎉
 
 You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀

@@ -243,8 +243,12 @@ These last two are used to configure the Turnstile integration with the portal, 
 - `TURNSTILE_KEY`: Stores the public key for Cloudflare Turnstile integration.
 - `TURNSTILE_SECRET`: Holds the secret key for Cloudflare Turnstile integration.
 
-For testing purposes with Cloudflare Turnstile, please use this
+For **testing** purposes with Cloudflare Turnstile, please use this
 link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+
+And for any **production deployment**, please follow the
+link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
+
 
 ### 🛠️ Settings Table
 
@@ -262,7 +266,7 @@ individual needs. Here's a rundown of several important variables and their func
    CA).
 
 **IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value.
-This number is important since it is needed
+This hash is important since it is needed
 to validate the RADIUS server's certificate.
 
 **Missing Values:** Please check that all crucial fields are fully filled if any values are missing.
@@ -287,8 +291,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     To prevent bots.
 
 12. `PAGE_TITLE`: The title displayed on the webpage.
-13. `CUSTOMER_LOGO_ENABLED` Shows the customer logo on the landing page.
-14. `CUSTOMER_LOGO`: The resource path or URL to the customer's logo image.
+13. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
+14. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
 15. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
 16. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
 17. `WELCOME_TEXT`: The welcome text displayed on the user interface.
