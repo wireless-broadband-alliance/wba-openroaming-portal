@@ -354,7 +354,7 @@ class SiteController extends AbstractController
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 dd('your are here, good');
             } else {
-                dd('your email does not exist');
+                $this->addFlash('warning', 'This email doesn\'t exist please submit a valid email from the system!');
             }
         }
 
