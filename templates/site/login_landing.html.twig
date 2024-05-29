@@ -81,13 +81,16 @@
 
     {# Divider #}
     <div class="my-[25px] divider"></div>
-
-    <p class="text-xs">
-        Did you forget your password?
-        <a href="{{ path('app_site_forgot_password') }}" class="font-semibold text-primary underline">Reset it</a>
-        here!
-    </p>
-
+    {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
+        <p class="text-xs">
+            Did you forget your password? Get a new one for your
+            <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
+            or
+            <a href="#" class="font-semibold text-primary underline">phone
+                number</a>
+            .
+        </p>
+    {% endif %}
     {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
         <p class="text-xs">You don't have an account? Register with

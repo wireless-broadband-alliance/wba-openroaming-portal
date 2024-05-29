@@ -323,7 +323,7 @@ class SiteController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/forgot-password/email', name: 'app_site_forgot_password')]
+    #[Route('/forgot-password/email', name: 'app_site_forgot_password_email')]
     public function forgotPasswordUser(
         Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
