@@ -302,7 +302,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
                 $eventRepository->save($event, true);
 
-                $this->addFlash('success', 'Your account has been verified, please click below to download the profile!');
+                $this->addFlash('success', 'Your account has been verified!');
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
