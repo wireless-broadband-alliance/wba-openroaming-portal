@@ -353,11 +353,58 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                // check if the 3 attempts have been reached
-                // make event trigger
-                // genereate new pasword -> random
-                // send email
-                // return to app_login with success message
+                $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+
+                // Check if the user has not exceeded the attempt limit
+                if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+                    $minInterval = new DateInterval('PT5M');
+                    $currentTime = new DateTime();
+
+                    // Check if enough time has passed since the last attempt
+                    if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                            $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+
+                        // Increment the attempt count
+                        $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+
+                        // Save event with attempt count and current time
+                        if (!$latestEvent) {
+                            $latestEvent = new Event();
+                            $latestEvent->setUser($user->getEmail());
+                            $latestEvent->setEventDatetime(new DateTime());
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                            $latestEvent->setEventMetadata([
+                                'platform' => PlatformMode::Live,
+                                'email' => $user->getEmail(),
+                            ]);
+                        }
+                        $latestEvent->setVerificationAttempts($attempts);
+                        $latestEvent->setLastVerificationCodeTime($currentTime);
+                        $eventRepository->save($latestEvent, true);
+                        $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+
+                        $randomPassword = bin2hex(random_bytes(4));
+                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                        $user->setPassword($hashedPassword);
+                        $entityManager->persist($user);
+                        $entityManager->flush();
+
+                        $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getEmail(), $attemptsLeft);
+                        $this->addFlash('success', $message);
+                    } else {
+                        // Inform the user to wait before trying again
+                        $this->addFlash('error', 'Please wait 5 minutes before trying again.');
+                    }
+                } else {
+                    // Inform the user that the attempt limit has been reached
+                    $this->addFlash('error', 'You have reached the maximum number of attempts. Please try again later.');
+                }
+
+                // check if the 3 attempts have been reached - done
+                // make event trigger - done
+                // genereate new random password - done
+                // send email - doing
+                // return to app_login with success message - doing
             } else {
                 $this->addFlash('warning', 'This email doesn\'t, exist please submit a valid email from the system!');
             }
