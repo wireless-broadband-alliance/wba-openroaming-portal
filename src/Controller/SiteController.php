@@ -367,7 +367,7 @@ class SiteController extends AbstractController
             $user = $this->userRepository->findOneBy(['email' => $user->getEmail(), 'googleId' => null]);
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestEmailAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-                $minInterval = new DateInterval('PT2M');
+                $minInterval = new DateInterval('PT0M');
                 $currentTime = new DateTime();
                 // Check if enough time has passed since the last attempt
                 if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
@@ -406,6 +406,7 @@ class SiteController extends AbstractController
                             'password' => $randomPassword,
                             'forgotPasswordUser' => true,
                             'uuid' => $user->getUuid(),
+                            'currentPassword' => $randomPassword,
                             'verificationCode' => $user->getVerificationCode(),
                         ]);
 
@@ -458,13 +459,16 @@ class SiteController extends AbstractController
             $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
             return $this->redirectToRoute('app_landing');
         }
+        $user = new User();
+        $event = new Event();
 
-        // Check if the page is only in live mode
-        // Check if you have a user login - done
-        // Check if the user has the forgot_password_request is true from the event table
-
+        $form = $this->createForm(NewPasswordAccountType::class, $user);
+        $form->handleRequest($request);
 
         dd('Testing route forgot password checker');
+        // make form
+        // make form type
+        // render page
         return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,]);
     }
