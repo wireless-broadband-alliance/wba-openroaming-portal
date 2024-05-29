@@ -100,8 +100,8 @@ class SiteController extends AbstractController
             }
 
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-            if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => true])) {
-                $this->addFlash('error', 'You need to verify your own password before download a profile!');
+            if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
+                $this->addFlash('error', 'You need to confirm the new password before download a profile!');
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
         }
@@ -388,7 +388,7 @@ class SiteController extends AbstractController
                     }
                     $latestEvent->setVerificationAttempts($attempts);
                     $latestEvent->setLastVerificationCodeTime($currentTime);
-                    $latestEvent->setForgetPasswordRequestUser(true);
+                    $user->setForgotPasswordRequest(true);
                     $this->eventRepository->save($latestEvent, true);
 
                     $randomPassword = bin2hex(random_bytes(4));
@@ -423,8 +423,10 @@ class SiteController extends AbstractController
             }
 
         }
-        return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
-            'data' => $data,]);
+        return $this->render('site/forgot_password_email_landing.html.twig', [
+            'forgotPasswordEmailForm' => $form->createView(),
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -436,7 +438,8 @@ class SiteController extends AbstractController
         Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface      $entityManager,
-        MailerInterface             $mailer
+        MailerInterface             $mailer,
+        UserPasswordHasherInterface $passwordHasher,
     ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -455,19 +458,52 @@ class SiteController extends AbstractController
         }
 
         // Checks if the user has a "forgot_password_request", if don't, return to landing page
-        if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => false])) {
+        if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
             $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
             return $this->redirectToRoute('app_landing');
         }
+
         $user = new User();
         $event = new Event();
-
         $form = $this->createForm(NewPasswordAccountType::class, $user);
         $form->handleRequest($request);
 
-        // make form
-        // make form type
-        // render page
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $currentPasswordDB = $user->getPassword();
+            $typedPassword = $form->get('password')->getData();
+
+            // Compare the typed password with the hashed password from the database
+            if (!password_verify($typedPassword, $currentPasswordDB)) {
+                $this->addFlash('error', 'Current password Invalid. Please try again.');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
+                $this->addFlash('error', 'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!');
+                return $this->redirectToRoute('app_landing');
+            }
+
+            $user->setPassword($passwordHasher->hashPassword($user, $form->get('newPassword')->getData()));
+            $user->setForgotPasswordRequest(false);
+            $event = new Event();
+            $event->setUser($user);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::FORGOT_PASSWORD_REQUEST_ACCEPTED);
+            $event->setEventMetadata([
+                'platform' => PlatformMode::Live,
+            ]);
+
+            $entityManager->persist($event);
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Your password has been updated successfully!');
+            return $this->redirectToRoute('app_landing');
+        }
+
         return $this->render('site/forgot_password_checker_landing.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,

@@ -33,9 +33,6 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $last_verification_code_time = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $forget_password_request_user = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -109,18 +106,6 @@ class Event
     public function setLastVerificationCodeTime(?\DateTimeInterface $last_verification_code_time): static
     {
         $this->last_verification_code_time = $last_verification_code_time;
-
-        return $this;
-    }
-
-    public function isForgetPasswordRequestUser(): ?bool
-    {
-        return $this->forget_password_request_user;
-    }
-
-    public function setForgetPasswordRequestUser(?bool $forget_password_request_user): static
-    {
-        $this->forget_password_request_user = $forget_password_request_user;
 
         return $this;
     }
