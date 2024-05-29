@@ -63,19 +63,20 @@ class EventRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find the latest 'USER_EMAIL_ATTEMPT' event for the given user.
+     * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *
      * @param User $user
+     * @param $eventLog // from ENUM AnalyticalEventType
      * @return Event|null
      * @throws NonUniqueResultException
      */
-    public function findLatestEmailAttemptEvent(User $user): ?Event
+    public function findLatestEmailAttemptEvent(User $user, $eventLog): ?Event
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')
             ->andWhere('e.event_name = :event_name')
             ->setParameter('user', $user)
-            ->setParameter('event_name', AnalyticalEventType::USER_EMAIL_ATTEMPT)
+            ->setParameter('event_name', $eventLog)
             ->orderBy('e.event_datetime', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

@@ -353,9 +353,13 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                dd('your are here, good');
+                // check if the 3 attempts have been reached
+                // make event trigger
+                // genereate new pasword -> random
+                // send email
+                // return to app_login with success message
             } else {
-                $this->addFlash('warning', 'This email doesn\'t exist please submit a valid email from the system!');
+                $this->addFlash('warning', 'This email doesn\'t, exist please submit a valid email from the system!');
             }
         }
 
@@ -465,7 +469,7 @@ class SiteController extends AbstractController
         $isVerified = $currentUser->isVerified();
 
         if (!$isVerified) {
-            $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser);
+            $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser, AnalyticalEventType::USER_EMAIL_ATTEMPT);
 
             // Check if the user has not exceeded the attempt limit
             if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
