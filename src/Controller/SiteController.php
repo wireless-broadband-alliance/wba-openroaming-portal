@@ -11,6 +11,7 @@ use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\NewPasswordAccountType;
+use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -108,7 +109,7 @@ class SiteController extends AbstractController
                 } else if ($this->getUser() === null) {
                     $user = new User();
                     $event = new Event();
-                    $form = $this->createForm(ForgotPasswordEmailType::class, $user);
+                    $form = $this->createForm(RegistrationFormType::class, $user);
                     $form->handleRequest($request);
                     if ($form->isSubmitted() && $form->isValid()) {
                         $user = $form->getData();
@@ -215,7 +216,7 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
-        $formResgistrationDemo = $this->createForm(ForgotPasswordEmailType::class, $this->getUser());
+        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
