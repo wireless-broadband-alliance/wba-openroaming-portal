@@ -527,7 +527,7 @@ class SiteController extends AbstractController
                             $content = $response->getContent();
                         }
                         $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
-                        $message = sprintf('We have sent you a message to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
+                        $message = sprintf('We have sent you a message to: %s. You have %d attempt(s) left.', $user->getPhoneNumber(), $attemptsLeft);
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
