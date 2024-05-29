@@ -93,16 +93,16 @@ class SiteController extends AbstractController
             $currentUser = $this->getUser();
             $verification = $currentUser->isVerified();
 
-            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-            if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => true])) {
-                $this->addFlash('error', 'You need to verify your own password before download a profile!');
-                return $this->redirectToRoute('app_site_forgot_password_checker');
-            }
-
             // Check if the user is verified
             if (!$verification) {
                 $this->addFlash('error', 'Your account is not verified to download a profile!');
                 return $this->redirectToRoute('app_email_code');
+            }
+
+            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => true])) {
+                $this->addFlash('error', 'You need to verify your own password before download a profile!');
+                return $this->redirectToRoute('app_site_forgot_password_checker');
             }
         }
 
@@ -342,6 +342,11 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        if ($this->getUser()) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
@@ -436,15 +441,17 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
-        }
-
-        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser) {
+            $this->addFlash('error', 'You must be logged in to access this page.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Check if the page is only in live mode
+        // Check if you have a user login - done
+        // Check if the user has the forgot_password_request is true from the event table
+
 
         dd('Testing route forgot password checker');
         return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
