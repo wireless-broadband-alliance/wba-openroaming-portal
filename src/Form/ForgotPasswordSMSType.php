@@ -8,11 +8,13 @@ use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\Regex;
 
-class ForgotPasswordEmailType extends AbstractType
+class ForgotPasswordSMSType extends AbstractType
 {
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
@@ -36,7 +38,24 @@ class ForgotPasswordEmailType extends AbstractType
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
-        $builder->add('email', EmailType::class);
+        $builder
+            ->add('phoneNumber', TextType::class, [
+                'constraints' => [
+                    new Length([
+                        'min' => 8,
+                        'max' => 15,
+                        'minMessage' => 'Phone number should be at least {{ limit }} characters long.',
+                        'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
+                    ]),
+                    new Regex([
+                        'pattern' => '/^\+\d+$/',
+                        'message' => 'Phone number should contain only digits. (The number must be in international format, example: +351965432XXX)',
+                    ]),
+                ],
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
+            ]);
 
         // Check if TURNSTILE_CHECKER value is ON
         if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
