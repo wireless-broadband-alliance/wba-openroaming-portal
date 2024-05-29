@@ -38,8 +38,7 @@ class ForgotPasswordSMSType extends AbstractType
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
-        $builder
-            ->add('phoneNumber', TextType::class, [
+        $builder->add('phoneNumber', TextType::class, [
                 'constraints' => [
                     new Length([
                         'min' => 8,

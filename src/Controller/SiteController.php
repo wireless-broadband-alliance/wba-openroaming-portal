@@ -465,8 +465,7 @@ class SiteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getEmail(), 'googleId' => null]);
-            dd($user);
+            $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()]);
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                 $minInterval = new DateInterval('PT2M');
