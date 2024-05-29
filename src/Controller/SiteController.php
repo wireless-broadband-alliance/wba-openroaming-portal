@@ -349,7 +349,7 @@ class SiteController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this verification method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -441,10 +441,21 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        if ($data['PLATFORM_MODE']['value'] == true) {
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this verification method!');
+            return $this->redirectToRoute('app_landing');
+        }
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser) {
             $this->addFlash('error', 'You must be logged in to access this page.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Checks if the user has a "forgot_password_request", if don't, return to landing page
+        if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => false])) {
+            $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
             return $this->redirectToRoute('app_landing');
         }
 
