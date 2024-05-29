@@ -352,8 +352,9 @@ class SiteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+            $user = $this->userRepository->findOneBy(['email' => $user->getEmail(), 'googleId' => null]);
+            if ($user) {
+                $latestEvent = $this->eventRepository->findLatestEmailAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
 
                 // Check if the user has not exceeded the attempt limit
                 if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
@@ -380,7 +381,7 @@ class SiteController extends AbstractController
                         }
                         $latestEvent->setVerificationAttempts($attempts);
                         $latestEvent->setLastVerificationCodeTime($currentTime);
-                        $eventRepository->save($latestEvent, true);
+                        $this->eventRepository->save($latestEvent, true);
                         $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
 
                         $randomPassword = bin2hex(random_bytes(4));
@@ -389,7 +390,19 @@ class SiteController extends AbstractController
                         $entityManager->persist($user);
                         $entityManager->flush();
 
-                        $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getEmail(), $attemptsLeft);
+                        $email = (new TemplatedEmail())
+                            ->from(new Address($this->parameterBag->get('app.email_address'), $this->parameterBag->get('app.sender_name')))
+                            ->to($user->getEmail())
+                            ->subject('Your Openroaming - Password Request')
+                            ->htmlTemplate('email/user_password.html.twig')
+                            ->context([
+                                'password' => $randomPassword,
+                                'isNewUser' => null
+                            ]);
+
+                        $mailer->send($email);
+
+                        $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
@@ -397,16 +410,10 @@ class SiteController extends AbstractController
                     }
                 } else {
                     // Inform the user that the attempt limit has been reached
-                    $this->addFlash('error', 'You have reached the maximum number of attempts. Please try again later.');
+                    $this->addFlash('error', 'You have reached the maximum number of attempts. Please contact our support.');
                 }
-
-                // check if the 3 attempts have been reached - done
-                // make event trigger - done
-                // genereate new random password - done
-                // send email - doing
-                // return to app_login with success message - doing
             } else {
-                $this->addFlash('warning', 'This email doesn\'t, exist please submit a valid email from the system!');
+                $this->addFlash('warning', 'This email doesn\'t, exist please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
             }
         }
 
@@ -558,7 +565,7 @@ class SiteController extends AbstractController
                 }
             } else {
                 // Inform the user that the attempt limit has been reached
-                $this->addFlash('error', 'You have reached the maximum number of attempts. Please try again later.');
+                $this->addFlash('error', 'You have reached the maximum number of attempts. Please contact our support.');
             }
         }
 
