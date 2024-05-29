@@ -465,12 +465,13 @@ class SiteController extends AbstractController
         $form = $this->createForm(NewPasswordAccountType::class, $user);
         $form->handleRequest($request);
 
-        dd('Testing route forgot password checker');
         // make form
         // make form type
         // render page
-        return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
-            'data' => $data,]);
+        return $this->render('site/forgot_password_checker_landing.html.twig', [
+            'forgotPasswordChecker' => $form->createView(),
+            'data' => $data,
+        ]);
     }
 
 
