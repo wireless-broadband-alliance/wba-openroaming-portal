@@ -518,13 +518,14 @@ class SiteController extends AbstractController
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
                             $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
-                            $message = "Your password is: " . $randomPassword . "\nPlease login: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                            $message = "Current Password:" . $randomPassword . "\nPlease login: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
                             $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
                             $response = $client->request('GET', $apiUrl);
                             // Handle the API response as needed
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
+                            dd($statusCode, $content, $apiUrl, $response, $message);
                         }
                         $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
                         $message = sprintf('We have sent you a message to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
