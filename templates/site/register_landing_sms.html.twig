@@ -90,12 +90,14 @@
         {% endif %}
     </div>
 
+
     {% if data.LOGIN_TRADITIONAL_ENABLED.value == true %}
         {# Divider #}
         <div class="my-[25px] divider"></div>
 
-        <p class="text-xs">You already have one account?
-            <a href="{{ path('app_register') }}" class="font-semibold text-primary underline">Login</a>
+        <p class="text-xs">
+            You already have one account?
+            <a href="{{ path('app_login') }}" class="font-semibold text-primary underline">Login</a>
             here!
         </p>
     {% endif %}
