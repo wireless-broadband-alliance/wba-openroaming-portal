@@ -396,21 +396,17 @@ class SiteController extends AbstractController
 
                     $mailer->send($email);
 
-                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
+                    $message = sprintf('We have sent you a new code to: %s.', $user->getEmail());
                     $this->addFlash('success', $message);
                 } else {
                     // Inform the user to wait before trying again
                     $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
                 }
             } else {
-                // Inform the user that the attempt limit has been reached
-                $this->addFlash('warning', 'You have reached the maximum number of attempts. Please contact our support.');
+                $this->addFlash('warning', 'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
             }
-        } else {
-            $this->addFlash('warning', 'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
+
         }
-
-
         return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,]);
     }
@@ -509,8 +505,7 @@ class SiteController extends AbstractController
      * @throws Exception
      * @throws TransportExceptionInterface
      */
-    #[
-        Route('/email/regenerate', name: 'app_regenerate_email_code')]
+    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
     public function regenerateCode(EventRepository $eventRepository, MailerInterface $mailer): RedirectResponse
     {
@@ -520,48 +515,41 @@ class SiteController extends AbstractController
 
         if (!$isVerified) {
             $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser, AnalyticalEventType::USER_EMAIL_ATTEMPT);
+            $minInterval = new DateInterval('PT2M');
+            $currentTime = new DateTime();
 
-            // Check if the user has not exceeded the attempt limit
-            if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
-                $minInterval = new DateInterval('PT2M');
-                $currentTime = new DateTime();
+            // Check if enough time has passed since the last attempt
+            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
 
-                // Check if enough time has passed since the last attempt
-                if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                        $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+                // Increment the attempt count
+                $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
 
-                    // Increment the attempt count
-                    $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+                $email = $this->createEmailCode($currentUser->getEmail());
+                $mailer->send($email);
 
-                    $email = $this->createEmailCode($currentUser->getEmail());
-                    $mailer->send($email);
-
-                    // Save event with attempt count and current time
-                    if (!$latestEvent) {
-                        $latestEvent = new Event();
-                        $latestEvent->setUser($currentUser);
-                        $latestEvent->setEventDatetime(new DateTime());
-                        $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
-                        $latestEvent->setEventMetadata([
-                            'platform' => PlatformMode::Live,
-                            'email' => $currentUser->getEmail(),
-                        ]);
-                    }
-
-                    $latestEvent->setVerificationAttempts($attempts);
-                    $latestEvent->setLastVerificationCodeTime($currentTime);
-                    $eventRepository->save($latestEvent, true);
-
-                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
-                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getEmail(), $attemptsLeft);
-                    $this->addFlash('success', $message);
-                } else {
-                    // Inform the user to wait before trying again
-                    $this->addFlash('error', 'Please wait 2 minutes before trying again.');
+                // Save event with attempt count and current time
+                if (!$latestEvent) {
+                    $latestEvent = new Event();
+                    $latestEvent->setUser($currentUser);
+                    $latestEvent->setEventDatetime(new DateTime());
+                    $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
+                    $latestEvent->setEventMetadata([
+                        'platform' => PlatformMode::Live,
+                        'email' => $currentUser->getEmail(),
+                    ]);
                 }
+
+                $latestEvent->setVerificationAttempts($attempts);
+                $latestEvent->setLastVerificationCodeTime($currentTime);
+                $eventRepository->save($latestEvent, true);
+
+                $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                $message = sprintf('We have sent you a new code to: %s.', $currentUser->getEmail());
+                $this->addFlash('success', $message);
             } else {
-                // Inform the user that the attempt limit has been reached
-                $this->addFlash('error', 'You have reached the maximum number of attempts. Please contact our support.');
+                // Inform the user to wait before trying again
+                $this->addFlash('error', 'Please wait 2 minutes before trying again.');
             }
         }
 
