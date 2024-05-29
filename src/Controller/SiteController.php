@@ -96,7 +96,7 @@ class SiteController extends AbstractController
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => true])) {
                 $this->addFlash('error', 'You need to verify your own password before download a profile!');
-                return $this->redirectToRoute('app_site_forgot_password_reset');
+                return $this->redirectToRoute('app_site_forgot_password_checker');
             }
 
             // Check if the user is verified
@@ -417,6 +417,36 @@ class SiteController extends AbstractController
             }
 
         }
+        return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
+            'data' => $data,]);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
+    public function forgotPasswordUserChecker(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer
+    ): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
+        }
+
+        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        dd('Testing route forgot password checker');
         return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,]);
     }
