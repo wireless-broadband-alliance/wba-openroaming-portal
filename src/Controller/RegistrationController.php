@@ -229,7 +229,7 @@ class RegistrationController extends AbstractController
                 $verificationCode = $user->getVerificationCode();
 
                 // Send SMS
-                $message = "Your account password is: " . $randomPassword . "\nVerification code is: " . $verificationCode;
+                $message = "Your account password is: " . $randomPassword . "%0A" . "Verification code is: " . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
 
