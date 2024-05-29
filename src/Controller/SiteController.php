@@ -525,10 +525,9 @@ class SiteController extends AbstractController
                             // Handle the API response as needed
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
-                            dd($message, $apiUrl, $response, $statusCode, $content);
                         }
-
-                        $message = sprintf('We have sent you a message to: %s.', $user->getPhoneNumber());
+                        $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                        $message = sprintf('We have sent you a message to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
