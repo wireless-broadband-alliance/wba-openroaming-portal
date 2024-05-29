@@ -93,7 +93,7 @@
         </p>
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
-            <p class="text-xs">You don't have an account? Register with
+            <p class="mt-2 text-xs">You don't have an account? Register with
 
                 {% if data.EMAIL_REGISTER_ENABLED %}<a href="{{ path('app_register') }}"
                                                        class="font-semibold text-primary underline">email</a>{% endif %}
