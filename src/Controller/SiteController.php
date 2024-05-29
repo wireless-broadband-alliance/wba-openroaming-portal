@@ -355,23 +355,20 @@ class SiteController extends AbstractController
             $user = $this->userRepository->findOneBy(['email' => $user->getEmail(), 'googleId' => null]);
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestEmailAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-
+                $minInterval = new DateInterval('PT2M');
+                $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
                 if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
-                    $minInterval = new DateInterval('PT5M');
-                    $currentTime = new DateTime();
-
                     // Check if enough time has passed since the last attempt
                     if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
                             $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
-
                         // Increment the attempt count
                         $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
 
                         // Save event with attempt count and current time
                         if (!$latestEvent) {
                             $latestEvent = new Event();
-                            $latestEvent->setUser($user->getEmail());
+                            $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                             $latestEvent->setEventMetadata([
@@ -406,14 +403,14 @@ class SiteController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $this->addFlash('error', 'Please wait 5 minutes before trying again.');
+                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
                     }
                 } else {
                     // Inform the user that the attempt limit has been reached
-                    $this->addFlash('error', 'You have reached the maximum number of attempts. Please contact our support.');
+                    $this->addFlash('warning', 'You have reached the maximum number of attempts. Please contact our support.');
                 }
             } else {
-                $this->addFlash('warning', 'This email doesn\'t, exist please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
+                $this->addFlash('warning', 'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
             }
         }
 
@@ -527,7 +524,7 @@ class SiteController extends AbstractController
 
             // Check if the user has not exceeded the attempt limit
             if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
-                $minInterval = new DateInterval('PT5M');
+                $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
 
                 // Check if enough time has passed since the last attempt
@@ -561,7 +558,7 @@ class SiteController extends AbstractController
                     $this->addFlash('success', $message);
                 } else {
                     // Inform the user to wait before trying again
-                    $this->addFlash('error', 'Please wait 5 minutes before trying again.');
+                    $this->addFlash('error', 'Please wait 2 minutes before trying again.');
                 }
             } else {
                 // Inform the user that the attempt limit has been reached
