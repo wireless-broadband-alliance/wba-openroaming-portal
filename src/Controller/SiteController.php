@@ -22,7 +22,6 @@ use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -325,7 +324,7 @@ class SiteController extends AbstractController
      * @throws Exception
      */
     #[Route('/forgot-password/email', name: 'app_site_forgot_password_email')]
-    public function forgotPasswordUser(
+    public function forgotPasswordUserEmail(
         Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface      $entityManager,
@@ -357,67 +356,63 @@ class SiteController extends AbstractController
                 $latestEvent = $this->eventRepository->findLatestEmailAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
-                // Check if the user has not exceeded the attempt limit
-                if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
-                    // Check if enough time has passed since the last attempt
-                    if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                            $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
-                        // Increment the attempt count
-                        $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+                // Check if enough time has passed since the last attempt
+                if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                        $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+                    // Increment the attempt count
+                    $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
 
-                        // Save event with attempt count and current time
-                        if (!$latestEvent) {
-                            $latestEvent = new Event();
-                            $latestEvent->setUser($user);
-                            $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-                            $latestEvent->setEventMetadata([
-                                'platform' => PlatformMode::Live,
-                                'email' => $user->getEmail(),
-                            ]);
-                        }
-                        $latestEvent->setVerificationAttempts($attempts);
-                        $latestEvent->setLastVerificationCodeTime($currentTime);
-                        $this->eventRepository->save($latestEvent, true);
-                        $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
-
-                        $randomPassword = bin2hex(random_bytes(4));
-                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-                        $user->setPassword($hashedPassword);
-                        $entityManager->persist($user);
-                        $entityManager->flush();
-
-                        $email = (new TemplatedEmail())
-                            ->from(new Address($this->parameterBag->get('app.email_address'), $this->parameterBag->get('app.sender_name')))
-                            ->to($user->getEmail())
-                            ->subject('Your Openroaming - Password Request')
-                            ->htmlTemplate('email/user_password.html.twig')
-                            ->context([
-                                'password' => $randomPassword,
-                                'isNewUser' => null
-                            ]);
-
-                        $mailer->send($email);
-
-                        $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
-                        $this->addFlash('success', $message);
-                    } else {
-                        // Inform the user to wait before trying again
-                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
+                    // Save event with attempt count and current time
+                    if (!$latestEvent) {
+                        $latestEvent = new Event();
+                        $latestEvent->setUser($user);
+                        $latestEvent->setEventDatetime(new DateTime());
+                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                        $latestEvent->setEventMetadata([
+                            'platform' => PlatformMode::Live,
+                            'email' => $user->getEmail(),
+                        ]);
                     }
+                    $latestEvent->setVerificationAttempts($attempts);
+                    $latestEvent->setLastVerificationCodeTime($currentTime);
+                    $this->eventRepository->save($latestEvent, true);
+                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+
+                    $randomPassword = bin2hex(random_bytes(4));
+                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                    $user->setPassword($hashedPassword);
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
+                    $email = (new TemplatedEmail())
+                        ->from(new Address($this->parameterBag->get('app.email_address'), $this->parameterBag->get('app.sender_name')))
+                        ->to($user->getEmail())
+                        ->subject('Your Openroaming - Password Request')
+                        ->htmlTemplate('email/user_password.html.twig')
+                        ->context([
+                            'password' => $randomPassword,
+                            'isNewUser' => null
+                        ]);
+
+                    $mailer->send($email);
+
+                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $user->getEmail(), $attemptsLeft);
+                    $this->addFlash('success', $message);
                 } else {
-                    // Inform the user that the attempt limit has been reached
-                    $this->addFlash('warning', 'You have reached the maximum number of attempts. Please contact our support.');
+                    // Inform the user to wait before trying again
+                    $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
                 }
             } else {
-                $this->addFlash('warning', 'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
+                // Inform the user that the attempt limit has been reached
+                $this->addFlash('warning', 'You have reached the maximum number of attempts. Please contact our support.');
             }
+        } else {
+            $this->addFlash('warning', 'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
         }
 
-        return $this->render('site/forgot_password_email_landing.html.twig', [
-            'forgotPasswordEmailForm' => $form->createView(),
-            'data' => $data,
-        ]);
+
+        return $this->render('site/forgot_password_email_landing.html.twig', ['forgotPasswordEmailForm' => $form->createView(),
+            'data' => $data,]);
     }
 
 
@@ -425,7 +420,8 @@ class SiteController extends AbstractController
      * @param $userAgent
      * @return string
      */
-    private function detectDevice($userAgent)
+    private
+    function detectDevice($userAgent)
     {
         $os = OSTypes::NONE;
 
@@ -464,7 +460,8 @@ class SiteController extends AbstractController
      * @return int The generated verification code.
      * @throws Exception
      */
-    protected function generateVerificationCode(User $user): int
+    protected
+    function generateVerificationCode(User $user): int
     {
         // Generate a random verification code with 6 digits
         $verificationCode = random_int(100000, 999999);
@@ -481,7 +478,8 @@ class SiteController extends AbstractController
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailCode(string $email): Email
+    protected
+    function createEmailCode(string $email): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -511,7 +509,8 @@ class SiteController extends AbstractController
      * @throws Exception
      * @throws TransportExceptionInterface
      */
-    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
+    #[
+        Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
     public function regenerateCode(EventRepository $eventRepository, MailerInterface $mailer): RedirectResponse
     {
