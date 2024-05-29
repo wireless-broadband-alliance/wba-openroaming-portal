@@ -85,12 +85,20 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Check if the user is logged in and verification of the user
+        // And Check if the user dont have a forgot_password_request active
         if (isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === EmailConfirmationStrategy::EMAIL &&
             $this->getUser()) {
             /** @var User $currentUser */
             $currentUser = $this->getUser();
             $verification = $currentUser->isVerified();
+
+            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            if ($this->eventRepository->findOneBy(['user' => $currentUser->getId(), 'forget_password_request_user' => true])) {
+                $this->addFlash('error', 'You need to verify your own password before download a profile!');
+                return $this->redirectToRoute('app_site_forgot_password_reset');
+            }
+
             // Check if the user is verified
             if (!$verification) {
                 $this->addFlash('error', 'Your account is not verified to download a profile!');
@@ -375,8 +383,8 @@ class SiteController extends AbstractController
                     }
                     $latestEvent->setVerificationAttempts($attempts);
                     $latestEvent->setLastVerificationCodeTime($currentTime);
+                    $latestEvent->setForgetPasswordRequestUser(true);
                     $this->eventRepository->save($latestEvent, true);
-                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
 
                     $randomPassword = bin2hex(random_bytes(4));
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
@@ -388,10 +396,12 @@ class SiteController extends AbstractController
                         ->from(new Address($this->parameterBag->get('app.email_address'), $this->parameterBag->get('app.sender_name')))
                         ->to($user->getEmail())
                         ->subject('Your Openroaming - Password Request')
-                        ->htmlTemplate('email/user_password.html.twig')
+                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,
-                            'isNewUser' => null
+                            'forgotPasswordUser' => true,
+                            'uuid' => $user->getUuid(),
+                            'verificationCode' => $user->getVerificationCode(),
                         ]);
 
                     $mailer->send($email);
@@ -544,7 +554,6 @@ class SiteController extends AbstractController
                 $latestEvent->setLastVerificationCodeTime($currentTime);
                 $eventRepository->save($latestEvent, true);
 
-                $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
                 $message = sprintf('We have sent you a new code to: %s.', $currentUser->getEmail());
                 $this->addFlash('success', $message);
             } else {
