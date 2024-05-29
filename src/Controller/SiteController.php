@@ -437,6 +437,7 @@ class SiteController extends AbstractController
         Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface      $entityManager,
+        RequestStack                $requestStack,
     ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -465,6 +466,7 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getEmail(), 'googleId' => null]);
+            dd($user);
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                 $minInterval = new DateInterval('PT2M');
@@ -482,7 +484,7 @@ class SiteController extends AbstractController
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEvent->setEventMetadata([
                                 'platform' => PlatformMode::Live,
                                 'phoneNumber' => $user->getPhoneNumber(),
@@ -508,24 +510,23 @@ class SiteController extends AbstractController
                         $userId = $data['SMS_USER_ID']['value'];
                         $handle = $data['SMS_HANDLE']['value'];
                         $from = $data['SMS_FROM']['value'];
+                        $recipient = $user->getPhoneNumber();
 
                         // Check if the user can get the SMS password and link
-                        $user = $this->userRepository->findOneBy(['phoneNumber' => $recipient]);
-                        if ($user && $this->canRegenerateSmsCode($user, $this->eventRepository)) {
+                        if ($user && $attempts < 3) {
                             $client = HttpClient::create();
                             $uuid = $user->getUuid();
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
                             $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
-                            dd($domainName);
-                            $message = "Your password is: " . $randomPassword . "\nPlease login " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                            $message = "Your password is: " . $randomPassword . "\nPlease login: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
                             $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
                             $response = $client->request('GET', $apiUrl);
-
                             // Handle the API response as needed
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
+                            dd($message, $apiUrl, $response, $statusCode, $content);
                         }
 
                         $message = sprintf('We have sent you a message to: %s.', $user->getPhoneNumber());
