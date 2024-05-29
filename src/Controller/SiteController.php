@@ -411,7 +411,7 @@ class SiteController extends AbstractController
 
                     $mailer->send($email);
 
-                    $message = sprintf('We have sent you a new code to: %s.', $user->getEmail());
+                    $message = sprintf('We have sent you a new email to: %s.', $user->getEmail());
                     $this->addFlash('success', $message);
                 } else {
                     // Inform the user to wait before trying again
