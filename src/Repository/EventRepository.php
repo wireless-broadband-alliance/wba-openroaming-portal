@@ -70,7 +70,7 @@ class EventRepository extends ServiceEntityRepository
      * @return Event|null
      * @throws NonUniqueResultException
      */
-    public function findLatestEmailAttemptEvent(User $user, $eventLog): ?Event
+    public function findLatestRequestAttemptEvent(User $user, $eventLog): ?Event
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')

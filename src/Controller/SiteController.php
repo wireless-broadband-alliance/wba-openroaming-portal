@@ -10,6 +10,7 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
+use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
@@ -25,6 +26,7 @@ use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -354,7 +356,7 @@ class SiteController extends AbstractController
         }
 
         if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            $this->addFlash('error', 'This verification method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -366,14 +368,12 @@ class SiteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->userRepository->findOneBy(['email' => $user->getEmail(), 'googleId' => null]);
             if ($user) {
-                $latestEvent = $this->eventRepository->findLatestEmailAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-                $minInterval = new DateInterval('PT0M');
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
                 // Check if enough time has passed since the last attempt
                 if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
                         $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
-                    // Increment the attempt count
-                    $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
 
                     // Save event with attempt count and current time
                     if (!$latestEvent) {
@@ -386,7 +386,6 @@ class SiteController extends AbstractController
                             'email' => $user->getEmail(),
                         ]);
                     }
-                    $latestEvent->setVerificationAttempts($attempts);
                     $latestEvent->setLastVerificationCodeTime($currentTime);
                     $user->setForgotPasswordRequest(true);
                     $this->eventRepository->save($latestEvent, true);
@@ -425,6 +424,125 @@ class SiteController extends AbstractController
         }
         return $this->render('site/forgot_password_email_landing.html.twig', [
             'forgotPasswordEmailForm' => $form->createView(),
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
+    public function forgotPasswordUserSMS(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+    ): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        if ($this->getUser()) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this verification method.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
+            $this->addFlash('error', 'This verification method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $user = new User();
+        $event = new Event();
+        $form = $this->createForm(ForgotPasswordSMSType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getEmail(), 'googleId' => null]);
+            if ($user) {
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
+                $minInterval = new DateInterval('PT2M');
+                $currentTime = new DateTime();
+                // Check if the user has not exceeded the attempt limit
+                if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+                    // Check if enough time has passed since the last attempt
+                    if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                            $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+                        // Increment the attempt count
+                        $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+
+                        // Save event with attempt count and current time
+                        if (!$latestEvent) {
+                            $latestEvent = new Event();
+                            $latestEvent->setUser($user);
+                            $latestEvent->setEventDatetime(new DateTime());
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                            $latestEvent->setEventMetadata([
+                                'platform' => PlatformMode::Live,
+                                'phoneNumber' => $user->getPhoneNumber(),
+                            ]);
+                        }
+                        $latestEvent->setVerificationAttempts($attempts);
+                        $latestEvent->setLastVerificationCodeTime($currentTime);
+                        $user->setForgotPasswordRequest(true);
+                        $this->eventRepository->save($latestEvent, true);
+
+                        // save new password hashed on the db for the user
+                        $randomPassword = bin2hex(random_bytes(4));
+                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                        $user->setPassword($hashedPassword);
+                        $entityManager->persist($user);
+                        $entityManager->flush();
+
+                        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+                        $apiUrl = $this->parameterBag->get('app.budget_api_url');
+
+                        // Fetch SMS credentials from the database
+                        $username = $data['SMS_USERNAME']['value'];
+                        $userId = $data['SMS_USER_ID']['value'];
+                        $handle = $data['SMS_HANDLE']['value'];
+                        $from = $data['SMS_FROM']['value'];
+
+                        // Check if the user can get the SMS password and link
+                        $user = $this->userRepository->findOneBy(['phoneNumber' => $recipient]);
+                        if ($user && $this->canRegenerateSmsCode($user, $this->eventRepository)) {
+                            $client = HttpClient::create();
+                            $uuid = $user->getUuid();
+                            $uuid = urlencode($uuid);
+                            $verificationCode = $user->getVerificationCode();
+                            $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
+                            dd($domainName);
+                            $message = "Your password is: " . $randomPassword . "\nPlease login " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                            // Adjust the API endpoint and parameters based on the Budget SMS documentation
+                            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+                            $response = $client->request('GET', $apiUrl);
+
+                            // Handle the API response as needed
+                            $statusCode = $response->getStatusCode();
+                            $content = $response->getContent();
+                        }
+
+                        $message = sprintf('We have sent you a message to: %s.', $user->getPhoneNumber());
+                        $this->addFlash('success', $message);
+                    } else {
+                        // Inform the user to wait before trying again
+                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
+                    }
+                } else {
+                    $this->addFlash('warning', 'You have exceed the limits for verification password. Please contact our support for help.');
+                }
+            } else {
+                $this->addFlash('warning', 'This phone number doesn\'t exist, please submit a valid one from the system!');
+            }
+        }
+        return $this->render('site/forgot_password_sms_landing.html.twig', [
+            'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
         ]);
     }
@@ -613,7 +731,7 @@ class SiteController extends AbstractController
         $isVerified = $currentUser->isVerified();
 
         if (!$isVerified) {
-            $latestEvent = $eventRepository->findLatestEmailAttemptEvent($currentUser, AnalyticalEventType::USER_EMAIL_ATTEMPT);
+            $latestEvent = $eventRepository->findLatestRequestAttemptEvent($currentUser, AnalyticalEventType::USER_EMAIL_ATTEMPT);
             $minInterval = new DateInterval('PT2M');
             $currentTime = new DateTime();
 
