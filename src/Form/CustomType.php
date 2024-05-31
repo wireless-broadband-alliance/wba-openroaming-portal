@@ -59,6 +59,13 @@ class CustomType extends AbstractType
                 // Handle the case where config is an array (like CONTACT_EMAIL)
                 $formFieldType = $config['type'];
                 $formFieldOptions['constraints'] = $config['constraints'];
+                // If the field is not an image, get the corresponding Setting entity and set its value
+                foreach ($options['settings'] as $setting) {
+                    if ($setting->getName() === $settingName) {
+                        $formFieldOptions['data'] = $setting->getValue();
+                        break;
+                    }
+                }
             } else {
                 // If the field is not an image, get the corresponding Setting entity and set its value
                 foreach ($options['settings'] as $setting) {
