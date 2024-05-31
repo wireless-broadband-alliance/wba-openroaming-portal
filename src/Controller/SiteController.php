@@ -100,11 +100,13 @@ class SiteController extends AbstractController
                 $this->addFlash('error', 'Your account is not verified to download a profile!');
                 return $this->redirectToRoute('app_email_code');
             }
-
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
                 $this->addFlash('error', 'You need to confirm the new password before download a profile!');
                 return $this->redirectToRoute('app_site_forgot_password_checker');
+            }
+            if ($currentUser->getDeletedAt()) {
+                return $this->redirectToRoute('saml_logout');
             }
         }
 
