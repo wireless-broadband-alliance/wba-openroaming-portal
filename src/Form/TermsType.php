@@ -34,7 +34,7 @@ class TermsType extends AbstractType
                 'constraints' => [
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
-                        'protocols' => ['http', 'https'], // Only allow these protocols
+                        'protocols' => ['http', 'https'],
                     ]),
                 ],
             ];
