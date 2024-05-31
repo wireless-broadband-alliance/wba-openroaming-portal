@@ -114,7 +114,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                $this->addFlash('warning', 'User with the same email already exists.');
+                $this->addFlash('warning', 'User with the same email already exists, please try to Login using the link below.');
             } else if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -200,7 +200,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
-                $this->addFlash('warning', 'User with the same phone number already exists.');
+                $this->addFlash('warning', 'User with the same phone number already exists, please try to Login using the link below.');
             } else {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
