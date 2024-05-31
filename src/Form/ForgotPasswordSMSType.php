@@ -47,7 +47,7 @@ class ForgotPasswordSMSType extends AbstractType
                         'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
                     ]),
                     new Regex([
-                        'pattern' => '/^\+\d+$/',
+                        'pattern' => '/^\+\d{1,3}\d{4,14}$/',
                         'message' => 'Phone number should contain only digits. (The number must be in international format, example: +351965432XXX)',
                     ]),
                 ],
