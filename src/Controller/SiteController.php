@@ -517,8 +517,8 @@ class SiteController extends AbstractController
                             $uuid = $user->getUuid();
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
-                            $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
-                            $message = "Current: " . $randomPassword . "\n" . "Please login: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                            $domainName = "/login";
+                            $message = "Your account password is: " . $randomPassword . "%0A" . "Login here: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
                             $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
                             $response = $client->request('GET', $apiUrl);
