@@ -14,7 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 class CustomType extends AbstractType
 {
     private GetSettings $getSettings;
@@ -35,18 +35,30 @@ class CustomType extends AbstractType
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => TextType::class,
             'ADDITIONAL_LABEL' => TextType::class,
-            'CONTACT_EMAIL' => EmailType::class
+            'CONTACT_EMAIL' => [
+                'type' => EmailType::class,
+                'constraints' => [
+                    new EmailConstraint([
+                        'message' => 'The value "{{ value }}" is not a valid email address.'
+                    ])
+                ]
+            ],
         ];
 
-        foreach ($allowedSettings as $settingName => $formFieldType) {
+        foreach ($allowedSettings as $settingName => $config) {
             $formFieldOptions = [
                 'data' => null, // Set data to null for FileType fields
             ];
 
-            if ($formFieldType === FileType::class) {
+            if ($config === FileType::class) {
                 // If the field is an image, set the appropriate options
                 $formFieldOptions['mapped'] = false;
                 $formFieldOptions['required'] = false;
+                $formFieldType = $config;
+            } elseif (is_array($config)) {
+                // Handle the case where config is an array (like CONTACT_EMAIL)
+                $formFieldType = $config['type'];
+                $formFieldOptions['constraints'] = $config['constraints'];
             } else {
                 // If the field is not an image, get the corresponding Setting entity and set its value
                 foreach ($options['settings'] as $setting) {
@@ -55,6 +67,7 @@ class CustomType extends AbstractType
                         break;
                     }
                 }
+                $formFieldType = $config;
             }
 
             // GetSettings service retrieves each description
@@ -72,7 +85,6 @@ class CustomType extends AbstractType
 
             $builder->add($settingName, $formFieldType, $formFieldOptions);
         }
-
     }
 
     public function configureOptions(OptionsResolver $resolver): void
