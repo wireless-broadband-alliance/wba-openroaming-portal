@@ -14,7 +14,7 @@
             {# Image Preview #}
             <img src="{{ imagePath ?? '' }}" alt="CustomizationImages"
                  class="w-1/2 max-h-48 shadow rounded-md object-contain"
-                    {{ stimulus_target('img', 'preview') }}>
+                    {{ stimulus_target('img', 'preview') }} {% if name == 'WALLPAPER_IMAGE' %} onerror="this.src='/resources/images/background.png'" {% endif %}>
 
             {# Upload Button #}
             <button class="p-1 bg-gray-100 rounded-lg w-24 flex flex-col justify-center items-center relative z-0 cursor-pointer mx-auto"
@@ -34,7 +34,6 @@
                         Upload Image
                     </label>
                 </div>
-
             </button>
         </div>
 
@@ -51,7 +50,7 @@
     {# Setting Description #}
     <div class="flex justify-center items-center">
         <div {{ stimulus_target('card', 'info') }}
-                class="bg-indigo-400 rounded-lg p-2 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden">
+                class="bg-indigo-400 rounded-lg p-2 mb-6 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden">
             {{ setting.vars.attr.description }}
         </div>
     </div>

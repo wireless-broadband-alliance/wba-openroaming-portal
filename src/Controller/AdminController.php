@@ -117,7 +117,7 @@ class AdminController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $perPage = 15; // Number of users to display per page
+        $perPage = 7; // Number of users to display per page
 
         // Fetch users with the specified sorting
         $users = $userRepository->findExcludingAdmin();
@@ -276,7 +276,7 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
-        $perPage = 15;
+        $perPage = 7;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
 
@@ -878,6 +878,14 @@ class AdminController extends AbstractController
 
                     if ($value === null) {
                         $value = "";
+                    }
+
+                    // Check for specific settings that need domain validation
+                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
+                        if (!$this->isValidDomain($value)) {
+                            $this->addFlash('error_admin', "The value for $settingName is not a valid domain or does not resolve to an IP address.");
+                            return $this->redirectToRoute('admin_dashboard_settings_radius');
+                        }
                     }
 
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
@@ -2171,6 +2179,20 @@ class AdminController extends AbstractController
         $this->userRepository->save($user, true);
 
         return $verificationCode;
+    }
+
+    // Validate domain names and check if they resolve to an IP address
+    // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
+    protected function isValidDomain($domain)
+    {
+        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            return false;
+        }
+        $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
+        if ($dnsRecords === false || empty($dnsRecords)) {
+            return false;
+        }
+        return true;
     }
 
     /**
