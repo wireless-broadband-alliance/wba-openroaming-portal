@@ -117,7 +117,7 @@ class AdminController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $perPage = 15; // Number of users to display per page
+        $perPage = 7; // Number of users to display per page
 
         // Fetch users with the specified sorting
         $users = $userRepository->findExcludingAdmin();
@@ -276,7 +276,7 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
-        $perPage = 15;
+        $perPage = 7;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
 

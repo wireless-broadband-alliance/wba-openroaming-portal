@@ -5,7 +5,7 @@
             {# Display only the capport settings #}
             {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_FROM', 'SMS_TIMER_RESEND'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                     {{ stimulus_controller('card') }}>
+                        {{ stimulus_controller('card') }}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -51,26 +51,21 @@
             {% endif %}
         {% endfor %}
     </div>
-    <div class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full lg:w-3/4">
-        <div class="flex bg-infoBgColor/50 rounded-lg p-4 mb-4 text-xs md:text-sm text-infoTextColor" role="alert">
-            <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
-                 xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clip-rule="evenodd"></path>
-            </svg>
-            <div>
-                <span class="font-medium">This is for the
-                    <a class="font-semibold underline"
-                       href="https://www.budgetsms.net/"
-                       target="_blank">BudgetSMS.net</a>
-                    provider, you should create and fund an account with them.</span>
-            </div>
+    <div class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full">
+        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
 
+            <span class="font-medium">
+                This is for the
+                <a class="font-semibold underline" href="https://www.budgetsms.net/" target="_blank">
+                    BudgetSMS.net
+                </a>
+                provider, you should create and fund an account with them.
+            </span>
         </div>
     </div>
 
-    <div class="mt-8 divider-solid"></div>
+    <div class="mt-6 divider-solid"></div>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingSMS'}) }}"
