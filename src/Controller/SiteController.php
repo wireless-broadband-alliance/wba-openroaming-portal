@@ -784,6 +784,12 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if (!$currentUser){
+            $this->addFlash('error', 'You must be logged in to access this page.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if (!$currentUser->isVerified()) {
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
@@ -806,12 +812,23 @@ class SiteController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventRepository $eventRepository): Response
     {
-        // Get the entered code from the form
-        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
-
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if (!$currentUser){
+            $this->addFlash('error', 'You must be logged in to access this page.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+        if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
+            $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+            return $this->redirectToRoute('app_site_forgot_password_checker');
+        }
+
+        // Get the entered code from the form
+        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
             $event = new Event();
@@ -850,6 +867,17 @@ class SiteController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if (!$currentUser){
+            $this->addFlash('error', 'You must be logged in to access this page.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+        if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
+            $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+            return $this->redirectToRoute('app_site_forgot_password_checker');
+        }
 
         try {
             $result = $sendSmsService->regenerateSmsCode($currentUser);
