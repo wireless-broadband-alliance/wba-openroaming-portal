@@ -518,7 +518,7 @@ class SiteController extends AbstractController
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
                             $domainName = "/login/link/?uuid=$uuid&verificationCode=$verificationCode";
-                            $message = "Current: " . $randomPassword . "%0A" . "Please login: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                            $message = "Current: " . $randomPassword . "\n" . "Please login: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
                             $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
                             $response = $client->request('GET', $apiUrl);
@@ -785,7 +785,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        if (!$currentUser){
+        if (!$currentUser) {
             $this->addFlash('error', 'You must be logged in to access this page.');
             return $this->redirectToRoute('app_landing');
         }
@@ -816,7 +816,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        if (!$currentUser){
+        if (!$currentUser) {
             $this->addFlash('error', 'You must be logged in to access this page.');
             return $this->redirectToRoute('app_landing');
         }
@@ -868,7 +868,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        if (!$currentUser){
+        if (!$currentUser) {
             $this->addFlash('error', 'You must be logged in to access this page.');
             return $this->redirectToRoute('app_landing');
         }
