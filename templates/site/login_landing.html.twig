@@ -85,7 +85,7 @@
 
 
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-            <p class="mt-2 text-xs">Did you forget your password? Get a new one for your
+            <p class="mt-2 text-sm">Did you forget your password? Get a new one for your
 
                 {% if data.EMAIL_REGISTER_ENABLED.value %}
                     <a href="{{ path('app_site_forgot_password_email') }}"
@@ -105,7 +105,7 @@
 
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
-            <p class="mt-2 text-xs">You don't have an account? Register with
+            <p class="mt-2 text-sm">You don't have an account? Register with
 
                 {% if data.EMAIL_REGISTER_ENABLED.value %}
                     <a href="{{ path('app_register') }}"

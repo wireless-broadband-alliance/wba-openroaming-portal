@@ -60,15 +60,13 @@
 
                 <label for="{{ registrationFormDemo.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
-                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">terms
-                        &
-                        conditions of
-                        use
+                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
+                        terms & conditions of use
                     </a>
                     and
                     <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
-                       class="underline text-primary font-semibold">privacy
-                        policy
+                       class="underline text-primary font-semibold">
+                        privacy policy
                     </a>.
                 </label>
             </div>
@@ -105,8 +103,8 @@
 
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
 
-            <p class="text-[#212529] text-opacity-40 text-sm">You are currently authenticated
-                as {{ app.user.uuid }}
+            <p class="text-[#212529] text-opacity-40 text-sm">
+                You are currently authenticated as {{ app.user.uuid }}
             </p>
         {% endif %}
 
@@ -142,8 +140,8 @@
 
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
 
-                    <p class="text-[#212529] text-opacity-40 text-sm">You are currently authenticated
-                        as {{ app.user.uuid }}
+                    <p class="text-[#212529] text-opacity-40 text-sm">
+                        You are currently authenticated as {{ app.user.uuid }}
                     </p>
 
                     {% if app.user.isVerified %}
