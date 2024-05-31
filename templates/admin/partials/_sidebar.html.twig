@@ -1,4 +1,4 @@
-<div class="z-50 bg-lightGray hidden absolute xl:relative xl:block 2xl:sticky top-0 h-screen p-4 pt-4 w-10/12 sm:w-8/12 md:w-5/12 lg:w-4/12 2xl:w-3/12 duration-300 border-r border-gray-300/50 overflow-y-auto"
+<div class="z-50 bg-lightGray hidden absolute xl:relative xl:block top-0 h-screen min-w-[300px] max-w-[300px] p-4 pt-4 border-r border-gray-300/50 overflow-y-auto"
         {{ stimulus_target('nav', 'container') }}>
 
     {# Nav Header #}
@@ -61,7 +61,7 @@
                     Portal Settings
                 </div>
 
-                <twig:ux:icon name="wba:down" class="w-4" fill="none"/>
+                <twig:ux:icon name="wba:right" class="w-4 transition ease-in {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'rotate-90' : '' }}" fill="none" data-nav-submenu-target="icon"/>
             </button>
 
             <div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
@@ -136,7 +136,7 @@
                     Statistics
                 </div>
 
-                <twig:ux:icon name="wba:down" class="w-4" fill="none"/>
+                <twig:ux:icon name="wba:right" class="w-4 transition ease-in {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'rotate-90' : '' }}" fill="none" data-nav-submenu-target="icon"/>
             </button>
             <div {{ stimulus_target('nav-submenu', 'container') }}
                     class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? '' : 'hidden' }}">
@@ -172,10 +172,8 @@
 
                     Options
                 </div>
-                <svg id="selectArrow" class="w-4  duration-300" fill="none" stroke="currentColor" stroke-width="1.5"
-                     viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-                </svg>
+
+                <twig:ux:icon name="wba:right" class="w-4 transition ease-in" fill="none" data-nav-submenu-target="icon"/>
             </button>
             <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" {{ stimulus_target('nav-submenu', 'container') }}>
                 <ul class="mx-2">
