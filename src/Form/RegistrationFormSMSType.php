@@ -51,7 +51,7 @@ class RegistrationFormSMSType extends AbstractType
                     ]),
                     new Regex([
                         'pattern' => '/^\+\d{1,3}\d{4,14}$/m',
-                        'message' => 'Phone number should contain only digits. (The number must be in international format, example: +351965432XXX)',
+                        'message' => 'Phone number should contain only digits and must be in international format (e.g., +19700XXXXXX)',
                     ]),
                 ],
                 'attr' => [
