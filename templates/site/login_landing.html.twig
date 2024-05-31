@@ -27,11 +27,11 @@
     </div>
     {{ form_start(form) }}
 
-    {% if data.EMAIL_REGISTER_ENABLED and data.AUTH_METHOD_SMS_REGISTER_ENABLED %}
+    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
         {% set label = 'Email or Phone Number' %}
-    {% elseif data.EMAIL_REGISTER_ENABLED %}
+    {% elseif data.EMAIL_REGISTER_ENABLED.value %}
         {% set label = 'Email' %}
-    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED %}
+    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
         {% set label = 'Phone Number' %}
     {% endif %}
 
@@ -82,28 +82,43 @@
     {# Divider #}
     <div class="my-[25px] divider"></div>
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::Demo') %}
-        <p class="text-xs">
-            Did you forget your password? Get a new one for your
-            <a href="{{ path('app_site_forgot_password_email') }}"
-               class="font-semibold text-primary underline">email</a>
-            or
-            <a href="{{ path('app_site_forgot_password_sms') }}" class="font-semibold text-primary underline">phone
-                number</a>
-            .
-        </p>
+
+
+        {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+            <p class="mt-2 text-xs">Did you forget your password? Get a new one for your
+
+                {% if data.EMAIL_REGISTER_ENABLED.value %}
+                    <a href="{{ path('app_site_forgot_password_email') }}"
+                       class="font-semibold text-primary underline">email</a>
+                {% endif %}
+
+                {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
+
+                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                    <a href="{{ path('app_site_forgot_password_sms') }}"
+                       class="font-semibold text-primary underline">phone number</a>
+                {% endif %}
+                .
+            </p>
+        {% endif %}
+
+
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
             <p class="mt-2 text-xs">You don't have an account? Register with
 
-                {% if data.EMAIL_REGISTER_ENABLED %}<a href="{{ path('app_register') }}"
-                                                       class="font-semibold text-primary underline">email</a>{% endif %}
+                {% if data.EMAIL_REGISTER_ENABLED.value %}
+                    <a href="{{ path('app_register') }}"
+                       class="font-semibold text-primary underline">email</a>
+                {% endif %}
 
-                {% if data.EMAIL_REGISTER_ENABLED and data.AUTH_METHOD_SMS_REGISTER_ENABLED %}or{% endif %}
+                {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED %}<a href="{{ path('app_register_sms') }}"
-                                                                 class="font-semibold text-primary underline">phone
-                    number</a>.{% endif %}
-
+                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                    <a href="{{ path('app_register_sms') }}"
+                       class="font-semibold text-primary underline">phone number</a>
+                {% endif %}
+                .
             </p>
         {% endif %}
     {% endif %}
