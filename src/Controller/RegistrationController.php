@@ -229,7 +229,7 @@ class RegistrationController extends AbstractController
                 $verificationCode = $user->getVerificationCode();
 
                 // Send SMS
-                $message = "Your account password is: " . $randomPassword . "\nVerification code is: " . $verificationCode;
+                $message = "Your account password is: " . $randomPassword . "%0A" . "Verification code is: " . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
 
@@ -302,7 +302,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
                 $eventRepository->save($event, true);
 
-                $this->addFlash('success', 'Your account has been verified, please click below to download the profile!');
+                $this->addFlash('success', 'Your account has been verified!');
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {

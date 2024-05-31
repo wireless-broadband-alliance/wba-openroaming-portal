@@ -173,6 +173,6 @@ class SendSMS
         }
 
         // Throw a generic exception when max attempts are exceeded
-        throw new RuntimeException('SMS regeneration failed. You have exceed the limits for regeneration. Please content your support for help.');
+        throw new RuntimeException('SMS resend failed. You have exceed the limits for regeneration. Please contact our support for help.');
     }
 }
