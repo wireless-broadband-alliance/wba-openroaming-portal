@@ -79,6 +79,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phoneNumber = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $forgot_password_request = null;
+
 
     public function __construct()
     {
@@ -407,6 +410,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setPhoneNumber(?string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    public function isForgotPasswordRequest(): ?bool
+    {
+        return $this->forgot_password_request;
+    }
+
+    public function setForgotPasswordRequest(?bool $forgot_password_request): static
+    {
+        $this->forgot_password_request = $forgot_password_request;
 
         return $this;
     }

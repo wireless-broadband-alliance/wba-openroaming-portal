@@ -880,6 +880,14 @@ class AdminController extends AbstractController
                         $value = "";
                     }
 
+                    // Check for specific settings that need domain validation
+                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
+                        if (!$this->isValidDomain($value)) {
+                            $this->addFlash('error_admin', "The value for $settingName is not a valid domain or does not resolve to an IP address.");
+                            return $this->redirectToRoute('admin_dashboard_settings_radius');
+                        }
+                    }
+
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                     if ($setting) {
                         $setting->setValue($value);
@@ -2171,6 +2179,20 @@ class AdminController extends AbstractController
         $this->userRepository->save($user, true);
 
         return $verificationCode;
+    }
+
+    // Validate domain names and check if they resolve to an IP address
+    // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
+    protected function isValidDomain($domain)
+    {
+        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            return false;
+        }
+        $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
+        if ($dnsRecords === false || empty($dnsRecords)) {
+            return false;
+        }
+        return true;
     }
 
     /**

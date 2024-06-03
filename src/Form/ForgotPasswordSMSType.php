@@ -2,21 +2,19 @@
 
 namespace App\Form;
 
-use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\Regex;
 
-class RegistrationFormSMSType extends AbstractType
+class ForgotPasswordSMSType extends AbstractType
 {
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
@@ -40,8 +38,7 @@ class RegistrationFormSMSType extends AbstractType
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
-        $builder
-            ->add('phoneNumber', TextType::class, [
+        $builder->add('phoneNumber', TextType::class, [
                 'constraints' => [
                     new Length([
                         'min' => 8,
@@ -57,10 +54,6 @@ class RegistrationFormSMSType extends AbstractType
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'label' => 'I agree to the terms',
             ]);
 
         // Check if TURNSTILE_CHECKER value is ON
@@ -77,8 +70,6 @@ class RegistrationFormSMSType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => User::class,
-        ]);
+        $resolver->setDefaults([]);
     }
 }

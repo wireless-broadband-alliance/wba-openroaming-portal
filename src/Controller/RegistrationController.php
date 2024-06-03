@@ -114,7 +114,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                $this->addFlash('warning', 'User with the same email already exists.');
+                $this->addFlash('warning', 'User with the same email already exists, please try to Login using the link below.');
             } else if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -200,7 +200,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
-                $this->addFlash('warning', 'User with the same phone number already exists.');
+                $this->addFlash('warning', 'User with the same phone number already exists, please try to Login using the link below.');
             } else {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -229,7 +229,7 @@ class RegistrationController extends AbstractController
                 $verificationCode = $user->getVerificationCode();
 
                 // Send SMS
-                $message = "Your account password is: " . $randomPassword . "\nVerification code is: " . $verificationCode;
+                $message = "Your account password is: " . $randomPassword . "%0A" . "Verification code is: " . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
 
@@ -302,7 +302,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
                 $eventRepository->save($event, true);
 
-                $this->addFlash('success', 'Your account has been verified, please click below to download the profile!');
+                $this->addFlash('success', 'Your account has been verified!');
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
