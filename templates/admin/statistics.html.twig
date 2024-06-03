@@ -1,36 +1,57 @@
-{% extends 'base.html.twig' %}
+{% extends '/admin/base.html.twig' %}
 
-{% block title %}Admin Page WBA{% endblock %}
+{% block title %}Admin Page WBA - Stats{% endblock %}
 
-{% block body %}
-    <section class="flex text-veryDarkPurple" data-controller="sidebar">
-        {% include 'admin/partials/_sidebar.html.twig' %}
-        <div class="p-7 w-full bg-lightGray">
-            {# Header section #}
-            <div class="flex items-center justify-between mb-10" id="header_page">
-                {# Header - Title and Buttons #}
-                {% include 'admin/partials/_header_admin.html.twig' %}
-            </div>
-            {# Portal Statistics #}
-            <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-between items-center mb-10">
-                <h2 class="text-2xl font-semibold text-center lg:text-left ">
-                    Portal Statistics
-                </h2>
-                <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics') }}" method="post"
-                    class="flex flex-col sm:flex-row items-center gap-2">
-                    <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate"
-                        class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-auto"
-                        value="{{ selectedStartDate }}"
-                        onchange="this.form.submit()">
-                    <span class="px-1"> to </span>
-                    <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate"
-                        class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-full sm:w-auto"
-                        value="{{ selectedEndDate }}"
-                        onchange="this.form.submit()">
-                </form>
-            </div>
-            {% include 'admin/partials/_statistics.html.twig' %}
-            <hr class="mb-8 mt-16 w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+{% block container %}
+    {# Header #}
+    <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
+        <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics') }}" method="post"
+              class="flex flex-col sm:flex-row items-center gap-2">
+
+            <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate"
+                   class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-auto"
+                   value="{{ selectedStartDate }}"
+                   onchange="this.form.submit()">
+            <span class="px-1"> to </span>
+
+            <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate"
+                   class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-full sm:w-auto"
+                   value="{{ selectedEndDate }}"
+                   onchange="this.form.submit()">
+        </form>
+    </div>
+
+    {# Charts #}
+    <div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="statistics">
+        {# Devices #}
+        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left">Devices</h1>
+            <canvas class="max-w-full" id="devicesChart" data-devices
+                    data-chart-data="{{ devicesDataJson }}"></canvas>
         </div>
-    </section>
+        {# Authentication #}
+        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left">Authentication</h1>
+            <canvas class="max-w-full" id="authenticationChart" data-authentication
+                    data-chart-data="{{ authenticationDataJson }}"></canvas>
+        </div>
+        {# SMS & Email #}
+        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left">Portal with SMS or Email</h1>
+            <canvas class="max-w-full" id="SMSEmailChart" data-SMSEmail
+                    data-chart-data="{{ SMSEmailDataJson }}"></canvas>
+        </div>
+        {# Platform Status #}
+        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left">User created in</h1>
+            <canvas class="max-w-full" id="platformStatusChart" data-platformStatus
+                    data-chart-data="{{ platformStatusDataJson }}"></canvas>
+        </div>
+        {# Users Manegement #}
+        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left">Users Management</h1>
+            <canvas class="max-w-full" id="userVerifiedChart" data-userVerified
+                    data-chart-data="{{ usersVerifiedDataJson }}"></canvas>
+        </div>
+    </div>
 {% endblock %}

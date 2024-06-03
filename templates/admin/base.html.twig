@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block body %}
+    <div class="flex text-veryDarkPurple" {{ stimulus_controller('nav') }}>
+
+        {% include 'admin/partials/_sidebar.html.twig' %}
+
+        <div class="ml-auto w-full xl:w-[calc(100%_-_300px)] px-7 py-12 min-h-screen bg-lightGray">
+            {# Header section #}
+            <div class="flex flew-row items-center justify-between pb-10">
+                {% include 'admin/partials/_header_admin.html.twig' %}
+            </div>
+
+            {% block container %}
+            {% endblock container %}
+        </div>
+    </div>
+{% endblock %}

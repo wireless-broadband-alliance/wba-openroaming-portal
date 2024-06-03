@@ -35,7 +35,7 @@ class GetSettings
         return $os;
     }
 
-    public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository)
+    public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository): array
     {
         $data = [];
 
@@ -119,6 +119,11 @@ class GetSettings
             'description' => $this->getSettingDescription('PAGE_TITLE'),
         ];
 
+        $data['CUSTOMER_LOGO_ENABLED'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO_ENABLED'])->getValue(),
+            'description' => $this->getSettingDescription('CUSTOMER_LOGO_ENABLED'),
+        ];
+
         $data['customerLogoName'] = [
             'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue(),
             'description' => $this->getSettingDescription('CUSTOMER_LOGO'),
@@ -158,6 +163,14 @@ class GetSettings
             'value' => $settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
+
+        $turnstile_checker = $settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        if ($turnstile_checker !== null) {
+            $data['TURNSTILE_CHECKER'] = [
+                'value' => $turnstile_checker->getValue(),
+                'description' => $this->getSettingDescription('TURNSTILE_CHECKER'),
+            ];
+        }
 
         $user_verification = $settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
         if ($user_verification !== null) {
@@ -320,11 +333,13 @@ class GetSettings
 
             'PLATFORM_MODE' => 'Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.',
             'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system. This system requires all the users to verify is own account before they download any profile',
+            'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to differentiate between genuine users and bots. This can be used in Live or Demo modes.',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
+            'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',
             'CUSTOMER_LOGO' => 'The resource path or URL to the customer\'s logo image',
             'OPENROAMING_LOGO' => 'The resource path or URL to the OpenRoaming logo image',
-            'WALLPAPER_IMAGE' => 'The resource path or URL to the wallpaper image',
+            'WALLPAPER_IMAGE' => 'The resource path or URL to the wallpaper image. Is recommended to use an image with a ratio of 13 : 14',
             'WELCOME_TEXT' => 'The welcome text displayed on the user interface',
             'WELCOME_DESCRIPTION' => 'The description text displayed under the welcome text',
             'ADDITIONAL_LABEL' => 'Additional label displayed on the landing page for more, if necessary, information',

@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -105,26 +106,21 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param int $page
+     * @param string $sort
+     * @param string $order
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(
-        Request        $request,
-        UserRepository $userRepository
-    ): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $page = $request->query->getInt('page', 1); // Get the current page from the query parameter
-        $perPage = 15; // Number of users to display per page
-
-
-        $sort = $request->query->get('sort', 'createdAt');  // Default sort by user creation date
-        $order = $request->query->get('order', 'desc'); // Default order: descending
+        $perPage = 7; // Number of users to display per page
 
         // Fetch users with the specified sorting
         $users = $userRepository->findExcludingAdmin();
@@ -276,28 +272,24 @@ class AdminController extends AbstractController
     /**
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param int $page
+     * @param string $sort
+     * @param string $order
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(
-        Request        $request,
-        UserRepository $userRepository
-    ): Response
+    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
-        $page = $request->query->getInt('page', 1);
-        $perPage = 15;
+        $perPage = 7;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
-
-        $sort = $request->query->get('sort', 'createdAt'); // Default sort by user creation date
-        $order = $request->query->get('order', 'desc'); // Default order: descending
 
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
@@ -493,7 +485,7 @@ class AdminController extends AbstractController
                 ->subject('Your Password Reset Details')
                 ->html(
                     $this->renderView(
-                        'email_activation/email_template_password.html.twig',
+                        'email/user_password.html.twig',
                         ['password' => $newPassword, 'isNewUser' => false]
                     )
                 );
@@ -588,7 +580,7 @@ class AdminController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reset successfully!');
+                $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
@@ -788,7 +780,7 @@ class AdminController extends AbstractController
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your Settings Reset Details')
-            ->htmlTemplate('email_activation/email_template_admin.html.twig')
+            ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
@@ -887,7 +879,7 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -901,45 +893,50 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            $settingsToUpdate = [
-                'RADIUS_REALM_NAME',
-                'DISPLAY_NAME',
-                'PAYLOAD_IDENTIFIER',
-                'OPERATOR_NAME',
-                'DOMAIN_NAME',
-                'RADIUS_TLS_NAME',
-                'NAI_REALM',
-                'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
-                'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
-            ];
-
             $staticValue = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
             if ($submittedData['PAYLOAD_IDENTIFIER'] === $staticValue) {
                 $this->addFlash('error_admin', 'Please do not use the default value from the Payload Identifier card.');
+            } else {
+                $settingsToUpdate = [
+                    'RADIUS_REALM_NAME',
+                    'DISPLAY_NAME',
+                    'PAYLOAD_IDENTIFIER',
+                    'OPERATOR_NAME',
+                    'DOMAIN_NAME',
+                    'RADIUS_TLS_NAME',
+                    'NAI_REALM',
+                    'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                    'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
+                ];
+
+                foreach ($settingsToUpdate as $settingName) {
+                    $value = $submittedData[$settingName] ?? null;
+
+                    if ($value === null) {
+                        $value = "";
+                    }
+
+                    // Check for specific settings that need domain validation
+                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
+                        if (!$this->isValidDomain($value)) {
+                            $this->addFlash('error_admin', "The value for $settingName is not a valid domain or does not resolve to an IP address.");
+                            return $this->redirectToRoute('admin_dashboard_settings_radius');
+                        }
+                    }
+
+                    $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                    if ($setting) {
+                        $setting->setValue($value);
+                        $em->persist($setting);
+                    }
+                }
+
+                // Flush the changes to the database
+                $em->flush();
+
+                $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
-
-            foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
-
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
-                }
-
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
-                    $setting->setValue($value);
-                    $em->persist($setting);
-                }
-            }
-
-
-            // Flush the changes to the database
-            $em->flush();
-
-            $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
-            return $this->redirectToRoute('admin_dashboard_settings_radius');
         }
 
         return $this->render('admin/settings_actions.html.twig', [
@@ -983,8 +980,9 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'PLATFORM_MODE' and 'USER_VERIFICATION' settings
+            // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
+            $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
@@ -998,6 +996,12 @@ class AdminController extends AbstractController
             if ($emailVerificationSetting) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $em->persist($emailVerificationSetting);
+            }
+
+            $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+            if ($turnstileCheckerSetting) {
+                $turnstileCheckerSetting->setValue($turnstileChecker);
+                $em->persist($turnstileCheckerSetting);
             }
 
             // Flush the changes to the database
@@ -2062,10 +2066,16 @@ class AdminController extends AbstractController
         $colors = [];
 
         if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
+            $maxValue = max($dataValues);
+            $minOpacity = 0.4; // Minimum opacity to ensure visibility
+            $maxOpacity = 1; // Maximum opacity for the most vibrant color
+
             foreach ($labels as $index => $type) {
-                $brightness = round(($dataValues[$index] / max($dataValues)) * 99); // Calculate brightness relative to the max count
+                // Calculate the brightness relative to the max count, scaled to the opacity range
+                $opacity = $minOpacity + ($dataValues[$index] / $maxValue) * ($maxOpacity - $minOpacity);
+                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
                 $data[] = $dataValues[$index];
-                $colors[] = "rgba(78, 164, 116, .{$brightness})"; // Generate a different color for each data point
+                $colors[] = "rgba(78, 164, 116, {$opacity})"; // Generate a different color for each data point
             }
         }
 
@@ -2241,7 +2251,7 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL'])) {
+                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL', 'CUSTOMER_LOGO_ENABLED'])) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 
@@ -2298,6 +2308,20 @@ class AdminController extends AbstractController
         $this->userRepository->save($user, true);
 
         return $verificationCode;
+    }
+
+    // Validate domain names and check if they resolve to an IP address
+    // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
+    protected function isValidDomain($domain)
+    {
+        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            return false;
+        }
+        $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
+        if ($dnsRecords === false || empty($dnsRecords)) {
+            return false;
+        }
+        return true;
     }
 
     /**

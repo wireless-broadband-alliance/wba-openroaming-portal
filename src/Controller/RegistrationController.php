@@ -110,7 +110,7 @@ class RegistrationController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible use this authentication method.');
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -126,7 +126,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                $this->addFlash('warning', 'User with the same email already exists.');
+                $this->addFlash('warning', 'User with the same email already exists, please try to Login using the link below.');
             } else if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -160,7 +160,7 @@ class RegistrationController extends AbstractController
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your OpenRoaming Registration Details')
-                    ->htmlTemplate('email_activation/email_template_password.html.twig')
+                    ->htmlTemplate('email/user_password.html.twig')
                     ->context([
                         'uuid' => $user->getUuid(),
                         'verificationCode' => $user->getVerificationCode(),
@@ -208,7 +208,7 @@ class RegistrationController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'This portal is in Demo mode. It is impossible to use this authentication method.');
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -224,7 +224,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
-                $this->addFlash('warning', 'User with the same phone number already exists.');
+                $this->addFlash('warning', 'User with the same phone number already exists, please try to Login using the link below.');
             } else {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -253,7 +253,7 @@ class RegistrationController extends AbstractController
                 $verificationCode = $user->getVerificationCode();
 
                 // Send SMS
-                $message = "Your account password is: " . $randomPassword . "\nVerification code is: " . $verificationCode;
+                $message = "Your account password is: " . $randomPassword . "%0A" . "Verification code is: " . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
 
@@ -327,7 +327,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
                 $eventRepository->save($event, true);
 
-                $this->addFlash('success', 'Your account has been verified, please click below to download the profile!');
+                $this->addFlash('success', 'Your account has been verified!');
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
