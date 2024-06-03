@@ -471,26 +471,37 @@ class AdminController extends AbstractController
         $formReset->handleRequest($request);
 
         if ($formReset->isSubmitted() && $formReset->isValid()) {
-            // get the typed password by the admin
+            // get the both typed passwords by the admin
             $newPassword = $formReset->get('password')->getData();
+            $confirmPassword = $formReset->get('confirmPassword')->getData();
+
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error_admin', 'Please make sure to type both passwords correctly.');
+                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+            }
+
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            // Send email to the user with the new password
-            $email = (new Email())
-                ->from(new Address($emailSender, $nameSender))
-                ->to($user->getEmail())
-                ->subject('Your Password Reset Details')
-                ->html(
-                    $this->renderView(
-                        'email/user_password.html.twig',
-                        ['password' => $newPassword, 'isNewUser' => false]
-                    )
-                );
-            $mailer->send($email);
-            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
+            $userEmail = $user->getEmail();
+            if ($userEmail) {
+                // Send email to the user with the new password
+                $email = (new Email())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($userEmail)
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email/user_password.html.twig',
+                            ['password' => $newPassword, 'isNewUser' => false]
+                        )
+                    );
+                $mailer->send($email);
+            }
+
+            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
             return $this->redirectToRoute('admin_page');
         }
 
@@ -2220,11 +2231,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(
-        Request $request,
-        EntityManagerInterface $em,
-        GetSettings $getSettings
-    ): Response
+    public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
