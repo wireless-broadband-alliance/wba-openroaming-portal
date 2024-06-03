@@ -122,8 +122,9 @@ class AdminController extends AbstractController
 
         $perPage = 7; // Number of users to display per page
 
+        $filter = $request->query->get('filter', 'all'); // Default filter
         // Fetch users with the specified sorting
-        $users = $userRepository->findExcludingAdmin();
+        $users = $userRepository->findExcludingAdmin($filter);
 
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
@@ -140,7 +141,6 @@ class AdminController extends AbstractController
             return $value2 <=> $value1; // +1
         });
 
-        $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users

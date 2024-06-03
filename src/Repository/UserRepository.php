@@ -90,18 +90,23 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    public function findExcludingAdmin(): array
+    /* This data is to call and be used on the admin Users Page */
+    public function findExcludingAdmin(?string $filter = null): array
     {
         $qb = $this->createQueryBuilder('u');
-        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
-
-        return $this->createQueryBuilder('u')
-            ->where('u.roles NOT LIKE :role')
+        $qb->where('u.roles NOT LIKE :role')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->orderBy('u.createdAt', 'DESC')
-            ->setParameter('role', '%ROLE_ADMIN%')
-            ->getQuery()
-            ->getResult();
+            ->setParameter('role', '%ROLE_ADMIN%');
+
+        if ($filter === 'verified') {
+            $qb->andWhere('u.isVerified = :isVerified')
+                ->setParameter('isVerified', true);
+        } elseif ($filter === 'banned') {
+            $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function searchWithFilter(string $filter, ?string $searchTerm = null): array
