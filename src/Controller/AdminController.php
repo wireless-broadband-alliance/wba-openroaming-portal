@@ -319,9 +319,9 @@ class AdminController extends AbstractController
         $offset = ($page - 1) * $perPage;
         $users = array_slice($users, $offset, $perPage);
 
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
-        $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm);
+        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $userRepository->countBannedUsers($searchTerm);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
