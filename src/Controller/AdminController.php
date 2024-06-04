@@ -109,22 +109,25 @@ class AdminController extends AbstractController
      * @param int $page
      * @param string $sort
      * @param string $order
+     * @param int $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc', #[MapQueryParameter] int $count = 7): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $perPage = 7; // Number of users to display per page
+        $searchTerm = $request->query->get('u');
+        $perPage = $count;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
-        // Fetch users with the specified sorting
-        $users = $userRepository->findExcludingAdmin($filter);
+
+        // Use the updated searchWithFilter method to handle both filter and search term
+        $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
@@ -141,6 +144,10 @@ class AdminController extends AbstractController
             return $value2 <=> $value1; // +1
         });
 
+        if (strlen($searchTerm) > 320) {
+            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
+            return $this->redirectToRoute('admin_page');
+        }
 
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
@@ -177,6 +184,7 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
+            'count' => $count,
             'export_users' => $export_users
         ]);
     }
@@ -264,88 +272,6 @@ class AdminController extends AbstractController
         }
 
         return UserProvider::Portal_Account;
-    }
-
-    /*
-    * Handles search bar of the Users Table on the Main Route, with/out filters
-    */
-    /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
-    #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $searchTerm = $request->query->get('u');
-        $perPage = 7;
-
-        $filter = $request->query->get('filter', 'all'); // Default filter
-
-        // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm);
-
-        // Sort the users based on the specified column and order
-        usort($users, static function ($user1, $user2) use ($sort, $order) {
-            // This function is used to sort the arrays uuid and created_at
-            // and compares them with the associated users with the highest number to the lowest id from both arrays
-            $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
-            $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
-
-            if ($order === 'asc') { // Check if the order is "asc" or "desc"
-                //and returns the correct result between arrays
-                return $value1 <=> $value2; // -1
-            }
-
-            return $value2 <=> $value1; // +1
-        });
-
-        if (strlen($searchTerm) > 320) {
-            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
-            return $this->redirectToRoute('admin_page');
-        }
-
-        $totalUsers = count($users);
-        $totalPages = ceil($totalUsers / $perPage);
-        $offset = ($page - 1) * $perPage;
-        $users = array_slice($users, $offset, $perPage);
-
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm);
-        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $userRepository->countBannedUsers($searchTerm);
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
-
-        return $this->render('admin/index.html.twig', [
-            'users' => $users,
-            'currentPage' => $page,
-            'current_user' => $currentUser,
-            'totalPages' => $totalPages,
-            'perPage' => $perPage,
-            'searchTerm' => $searchTerm,
-            'data' => $data,
-            'allUsersCount' => $allUsersCount,
-            'verifiedUsersCount' => $verifiedUsersCount,
-            'bannedUsersCount' => $bannedUsersCount,
-            'activeFilter' => $filter,
-            'activeSort' => $sort,
-            'activeOrder' => $order,
-            'export_users' => $export_users
-        ]);
     }
 
     /*

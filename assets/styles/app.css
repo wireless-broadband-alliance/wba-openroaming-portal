@@ -30,6 +30,10 @@
 	@apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
 }
 
+.form-select {
+	@apply bg-white border rounded-lg px-3 py-1 text-[#656565] border-[#CECECE] focus:border-primary;
+}
+
 /* buttons */
 .btn-primary {
 	@apply h-[50px] px-2 rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center text-center items-center text-white font-semibold text-center;
