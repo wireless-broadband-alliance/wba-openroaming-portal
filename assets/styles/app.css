@@ -13,12 +13,23 @@
 	@apply w-full h-0.5 bg-gray-300/50;
 }
 
+
+/* toasts and pills */
+
 .toast-success {
 	@apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
 .toast-warning {
 	@apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
+}
+
+.pill-success {
+	@apply px-2 py-1 text-green-400 bg-green-100/50 rounded-lg;
+}
+
+.pill-error {
+	@apply px-2 py-1 text-red-400 bg-red-100/50 rounded-lg;
 }
 
 /* Form */
@@ -46,3 +57,4 @@
 .btn-logout {
 	@apply h-[50px] px-2 border border-[#E33D40] rounded-[5px] bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
 }
+
