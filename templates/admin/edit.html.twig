@@ -77,22 +77,32 @@
 
     {# Content - Reset Password Users/Admin #}
     <h1 class="text-2xl font-semibold mb-6">Reset Password</h1>
-    <div class="w-full lg:w-1/2 bg-white rounded-md p-6">
+    <div>
         {{ form_start(formReset) }}
         {{ form_errors(formReset) }}
+        <div class="p-6 mx-auto bg-white rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div class="relative">
-            {{ form_label(formReset.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(formReset.password, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(formReset.password) }}
+            <div class="relative">
+                {{ form_label(formReset.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(formReset.password, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
+                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                    {{ form_errors(formReset.password) }}
+                </div>
             </div>
-            <div class="flex justify-end mt-10">
-                <button type="submit" class="btn-primary"
-                        onclick="return confirm('Are you sure you want to reset the password of: {{ user.email }}?')">
-                    Reset Password
-                </button>
+            <div class="relative">
+
+                {{ form_label(formReset.confirmPassword, 'Confirm New Password', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(formReset.confirmPassword, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
+                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                    {{ form_errors(formReset.confirmPassword) }}
+                </div>
             </div>
+        </div>
+        <div class="flex justify-end mt-10">
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('Are you sure you want to reset the password of: {{ user.uuid }}?')">
+                Reset Password
+            </button>
         </div>
         {{ form_rest(formReset) }}
         {{ form_end(formReset) }}

@@ -14,7 +14,7 @@ export default class extends Controller {
 				// Create the Chart.js charts with the fetched data about the freeradius content
 
 				const authAttemptsChart = new Chart(authenticationAttempts, {
-					type: 'pie',
+					type: 'line',
 					data: authAttemptsData,
 					options: {
 						responsive: true,

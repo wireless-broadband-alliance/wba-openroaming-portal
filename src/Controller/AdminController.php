@@ -100,6 +100,9 @@ class AdminController extends AbstractController
         $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
 
+    /*
+    * Dashboard Page Main Route
+    */
     /**
      * @param Request $request
      * @param UserRepository $userRepository
@@ -119,8 +122,9 @@ class AdminController extends AbstractController
 
         $perPage = 7; // Number of users to display per page
 
+        $filter = $request->query->get('filter', 'all'); // Default filter
         // Fetch users with the specified sorting
-        $users = $userRepository->findExcludingAdmin();
+        $users = $userRepository->findExcludingAdmin($filter);
 
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
@@ -137,7 +141,6 @@ class AdminController extends AbstractController
             return $value2 <=> $value1; // +1
         });
 
-        $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
@@ -178,6 +181,9 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /*
+    * Handle export of the Users Table on the Main Route
+    */
     /**
      * @param UserRepository $userRepository
      * @return Response
@@ -185,7 +191,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportUsers(UserRepository $userRepository): Response
+    public function exportUsers(
+        UserRepository $userRepository
+    ): Response
     {
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
@@ -258,6 +266,9 @@ class AdminController extends AbstractController
         return UserProvider::Portal_Account;
     }
 
+    /*
+    * Handles search bar of the Users Table on the Main Route, with/out filters
+    */
     /**
      * @param Request $request
      * @param UserRepository $userRepository
@@ -308,9 +319,9 @@ class AdminController extends AbstractController
         $offset = ($page - 1) * $perPage;
         $users = array_slice($users, $offset, $perPage);
 
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
-        $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm);
+        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $userRepository->countBannedUsers($searchTerm);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -337,6 +348,9 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /*
+     * Deletes Users from the Project, this only adds a deletedAt date for legal reasons
+     */
     /**
      * @param $id
      * @param EntityManagerInterface $em
@@ -344,7 +358,10 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers($id, EntityManagerInterface $em): Response
+    public function deleteUsers(
+        $id,
+        EntityManagerInterface $em
+    ): Response
     {
         $user = $this->userRepository->find($id);
         if (!$user) {
@@ -370,7 +387,9 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_page');
     }
 
-
+    /*
+    * Handles the edit of the Users by the admin
+    */
     /**
      * @param Request $request
      * @param UserRepository $userRepository
@@ -383,7 +402,13 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
-    public function editUsers(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, MailerInterface $mailer, $id): Response
+    public function editUsers(
+        Request                     $request,
+        UserRepository              $userRepository,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface      $em,
+        MailerInterface             $mailer,
+                                    $id): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -446,36 +471,37 @@ class AdminController extends AbstractController
         $formReset->handleRequest($request);
 
         if ($formReset->isSubmitted() && $formReset->isValid()) {
-            // get the typed password by the admin
+            // get the both typed passwords by the admin
             $newPassword = $formReset->get('password')->getData();
+            $confirmPassword = $formReset->get('confirmPassword')->getData();
+
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error_admin', 'Please make sure to type both passwords correctly.');
+                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+            }
+
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-//            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-//                $verificationCode = $this->generateVerificationCode($user);
-//                // Removes the admin access until he confirms his new password
-//                $user->setVerificationCode($verificationCode);
-//                $user->setPassword($hashedPassword);
-//                $user->setIsVerified(0);
-//                $em->persist($user);
-//                $em->flush();
-//                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
-//            }
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            // Send email to the user with the new password
-            $email = (new Email())
-                ->from(new Address($emailSender, $nameSender))
-                ->to($user->getEmail())
-                ->subject('Your Password Reset Details')
-                ->html(
-                    $this->renderView(
-                        'email/user_password.html.twig',
-                        ['password' => $newPassword, 'isNewUser' => false]
-                    )
-                );
-            $mailer->send($email);
-            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
+            $userEmail = $user->getEmail();
+            if ($userEmail) {
+                // Send email to the user with the new password
+                $email = (new Email())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($userEmail)
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email/user_password.html.twig',
+                            ['password' => $newPassword, 'isNewUser' => false]
+                        )
+                    );
+                $mailer->send($email);
+            }
+
+            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
             return $this->redirectToRoute('admin_page');
         }
 
@@ -491,15 +517,18 @@ class AdminController extends AbstractController
         );
     }
 
-
+    /*
+     * Render a confirmation password form
+     */
     /**
      * @param string $type Type of action
-     * Render a confirmation password form
      * @return Response
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(string $type): Response
+    public function confirmReset(
+        string $type
+    ): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -513,17 +542,23 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /*
+     * Check if the code and then return the correct action
+     */
     /**
      * @param RequestStack $requestStack
      * @param EntityManagerInterface $em
      * @param string $type Type of action
      * @return Response
-     * Check if the code and then return the correct action
      * @throws Exception
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkPassword(RequestStack $requestStack, EntityManagerInterface $em, string $type): Response
+    public function checkPassword(
+        RequestStack           $requestStack,
+        EntityManagerInterface $em,
+        string                 $type
+    ): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -665,7 +700,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function regenerateCode(string $type): RedirectResponse
+    public function regenerateCode(
+        string $type
+    ): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -737,7 +774,9 @@ class AdminController extends AbstractController
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailAdmin(string $email): Email
+    protected function createEmailAdmin(
+        string $email
+    ): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -767,7 +806,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_terms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_terms(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -837,7 +880,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_radius(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -920,7 +967,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_status(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_status(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -989,7 +1040,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_LDAP(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_LDAP(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1056,7 +1111,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_auth(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_auth(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1137,7 +1196,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_capport(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_capport(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1201,7 +1264,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_sms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_sms(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1260,6 +1327,9 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Render Statistics  about the Portal data
+     */
+    /**
      * @param Request $request
      * @return Response
      * @throws \JsonException
@@ -1267,7 +1337,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(Request $request): Response
+    public function statisticsData(
+        Request $request
+    ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
@@ -1313,13 +1385,18 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Render Statistics about the freeradius data
+     */
+    /**
      * @return Response
      * @throws \JsonException
      * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function freeradiusStatisticsData(Request $request): Response
+    public function freeradiusStatisticsData(
+        Request $request
+    ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
@@ -1355,8 +1432,8 @@ class AdminController extends AbstractController
 
         // Extract the connection attempts
         $authCounts = [
-            'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
-            'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
+            'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0]),
+            'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1]),
         ];
 
         $totalSessionTimeSeconds = 0;
@@ -1428,12 +1505,17 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Exports the freeradius data
+     */
+    /**
      * @return Response
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportFreeradius(Request $request): Response
+    public function exportFreeradius(
+        Request $request
+    ): Response
     {
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1568,6 +1650,9 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Fetch data related to downloaded profiles devices
+     */
+    /**
      * @throws Exception
      */
     private function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
@@ -1612,6 +1697,12 @@ class AdminController extends AbstractController
         return $this->generateDatasets($profileCounts);
     }
 
+    /**
+     * Fetch data related to types of authentication
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
@@ -1649,6 +1740,12 @@ class AdminController extends AbstractController
         return $this->generateDatasets($userCounts);
     }
 
+    /**
+     * Fetch data related to users created in platform mode - Live/Demo
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartPlatformStatus(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(Event::class);
@@ -1688,6 +1785,12 @@ class AdminController extends AbstractController
         return $this->generateDatasets($statusCounts);
     }
 
+    /**
+     * Fetch data related to verified users
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartUserVerified(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
@@ -1727,6 +1830,9 @@ class AdminController extends AbstractController
         return $this->generateDatasets($userCounts);
     }
 
+    /**
+     * Fetch data related to User created on the portal with email or sms
+     */
     /**
      * @throws Exception
      */
@@ -1771,49 +1877,95 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Fetch data related to authentication attempts on the freeradius database
+     */
+    /**
      * @throws Exception
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
+        // Fetch the oldest and most recent event dates if startDate or endDate are not provided
+        if (!$startDate || !$endDate) {
+            $oldestEvent = $this->radiusAuthsRepository->findOneBy(
+                ['reply' => ['Access-Accept', 'Access-Reject']],
+                ['authdate' => 'ASC']
+            );
+
+            $mostRecentEvent = $this->radiusAuthsRepository->findOneBy(
+                ['reply' => ['Access-Accept', 'Access-Reject']],
+                ['authdate' => 'DESC']
+            );
+
+            if ($oldestEvent) {
+                $startDate = new DateTime($oldestEvent->getAuthdate());
+            }
+
+            if ($mostRecentEvent) {
+                $endDate = new DateTime($mostRecentEvent->getAuthdate());
+            }
+        }
+
         // Fetch all data with date filtering
-        $events = $this->radiusAuthsRepository->findBy(['reply' => ['Access-Accept', 'Access-Reject']]);
+        $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
+
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
 
         $authsCounts = [
-            'Accepted' => 0,
-            'Rejected' => 0,
+            'Accepted' => [],
+            'Rejected' => [],
         ];
 
-        $uniqueSeconds = []; // Keep track of unique seconds
+        $uniqueTimestamps = [];
 
-        // Filter and count authenticates types based on the date criteria
+        // Group the events based on the determined granularity
         foreach ($events as $event) {
             // Convert event date string to DateTime object
             $eventDateTime = new DateTime($event->getAuthdate());
 
-            // Skip events with missing dates
-            if (!$eventDateTime) {
-                continue;
-            }
+            // Get the second part of the date
+            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
 
-            // Check if the event date falls within the specified date range
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $reply = $event->getReply();
-                $second = $eventDateTime->format('Y-m-d H:i:s'); // Get the second part of the date
-
-                // Check if this second has already been counted
-                if (!in_array($second, $uniqueSeconds)) {
-                    if ($reply === 'Access-Accept') {
-                        $authsCounts['Accepted']++;
-                    } elseif ($reply === 'Access-Reject') {
-                        $authsCounts['Rejected']++;
-                    }
-
-                    // Add the second to the list of counted seconds
-                    $uniqueSeconds[] = $second;
+            // Check if this second has already been counted
+            if (!in_array($timestamp, $uniqueTimestamps)) {
+                // Determine the time period based on granularity
+                switch ($granularity) {
+                    case 'month':
+                        $period = $eventDateTime->format('Y-m');
+                        break;
+                    case 'week':
+                        $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
+                        break;
+                    case 'day':
+                    default:
+                        $period = $eventDateTime->format('Y-m-d');
+                        break;
                 }
+
+                // Initialize the period if not already set
+                if (!isset($authsCounts['Accepted'][$period])) {
+                    $authsCounts['Accepted'][$period] = 0;
+                    $authsCounts['Rejected'][$period] = 0;
+                }
+
+                $reply = $event->getReply();
+                if ($reply === 'Access-Accept') {
+                    $authsCounts['Accepted'][$period]++;
+                } elseif ($reply === 'Access-Reject') {
+                    $authsCounts['Rejected'][$period]++;
+                }
+
+                // Add the timestamp to the list of counted timestamps
+                $uniqueTimestamps[] = $timestamp;
             }
         }
 
@@ -1821,6 +1973,9 @@ class AdminController extends AbstractController
         return $this->generateDatasetsAuths($authsCounts);
     }
 
+    /**
+     * Fetch data related to realms usage on the freeradius database
+     */
     /**
      * @throws Exception
      */
@@ -1856,6 +2011,12 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
+    /**
+     * Fetch data related to current authentications on the freeradius database
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartCurrentAuthFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the active sessions using the findActiveSessions query
@@ -1873,6 +2034,12 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
+    /**
+     * Fetch data related to traffic passed on the freeradius database
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the traffic using the findTrafficPerRealm query
@@ -1897,6 +2064,12 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsTraffic($realmTraffic);
     }
 
+    /**
+     * Fetch data related to session time (average/total) on the freeradius database
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartSessionTimeFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
@@ -1934,6 +2107,9 @@ class AdminController extends AbstractController
         return $result;
     }
 
+    /**
+     * Generated Datasets for charts graphics
+     */
     private function generateDatasets(array $counts): array
     {
         $datasets = [];
@@ -2087,6 +2263,9 @@ class AdminController extends AbstractController
         return $color;
     }
 
+    /**
+     * Handles the Page Style on the dasboard
+     */
     /**
      * @param Request $request
      * @param EntityManagerInterface $em
