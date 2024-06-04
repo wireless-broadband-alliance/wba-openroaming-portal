@@ -1432,10 +1432,10 @@ class AdminController extends AbstractController
 
         // Extract the connection attempts
         $authCounts = [
-            'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
-            'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
+            'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0]),
+            'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1]),
         ];
-        dd($fetchChartAuthenticationsFreeradius, $authCounts);
+
         $totalSessionTimeSeconds = 0;
         $averageSessionTimeSeconds = 0;
         // Iterate over the session data to calculate total and average session times
