@@ -1435,7 +1435,7 @@ class AdminController extends AbstractController
             'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
             'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
         ];
-
+        dd($fetchChartAuthenticationsFreeradius, $authCounts);
         $totalSessionTimeSeconds = 0;
         $averageSessionTimeSeconds = 0;
         // Iterate over the session data to calculate total and average session times
@@ -1884,45 +1884,78 @@ class AdminController extends AbstractController
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        // Fetch all data with date filtering
-        $events = $this->radiusAuthsRepository->findBy(['reply' => ['Access-Accept', 'Access-Reject']]);
+        // Fetch the oldest and most recent event dates if startDate or endDate are not provided
+        if (!$startDate || !$endDate) {
+            $oldestEvent = $this->radiusAuthsRepository->findOneBy(
+                ['reply' => ['Access-Accept', 'Access-Reject']],
+                ['authdate' => 'ASC']
+            );
 
-        $authsCounts = [
-            'Accepted' => 0,
-            'Rejected' => 0,
-        ];
+            $mostRecentEvent = $this->radiusAuthsRepository->findOneBy(
+                ['reply' => ['Access-Accept', 'Access-Reject']],
+                ['authdate' => 'DESC']
+            );
 
-        $uniqueSeconds = []; // Keep track of unique seconds
-
-        // Filter and count authenticates types based on the date criteria
-        foreach ($events as $event) {
-            // Convert event date string to DateTime object
-            $eventDateTime = new DateTime($event->getAuthdate());
-
-            // Skip events with missing dates
-            if (!$eventDateTime) {
-                continue;
+            if ($oldestEvent) {
+                $startDate = new DateTime($oldestEvent->getAuthdate());
             }
 
-            // Check if the event date falls within the specified date range
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $reply = $event->getReply();
-                $second = $eventDateTime->format('Y-m-d H:i:s'); // Get the second part of the date
+            if ($mostRecentEvent) {
+                $endDate = new DateTime($mostRecentEvent->getAuthdate());
+            }
+        }
 
-                // Check if this second has already been counted
-                if (!in_array($second, $uniqueSeconds)) {
-                    if ($reply === 'Access-Accept') {
-                        $authsCounts['Accepted']++;
-                    } elseif ($reply === 'Access-Reject') {
-                        $authsCounts['Rejected']++;
-                    }
+        // Fetch all data with date filtering
+        $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
 
-                    // Add the second to the list of counted seconds
-                    $uniqueSeconds[] = $second;
-                }
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
+
+        $authsCounts = [
+            'Accepted' => [],
+            'Rejected' => [],
+        ];
+
+        // Group the events based on the determined granularity
+        foreach ($events as $event) {
+            // Convert event date string to DateTime object
+            $eventStartTime = new DateTime($event->getAuthDate());
+            $eventStopTime = new DateTime($event->getAuthDate());
+
+            // Determine the time period based on granularity
+            switch ($granularity) {
+                case 'month':
+                    $period = $eventStartTime->format('Y-m');
+                    break;
+                case 'week':
+                    $period = $eventStartTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
+                    break;
+                case 'day':
+                default:
+                    $period = $eventStartTime->format('Y-m-d');
+                    break;
+            }
+
+            // Initialize the period if not already set
+            if (!isset($authsCounts['Accepted'][$period])) {
+                $authsCounts['Accepted'][$period] = 0;
+                $authsCounts['Rejected'][$period] = 0;
+            }
+
+            $reply = $event->getReply();
+            if ($reply === 'Access-Accept') {
+                $authsCounts['Accepted'][$period]++;
+            } elseif ($reply === 'Access-Reject') {
+                $authsCounts['Rejected'][$period]++;
             }
         }
 
