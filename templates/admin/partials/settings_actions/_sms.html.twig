@@ -20,21 +20,13 @@
                         </div>
                         <label class="flex items-center bg-opacity-40">
                             <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['SMS_USERNAME', 'SMS_USER_ID', 'SMS_HANDLE', 'SMS_TIMER_RESEND'] %}
-                        <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
-                        </div>
-                    {% endif %}
 
-                    {% if setting.vars.name in ['SMS_FROM'] %}
-                        <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 11}}) }}
-                        </div>
-                    {% endif %}
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 11}}) }}
+                    </div>
 
                     {{ include('/admin/partials/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
 
@@ -45,6 +37,7 @@
             {% endif %}
         {% endfor %}
     </div>
+
     <div class="mt-2 mr-2 p-2 z-0 text-base font-semibold w-full">
         <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
             <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>

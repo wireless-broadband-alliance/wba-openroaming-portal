@@ -2,8 +2,6 @@
     {{ form_row(form._token) }}
 
     <div class="grid gap-4 lg:grid-cols-2 p-2">
-
-    {# Form #}
         {% for setting in form %}
             {# Display only the terms and conditions settings #}
             {% if setting.vars.name in ['TOS_LINK', 'PRIVACY_POLICY_LINK'] %}
@@ -16,22 +14,19 @@
                                 'TOS_LINK': 'Terms and Conditions Link',
                                 'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
                             }[setting.vars.name] ?? setting.vars.name %}
+
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                         </div>
 
                         <label class="flex items-center bg-opacity-40">
                             <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                         </label>
                     </div>
 
-
-                    {% if setting.vars.name in ['TOS_LINK', 'PRIVACY_POLICY_LINK'] %}
-                        <div class="mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
-                        </div>
-                    {% endif %}
+                    <div class="mt-5">
+                        {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                    </div>
 
                     {{ include('/admin/partials/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
 

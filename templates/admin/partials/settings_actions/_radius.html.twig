@@ -4,8 +4,7 @@
         {% for setting in form %}
             {# Display only the Radius settings #}
             {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                        {{ stimulus_controller('card') }}>
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -24,20 +23,13 @@
                         </div>
                         <label class="flex items-center bg-opacity-40">
                             <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                         </label>
                     </div>
-                    {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME','DOMAIN_NAME','RADIUS_TLS_NAME','NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER'] %}
-                        <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'form-widget', 'autocomplete': 'off'}}) }}
-                        </div>
-                    {% endif %}
-                    {% if setting.vars.name in ['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
-                        <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
-                        </div>
-                    {% endif %}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(setting, {'attr': {'class': 'form-widget', 'autocomplete': 'off'}}) }}
+                    </div>
 
                     {{ include('/admin/partials/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
 
