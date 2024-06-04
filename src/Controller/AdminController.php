@@ -1925,37 +1925,47 @@ class AdminController extends AbstractController
             'Rejected' => [],
         ];
 
+        $uniqueTimestamps = [];
+
         // Group the events based on the determined granularity
         foreach ($events as $event) {
             // Convert event date string to DateTime object
-            $eventStartTime = new DateTime($event->getAuthDate());
-            $eventStopTime = new DateTime($event->getAuthDate());
+            $eventDateTime = new DateTime($event->getAuthdate());
 
-            // Determine the time period based on granularity
-            switch ($granularity) {
-                case 'month':
-                    $period = $eventStartTime->format('Y-m');
-                    break;
-                case 'week':
-                    $period = $eventStartTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
-                    break;
-                case 'day':
-                default:
-                    $period = $eventStartTime->format('Y-m-d');
-                    break;
-            }
+            // Get the second part of the date
+            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
 
-            // Initialize the period if not already set
-            if (!isset($authsCounts['Accepted'][$period])) {
-                $authsCounts['Accepted'][$period] = 0;
-                $authsCounts['Rejected'][$period] = 0;
-            }
+            // Check if this second has already been counted
+            if (!in_array($timestamp, $uniqueTimestamps)) {
+                // Determine the time period based on granularity
+                switch ($granularity) {
+                    case 'month':
+                        $period = $eventDateTime->format('Y-m');
+                        break;
+                    case 'week':
+                        $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
+                        break;
+                    case 'day':
+                    default:
+                        $period = $eventDateTime->format('Y-m-d');
+                        break;
+                }
 
-            $reply = $event->getReply();
-            if ($reply === 'Access-Accept') {
-                $authsCounts['Accepted'][$period]++;
-            } elseif ($reply === 'Access-Reject') {
-                $authsCounts['Rejected'][$period]++;
+                // Initialize the period if not already set
+                if (!isset($authsCounts['Accepted'][$period])) {
+                    $authsCounts['Accepted'][$period] = 0;
+                    $authsCounts['Rejected'][$period] = 0;
+                }
+
+                $reply = $event->getReply();
+                if ($reply === 'Access-Accept') {
+                    $authsCounts['Accepted'][$period]++;
+                } elseif ($reply === 'Access-Reject') {
+                    $authsCounts['Rejected'][$period]++;
+                }
+
+                // Add the timestamp to the list of counted timestamps
+                $uniqueTimestamps[] = $timestamp;
             }
         }
 
