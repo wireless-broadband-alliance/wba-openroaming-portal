@@ -77,7 +77,7 @@
             <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
                 <li>
                     {# Account Setting #}
-                    <a href="{{ path('admin_update', {id : current_user.id}) }}"
+                    <a href="{{ path('admin_update', {id : app.user.id}) }}"
                        class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
                         <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2" fill="none"/>
                         Account Settings
@@ -105,11 +105,10 @@
     </div>
     {# User Info #}
     <div class="top-0 right-16 mt-2 ml-2 text-gray-700 text-base font-bold whitespace-nowrap hidden xl:block xl:absolute ">
-        {% if current_user.firstName == null and current_user.lastName == null %}
+        {% if app.user.firstName == null and app.user.lastName == null %}
             Admin OR Portal
         {% else %}
-            {{ current_user.firstName }}
-            {{ current_user.lastName }}
+            {{ app.user.firstName }} {{ app.user.lastName }}
         {% endif %}
     </div>
     <div class="top-6 right-16 mt-2 ml-2 text-gray-500 text-sm font-normal whitespace-nowrap hidden xl:block xl:absolute">

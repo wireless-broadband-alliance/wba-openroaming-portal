@@ -163,16 +163,11 @@ class AdminController extends AbstractController
         $verifiedUsersCount = $userRepository->countVerifiedUsers();
         $bannedUsersCount = $userRepository->countBannedUsers();
 
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
-            'current_user' => $currentUser,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'perPage' => $perPage,
@@ -452,19 +447,14 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(
-        string $type
-    ): Response
+    public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
 
         return $this->render('admin/confirm.html.twig', [
             'data' => $data,
-            'type' => $type,
-            'current_user' => $currentUser,
+            'type' => $type
         ]);
     }
 
@@ -806,16 +796,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(
-        Request                $request,
-        EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
+    public function settings_radius(Request     $request, EntityManagerInterface $em,
+                                    GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -880,8 +863,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -972,9 +954,6 @@ class AdminController extends AbstractController
         GetSettings            $getSettings
     ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1024,8 +1003,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1128,9 +1106,6 @@ class AdminController extends AbstractController
         GetSettings            $getSettings
     ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1177,8 +1152,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1263,12 +1237,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(
-        Request $request
-    ): Response
+    public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $user = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1299,7 +1270,6 @@ class AdminController extends AbstractController
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
-            'current_user' => $user,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
@@ -2202,9 +2172,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -2264,8 +2231,7 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
-            'getSettings' => $getSettings,
-            'current_user' => $currentUser,
+            'getSettings' => $getSettings
         ]);
     }
 
