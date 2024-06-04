@@ -88,7 +88,7 @@
                           method="post" {{ stimulus_target('alert', 'form') }}>
                         <input type="hidden" name="_method" value="DELETE">
 
-                        <a  href="javascript:void(0)" data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}"
+                        <a href="javascript:void(0)" data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}"
                                 {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
                                 class="flex flex-row items-center px-2 py-2 duration-100 rounded p-2 cursor-pointer hover:shadow hover:text-lightGreen">
                             <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>

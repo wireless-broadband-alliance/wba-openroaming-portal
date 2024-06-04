@@ -23,11 +23,11 @@
     {# Asap Font #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
 
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
-
     {% endblock %}
 
     {% block javascripts %}
@@ -37,6 +37,6 @@
 
 <body>
 {% block body %}{% endblock %}
-{% include 'admin/partials/_app_version.html.twig' %}
+{% include '/shared/_app_version.html.twig' %}
 </body>
 </html>
