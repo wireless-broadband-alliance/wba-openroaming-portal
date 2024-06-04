@@ -1432,8 +1432,8 @@ class AdminController extends AbstractController
 
         // Extract the connection attempts
         $authCounts = [
-            'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0]),
-            'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1]),
+            'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data']),
+            'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][1]['data']),
         ];
 
         $totalSessionTimeSeconds = 0;
@@ -2148,26 +2148,42 @@ class AdminController extends AbstractController
 
     private function generateDatasetsAuths(array $counts): array
     {
-        $datasets = [];
-        $labels = array_keys($counts);
-        $dataValues = array_values($counts);
+        // Ensure the 'Accepted' and 'Rejected' keys exist in the counts array
+        $acceptedCounts = $counts['Accepted'] ?? [];
+        $rejectedCounts = $counts['Rejected'] ?? [];
 
-        $colors = [];
+        // Extract dates from both accepted and rejected counts
+        $dates = array_unique(array_merge(array_keys($acceptedCounts), array_keys($rejectedCounts)));
+        sort($dates);
 
-        // Determine the color for each data point based on the type
-        foreach ($labels as $type) {
-            $color = $type === 'Accepted' ? '#7DB928' : '#FE4068';
-            $colors[] = $color;
+        $acceptedData = [];
+        $rejectedData = [];
+
+        // Populate the data arrays, ensuring each date has a value
+        foreach ($dates as $date) {
+            $acceptedData[] = $acceptedCounts[$date] ?? 0;
+            $rejectedData[] = $rejectedCounts[$date] ?? 0;
         }
 
-        $datasets[] = [
-            'data' => $dataValues,
-            'backgroundColor' => $colors,
-            'borderRadius' => "15",
+        // Create datasets
+        $datasets = [
+            [
+                'label' => 'Accepted',
+                'data' => $acceptedData,
+                'backgroundColor' => '#7DB928',
+                'borderRadius' => '15',
+            ],
+            [
+                'label' => 'Rejected',
+                'data' => $rejectedData,
+                'backgroundColor' => '#FE4068',
+                'borderRadius' => '15',
+            ]
         ];
 
+        // Return the data in the expected format
         return [
-            'labels' => $labels,
+            'labels' => $dates,
             'datasets' => $datasets,
         ];
     }
