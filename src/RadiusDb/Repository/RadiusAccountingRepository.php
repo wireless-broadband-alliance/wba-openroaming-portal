@@ -124,7 +124,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctSessionTime');
+            ->select('DISTINCT ra.realm, ra.acctSessionTime, ra.acctStartTime, ra.acctStopTime');
 
         // Apply date filters if provided
         if ($startDate && $endDate) {

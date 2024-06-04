@@ -1517,6 +1517,13 @@ class AdminController extends AbstractController
         Request $request
     ): Response
     {
+        // Check if the export users operation is enabled
+        $export_freeradius = $this->parameterBag->get('app.export_freeradius_statistics');
+        if ($export_freeradius === EmailConfirmationStrategy::NO_EMAIL) {
+            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
+            return $this->redirectToRoute('admin_page');
+        }
+
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
         $endDateString = $request->request->get('endDate');
