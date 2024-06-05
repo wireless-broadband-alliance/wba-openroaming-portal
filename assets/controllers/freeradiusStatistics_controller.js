@@ -38,6 +38,17 @@ export default class extends Controller {
 					data: sessionTimeData,
 					options: {
 						plugins: {
+							tooltip: {
+								callbacks: {
+									label: function(context) {
+										const index = context.dataIndex;
+										const dataset = context.dataset;
+										const value = dataset.data[index];
+										const tooltip = dataset.tooltips[index];
+										return tooltip; // Display human-readable format
+									}
+								}
+							},
 							legend: {
 								display: false,
 							},

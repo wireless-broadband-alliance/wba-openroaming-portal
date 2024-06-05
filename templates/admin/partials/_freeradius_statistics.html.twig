@@ -35,18 +35,10 @@
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                 <h1 class="px-2 text-lg sm:text-base">
-                    Average
+                    Total Average of
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2">5 mins</span>
-                </div>
-            </a>
-            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
-                <h1 class="px-2 text-lg sm:text-base">
-                    Total
-                </h1>
-                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2">5 mins</span>
+                    <span class="w-auto h-6 mb-1 px-2">{{ sessionTimeAverage }}</span>
                 </div>
             </a>
         </div>
