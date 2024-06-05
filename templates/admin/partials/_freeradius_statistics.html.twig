@@ -21,65 +21,87 @@
             </a>
         </div>
         <div class="flex flex-col gap-6 animate-fadeIn">
-            <canvas class="max-w-full" id="authAttemptsChart" data-devices
+            <canvas class="max-w-full" id="authAttemptsChart" data-authAttempts
                     data-chart-data="{{ authAttemptsJson }}"></canvas>
         </div>
     </div>
 
     {# Session Time #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
-        <div class="flex flex-row justify-between sm:pt-2 font-medium">
-            <h1 class="text-lg text-left">Session Time</h1>
-            <span class="text-base text-gray-500 text-left">(in Hours)</span>
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
+        <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
+            <h1 class="text-lg font-medium">Session Time</h1>
+            <span class="text-base text-gray-500">(in Hours)</span>
         </div>
-        <div class="mx-8 mt-10 flex md:flex-row flex-col justify-center md:justify-between items-center md:space-x-6 space-x-0">
-            <div class="flex flex-col">
-                <h1 class="text-center font-semibold">
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2 text-lg sm:text-base">
                     Average
                 </h1>
-                {% if sessionTimeAverageSeconds > 0 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                    {% if sessionTimeAverageSeconds >= 1000 %}
-                        {% set sizeClass = 'w-36 h-36' %}
-                    {% endif %}
-                    {% if sessionTimeAverageSeconds >= 10000 %}
-                        {% set sizeClass = 'w-40 h-40' %}
-                    {% endif %}
-                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
-                        {{ sessionTimeAverage }}
-                    </div>
-                {% else %}
-                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                        No Data Available
-                    </div>
-                {% endif %}
-            </div>
-            <div class="mt-8 md:mt-0 flex flex-col">
-                <h1 class="text-center font-semibold">
+                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                    <span class="w-auto h-6 mb-1 px-2">5 mins</span>
+                </div>
+            </a>
+            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2 text-lg sm:text-base">
                     Total
                 </h1>
-                {% if sessionTimeTotalSeconds > 0 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                    {% if sessionTimeTotalSeconds >= 1000 %}
-                        {% set sizeClass = 'w-36 h-36' %}
-                    {% endif %}
-                    {% if sessionTimeTotalSeconds >= 10000 %}
-                        {% set sizeClass = 'w-40 h-40' %}
-                    {% endif %}
-                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
-                        {{ sessionTimeTotal }}
-                    </div>
-                {% else %}
-                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                        No Data Available
-                    </div>
-                {% endif %}
-            </div>
+                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                    <span class="w-auto h-6 mb-1 px-2">5 mins</span>
+                </div>
+            </a>
         </div>
+        <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="sessionTimeChart" data-sessionTime
+                    data-chart-data="{{ sessionTimeJson }}"></canvas>
+        </div>
+{#        <div class="mx-8 mt-10 flex md:flex-row flex-col justify-center md:justify-between items-center md:space-x-6 space-x-0">#}
+{#            <div class="flex flex-col">#}
+{#                <h1 class="text-center font-semibold">#}
+{#                    Average#}
+{#                </h1>#}
+{#                {% if sessionTimeAverageSeconds > 0 %}#}
+{#                    {% set sizeClass = 'w-32 h-32' %}#}
+{#                    {% if sessionTimeAverageSeconds >= 1000 %}#}
+{#                        {% set sizeClass = 'w-36 h-36' %}#}
+{#                    {% endif %}#}
+{#                    {% if sessionTimeAverageSeconds >= 10000 %}#}
+{#                        {% set sizeClass = 'w-40 h-40' %}#}
+{#                    {% endif %}#}
+{#                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">#}
+{#                        {{ sessionTimeAverage }}#}
+{#                    </div>#}
+{#                {% else %}#}
+{#                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">#}
+{#                        No Data Available#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            </div>#}
+{#            <div class="mt-8 md:mt-0 flex flex-col">#}
+{#                <h1 class="text-center font-semibold">#}
+{#                    Total#}
+{#                </h1>#}
+{#                {% if sessionTimeTotalSeconds > 0 %}#}
+{#                    {% set sizeClass = 'w-32 h-32' %}#}
+{#                    {% if sessionTimeTotalSeconds >= 1000 %}#}
+{#                        {% set sizeClass = 'w-36 h-36' %}#}
+{#                    {% endif %}#}
+{#                    {% if sessionTimeTotalSeconds >= 10000 %}#}
+{#                        {% set sizeClass = 'w-40 h-40' %}#}
+{#                    {% endif %}#}
+{#                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">#}
+{#                        {{ sessionTimeTotal }}#}
+{#                    </div>#}
+{#                {% else %}#}
+{#                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">#}
+{#                        No Data Available#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            </div>#}
+{#        </div>#}
     </div>
 
     {# Display All Traffic #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow">
         <div class="flex flex-row justify-between sm:pt-2 font-medium">
             <h1 class="text-lg text-left">Total of Traffic</h1>
             <span class="text-base text-gray-500 text-left">(in GigaBytes)</span>
@@ -193,7 +215,7 @@
 
     {# No need data filter card - Total of current authentications #}
     <div class="z-0 text-base font-semibold w-full">
-        <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
+        <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow">
             <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
             {% if totalCurrentAuths >= 1 %}
                 {% set sizeClass = 'w-24 h-24' %}

@@ -6,10 +6,12 @@ export default class extends Controller {
 		document.addEventListener('DOMContentLoaded', () => {
 			// Get the chart elements for freeradius statistics from the radius database
 			const authenticationAttempts = document.getElementById('authAttemptsChart');
+			const sessionTime = document.getElementById('sessionTimeChart');
 
-			if (authenticationAttempts) {
+			if (authenticationAttempts && sessionTime) {
 				// Get the chart data from the data attributes on the elements
 				const authAttemptsData = JSON.parse(authenticationAttempts.getAttribute('data-chart-data'));
+				const sessionTimeData = JSON.parse(sessionTime.getAttribute('data-chart-data'));
 
 				// Create the Chart.js charts with the fetched data about the freeradius content
 				const authAttemptsChart = new Chart(authenticationAttempts, {
@@ -30,6 +32,26 @@ export default class extends Controller {
 						}
 					}
 				});
+
+				const sessionTimeChart = new Chart(sessionTime, {
+					type: 'bar',
+					data: sessionTimeData,
+					options: {
+						plugins: {
+							legend: {
+								display: false,
+							},
+						},
+						scales: {
+							y: {
+								ticks: {
+									precision: 0
+								}
+							}
+						}
+					}
+				});
+
 			}
 		});
 	}

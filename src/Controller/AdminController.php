@@ -1436,23 +1436,6 @@ class AdminController extends AbstractController
             'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][1]['data']),
         ];
 
-        $totalSessionTimeSeconds = 0;
-        $averageSessionTimeSeconds = 0;
-        // Iterate over the session data to calculate total and average session times
-        foreach ($fetchChartSessionTimeFreeradius as $session) {
-            $totalSessionTimeSeconds = $session['totalSessionTime'] + $totalSessionTimeSeconds;
-            $averageSessionTimeSeconds = $session['averageSessionTime'] + $averageSessionTimeSeconds;
-        }
-
-        // Format total session time
-        $totalHours = floor($totalSessionTimeSeconds / 3600);
-        $totalMinutes = floor(($totalSessionTimeSeconds % 3600) / 60);
-        $sessionTotalTime = sprintf('%dh %dm', $totalHours, $totalMinutes);
-
-        // Format average session time
-        $averageHours = floor($averageSessionTimeSeconds / 3600);
-        $averageMinutes = floor(($averageSessionTimeSeconds % 3600) / 60);
-        $sessionAverageTime = sprintf('%dh %dm', $averageHours, $averageMinutes);
 
         // Sum all the traffic from the Accounting table
         $totalTraffic = [
@@ -1493,11 +1476,12 @@ class AdminController extends AbstractController
             'totalTrafficFreeradius' => $totalTraffic,
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
-            'sessionTimeAverage' => $sessionAverageTime,
+            /*'sessionTimeAverage' => $sessionAverageTime,
             'sessionTimeAverageSeconds' => $averageSessionTimeSeconds,
             'sessionTimeTotal' => $sessionTotalTime,
-            'sessionTimeTotalSeconds' => $totalSessionTimeSeconds,
+            'sessionTimeTotalSeconds' => $totalSessionTimeSeconds,*/
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
+            'sessionTimeJson' => json_encode($fetchChartSessionTimeFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
@@ -2074,44 +2058,62 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to session time (average/total) on the freeradius database
      */
-    /**
-     * @throws Exception
-     */
     private function fetchChartSessionTimeFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
+        if (!$startDate || !$endDate) {
+            $oldestEvent = $this->radiusAccountingRepository->findBy([], ['acctStartTime' => 'ASC'], 1);
+            $mostRecentEvent = $this->radiusAccountingRepository->findBy([], ['acctStopTime' => 'DESC'], 1);
+
+            if (!empty($oldestEvent)) {
+                $startDate = $oldestEvent[0]->getAcctStartTime();
+            }
+
+            if (!empty($mostRecentEvent)) {
+                $endDate = $mostRecentEvent[0]->getAcctStopTime();
+            }
+        }
+
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
         $realmSessionTotalTime = [];
         $realmSessionCount = [];
 
-        // Sum the session time and count the sessions
-        foreach ($events as $event) {
-            $realm = $event['realm'];
-            $sessionTime = $event['acctSessionTime'];
+        $interval = $startDate->diff($endDate);
 
-            // Add the session time to the total
-            if (!isset($realmSessionTotalTime[$realm])) {
-                $realmSessionTotalTime[$realm] = $sessionTime;
-                $realmSessionCount[$realm] = 1;
-            } else {
-                $realmSessionTotalTime[$realm] += $sessionTime; // Update total session time
-                $realmSessionCount[$realm]++;
-            }
+        if ($interval->days <= 1) {
+            $groupFormat = 'Y-m-d';
+        } elseif ($interval->days <= 7) {
+            $groupFormat = 'Y-W';
+        } else {
+            $groupFormat = 'Y-m';
         }
 
-        // Calculate the average session time and return both total and average session time
+        foreach ($events as $event) {
+            $sessionTime = $event['acctSessionTime'];
+            $date = $event['acctStartTime'];
+            $groupKey = $date->format($groupFormat);
+
+            if (!isset($realmSessionTotalTime[$groupKey])) {
+                $realmSessionTotalTime[$groupKey] = 0;
+                $realmSessionCount[$groupKey] = 0;
+            }
+
+            $realmSessionTotalTime[$groupKey] += $sessionTime;
+            $realmSessionCount[$groupKey]++;
+        }
+
         $result = [];
-        foreach ($realmSessionTotalTime as $realm => $totalSessionTime) {
-            $count = $realmSessionCount[$realm];
+        foreach ($realmSessionTotalTime as $groupKey => $totalSessionTime) {
+            $count = $realmSessionCount[$groupKey];
             $averageSessionTime = $count > 0 ? $totalSessionTime / $count : 0;
             $result[] = [
-                'realm' => $realm,
+                'group' => $groupKey,
                 'totalSessionTime' => $totalSessionTime,
                 'averageSessionTime' => $averageSessionTime
             ];
         }
 
-        return $result;
+        return $this->generateDatasetsSessionTime($result);
     }
 
     /**
@@ -2145,6 +2147,36 @@ class AdminController extends AbstractController
             'backgroundColor' => $colors,
             'borderColor' => "rgb(78, 164, 116)",
             'borderRadius' => "15",
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+    /**
+     * Generate datasets for session time
+     */
+    private function generateDatasetsSessionTime(array $sessionTime): array
+    {
+        $labels = array_column($sessionTime, 'group');
+        $totalTimes = array_column($sessionTime, 'totalSessionTime');
+        $averageTimes = array_column($sessionTime, 'averageSessionTime');
+
+        $datasets = [
+            [
+                'label' => 'Total Session Time',
+                'data' => $totalTimes,
+                'backgroundColor' => '#7DB928',
+                'borderRadius' => "15",
+            ],
+            [
+                'label' => 'Average Session Time',
+                'data' => $averageTimes,
+                'backgroundColor' => '#3498DB',
+                'borderRadius' => "15",
+            ]
         ];
 
         return [
