@@ -4,9 +4,7 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
-use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -15,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Component\Validator\Constraints\Length;
+
 class CustomType extends AbstractType
 {
     private GetSettings $getSettings;
@@ -34,7 +34,15 @@ class CustomType extends AbstractType
             'WELCOME_TEXT' => TextareaType::class,
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => TextType::class,
-            'ADDITIONAL_LABEL' => TextType::class,
+            'ADDITIONAL_LABEL' => [
+                'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 255,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
+            ],
             'CONTACT_EMAIL' => [
                 'type' => EmailType::class,
                 'constraints' => [
@@ -59,6 +67,7 @@ class CustomType extends AbstractType
                 // Handle the case where config is an array (like CONTACT_EMAIL)
                 $formFieldType = $config['type'];
                 $formFieldOptions['constraints'] = $config['constraints'];
+                $formFieldOptions['required'] = false;
                 // If the field is not an image, get the corresponding Setting entity and set its value
                 foreach ($options['settings'] as $setting) {
                     if ($setting->getName() === $settingName) {
