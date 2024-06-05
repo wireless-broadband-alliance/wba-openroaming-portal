@@ -1875,24 +1875,29 @@ class AdminController extends AbstractController
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        // Fetch the oldest and most recent event dates if startDate or endDate are not provided
+        // Fetch the last week's data if startDate or endDate are not provided
         if (!$startDate || !$endDate) {
-            $oldestEvent = $this->radiusAuthsRepository->findOneBy(
-                ['reply' => ['Access-Accept', 'Access-Reject']],
-                ['authdate' => 'ASC']
-            );
+            if (!$startDate && !$endDate) {
+                $endDate = new DateTime();
+                $startDate = (clone $endDate)->modify('-1 week');
+            } else {
+                $oldestEvent = $this->radiusAuthsRepository->findOneBy(
+                    ['reply' => ['Access-Accept', 'Access-Reject']],
+                    ['authdate' => 'ASC']
+                );
 
-            $mostRecentEvent = $this->radiusAuthsRepository->findOneBy(
-                ['reply' => ['Access-Accept', 'Access-Reject']],
-                ['authdate' => 'DESC']
-            );
+                $mostRecentEvent = $this->radiusAuthsRepository->findOneBy(
+                    ['reply' => ['Access-Accept', 'Access-Reject']],
+                    ['authdate' => 'DESC']
+                );
 
-            if ($oldestEvent) {
-                $startDate = new DateTime($oldestEvent->getAuthdate());
-            }
+                if ($oldestEvent) {
+                    $startDate = new DateTime($oldestEvent->getAuthdate());
+                }
 
-            if ($mostRecentEvent) {
-                $endDate = new DateTime($mostRecentEvent->getAuthdate());
+                if ($mostRecentEvent) {
+                    $endDate = new DateTime($mostRecentEvent->getAuthdate());
+                }
             }
         }
 
@@ -1903,7 +1908,9 @@ class AdminController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         // Determine the appropriate time granularity
-        if ($interval->days > 90) {
+        if ($interval->days > 365) {
+            $granularity = 'year';
+        } else if ($interval->days > 90) {
             $granularity = 'month';
         } elseif ($interval->days > 30) {
             $granularity = 'week';
@@ -1916,47 +1923,39 @@ class AdminController extends AbstractController
             'Rejected' => [],
         ];
 
-        $uniqueTimestamps = [];
-
         // Group the events based on the determined granularity
         foreach ($events as $event) {
             // Convert event date string to DateTime object
             $eventDateTime = new DateTime($event->getAuthdate());
 
-            // Get the second part of the date
-            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
+            // Determine the time period based on granularity
+            switch ($granularity) {
+                case 'year':
+                    $period = $eventDateTime->format('Y');
+                    break;
+                case 'month':
+                    $period = $eventDateTime->format('Y-m');
+                    break;
+                case 'week':
+                    $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
+                    break;
+                case 'day':
+                default:
+                    $period = $eventDateTime->format('Y-m-d');
+                    break;
+            }
 
-            // Check if this second has already been counted
-            if (!in_array($timestamp, $uniqueTimestamps)) {
-                // Determine the time period based on granularity
-                switch ($granularity) {
-                    case 'month':
-                        $period = $eventDateTime->format('Y-m');
-                        break;
-                    case 'week':
-                        $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
-                        break;
-                    case 'day':
-                    default:
-                        $period = $eventDateTime->format('Y-m-d');
-                        break;
-                }
+            // Initialize the period if not already set
+            if (!isset($authsCounts['Accepted'][$period])) {
+                $authsCounts['Accepted'][$period] = 0;
+                $authsCounts['Rejected'][$period] = 0;
+            }
 
-                // Initialize the period if not already set
-                if (!isset($authsCounts['Accepted'][$period])) {
-                    $authsCounts['Accepted'][$period] = 0;
-                    $authsCounts['Rejected'][$period] = 0;
-                }
-
-                $reply = $event->getReply();
-                if ($reply === 'Access-Accept') {
-                    $authsCounts['Accepted'][$period]++;
-                } elseif ($reply === 'Access-Reject') {
-                    $authsCounts['Rejected'][$period]++;
-                }
-
-                // Add the timestamp to the list of counted timestamps
-                $uniqueTimestamps[] = $timestamp;
+            $reply = $event->getReply();
+            if ($reply === 'Access-Accept') {
+                $authsCounts['Accepted'][$period]++;
+            } elseif ($reply === 'Access-Reject') {
+                $authsCounts['Rejected'][$period]++;
             }
         }
 
@@ -2185,44 +2184,32 @@ class AdminController extends AbstractController
         ];
     }
 
-    private function generateDatasetsAuths(array $counts): array
+    /**
+     * Generate datasets for authentication attempts
+     */
+    private function generateDatasetsAuths(array $authsCounts): array
     {
-        // Ensure the 'Accepted' and 'Rejected' keys exist in the counts array
-        $acceptedCounts = $counts['Accepted'] ?? [];
-        $rejectedCounts = $counts['Rejected'] ?? [];
+        $labels = array_keys($authsCounts['Accepted']);
+        $acceptedCounts = array_values($authsCounts['Accepted']);
+        $rejectedCounts = array_values($authsCounts['Rejected']);
 
-        // Extract dates from both accepted and rejected counts
-        $dates = array_unique(array_merge(array_keys($acceptedCounts), array_keys($rejectedCounts)));
-        sort($dates);
-
-        $acceptedData = [];
-        $rejectedData = [];
-
-        // Populate the data arrays, ensuring each date has a value
-        foreach ($dates as $date) {
-            $acceptedData[] = $acceptedCounts[$date] ?? 0;
-            $rejectedData[] = $rejectedCounts[$date] ?? 0;
-        }
-
-        // Create datasets
         $datasets = [
             [
                 'label' => 'Accepted',
-                'data' => $acceptedData,
+                'data' => $acceptedCounts,
                 'backgroundColor' => '#7DB928',
-                'borderRadius' => '15',
+                'borderRadius' => "15",
             ],
             [
                 'label' => 'Rejected',
-                'data' => $rejectedData,
+                'data' => $rejectedCounts,
                 'backgroundColor' => '#FE4068',
-                'borderRadius' => '15',
+                'borderRadius' => "15",
             ]
         ];
 
-        // Return the data in the expected format
         return [
-            'labels' => $dates,
+            'labels' => $labels,
             'datasets' => $datasets,
         ];
     }
