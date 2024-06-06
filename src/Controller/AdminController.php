@@ -1449,8 +1449,15 @@ class AdminController extends AbstractController
         );
 
         // Extract the average time
-        $totalTimes = $fetchChartSessionTotalFreeradius['datasets'][0]['data'];
+        $totalTimes = $fetchChartSessionTotalFreeradius['rawData'];
         $totalTimeSeconds = array_sum($totalTimes);
+
+        // Convert the total average time to human-readable format
+        $totalTimeReadable = sprintf(
+            '%dh %dm',
+            floor($totalTimeSeconds / 3600),
+            floor(($totalTimeSeconds % 3600) / 60)
+        );
 
         // Sum all the traffic from the Accounting table
         $totalTraffic = [
@@ -1492,7 +1499,7 @@ class AdminController extends AbstractController
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
             'sessionTimeAverage' => $totalAverageTimeReadable,
-            'totalTime' => 'null',
+            'totalTime' => $totalTimeReadable,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
@@ -2122,20 +2129,6 @@ class AdminController extends AbstractController
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
-        // Calculate the time difference between start and end dates
-        $interval = $startDate->diff($endDate);
-
-        // Determine the appropriate time granularity
-        if ($interval->days > 365) {
-            $granularity = 'year';
-        } else if ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
-        } else {
-            $granularity = 'day';
-        }
-
         $sessionAverageTimes = [];
 
         // Group the events based on the determined granularity
@@ -2173,19 +2166,6 @@ class AdminController extends AbstractController
         list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
-        // Calculate the time difference between start and end dates
-        $interval = $startDate->diff($endDate);
-
-        // Determine the appropriate time granularity
-        if ($interval->days > 365) {
-            $granularity = 'year';
-        } else if ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
-        } else {
-            $granularity = 'day';
-        }
 
         $sessionTotalTimes = [];
 
@@ -2209,7 +2189,7 @@ class AdminController extends AbstractController
                 'totalSessionTime' => $totalSessionTime
             ];
         }
-        dd($result);
+
         return $this->generateDatasetsSessionTotal($result);
     }
 
