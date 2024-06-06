@@ -1430,7 +1430,6 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-
         // Extract the connection attempts
         $authCounts = [
             'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data']),
@@ -1448,11 +1447,11 @@ class AdminController extends AbstractController
             floor(($totalAverageTimeSeconds % 3600) / 60)
         );
 
-        // Extract the average time
-        $totalTimes = $fetchChartSessionTotalFreeradius['rawData'];
+        // Extract the total time
+        $totalTimes = $fetchChartSessionTotalFreeradius['datasets'][0]['data'];
         $totalTimeSeconds = array_sum($totalTimes);
 
-        // Convert the total average time to human-readable format
+        // Convert the total time to human-readable format
         $totalTimeReadable = sprintf(
             '%dh %dm',
             floor($totalTimeSeconds / 3600),
@@ -1502,6 +1501,7 @@ class AdminController extends AbstractController
             'totalTime' => $totalTimeReadable,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
+            'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
@@ -2272,8 +2272,7 @@ class AdminController extends AbstractController
     {
         $labels = array_column($sessionTime, 'group');
         $totalTimes = array_map(function ($item) {
-            $seconds = $item['totalSessionTime'];
-            return $seconds;
+            return $item['totalSessionTime'];
         }, $sessionTime);
 
         $totalTimesReadable = array_map(function ($seconds) {
@@ -2285,7 +2284,7 @@ class AdminController extends AbstractController
         $datasets = [
             [
                 'label' => 'Total Session Time',
-                'data' => $totalTimesReadable,
+                'data' => $totalTimes,
                 'backgroundColor' => '#3498DB',
                 'borderRadius' => "15",
                 'tooltips' => $totalTimesReadable,
@@ -2295,7 +2294,6 @@ class AdminController extends AbstractController
         return [
             'labels' => $labels,
             'datasets' => $datasets,
-            'rawData' => $totalTimes, // Include raw numerical data
         ];
     }
 
