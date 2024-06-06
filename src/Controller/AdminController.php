@@ -2187,8 +2187,8 @@ class AdminController extends AbstractController
         $datasets = [
             [
                 'label' => 'Average Session Time',
-                'data' => $averageTimes, // Numerical values for plotting
-                'backgroundColor' => '#3498DB',
+                'data' => $averageTimes,
+                'backgroundColor' => '#7DB928',
                 'borderRadius' => "15",
                 'tooltips' => $averageTimesReadable, // Human-readable values for tooltips
             ]
