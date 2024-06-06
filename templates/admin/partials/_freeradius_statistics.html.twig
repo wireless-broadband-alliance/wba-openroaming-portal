@@ -29,7 +29,7 @@
     {# Average Session Time #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
         <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
-            <h1 class="text-lg font-medium">Total Session Time</h1>
+            <h1 class="text-lg font-medium">Average Session Time</h1>
             <span class="text-base text-gray-500">(in Hours)</span>
         </div>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
@@ -51,7 +51,7 @@
     {# Total Session Time #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
         <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
-            <h1 class="text-lg font-medium">Average Session Time</h1>
+            <h1 class="text-lg font-medium">Total Session Time</h1>
             <span class="text-base text-gray-500">(in Hours)</span>
         </div>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
@@ -60,7 +60,7 @@
                     Total of
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2">{{ sessionTimeAverage }}</span>
+                    <span class="w-auto h-6 mb-1 px-2">{{ totalTime }}</span>
                 </div>
             </a>
         </div>
@@ -184,8 +184,8 @@
     </div>
 
     {# No need data filter card - Total of current authentications #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col md:justify-center md:items-center gap-4 shadow">
-        <h1 class="text-lg font-medium text-left ">Total of Current Authentications</h1>
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
+        <h1 class="text-lg font-medium text-left">Total of Current Authentications</h1>
         {% if totalCurrentAuths >= 1 %}
             {% set sizeClass = 'w-24 h-24' %}
             {% if totalCurrentAuths >= 10000 %}

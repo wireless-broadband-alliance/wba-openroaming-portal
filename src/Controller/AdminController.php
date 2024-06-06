@@ -1429,6 +1429,7 @@ class AdminController extends AbstractController
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
 
         // Extract the connection attempts
         $authCounts = [
@@ -1446,6 +1447,10 @@ class AdminController extends AbstractController
             floor($totalAverageTimeSeconds / 3600),
             floor(($totalAverageTimeSeconds % 3600) / 60)
         );
+
+        // Extract the average time
+        $totalTimes = $fetchChartSessionTotalFreeradius['datasets'][0]['data'];
+        $totalTimeSeconds = array_sum($totalTimes);
 
         // Sum all the traffic from the Accounting table
         $totalTraffic = [
@@ -1487,6 +1492,7 @@ class AdminController extends AbstractController
             'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
             'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
             'sessionTimeAverage' => $totalAverageTimeReadable,
+            'totalTime' => 'null',
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
@@ -2062,9 +2068,14 @@ class AdminController extends AbstractController
     }
 
     /**
-     * Fetch data related to session time (average) on the freeradius database
+     * Determine date range and granularity
+     *
+     * @param ?DateTime $startDate
+     * @param ?DateTime $endDate
+     * @param object $repository
+     * @return array
      */
-    private function fetchChartSessionAverageFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
     {
         // Fetch the last week's data if startDate or endDate are not provided
         if (!$startDate || !$endDate) {
@@ -2072,8 +2083,8 @@ class AdminController extends AbstractController
                 $endDate = new DateTime();
                 $startDate = (clone $endDate)->modify('-1 week');
             } else {
-                $oldestEvent = $this->radiusAccountingRepository->findBy([], ['acctStartTime' => 'ASC'], 1);
-                $mostRecentEvent = $this->radiusAccountingRepository->findBy([], ['acctStopTime' => 'DESC'], 1);
+                $oldestEvent = $repository->findBy([], ['acctStartTime' => 'ASC'], 1);
+                $mostRecentEvent = $repository->findBy([], ['acctStopTime' => 'DESC'], 1);
 
                 if ($oldestEvent) {
                     $startDate = $oldestEvent[0]->getAcctStartTime();
@@ -2084,6 +2095,30 @@ class AdminController extends AbstractController
                 }
             }
         }
+
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 365) {
+            $granularity = 'year';
+        } elseif ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
+
+        return [$startDate, $endDate, $granularity];
+    }
+
+    /**
+     * Fetch data related to session time (average) on the freeradius database
+     */
+    private function fetchChartSessionAverageFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
@@ -2128,6 +2163,56 @@ class AdminController extends AbstractController
 
         return $this->generateDatasetsSessionAverage($result);
     }
+
+
+    /**
+     * Fetch data related to session time (total) on the freeradius database
+     */
+    private function fetchChartSessionTotalFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 365) {
+            $granularity = 'year';
+        } else if ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
+
+        $sessionTotalTimes = [];
+
+        // Group the events based on the determined granularity
+        foreach ($events as $event) {
+            $sessionTime = $event['acctSessionTime'];
+            $date = $event['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+
+            if (!isset($sessionTotalTimes[$groupKey])) {
+                $sessionTotalTimes[$groupKey] = 0;
+            }
+
+            $sessionTotalTimes[$groupKey] += $sessionTime;
+        }
+
+        $result = [];
+        foreach ($sessionTotalTimes as $groupKey => $totalSessionTime) {
+            $result[] = [
+                'group' => $groupKey,
+                'totalSessionTime' => $totalSessionTime
+            ];
+        }
+        dd($result);
+        return $this->generateDatasetsSessionTotal($result);
+    }
+
 
     /**
      * Generated Datasets for charts graphics
@@ -2197,6 +2282,40 @@ class AdminController extends AbstractController
         return [
             'labels' => $labels,
             'datasets' => $datasets,
+        ];
+    }
+
+    /**
+     * Generate datasets for session total time
+     */
+    private function generateDatasetsSessionTotal(array $sessionTime): array
+    {
+        $labels = array_column($sessionTime, 'group');
+        $totalTimes = array_map(function ($item) {
+            $seconds = $item['totalSessionTime'];
+            return $seconds;
+        }, $sessionTime);
+
+        $totalTimesReadable = array_map(function ($seconds) {
+            $hours = floor($seconds / 3600);
+            $minutes = floor(($seconds % 3600) / 60);
+            return sprintf('%dh %dm', $hours, $minutes);
+        }, $totalTimes);
+
+        $datasets = [
+            [
+                'label' => 'Total Session Time',
+                'data' => $totalTimesReadable,
+                'backgroundColor' => '#3498DB',
+                'borderRadius' => "15",
+                'tooltips' => $totalTimesReadable,
+            ]
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+            'rawData' => $totalTimes, // Include raw numerical data
         ];
     }
 
