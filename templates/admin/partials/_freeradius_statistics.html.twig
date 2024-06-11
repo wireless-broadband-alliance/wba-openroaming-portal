@@ -158,20 +158,20 @@
                         </tr>
                     {% else %}
                         {% for index, label in realmsUsage %}
-                            <tr name="{{ label }}"
-                                onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ datasetsRealmList[0]['backgroundColor'][index] }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
+                            <tr name="{{ index }}"
+                                onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ label }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
                                 onmouseout="this.childNodes[1].childNodes[1].style.backgroundColor='#f1f8f4'; this.childNodes[1].childNodes[1].style.color='#594B60';"
                             >
                                 <td class="w-full px-8 py-2">
                                     <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
                         <span>
-                            {{ datasetsRealmList[0]['data'][index] }}
+                            {{ label }}
                         </span>
                                     </div>
                                 </td>
                                 <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200">
                                     <div class="text-left text-base sm:text-lg">
-                                        {{ label }}
+                                        {{ index }}
                                     </div>
                                 </td>
                             </tr>

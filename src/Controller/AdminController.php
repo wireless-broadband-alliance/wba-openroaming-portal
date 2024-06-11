@@ -1472,8 +1472,18 @@ class AdminController extends AbstractController
         $totalTraffic['total_input'] = number_format($totalTraffic['total_input'] / (1024 * 1024 * 1024), 1);
         $totalTraffic['total_output'] = number_format($totalTraffic['total_output'] / (1024 * 1024 * 1024), 1);
 
-        // Extract all realms names
-        $realmsNames = $fetchChartRealmsFreeradius['labels'];
+        // Extract all realms names and usage
+        $realmsUsage = [];
+        foreach ($fetchChartRealmsFreeradius as $content) {
+            $realm = $content['realm'];
+            $count = $content['count'];
+
+            if (isset($realmsUsage[$realm])) {
+                $realmsUsage[$realm] += $count;
+            } else {
+                $realmsUsage[$realm] = $count;
+            }
+        }
 
         // Sum all the current authentication
         $totalCurrentAuths = 0;
@@ -1485,12 +1495,10 @@ class AdminController extends AbstractController
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'realmsUsage' => $realmsNames,
+            'realmsUsage' => $realmsUsage,
             'authCounts' => $authCounts,
             'totalCurrentAuths' => $totalCurrentAuths,
             'totalTrafficFreeradius' => $totalTraffic,
-            'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
-            'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
             'sessionTimeAverage' => $totalAverageTimeReadable,
             'totalTime' => $totalTimeReadable,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
@@ -1979,40 +1987,50 @@ class AdminController extends AbstractController
 
     /**
      * Fetch data related to realms usage on the freeradius database
-     */
-    /**
+     *
      * @throws Exception
      */
     private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        // Fetch all data with date filtering
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
         $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
 
-        // Initialize an array to store the counts of each realm
         $realmCounts = [];
 
-        // Count the occurrences of each realm
+        // Group the realm usage data based on the determined granularity
         foreach ($events as $event) {
             $realm = $event['realm'];
+            $date = $event['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
 
-            // Skip if realm is null or empty
             if (!$realm) {
                 continue;
             }
 
-            // Increment the count for the realm
-            if (!isset($realmCounts[$realm])) {
-                $realmCounts[$realm] = 1;
-            } else {
-                $realmCounts[$realm]++;
+            if (!isset($realmCounts[$groupKey])) {
+                $realmCounts[$groupKey] = [];
+            }
+
+            if (!isset($realmCounts[$groupKey][$realm])) {
+                $realmCounts[$groupKey][$realm] = 0;
+            }
+
+            $realmCounts[$groupKey][$realm]++;
+        }
+
+        $result = [];
+        foreach ($realmCounts as $groupKey => $realms) {
+            foreach ($realms as $realm => $count) {
+                $result[] = [
+                    'group' => $groupKey,
+                    'realm' => $realm,
+                    'count' => $count
+                ];
             }
         }
 
-        // Sort the realm counts in descending order
-        arsort($realmCounts);
-
-        // Return the counts of each realm
-        return $this->generateDatasetsRealmsCounting($realmCounts);
+        return $result;
     }
 
     /**
