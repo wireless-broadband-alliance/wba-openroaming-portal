@@ -1465,20 +1465,12 @@ class AdminController extends AbstractController
             'total_input' => 0,
             'total_output' => 0,
         ];
-        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
-            // Check if the dataset is for input or output
-            if ($dataset['label'] === 'Uploaded') {
-                // Sum the data for total input
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
-                }
-            } elseif ($dataset['label'] === 'Downloaded') {
-                // Sum the data for total output
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
-                }
-            }
+        foreach ($fetchChartTrafficFreeradius as $content) {
+            $totalTraffic['total_input'] += $content['total_input'];
+            $totalTraffic['total_output'] += $content['total_output'];
         }
+        $totalTraffic['total_input'] = number_format($totalTraffic['total_input'] / (1024 * 1024 * 1024), 1);
+        $totalTraffic['total_output'] = number_format($totalTraffic['total_output'] / (1024 * 1024 * 1024), 1);
 
         // Extract all realms names
         $realmsNames = $fetchChartRealmsFreeradius['labels'];
@@ -2048,32 +2040,48 @@ class AdminController extends AbstractController
 
     /**
      * Fetch data related to traffic passed on the freeradius database
-     */
-    /**
      * @throws Exception
      */
     private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        // Get the traffic using the findTrafficPerRealm query
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
-
-        // Convert the results into the expected format
         $realmTraffic = [];
-        foreach ($trafficData as $data) {
-            $realm = $data['realm'];
-            // Conver the data to GigaBytes
-            $totalInput = number_format($data['total_input'] / (1024 * 1024 * 1024), 1);
-            $totalOutput = number_format($data['total_output'] / (1024 * 1024 * 1024), 1);
 
-            // Sum the total input and output for each realm
-            $realmTraffic[$realm] = [
-                'total_input' => $totalInput,
-                'total_output' => $totalOutput,
-            ];
+        // Group the traffic data based on the determined granularity
+        foreach ($trafficData as $content) {
+            $realm = $content['realm'];
+            $totalInput = $content['total_input'];
+            $totalOutput = $content['total_output'];
+            $date = $content['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+
+            if (!isset($realmTraffic[$realm])) {
+                $realmTraffic[$realm] = [];
+            }
+
+            if (!isset($realmTraffic[$realm][$groupKey])) {
+                $realmTraffic[$realm][$groupKey] = ['total_input' => 0, 'total_output' => 0];
+            }
+
+            $realmTraffic[$realm][$groupKey]['total_input'] += $totalInput;
+            $realmTraffic[$realm][$groupKey]['total_output'] += $totalOutput;
         }
 
-        // Return the sums traffic of each realm
-        return $this->generateDatasetsRealmsTraffic($realmTraffic);
+        $result = [];
+        foreach ($realmTraffic as $realm => $groups) {
+            foreach ($groups as $groupKey => $traffic) {
+                $result[] = [
+                    'realm' => $realm,
+                    'group' => $groupKey,
+                    'total_input' => $traffic['total_input'],
+                    'total_output' => $traffic['total_output']
+                ];
+            }
+        }
+
+        return $result;
     }
 
 

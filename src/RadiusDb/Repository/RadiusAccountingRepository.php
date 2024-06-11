@@ -57,8 +57,8 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function findTrafficPerRealm(?DateTime $startDate, ?DateTime $endDate): Query
     {
         $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('ra.realm, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output')
-            ->groupBy('ra.realm');
+            ->select('ra.realm, ra.acctStartTime, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output')
+            ->groupBy('ra.realm, ra.acctStartTime');
 
         // Apply date filters if provided
         if ($startDate && $endDate) {
