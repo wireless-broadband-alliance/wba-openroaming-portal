@@ -2076,51 +2076,6 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsTraffic($realmTraffic);
     }
 
-    /**
-     * Determine date range and granularity
-     *
-     * @param ?DateTime $startDate
-     * @param ?DateTime $endDate
-     * @param object $repository
-     * @return array
-     */
-    private function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
-    {
-        // Fetch the last week's data if startDate or endDate are not provided
-        if (!$startDate || !$endDate) {
-            if (!$startDate && !$endDate) {
-                $endDate = new DateTime();
-                $startDate = (clone $endDate)->modify('-1 week');
-            } else {
-                $oldestEvent = $repository->findBy([], ['acctStartTime' => 'ASC'], 1);
-                $mostRecentEvent = $repository->findBy([], ['acctStopTime' => 'DESC'], 1);
-
-                if ($oldestEvent) {
-                    $startDate = $oldestEvent[0]->getAcctStartTime();
-                }
-
-                if ($mostRecentEvent) {
-                    $endDate = $mostRecentEvent[0]->getAcctStopTime();
-                }
-            }
-        }
-
-        // Calculate the time difference between start and end dates
-        $interval = $startDate->diff($endDate);
-
-        // Determine the appropriate time granularity
-        if ($interval->days > 365) {
-            $granularity = 'year';
-        } elseif ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
-        } else {
-            $granularity = 'day';
-        }
-
-        return [$startDate, $endDate, $granularity];
-    }
 
     /**
      * Fetch data related to session time (average) on the freeradius database
@@ -2204,9 +2159,29 @@ class AdminController extends AbstractController
         list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
 
         $events = $this->radiusAccountingRepository->findWifiTags($startDate, $endDate);
-        dd($events);
+        $wifiUsage = [];
 
-        return $this->generateDatasets($result);
+        // Group the events based on the wifi Standard
+        foreach ($events as $event) {
+            $connectInfo = $event['connectInfo_start'];
+            $wifiStandard = $this->mapConnectInfoToWifiStandard($connectInfo);
+
+            if (!isset($wifiUsage[$wifiStandard])) {
+                $wifiUsage[$wifiStandard] = 0;
+            }
+
+            $wifiUsage[$wifiStandard]++;
+        }
+
+        $result = [];
+        foreach ($wifiUsage as $standard => $count) {
+            $result[] = [
+                'standard' => $standard,
+                'count' => $count
+            ];
+        }
+
+        return $this->generateDatasetsWifiTags($result);
     }
 
     /**
@@ -2433,6 +2408,7 @@ class AdminController extends AbstractController
         return $color;
     }
 
+
     /**
      * Handles the Page Style on the dasboard
      */
@@ -2511,6 +2487,79 @@ class AdminController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
         ]);
+    }
+
+    /**
+     * Map connectInfo_start to Wifi standards
+     * @param string $connectInfo
+     * @return string
+     */
+    protected function mapConnectInfoToWifiStandard(string $connectInfo): string
+    {
+        switch (true) {
+            case strpos($connectInfo, '802.11be') !== false:
+                return 'Wifi 7';
+            case strpos($connectInfo, '802.11ax') !== false:
+                return 'Wifi 6';
+            case strpos($connectInfo, '802.11ac') !== false:
+                return 'Wifi 5';
+            case strpos($connectInfo, '802.11n') !== false:
+                return 'Wifi 4';
+            case strpos($connectInfo, '802.11g') !== false:
+                return 'Wifi 3';
+            case strpos($connectInfo, '802.11a') !== false:
+                return 'Wifi 2';
+            case strpos($connectInfo, '802.11b') !== false:
+                return 'Wifi 1';
+            default:
+                return 'Unknown';
+        }
+    }
+
+    /**
+     * Determine date range and granularity
+     *
+     * @param ?DateTime $startDate
+     * @param ?DateTime $endDate
+     * @param object $repository
+     * @return array
+     */
+    protected function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
+    {
+        // Fetch the last week's data if startDate or endDate are not provided
+        if (!$startDate || !$endDate) {
+            if (!$startDate && !$endDate) {
+                $endDate = new DateTime();
+                $startDate = (clone $endDate)->modify('-1 week');
+            } else {
+                $oldestEvent = $repository->findBy([], ['acctStartTime' => 'ASC'], 1);
+                $mostRecentEvent = $repository->findBy([], ['acctStopTime' => 'DESC'], 1);
+
+                if ($oldestEvent) {
+                    $startDate = $oldestEvent[0]->getAcctStartTime();
+                }
+
+                if ($mostRecentEvent) {
+                    $endDate = $mostRecentEvent[0]->getAcctStopTime();
+                }
+            }
+        }
+
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 365) {
+            $granularity = 'year';
+        } elseif ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
+
+        return [$startDate, $endDate, $granularity];
     }
 
     /**
