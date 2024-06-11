@@ -35,14 +35,14 @@ export default class extends Controller {
 					}
 				});
 
-				const sessionTimeChart = new Chart(sessionTime, {
+				const averageTimeChart = new Chart(sessionTime, {
 					type: 'bar',
 					data: sessionTimeData,
 					options: {
 						plugins: {
 							tooltip: {
 								callbacks: {
-									label: function(context) {
+									label: function (context) {
 										const index = context.dataIndex;
 										const dataset = context.dataset;
 										const value = dataset.data[index];
@@ -59,8 +59,9 @@ export default class extends Controller {
 							y: {
 								ticks: {
 									precision: 0
-								}
-							}
+								},
+								display: false
+							},
 						}
 					}
 				});
@@ -72,7 +73,7 @@ export default class extends Controller {
 						plugins: {
 							tooltip: {
 								callbacks: {
-									label: function(context) {
+									label: function (context) {
 										const index = context.dataIndex;
 										const dataset = context.dataset;
 										const value = dataset.data[index];
@@ -89,8 +90,9 @@ export default class extends Controller {
 							y: {
 								ticks: {
 									precision: 0
-								}
-							}
+								},
+								display: false
+							},
 						}
 					}
 				});
