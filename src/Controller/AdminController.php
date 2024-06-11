@@ -1430,6 +1430,8 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+
         // Extract the connection attempts
         $authCounts = [
             'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data']),
@@ -2195,6 +2197,19 @@ class AdminController extends AbstractController
 
 
     /**
+     * Fetch data related to wifi tag usage on the freeradius database
+     */
+    private function fetchChartWifiTags(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findWifiTags($startDate, $endDate);
+        dd($events);
+
+        return $this->generateDatasets($result);
+    }
+
+    /**
      * Generated Datasets for charts graphics
      */
     private function generateDatasets(array $counts): array
@@ -2285,7 +2300,7 @@ class AdminController extends AbstractController
             [
                 'label' => 'Total Session Time',
                 'data' => $totalTimes,
-                'backgroundColor' => '#3498DB',
+                'backgroundColor' => '#7DB928',
                 'borderRadius' => "15",
                 'tooltips' => $totalTimesReadable,
             ]

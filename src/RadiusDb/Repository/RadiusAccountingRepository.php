@@ -149,4 +149,38 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     * @return array
+     */
+    public function findWifiTags(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        $queryBuilder = $this->createQueryBuilder('ra')
+            ->select('DISTINCT ra.realm, ra.connectInfo_start, ra.acctStartTime, ra.acctStopTime');
+
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        } elseif ($startDate) {
+            // If only start date is provided, search from start date to now
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->setParameter('startDate', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, search from end date to the past
+            $queryBuilder
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('endDate', $endDate);
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult();
+    }
 }
