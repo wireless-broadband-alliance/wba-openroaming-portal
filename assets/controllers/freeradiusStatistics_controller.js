@@ -29,8 +29,9 @@ export default class extends Controller {
 							y: {
 								ticks: {
 									precision: 0
-								}
-							}
+								},
+								display: false
+							},
 						}
 					}
 				});
