@@ -1504,6 +1504,7 @@ class AdminController extends AbstractController
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
             'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
             'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
+            'wifiTagsJson' => json_encode($fetchChartWifiTags, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
@@ -2222,18 +2223,11 @@ class AdminController extends AbstractController
         $data = [];
         $colors = [];
 
-        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
-            $maxValue = max($dataValues);
-            $minOpacity = 0.4; // Minimum opacity to ensure visibility
-            $maxOpacity = 1; // Maximum opacity for the most vibrant color
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($dataValues);
 
-            foreach ($labels as $index => $type) {
-                // Calculate the brightness relative to the max count, scaled to the opacity range
-                $opacity = $minOpacity + ($dataValues[$index] / $maxValue) * ($maxOpacity - $minOpacity);
-                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
-                $data[] = $dataValues[$index];
-                $colors[] = "rgba(125, 185, 40, {$opacity})"; // Generate a different color for each data point
-            }
+        foreach ($labels as $index => $type) {
+            $data[] = $dataValues[$index];
         }
 
         $datasets[] = [
@@ -2265,11 +2259,14 @@ class AdminController extends AbstractController
             return sprintf('%dh %dm', $hours, $minutes);
         }, $averageTimes);
 
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($averageTimes);
+
         $datasets = [
             [
                 'label' => 'Average Session Time',
                 'data' => $averageTimes,
-                'backgroundColor' => '#7DB928',
+                'backgroundColor' => $colors,
                 'borderRadius' => "15",
                 'tooltips' => $averageTimesReadable, // Human-readable values for tooltips
             ]
@@ -2297,11 +2294,14 @@ class AdminController extends AbstractController
             return sprintf('%dh %dm', $hours, $minutes);
         }, $totalTimes);
 
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($totalTimes);
+
         $datasets = [
             [
                 'label' => 'Total Session Time',
                 'data' => $totalTimes,
-                'backgroundColor' => '#7DB928',
+                'backgroundColor' => $colors,
                 'borderRadius' => "15",
                 'tooltips' => $totalTimesReadable,
             ]
@@ -2310,6 +2310,30 @@ class AdminController extends AbstractController
         return [
             'labels' => $labels,
             'datasets' => $datasets,
+        ];
+    }
+
+    /**
+     * Generate datasets for Wi-Fi tags
+     */
+    private function generateDatasetsWifiTags(array $wifiUsage): array
+    {
+        $labels = array_column($wifiUsage, 'standard');
+        $counts = array_column($wifiUsage, 'count');
+
+        $datasets = [
+            [
+                'label' => 'Wi-Fi Usage',
+                'data' => $counts,
+                'backgroundColor' => '#3498DB',
+                'borderRadius' => "15"
+            ]
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+            'rawData' => $counts // Include raw numerical data
         ];
     }
 
@@ -2386,14 +2410,13 @@ class AdminController extends AbstractController
         $dataValuesOutput = [];
         $colors = [];
 
-        // Assign a specific color to the first realm
         $colors[] = '#7DB928';
 
         foreach ($trafficData as $realm => $traffic) {
             $labels[] = $realm;
             $dataValuesInput[] = $traffic['total_input'];
             $dataValuesOutput[] = $traffic['total_output'];
-            $colors[] = $this->generateColorFromRealmName($realm); // Generate color based on realm name
+            $colors[] = $this->generateColorFromRealmName($realm);
         }
 
         $datasets[] = [
@@ -2524,19 +2547,19 @@ class AdminController extends AbstractController
     {
         switch (true) {
             case strpos($connectInfo, '802.11be') !== false:
-                return 'Wifi 7';
+                return 'Wi-fi 7';
             case strpos($connectInfo, '802.11ax') !== false:
-                return 'Wifi 6';
+                return 'Wi-fi 6';
             case strpos($connectInfo, '802.11ac') !== false:
-                return 'Wifi 5';
+                return 'Wi-fi 5';
             case strpos($connectInfo, '802.11n') !== false:
-                return 'Wifi 4';
+                return 'Wi-fi 4';
             case strpos($connectInfo, '802.11g') !== false:
-                return 'Wifi 3';
+                return 'Wi-fi 3';
             case strpos($connectInfo, '802.11a') !== false:
-                return 'Wifi 2';
+                return 'Wi-fi 2';
             case strpos($connectInfo, '802.11b') !== false:
-                return 'Wifi 1';
+                return 'Wi-fi 1';
             default:
                 return 'Unknown';
         }
@@ -2586,6 +2609,33 @@ class AdminController extends AbstractController
         }
 
         return [$startDate, $endDate, $granularity];
+    }
+
+    /**
+     * Generate colors with varying opacities based on data values
+     *
+     * @param array $values
+     * @param float $minOpacity
+     * @param float $maxOpacity
+     * @return array
+     */
+    private function generateColorsWithOpacity(array $values, float $minOpacity = 0.4, float $maxOpacity = 1): array
+    {
+        if (!empty(array_filter($values, static fn($value) => $value !== 0))) {
+            $maxValue = max($values);
+            $colors = [];
+
+            foreach ($values as $value) {
+                // Calculate the opacity relative to the max value, scaled to the opacity range
+                $opacity = $minOpacity + ($value / $maxValue) * ($maxOpacity - $minOpacity);
+                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
+                $colors[] = "rgba(125, 185, 40, {$opacity})";
+            }
+
+            return $colors;
+        } else {
+            return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
+        }
     }
 
     /**

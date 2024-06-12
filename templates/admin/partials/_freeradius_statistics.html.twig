@@ -185,6 +185,17 @@
 
 </div>
 <div class="mt-10 grid gap-8 xl:grid-cols-3" data-controller="freeradiusStatistics">
+    {# Wifi Tags Usage #}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
+        <div class="flex flex-row justify-start sm:pt-2 pb-6 font-medium text-lg text-left">
+            <h1 class="text-lg font-medium">Most Used Wi-Fi Standards</h1>
+        </div>
+        <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="wifiTagsChart" data-wifiTags
+                    data-chart-data="{{ wifiTagsJson }}"></canvas>
+        </div>
+    </div>
+
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
         <h1 class="text-lg font-medium text-left">Total of Current Authentications</h1>
         <div class="flex flex-col items-center">
@@ -207,7 +218,7 @@
                     No Data Available
                 </div>
             {% endif %}
-            <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-4" role="alert">
+            <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-8" role="alert">
                 <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
                 <span class="font-medium">This card is independent of the date filtering.</span>
             </div>

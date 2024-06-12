@@ -8,12 +8,14 @@ export default class extends Controller {
 			const authenticationAttempts = document.getElementById('authAttemptsChart');
 			const sessionTime = document.getElementById('sessionTimeChart');
 			const totalTime = document.getElementById('totalTimeChart');
+			const wifiTags = document.getElementById('wifiTagsChart');
 
-			if (authenticationAttempts && sessionTime && totalTime) {
+			if (authenticationAttempts && sessionTime && totalTime && wifiTags) {
 				// Get the chart data from the data attributes on the elements
 				const authAttemptsData = JSON.parse(authenticationAttempts.getAttribute('data-chart-data'));
 				const sessionTimeData = JSON.parse(sessionTime.getAttribute('data-chart-data'));
 				const totalTimeData = JSON.parse(totalTime.getAttribute('data-chart-data'));
+				const wifiTagsData = JSON.parse(wifiTags.getAttribute('data-chart-data'));
 
 				// Create the Chart.js charts with the fetched data about the freeradius content
 				const authAttemptsChart = new Chart(authenticationAttempts, {
@@ -93,6 +95,26 @@ export default class extends Controller {
 									precision: 0
 								},
 								display: false
+							},
+						}
+					}
+				});
+
+
+				const wifiTagsChart = new Chart(wifiTags, {
+					type: 'bar',
+					data: wifiTagsData,
+					options: {
+						plugins: {
+							legend: {
+								display: false,
+							},
+						},
+						scales: {
+							y: {
+								ticks: {
+									precision: 0
+								},
 							},
 						}
 					}
