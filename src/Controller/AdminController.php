@@ -2321,11 +2321,14 @@ class AdminController extends AbstractController
         $labels = array_column($wifiUsage, 'standard');
         $counts = array_column($wifiUsage, 'count');
 
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($counts);
+
         $datasets = [
             [
                 'label' => 'Wi-Fi Usage',
                 'data' => $counts,
-                'backgroundColor' => '#3498DB',
+                'backgroundColor' => $colors,
                 'borderRadius' => "15"
             ]
         ];
