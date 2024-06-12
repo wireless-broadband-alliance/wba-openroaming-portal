@@ -2232,14 +2232,14 @@ class AdminController extends AbstractController
                 $opacity = $minOpacity + ($dataValues[$index] / $maxValue) * ($maxOpacity - $minOpacity);
                 $opacity = round($opacity, 2); // Round to 2 decimal places for better control
                 $data[] = $dataValues[$index];
-                $colors[] = "rgba(78, 164, 116, {$opacity})"; // Generate a different color for each data point
+                $colors[] = "rgba(125, 185, 40, {$opacity})"; // Generate a different color for each data point
             }
         }
 
         $datasets[] = [
             'data' => $data,
             'backgroundColor' => $colors,
-            'borderColor' => "rgb(78, 164, 116)",
+            'borderColor' => "rgb(125, 185, 40)",
             'borderRadius' => "15",
         ];
 

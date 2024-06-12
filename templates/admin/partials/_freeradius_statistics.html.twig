@@ -1,4 +1,4 @@
-<div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="freeradiusStatistics">
+<div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
     {# Authentications Attempts #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
@@ -71,7 +71,7 @@
     </div>
 </div>
 
-<div class="mt-10 grid gap-8 xl:grid-cols-3" data-controller="freeradiusStatistics">
+<div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
     {# Total of Traffic #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow">
         <div class="flex flex-row justify-between sm:pt-2 font-medium">
@@ -131,7 +131,7 @@
     </div>
 
     {# Realm Usage #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow">
+    <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Realm Usage</h1>
         <div class="flex flex-col gap-6 animate-fadeIn">
             <div class="max-w-full relative p-2 pb-2">
@@ -158,20 +158,19 @@
                         </tr>
                     {% else %}
                         {% for index, label in realmsUsage %}
-                            <tr name="{{ index }}"
-                                onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ label }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
-                                onmouseout="this.childNodes[1].childNodes[1].style.backgroundColor='#f1f8f4'; this.childNodes[1].childNodes[1].style.color='#594B60';"
-                            >
+                            <tr name="{{ label }}">
                                 <td class="w-full px-8 py-2">
                                     <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
-                        <span>
-                            {{ label }}
-                        </span>
+                                        <span>
+                                            {{ label }}
+                                        </span>
                                     </div>
                                 </td>
                                 <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200">
                                     <div class="text-left text-base sm:text-lg">
-                                        {{ index }}
+                                        <span>
+                                            {{ index }}
+                                        </span>
                                     </div>
                                 </td>
                             </tr>
@@ -183,36 +182,33 @@
         </div>
     </div>
 
-    {# No need data filter card - Total of current authentications #}
+
+</div>
+<div class="mt-10 grid gap-8 xl:grid-cols-3" data-controller="freeradiusStatistics">
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
         <h1 class="text-lg font-medium text-left">Total of Current Authentications</h1>
-        {% if totalCurrentAuths >= 1 %}
-            {% set sizeClass = 'w-24 h-24' %}
-            {% if totalCurrentAuths >= 10000 %}
-                {% set sizeClass = 'w-32 h-32' %}
+        <div class="flex flex-col items-center">
+            {% if totalCurrentAuths >= 1 %}
+                {% set sizeClass = 'w-24 h-24' %}
+                {% if totalCurrentAuths >= 10000 %}
+                    {% set sizeClass = 'w-32 h-32' %}
+                {% endif %}
+                {% if totalCurrentAuths >= 100000 %}
+                    {% set sizeClass = 'w-36 h-36' %}
+                {% endif %}
+                {% if totalCurrentAuths >= 1000000 %}
+                    {% set sizeClass = 'w-40 h-40' %}
+                {% endif %}
+                <div class="mt-4 bg-[#7DB928] rounded-full text-white text-4xl font-bold flex justify-center items-center {{ sizeClass }}">
+                    <span>{{ totalCurrentAuths }}</span>
+                </div>
+            {% else %}
+                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                    No Data Available
+                </div>
             {% endif %}
-            {% if totalCurrentAuths >= 100000 %}
-                {% set sizeClass = 'w-36 h-36' %}
-            {% endif %}
-            {% if totalCurrentAuths >= 1000000 %}
-                {% set sizeClass = 'w-40 h-40' %}
-            {% endif %}
-            <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                {{ totalCurrentAuths }}
-            </div>
-        {% else %}
-            <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                No Data Available
-            </div>
-        {% endif %}
-        <div class="flex bg-infoBgColor/50 rounded-lg p-4 mt-8 text-sm text-infoTextColor" role="alert">
-            <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
-                 xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clip-rule="evenodd"></path>
-            </svg>
-            <div>
+            <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-4" role="alert">
+                <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
                 <span class="font-medium">This card is independent of the date filtering.</span>
             </div>
         </div>
