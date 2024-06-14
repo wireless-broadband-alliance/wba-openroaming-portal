@@ -1513,18 +1513,13 @@ class AdminController extends AbstractController
         ]);
     }
 
+
     /**
-     * Exports the freeradius data
-     */
-    /**
-     * @return Response
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * Exports the freeradius authentication data
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportFreeradius(
-        Request $request
-    ): Response
+    public function exportFreeradius(Request $request): Response
     {
         // Check if the export users operation is enabled
         $export_freeradius = $this->parameterBag->get('app.export_freeradius_statistics');
@@ -1538,135 +1533,63 @@ class AdminController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else if ($startDateString === "") {
-            $startDate = null;
-        } else {
-            $startDate = (new DateTime())->modify('-1 month');
-        }
+        $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 month');
+        $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
-        if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else if ($endDateString === "") {
-            $endDate = null;
-        } else {
-            $endDate = new DateTime();
-        }
-
-        // Fetch all the required data, graphics etc...
+        // Fetch the authentication data
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
-        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
-        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
-        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
-        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
-        // Sum all the current authentication
-        $totalCurrentAuths = 0;
-        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
-            // Sum the data points in the current dataset
-            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
-        }
+        // Prepare the data in the format for Excel
+        $excelData = [];
+        foreach ($fetchChartAuthenticationsFreeradius['labels'] as $index => $auth_date) {
+            $accepted = $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][$index] ?? 0;
+            $rejected = $fetchChartAuthenticationsFreeradius['datasets'][1]['data'][$index] ?? 0;
 
-        $totalTraffic = [
-            'total_input' => 0,
-            'total_output' => 0,
-        ];
-        // Sum all the traffic from the Accounting table
-        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
-            // Check if the dataset is for input or output
-            if ($dataset['label'] === 'Uploaded') {
-                // Sum the data for total input
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
-                }
-            } elseif ($dataset['label'] === 'Downloaded') {
-                // Sum the data for total output
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
-                }
-            }
-        }
-
-        // Create a new PhpSpreadsheet Spreadsheet object
-        $spreadsheet = new Spreadsheet();
-        $pageOne = $spreadsheet->getActiveSheet();
-
-        // Return realms names and session time to export
-        $combinedRealmSessionTime = [];
-        foreach ($fetchChartSessionTimeFreeradius as $session) {
-            $realm = $session['realm'];
-            $totalSessionTime = $session['totalSessionTime'];
-            $averageSessionTime = $session['averageSessionTime'];
-
-            $combinedRealmSessionTime[] = [
-                'Realm Name' => $realm,
-                'Total Session Time (seconds)' => $totalSessionTime,
-                'Average Session Time (seconds)' => $averageSessionTime,
+            $excelData[] = [
+                'auth_date' => $auth_date,
+                'Accepted' => $accepted,
+                'Rejected' => $rejected,
             ];
         }
 
-        // Set the titles and their respective content
-        $titlesAndContent = [
-            'Authentication Attempts' => [
-                'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0] ?? [],
-                'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1] ?? [],
-            ],
-            'Session Time' => $combinedRealmSessionTime,
-            'Total of Traffic' => [
-                'Uploaded' => $totalTraffic['total_input'],
-                'Downloaded' => $totalTraffic['total_output'],
-            ],
-            'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? [],
-            'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? [],
-            'Total Of Current Authentications' => $totalCurrentAuths,
-        ];
+        // Create a new Spreadsheet object
+        $spreadsheet = new Spreadsheet();
 
-        $row = 1;
-        // Iterate over each title and its content
-        foreach ($titlesAndContent as $title => $content) {
-            // Set the title in column A
-            $pageOne->setCellValue('A' . $row, $title);
+        // Set headers for the spreadsheet
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue('A1', 'Date')
+            ->setCellValue('B1', 'Accepted')
+            ->setCellValue('C1', 'Rejected');
 
-            // Check if the content is an array
-            if (is_array($content)) {
-                // Iterate over the content
-                foreach ($content as $key => $value) {
-                    // Check if the value is an array
-                    if (is_array($value)) {
-                        // If the value is an array, convert it to a string representation
-                        $formattedValue = json_encode($value);
-                    } else {
-                        // If the value is not an array, use it directly
-                        $formattedValue = $value;
-                    }
+        // Fill the spreadsheet with data
+        $row = 2;
+        foreach ($excelData as $data) {
+            $date = $data['auth_date'];
+            $accepted = $data['Accepted'];
+            $rejected = $data['Rejected'];
 
-                    // Set the key and formatted value in columns B and C
-                    $pageOne->setCellValue('B' . $row, $key);
-                    $pageOne->setCellValue('C' . $row, $formattedValue);
+            $spreadsheet->setActiveSheetIndex(0)
+                ->setCellValue('A' . $row, $date)
+                ->setCellValue('B' . $row, $accepted)
+                ->setCellValue('C' . $row, $rejected);
 
-                    // Increment row counter
-                    $row++;
-                }
-            } else {
-                // If the content is not an array, set it in column B
-                $pageOne->setCellValue('B' . $row, $content);
-
-                // Increment row counter
-                $row++;
-            }
+            $row++;
         }
+
+        // Set the column widths
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(15);
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
+        // Return the file as a response
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
+
 
     /**
      * Fetch data related to downloaded profiles devices
