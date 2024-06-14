@@ -1431,12 +1431,45 @@ class AdminController extends AbstractController
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Extract the connection attempts
         $authCounts = [
             'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data']),
             'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][1]['data']),
         ];
+
+        // Extract all realms names and usage
+        $realmsUsage = [];
+        foreach ($fetchChartRealmsFreeradius as $content) {
+            $realm = $content['realm'];
+            $count = $content['count'];
+
+            if (isset($realmsUsage[$realm])) {
+                $realmsUsage[$realm] += $count;
+            } else {
+                $realmsUsage[$realm] = $count;
+            }
+        }
+
+        // Sum all the current authentication
+        $totalCurrentAuths = 0;
+        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
+            // Sum the data points in the current dataset
+            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
+        }
+
+        // Sum all the traffic from the Accounting table
+        $totalTraffic = [
+            'total_input' => 0,
+            'total_output' => 0,
+        ];
+        foreach ($fetchChartTrafficFreeradius as $content) {
+            $totalTraffic['total_input'] += $content['total_input'];
+            $totalTraffic['total_output'] += $content['total_output'];
+        }
+        $totalTraffic['total_input'] = number_format($totalTraffic['total_input'] / (1024 * 1024 * 1024), 1);
+        $totalTraffic['total_output'] = number_format($totalTraffic['total_output'] / (1024 * 1024 * 1024), 1);
 
         // Extract the average time
         $averageTimes = $fetchChartSessionAverageFreeradius['datasets'][0]['data'];
@@ -1460,38 +1493,6 @@ class AdminController extends AbstractController
             floor(($totalTimeSeconds % 3600) / 60)
         );
 
-        // Sum all the traffic from the Accounting table
-        $totalTraffic = [
-            'total_input' => 0,
-            'total_output' => 0,
-        ];
-        foreach ($fetchChartTrafficFreeradius as $content) {
-            $totalTraffic['total_input'] += $content['total_input'];
-            $totalTraffic['total_output'] += $content['total_output'];
-        }
-        $totalTraffic['total_input'] = number_format($totalTraffic['total_input'] / (1024 * 1024 * 1024), 1);
-        $totalTraffic['total_output'] = number_format($totalTraffic['total_output'] / (1024 * 1024 * 1024), 1);
-
-        // Extract all realms names and usage
-        $realmsUsage = [];
-        foreach ($fetchChartRealmsFreeradius as $content) {
-            $realm = $content['realm'];
-            $count = $content['count'];
-
-            if (isset($realmsUsage[$realm])) {
-                $realmsUsage[$realm] += $count;
-            } else {
-                $realmsUsage[$realm] = $count;
-            }
-        }
-
-        // Sum all the current authentication
-        $totalCurrentAuths = 0;
-        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
-            // Sum the data points in the current dataset
-            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
-        }
-
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
@@ -1505,6 +1506,7 @@ class AdminController extends AbstractController
             'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
             'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
             'wifiTagsJson' => json_encode($fetchChartWifiTags, JSON_THROW_ON_ERROR),
+            'ApUsage' => $fetchChartApUsage,
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
@@ -2223,6 +2225,45 @@ class AdminController extends AbstractController
         }
 
         return $this->generateDatasetsWifiTags($result);
+    }
+
+    /**
+     * Fetch data related to AP usage on the freeradius database
+     *
+     * @throws Exception
+     */
+    private function fetchChartApUsage(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
+
+        $apCounts = [];
+
+        // Count the usage of each AP
+        foreach ($events as $event) {
+            $ap = $event['calledStationId'];
+
+            if (!$ap) {
+                continue;
+            }
+
+            if (!isset($apCounts[$ap])) {
+                $apCounts[$ap] = 0;
+            }
+
+            $apCounts[$ap]++;
+        }
+
+        $result = [];
+        foreach ($apCounts as $ap => $count) {
+            $result[] = [
+                'ap' => $ap,
+                'count' => $count
+            ];
+        }
+
+        return $result;
     }
 
     /**

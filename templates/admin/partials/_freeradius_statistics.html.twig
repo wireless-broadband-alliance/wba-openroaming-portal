@@ -181,9 +181,8 @@
             </div>
         </div>
     </div>
-
-
 </div>
+
 <div class="mt-10 grid gap-8 xl:grid-cols-3" data-controller="freeradiusStatistics">
     {# Wifi Tags Usage #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
@@ -196,32 +195,86 @@
         </div>
     </div>
 
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
-        <h1 class="text-lg font-medium text-left">Total of Current Authentications</h1>
-        <div class="flex flex-col items-center">
-            {% if totalCurrentAuths >= 1 %}
-                {% set sizeClass = 'w-24 h-24' %}
-                {% if totalCurrentAuths >= 10000 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                {% endif %}
-                {% if totalCurrentAuths >= 100000 %}
-                    {% set sizeClass = 'w-36 h-36' %}
-                {% endif %}
-                {% if totalCurrentAuths >= 1000000 %}
-                    {% set sizeClass = 'w-40 h-40' %}
-                {% endif %}
-                <div class="mt-4 bg-[#7DB928] rounded-full text-white text-4xl font-bold flex justify-center items-center {{ sizeClass }}">
-                    <span>{{ totalCurrentAuths }}</span>
-                </div>
-            {% else %}
-                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                    No Data Available
-                </div>
-            {% endif %}
-            <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-8" role="alert">
-                <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
-                <span class="font-medium">This card is independent of the date filtering.</span>
+    {# Access Points Usage #}
+    <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
+        <h1 class="text-lg font-medium text-left sm:pt-2">Access Points Usage</h1>
+        <div class="flex flex-col gap-6 animate-fadeIn">
+            <div class="max-w-full relative p-2 pb-2">
+                <table class="w-full h-1/2 divide-y divide-gray-200 table-fixed">
+                    <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
+                    <tr>
+                        <th scope="col"
+                            class="w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                            Usage
+                        </th>
+                        <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                            Mac Address:SSID
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if ApUsage is empty %}
+                        <tr>
+                            <td colspan="2">
+                                <div class="bg-red-500/50 rounded-full m-4 p-1 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                                    No Data Available
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for usage in ApUsage %}
+                            <tr name="{{ usage.ap }}">
+                                <td class="w-full px-8 py-2">
+                                    <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
+                                        <span>
+                                            {{ usage.count }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200">
+                                    <div class="text-left text-base sm:text-lg">
+                                        <span>
+                                            {{ usage.ap }}
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="mt-10 col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
+    <h1 class="text-lg font-medium text-left">Total of Current Authentications</h1>
+    <div class="flex flex-col items-center">
+        {% if totalCurrentAuths >= 1 %}
+            {% set sizeClass = 'w-24 h-24' %}
+            {% if totalCurrentAuths >= 10000 %}
+                {% set sizeClass = 'w-32 h-32' %}
+            {% endif %}
+            {% if totalCurrentAuths >= 100000 %}
+                {% set sizeClass = 'w-36 h-36' %}
+            {% endif %}
+            {% if totalCurrentAuths >= 1000000 %}
+                {% set sizeClass = 'w-40 h-40' %}
+            {% endif %}
+            <div class="mt-4 bg-[#7DB928] rounded-full text-white text-4xl font-bold flex justify-center items-center {{ sizeClass }}">
+                <span>{{ totalCurrentAuths }}</span>
+            </div>
+        {% else %}
+            <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                No Data Available
+            </div>
+        {% endif %}
+        <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-8" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+            <span class="font-medium">This card is independent of the date filtering.</span>
         </div>
     </div>
 </div>
