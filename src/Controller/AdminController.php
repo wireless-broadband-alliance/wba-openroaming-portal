@@ -1970,16 +1970,30 @@ class AdminController extends AbstractController
 
             // Initialize the period if not already set
             if (!isset($authsCounts['Accepted'][$period])) {
-                $authsCounts['Accepted'][$period] = 0;
-                $authsCounts['Rejected'][$period] = 0;
+                $authsCounts['Accepted'][$period] = [];
+                $authsCounts['Rejected'][$period] = [];
             }
 
-            $reply = $event->getReply();
-            if ($reply === 'Access-Accept') {
-                $authsCounts['Accepted'][$period]++;
-            } elseif ($reply === 'Access-Reject') {
-                $authsCounts['Rejected'][$period]++;
+            // Use the timestamp down to the second for deduplication
+            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
+
+            // Track unique timestamps within the period
+            if (!isset($authsCounts['Accepted'][$period][$timestamp]) && !isset($authsCounts['Rejected'][$period][$timestamp])) {
+                $reply = $event->getReply();
+                if ($reply === 'Access-Accept') {
+                    $authsCounts['Accepted'][$period][$timestamp] = true;
+                } elseif ($reply === 'Access-Reject') {
+                    $authsCounts['Rejected'][$period][$timestamp] = true;
+                }
             }
+        }
+
+        // Convert the tracked timestamps into counts
+        foreach ($authsCounts['Accepted'] as $period => $timestamps) {
+            $authsCounts['Accepted'][$period] = count($timestamps);
+        }
+        foreach ($authsCounts['Rejected'] as $period => $timestamps) {
+            $authsCounts['Rejected'][$period] = count($timestamps);
         }
 
         // Return an array containing both the generated datasets and the counts
