@@ -1352,15 +1352,15 @@ class AdminController extends AbstractController
         if ($startDateString) {
             $startDate = new DateTime($startDateString);
         } else if ($startDateString === "") {
-            $startDate = null;
+            $startDate = (new DateTime())->modify('-1 week');
         } else {
-            $startDate = (new DateTime())->modify('-1 month');
+            $startDate = (new DateTime())->modify('-1 week');
         }
 
         if ($endDateString) {
             $endDate = new DateTime($endDateString);
         } else if ($endDateString === "") {
-            $endDate = null;
+            $endDate = new DateTime();
         } else {
             $endDate = new DateTime();
         }
@@ -1410,15 +1410,15 @@ class AdminController extends AbstractController
         if ($startDateString) {
             $startDate = new DateTime($startDateString);
         } else if ($startDateString === "") {
-            $startDate = null;
+            $startDate = (new DateTime())->modify('-1 week');
         } else {
-            $startDate = (new DateTime())->modify('-1 month');
+            $startDate = (new DateTime())->modify('-1 week');
         }
 
         if ($endDateString) {
             $endDate = new DateTime($endDateString);
         } else if ($endDateString === "") {
-            $endDate = null;
+            $endDate = new DateTime();
         } else {
             $endDate = new DateTime();
         }
@@ -1826,32 +1826,6 @@ class AdminController extends AbstractController
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        // Fetch the last week's data if startDate or endDate are not provided
-        if (!$startDate || !$endDate) {
-            if (!$startDate && !$endDate) {
-                $endDate = new DateTime();
-                $startDate = (clone $endDate)->modify('-1 week');
-            } else {
-                $oldestEvent = $this->radiusAuthsRepository->findOneBy(
-                    ['reply' => ['Access-Accept', 'Access-Reject']],
-                    ['authdate' => 'ASC']
-                );
-
-                $mostRecentEvent = $this->radiusAuthsRepository->findOneBy(
-                    ['reply' => ['Access-Accept', 'Access-Reject']],
-                    ['authdate' => 'DESC']
-                );
-
-                if ($oldestEvent) {
-                    $startDate = new DateTime($oldestEvent->getAuthdate());
-                }
-
-                if ($mostRecentEvent) {
-                    $endDate = new DateTime($mostRecentEvent->getAuthdate());
-                }
-            }
-        }
-
         // Fetch all data with date filtering
         $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
 
@@ -2559,40 +2533,6 @@ class AdminController extends AbstractController
      */
     protected function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
     {
-        // Fetch the last week's data if startDate or endDate are not provided
-        if (!$startDate || !$endDate) {
-            if (!$startDate && !$endDate) {
-                $endDate = new DateTime();
-                $startDate = (clone $endDate)->modify('-1 week');
-            } else {
-                if (!$startDate) {
-                    $oldestEvent = $repository->findBy([], ['acctStartTime' => 'ASC'], 1);
-                    if ($oldestEvent) {
-                        $startDate = $oldestEvent[0]->getAcctStartTime();
-                    } else {
-                        $startDate = (new DateTime())->modify('-1 week');
-                    }
-                }
-
-                if (!$endDate) {
-                    $mostRecentEvent = $repository->findBy([], ['acctStopTime' => 'DESC'], 1);
-                    if ($mostRecentEvent) {
-                        $endDate = $mostRecentEvent[0]->getAcctStopTime();
-                    } else {
-                        $endDate = new DateTime();
-                    }
-                }
-            }
-        }
-
-        // Ensure both startDate and endDate are DateTime objects
-        if (!$startDate) {
-            $startDate = (new DateTime())->modify('-1 week');
-        }
-        if (!$endDate) {
-            $endDate = new DateTime();
-        }
-
         // Calculate the time difference between start and end dates
         $interval = $startDate->diff($endDate);
 
