@@ -2598,17 +2598,32 @@ class AdminController extends AbstractController
                 $endDate = new DateTime();
                 $startDate = (clone $endDate)->modify('-1 week');
             } else {
-                $oldestEvent = $repository->findBy([], ['acctStartTime' => 'ASC'], 1);
-                $mostRecentEvent = $repository->findBy([], ['acctStopTime' => 'DESC'], 1);
-
-                if ($oldestEvent) {
-                    $startDate = $oldestEvent[0]->getAcctStartTime();
+                if (!$startDate) {
+                    $oldestEvent = $repository->findBy([], ['acctStartTime' => 'ASC'], 1);
+                    if ($oldestEvent) {
+                        $startDate = $oldestEvent[0]->getAcctStartTime();
+                    } else {
+                        $startDate = (new DateTime())->modify('-1 week');
+                    }
                 }
 
-                if ($mostRecentEvent) {
-                    $endDate = $mostRecentEvent[0]->getAcctStopTime();
+                if (!$endDate) {
+                    $mostRecentEvent = $repository->findBy([], ['acctStopTime' => 'DESC'], 1);
+                    if ($mostRecentEvent) {
+                        $endDate = $mostRecentEvent[0]->getAcctStopTime();
+                    } else {
+                        $endDate = new DateTime();
+                    }
                 }
             }
+        }
+
+        // Ensure both startDate and endDate are DateTime objects
+        if (!$startDate) {
+            $startDate = (new DateTime())->modify('-1 week');
+        }
+        if (!$endDate) {
+            $endDate = new DateTime();
         }
 
         // Calculate the time difference between start and end dates
