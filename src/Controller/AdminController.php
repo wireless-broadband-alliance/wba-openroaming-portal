@@ -1559,7 +1559,10 @@ class AdminController extends AbstractController
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartSessionTimeFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Sum all the current authentication
         $totalCurrentAuths = 0;
