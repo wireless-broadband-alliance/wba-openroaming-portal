@@ -1533,7 +1533,7 @@ class AdminController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 month');
+        $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 week');
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
         // Fetch the authentication data
