@@ -1540,6 +1540,7 @@ class AdminController extends AbstractController
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -1574,6 +1575,22 @@ class AdminController extends AbstractController
             ];
         }
 
+        // Prepare the total traffic data for Excel
+        $trafficData = [];
+        foreach ($fetchChartTrafficFreeradius as $session_date) {
+            $realm = $fetchChartTrafficFreeradius[0]['realm'] ?? 0;
+            $totalInput = $fetchChartTrafficFreeradius[0]['total_input'] ?? 0;
+            $totalOutput = $fetchChartTrafficFreeradius[0]['total_output'] ?? 0;
+
+            $trafficData[] = [
+                'realm' => $realm,
+                'total_input_flat' => $totalInput,
+                'total_input' => number_format($totalInput / (1024 * 1024 * 1024), 1),
+                'total_output_flat' => $totalOutput,
+                'total_output' => number_format($totalOutput / (1024 * 1024 * 1024), 1)
+            ];
+        }
+
         // Create a new Spreadsheet object
         $spreadsheet = new Spreadsheet();
 
@@ -1600,7 +1617,7 @@ class AdminController extends AbstractController
         $sheet2 = $spreadsheet->createSheet();
         $sheet2->setTitle('Session Average');
         $sheet2->setCellValue('A1', 'Date')
-            ->setCellValue('B1', 'Average Time');
+            ->setCellValue('B1', 'Average Session Time');
 
         $row = 2;
         foreach ($sessionData as $data) {
@@ -1616,7 +1633,7 @@ class AdminController extends AbstractController
         $sheet3 = $spreadsheet->createSheet();
         $sheet3->setTitle('Session Total');
         $sheet3->setCellValue('A1', 'Date')
-            ->setCellValue('B1', 'Total Time');
+            ->setCellValue('B1', 'Total Session Time');
 
         $row = 2;
         foreach ($totalTimeData as $data) {
@@ -1627,6 +1644,30 @@ class AdminController extends AbstractController
 
         $sheet3->getColumnDimension('A')->setWidth(20);
         $sheet3->getColumnDimension('B')->setWidth(15);
+
+        // Create a new sheet for Total Traffic data
+        $sheet4 = $spreadsheet->createSheet();
+        $sheet4->setTitle('Total of Traffic');
+        $sheet4->setCellValue('A1', 'Realm Name')
+            ->setCellValue('B1', 'Uploads Flat')
+            ->setCellValue('C1', 'Uploads')
+            ->setCellValue('D1', 'Downloads Flat')
+            ->setCellValue('E1', 'Downloads');
+
+        $row = 2;
+        foreach ($trafficData as $data) {
+            $sheet4->setCellValue('B' . $row, $data['total_input_flat'])
+                ->setCellValue('C' . $row, $data['total_input'])
+                ->setCellValue('D' . $row, $data['total_output_flat'])
+                ->setCellValue('E' . $row, $data['total_output']);
+            $row++;
+        }
+
+        $sheet4->getColumnDimension('A')->setWidth(20);
+        $sheet4->getColumnDimension('B')->setWidth(20);
+        $sheet4->getColumnDimension('C')->setWidth(20);
+        $sheet4->getColumnDimension('D')->setWidth(20);
+        $sheet4->getColumnDimension('E')->setWidth(20);
 
 
         // Save the spreadsheet to a temporary file
