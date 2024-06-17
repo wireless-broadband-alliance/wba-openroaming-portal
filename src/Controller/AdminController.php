@@ -1515,7 +1515,7 @@ class AdminController extends AbstractController
 
 
     /**
-     * Exports the freeradius authentication data
+     * Exports the freeradius data
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1538,48 +1538,68 @@ class AdminController extends AbstractController
 
         // Fetch the authentication data
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
 
-        // Prepare the data in the format for Excel
-        $excelData = [];
+        // Prepare the authentication data for Excel
+        $authData = [];
         foreach ($fetchChartAuthenticationsFreeradius['labels'] as $index => $auth_date) {
             $accepted = $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][$index] ?? 0;
             $rejected = $fetchChartAuthenticationsFreeradius['datasets'][1]['data'][$index] ?? 0;
 
-            $excelData[] = [
+            $authData[] = [
                 'auth_date' => $auth_date,
                 'Accepted' => $accepted,
                 'Rejected' => $rejected,
             ];
         }
 
+        // Prepare the session data for Excel
+        $sessionData = [];
+        foreach ($fetchChartSessionAverageFreeradius['labels'] as $index => $session_date) {
+            $sessionAverage = $fetchChartSessionAverageFreeradius['datasets'][0]['tooltips'][$index] ?? 0;
+            $sessionData[] = [
+                'session_date' => $session_date,
+                'average_time' => $sessionAverage,
+            ];
+        }
+
         // Create a new Spreadsheet object
         $spreadsheet = new Spreadsheet();
 
-        // Set headers for the spreadsheet
-        $spreadsheet->setActiveSheetIndex(0)
-            ->setCellValue('A1', 'Date')
+        // Fill the first sheet with authentication data
+        $sheet1 = $spreadsheet->getActiveSheet();
+        $sheet1->setTitle('Authentications');
+        $sheet1->setCellValue('A1', 'Date')
             ->setCellValue('B1', 'Accepted')
             ->setCellValue('C1', 'Rejected');
 
-        // Fill the spreadsheet with data
         $row = 2;
-        foreach ($excelData as $data) {
-            $date = $data['auth_date'];
-            $accepted = $data['Accepted'];
-            $rejected = $data['Rejected'];
-
-            $spreadsheet->setActiveSheetIndex(0)
-                ->setCellValue('A' . $row, $date)
-                ->setCellValue('B' . $row, $accepted)
-                ->setCellValue('C' . $row, $rejected);
-
+        foreach ($authData as $data) {
+            $sheet1->setCellValue('A' . $row, $data['auth_date'])
+                ->setCellValue('B' . $row, $data['Accepted'])
+                ->setCellValue('C' . $row, $data['Rejected']);
             $row++;
         }
 
-        // Set the column widths
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(15);
+        $sheet1->getColumnDimension('A')->setWidth(20);
+        $sheet1->getColumnDimension('B')->setWidth(15);
+        $sheet1->getColumnDimension('C')->setWidth(15);
+
+        // Create a new sheet for session data
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Session Average');
+        $sheet2->setCellValue('A1', 'Date')
+            ->setCellValue('B1', 'Average Time');
+
+        $row = 2;
+        foreach ($sessionData as $data) {
+            $sheet2->setCellValue('A' . $row, $data['session_date'])
+                ->setCellValue('B' . $row, $data['average_time']);
+            $row++;
+        }
+
+        $sheet2->getColumnDimension('A')->setWidth(20);
+        $sheet2->getColumnDimension('B')->setWidth(15);
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
