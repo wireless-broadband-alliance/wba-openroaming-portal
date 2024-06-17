@@ -2252,6 +2252,11 @@ class AdminController extends AbstractController
             ];
         }
 
+        // Sort the result array by the count value with the highest usage
+        usort($result, static function ($highest, $lowest) {
+            return $lowest['count'] <=> $highest['count'];
+        });
+
         return $result;
     }
 
