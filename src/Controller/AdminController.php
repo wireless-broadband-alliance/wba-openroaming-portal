@@ -1539,6 +1539,7 @@ class AdminController extends AbstractController
         // Fetch the authentication data
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -1553,13 +1554,23 @@ class AdminController extends AbstractController
             ];
         }
 
-        // Prepare the session data for Excel
+        // Prepare the session average data for Excel
         $sessionData = [];
         foreach ($fetchChartSessionAverageFreeradius['labels'] as $index => $session_date) {
             $sessionAverage = $fetchChartSessionAverageFreeradius['datasets'][0]['tooltips'][$index] ?? 0;
             $sessionData[] = [
                 'session_date' => $session_date,
                 'average_time' => $sessionAverage,
+            ];
+        }
+
+        // Prepare the session total data for Excel
+        $totalTimeData = [];
+        foreach ($fetchChartSessionTotalFreeradius['labels'] as $index => $session_date) {
+            $sessionTotal = $fetchChartSessionTotalFreeradius['datasets'][0]['tooltips'][$index] ?? 0;
+            $totalTimeData[] = [
+                'session_date' => $session_date,
+                'total_time' => $sessionTotal,
             ];
         }
 
@@ -1585,7 +1596,7 @@ class AdminController extends AbstractController
         $sheet1->getColumnDimension('B')->setWidth(15);
         $sheet1->getColumnDimension('C')->setWidth(15);
 
-        // Create a new sheet for session data
+        // Create a new sheet for Average session data
         $sheet2 = $spreadsheet->createSheet();
         $sheet2->setTitle('Session Average');
         $sheet2->setCellValue('A1', 'Date')
@@ -1600,6 +1611,23 @@ class AdminController extends AbstractController
 
         $sheet2->getColumnDimension('A')->setWidth(20);
         $sheet2->getColumnDimension('B')->setWidth(15);
+
+        // Create a new sheet for Total session data
+        $sheet3 = $spreadsheet->createSheet();
+        $sheet3->setTitle('Session Total');
+        $sheet3->setCellValue('A1', 'Date')
+            ->setCellValue('B1', 'Total Time');
+
+        $row = 2;
+        foreach ($totalTimeData as $data) {
+            $sheet3->setCellValue('A' . $row, $data['session_date'])
+                ->setCellValue('B' . $row, $data['total_time']);
+            $row++;
+        }
+
+        $sheet3->getColumnDimension('A')->setWidth(20);
+        $sheet3->getColumnDimension('B')->setWidth(15);
+
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
