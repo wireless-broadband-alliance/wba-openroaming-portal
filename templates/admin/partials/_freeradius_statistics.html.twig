@@ -73,11 +73,8 @@
 
 <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
     {# Total of Traffic #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow">
-        <div class="flex flex-row justify-between sm:pt-2 font-medium">
-            <h1 class="text-lg text-left">Total of Traffic</h1>
-            <span class="text-base text-gray-500 text-left">(in GigaBytes)</span>
-        </div>
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-4 gap-4 shadow">
+        <h1 class="text-lg font-medium text-left pb-4">Total of Traffic</h1>
         <div class="mx-8 md:mx-16 md:mt-6 flex md:flex-row flex-col justify-center md:justify-between items-center xl:space-x-6 space-x-0">
             <div class="flex flex-col">
                 <h1 class="text-center font-semibold">
@@ -132,14 +129,14 @@
 
     {# Realm Usage #}
     <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Realm Usage</h1>
-        <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="max-w-full relative p-2 pb-2">
-                <table class="w-full h-1/2 divide-y divide-gray-200 table-fixed">
+        <h1 class="text-lg font-medium text-left pb-4">Realm Usage</h1>
+        <div class="overflow-x-auto max-w-full flex flex-col gap-6 animate-fadeIn">
+            <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+                <table class="w-full items-start">
                     <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
                         <th scope="col"
-                            class="w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                            class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
                             Usage
                         </th>
                         <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
@@ -183,9 +180,9 @@
     </div>
 </div>
 
-<div class="mt-10 grid gap-8 xl:grid-cols-3" data-controller="freeradiusStatistics">
+<div class="mt-10 grid gap-8 grid-cols-1 xl:grid-cols-3" data-controller="freeradiusStatistics">
     {# Wifi Tags Usage #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-2 shadow">
         <div class="flex flex-row justify-start sm:pt-2 pb-6 font-medium text-lg text-left">
             <h1 class="text-lg font-medium">Wi-Fi Standards - Usage</h1>
         </div>
@@ -197,10 +194,10 @@
 
     {# Access Points Usage #}
     <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Access Points Usage</h1>
-        <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="max-w-full relative p-2 pb-2">
-                <table class="w-full h-1/2 divide-y divide-gray-200 table-fixed">
+        <h1 class="text-lg font-medium text-left sm:pb-4">Access Points Usage</h1>
+        <div class="overflow-x-auto max-w-full flex flex-col gap-6 animate-fadeIn">
+            <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+                <table class="w-full items-start">
                     <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
                         <th scope="col"
@@ -251,8 +248,6 @@
             {% include '/admin/partials/_access_points_pagination.html.twig' %}
         </div>
     </div>
-
-
 </div>
 
 <div class="mt-10 col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
