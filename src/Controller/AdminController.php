@@ -1395,7 +1395,8 @@ class AdminController extends AbstractController
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
     public function freeradiusStatisticsData(
-        Request $request
+        Request $request,
+        #[MapQueryParameter] int $page = 1,
     ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -1493,9 +1494,19 @@ class AdminController extends AbstractController
             floor(($totalTimeSeconds % 3600) / 60)
         );
 
+        $perPage = 4;
+        $totalApCount = count($fetchChartApUsage);
+        $totalPages = ceil($totalApCount / $perPage);
+        $offset = ($page - 1) * $perPage;
+        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $perPage);
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
+            'totalApCount' => $totalApCount,
             'realmsUsage' => $realmsUsage,
             'authCounts' => $authCounts,
             'totalCurrentAuths' => $totalCurrentAuths,
