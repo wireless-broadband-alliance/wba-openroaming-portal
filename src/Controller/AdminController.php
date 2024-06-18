@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Entity\UserBackup;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -373,16 +374,37 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $uuid = $user->getUUID();
-        foreach ($user->getEvent() as $event) {
-            $em->remove($event);
-        }
-        $user->setDeletedAt(new DateTime());
-        $this->disableProfiles($user);
+        $userBackup = new UserBackup();
+        $userBackup->setUuid($user->getUuid());
+        $userBackup->setRoles($user->getRoles());
+        $userBackup->setEmail($user->getEmail());
+        $userBackup->setVerified($user->isVerified());
+        $userBackup->setSamlIdentifier($user->getSamlIdentifier());
+        $userBackup->setFirstName($user->getFirstName());
+        $userBackup->setLastName($user->getLastName());
+        $userBackup->setGoogleId($user->getGoogleId());
+        $userBackup->setCreatedAt($user->getCreatedAt());
+        $userBackup->setBannedAt($user->getBannedAt());
+        $userBackup->setDeletedAt(new DateTime());
+        $userBackup->setPhoneNumber($user->getPhoneNumber());
+        $userBackup->setUserBackup($user);
 
+        $user->setUuid($user->getId());
+        $user->setPassword($user->getId());
+        $user->setSamlIdentifier(null);
+        $user->setFirstName(null);
+        $user->setLastName(null);
+        $user->setGoogleId(null);
+        $user->setBannedAt(null);
+        $user->setDeletedAt(new DateTime());
+
+        $this->disableProfiles($user);
+        $em->persist($userBackup);
         $em->persist($user);
         $em->flush();
 
+
+        $uuid = $userBackup->getUUID();
         $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
         return $this->redirectToRoute('admin_page');
     }
