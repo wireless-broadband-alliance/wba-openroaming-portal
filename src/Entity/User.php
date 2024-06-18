@@ -437,8 +437,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setUserBackup(UserBackup $userBackup): static
     {
         // set the owning side of the relation if necessary
-        if ($userBackup->getUuidBackup() !== $this) {
-            $userBackup->setUuidBackup($this);
+        if ($userBackup->getUserBackup()() !== $this) {
+            $userBackup->setUserBackup($this);
         }
 
         $this->userBackup = $userBackup;
