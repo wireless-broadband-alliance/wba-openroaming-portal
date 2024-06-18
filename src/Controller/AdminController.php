@@ -390,6 +390,8 @@ class AdminController extends AbstractController
         $userBackup->setUserBackup($user);
 
         $user->setUuid($user->getId());
+        $user->setEmail('');
+        $user->setPhoneNumber('');
         $user->setPassword($user->getId());
         $user->setSamlIdentifier(null);
         $user->setFirstName(null);
