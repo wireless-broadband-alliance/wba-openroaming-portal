@@ -82,7 +82,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
 
-    #[ORM\OneToOne(mappedBy: 'uuidBackup', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'userBackup', cascade: ['persist', 'remove'])]
     private ?UserBackup $userBackup = null;
 
 

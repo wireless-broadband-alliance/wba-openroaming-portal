@@ -52,7 +52,7 @@ class UserBackup
 
     #[ORM\OneToOne(inversedBy: 'userBackup', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $uuidBackup = null;
+    private ?User $userBackup = null;
 
     public function getId(): ?int
     {
@@ -203,14 +203,14 @@ class UserBackup
         return $this;
     }
 
-    public function getUuidBackup(): ?User
+    public function getUserBackup(): ?User
     {
-        return $this->uuidBackup;
+        return $this->userBackup;
     }
 
-    public function setUuidBackup(User $uuidBackup): static
+    public function setUserBackup(User $userBackup): static
     {
-        $this->uuidBackup = $uuidBackup;
+        $this->userBackup = $userBackup;
 
         return $this;
     }
