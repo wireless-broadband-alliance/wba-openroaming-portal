@@ -1494,7 +1494,7 @@ class AdminController extends AbstractController
             floor(($totalTimeSeconds % 3600) / 60)
         );
 
-        $perPage = 4;
+        $perPage = 3;
         $totalApCount = count($fetchChartApUsage);
         $totalPages = ceil($totalApCount / $perPage);
         $offset = ($page - 1) * $perPage;
