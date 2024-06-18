@@ -82,6 +82,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
 
+    #[ORM\OneToOne(mappedBy: 'uuidBackup', cascade: ['persist', 'remove'])]
+    private ?UserBackup $userBackup = null;
+
 
     public function __construct()
     {
@@ -422,6 +425,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     public function setForgotPasswordRequest(?bool $forgot_password_request): static
     {
         $this->forgot_password_request = $forgot_password_request;
+
+        return $this;
+    }
+
+    public function getUserBackup(): ?UserBackup
+    {
+        return $this->userBackup;
+    }
+
+    public function setUserBackup(UserBackup $userBackup): static
+    {
+        // set the owning side of the relation if necessary
+        if ($userBackup->getUuidBackup() !== $this) {
+            $userBackup->setUuidBackup($this);
+        }
+
+        $this->userBackup = $userBackup;
 
         return $this;
     }

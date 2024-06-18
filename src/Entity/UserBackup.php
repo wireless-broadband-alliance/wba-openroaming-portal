@@ -20,9 +20,6 @@ class UserBackup
     #[ORM\Column]
     private array $roles = [];
 
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
 
@@ -53,6 +50,10 @@ class UserBackup
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phoneNumber = null;
 
+    #[ORM\OneToOne(inversedBy: 'userBackup', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $uuidBackup = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -78,18 +79,6 @@ class UserBackup
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
-        return $this;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
 
         return $this;
     }
@@ -210,6 +199,18 @@ class UserBackup
     public function setPhoneNumber(?string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    public function getUuidBackup(): ?User
+    {
+        return $this->uuidBackup;
+    }
+
+    public function setUuidBackup(User $uuidBackup): static
+    {
+        $this->uuidBackup = $uuidBackup;
 
         return $this;
     }
