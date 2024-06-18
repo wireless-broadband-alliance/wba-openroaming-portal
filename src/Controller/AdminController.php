@@ -1554,6 +1554,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -1636,6 +1637,16 @@ class AdminController extends AbstractController
             $apUsageData[] = [
                 'ap_Name' => $apName,
                 'ap_Usage' => $apUsage,
+            ];
+        }
+
+        // Prepare the Wifi Standards Usage data for Excel
+        $wifiStandardsData = [];
+        foreach ($fetchChartWifiTags['labels'] as $index => $wifi_Standards) {
+            $wifiUsage = $fetchChartWifiTags['datasets'][0]['data'][$index] ?? 0;
+            $wifiStandardsData[] = [
+                'wifi_Standards' => $wifi_Standards,
+                'wifi_Usage' => $wifiUsage,
             ];
         }
 
@@ -1749,6 +1760,22 @@ class AdminController extends AbstractController
 
         $sheet6->getColumnDimension('A')->setWidth(40);
         $sheet6->getColumnDimension('B')->setWidth(20);
+
+        // Create a new sheet for Wifi Standards Usage data
+        $sheet7 = $spreadsheet->createSheet();
+        $sheet7->setTitle('Wifi Standards Usage');
+        $sheet7->setCellValue('A1', 'Wifi Standard Name')
+            ->setCellValue('B1', 'Usage');
+
+        $row = 2;
+        foreach ($wifiStandardsData as $data) {
+            $sheet7->setCellValue('A' . $row, $data['wifi_Standards'])
+                ->setCellValue('B' . $row, $data['wifi_Usage']);
+            $row++;
+        }
+
+        $sheet7->getColumnDimension('A')->setWidth(20);
+        $sheet7->getColumnDimension('B')->setWidth(20);
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
