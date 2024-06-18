@@ -1552,6 +1552,7 @@ class AdminController extends AbstractController
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -1599,6 +1600,18 @@ class AdminController extends AbstractController
                 'total_input' => number_format($totalInput / (1024 * 1024 * 1024), 1),
                 'total_output_flat' => $totalOutput,
                 'total_output' => number_format($totalOutput / (1024 * 1024 * 1024), 1)
+            ];
+        }
+
+        // Prepare the realm Usage data for Excel
+        $realmUsageData = [];
+        foreach ($fetchChartRealmsFreeradius as $session_date) {
+            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
+            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
+
+            $realmUsageData[] = [
+                'realm' => $realm,
+                'total_count' => $totalCount,
             ];
         }
 
@@ -1667,7 +1680,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($trafficData as $data) {
-            $sheet4->setCellValue('B' . $row, $data['total_input_flat'])
+            $sheet4->setCellValue('A' . $row, $data['realm'])
+                ->setCellValue('B' . $row, $data['total_input_flat'])
                 ->setCellValue('C' . $row, $data['total_input'])
                 ->setCellValue('D' . $row, $data['total_output_flat'])
                 ->setCellValue('E' . $row, $data['total_output']);
@@ -1679,6 +1693,23 @@ class AdminController extends AbstractController
         $sheet4->getColumnDimension('C')->setWidth(20);
         $sheet4->getColumnDimension('D')->setWidth(20);
         $sheet4->getColumnDimension('E')->setWidth(20);
+
+
+       // Create a new sheet for Realm Usage data
+        $sheet5 = $spreadsheet->createSheet();
+        $sheet5->setTitle('Realm Usage');
+        $sheet5->setCellValue('A1', 'Realm Name')
+            ->setCellValue('B1', 'Usage');
+
+        $row = 2;
+        foreach ($realmUsageData as $data) {
+            $sheet5->setCellValue('A' . $row, $data['realm'])
+                ->setCellValue('B' . $row, $data['total_count']);
+            $row++;
+        }
+
+        $sheet5->getColumnDimension('A')->setWidth(20);
+        $sheet5->getColumnDimension('B')->setWidth(20);
 
 
         // Save the spreadsheet to a temporary file
