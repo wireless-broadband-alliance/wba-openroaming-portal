@@ -1553,6 +1553,7 @@ class AdminController extends AbstractController
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -1612,6 +1613,29 @@ class AdminController extends AbstractController
             $realmUsageData[] = [
                 'realm' => $realm,
                 'total_count' => $totalCount,
+            ];
+        }
+
+        // Prepare the realm Usage data for Excel
+        $realmUsageData = [];
+        foreach ($fetchChartRealmsFreeradius as $session_date) {
+            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
+            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
+
+            $realmUsageData[] = [
+                'realm' => $realm,
+                'total_count' => $totalCount,
+            ];
+        }
+
+        // Prepare the AP Usage data for Excel
+        $apUsageData = [];
+        foreach ($fetchChartApUsage as $index => $session_date) {
+            $apName = $fetchChartApUsage[$index]['ap'] ?? 0;
+            $apUsage = $fetchChartApUsage[$index]['count'] ?? 0;
+            $apUsageData[] = [
+                'ap_Name' => $apName,
+                'ap_Usage' => $apUsage,
             ];
         }
 
@@ -1694,8 +1718,7 @@ class AdminController extends AbstractController
         $sheet4->getColumnDimension('D')->setWidth(20);
         $sheet4->getColumnDimension('E')->setWidth(20);
 
-
-       // Create a new sheet for Realm Usage data
+        // Create a new sheet for Realm Usage data
         $sheet5 = $spreadsheet->createSheet();
         $sheet5->setTitle('Realm Usage');
         $sheet5->setCellValue('A1', 'Realm Name')
@@ -1711,6 +1734,21 @@ class AdminController extends AbstractController
         $sheet5->getColumnDimension('A')->setWidth(20);
         $sheet5->getColumnDimension('B')->setWidth(20);
 
+        // Create a new sheet for Access Points Usage data
+        $sheet6 = $spreadsheet->createSheet();
+        $sheet6->setTitle('Access Points Usage');
+        $sheet6->setCellValue('A1', 'MAC ADDRESS:SSID')
+            ->setCellValue('B1', 'Usage');
+
+        $row = 2;
+        foreach ($apUsageData as $data) {
+            $sheet6->setCellValue('A' . $row, $data['ap_Name'])
+                ->setCellValue('B' . $row, $data['ap_Usage']);
+            $row++;
+        }
+
+        $sheet6->getColumnDimension('A')->setWidth(40);
+        $sheet6->getColumnDimension('B')->setWidth(20);
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
