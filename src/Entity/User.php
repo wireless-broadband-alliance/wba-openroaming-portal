@@ -3,11 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Nbgrp\OneloginSamlBundle\Security\User\SamlUserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
 #[ORM\HasLifecycleCallbacks]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUserInterface
+class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthenticatedUserInterface
 
 {
     #[ORM\Id]
@@ -213,7 +213,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
 
     public function setSamlAttributes(array $attributes): void
     {
-        $this->email = $attributes['email'][0];
+        if (!$attributes['email'][0]){
+            $this->email = $attributes['sAMAccountName'][0];
+        } else {
+            $this->email = $attributes['email'][0];
+        }
+
         $this->saml_identifier = $attributes['sAMAccountName'][0];
         $this->first_name = $attributes['givenName'][0];
         $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
