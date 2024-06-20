@@ -8,6 +8,7 @@ namespace App\Security;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use function is_string;
 
@@ -33,12 +34,25 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         /** @psalm-suppress MixedAssignment */
         foreach ($this->mapping as $field => $attribute) {
             $property = $reflection->getProperty($field);
-            $property->setValue(
-                $user,
-                is_string($attribute) && str_starts_with($attribute, '$')
-                    ? $this->getAttributeValue($attributes, substr($attribute, 1))
-                    : $attribute,
-            );
+            $value = null;
+
+            if (is_string($attribute) && str_starts_with($attribute, '$')) {
+                try {
+                    $value = $this->getAttributeValue($attributes, substr($attribute, 1));
+                } catch (RuntimeException) {
+                    if ($field === 'email') {
+                        // Fallback to sAMAccountName if email is missing
+                        $value = $this->getAttributeValue($attributes, 'sAMAccountName');
+                    } else {
+                        // Handle other missing attributes as necessary
+                        $value = 'notused';
+                    }
+                }
+            } else {
+                $value = $attribute;
+            }
+
+            $property->setValue($user, $value);
         }
 
         return $user;
@@ -50,7 +64,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $attribute = $isArrayValue ? substr($attribute, 0, -2) : $attribute;
 
         if (!\array_key_exists($attribute, $attributes)) {
-            throw new \RuntimeException('Attribute "'.$attribute.'" not found in SAML data.');
+            throw new RuntimeException('Attribute "'.$attribute.'" not found in SAML data.');
         }
 
         $attributeValue = (array) $attributes[$attribute];

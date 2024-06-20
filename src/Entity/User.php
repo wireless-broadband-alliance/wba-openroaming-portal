@@ -213,16 +213,11 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function setSamlAttributes(array $attributes): void
     {
-        if (!$attributes['email'][0]){
-            $this->email = $attributes['sAMAccountName'][0];
-        } else {
-            $this->email = $attributes['email'][0];
-        }
-
+        $this->uuid = $attributes['sAMAccountName'][0];
         $this->saml_identifier = $attributes['sAMAccountName'][0];
+        $this->email = $attributes['email'][0] ?? '';
         $this->first_name = $attributes['givenName'][0];
         $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
-        $this->uuid = $attributes['sAMAccountName'][0];
         $this->password = 'notused'; //invalid hash so won't ever authenticate
         $this->isVerified = 1;
         // #$this->setLevel(LevelType::NONE);
