@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
+use App\Repository\DeletedUserDataRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: DeletedUserData::class)]
+#[ORM\Entity(repositoryClass: DeletedUserDataRepository::class)]
 class DeletedUserData
 {
     #[ORM\Id]
@@ -13,188 +14,38 @@ class DeletedUserData
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
-    private ?string $uuid = null;
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $pgpEncryptedJsonFile = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $email = null;
-
-    #[ORM\Column]
-    private ?bool $isVerified = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $saml_identifier = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $first_name = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $last_name = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $googleId = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $bannedAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $deletedAt = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $phoneNumber = null;
-
-    #[ORM\OneToOne(inversedBy: 'userBackup', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'deletedUserData', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $userBackup = null;
+    private ?User $user = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUuid(): ?string
+    public function getPgpEncryptedJsonFile(): ?string
     {
-        return $this->uuid;
+        return $this->pgpEncryptedJsonFile;
     }
 
-    public function setUuid(string $uuid): static
+    public function setPgpEncryptedJsonFile(string $pgpEncryptedJsonFile): static
     {
-        $this->uuid = $uuid;
+        $this->pgpEncryptedJsonFile = $pgpEncryptedJsonFile;
 
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getUser(): ?User
     {
-        return $this->email;
+        return $this->user;
     }
 
-    public function setEmail(?string $email): static
+    public function setUser(User $user): static
     {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function isVerified(): ?bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getSamlIdentifier(): ?string
-    {
-        return $this->saml_identifier;
-    }
-
-    public function setSamlIdentifier(?string $saml_identifier): static
-    {
-        $this->saml_identifier = $saml_identifier;
-
-        return $this;
-    }
-
-    public function getFirstName(): ?string
-    {
-        return $this->first_name;
-    }
-
-    public function setFirstName(?string $first_name): static
-    {
-        $this->first_name = $first_name;
-
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->last_name;
-    }
-
-    public function setLastName(?string $last_name): static
-    {
-        $this->last_name = $last_name;
-
-        return $this;
-    }
-
-    public function getGoogleId(): ?string
-    {
-        return $this->googleId;
-    }
-
-    public function setGoogleId(?string $googleId): static
-    {
-        $this->googleId = $googleId;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getBannedAt(): ?\DateTimeInterface
-    {
-        return $this->bannedAt;
-    }
-
-    public function setBannedAt(?\DateTimeInterface $bannedAt): static
-    {
-        $this->bannedAt = $bannedAt;
-
-        return $this;
-    }
-
-    public function getDeletedAt(): ?\DateTimeInterface
-    {
-        return $this->deletedAt;
-    }
-
-    public function setDeletedAt(\DateTimeInterface $deletedAt): static
-    {
-        $this->deletedAt = $deletedAt;
-
-        return $this;
-    }
-
-    public function getPhoneNumber(): ?string
-    {
-        return $this->phoneNumber;
-    }
-
-    public function setPhoneNumber(?string $phoneNumber): static
-    {
-        $this->phoneNumber = $phoneNumber;
-
-        return $this;
-    }
-
-    public function getUserBackup(): ?User
-    {
-        return $this->userBackup;
-    }
-
-    public function setUserBackup(User $userBackup): static
-    {
-        $this->userBackup = $userBackup;
+        $this->user = $user;
 
         return $this;
     }
