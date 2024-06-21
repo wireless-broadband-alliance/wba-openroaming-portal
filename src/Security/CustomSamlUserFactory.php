@@ -62,7 +62,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
                         $value = $this->getAttributeValue($attributes, 'sAMAccountName');
                     } else {
                         // Handle other missing attributes as necessary
-                        $value = 'notused';
+                        $value = '';
                     }
                 }
             } else {
