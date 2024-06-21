@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
-use App\Entity\DeletedUserData;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -378,32 +377,26 @@ class AdminController extends AbstractController
             $this->addFlash('error_admin', 'This user has already been deleted.');
             return $this->redirectToRoute('admin_page');
         }
-        $uuidBeforeDelete = $user->getUuid();
 
-        // Hash sensitive fields
-        $hashedUuid = $userPasswordHasher->hashPassword($user, $user->getUuid());
-        $hashedEmail = null;
-        $hashedPhoneNumber = null;
-        if ($user->getEmail() !== null) {
-            $hashedEmail = $userPasswordHasher->hashPassword($user, $user->getEmail());
-        } else if ($user->getPhoneNumber() !== null) {
-            $hashedPhoneNumber = $userPasswordHasher->hashPassword($user, $user->getPhoneNumber());
-        }
+        $deletedUserData = [
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail() ?? 'This value is empty',
+            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
+            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
+            'googleId' => $user->getGoogleId() ?? 'This value is empty',
+            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
+            'lastName' => $user->getLastName() ?? 'This value is empty',
+            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
+            'deletedAt' => new DateTime(),
+        ];
 
-        // Create DeletedUserData entity and set hashed values
-        $userBackup = new DeletedUserData();
-        $userBackup->setUuid($hashedUuid);
-        $userBackup->setEmail($hashedEmail);
-        $userBackup->setVerified($user->isVerified());
-        $userBackup->setSamlIdentifier($user->getSamlIdentifier());
-        $userBackup->setFirstName($user->getFirstName());
-        $userBackup->setLastName($user->getLastName());
-        $userBackup->setGoogleId($user->getGoogleId());
-        $userBackup->setCreatedAt($user->getCreatedAt());
-        $userBackup->setBannedAt($user->getBannedAt());
-        $userBackup->setDeletedAt(new DateTime());
-        $userBackup->setPhoneNumber($hashedPhoneNumber);
-        $userBackup->setUserBackup($user);
+        $jsonData = json_encode($userData);
+        // Encrypt JSON data using PGP encryption
+        $pgpEncryptedData = $pgpEncryptionService->encrypt($jsonData);
+        $deletedUserData = new DeletedUserData();
+        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
+        $deletedUserData->setUserId($user->getId());
 
         $user->setUuid($user->getId());
         $user->setEmail('');
@@ -417,12 +410,11 @@ class AdminController extends AbstractController
         $user->setDeletedAt(new DateTime());
 
         $this->disableProfiles($user);
-        $em->persist($userBackup);
+        $em->persist($deletedUserData);
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuidBeforeDelete));
-        return $this->redirectToRoute('admin_page');
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $user->getUUID()));
     }
 
     /*
@@ -1433,7 +1425,7 @@ class AdminController extends AbstractController
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
     public function freeradiusStatisticsData(
-        Request $request,
+        Request                  $request,
         #[MapQueryParameter] int $page = 1,
     ): Response
     {
