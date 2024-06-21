@@ -213,7 +213,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function setSamlAttributes(array $attributes): void
     {
-        $this->uuid = $attributes['sAMAccountName'][0];
+        $this->uuid = $attributes['samlUuid'][0];
         $this->saml_identifier = $attributes['sAMAccountName'][0];
         $this->email = $attributes['email'][0] ?? '';
         $this->first_name = $attributes['givenName'][0];

@@ -5,6 +5,8 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -14,20 +16,35 @@ use function is_string;
 
 class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
+    private UserRepository $userRepository;
+
     /**
      * @param class-string<UserInterface> $userClass
-     * @param array<string, mixed>        $mapping
+     * @param array<string, mixed> $mapping
      */
     public function __construct(
         private readonly string $userClass,
-        private readonly array $mapping,
-    ) {}
+        private readonly array  $mapping,
+        EntityManagerInterface  $entityManager,
+    )
+    {
+        $this->userRepository = $entityManager->getRepository($userClass);
+    }
 
     /**
      * @throws ReflectionException
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
+        $uuid = $this->getAttributeValue($attributes, 'samlUuid');
+
+        // Check if the user already exists
+        $existingUser = $this->userRepository->findOneBy(['uuid' => $uuid]);
+
+        if ($existingUser) {
+            return $existingUser;
+        }
+
         $user = new $this->userClass($identifier);
         $reflection = new ReflectionClass($this->userClass);
 
@@ -64,10 +81,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $attribute = $isArrayValue ? substr($attribute, 0, -2) : $attribute;
 
         if (!\array_key_exists($attribute, $attributes)) {
-            throw new RuntimeException('Attribute "'.$attribute.'" not found in SAML data.');
+            throw new RuntimeException('Attribute "' . $attribute . '" not found in SAML data.');
         }
 
-        $attributeValue = (array) $attributes[$attribute];
+        $attributeValue = (array)$attributes[$attribute];
         if (!$isArrayValue) {
             /** @psalm-suppress MixedAssignment */
             $attributeValue = reset($attributeValue);

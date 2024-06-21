@@ -39,10 +39,10 @@ services:
       - App\Entity\User
       ##  Attribute mapping
       - password: 'notused'
+        uuid: $samlUuid
         email: $email
         first_name: $givenName
         last_name: $surname
-        uuid: $sAMAccountName
         saml_identifier: $sAMAccountName
         isVerified: 1
         roles: [ ]
