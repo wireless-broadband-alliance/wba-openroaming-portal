@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
-use App\Entity\UserBackup;
+use App\Entity\DeletedUserData;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -70,6 +70,7 @@ class AdminController extends AbstractController
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
+     * @param UserPasswordHasherInterface $passwordEncoder
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
@@ -79,19 +80,21 @@ class AdminController extends AbstractController
      * @param RadiusAccountingRepository $radiusAccountingRepository
      */
     public function __construct(
-        MailerInterface            $mailer,
-        UserRepository             $userRepository,
-        ProfileManager             $profileManager,
-        ParameterBagInterface      $parameterBag,
-        GetSettings                $getSettings,
-        SettingRepository          $settingRepository,
-        EntityManagerInterface     $entityManager,
-        RadiusAuthsRepository      $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository
+        MailerInterface             $mailer,
+        UserRepository              $userRepository,
+        UserPasswordHasherInterface $passwordEncoder,
+        ProfileManager              $profileManager,
+        ParameterBagInterface       $parameterBag,
+        GetSettings                 $getSettings,
+        SettingRepository           $settingRepository,
+        EntityManagerInterface      $entityManager,
+        RadiusAuthsRepository       $radiusAuthsRepository,
+        RadiusAccountingRepository  $radiusAccountingRepository
     )
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->passwordEncoder = $passwordEncoder;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
@@ -355,13 +358,15 @@ class AdminController extends AbstractController
     /**
      * @param $id
      * @param EntityManagerInterface $em
+     * @param UserPasswordHasherInterface $userPasswordHasher
      * @return Response
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
         $id,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $userPasswordHasher,
     ): Response
     {
         $user = $this->userRepository->find($id);
@@ -373,11 +378,22 @@ class AdminController extends AbstractController
             $this->addFlash('error_admin', 'This user has already been deleted.');
             return $this->redirectToRoute('admin_page');
         }
+        $uuidBeforeDelete = $user->getUuid();
 
-        $userBackup = new UserBackup();
-        $userBackup->setUuid($user->getUuid());
-        $userBackup->setRoles($user->getRoles());
-        $userBackup->setEmail($user->getEmail());
+        // Hash sensitive fields
+        $hashedUuid = $userPasswordHasher->hashPassword($user, $user->getUuid());
+        $hashedEmail = null;
+        $hashedPhoneNumber = null;
+        if ($user->getEmail() !== null) {
+            $hashedEmail = $userPasswordHasher->hashPassword($user, $user->getEmail());
+        } else if ($user->getPhoneNumber() !== null) {
+            $hashedPhoneNumber = $userPasswordHasher->hashPassword($user, $user->getPhoneNumber());
+        }
+
+        // Create DeletedUserData entity and set hashed values
+        $userBackup = new DeletedUserData();
+        $userBackup->setUuid($hashedUuid);
+        $userBackup->setEmail($hashedEmail);
         $userBackup->setVerified($user->isVerified());
         $userBackup->setSamlIdentifier($user->getSamlIdentifier());
         $userBackup->setFirstName($user->getFirstName());
@@ -386,7 +402,7 @@ class AdminController extends AbstractController
         $userBackup->setCreatedAt($user->getCreatedAt());
         $userBackup->setBannedAt($user->getBannedAt());
         $userBackup->setDeletedAt(new DateTime());
-        $userBackup->setPhoneNumber($user->getPhoneNumber());
+        $userBackup->setPhoneNumber($hashedPhoneNumber);
         $userBackup->setUserBackup($user);
 
         $user->setUuid($user->getId());
@@ -405,9 +421,7 @@ class AdminController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-
-        $uuid = $userBackup->getUUID();
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuidBeforeDelete));
         return $this->redirectToRoute('admin_page');
     }
 
