@@ -2,12 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\UserBackupRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: UserBackupRepository::class)]
-class UserBackup
+#[ORM\Entity(repositoryClass: DeletedUserData::class)]
+class DeletedUserData
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -16,9 +15,6 @@ class UserBackup
 
     #[ORM\Column(length: 180)]
     private ?string $uuid = null;
-
-    #[ORM\Column]
-    private array $roles = [];
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
@@ -67,18 +63,6 @@ class UserBackup
     public function setUuid(string $uuid): static
     {
         $this->uuid = $uuid;
-
-        return $this;
-    }
-
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
 
         return $this;
     }

@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\UserBackup;
+use App\Entity\DeletedUserData;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<UserBackup>
+ * @extends ServiceEntityRepository<DeletedUserData>
  */
-class UserBackupRepository extends ServiceEntityRepository
+class DeletedUserDataRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, UserBackup::class);
+        parent::__construct($registry, DeletedUserData::class);
     }
 
     //    /**
-    //     * @return UserBackup[] Returns an array of UserBackup objects
+    //     * @return DeletedUserData[] Returns an array of DeletedUserData objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class UserBackupRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?UserBackup
+    //    public function findOneBySomeField($value): ?DeletedUserData
     //    {
     //        return $this->createQueryBuilder('u')
     //            ->andWhere('u.exampleField = :val')
