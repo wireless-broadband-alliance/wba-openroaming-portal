@@ -82,6 +82,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?DeletedUserData $deletedUserData = null;
+
 
     public function __construct()
     {
@@ -426,4 +429,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, SamlUse
         return $this;
     }
 
+    public function getDeletedUserData(): ?DeletedUserData
+    {
+        return $this->deletedUserData;
+    }
+
+    public function setDeletedUserData(DeletedUserData $deletedUserData): static
+    {
+        // set the owning side of the relation if necessary
+        if ($deletedUserData->getUser() !== $this) {
+            $deletedUserData->setUser($this);
+        }
+
+        $this->deletedUserData = $deletedUserData;
+
+        return $this;
+    }
 }

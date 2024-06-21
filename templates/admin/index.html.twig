@@ -161,14 +161,11 @@
                 </div>
             </div>
 
-            {# Pagination #}
-            <form action="{{ path('admin_page') }}" method="GET">
-                <div class="px-5 m-8">
-                    <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-
-                    {% include '/admin/shared/_pagination.html.twig' %}
-                </div>
-            </form>
+            {# Users Table Pagination #}
+            <div class="m-8">
+                <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+                {% include '/admin/partials/_users_pagination.html.twig' %}
+            </div>
         </div>
     </div>
 {% endblock %}
