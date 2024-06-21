@@ -236,6 +236,8 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
   the IdP.
 
+**Important**: If you want to use this provider authentication on the project, make sure to step up one of the variables to **samlUuid**, to save the unique id of the SAML account.
+
 ### 👾 Turnstile Integration
 
 These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
