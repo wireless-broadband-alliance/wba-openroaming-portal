@@ -6,7 +6,6 @@ declare(strict_types=1);
 namespace App\Security;
 
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -21,14 +20,15 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     /**
      * @param class-string<UserInterface> $userClass
      * @param array<string, mixed> $mapping
+     * @param UserRepository $userRepository
      */
     public function __construct(
         private readonly string $userClass,
         private readonly array  $mapping,
-        EntityManagerInterface  $entityManager,
+        UserRepository          $userRepository,
     )
     {
-        $this->userRepository = $entityManager->getRepository($userClass);
+        $this->userRepository = $userRepository;
     }
 
     /**
