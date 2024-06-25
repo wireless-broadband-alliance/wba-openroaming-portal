@@ -1,23 +1,38 @@
 <?php
-
 namespace App\Service;
 
-use phpseclib3\Crypt\PublicKeyLoader;
-use phpseclib3\Crypt\RSA;
+use InvalidArgumentException;
+use RuntimeException;
 
 class PgpEncryptionService
 {
-    private string $publicKey;
 
-    public function __construct(string $publicKey)
+    public function encrypt(string $publicKeyPath, string $data): string
     {
-        $this->publicKey = $publicKey;
-    }
+        $publicKeyPath = "/var/www/openroaming" . $publicKeyPath;
+        $publicKeyContent = file_get_contents($publicKeyPath);
 
-    public function encrypt(string $data): string
-    {
-        $publicKey = PublicKeyLoader::load($this->publicKey);
-        $encryptedData = $publicKey->encrypt($data);
-        return base64_encode($encryptedData);
+        if (empty($publicKeyContent)) {
+            throw new InvalidArgumentException('Public key not set.');
+        }
+
+        $gpg = gnupg_init();
+        gnupg_seterrormode($gpg, GNUPG_ERROR_EXCEPTION);
+
+        $importResult = gnupg_import($gpg, $publicKeyContent);
+
+        if ($importResult === false || empty($importResult['fingerprint'])) {
+            throw new InvalidArgumentException('Invalid PGP public key.');
+        }
+
+        gnupg_addencryptkey($gpg, $importResult['fingerprint']);
+
+        $encryptedData = gnupg_encrypt($gpg, $data);
+
+        if ($encryptedData === false) {
+            throw new RuntimeException('Encryption failed.');
+        }
+
+        return $encryptedData;
     }
 }

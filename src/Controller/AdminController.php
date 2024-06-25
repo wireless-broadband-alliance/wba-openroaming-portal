@@ -23,6 +23,7 @@ use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -65,6 +66,7 @@ class AdminController extends AbstractController
     private EntityManagerInterface $entityManager;
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
+    private PgpEncryptionService $pgpEncryptionService;
 
     /**
      * @param MailerInterface $mailer
@@ -77,6 +79,7 @@ class AdminController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param RadiusAuthsRepository $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
+     * @param PgpEncryptionService $pgpEncryptionService
      */
     public function __construct(
         MailerInterface             $mailer,
@@ -88,7 +91,7 @@ class AdminController extends AbstractController
         SettingRepository           $settingRepository,
         EntityManagerInterface      $entityManager,
         RadiusAuthsRepository       $radiusAuthsRepository,
-        RadiusAccountingRepository  $radiusAccountingRepository
+        RadiusAccountingRepository  $radiusAccountingRepository, PgpEncryptionService $pgpEncryptionService
     )
     {
         $this->mailer = $mailer;
@@ -101,6 +104,7 @@ class AdminController extends AbstractController
         $this->entityManager = $entityManager;
         $this->radiusAuthsRepository = $radiusAuthsRepository;
         $this->radiusAccountingRepository = $radiusAccountingRepository;
+        $this->pgpEncryptionService = $pgpEncryptionService;
     }
 
     /*
@@ -378,6 +382,7 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+
         $deletedUserData = [
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail() ?? 'This value is empty',
@@ -391,9 +396,12 @@ class AdminController extends AbstractController
             'deletedAt' => new DateTime(),
         ];
 
-        $jsonData = json_encode($userData);
+        $jsonData = json_encode($deletedUserData);
+
         // Encrypt JSON data using PGP encryption
-        $pgpEncryptedData = $pgpEncryptionService->encrypt($jsonData);
+        $pgpEncryptedService = new PgpEncryptionService();
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($this->parameterBag->get('app.pgp_public_key'), $jsonData);
+        dd($pgpEncryptedData);
         $deletedUserData = new DeletedUserData();
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserData->setUserId($user->getId());
