@@ -169,6 +169,8 @@ class AdminController extends AbstractController
 
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
+        // Check if the delete action has a public PGP key defined
+        $public_PGP_PATH = $this->parameterBag->get('app.pgp_public_key');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -184,7 +186,8 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
-            'export_users' => $export_users
+            'export_users' => $export_users,
+            'public_pgp_path' => $public_PGP_PATH
         ]);
     }
 

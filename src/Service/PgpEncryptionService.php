@@ -9,8 +9,7 @@ class PgpEncryptionService
 
     public function encrypt(string $publicKeyPath, string $data): string
     {
-        $publicKeyPath = "/var/www/openroaming" . $publicKeyPath;
-        $publicKeyContent = file_get_contents($publicKeyPath);
+        $publicKeyContent = file_get_contents("/var/www/openroaming/public/resources/public_pgp_key/public_key.asc");
 
         if (empty($publicKeyContent)) {
             throw new InvalidArgumentException('Public key not set.');
