@@ -58,11 +58,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
                     $value = $this->getAttributeValue($attributes, substr($attribute, 1));
                 } catch (RuntimeException) {
                     if ($field === 'email') {
-                        // Fallback to sAMAccountName if email is missing
-                        $value = $this->getAttributeValue($attributes, 'sAMAccountName');
-                    } else {
-                        // Handle other missing attributes as necessary
-                        $value = '';
+                        $value = null;
                     }
                 }
             } else {
