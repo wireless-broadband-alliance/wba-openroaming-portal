@@ -374,39 +374,13 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $userBackup = new UserBackup();
-        $userBackup->setUuid($user->getUuid());
-        $userBackup->setRoles($user->getRoles());
-        $userBackup->setEmail($user->getEmail());
-        $userBackup->setVerified($user->isVerified());
-        $userBackup->setSamlIdentifier($user->getSamlIdentifier());
-        $userBackup->setFirstName($user->getFirstName());
-        $userBackup->setLastName($user->getLastName());
-        $userBackup->setGoogleId($user->getGoogleId());
-        $userBackup->setCreatedAt($user->getCreatedAt());
-        $userBackup->setBannedAt($user->getBannedAt());
-        $userBackup->setDeletedAt(new DateTime());
-        $userBackup->setPhoneNumber($user->getPhoneNumber());
-        $userBackup->setUserBackup($user);
-
-        $user->setUuid($user->getId());
-        $user->setEmail('');
-        $user->setPhoneNumber('');
-        $user->setPassword($user->getId());
-        $user->setSamlIdentifier(null);
-        $user->setFirstName(null);
-        $user->setLastName(null);
-        $user->setGoogleId(null);
-        $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
         $this->disableProfiles($user);
-        $em->persist($userBackup);
         $em->persist($user);
         $em->flush();
 
-
-        $uuid = $userBackup->getUUID();
+        $uuid = $user->getUUID();
         $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
         return $this->redirectToRoute('admin_page');
     }
