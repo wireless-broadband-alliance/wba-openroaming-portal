@@ -1,6 +1,6 @@
 <div class="flex flex-col sm:flex-row items-center justify-start mt-5 gap-y-6">
     <div class="flex flex-row justify-start items-center gap-4">
-        <label for="count">Users per page</label>
+        <label for="count">{{ label }}</label>
 
         <select class="form-select" name="count" id="count" onchange="this.form.submit()">
             <option value="7" {% if count == 7 %} selected {% endif %}>7</option>
@@ -14,18 +14,18 @@
         <div class="sm:ml-auto flex flex-row text-base cursor-default">
             {# Display the range of user numbers on the current page #}
             <div class="flex space-x-2 mr-4">
-                {{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, allUsersCount) }} of {{ allUsersCount }}
+                {{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, occurrencies) }} of {{ occurrencies }}
             </div>
 
             <div class="flex space-x-2.5">
                 {# Previous page navigation #}
-                <a {% if currentPage > 1 %} href="{{ path('admin_page', {'u': searchTerm, 'page': currentPage - 1, 'filter': activeFilter}) }}" {% endif %}
+                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage - 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
                     <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
                 </a>
 
                 {# Next page navigation #}
-                <a {% if currentPage < totalPages %} href="{{ path('admin_page', {'u': searchTerm, 'page': currentPage + 1, 'filter': activeFilter}) }}" {% endif %}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage + 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
                     <twig:ux:icon name="wba:right" class="w-4" fill="none"/>
                 </a>

@@ -4,20 +4,20 @@
 
 {% block container %}
     {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
-        {% include 'admin/partials/settings_actions/_custom_portal.html.twig' %}
+        {% include 'admin/shared/settings_actions/_custom_portal.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
-        {% include 'admin/partials/settings_actions/_terms.html.twig' %}
+        {% include 'admin/shared/settings_actions/_terms.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
-        {% include 'admin/partials/settings_actions/_radius.html.twig' %}
+        {% include 'admin/shared/settings_actions/_radius.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
-        {% include 'admin/partials/settings_actions/_status.html.twig' %}
+        {% include 'admin/shared/settings_actions/_status.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-        {% include 'admin/partials/settings_actions/_LDAP.html.twig' %}
+        {% include 'admin/shared/settings_actions/_LDAP.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
-        {% include 'admin/partials/settings_actions/_auth.html.twig' %}
+        {% include 'admin/shared/settings_actions/_auth.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
-        {% include 'admin/partials/settings_actions/_capport.html.twig' %}
+        {% include 'admin/shared/settings_actions/_capport.html.twig' %}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
-        {% include 'admin/partials/settings_actions/_sms.html.twig' %}
+        {% include 'admin/shared/settings_actions/_sms.html.twig' %}
     {% endif %}
 {% endblock %}
