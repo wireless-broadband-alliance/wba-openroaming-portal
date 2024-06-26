@@ -32,12 +32,6 @@ class ResetPasswordType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter the confirmation',
                 ],
-                'constraints' => [
-                    new Length([
-                        'min' => 7,
-                        'minMessage' => ' This field cannot be shorter than {{ limit }} characters',
-                    ])
-                ],
             ]);
     }
 
