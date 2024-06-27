@@ -27,6 +27,9 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 RUN composer self-update --2
 #RUN rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/www/.gnupg && chown -R www-data:www-data /var/www/.gnupg
+WORKDIR /var/www/.gnupg
+RUN chmod 700 /var/www/.gnupg
 WORKDIR /var/www/openroaming
 COPY . /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
