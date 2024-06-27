@@ -49,7 +49,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  *
@@ -69,6 +69,7 @@ class AdminController extends AbstractController
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
+     * @param UserPasswordHasherInterface $passwordEncoder
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
@@ -78,19 +79,21 @@ class AdminController extends AbstractController
      * @param RadiusAccountingRepository $radiusAccountingRepository
      */
     public function __construct(
-        MailerInterface            $mailer,
-        UserRepository             $userRepository,
-        ProfileManager             $profileManager,
-        ParameterBagInterface      $parameterBag,
-        GetSettings                $getSettings,
-        SettingRepository          $settingRepository,
-        EntityManagerInterface     $entityManager,
-        RadiusAuthsRepository      $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository
+        MailerInterface             $mailer,
+        UserRepository              $userRepository,
+        UserPasswordHasherInterface $passwordEncoder,
+        ProfileManager              $profileManager,
+        ParameterBagInterface       $parameterBag,
+        GetSettings                 $getSettings,
+        SettingRepository           $settingRepository,
+        EntityManagerInterface      $entityManager,
+        RadiusAuthsRepository       $radiusAuthsRepository,
+        RadiusAccountingRepository  $radiusAccountingRepository
     )
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->passwordEncoder = $passwordEncoder;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
@@ -109,22 +112,25 @@ class AdminController extends AbstractController
      * @param int $page
      * @param string $sort
      * @param string $order
+     * @param int $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc', #[MapQueryParameter] int $count = 7): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $perPage = 7; // Number of users to display per page
+        $searchTerm = $request->query->get('u');
+        $perPage = $count;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
-        // Fetch users with the specified sorting
-        $users = $userRepository->findExcludingAdmin($filter);
+
+        // Use the updated searchWithFilter method to handle both filter and search term
+        $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
@@ -141,6 +147,10 @@ class AdminController extends AbstractController
             return $value2 <=> $value1; // +1
         });
 
+        if (strlen($searchTerm) > 320) {
+            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
+            return $this->redirectToRoute('admin_page');
+        }
 
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
@@ -156,16 +166,11 @@ class AdminController extends AbstractController
         $verifiedUsersCount = $userRepository->countVerifiedUsers();
         $bannedUsersCount = $userRepository->countBannedUsers();
 
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
-            'current_user' => $currentUser,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'perPage' => $perPage,
@@ -177,6 +182,7 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
+            'count' => $count,
             'export_users' => $export_users
         ]);
     }
@@ -267,100 +273,20 @@ class AdminController extends AbstractController
     }
 
     /*
-    * Handles search bar of the Users Table on the Main Route, with/out filters
-    */
-    /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
-    #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $searchTerm = $request->query->get('u');
-        $perPage = 7;
-
-        $filter = $request->query->get('filter', 'all'); // Default filter
-
-        // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm);
-
-        // Sort the users based on the specified column and order
-        usort($users, static function ($user1, $user2) use ($sort, $order) {
-            // This function is used to sort the arrays uuid and created_at
-            // and compares them with the associated users with the highest number to the lowest id from both arrays
-            $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
-            $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
-
-            if ($order === 'asc') { // Check if the order is "asc" or "desc"
-                //and returns the correct result between arrays
-                return $value1 <=> $value2; // -1
-            }
-
-            return $value2 <=> $value1; // +1
-        });
-
-        if (strlen($searchTerm) > 320) {
-            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
-            return $this->redirectToRoute('admin_page');
-        }
-
-        $totalUsers = count($users);
-        $totalPages = ceil($totalUsers / $perPage);
-        $offset = ($page - 1) * $perPage;
-        $users = array_slice($users, $offset, $perPage);
-
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm);
-        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $userRepository->countBannedUsers($searchTerm);
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
-
-        return $this->render('admin/index.html.twig', [
-            'users' => $users,
-            'currentPage' => $page,
-            'current_user' => $currentUser,
-            'totalPages' => $totalPages,
-            'perPage' => $perPage,
-            'searchTerm' => $searchTerm,
-            'data' => $data,
-            'allUsersCount' => $allUsersCount,
-            'verifiedUsersCount' => $verifiedUsersCount,
-            'bannedUsersCount' => $bannedUsersCount,
-            'activeFilter' => $filter,
-            'activeSort' => $sort,
-            'activeOrder' => $order,
-            'export_users' => $export_users
-        ]);
-    }
-
-    /*
      * Deletes Users from the Project, this only adds a deletedAt date for legal reasons
      */
     /**
      * @param $id
      * @param EntityManagerInterface $em
+     * @param UserPasswordHasherInterface $userPasswordHasher
      * @return Response
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
         $id,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $userPasswordHasher,
     ): Response
     {
         $user = $this->userRepository->find($id);
@@ -373,18 +299,43 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $uuid = $user->getUUID();
-        foreach ($user->getEvent() as $event) {
-            $em->remove($event);
-        }
-        $user->setDeletedAt(new DateTime());
-        $this->disableProfiles($user);
+        $deletedUserData = [
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail() ?? 'This value is empty',
+            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
+            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
+            'googleId' => $user->getGoogleId() ?? 'This value is empty',
+            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
+            'lastName' => $user->getLastName() ?? 'This value is empty',
+            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
+            'deletedAt' => new DateTime(),
+        ];
 
+        $jsonData = json_encode($userData);
+        // Encrypt JSON data using PGP encryption
+        $pgpEncryptedData = $pgpEncryptionService->encrypt($jsonData);
+        $deletedUserData = new DeletedUserData();
+        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
+        $deletedUserData->setUserId($user->getId());
+
+        $user->setUuid($user->getId());
+        $user->setEmail('');
+        $user->setPhoneNumber('');
+        $user->setPassword($user->getId());
+        $user->setSamlIdentifier(null);
+        $user->setFirstName(null);
+        $user->setLastName(null);
+        $user->setGoogleId(null);
+        $user->setBannedAt(null);
+        $user->setDeletedAt(new DateTime());
+
+        $this->disableProfiles($user);
+        $em->persist($deletedUserData);
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
-        return $this->redirectToRoute('admin_page');
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $user->getUUID()));
     }
 
     /*
@@ -526,19 +477,14 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(
-        string $type
-    ): Response
+    public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
 
         return $this->render('admin/confirm.html.twig', [
             'data' => $data,
-            'type' => $type,
-            'current_user' => $currentUser,
+            'type' => $type
         ]);
     }
 
@@ -880,16 +826,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(
-        Request                $request,
-        EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
+    public function settings_radius(Request     $request, EntityManagerInterface $em,
+                                    GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -954,8 +893,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1046,9 +984,6 @@ class AdminController extends AbstractController
         GetSettings            $getSettings
     ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1098,8 +1033,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1202,9 +1136,6 @@ class AdminController extends AbstractController
         GetSettings            $getSettings
     ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1251,8 +1182,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1337,12 +1267,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(
-        Request $request
-    ): Response
+    public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $user = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1373,7 +1300,6 @@ class AdminController extends AbstractController
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
-            'current_user' => $user,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
@@ -1388,14 +1314,15 @@ class AdminController extends AbstractController
      * Render Statistics about the freeradius data
      */
     /**
+     * @param Request $request
+     * @param int $page
      * @return Response
      * @throws \JsonException
-     * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
     public function freeradiusStatisticsData(
-        Request $request,
+        Request                  $request,
         #[MapQueryParameter] int $page = 1,
     ): Response
     {
@@ -2630,9 +2557,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -2692,8 +2616,7 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
-            'getSettings' => $getSettings,
-            'current_user' => $currentUser,
+            'getSettings' => $getSettings
         ]);
     }
 

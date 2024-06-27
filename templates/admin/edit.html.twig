@@ -81,7 +81,6 @@
         {{ form_start(formReset) }}
         {{ form_errors(formReset) }}
         <div class="p-6 mx-auto bg-white rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
-
             <div class="relative">
                 {{ form_label(formReset.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(formReset.password, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
@@ -90,7 +89,6 @@
                 </div>
             </div>
             <div class="relative">
-
                 {{ form_label(formReset.confirmPassword, 'Confirm New Password', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(formReset.confirmPassword, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
                 <div class="mt-2 -mb-2 text-center text-red-500 text-base">
@@ -98,8 +96,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex justify-end mt-10">
-            <button type="submit" class="btn-primary"
+        <div class="flex justify-end">
+            <button type="submit" class="btn-primary mt-6"
                     onclick="return confirm('Are you sure you want to reset the password of: {{ user.uuid }}?')">
                 Reset Password
             </button>
