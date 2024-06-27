@@ -403,7 +403,7 @@ class AdminController extends AbstractController
 
         // Encrypt JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
-        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($this->parameterBag->get('app.pgp_public_key'), $jsonData);
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
         dd($pgpEncryptedData);
         $deletedUserData = new DeletedUserData();
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
