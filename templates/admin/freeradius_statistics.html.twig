@@ -4,10 +4,10 @@
 
 {% block container %}
     {# Freeradius Statistics #}
-    <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-between items-center mb-10">
+        <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
 
         {% if exportFreeradiusStatistics == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
-            <div class="flex items-center space-x-6">
+            <div class="mr-auto flex items-center space-x-6">
                 <a href="{{ path('admin_page_export_freeradius') }}"
                    onclick="return confirm('Are you sure you want to export data' +
                    {% if selectedStartDate and selectedEndDate %}
@@ -21,6 +21,7 @@
                 </a>
             </div>
         {% endif %}
+
         <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics_freeradius') }}"
               method="post"
               class="flex flex-col sm:flex-row items-center gap-2">
