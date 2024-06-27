@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
@@ -385,6 +386,7 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        $getUUID = $user->getUuid();
 
         $deletedUserData = [
             'uuid' => $user->getUuid(),
@@ -404,10 +406,10 @@ class AdminController extends AbstractController
         // Encrypt JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
-        dd($pgpEncryptedData);
+
         $deletedUserData = new DeletedUserData();
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
-        $deletedUserData->setUserId($user->getId());
+        $deletedUserData->setUser($user);
 
         $user->setUuid($user->getId());
         $user->setEmail('');
@@ -425,7 +427,8 @@ class AdminController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $user->getUUID()));
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
+        return $this->redirectToRoute('admin_page');
     }
 
     /*
