@@ -49,7 +49,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  *
@@ -1314,9 +1314,10 @@ class AdminController extends AbstractController
      * Render Statistics about the freeradius data
      */
     /**
+     * @param Request $request
+     * @param int $page
      * @return Response
      * @throws \JsonException
-     * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
