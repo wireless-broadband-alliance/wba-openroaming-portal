@@ -1956,7 +1956,7 @@ class AdminController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         // Determine the appropriate time granularity
-        if ($interval->days > 365) {
+        if ($interval->days > 365.2) {
             $granularity = 'year';
         } else if ($interval->days > 90) {
             $granularity = 'month';
@@ -2661,7 +2661,7 @@ class AdminController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         // Determine the appropriate time granularity
-        if ($interval->days > 365) {
+        if ($interval->days > 365.2) {
             $granularity = 'year';
         } elseif ($interval->days > 90) {
             $granularity = 'month';
