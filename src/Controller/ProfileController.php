@@ -97,7 +97,8 @@ class ProfileController extends AbstractController
         $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
         $event->setEventMetadata([
             'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::ANDROID
+            'type' => OSTypes::ANDROID,
+            'isIP' => $_SERVER['REMOTE_ADDR'],
         ]);
         $eventRepository->save($event, true);
 
@@ -200,11 +201,13 @@ class ProfileController extends AbstractController
             $event->setEventMetadata([
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS,
+                'isIP' => $_SERVER['REMOTE_ADDR'],
             ]);
         } elseif (stripos($userAgent, 'Mac OS') !== false) {
             $event->setEventMetadata([
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
+                'isIP' => $_SERVER['REMOTE_ADDR'],
             ]);
         }
 
@@ -288,7 +291,8 @@ class ProfileController extends AbstractController
         $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
         $event->setEventMetadata([
             'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::WINDOWS
+            'type' => OSTypes::WINDOWS,
+            'isIP' => $_SERVER['REMOTE_ADDR'],
         ]);
         $eventRepository->save($event, true);
 

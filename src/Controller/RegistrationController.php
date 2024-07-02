@@ -135,7 +135,8 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_CREATION);
                 $event->setEventMetadata([
                     'platform' => PlatformMode::Live,
-                    'sms' => false,
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'registrationType' => 'email',
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();
@@ -221,7 +222,7 @@ class RegistrationController extends AbstractController
                 $event->setEventName(AnalyticalEventType::USER_CREATION);
                 $event->setEventMetadata([
                     'platform' => PlatformMode::Live,
-                    'sms' => true,
+                    'registrationType' => 'phoneNumber',
                 ]);
                 $entityManager->persist($event);
                 $entityManager->flush();

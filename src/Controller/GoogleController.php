@@ -210,6 +210,8 @@ class GoogleController extends AbstractController
         $event_create->setEventName(AnalyticalEventType::USER_CREATION);
         $event_create->setEventMetadata([
             'platform' => PlatformMode::Live,
+            'isIP' => $_SERVER['REMOTE_ADDR'],
+            'registrationType' => 'GoogleAccount'
         ]);
         $event_create->setEventDatetime(new DateTime());
 
