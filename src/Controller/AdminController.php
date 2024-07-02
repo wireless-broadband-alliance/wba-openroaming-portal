@@ -504,6 +504,19 @@ class AdminController extends AbstractController
                 );
             $mailer->send($email);
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
+
+            $event = new Event();
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI);
+            $event->setEventMetadata([
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ]);
+
+            $em->persist($event);
+            $em->flush();
+
             return $this->redirectToRoute('admin_page');
         }
 
