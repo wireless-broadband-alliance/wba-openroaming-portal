@@ -449,6 +449,19 @@ class AdminController extends AbstractController
 
             $userRepository->save($user, true);
             $email = $user->getEmail();
+
+            $event = new Event();
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI);
+            $event->setEventMetadata([
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ]);
+
+            $em->persist($event);
+            $em->flush();
+
             $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
 
             return $this->redirectToRoute('admin_page');
