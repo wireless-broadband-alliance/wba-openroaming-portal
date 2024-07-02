@@ -6,6 +6,7 @@ use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -411,6 +412,17 @@ class AdminController extends AbstractController
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserData->setUser($user);
 
+        $event = new Event();
+        $event->setUser($user);
+        $event->setEventDatetime(new DateTime());
+        $event->setEventName(AnalyticalEventType::DELETED_USER_BY);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $event->setEventMetadata([
+            'deletedBy' => $currentUser->getUuid(),
+            'isIP' => $_SERVER['REMOTE_ADDR'],
+        ]);
+
         $user->setUuid($user->getId());
         $user->setEmail('');
         $user->setPhoneNumber('');
@@ -422,8 +434,10 @@ class AdminController extends AbstractController
         $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
+
         $this->disableProfiles($user);
         $em->persist($deletedUserData);
+        $em->persist($event);
         $em->persist($user);
         $em->flush();
 
