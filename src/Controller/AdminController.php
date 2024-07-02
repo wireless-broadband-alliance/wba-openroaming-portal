@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -51,9 +52,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- *
- */
+
 class AdminController extends AbstractController
 {
     private MailerInterface $mailer;
@@ -185,8 +184,12 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportUsers(UserRepository $userRepository): Response
+    public function exportUsers(UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
         if ($export_users === EmailConfirmationStrategy::NO_EMAIL) {
@@ -239,6 +242,18 @@ class AdminController extends AbstractController
         $tempFile = tempnam(sys_get_temp_dir(), 'users');
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
+
+        $event = new Event();
+        $event->setUser($currentUser);
+        $event->setEventDatetime(new DateTime());
+        $event->setEventName(AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST);
+        $event->setEventMetadata([
+            'isIP' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $currentUser->getUuid()
+        ]);
+
+        $entityManager->persist($event);
+        $entityManager->flush();
 
         // Return the file as a response
         return $this->file($tempFile, 'users.xlsx');
