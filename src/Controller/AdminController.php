@@ -583,6 +583,18 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The setting has been reset successfully!');
+                $event = new Event();
+                $event->setUser($currentUser);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST);
+                $event->setEventMetadata([
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid()
+                ]);
+
+                $em->persist($event);
+                $em->flush();
+
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
@@ -598,6 +610,18 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
+                $event = new Event();
+                $event->setUser($currentUser);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::SETTING_TERMS_RESET_REQUEST);
+                $event->setEventMetadata([
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid()
+                ]);
+
+                $em->persist($event);
+                $em->flush();
+
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
@@ -613,6 +637,18 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
+                $event = new Event();
+                $event->setUser($currentUser);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST);
+                $event->setEventMetadata([
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid()
+                ]);
+
+                $em->persist($event);
+                $em->flush();
+
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
@@ -628,6 +664,18 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The platform mode status has been reset successfully!');
+
+                $event = new Event();
+                $event->setUser($currentUser);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
+                $event->setEventMetadata([
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid()
+                ]);
+
+                $em->persist($event);
+                $em->flush();
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
@@ -706,7 +754,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function regenerateCode(string $type): RedirectResponse
+    public function regenerateCode(string $type, EntityManagerInterface $entityManager): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -852,7 +900,16 @@ class AdminController extends AbstractController
                 $privacyPolicySetting->setValue($privacyPolicyLink);
                 $em->persist($privacyPolicySetting);
             }
+            $event = new Event();
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::SETTING_TERMS_REQUEST);
+            $event->setEventMetadata([
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ]);
 
+            $em->persist($event);
             // Flush the changes to the database
             $em->flush();
 
@@ -935,7 +992,16 @@ class AdminController extends AbstractController
                         $em->persist($setting);
                     }
                 }
+                $event = new Event();
+                $event->setUser($currentUser);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST);
+                $event->setEventMetadata([
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid()
+                ]);
 
+                $em->persist($event);
                 // Flush the changes to the database
                 $em->flush();
 
@@ -1004,7 +1070,16 @@ class AdminController extends AbstractController
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
             }
+            $event = new Event();
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST);
+            $event->setEventMetadata([
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ]);
 
+            $em->persist($event);
             // Flush the changes to the database
             $em->flush();
 
@@ -2191,6 +2266,16 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
 
             // Flush the changes to the database
+            $event = new Event();
+            $event->setUser($currentUser);
+            $event->setEventDatetime(new DateTime());
+            $event->setEventName(AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST);
+            $event->setEventMetadata([
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ]);
+
+            $em->persist($event);
             $em->flush();
 
             return $this->redirectToRoute('admin_dashboard_customize');
