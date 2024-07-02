@@ -301,6 +301,10 @@ class RegistrationController extends AbstractController
                 $event->setUser($user);
                 $event->setEventDatetime(new DateTime());
                 $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
+                $event->setEventMetadata([
+                    'platform' => PlatformMode::Live,
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                ]);
                 $eventRepository->save($event, true);
 
                 $this->addFlash('success', 'Your account has been verified!');

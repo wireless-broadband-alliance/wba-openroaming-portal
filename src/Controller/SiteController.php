@@ -271,6 +271,7 @@ class SiteController extends AbstractController
             $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE);
             $event->setEventMetadata([
                 'platform' => PlatformMode::Live,
+                'isIP' => $_SERVER['REMOTE_ADDR'],
                 'Old data' => [
                     'First Name' => $oldFirstName,
                     'Last Name' => $oldLastName,
@@ -320,6 +321,7 @@ class SiteController extends AbstractController
             $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD);
             $event->setEventMetadata([
                 'platform' => PlatformMode::Live,
+                'isIP' => $_SERVER['REMOTE_ADDR'],
             ]);
 
             $em->persist($event);
@@ -386,6 +388,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                         $latestEvent->setEventMetadata([
                             'platform' => PlatformMode::Live,
+                            'isIP' => $_SERVER['REMOTE_ADDR'],
                             'email' => $user->getEmail(),
                         ]);
                     }
@@ -489,6 +492,7 @@ class SiteController extends AbstractController
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEvent->setEventMetadata([
                                 'platform' => PlatformMode::Live,
+                                'isIP' => $_SERVER['REMOTE_ADDR'],
                                 'phoneNumber' => $user->getPhoneNumber(),
                             ]);
                         }
@@ -614,6 +618,7 @@ class SiteController extends AbstractController
             $event->setEventName(AnalyticalEventType::FORGOT_PASSWORD_REQUEST_ACCEPTED);
             $event->setEventMetadata([
                 'platform' => PlatformMode::Live,
+                'isIP' => $_SERVER['REMOTE_ADDR'],
             ]);
 
             $entityManager->persist($event);
@@ -756,6 +761,7 @@ class SiteController extends AbstractController
                     $latestEvent->setEventMetadata([
                         'platform' => PlatformMode::Live,
                         'email' => $currentUser->getEmail(),
+                        'isIP' => $_SERVER['REMOTE_ADDR'],
                     ]);
                 }
 
@@ -842,6 +848,10 @@ class SiteController extends AbstractController
             $event->setUser($currentUser);
             $event->setEventDatetime(new DateTime());
             $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
+            $event->setEventMetadata([
+                'platform' => PlatformMode::Live,
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+            ]);
             $eventRepository->save($event, true);
 
             $this->addFlash('success', 'Your account is now successfully verified');

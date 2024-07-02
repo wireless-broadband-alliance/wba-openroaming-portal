@@ -152,6 +152,7 @@ class SendSMS
                     $latestEvent->setEventMetadata([
                         'platform' => PlatformMode::Live,
                         'phoneNumber' => $user->getPhoneNumber(),
+                        'isIP' => $_SERVER['REMOTE_ADDR'],
                     ]);
                 } else {
                     // Increment the attempts
