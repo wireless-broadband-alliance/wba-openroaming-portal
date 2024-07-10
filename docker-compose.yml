@@ -6,6 +6,7 @@ services:
       - .env
     volumes:
       - .env/:/var/www/openroaming/.env
+      - ./pgp_public_keys/:/var/www/openroaming/pgp_public_keys/
       - ./signing-keys/:/var/www/openroaming/signing-keys/
       - uploads:/var/www/openroaming/public/resources/uploaded
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro

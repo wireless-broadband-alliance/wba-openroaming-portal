@@ -47,13 +47,7 @@
         </div>
     {% endif %}
 
-    {# Setting Description #}
-    <div class="flex justify-center items-center">
-        <div {{ stimulus_target('card', 'info') }}
-                class="bg-indigo-400 rounded-lg p-2 mb-6 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden">
-            {{ setting.vars.attr.description }}
-        </div>
-    </div>
+    {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
 
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(setting) }}

@@ -33,6 +33,7 @@ class SMSType extends AbstractType
             ],
             'SMS_FROM' => [
                 'type' => TextType::class,
+                'attr' => ['maxlength' => 11],
                 'constraints' => [
                     new Length([
                         'max' => 11,
@@ -57,6 +58,9 @@ class SMSType extends AbstractType
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    if (array_key_exists('attr', $config) && array_key_exists('maxlength', $config['attr'])) {
+                        $formFieldOptions['attr']['maxlength'] = $config['attr']['maxlength'];
+                    }
                     $formFieldOptions['constraints'] = $config['constraints'] ?? [];
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;

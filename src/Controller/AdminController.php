@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
@@ -24,6 +25,7 @@ use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -50,7 +52,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 
 class AdminController extends AbstractController
@@ -64,6 +66,7 @@ class AdminController extends AbstractController
     private EntityManagerInterface $entityManager;
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
+    private PgpEncryptionService $pgpEncryptionService;
 
     /**
      * @param MailerInterface $mailer
@@ -75,17 +78,18 @@ class AdminController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param RadiusAuthsRepository $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
+     * @param PgpEncryptionService $pgpEncryptionService
      */
     public function __construct(
-        MailerInterface            $mailer,
-        UserRepository             $userRepository,
-        ProfileManager             $profileManager,
-        ParameterBagInterface      $parameterBag,
-        GetSettings                $getSettings,
-        SettingRepository          $settingRepository,
-        EntityManagerInterface     $entityManager,
-        RadiusAuthsRepository      $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository
+        MailerInterface             $mailer,
+        UserRepository              $userRepository,
+        ProfileManager              $profileManager,
+        ParameterBagInterface       $parameterBag,
+        GetSettings                 $getSettings,
+        SettingRepository           $settingRepository,
+        EntityManagerInterface      $entityManager,
+        RadiusAuthsRepository       $radiusAuthsRepository,
+        RadiusAccountingRepository  $radiusAccountingRepository, PgpEncryptionService $pgpEncryptionService
     )
     {
         $this->mailer = $mailer;
@@ -97,29 +101,37 @@ class AdminController extends AbstractController
         $this->entityManager = $entityManager;
         $this->radiusAuthsRepository = $radiusAuthsRepository;
         $this->radiusAccountingRepository = $radiusAccountingRepository;
+        $this->pgpEncryptionService = $pgpEncryptionService;
     }
 
+    /*
+    * Dashboard Page Main Route
+    */
     /**
      * @param Request $request
      * @param UserRepository $userRepository
      * @param int $page
      * @param string $sort
      * @param string $order
+     * @param int $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc', #[MapQueryParameter] int $count = 7): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $perPage = 7; // Number of users to display per page
+        $searchTerm = $request->query->get('u');
+        $perPage = $count;
 
-        // Fetch users with the specified sorting
-        $users = $userRepository->findExcludingAdmin();
+        $filter = $request->query->get('filter', 'all'); // Default filter
+
+        // Use the updated searchWithFilter method to handle both filter and search term
+        $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
@@ -136,7 +148,6 @@ class AdminController extends AbstractController
             return $value2 <=> $value1; // +1
         });
 
-        $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
@@ -150,18 +161,15 @@ class AdminController extends AbstractController
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
         $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
+        $bannedUsersCount = $userRepository->totalBannedUsers();
 
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
+        // Check if the delete action has a public PGP key defined
+        $public_PGP_PATH = $this->parameterBag->get('app.pgp_public_key');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
-            'current_user' => $currentUser,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'perPage' => $perPage,
@@ -173,10 +181,15 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
-            'export_users' => $export_users
+            'count' => $count,
+            'export_users' => $export_users,
+            'public_pgp_path' => $public_PGP_PATH
         ]);
     }
 
+    /*
+    * Handle export of the Users Table on the Main Route
+    */
     /**
      * @param UserRepository $userRepository
      * @return Response
@@ -273,93 +286,22 @@ class AdminController extends AbstractController
         return UserProvider::Portal_Account;
     }
 
-    /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+    /*
+     * Deletes Users from the Project, this only adds a deletedAt date for legal reasons
      */
-    #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $searchTerm = $request->query->get('u');
-        $perPage = 7;
-
-        $filter = $request->query->get('filter', 'all'); // Default filter
-
-        // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm);
-
-        // Sort the users based on the specified column and order
-        usort($users, static function ($user1, $user2) use ($sort, $order) {
-            // This function is used to sort the arrays uuid and created_at
-            // and compares them with the associated users with the highest number to the lowest id from both arrays
-            $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
-            $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
-
-            if ($order === 'asc') { // Check if the order is "asc" or "desc"
-                //and returns the correct result between arrays
-                return $value1 <=> $value2; // -1
-            }
-
-            return $value2 <=> $value1; // +1
-        });
-
-        if (strlen($searchTerm) > 320) {
-            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
-            return $this->redirectToRoute('admin_page');
-        }
-
-        $totalUsers = count($users);
-        $totalPages = ceil($totalUsers / $perPage);
-        $offset = ($page - 1) * $perPage;
-        $users = array_slice($users, $offset, $perPage);
-
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
-        $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
-
-        return $this->render('admin/index.html.twig', [
-            'users' => $users,
-            'currentPage' => $page,
-            'current_user' => $currentUser,
-            'totalPages' => $totalPages,
-            'perPage' => $perPage,
-            'searchTerm' => $searchTerm,
-            'data' => $data,
-            'allUsersCount' => $allUsersCount,
-            'verifiedUsersCount' => $verifiedUsersCount,
-            'bannedUsersCount' => $bannedUsersCount,
-            'activeFilter' => $filter,
-            'activeSort' => $sort,
-            'activeOrder' => $order,
-            'export_users' => $export_users
-        ]);
-    }
-
     /**
      * @param $id
      * @param EntityManagerInterface $em
+     * @param UserPasswordHasherInterface $userPasswordHasher
      * @return Response
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers($id, EntityManagerInterface $em): Response
+    public function deleteUsers(
+        $id,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $userPasswordHasher,
+    ): Response
     {
         $user = $this->userRepository->find($id);
         if (!$user) {
@@ -371,21 +313,67 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $uuid = $user->getUUID();
-        foreach ($user->getEvent() as $event) {
-            $em->remove($event);
-        }
-        $user->setDeletedAt(new DateTime());
-        $this->disableProfiles($user);
+        $getUUID = $user->getUuid();
 
+        $deletedUserData = [
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail() ?? 'This value is empty',
+            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
+            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
+            'googleId' => $user->getGoogleId() ?? 'This value is empty',
+            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
+            'lastName' => $user->getLastName() ?? 'This value is empty',
+            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
+            'deletedAt' => new DateTime(),
+        ];
+
+        $jsonData = json_encode($deletedUserData);
+
+        // Encrypt JSON data using PGP encryption
+        $pgpEncryptedService = new PgpEncryptionService();
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
+
+        $deletedUserData = new DeletedUserData();
+        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
+        $deletedUserData->setUser($user);
+
+        $event = new Event();
+        $event->setUser($user);
+        $event->setEventDatetime(new DateTime());
+        $event->setEventName(AnalyticalEventType::DELETED_USER_BY);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $event->setEventMetadata([
+            'deletedBy' => $currentUser->getUuid(),
+            'isIP' => $_SERVER['REMOTE_ADDR'],
+        ]);
+
+        $user->setUuid($user->getId());
+        $user->setEmail('');
+        $user->setPhoneNumber('');
+        $user->setPassword($user->getId());
+        $user->setSamlIdentifier(null);
+        $user->setFirstName(null);
+        $user->setLastName(null);
+        $user->setGoogleId(null);
+        $user->setBannedAt(null);
+        $user->setDeletedAt(new DateTime());
+
+
+        $this->disableProfiles($user);
+        $em->persist($deletedUserData);
+        $em->persist($event);
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
         return $this->redirectToRoute('admin_page');
     }
 
-
+    /*
+    * Handles the edit of the Users by the admin
+    */
     /**
      * @param Request $request
      * @param UserRepository $userRepository
@@ -398,7 +386,13 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
-    public function editUsers(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, MailerInterface $mailer, $id): Response
+    public function editUsers(
+        Request                     $request,
+        UserRepository              $userRepository,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface      $em,
+        MailerInterface             $mailer,
+                                    $id): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -474,20 +468,17 @@ class AdminController extends AbstractController
         $formReset->handleRequest($request);
 
         if ($formReset->isSubmitted() && $formReset->isValid()) {
-            // get the typed password by the admin
+            // get the both typed passwords by the admin
             $newPassword = $formReset->get('password')->getData();
+            $confirmPassword = $formReset->get('confirmPassword')->getData();
+
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
+                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+            }
+
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-//            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-//                $verificationCode = $this->generateVerificationCode($user);
-//                // Removes the admin access until he confirms his new password
-//                $user->setVerificationCode($verificationCode);
-//                $user->setPassword($hashedPassword);
-//                $user->setIsVerified(0);
-//                $em->persist($user);
-//                $em->flush();
-//                return $this->redirectToRoute('app_dashboard_regenerate_code_admin', ['type' => 'password']);
-//            }
             $user->setPassword($hashedPassword);
             $em->flush();
 
@@ -532,10 +523,11 @@ class AdminController extends AbstractController
         );
     }
 
-
+    /*
+     * Render a confirmation password form
+     */
     /**
      * @param string $type Type of action
-     * Render a confirmation password form
      * @return Response
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
@@ -544,27 +536,30 @@ class AdminController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
 
         return $this->render('admin/confirm.html.twig', [
             'data' => $data,
-            'type' => $type,
-            'current_user' => $currentUser,
+            'type' => $type
         ]);
     }
 
+    /*
+     * Check if the code and then return the correct action
+     */
     /**
      * @param RequestStack $requestStack
      * @param EntityManagerInterface $em
      * @param string $type Type of action
      * @return Response
-     * Check if the code and then return the correct action
      * @throws Exception
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkPassword(RequestStack $requestStack, EntityManagerInterface $em, string $type): Response
+    public function checkPassword(
+        RequestStack           $requestStack,
+        EntityManagerInterface $em,
+        string                 $type
+    ): Response
     {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
@@ -870,7 +865,9 @@ class AdminController extends AbstractController
      * @return Email The email with the code.
      * @throws Exception
      */
-    protected function createEmailAdmin(string $email): Email
+    protected function createEmailAdmin(
+        string $email
+    ): Email
     {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -900,7 +897,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_terms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_terms(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -979,12 +980,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_radius(Request     $request, EntityManagerInterface $em,
+                                    GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1058,8 +1056,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1071,7 +1068,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_status(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_status(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1149,11 +1150,12 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_LDAP(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_LDAP(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1212,8 +1214,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1225,7 +1226,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_auth(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_auth(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1315,11 +1320,12 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_capport(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_capport(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1376,8 +1382,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1389,7 +1394,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_sms(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settings_sms(
+        Request                $request,
+        EntityManagerInterface $em,
+        GetSettings            $getSettings
+    ): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1457,6 +1466,9 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Render Statistics  about the Portal data
+     */
+    /**
      * @param Request $request
      * @return Response
      * @throws \JsonException
@@ -1467,7 +1479,6 @@ class AdminController extends AbstractController
     public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $user = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1477,15 +1488,15 @@ class AdminController extends AbstractController
         if ($startDateString) {
             $startDate = new DateTime($startDateString);
         } else if ($startDateString === "") {
-            $startDate = null;
+            $startDate = (new DateTime())->modify('-1 week');
         } else {
-            $startDate = (new DateTime())->modify('-1 month');
+            $startDate = (new DateTime())->modify('-1 week');
         }
 
         if ($endDateString) {
             $endDate = new DateTime($endDateString);
         } else if ($endDateString === "") {
-            $endDate = null;
+            $endDate = new DateTime();
         } else {
             $endDate = new DateTime();
         }
@@ -1498,7 +1509,6 @@ class AdminController extends AbstractController
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
-            'current_user' => $user,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
@@ -1510,13 +1520,20 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Render Statistics about the freeradius data
+     */
+    /**
+     * @param Request $request
+     * @param int $page
      * @return Response
      * @throws \JsonException
-     * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function freeradiusStatisticsData(Request $request): Response
+    public function freeradiusStatisticsData(
+        Request                  $request,
+        #[MapQueryParameter] int $page = 1,
+    ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
@@ -1530,15 +1547,15 @@ class AdminController extends AbstractController
         if ($startDateString) {
             $startDate = new DateTime($startDateString);
         } else if ($startDateString === "") {
-            $startDate = null;
+            $startDate = (new DateTime())->modify('-1 week');
         } else {
-            $startDate = (new DateTime())->modify('-1 month');
+            $startDate = (new DateTime())->modify('-1 week');
         }
 
         if ($endDateString) {
             $endDate = new DateTime($endDateString);
         } else if ($endDateString === "") {
-            $endDate = null;
+            $endDate = new DateTime();
         } else {
             $endDate = new DateTime();
         }
@@ -1548,54 +1565,29 @@ class AdminController extends AbstractController
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
+        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Extract the connection attempts
         $authCounts = [
-            'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0],
-            'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1],
+            'Accepted' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][0]['data']),
+            'Rejected' => array_sum($fetchChartAuthenticationsFreeradius['datasets'][1]['data']),
         ];
 
-        $totalSessionTimeSeconds = 0;
-        $averageSessionTimeSeconds = 0;
-        // Iterate over the session data to calculate total and average session times
-        foreach ($fetchChartSessionTimeFreeradius as $session) {
-            $totalSessionTimeSeconds = $session['totalSessionTime'] + $totalSessionTimeSeconds;
-            $averageSessionTimeSeconds = $session['averageSessionTime'] + $averageSessionTimeSeconds;
-        }
+        // Extract all realms names and usage
+        $realmsUsage = [];
+        foreach ($fetchChartRealmsFreeradius as $content) {
+            $realm = $content['realm'];
+            $count = $content['count'];
 
-        // Format total session time
-        $totalHours = floor($totalSessionTimeSeconds / 3600);
-        $totalMinutes = floor(($totalSessionTimeSeconds % 3600) / 60);
-        $sessionTotalTime = sprintf('%dh %dm', $totalHours, $totalMinutes);
-
-        // Format average session time
-        $averageHours = floor($averageSessionTimeSeconds / 3600);
-        $averageMinutes = floor(($averageSessionTimeSeconds % 3600) / 60);
-        $sessionAverageTime = sprintf('%dh %dm', $averageHours, $averageMinutes);
-
-        // Sum all the traffic from the Accounting table
-        $totalTraffic = [
-            'total_input' => 0,
-            'total_output' => 0,
-        ];
-        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
-            // Check if the dataset is for input or output
-            if ($dataset['label'] === 'Uploaded') {
-                // Sum the data for total input
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
-                }
-            } elseif ($dataset['label'] === 'Downloaded') {
-                // Sum the data for total output
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
-                }
+            if (isset($realmsUsage[$realm])) {
+                $realmsUsage[$realm] += $count;
+            } else {
+                $realmsUsage[$realm] = $count;
             }
         }
-
-        // Extract all realms names
-        $realmsNames = $fetchChartRealmsFreeradius['labels'];
 
         // Sum all the current authentication
         $totalCurrentAuths = 0;
@@ -1604,29 +1596,73 @@ class AdminController extends AbstractController
             $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
         }
 
+        // Sum all the traffic from the Accounting table
+        $totalTraffic = [
+            'total_input' => 0,
+            'total_output' => 0,
+        ];
+        foreach ($fetchChartTrafficFreeradius as $content) {
+            $totalTraffic['total_input'] += $content['total_input'];
+            $totalTraffic['total_output'] += $content['total_output'];
+        }
+        $totalTraffic['total_input'] = number_format($totalTraffic['total_input'] / (1024 * 1024 * 1024), 1);
+        $totalTraffic['total_output'] = number_format($totalTraffic['total_output'] / (1024 * 1024 * 1024), 1);
+
+        // Extract the average time
+        $averageTimes = $fetchChartSessionAverageFreeradius['datasets'][0]['data'];
+        $totalAverageTimeSeconds = array_sum($averageTimes);
+
+        // Convert the total average time to human-readable format
+        $totalAverageTimeReadable = sprintf(
+            '%dh %dm',
+            floor($totalAverageTimeSeconds / 3600),
+            floor(($totalAverageTimeSeconds % 3600) / 60)
+        );
+
+        // Extract the total time
+        $totalTimes = $fetchChartSessionTotalFreeradius['datasets'][0]['data'];
+        $totalTimeSeconds = array_sum($totalTimes);
+
+        // Convert the total time to human-readable format
+        $totalTimeReadable = sprintf(
+            '%dh %dm',
+            floor($totalTimeSeconds / 3600),
+            floor(($totalTimeSeconds % 3600) / 60)
+        );
+
+        $perPage = 3;
+        $totalApCount = count($fetchChartApUsage);
+        $totalPages = ceil($totalApCount / $perPage);
+        $offset = ($page - 1) * $perPage;
+        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $perPage);
+
         return $this->render('admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
-            'realmsUsage' => $realmsNames,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
+            'totalApCount' => $totalApCount,
+            'realmsUsage' => $realmsUsage,
             'authCounts' => $authCounts,
             'totalCurrentAuths' => $totalCurrentAuths,
             'totalTrafficFreeradius' => $totalTraffic,
-            'labelsRealmList' => $fetchChartRealmsFreeradius['labels'],
-            'datasetsRealmList' => $fetchChartRealmsFreeradius['datasets'],
-            'sessionTimeAverage' => $sessionAverageTime,
-            'sessionTimeAverageSeconds' => $averageSessionTimeSeconds,
-            'sessionTimeTotal' => $sessionTotalTime,
-            'sessionTimeTotalSeconds' => $totalSessionTimeSeconds,
+            'sessionTimeAverage' => $totalAverageTimeReadable,
+            'totalTime' => $totalTimeReadable,
             'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
+            'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
+            'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
+            'wifiTagsJson' => json_encode($fetchChartWifiTags, JSON_THROW_ON_ERROR),
+            'ApUsage' => $fetchChartApUsage,
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
         ]);
     }
 
+
     /**
-     * @return Response
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * Exports the freeradius data
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1637,128 +1673,242 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
 
         // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
-        if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else if ($startDateString === "") {
-            $startDate = null;
-        } else {
-            $startDate = (new DateTime())->modify('-1 month');
-        }
+        $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 week');
+        $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
-        if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else if ($endDateString === "") {
-            $endDate = null;
-        } else {
-            $endDate = new DateTime();
-        }
-
-        // Fetch all the required data, graphics etc...
+        // Fetch the authentication data
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
-        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
-        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartSessionTimeFreeradius = $this->fetchChartSessionTimeFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
 
-        // Sum all the current authentication
-        $totalCurrentAuths = 0;
-        foreach ($fetchChartCurrentAuthFreeradius['datasets'] as $dataset) {
-            // Sum the data points in the current dataset
-            $totalCurrentAuths = array_sum($dataset['data']) + $totalCurrentAuths;
-        }
+        // Prepare the authentication data for Excel
+        $authData = [];
+        foreach ($fetchChartAuthenticationsFreeradius['labels'] as $index => $auth_date) {
+            $accepted = $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][$index] ?? 0;
+            $rejected = $fetchChartAuthenticationsFreeradius['datasets'][1]['data'][$index] ?? 0;
 
-        $totalTraffic = [
-            'total_input' => 0,
-            'total_output' => 0,
-        ];
-        // Sum all the traffic from the Accounting table
-        foreach ($fetchChartTrafficFreeradius['datasets'] as $dataset) {
-            // Check if the dataset is for input or output
-            if ($dataset['label'] === 'Uploaded') {
-                // Sum the data for total input
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_input'] = $sum + $totalTraffic['total_input'];
-                }
-            } elseif ($dataset['label'] === 'Downloaded') {
-                // Sum the data for total output
-                foreach ($dataset['data'] as $sum) {
-                    $totalTraffic['total_output'] = $sum + $totalTraffic['total_output'];
-                }
-            }
-        }
-
-        // Create a new PhpSpreadsheet Spreadsheet object
-        $spreadsheet = new Spreadsheet();
-        $pageOne = $spreadsheet->getActiveSheet();
-
-        // Return realms names and session time to export
-        $combinedRealmSessionTime = [];
-        foreach ($fetchChartSessionTimeFreeradius as $session) {
-            $realm = $session['realm'];
-            $totalSessionTime = $session['totalSessionTime'];
-            $averageSessionTime = $session['averageSessionTime'];
-
-            $combinedRealmSessionTime[] = [
-                'Realm Name' => $realm,
-                'Total Session Time (seconds)' => $totalSessionTime,
-                'Average Session Time (seconds)' => $averageSessionTime,
+            $authData[] = [
+                'auth_date' => $auth_date,
+                'Accepted' => $accepted,
+                'Rejected' => $rejected,
             ];
         }
 
-        // Set the titles and their respective content
-        $titlesAndContent = [
-            'Authentication Attempts' => [
-                'Accepted' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][0] ?? [],
-                'Rejected' => $fetchChartAuthenticationsFreeradius['datasets'][0]['data'][1] ?? [],
-            ],
-            'Session Time' => $combinedRealmSessionTime,
-            'Total of Traffic' => [
-                'Uploaded' => $totalTraffic['total_input'],
-                'Downloaded' => $totalTraffic['total_output'],
-            ],
-            'Realms List' => $fetchChartRealmsFreeradius['labels'] ?? [],
-            'Current Authenticated per Realm' => $fetchChartCurrentAuthFreeradius['labels'] ?? [],
-            'Total Of Current Authentications' => $totalCurrentAuths,
-        ];
-
-        $row = 1;
-        // Iterate over each title and its content
-        foreach ($titlesAndContent as $title => $content) {
-            // Set the title in column A
-            $pageOne->setCellValue('A' . $row, $title);
-
-            // Check if the content is an array
-            if (is_array($content)) {
-                // Iterate over the content
-                foreach ($content as $key => $value) {
-                    // Check if the value is an array
-                    if (is_array($value)) {
-                        // If the value is an array, convert it to a string representation
-                        $formattedValue = json_encode($value);
-                    } else {
-                        // If the value is not an array, use it directly
-                        $formattedValue = $value;
-                    }
-
-                    // Set the key and formatted value in columns B and C
-                    $pageOne->setCellValue('B' . $row, $key);
-                    $pageOne->setCellValue('C' . $row, $formattedValue);
-
-                    // Increment row counter
-                    $row++;
-                }
-            } else {
-                // If the content is not an array, set it in column B
-                $pageOne->setCellValue('B' . $row, $content);
-
-                // Increment row counter
-                $row++;
-            }
+        // Prepare the session average data for Excel
+        $sessionData = [];
+        foreach ($fetchChartSessionAverageFreeradius['labels'] as $index => $session_date) {
+            $sessionAverage = $fetchChartSessionAverageFreeradius['datasets'][0]['tooltips'][$index] ?? 0;
+            $sessionData[] = [
+                'session_date' => $session_date,
+                'average_time' => $sessionAverage,
+            ];
         }
+
+        // Prepare the session total data for Excel
+        $totalTimeData = [];
+        foreach ($fetchChartSessionTotalFreeradius['labels'] as $index => $session_date) {
+            $sessionTotal = $fetchChartSessionTotalFreeradius['datasets'][0]['tooltips'][$index] ?? 0;
+            $totalTimeData[] = [
+                'session_date' => $session_date,
+                'total_time' => $sessionTotal,
+            ];
+        }
+
+        // Prepare the total traffic data for Excel
+        $trafficData = [];
+        foreach ($fetchChartTrafficFreeradius as $session_date) {
+            $realm = $fetchChartTrafficFreeradius[0]['realm'] ?? 0;
+            $totalInput = $fetchChartTrafficFreeradius[0]['total_input'] ?? 0;
+            $totalOutput = $fetchChartTrafficFreeradius[0]['total_output'] ?? 0;
+
+            $trafficData[] = [
+                'realm' => $realm,
+                'total_input_flat' => $totalInput,
+                'total_input' => number_format($totalInput / (1024 * 1024 * 1024), 1),
+                'total_output_flat' => $totalOutput,
+                'total_output' => number_format($totalOutput / (1024 * 1024 * 1024), 1)
+            ];
+        }
+
+        // Prepare the realm Usage data for Excel
+        $realmUsageData = [];
+        foreach ($fetchChartRealmsFreeradius as $session_date) {
+            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
+            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
+
+            $realmUsageData[] = [
+                'realm' => $realm,
+                'total_count' => $totalCount,
+            ];
+        }
+
+        // Prepare the realm Usage data for Excel
+        $realmUsageData = [];
+        foreach ($fetchChartRealmsFreeradius as $session_date) {
+            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
+            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
+
+            $realmUsageData[] = [
+                'realm' => $realm,
+                'total_count' => $totalCount,
+            ];
+        }
+
+        // Prepare the AP Usage data for Excel
+        $apUsageData = [];
+        foreach ($fetchChartApUsage as $index => $session_date) {
+            $apName = $fetchChartApUsage[$index]['ap'] ?? 0;
+            $apUsage = $fetchChartApUsage[$index]['count'] ?? 0;
+            $apUsageData[] = [
+                'ap_Name' => $apName,
+                'ap_Usage' => $apUsage,
+            ];
+        }
+
+        // Prepare the Wifi Standards Usage data for Excel
+        $wifiStandardsData = [];
+        foreach ($fetchChartWifiTags['labels'] as $index => $wifi_Standards) {
+            $wifiUsage = $fetchChartWifiTags['datasets'][0]['data'][$index] ?? 0;
+            $wifiStandardsData[] = [
+                'wifi_Standards' => $wifi_Standards,
+                'wifi_Usage' => $wifiUsage,
+            ];
+        }
+
+        // Create a new Spreadsheet object
+        $spreadsheet = new Spreadsheet();
+
+        // Fill the first sheet with authentication data
+        $sheet1 = $spreadsheet->getActiveSheet();
+        $sheet1->setTitle('Authentications');
+        $sheet1->setCellValue('A1', 'Date')
+            ->setCellValue('B1', 'Accepted')
+            ->setCellValue('C1', 'Rejected');
+
+        $row = 2;
+        foreach ($authData as $data) {
+            $sheet1->setCellValue('A' . $row, $data['auth_date'])
+                ->setCellValue('B' . $row, $data['Accepted'])
+                ->setCellValue('C' . $row, $data['Rejected']);
+            $row++;
+        }
+
+        $sheet1->getColumnDimension('A')->setWidth(20);
+        $sheet1->getColumnDimension('B')->setWidth(15);
+        $sheet1->getColumnDimension('C')->setWidth(15);
+
+        // Create a new sheet for Average session data
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Session Average');
+        $sheet2->setCellValue('A1', 'Date')
+            ->setCellValue('B1', 'Average Session Time');
+
+        $row = 2;
+        foreach ($sessionData as $data) {
+            $sheet2->setCellValue('A' . $row, $data['session_date'])
+                ->setCellValue('B' . $row, $data['average_time']);
+            $row++;
+        }
+
+        $sheet2->getColumnDimension('A')->setWidth(20);
+        $sheet2->getColumnDimension('B')->setWidth(15);
+
+        // Create a new sheet for Total session data
+        $sheet3 = $spreadsheet->createSheet();
+        $sheet3->setTitle('Session Total');
+        $sheet3->setCellValue('A1', 'Date')
+            ->setCellValue('B1', 'Total Session Time');
+
+        $row = 2;
+        foreach ($totalTimeData as $data) {
+            $sheet3->setCellValue('A' . $row, $data['session_date'])
+                ->setCellValue('B' . $row, $data['total_time']);
+            $row++;
+        }
+
+        $sheet3->getColumnDimension('A')->setWidth(20);
+        $sheet3->getColumnDimension('B')->setWidth(15);
+
+        // Create a new sheet for Total Traffic data
+        $sheet4 = $spreadsheet->createSheet();
+        $sheet4->setTitle('Total of Traffic');
+        $sheet4->setCellValue('A1', 'Realm Name')
+            ->setCellValue('B1', 'Uploads Flat')
+            ->setCellValue('C1', 'Uploads')
+            ->setCellValue('D1', 'Downloads Flat')
+            ->setCellValue('E1', 'Downloads');
+
+        $row = 2;
+        foreach ($trafficData as $data) {
+            $sheet4->setCellValue('A' . $row, $data['realm'])
+                ->setCellValue('B' . $row, $data['total_input_flat'])
+                ->setCellValue('C' . $row, $data['total_input'])
+                ->setCellValue('D' . $row, $data['total_output_flat'])
+                ->setCellValue('E' . $row, $data['total_output']);
+            $row++;
+        }
+
+        $sheet4->getColumnDimension('A')->setWidth(20);
+        $sheet4->getColumnDimension('B')->setWidth(20);
+        $sheet4->getColumnDimension('C')->setWidth(20);
+        $sheet4->getColumnDimension('D')->setWidth(20);
+        $sheet4->getColumnDimension('E')->setWidth(20);
+
+        // Create a new sheet for Realm Usage data
+        $sheet5 = $spreadsheet->createSheet();
+        $sheet5->setTitle('Realm Usage');
+        $sheet5->setCellValue('A1', 'Realm Name')
+            ->setCellValue('B1', 'Usage');
+
+        $row = 2;
+        foreach ($realmUsageData as $data) {
+            $sheet5->setCellValue('A' . $row, $data['realm'])
+                ->setCellValue('B' . $row, $data['total_count']);
+            $row++;
+        }
+
+        $sheet5->getColumnDimension('A')->setWidth(20);
+        $sheet5->getColumnDimension('B')->setWidth(20);
+
+        // Create a new sheet for Access Points Usage data
+        $sheet6 = $spreadsheet->createSheet();
+        $sheet6->setTitle('Access Points Usage');
+        $sheet6->setCellValue('A1', 'MAC ADDRESS:SSID')
+            ->setCellValue('B1', 'Usage');
+
+        $row = 2;
+        foreach ($apUsageData as $data) {
+            $sheet6->setCellValue('A' . $row, $data['ap_Name'])
+                ->setCellValue('B' . $row, $data['ap_Usage']);
+            $row++;
+        }
+
+        $sheet6->getColumnDimension('A')->setWidth(40);
+        $sheet6->getColumnDimension('B')->setWidth(20);
+
+        // Create a new sheet for Wifi Standards Usage data
+        $sheet7 = $spreadsheet->createSheet();
+        $sheet7->setTitle('Wifi Standards Usage');
+        $sheet7->setCellValue('A1', 'Wifi Standard Name')
+            ->setCellValue('B1', 'Usage');
+
+        $row = 2;
+        foreach ($wifiStandardsData as $data) {
+            $sheet7->setCellValue('A' . $row, $data['wifi_Standards'])
+                ->setCellValue('B' . $row, $data['wifi_Usage']);
+            $row++;
+        }
+
+        $sheet7->getColumnDimension('A')->setWidth(20);
+        $sheet7->getColumnDimension('B')->setWidth(20);
 
         // Save the spreadsheet to a temporary file
         $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
@@ -1779,6 +1929,10 @@ class AdminController extends AbstractController
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
 
+
+    /**
+     * Fetch data related to downloaded profiles devices
+     */
     /**
      * @throws Exception
      */
@@ -1824,6 +1978,12 @@ class AdminController extends AbstractController
         return $this->generateDatasets($profileCounts);
     }
 
+    /**
+     * Fetch data related to types of authentication
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
@@ -1861,6 +2021,12 @@ class AdminController extends AbstractController
         return $this->generateDatasets($userCounts);
     }
 
+    /**
+     * Fetch data related to users created in platform mode - Live/Demo
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartPlatformStatus(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(Event::class);
@@ -1900,6 +2066,12 @@ class AdminController extends AbstractController
         return $this->generateDatasets($statusCounts);
     }
 
+    /**
+     * Fetch data related to verified users
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartUserVerified(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
@@ -1939,6 +2111,9 @@ class AdminController extends AbstractController
         return $this->generateDatasets($userCounts);
     }
 
+    /**
+     * Fetch data related to User created on the portal with email or sms
+     */
     /**
      * @throws Exception
      */
@@ -1983,50 +2158,83 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Fetch data related to authentication attempts on the freeradius database
+     */
+    /**
      * @throws Exception
      */
     private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         // Fetch all data with date filtering
-        $events = $this->radiusAuthsRepository->findBy(['reply' => ['Access-Accept', 'Access-Reject']]);
+        $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
+
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 365.2) {
+            $granularity = 'year';
+        } else if ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
 
         $authsCounts = [
-            'Accepted' => 0,
-            'Rejected' => 0,
+            'Accepted' => [],
+            'Rejected' => [],
         ];
 
-        $uniqueSeconds = []; // Keep track of unique seconds
-
-        // Filter and count authenticates types based on the date criteria
+        // Group the events based on the determined granularity
         foreach ($events as $event) {
             // Convert event date string to DateTime object
             $eventDateTime = new DateTime($event->getAuthdate());
 
-            // Skip events with missing dates
-            if (!$eventDateTime) {
-                continue;
+            // Determine the time period based on granularity
+            switch ($granularity) {
+                case 'year':
+                    $period = $eventDateTime->format('Y');
+                    break;
+                case 'month':
+                    $period = $eventDateTime->format('Y-m');
+                    break;
+                case 'week':
+                    $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
+                    break;
+                case 'day':
+                default:
+                    $period = $eventDateTime->format('Y-m-d');
+                    break;
             }
 
-            // Check if the event date falls within the specified date range
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
+            // Initialize the period if not already set
+            if (!isset($authsCounts['Accepted'][$period])) {
+                $authsCounts['Accepted'][$period] = [];
+                $authsCounts['Rejected'][$period] = [];
+            }
+
+            // Use the timestamp down to the second for deduplication
+            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
+
+            // Track unique timestamps within the period
+            if (!isset($authsCounts['Accepted'][$period][$timestamp]) && !isset($authsCounts['Rejected'][$period][$timestamp])) {
                 $reply = $event->getReply();
-                $second = $eventDateTime->format('Y-m-d H:i:s'); // Get the second part of the date
-
-                // Check if this second has already been counted
-                if (!in_array($second, $uniqueSeconds)) {
-                    if ($reply === 'Access-Accept') {
-                        $authsCounts['Accepted']++;
-                    } elseif ($reply === 'Access-Reject') {
-                        $authsCounts['Rejected']++;
-                    }
-
-                    // Add the second to the list of counted seconds
-                    $uniqueSeconds[] = $second;
+                if ($reply === 'Access-Accept') {
+                    $authsCounts['Accepted'][$period][$timestamp] = true;
+                } elseif ($reply === 'Access-Reject') {
+                    $authsCounts['Rejected'][$period][$timestamp] = true;
                 }
             }
+        }
+
+        // Convert the tracked timestamps into counts
+        foreach ($authsCounts['Accepted'] as $period => $timestamps) {
+            $authsCounts['Accepted'][$period] = count($timestamps);
+        }
+        foreach ($authsCounts['Rejected'] as $period => $timestamps) {
+            $authsCounts['Rejected'][$period] = count($timestamps);
         }
 
         // Return an array containing both the generated datasets and the counts
@@ -2034,40 +2242,59 @@ class AdminController extends AbstractController
     }
 
     /**
+     * Fetch data related to realms usage on the freeradius database
+     *
      * @throws Exception
      */
     private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        // Fetch all data with date filtering
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
         $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
 
-        // Initialize an array to store the counts of each realm
         $realmCounts = [];
 
-        // Count the occurrences of each realm
+        // Group the realm usage data based on the determined granularity
         foreach ($events as $event) {
             $realm = $event['realm'];
+            $date = $event['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
 
-            // Skip if realm is null or empty
             if (!$realm) {
                 continue;
             }
 
-            // Increment the count for the realm
-            if (!isset($realmCounts[$realm])) {
-                $realmCounts[$realm] = 1;
-            } else {
-                $realmCounts[$realm]++;
+            if (!isset($realmCounts[$groupKey])) {
+                $realmCounts[$groupKey] = [];
+            }
+
+            if (!isset($realmCounts[$groupKey][$realm])) {
+                $realmCounts[$groupKey][$realm] = 0;
+            }
+
+            $realmCounts[$groupKey][$realm]++;
+        }
+
+        $result = [];
+        foreach ($realmCounts as $groupKey => $realms) {
+            foreach ($realms as $realm => $count) {
+                $result[] = [
+                    'group' => $groupKey,
+                    'realm' => $realm,
+                    'count' => $count
+                ];
             }
         }
 
-        // Sort the realm counts in descending order
-        arsort($realmCounts);
-
-        // Return the counts of each realm
-        return $this->generateDatasetsRealmsCounting($realmCounts);
+        return $result;
     }
 
+    /**
+     * Fetch data related to current authentications on the freeradius database
+     */
+    /**
+     * @throws Exception
+     */
     private function fetchChartCurrentAuthFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
         // Get the active sessions using the findActiveSessions query
@@ -2085,67 +2312,207 @@ class AdminController extends AbstractController
         return $this->generateDatasetsRealmsCounting($realmCounts);
     }
 
+    /**
+     * Fetch data related to traffic passed on the freeradius database
+     * @throws Exception
+     */
     private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        // Get the traffic using the findTrafficPerRealm query
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
-
-        // Convert the results into the expected format
         $realmTraffic = [];
-        foreach ($trafficData as $data) {
-            $realm = $data['realm'];
-            // Conver the data to GigaBytes
-            $totalInput = number_format($data['total_input'] / (1024 * 1024 * 1024), 1);
-            $totalOutput = number_format($data['total_output'] / (1024 * 1024 * 1024), 1);
 
-            // Sum the total input and output for each realm
-            $realmTraffic[$realm] = [
-                'total_input' => $totalInput,
-                'total_output' => $totalOutput,
-            ];
-        }
+        // Group the traffic data based on the determined granularity
+        foreach ($trafficData as $content) {
+            $realm = $content['realm'];
+            $totalInput = $content['total_input'];
+            $totalOutput = $content['total_output'];
+            $date = $content['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
 
-        // Return the sums traffic of each realm
-        return $this->generateDatasetsRealmsTraffic($realmTraffic);
-    }
-
-    private function fetchChartSessionTimeFreeradius(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
-
-        $realmSessionTotalTime = [];
-        $realmSessionCount = [];
-
-        // Sum the session time and count the sessions
-        foreach ($events as $event) {
-            $realm = $event['realm'];
-            $sessionTime = $event['acctSessionTime'];
-
-            // Add the session time to the total
-            if (!isset($realmSessionTotalTime[$realm])) {
-                $realmSessionTotalTime[$realm] = $sessionTime;
-                $realmSessionCount[$realm] = 1;
-            } else {
-                $realmSessionTotalTime[$realm] += $sessionTime; // Update total session time
-                $realmSessionCount[$realm]++;
+            if (!isset($realmTraffic[$realm])) {
+                $realmTraffic[$realm] = [];
             }
+
+            if (!isset($realmTraffic[$realm][$groupKey])) {
+                $realmTraffic[$realm][$groupKey] = ['total_input' => 0, 'total_output' => 0];
+            }
+
+            $realmTraffic[$realm][$groupKey]['total_input'] += $totalInput;
+            $realmTraffic[$realm][$groupKey]['total_output'] += $totalOutput;
         }
 
-        // Calculate the average session time and return both total and average session time
         $result = [];
-        foreach ($realmSessionTotalTime as $realm => $totalSessionTime) {
-            $count = $realmSessionCount[$realm];
-            $averageSessionTime = $count > 0 ? $totalSessionTime / $count : 0;
-            $result[] = [
-                'realm' => $realm,
-                'totalSessionTime' => $totalSessionTime,
-                'averageSessionTime' => $averageSessionTime
-            ];
+        foreach ($realmTraffic as $realm => $groups) {
+            foreach ($groups as $groupKey => $traffic) {
+                $result[] = [
+                    'realm' => $realm,
+                    'group' => $groupKey,
+                    'total_input' => $traffic['total_input'],
+                    'total_output' => $traffic['total_output']
+                ];
+            }
         }
 
         return $result;
     }
 
+
+    /**
+     * Fetch data related to session time (average) on the freeradius database
+     */
+    private function fetchChartSessionAverageFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+
+        $sessionAverageTimes = [];
+
+        // Group the events based on the determined granularity
+        foreach ($events as $event) {
+            $sessionTime = $event['acctSessionTime'];
+            $date = $event['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+
+            if (!isset($sessionAverageTimes[$groupKey])) {
+                $sessionAverageTimes[$groupKey] = ['totalTime' => 0, 'count' => 0];
+            }
+
+            $sessionAverageTimes[$groupKey]['totalTime'] += $sessionTime;
+            $sessionAverageTimes[$groupKey]['count']++;
+        }
+
+        $result = [];
+        foreach ($sessionAverageTimes as $groupKey => $data) {
+            $averageSessionTime = $data['count'] > 0 ? $data['totalTime'] / $data['count'] : 0;
+            $result[] = [
+                'group' => $groupKey,
+                'averageSessionTime' => $averageSessionTime
+            ];
+        }
+
+        return $this->generateDatasetsSessionAverage($result);
+    }
+
+
+    /**
+     * Fetch data related to session time (total) on the freeradius database
+     */
+    private function fetchChartSessionTotalFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+
+        $sessionTotalTimes = [];
+
+        // Group the events based on the determined granularity
+        foreach ($events as $event) {
+            $sessionTime = $event['acctSessionTime'];
+            $date = $event['acctStartTime'];
+            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+
+            if (!isset($sessionTotalTimes[$groupKey])) {
+                $sessionTotalTimes[$groupKey] = 0;
+            }
+
+            $sessionTotalTimes[$groupKey] += $sessionTime;
+        }
+
+        $result = [];
+        foreach ($sessionTotalTimes as $groupKey => $totalSessionTime) {
+            $result[] = [
+                'group' => $groupKey,
+                'totalSessionTime' => $totalSessionTime
+            ];
+        }
+
+        return $this->generateDatasetsSessionTotal($result);
+    }
+
+
+    /**
+     * Fetch data related to wifi tag usage on the freeradius database
+     */
+    private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
+        $wifiUsage = [];
+
+        // Group the events based on the wifi Standard
+        foreach ($events as $event) {
+            $connectInfo = $event['connectInfo_start'];
+            $wifiStandard = $this->mapConnectInfoToWifiStandard($connectInfo);
+
+            if (!isset($wifiUsage[$wifiStandard])) {
+                $wifiUsage[$wifiStandard] = 0;
+            }
+
+            $wifiUsage[$wifiStandard]++;
+        }
+
+        $result = [];
+        foreach ($wifiUsage as $standard => $count) {
+            $result[] = [
+                'standard' => $standard,
+                'count' => $count
+            ];
+        }
+
+        return $this->generateDatasetsWifiTags($result);
+    }
+
+    /**
+     * Fetch data related to AP usage on the freeradius database
+     *
+     * @throws Exception
+     */
+    private function fetchChartApUsage(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        list($startDate, $endDate) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+
+        $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
+
+        $apCounts = [];
+
+        // Count the usage of each AP
+        foreach ($events as $event) {
+            $ap = $event['calledStationId'];
+
+            if (!$ap) {
+                continue;
+            }
+
+            if (!isset($apCounts[$ap])) {
+                $apCounts[$ap] = 0;
+            }
+
+            $apCounts[$ap]++;
+        }
+
+        $result = [];
+        foreach ($apCounts as $ap => $count) {
+            $result[] = [
+                'ap' => $ap,
+                'count' => $count
+            ];
+        }
+
+        // Sort the result array by the count value with the highest usage
+        usort($result, static function ($highest, $lowest) {
+            return $lowest['count'] <=> $highest['count'];
+        });
+
+        return $result;
+    }
+
+    /**
+     * Generated Datasets for charts graphics
+     */
     private function generateDatasets(array $counts): array
     {
         $datasets = [];
@@ -2155,24 +2522,17 @@ class AdminController extends AbstractController
         $data = [];
         $colors = [];
 
-        if (!empty(array_filter($dataValues, static fn($value) => $value !== 0))) {
-            $maxValue = max($dataValues);
-            $minOpacity = 0.4; // Minimum opacity to ensure visibility
-            $maxOpacity = 1; // Maximum opacity for the most vibrant color
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($dataValues);
 
-            foreach ($labels as $index => $type) {
-                // Calculate the brightness relative to the max count, scaled to the opacity range
-                $opacity = $minOpacity + ($dataValues[$index] / $maxValue) * ($maxOpacity - $minOpacity);
-                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
-                $data[] = $dataValues[$index];
-                $colors[] = "rgba(78, 164, 116, {$opacity})"; // Generate a different color for each data point
-            }
+        foreach ($labels as $index => $type) {
+            $data[] = $dataValues[$index];
         }
 
         $datasets[] = [
             'data' => $data,
             'backgroundColor' => $colors,
-            'borderColor' => "rgb(78, 164, 116)",
+            'borderColor' => "rgb(125, 185, 40)",
             'borderRadius' => "15",
         ];
 
@@ -2182,24 +2542,125 @@ class AdminController extends AbstractController
         ];
     }
 
-    private function generateDatasetsAuths(array $counts): array
+    /**
+     * Generate datasets for session average time
+     */
+    private function generateDatasetsSessionAverage(array $sessionTime): array
     {
-        $datasets = [];
-        $labels = array_keys($counts);
-        $dataValues = array_values($counts);
+        $labels = array_column($sessionTime, 'group');
+        $averageTimes = array_map(function ($item) {
+            return $item['averageSessionTime']; // Keep numerical values for plotting
+        }, $sessionTime);
 
-        $colors = [];
+        $averageTimesReadable = array_map(function ($seconds) {
+            $hours = floor($seconds / 3600);
+            $minutes = floor(($seconds % 3600) / 60);
+            return sprintf('%dh %dm', $hours, $minutes);
+        }, $averageTimes);
 
-        // Determine the color for each data point based on the type
-        foreach ($labels as $type) {
-            $color = $type === 'Accepted' ? '#7DB928' : '#FE4068';
-            $colors[] = $color;
-        }
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($averageTimes);
 
-        $datasets[] = [
-            'data' => $dataValues,
-            'backgroundColor' => $colors,
-            'borderRadius' => "15",
+        $datasets = [
+            [
+                'label' => 'Average Session Time',
+                'data' => $averageTimes,
+                'backgroundColor' => $colors,
+                'borderRadius' => "15",
+                'tooltips' => $averageTimesReadable, // Human-readable values for tooltips
+            ]
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+    /**
+     * Generate datasets for session total time
+     */
+    private function generateDatasetsSessionTotal(array $sessionTime): array
+    {
+        $labels = array_column($sessionTime, 'group');
+        $totalTimes = array_map(function ($item) {
+            return $item['totalSessionTime'];
+        }, $sessionTime);
+
+        $totalTimesReadable = array_map(function ($seconds) {
+            $hours = floor($seconds / 3600);
+            $minutes = floor(($seconds % 3600) / 60);
+            return sprintf('%dh %dm', $hours, $minutes);
+        }, $totalTimes);
+
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($totalTimes);
+
+        $datasets = [
+            [
+                'label' => 'Total Session Time',
+                'data' => $totalTimes,
+                'backgroundColor' => $colors,
+                'borderRadius' => "15",
+                'tooltips' => $totalTimesReadable,
+            ]
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+        ];
+    }
+
+    /**
+     * Generate datasets for Wi-Fi tags
+     */
+    private function generateDatasetsWifiTags(array $wifiUsage): array
+    {
+        $labels = array_column($wifiUsage, 'standard');
+        $counts = array_column($wifiUsage, 'count');
+
+        // Calculate the colors with varying opacities
+        $colors = $this->generateColorsWithOpacity($counts);
+
+        $datasets = [
+            [
+                'label' => 'Wi-Fi Usage',
+                'data' => $counts,
+                'backgroundColor' => $colors,
+                'borderRadius' => "15"
+            ]
+        ];
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets,
+            'rawData' => $counts // Include raw numerical data
+        ];
+    }
+
+    /**
+     * Generate datasets for authentication attempts
+     */
+    private function generateDatasetsAuths(array $authsCounts): array
+    {
+        $labels = array_keys($authsCounts['Accepted']);
+        $acceptedCounts = array_values($authsCounts['Accepted']);
+        $rejectedCounts = array_values($authsCounts['Rejected']);
+
+        $datasets = [
+            [
+                'label' => 'Accepted',
+                'data' => $acceptedCounts,
+                'backgroundColor' => '#7DB928',
+                'borderRadius' => "15",
+            ],
+            [
+                'label' => 'Rejected',
+                'data' => $rejectedCounts,
+                'backgroundColor' => '#FE4068',
+                'borderRadius' => "15",
+            ]
         ];
 
         return [
@@ -2251,14 +2712,13 @@ class AdminController extends AbstractController
         $dataValuesOutput = [];
         $colors = [];
 
-        // Assign a specific color to the first realm
         $colors[] = '#7DB928';
 
         foreach ($trafficData as $realm => $traffic) {
             $labels[] = $realm;
             $dataValuesInput[] = $traffic['total_input'];
             $dataValuesOutput[] = $traffic['total_output'];
-            $colors[] = $this->generateColorFromRealmName($realm); // Generate color based on realm name
+            $colors[] = $this->generateColorFromRealmName($realm);
         }
 
         $datasets[] = [
@@ -2299,6 +2759,10 @@ class AdminController extends AbstractController
         return $color;
     }
 
+
+    /**
+     * Handles the Page Style on the dasboard
+     */
     /**
      * @param Request $request
      * @param EntityManagerInterface $em
@@ -2309,9 +2773,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -2381,9 +2842,89 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
-            'getSettings' => $getSettings,
-            'current_user' => $currentUser,
+            'getSettings' => $getSettings
         ]);
+    }
+
+    /**
+     * Map connectInfo_start to Wifi standards
+     * @param string $connectInfo
+     * @return string
+     */
+    protected function mapConnectInfoToWifiStandard(string $connectInfo): string
+    {
+        switch (true) {
+            case strpos($connectInfo, '802.11be') !== false:
+                return 'Wi-fi 7';
+            case strpos($connectInfo, '802.11ax') !== false:
+                return 'Wi-fi 6';
+            case strpos($connectInfo, '802.11ac') !== false:
+                return 'Wi-fi 5';
+            case strpos($connectInfo, '802.11n') !== false:
+                return 'Wi-fi 4';
+            case strpos($connectInfo, '802.11g') !== false:
+                return 'Wi-fi 3';
+            case strpos($connectInfo, '802.11a') !== false:
+                return 'Wi-fi 2';
+            case strpos($connectInfo, '802.11b') !== false:
+                return 'Wi-fi 1';
+            default:
+                return 'Unknown';
+        }
+    }
+
+    /**
+     * Determine date range and granularity
+     *
+     * @param ?DateTime $startDate
+     * @param ?DateTime $endDate
+     * @param object $repository
+     * @return array
+     */
+    protected function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
+    {
+        // Calculate the time difference between start and end dates
+        $interval = $startDate->diff($endDate);
+
+        // Determine the appropriate time granularity
+        if ($interval->days > 365.2) {
+            $granularity = 'year';
+        } elseif ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
+        } else {
+            $granularity = 'day';
+        }
+
+        return [$startDate, $endDate, $granularity];
+    }
+
+    /**
+     * Generate colors with varying opacities based on data values
+     *
+     * @param array $values
+     * @param float $minOpacity
+     * @param float $maxOpacity
+     * @return array
+     */
+    private function generateColorsWithOpacity(array $values, float $minOpacity = 0.4, float $maxOpacity = 1): array
+    {
+        if (!empty(array_filter($values, static fn($value) => $value !== 0))) {
+            $maxValue = max($values);
+            $colors = [];
+
+            foreach ($values as $value) {
+                // Calculate the opacity relative to the max value, scaled to the opacity range
+                $opacity = $minOpacity + ($value / $maxValue) * ($maxOpacity - $minOpacity);
+                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
+                $colors[] = "rgba(125, 185, 40, {$opacity})";
+            }
+
+            return $colors;
+        } else {
+            return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
+        }
     }
 
     /**
