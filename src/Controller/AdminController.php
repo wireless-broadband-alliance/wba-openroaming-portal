@@ -1429,7 +1429,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Extract the connection attempts
@@ -1552,7 +1552,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -2291,11 +2291,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to wifi tag usage on the freeradius database
      */
-    private function fetchChartWifiTags(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
         list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
 
-        $events = $this->radiusAccountingRepository->findWifiTags($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
 
         // Group the events based on the wifi Standard
