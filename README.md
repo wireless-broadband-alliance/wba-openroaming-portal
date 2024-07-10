@@ -102,12 +102,15 @@ This page shows data related to the user created on the portal
 - **User Management**: Shows data about the verification (verified/banned/need verification)
 
 ### Connectivity Statistics
+
 This page shows data related to the hybrid machine
+
 - **Authentication Attempts**: Shows number of attempts (Accepted/Rejected)
 - **Session Time**: Shows the session time spent connected with a profile, of each user (Average/Total in hours)
 - **Total of Traffic**: Shows the traffic passed between the freeradius and the user profile (Uploads/Downloads)
 - **Realms Usage**: Number of devices connected using the realm from the portal
-- **Total of Current Authentications** Shows the number of current users connected with a profile (This card is independent of the date filtering)
+- **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
+  independent of the date filtering)
 
 ## 🛠️ Tools Used
 
@@ -154,6 +157,7 @@ You have two options to get the project:
 ```
 
 # ⚙️ Installation Guide
+
 Please click this link if you want to install this project on your own. [Installation Guide](INSTALATION.md).
 
 # How it Looks and How it Works?
@@ -236,6 +240,13 @@ These variables are needed to set up the SAML Service Provider (SP) and Identity
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
   the IdP.
 
+**Important**:
+If you want to use this provider authentication on the project,
+make sure to expose a SAML attribute on your IDP named
+`samlUuid`,
+to expose a unique id of the SAML account.
+This property it's required to authenticate users if one of them doesn't have an email defined on the IDP.
+
 ### 👾 Turnstile Integration
 
 These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
@@ -248,7 +259,6 @@ link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile
 
 And for any **production deployment**, please follow the
 link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
-
 
 ### 🛠️ Settings Table
 

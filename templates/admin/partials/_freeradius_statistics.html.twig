@@ -1,10 +1,10 @@
-<div class="grid gap-8 sm:gap-12 lg:gap-16 lg:grid-cols-3" data-controller="freeradiusStatistics">
+<div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
     {# Authentications Attempts #}
     <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
         <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
             <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
-                <h1 class="px-2 text-base sm:text-lg">
+                <h1 class="px-2 text-lg sm:text-base">
                     Accepted
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
@@ -12,7 +12,7 @@
                 </div>
             </a>
             <a class="cursor-default flex flex-row group hover:text-[#FE4068] hover:border-b-2 hover:border-y-[#FE4068]/50 transition-all duration-100">
-                <h1 class="px-2 text-base sm:text-lg">
+                <h1 class="px-2 text-lg sm:text-base">
                     Rejected
                 </h1>
                 <div class="mb-1 bg-veryLightGreen group-hover:bg-[#FE4068] rounded-md group-hover:text-white text-center transition-all duration-100">
@@ -21,70 +21,61 @@
             </a>
         </div>
         <div class="flex flex-col gap-6 animate-fadeIn">
-            <canvas class="max-w-full" id="authAttemptsChart" data-devices
+            <canvas class="max-w-full" id="authAttemptsChart" data-authAttempts
                     data-chart-data="{{ authAttemptsJson }}"></canvas>
         </div>
     </div>
 
-    {# Session Time #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
-        <div class="flex flex-row justify-between sm:pt-2 font-medium">
-            <h1 class="text-lg text-left">Session Time</h1>
-            <span class="text-base text-gray-500 text-left">(in Hours)</span>
+    {# Average Session Time #}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
+        <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
+            <h1 class="text-lg font-medium">Average Session Time</h1>
+            <span class="text-base text-gray-500">(in Hours)</span>
         </div>
-        <div class="mx-8 mt-10 flex md:flex-row flex-col justify-center md:justify-between items-center md:space-x-6 space-x-0">
-            <div class="flex flex-col">
-                <h1 class="text-center font-semibold">
-                    Average
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2 text-lg sm:text-base">
+                    Total Average of
                 </h1>
-                {% if sessionTimeAverageSeconds > 0 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                    {% if sessionTimeAverageSeconds >= 1000 %}
-                        {% set sizeClass = 'w-36 h-36' %}
-                    {% endif %}
-                    {% if sessionTimeAverageSeconds >= 10000 %}
-                        {% set sizeClass = 'w-40 h-40' %}
-                    {% endif %}
-                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
-                        {{ sessionTimeAverage }}
-                    </div>
-                {% else %}
-                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                        No Data Available
-                    </div>
-                {% endif %}
-            </div>
-            <div class="mt-8 md:mt-0 flex flex-col">
-                <h1 class="text-center font-semibold">
-                    Total
-                </h1>
-                {% if sessionTimeTotalSeconds > 0 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                    {% if sessionTimeTotalSeconds >= 1000 %}
-                        {% set sizeClass = 'w-36 h-36' %}
-                    {% endif %}
-                    {% if sessionTimeTotalSeconds >= 10000 %}
-                        {% set sizeClass = 'w-40 h-40' %}
-                    {% endif %}
-                    <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-3xl font-bold {{ sizeClass }}">
-                        {{ sessionTimeTotal }}
-                    </div>
-                {% else %}
-                    <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                        No Data Available
-                    </div>
-                {% endif %}
-            </div>
+                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                    <span class="w-auto h-6 mb-1 px-2">{{ sessionTimeAverage }}</span>
+                </div>
+            </a>
+        </div>
+        <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="sessionTimeChart" data-sessionTime
+                    data-chart-data="{{ sessionTimeJson }}"></canvas>
         </div>
     </div>
 
-    {# Display All Traffic #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg p-4 gap-4 shadow-md">
-        <div class="flex flex-row justify-between sm:pt-2 font-medium">
-            <h1 class="text-lg text-left">Total of Traffic</h1>
-            <span class="text-base text-gray-500 text-left">(in GigaBytes)</span>
+    {# Total Session Time #}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
+        <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
+            <h1 class="text-lg font-medium">Total Session Time</h1>
+            <span class="text-base text-gray-500">(in Hours)</span>
         </div>
-        <div class="mx-8 md:mt-14 flex md:flex-row flex-col justify-center md:justify-between items-center md:space-x-6 space-x-0">
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                <h1 class="px-2 text-lg sm:text-base">
+                    Total of
+                </h1>
+                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                    <span class="w-auto h-6 mb-1 px-2">{{ totalTime }}</span>
+                </div>
+            </a>
+        </div>
+        <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="totalTimeChart" data-totalTime
+                    data-chart-data="{{ totalTimeJson }}"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
+    {# Total of Traffic #}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-4 gap-4 shadow">
+        <h1 class="text-lg font-medium text-left pb-4">Total of Traffic</h1>
+        <div class="md:mt-6 flex md:flex-row flex-col justify-center md:justify-between items-center xl:space-x-6 space-x-0">
             <div class="flex flex-col">
                 <h1 class="text-center font-semibold">
                     Uploads
@@ -135,19 +126,17 @@
             </div>
         </div>
     </div>
-</div>
 
-<div class="mt-10 grid gap-8 sm:gap-12 lg:gap-16 grid-cols-3" data-controller="freeradiusStatistics">
     {# Realm Usage #}
-    <div class="col-span-3 md:col-span-2 xl:col-span-2 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">Realm Usage</h1>
-        <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="max-w-full relative">
-                <table class="w-full h-1/2 divide-y divide-gray-200 table-fixed">
+    <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
+        <h1 class="text-lg font-medium text-left pb-4">Realm Usage</h1>
+        <div class="overflow-x-auto max-w-full flex flex-col gap-6 animate-fadeIn">
+            <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+                <table class="w-full items-start">
                     <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
                     <tr>
                         <th scope="col"
-                            class="md:w-2/12 w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                            class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
                             Usage
                         </th>
                         <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
@@ -166,20 +155,19 @@
                         </tr>
                     {% else %}
                         {% for index, label in realmsUsage %}
-                            <tr name="{{ label }}"
-                                onmouseover="this.childNodes[1].childNodes[1].style.backgroundColor='{{ datasetsRealmList[0]['backgroundColor'][index] }}'; this.childNodes[1].childNodes[1].style.color='#f1f8f4';"
-                                onmouseout="this.childNodes[1].childNodes[1].style.backgroundColor='#f1f8f4'; this.childNodes[1].childNodes[1].style.color='#594B60';"
-                            >
-                                <td class="w-full px-8 py-2">
+                            <tr name="{{ label }}">
+                                <td class="w-1/3 px-8 py-2">
                                     <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
-                        <span>
-                            {{ datasetsRealmList[0]['data'][index] }}
-                        </span>
+                                        <span>
+                                            {{ label }}
+                                        </span>
                                     </div>
                                 </td>
-                                <td class="w-full px-6 py-2 whitespace-nowrap transition-all duration-200">
+                                <td class="w-2/3 px-6 py-2 whitespace-nowrap transition-all duration-200">
                                     <div class="text-left text-base sm:text-lg">
-                                        {{ label }}
+                                        <span>
+                                            {{ index }}
+                                        </span>
                                     </div>
                                 </td>
                             </tr>
@@ -190,41 +178,103 @@
             </div>
         </div>
     </div>
+</div>
 
-    {# No need data filter card - Total of current authentications #}
-    <div class="z-0 text-base font-semibold w-full">
-        <div class="col-span-3 sm:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col justify-center items-center gap-4 shadow-md">
-            <h1 class="text-lg font-medium text-center">Total of Current Authentications</h1>
-            {% if totalCurrentAuths >= 1 %}
-                {% set sizeClass = 'w-24 h-24' %}
-                {% if totalCurrentAuths >= 10000 %}
-                    {% set sizeClass = 'w-32 h-32' %}
-                {% endif %}
-                {% if totalCurrentAuths >= 100000 %}
-                    {% set sizeClass = 'w-36 h-36' %}
-                {% endif %}
-                {% if totalCurrentAuths >= 1000000 %}
-                    {% set sizeClass = 'w-40 h-40' %}
-                {% endif %}
-                <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                    {{ totalCurrentAuths }}
-                </div>
-            {% else %}
-                <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                    No Data Available
-                </div>
-            {% endif %}
-            <div class="flex bg-infoBgColor/50 rounded-lg p-4 mt-8 text-sm text-infoTextColor" role="alert">
-                <svg class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clip-rule="evenodd"></path>
-                </svg>
-                <div>
-                    <span class="font-medium">This card is independent of the date filtering.</span>
-                </div>
+<div class="mt-10 grid gap-8 grid-cols-1 xl:grid-cols-3" data-controller="freeradiusStatistics">
+    {# Wifi Tags Usage #}
+    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-2 shadow">
+        <div class="flex flex-row justify-start sm:pt-2 pb-6 font-medium text-lg text-left">
+            <h1 class="text-lg font-medium">Wi-Fi Standards - Usage</h1>
+        </div>
+        <div class="xl:pt-10 flex flex-col gap-6 animate-fadeIn">
+            <canvas class="max-w-full" id="wifiTagsChart" data-wifiTags
+                    data-chart-data="{{ wifiTagsJson }}"></canvas>
+        </div>
+    </div>
+
+    {# Access Points Usage #}
+    <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
+        <h1 class="text-lg font-medium text-left sm:pb-4">Access Points Usage</h1>
+        <div class="overflow-x-auto max-w-full flex flex-col gap-6 animate-fadeIn">
+            <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+                <table class="w-full items-start">
+                    <thead class="bg-veryLightGreen text-gray-700 font-bold rounded-t-md">
+                    <tr>
+                        <th scope="col"
+                            class="w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                            Usage
+                        </th>
+                        <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
+                            Mac Address:SSID
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if ApUsage is empty %}
+                        <tr>
+                            <td colspan="2">
+                                <div class="bg-red-500/50 rounded-full m-4 p-1 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                                    No Data Available
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for usage in ApUsage %}
+                            <tr name="{{ usage.ap }}">
+                                <td class="w-1/3 px-8 py-2">
+                                    <div class="px-2 py-1 md:p-0 w-full bg-veryLightGreen rounded-full flex justify-center items-center transition-all duration-200">
+                                        <span>
+                                            {{ usage.count }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="w-2/3 px-6 py-2 whitespace-nowrap transition-all duration-200">
+                                    <div class="text-left text-base sm:text-lg">
+                                        <span>
+                                            {{ usage.ap }}
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
             </div>
+        </div>
+        {# AccessPoints Pagination #}
+        <div class="m-8">
+            <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+            {% include '/admin/partials/_access_points_pagination.html.twig' %}
+        </div>
+    </div>
+</div>
+
+<div class="mt-10 col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
+    <h1 class="text-lg font-medium text-left">Total of Current Authentications</h1>
+    <div class="flex flex-col items-center">
+        {% if totalCurrentAuths >= 1 %}
+            {% set sizeClass = 'w-24 h-24' %}
+            {% if totalCurrentAuths >= 10000 %}
+                {% set sizeClass = 'w-32 h-32' %}
+            {% endif %}
+            {% if totalCurrentAuths >= 100000 %}
+                {% set sizeClass = 'w-36 h-36' %}
+            {% endif %}
+            {% if totalCurrentAuths >= 1000000 %}
+                {% set sizeClass = 'w-40 h-40' %}
+            {% endif %}
+            <div class="mt-4 bg-[#7DB928] rounded-full text-white text-4xl font-bold flex justify-center items-center {{ sizeClass }}">
+                <span>{{ totalCurrentAuths }}</span>
+            </div>
+        {% else %}
+            <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
+                No Data Available
+            </div>
+        {% endif %}
+        <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-8" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+            <span class="font-medium">This card is independent of the date filtering.</span>
         </div>
     </div>
 </div>
