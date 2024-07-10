@@ -155,7 +155,7 @@ class AdminController extends AbstractController
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
         $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
+        $bannedUsersCount = $userRepository->totalBannedUsers();
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -322,7 +322,7 @@ class AdminController extends AbstractController
 
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm);
         $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $userRepository->countBannedUsers($searchTerm);
+        $bannedUsersCount = $userRepository->totalBannedUsers($searchTerm);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */

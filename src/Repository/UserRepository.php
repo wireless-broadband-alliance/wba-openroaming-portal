@@ -214,7 +214,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function countBannedUsers(?string $searchTerm = null): int
+    public function totalBannedUsers(?string $searchTerm = null): int
     {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
