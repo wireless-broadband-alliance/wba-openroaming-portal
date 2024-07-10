@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\User_Verification_Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -99,10 +100,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === 'verified') {
+        if ($filter === User_Verification_Status::verified) {
             $qb->andWhere('u.isVerified = :isVerified')
                 ->setParameter('isVerified', true);
-        } elseif ($filter === 'banned') {
+        } elseif ($filter === User_Verification_Status::banned) {
             $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
         }
 
@@ -116,10 +117,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->where('u.roles NOT LIKE :role')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === 'verified') {
+        if ($filter === User_Verification_Status::verified) {
             $qb->andWhere('u.isVerified = :verified')
-                ->setParameter('verified', true);
-        } elseif ($filter === 'banned') {
+                ->setParameter(User_Verification_Status::verified, true);
+        } elseif ($filter === User_Verification_Status::banned) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
@@ -196,7 +197,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->where('u.isVerified = :verified')
             ->andWhere('u.roles NOT LIKE :adminRole')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->setParameter('verified', true)
+            ->setParameter(User_Verification_Status::verified, true)
             ->setParameter('adminRole', '%ROLE_ADMIN%');
 
         if ($searchTerm !== null) {
