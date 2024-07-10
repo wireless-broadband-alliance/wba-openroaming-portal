@@ -155,7 +155,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
      * @param DateTime|null $endDate
      * @return array
      */
-    public function findWifiTags(?DateTime $startDate, ?DateTime $endDate): array
+    public function findWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
             ->select('DISTINCT ra.realm, ra.connectInfo_start, ra.acctStartTime, ra.acctStopTime');

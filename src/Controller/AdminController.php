@@ -164,7 +164,7 @@ class AdminController extends AbstractController
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
         $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
+        $bannedUsersCount = $userRepository->totalBannedUsers();
 
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
@@ -299,43 +299,15 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $deletedUserData = [
-            'uuid' => $user->getUuid(),
-            'email' => $user->getEmail() ?? 'This value is empty',
-            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
-            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
-            'googleId' => $user->getGoogleId() ?? 'This value is empty',
-            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
-            'lastName' => $user->getLastName() ?? 'This value is empty',
-            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
-            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
-            'deletedAt' => new DateTime(),
-        ];
-
-        $jsonData = json_encode($userData);
-        // Encrypt JSON data using PGP encryption
-        $pgpEncryptedData = $pgpEncryptionService->encrypt($jsonData);
-        $deletedUserData = new DeletedUserData();
-        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
-        $deletedUserData->setUserId($user->getId());
-
-        $user->setUuid($user->getId());
-        $user->setEmail('');
-        $user->setPhoneNumber('');
-        $user->setPassword($user->getId());
-        $user->setSamlIdentifier(null);
-        $user->setFirstName(null);
-        $user->setLastName(null);
-        $user->setGoogleId(null);
-        $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
         $this->disableProfiles($user);
-        $em->persist($deletedUserData);
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $user->getUUID()));
+        $uuid = $user->getUUID();
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
+        return $this->redirectToRoute('admin_page');
     }
 
     /*
@@ -1358,7 +1330,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Extract the connection attempts
@@ -1481,7 +1453,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -2220,11 +2192,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to wifi tag usage on the freeradius database
      */
-    private function fetchChartWifiTags(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
         list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
 
-        $events = $this->radiusAccountingRepository->findWifiTags($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
 
         // Group the events based on the wifi Standard
