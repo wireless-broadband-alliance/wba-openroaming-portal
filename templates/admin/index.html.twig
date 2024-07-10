@@ -15,13 +15,14 @@
 {% endmacro %}
 
 {% block container %}
-    <div class="p-5 text-left space-y-3 rounded-xl bg-white">
-        <div class="w-full mx-auto">
-            <div class="sm:w-auto p-4">
+    <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
+        <div class="w-full">
+            <div class="sm:w-auto px-5 py-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
+
                     {# Left Search Filters #}
                     <div class="flex items-center space-x-6 cursor-default">
-                        <a href="{{ path('admin_search', {'filter': 'all'}) }}"
+                        <a href="{{ path('admin_page', {'filter': 'all'}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
                                 All
@@ -30,7 +31,7 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_search', {'filter': 'verified'}) }}"
+                        <a href="{{ path('admin_page', {'filter': 'verified'}) }}"
                            class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 Verified
@@ -39,7 +40,7 @@
                                 {{ verifiedUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_search', {'filter': 'banned'}) }}"
+                        <a href="{{ path('admin_page', {'filter': 'banned'}) }}"
                            class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 Banned
@@ -51,28 +52,31 @@
                     </div>
 
                     {# Midle Search Bar #}
-                    <form action="{{ path('admin_search') }}" method="GET" class="w-full md:w-3/6">
-                        <div class="flex flex-row items-center border rounded-md">
-                            {# Search Icon #}
-                            <button type="submit">
-                                <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
-                                     stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                                     aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-                                </svg>
-                            </button>
-                            {# Search Input #}
-                            <label class="w-full">
-                                <input type="text" class="form-widget w-full p-2 bg-transparent border-none outline-none"
-                                       placeholder="Search Users ..." name="u"
-                                       value="{{ app.request.query.get('u', '') }}">
-                            </label>
-                            {# Hidden Filter Input #}
-                            <input type="hidden" name="filter"
-                                   value="{{ app.request.query.get('filter', 'all') }}">
-                        </div>
-                    </form>
+                    <div class="w-full md:w-3/6">
+                        <form action="{{ path('admin_page') }}" method="GET">
+
+                            <div class="flex flex-row items-center border rounded-md">
+                                {# Search Icon #}
+                                <button type="submit">
+                                    <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                                         stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                         aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                                    </svg>
+                                </button>
+                                {# Search Input #}
+                                <label class="w-full">
+                                    <input type="text"
+                                           class="form-widget w-full p-2 bg-transparent border-none outline-none"
+                                           placeholder="Search Users ..." name="u"
+                                           value="{{ app.request.query.get('u', '') }}">
+                                </label>
+                                {# Hidden Filter Input #}
+                                <input type="hidden" name="filter" value="{{ app.request.query.get('filter', 'all') }}">
+                            </div>
+                        </form>
+                    </div>
 
                     {% if export_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                         <div class="flex items-center space-x-6">
@@ -84,7 +88,7 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto max-w-full -m-5 mt-3">
+            <div class="overflow-x-auto max-w-full mt-3">
                 <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
                     {# Table Content #}
                     <table class="w-full items-start">
@@ -97,18 +101,23 @@
                                     {{ _self.sortArrow('uuid', activeSort, activeOrder) }}
                                 </a>
                             </th>
+
                             <th scope="col" class="px-4 py-3 -ml-4">
                                 <h1 class="mr-2">Email</h1>
                             </th>
+
                             <th scope="col" class="px-6 py-3 -ml-2">
                                 Provider
                             </th>
+
                             <th scope="col" class="px-6 py-3">
                                 Verification
                             </th>
+
                             <th scope="col" class="px-6 py-3">
                                 BannedAt
                             </th>
+
                             <th scope="col" class="flex items-center px-6 py-3">
                                 <h1 class="mr-2">CreatedAt</h1>
                                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
@@ -117,22 +126,21 @@
                                     {{ _self.sortArrow('createdAt', activeSort, activeOrder) }}
                                 </a>
                             </th>
+
                             <th scope="col" class="px-6 py-3">
                                 <span class="none"></span>
                             </th>
                         </tr>
                         </thead>
-                        <tbody>
-                        {# Show the users with the partial _users #}
-                        {% if users|length > 0 %}
-                            {% for user in users %}
-                                {{ include('admin/partials/_users.html.twig', { 'user': user }) }}
-                            {% endfor %}
+                        <tbody class="px-5">
+
+                        {% for user in users %}
+                            {{ include('admin/shared/_user.html.twig', { 'user': user }) }}
                         {% else %}
                             <tr>
                                 <td colspan="7">
-                                    <div class="flex md:justify-center justify-start md:items-center items-start text-center md:p-1 p-8">
-                                        <div class="bg-red-500/50 rounded-full px-4 py-2 mt-2 text-red-500 font-semibold md:text-xs text-sm">
+                                    <div class="flex flex-row justify-center items-start mt-2">
+                                        <div class="pill-error">
                                             {% if searchTerm %}
                                                 No users found with "{{ searchTerm }}"
                                             {% elseif app.request.query.get('filter') == 'verified' %}
@@ -146,7 +154,7 @@
                                     </div>
                                 </td>
                             </tr>
-                        {% endif %}
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -155,7 +163,7 @@
             {# Users Table Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {% include '/admin/partials/_users_pagination.html.twig' %}
+                {{ include('admin/shared/_pagination.html.twig', {label: 'Users per page', route: 'admin_page', occurrencies: allUsersCount}) }}
             </div>
         </div>
     </div>

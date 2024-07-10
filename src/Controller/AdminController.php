@@ -52,7 +52,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  *
@@ -73,7 +73,6 @@ class AdminController extends AbstractController
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
-     * @param UserPasswordHasherInterface $passwordEncoder
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
@@ -86,7 +85,6 @@ class AdminController extends AbstractController
     public function __construct(
         MailerInterface             $mailer,
         UserRepository              $userRepository,
-        UserPasswordHasherInterface $passwordEncoder,
         ProfileManager              $profileManager,
         ParameterBagInterface       $parameterBag,
         GetSettings                 $getSettings,
@@ -98,7 +96,6 @@ class AdminController extends AbstractController
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
-        $this->passwordEncoder = $passwordEncoder;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
@@ -118,22 +115,25 @@ class AdminController extends AbstractController
      * @param int $page
      * @param string $sort
      * @param string $order
+     * @param int $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
+    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc', #[MapQueryParameter] int $count = 7): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $perPage = 7; // Number of users to display per page
+        $searchTerm = $request->query->get('u');
+        $perPage = $count;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
-        // Fetch users with the specified sorting
-        $users = $userRepository->findExcludingAdmin($filter);
+
+        // Use the updated searchWithFilter method to handle both filter and search term
+        $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
@@ -163,11 +163,7 @@ class AdminController extends AbstractController
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
         $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->countBannedUsers();
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
+        $bannedUsersCount = $userRepository->totalBannedUsers();
 
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
@@ -176,7 +172,6 @@ class AdminController extends AbstractController
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
-            'current_user' => $currentUser,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'perPage' => $perPage,
@@ -188,6 +183,7 @@ class AdminController extends AbstractController
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
+            'count' => $count,
             'export_users' => $export_users,
             'public_pgp_path' => $public_PGP_PATH
         ]);
@@ -276,88 +272,6 @@ class AdminController extends AbstractController
         }
 
         return UserProvider::Portal_Account;
-    }
-
-    /*
-    * Handles search bar of the Users Table on the Main Route, with/out filters
-    */
-    /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
-    #[Route('/dashboard/search', name: 'admin_search', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function searchUsers(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc'): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $searchTerm = $request->query->get('u');
-        $perPage = 7;
-
-        $filter = $request->query->get('filter', 'all'); // Default filter
-
-        // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm);
-
-        // Sort the users based on the specified column and order
-        usort($users, static function ($user1, $user2) use ($sort, $order) {
-            // This function is used to sort the arrays uuid and created_at
-            // and compares them with the associated users with the highest number to the lowest id from both arrays
-            $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
-            $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
-
-            if ($order === 'asc') { // Check if the order is "asc" or "desc"
-                //and returns the correct result between arrays
-                return $value1 <=> $value2; // -1
-            }
-
-            return $value2 <=> $value1; // +1
-        });
-
-        if (strlen($searchTerm) > 320) {
-            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
-            return $this->redirectToRoute('admin_page');
-        }
-
-        $totalUsers = count($users);
-        $totalPages = ceil($totalUsers / $perPage);
-        $offset = ($page - 1) * $perPage;
-        $users = array_slice($users, $offset, $perPage);
-
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm);
-        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $userRepository->countBannedUsers($searchTerm);
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
-
-        return $this->render('admin/index.html.twig', [
-            'users' => $users,
-            'currentPage' => $page,
-            'current_user' => $currentUser,
-            'totalPages' => $totalPages,
-            'perPage' => $perPage,
-            'searchTerm' => $searchTerm,
-            'data' => $data,
-            'allUsersCount' => $allUsersCount,
-            'verifiedUsersCount' => $verifiedUsersCount,
-            'bannedUsersCount' => $bannedUsersCount,
-            'activeFilter' => $filter,
-            'activeSort' => $sort,
-            'activeOrder' => $order,
-            'export_users' => $export_users
-        ]);
     }
 
     /*
@@ -534,7 +448,7 @@ class AdminController extends AbstractController
             $confirmPassword = $formReset->get('confirmPassword')->getData();
 
             if ($newPassword !== $confirmPassword) {
-                $this->addFlash('error_admin', 'Please make sure to type both passwords correctly.');
+                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
                 return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
             }
 
@@ -584,19 +498,14 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
-    public function confirmReset(
-        string $type
-    ): Response
+    public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
 
         return $this->render('admin/confirm.html.twig', [
             'data' => $data,
-            'type' => $type,
-            'current_user' => $currentUser,
+            'type' => $type
         ]);
     }
 
@@ -938,16 +847,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(
-        Request                $request,
-        EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
+    public function settings_radius(Request     $request, EntityManagerInterface $em,
+                                    GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1012,8 +914,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1104,9 +1005,6 @@ class AdminController extends AbstractController
         GetSettings            $getSettings
     ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1156,8 +1054,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1260,9 +1157,6 @@ class AdminController extends AbstractController
         GetSettings            $getSettings
     ): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
@@ -1309,8 +1203,7 @@ class AdminController extends AbstractController
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
-            'current_user' => $currentUser,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ]);
     }
 
@@ -1395,12 +1288,9 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted('ROLE_ADMIN')]
-    public function statisticsData(
-        Request $request
-    ): Response
+    public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $user = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1431,7 +1321,6 @@ class AdminController extends AbstractController
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
-            'current_user' => $user,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
@@ -1446,9 +1335,10 @@ class AdminController extends AbstractController
      * Render Statistics about the freeradius data
      */
     /**
+     * @param Request $request
+     * @param int $page
      * @return Response
      * @throws \JsonException
-     * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1489,7 +1379,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
 
         // Extract the connection attempts
@@ -1598,8 +1488,8 @@ class AdminController extends AbstractController
         }
 
         // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
         $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 week');
@@ -1612,7 +1502,7 @@ class AdminController extends AbstractController
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiTags($startDate, $endDate);
+        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -2087,7 +1977,7 @@ class AdminController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         // Determine the appropriate time granularity
-        if ($interval->days > 365) {
+        if ($interval->days > 365.2) {
             $granularity = 'year';
         } else if ($interval->days > 90) {
             $granularity = 'month';
@@ -2351,11 +2241,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to wifi tag usage on the freeradius database
      */
-    private function fetchChartWifiTags(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
         list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
 
-        $events = $this->radiusAccountingRepository->findWifiTags($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
 
         // Group the events based on the wifi Standard
@@ -2688,9 +2578,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -2750,8 +2637,7 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
-            'getSettings' => $getSettings,
-            'current_user' => $currentUser,
+            'getSettings' => $getSettings
         ]);
     }
 
@@ -2796,7 +2682,7 @@ class AdminController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         // Determine the appropriate time granularity
-        if ($interval->days > 365) {
+        if ($interval->days > 365.2) {
             $granularity = 'year';
         } elseif ($interval->days > 90) {
             $granularity = 'month';
