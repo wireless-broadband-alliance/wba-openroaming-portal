@@ -147,10 +147,6 @@ class AdminController extends AbstractController
             return $value2 <=> $value1; // +1
         });
 
-        if (strlen($searchTerm) > 320) {
-            $this->addFlash('error', 'Please enter a search term with fewer than 320 characters.');
-            return $this->redirectToRoute('admin_page');
-        }
 
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
@@ -399,7 +395,7 @@ class AdminController extends AbstractController
             $confirmPassword = $formReset->get('confirmPassword')->getData();
 
             if ($newPassword !== $confirmPassword) {
-                $this->addFlash('error_admin', 'Please make sure to type both passwords correctly.');
+                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
                 return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
             }
 
