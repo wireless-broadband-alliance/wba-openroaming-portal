@@ -65,12 +65,10 @@ class AdminController extends AbstractController
     private EntityManagerInterface $entityManager;
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
-    private UserPasswordHasherInterface $passworndEncoder;
 
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
-     * @param UserPasswordHasherInterface $passwordEncoder
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
@@ -82,7 +80,6 @@ class AdminController extends AbstractController
     public function __construct(
         MailerInterface             $mailer,
         UserRepository              $userRepository,
-        UserPasswordHasherInterface $passwordEncoder,
         ProfileManager              $profileManager,
         ParameterBagInterface       $parameterBag,
         GetSettings                 $getSettings,
@@ -94,7 +91,6 @@ class AdminController extends AbstractController
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
-        $this->passwordEncoder = $passwordEncoder;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
