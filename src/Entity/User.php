@@ -82,10 +82,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
 
-    #[ORM\OneToOne(mappedBy: 'userBackup', cascade: ['persist', 'remove'])]
-    private ?UserBackup $userBackup = null;
-
-
+    
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
@@ -425,23 +422,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setForgotPasswordRequest(?bool $forgot_password_request): static
     {
         $this->forgot_password_request = $forgot_password_request;
-
-        return $this;
-    }
-
-    public function getUserBackup(): ?UserBackup
-    {
-        return $this->userBackup;
-    }
-
-    public function setUserBackup(UserBackup $userBackup): static
-    {
-        // set the owning side of the relation if necessary
-        if ($userBackup->getUserBackup()() !== $this) {
-            $userBackup->setUserBackup($this);
-        }
-
-        $this->userBackup = $userBackup;
 
         return $this;
     }
