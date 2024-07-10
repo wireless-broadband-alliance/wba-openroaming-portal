@@ -65,6 +65,7 @@ class AdminController extends AbstractController
     private EntityManagerInterface $entityManager;
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
+    private UserPasswordHasherInterface $passworndEncoder;
 
     /**
      * @param MailerInterface $mailer
