@@ -82,7 +82,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
 
-    
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?DeletedUserData $deletedUserData = null;
+
+
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
@@ -425,5 +428,23 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
         return $this;
     }
+
+    public function getDeletedUserData(): ?DeletedUserData
+    {
+        return $this->deletedUserData;
+    }
+
+    public function setDeletedUserData(DeletedUserData $deletedUserData): static
+    {
+        // set the owning side of the relation if necessary
+        if ($deletedUserData->getUser() !== $this) {
+            $deletedUserData->setUser($this);
+        }
+
+        $this->deletedUserData = $deletedUserData;
+
+        return $this;
+    }
+
 
 }

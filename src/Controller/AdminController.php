@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -23,6 +25,7 @@ use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -65,6 +68,7 @@ class AdminController extends AbstractController
     private EntityManagerInterface $entityManager;
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
+    private PgpEncryptionService $pgpEncryptionService;
 
     /**
      * @param MailerInterface $mailer
@@ -76,6 +80,7 @@ class AdminController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param RadiusAuthsRepository $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
+     * @param PgpEncryptionService $pgpEncryptionService
      */
     public function __construct(
         MailerInterface             $mailer,
@@ -86,7 +91,7 @@ class AdminController extends AbstractController
         SettingRepository           $settingRepository,
         EntityManagerInterface      $entityManager,
         RadiusAuthsRepository       $radiusAuthsRepository,
-        RadiusAccountingRepository  $radiusAccountingRepository
+        RadiusAccountingRepository  $radiusAccountingRepository, PgpEncryptionService $pgpEncryptionService
     )
     {
         $this->mailer = $mailer;
@@ -98,6 +103,7 @@ class AdminController extends AbstractController
         $this->entityManager = $entityManager;
         $this->radiusAuthsRepository = $radiusAuthsRepository;
         $this->radiusAccountingRepository = $radiusAccountingRepository;
+        $this->pgpEncryptionService = $pgpEncryptionService;
     }
 
     /*
@@ -161,6 +167,8 @@ class AdminController extends AbstractController
 
         // Check if the export users operation is enabled
         $export_users = $this->parameterBag->get('app.export_users');
+        // Check if the delete action has a public PGP key defined
+        $public_PGP_PATH = $this->parameterBag->get('app.pgp_public_key');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -176,7 +184,8 @@ class AdminController extends AbstractController
             'activeSort' => $sort,
             'activeOrder' => $order,
             'count' => $count,
-            'export_users' => $export_users
+            'export_users' => $export_users,
+            'public_pgp_path' => $public_PGP_PATH
         ]);
     }
 
@@ -292,14 +301,61 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        $getUUID = $user->getUuid();
+
+        $deletedUserData = [
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail() ?? 'This value is empty',
+            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
+            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
+            'googleId' => $user->getGoogleId() ?? 'This value is empty',
+            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
+            'lastName' => $user->getLastName() ?? 'This value is empty',
+            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
+            'deletedAt' => new DateTime(),
+        ];
+
+        $jsonData = json_encode($deletedUserData);
+
+        // Encrypt JSON data using PGP encryption
+        $pgpEncryptedService = new PgpEncryptionService();
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
+
+        $deletedUserData = new DeletedUserData();
+        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
+        $deletedUserData->setUser($user);
+
+        $event = new Event();
+        $event->setUser($user);
+        $event->setEventDatetime(new DateTime());
+        $event->setEventName(AnalyticalEventType::DELETED_USER_BY);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $event->setEventMetadata([
+            'deletedBy' => $currentUser->getUuid(),
+            'isIP' => $_SERVER['REMOTE_ADDR'],
+        ]);
+
+        $user->setUuid($user->getId());
+        $user->setEmail('');
+        $user->setPhoneNumber('');
+        $user->setPassword($user->getId());
+        $user->setSamlIdentifier(null);
+        $user->setFirstName(null);
+        $user->setLastName(null);
+        $user->setGoogleId(null);
+        $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
+
         $this->disableProfiles($user);
+        $em->persist($deletedUserData);
+        $em->persist($event);
         $em->persist($user);
         $em->flush();
 
-        $uuid = $user->getUUID();
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $uuid));
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
         return $this->redirectToRoute('admin_page');
     }
 
