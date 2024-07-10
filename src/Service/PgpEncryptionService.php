@@ -15,7 +15,7 @@ class PgpEncryptionService
         $publicKeyContent = file_get_contents($publicKeyPath);
 
         if (empty($publicKeyContent)) {
-            throw new InvalidArgumentException('Public key not set.');
+            throw new InvalidArgumentException('Please define a public key to be able to delete users from the UI.');
         }
 
         try {
@@ -32,7 +32,7 @@ class PgpEncryptionService
 
             $gpg->addencryptKey($fingerprint);
             return $gpg->encrypt($data);
-            
+
         } catch (Exception $e) {
             // Catch any exceptions and display the message for debugging
             throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());
