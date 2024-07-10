@@ -1439,8 +1439,8 @@ class AdminController extends AbstractController
         }
 
         // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
         $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 week');
