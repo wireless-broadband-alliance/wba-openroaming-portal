@@ -11,7 +11,7 @@ class PgpEncryptionService
 {
     public function encrypt(string $data): string
     {
-        $publicKeyPath = "/var/www/openroaming/public/resources/public_pgp_key/public_key.asc";
+        $publicKeyPath = "/var/www/openroaming/signing-keys/pgp_public_key/public_key.asc";
         $publicKeyContent = file_get_contents($publicKeyPath);
 
         if (empty($publicKeyContent)) {
