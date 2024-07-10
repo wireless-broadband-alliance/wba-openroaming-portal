@@ -85,7 +85,7 @@
         {% else %}
             {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                 {% if not app.user.isVerified %}
-                    {% include 'site/shared/_account_activation.html.twig' %}
+                    {{ include('site/shared/_account_activation.html.twig') }}
                 {% endif %}
             {% endif %}
 
@@ -104,7 +104,11 @@
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
 
             <p class="text-[#212529] text-opacity-40 text-sm">
-                You are currently authenticated as {{ app.user.uuid }}
+                You are currently authenticated
+                as
+                {% if app.user.samlIdentifier %}{{ app.user.samlIdentifier }}{% else %}
+                    {{ app.user.uuid }}
+                {% endif %}
             </p>
         {% endif %}
 
@@ -127,7 +131,7 @@
                 </form>
             {% else %}
                 {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
-                    {% include 'site/shared/_account_activation.html.twig' %}
+                    {{ include('site/shared/_account_activation.html.twig') }}
                 {% else %}
                     <form method="post" novalidate>
                         {{ include('site/shared/_os_selection.html.twig') }}
@@ -141,7 +145,10 @@
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
 
                     <p class="text-[#212529] text-opacity-40 text-sm">
-                        You are currently authenticated as {{ app.user.uuid }}
+                        You are currently authenticated as
+                        {% if app.user.samlIdentifier %}{{ app.user.samlIdentifier }}{% else %}
+                            {{ app.user.uuid }}
+                        {% endif %}
                     </p>
 
                     {% if app.user.isVerified %}
