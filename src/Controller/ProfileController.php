@@ -15,6 +15,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Utils\CacheUtils;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
@@ -30,15 +31,19 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class ProfileController extends AbstractController
 {
     private array $settings;
+    private EventActions $eventActions;
 
     /**
      * @param SettingRepository $settingRepository
+     * @param EventActions $eventActions ,
      */
     public function __construct(
         SettingRepository $settingRepository,
+        EventActions      $eventActions,
     )
     {
         $this->settings = $this->getSettings($settingRepository);
+        $this->eventActions = $eventActions;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
@@ -90,17 +95,14 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Type', 'application/x-wifi-config');
         $response->headers->set('Content-Transfer-Encoding', 'base64');
 
-        // Defines the Event to the table
-        $event = new Event();
-        $event->setUser($user);
-        $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
-        $event->setEventMetadata([
+        $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::ANDROID,
-            'isIP' => $_SERVER['REMOTE_ADDR'],
-        ]);
-        $eventRepository->save($event, true);
+            'ip' => $_SERVER['REMOTE_ADDR'],
+        ];
+
+        // Save the event Action using the service
+        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
 
         return $response;
     }
