@@ -446,22 +446,16 @@ class AdminController extends AbstractController
                 $user->setBannedAt(null);
                 $this->enableProfiles($user);
             }
-
             $userRepository->save($user, true);
+
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'edited ' => $user->getUuid(),
+                'by' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI, new DateTime(), $eventMetadata);
+
             $email = $user->getEmail();
-
-            $event = new Event();
-            $event->setUser($currentUser);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI);
-            $event->setEventMetadata([
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-                'uuid' => $currentUser->getUuid()
-            ]);
-
-            $em->persist($event);
-            $em->flush();
-
             $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
 
             return $this->redirectToRoute('admin_page');
@@ -502,17 +496,12 @@ class AdminController extends AbstractController
             $mailer->send($email);
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
 
-            $event = new Event();
-            $event->setUser($currentUser);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI);
-            $event->setEventMetadata([
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-                'uuid' => $currentUser->getUuid()
-            ]);
-
-            $em->persist($event);
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'edited ' => $user->getUuid(),
+                'by' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI, new DateTime(), $eventMetadata);
 
             return $this->redirectToRoute('admin_page');
         }

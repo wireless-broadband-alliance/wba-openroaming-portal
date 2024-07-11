@@ -268,14 +268,10 @@ class SiteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $event = new Event();
-
-            $event->setUser($user);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE);
-            $event->setEventMetadata([
+            $eventMetaData = [
                 'platform' => PlatformMode::Live,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+                'ip' => $_SERVER['REMOTE_ADDR'],
                 'Old data' => [
                     'First Name' => $oldFirstName,
                     'Last Name' => $oldLastName,
@@ -284,12 +280,8 @@ class SiteController extends AbstractController
                     'First Name' => $user->getFirstName(),
                     'Last Name' => $user->getLastName(),
                 ],
-            ]);
-
-            $em->persist($event);
-            $em->persist($user);
-
-            $em->flush();
+            ];
+            $this->eventActions->saveEvent($user, AnalyticalEventType::USER_ACCOUNT_UPDATE, new DateTime(), $eventMetaData);
 
             $this->addFlash('success', 'Your account information has been updated');
 
@@ -319,18 +311,16 @@ class SiteController extends AbstractController
             }
 
             $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
-            $event = new Event();
-            $event->setUser($user);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD);
-            $event->setEventMetadata([
-                'platform' => PlatformMode::Live,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-            ]);
 
-            $em->persist($event);
             $em->persist($user);
             $em->flush();
+
+            $eventMetaData->setEventMetadata([
+                'platform' => PlatformMode::Live,
+                'uuid' => $user->getUuid(),
+                'ip' => $_SERVER['REMOTE_ADDR'],
+            ]);
+            $this->eventActions->saveEvent($user, AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD, new DateTime(), $eventMetaData);
 
             $this->addFlash('success', 'Your password has been updated successfully!');
         }
@@ -764,8 +754,8 @@ class SiteController extends AbstractController
                     $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
                     $latestEvent->setEventMetadata([
                         'platform' => PlatformMode::Live,
-                        'email' => $currentUser->getEmail(),
-                        'isIP' => $_SERVER['REMOTE_ADDR'],
+                        'uuid' => $currentUser->getEmail(),
+                        'ip' => $_SERVER['REMOTE_ADDR'],
                     ]);
                 }
 
