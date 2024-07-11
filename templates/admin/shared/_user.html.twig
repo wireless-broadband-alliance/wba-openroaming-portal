@@ -83,6 +83,7 @@
                         Edit
                     </a>
                 </li>
+                {% if delete_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
                 <li {{ stimulus_controller('alert') }}>
                     <form action="{{ path('admin_delete', {id: user.id}) }}"
                           method="post" {{ stimulus_target('alert', 'form') }}>
@@ -96,6 +97,7 @@
                         </a>
                     </form>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </td>

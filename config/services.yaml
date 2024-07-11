@@ -9,7 +9,7 @@ parameters:
   app.budget_api_url: '%env(BUDGETSMS_API_URL)%'
   app.export_users: '%env(EXPORT_USERS)%'
   app.export_freeradius_statistics: '%env(EXPORT_FREERADIUS_STATISTICS)%'
-  app.pgp_public_key: '%env(PGP_DELETE_USERS_ACTION)%'
+  app.pgp_public_key: '%env(ENABLE_DELETE_USERS_UI)%'
 services:
   App\Form\Transformer\BooleanToDateTimeTransformer: ~
   #Things to make the login with Google work
