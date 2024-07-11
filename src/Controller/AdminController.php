@@ -24,6 +24,7 @@ use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
@@ -67,6 +68,7 @@ class AdminController extends AbstractController
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
     private PgpEncryptionService $pgpEncryptionService;
+    private EventActions $eventAction;
 
     /**
      * @param MailerInterface $mailer
@@ -79,6 +81,7 @@ class AdminController extends AbstractController
      * @param RadiusAuthsRepository $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
      * @param PgpEncryptionService $pgpEncryptionService
+     * @param EventActions $eventActions ;
      */
     public function __construct(
         MailerInterface            $mailer,
@@ -90,7 +93,8 @@ class AdminController extends AbstractController
         EntityManagerInterface     $entityManager,
         RadiusAuthsRepository      $radiusAuthsRepository,
         RadiusAccountingRepository $radiusAccountingRepository,
-        PgpEncryptionService       $pgpEncryptionService
+        PgpEncryptionService       $pgpEncryptionService,
+        EventActions               $eventActions
     )
     {
         $this->mailer = $mailer;
@@ -103,6 +107,7 @@ class AdminController extends AbstractController
         $this->radiusAuthsRepository = $radiusAuthsRepository;
         $this->radiusAccountingRepository = $radiusAccountingRepository;
         $this->pgpEncryptionService = $pgpEncryptionService;
+        $this->eventActions = $eventActions;
     }
 
     /*
@@ -277,14 +282,14 @@ class AdminController extends AbstractController
     public function getUserProvider(User $user): string
     {
         if ($user->getGoogleId() !== null) {
-            return UserProvider::Google_Account;
+            return UserProvider::GOOGLE_ACCOUNT;
         }
 
         if ($user->getSamlIdentifier() !== null) {
             return UserProvider::SAML;
         }
 
-        return UserProvider::Portal_Account;
+        return UserProvider::PORTAL_ACCOUNT;
     }
 
     /*
@@ -1118,18 +1123,14 @@ class AdminController extends AbstractController
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
             }
-            $event = new Event();
-            $event->setUser($currentUser);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST);
-            $event->setEventMetadata([
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-                'uuid' => $currentUser->getUuid()
-            ]);
-
-            $em->persist($event);
             // Flush the changes to the database
             $em->flush();
+
+            $eventMetadata = [
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST, new DateTime(), $eventMetadata);
 
             $this->addFlash('success_admin', 'The new changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_status');

@@ -2,15 +2,14 @@
 
 namespace App\EventListener;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
@@ -19,27 +18,27 @@ use Symfony\Component\Security\Http\SecurityEvents;
 class LoginSuccessListener implements EventSubscriberInterface
 {
     private GetSettings $getSettings;
-    private EntityManagerInterface $entityManager;
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
+    private EventActions $eventActions;
 
     /**
      * @param GetSettings $getSettings
-     * @param EntityManagerInterface $entityManager
      * @param UserRepository $userRepository
      * @param SettingRepository $settingRepository
+     * @param EventActions $eventActions
      */
     public function __construct(
-        GetSettings            $getSettings,
-        EntityManagerInterface $entityManager,
-        UserRepository         $userRepository,
-        SettingRepository      $settingRepository
+        GetSettings       $getSettings,
+        UserRepository    $userRepository,
+        SettingRepository $settingRepository,
+        EventActions      $eventActions
     )
     {
-        $this->entityManager = $entityManager;
         $this->getSettings = $getSettings;
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
+        $this->eventActions = $eventActions;
     }
 
     public static function getSubscribedEvents(): array
@@ -61,18 +60,13 @@ class LoginSuccessListener implements EventSubscriberInterface
         }
 
         if ($user instanceof User) {
-            $eventEntity = new Event();
-            $eventEntity->setUser($user);
-            $eventEntity->setEventDatetime(new DateTime());
-            $eventEntity->setEventName(AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST);
-            $eventEntity->setEventMetadata([
+            // Defines the Event to the table
+            $eventMetadata = [
                 'platform' => $platformMode,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $user->getUuid(),
-            ]);
-
-            $this->entityManager->persist($eventEntity);
-            $this->entityManager->flush();
+            ];
+            $this->eventActions->saveEvent($user, AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST, new DateTime(), $eventMetadata);
         }
     }
 }

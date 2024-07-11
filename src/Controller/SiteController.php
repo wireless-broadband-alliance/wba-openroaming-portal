@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -17,12 +18,14 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -38,7 +41,6 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @method getParameterBag()
@@ -51,6 +53,7 @@ class SiteController extends AbstractController
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
     private EventRepository $eventRepository;
+    private EventActions $eventActions;
 
     /**
      * SiteController constructor.
@@ -61,8 +64,9 @@ class SiteController extends AbstractController
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
+     * @param EventActions $eventActions Used to generate event related to the User creation
      */
-    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings, EventRepository $eventRepository)
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings, EventRepository $eventRepository, EventActions $eventActions)
     {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -70,6 +74,7 @@ class SiteController extends AbstractController
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->eventRepository = $eventRepository;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -120,7 +125,6 @@ class SiteController extends AbstractController
                     $this->addFlash('error', 'Please select OS');
                 } else if ($this->getUser() === null) {
                     $user = new User();
-                    $event = new Event();
                     $form = $this->createForm(RegistrationFormType::class, $user);
                     $form->handleRequest($request);
                     if ($form->isSubmitted() && $form->isValid()) {
@@ -132,15 +136,15 @@ class SiteController extends AbstractController
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                         $entityManager->persist($user);
 
-                        $event->setUser($user);
-                        $event->setEventDatetime(new DateTime());
-                        $event->setEventName(AnalyticalEventType::USER_CREATION);
-                        $event->setEventMetadata([
+                        // Defines the Event to the table
+                        $eventMetadata = [
                             'platform' => PlatformMode::Demo,
-                            'registrationType' => 'email',
-                        ]);
-                        $entityManager->persist($event);
-                        $entityManager->flush();
+                            'uuid' => $user->getUuid(),
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'registrationType' => UserProvider::EMAIL,
+                        ];
+                        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetadata);
+
                         $userAuthenticator->authenticateUser(
                             $user,
                             $authenticator,
@@ -845,14 +849,12 @@ class SiteController extends AbstractController
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
 
-            $event->setUser($currentUser);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
-            $event->setEventMetadata([
+            $eventMetadata = [
                 'platform' => PlatformMode::Live,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-            ]);
-            $eventRepository->save($event, true);
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_VERIFICATION, new DateTime(), $eventMetadata);
 
             $this->addFlash('success', 'Your account is now successfully verified');
             return $this->redirectToRoute('app_landing');
