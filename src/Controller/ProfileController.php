@@ -186,34 +186,30 @@ class ProfileController extends AbstractController
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
 
-
-        ///
         $response = new Response($signedProfileContents);
 
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
 
-        // Defines the Event to the table
-        $event = new Event();
-        $event->setUser($user);
-        $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
-        $userAgent = $request->headers->get('User-Agent');
 
+        // Save the event Action using the service
+        $userAgent = $request->headers->get('User-Agent');
+        $eventMetadata = [];
         if (stripos($userAgent, 'iPhone') !== false || stripos($userAgent, 'iPad') !== false) {
-            $event->setEventMetadata([
+            $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-            ]);
+                'ip' => $_SERVER['REMOTE_ADDR'],
+            ];
         } elseif (stripos($userAgent, 'Mac OS') !== false) {
-            $event->setEventMetadata([
+            $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-            ]);
+                'ip' => $_SERVER['REMOTE_ADDR'],
+            ];
         }
 
-        $eventRepository->save($event, true);
+        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+
         return $response;
     }
 
@@ -286,17 +282,14 @@ class ProfileController extends AbstractController
         $cache = new CacheUtils();
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
-        // Defines the Event to the table
-        $event = new Event();
-        $event->setUser($user);
-        $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DOWNLOAD_PROFILE);
-        $event->setEventMetadata([
+        $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::WINDOWS,
-            'isIP' => $_SERVER['REMOTE_ADDR'],
-        ]);
-        $eventRepository->save($event, true);
+            'ip' => $_SERVER['REMOTE_ADDR'],
+        ];
+
+        // Save the event Action using the service
+        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
 
         return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));
     }
