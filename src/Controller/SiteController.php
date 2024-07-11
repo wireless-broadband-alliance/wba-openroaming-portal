@@ -382,8 +382,8 @@ class SiteController extends AbstractController
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                         $latestEvent->setEventMetadata([
                             'platform' => PlatformMode::Live,
-                            'isIP' => $_SERVER['REMOTE_ADDR'],
-                            'email' => $user->getEmail(),
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'uuid' => $user->getUuid(),
                         ]);
                     }
                     $latestEvent->setLastVerificationCodeTime($currentTime);
@@ -486,8 +486,8 @@ class SiteController extends AbstractController
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEvent->setEventMetadata([
                                 'platform' => PlatformMode::Live,
-                                'isIP' => $_SERVER['REMOTE_ADDR'],
-                                'phoneNumber' => $user->getPhoneNumber(),
+                                'ip' => $_SERVER['REMOTE_ADDR'],
+                                'uuid' => $user->getUuid(),
                             ]);
                         }
                         $latestEvent->setVerificationAttempts($attempts);
@@ -606,18 +606,15 @@ class SiteController extends AbstractController
 
             $user->setPassword($passwordHasher->hashPassword($user, $form->get('newPassword')->getData()));
             $user->setForgotPasswordRequest(false);
-            $event = new Event();
-            $event->setUser($user);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::FORGOT_PASSWORD_REQUEST_ACCEPTED);
-            $event->setEventMetadata([
-                'platform' => PlatformMode::Live,
-                'isIP' => $_SERVER['REMOTE_ADDR'],
-            ]);
-
-            $entityManager->persist($event);
             $entityManager->persist($user);
             $entityManager->flush();
+
+            $eventMetadata = [
+                'platform' => PlatformMode::Live,
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED, new DateTime(), $eventMetadata);
 
             $this->addFlash('success', 'Your password has been updated successfully!');
             return $this->redirectToRoute('app_landing');

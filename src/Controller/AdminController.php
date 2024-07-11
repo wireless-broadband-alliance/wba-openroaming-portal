@@ -262,17 +262,12 @@ class AdminController extends AbstractController
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        $event = new Event();
-        $event->setUser($currentUser);
-        $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST);
-        $event->setEventMetadata([
-            'isIP' => $_SERVER['REMOTE_ADDR'],
-            'uuid' => $currentUser->getUuid()
-        ]);
+        $eventMetadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST, new DateTime(), $eventMetadata);
 
-        $entityManager->persist($event);
-        $entityManager->flush();
 
         // Return the file as a response
         return $this->file($tempFile, 'users.xlsx');
@@ -366,12 +361,17 @@ class AdminController extends AbstractController
         $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
-
         $this->disableProfiles($user);
         $em->persist($deletedUserData);
-        $em->persist($event);
         $em->persist($user);
         $em->flush();
+
+        $eventMetadata = [
+            'uuid' => $getUUID,
+            'deletedBy' => $currentUser->getUuid(),
+            'ip' => $_SERVER['REMOTE_ADDR'],
+        ];
+        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::DELETED_USER_BY, new DateTime(), $eventMetadata);
 
         $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
         return $this->redirectToRoute('admin_page');
@@ -1914,16 +1914,12 @@ class AdminController extends AbstractController
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        $event = new Event();
-        $event->setUser($currentUser);
-        $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST);
-        $event->setEventMetadata([
-            'isIP' => $_SERVER['REMOTE_ADDR'],
-            'uuid' => $currentUser->getUuid()
-        ]);
-        $entityManager->persist($event);
-        $entityManager->flush();
+        $eventMetadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST, new DateTime(), $eventMetadata);
+
 
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
