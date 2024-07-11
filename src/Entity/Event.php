@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\EventRepository;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,7 +16,7 @@ class Event
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $event_datetime = null;
+    private ?DateTimeInterface $event_datetime = null;
 
     #[ORM\Column(length: 255)]
     private ?string $event_name = null;
@@ -31,19 +32,19 @@ class Event
     private ?int $verification_attempts = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $last_verification_code_time = null;
+    private ?DateTimeInterface $last_verification_code_time = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getEventDatetime(): ?\DateTimeInterface
+    public function getEventDatetime(): ?DateTimeInterface
     {
         return $this->event_datetime;
     }
 
-    public function setEventDatetime(\DateTimeInterface $event_datetime): static
+    public function setEventDatetime(DateTimeInterface $event_datetime): static
     {
         $this->event_datetime = $event_datetime;
 
@@ -98,12 +99,12 @@ class Event
         return $this;
     }
 
-    public function getLastVerificationCodeTime(): ?\DateTimeInterface
+    public function getLastVerificationCodeTime(): ?DateTimeInterface
     {
         return $this->last_verification_code_time;
     }
 
-    public function setLastVerificationCodeTime(?\DateTimeInterface $last_verification_code_time): static
+    public function setLastVerificationCodeTime(?DateTimeInterface $last_verification_code_time): static
     {
         $this->last_verification_code_time = $last_verification_code_time;
 
