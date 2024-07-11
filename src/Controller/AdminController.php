@@ -81,15 +81,16 @@ class AdminController extends AbstractController
      * @param PgpEncryptionService $pgpEncryptionService
      */
     public function __construct(
-        MailerInterface             $mailer,
-        UserRepository              $userRepository,
-        ProfileManager              $profileManager,
-        ParameterBagInterface       $parameterBag,
-        GetSettings                 $getSettings,
-        SettingRepository           $settingRepository,
-        EntityManagerInterface      $entityManager,
-        RadiusAuthsRepository       $radiusAuthsRepository,
-        RadiusAccountingRepository  $radiusAccountingRepository, PgpEncryptionService $pgpEncryptionService
+        MailerInterface            $mailer,
+        UserRepository             $userRepository,
+        ProfileManager             $profileManager,
+        ParameterBagInterface      $parameterBag,
+        GetSettings                $getSettings,
+        SettingRepository          $settingRepository,
+        EntityManagerInterface     $entityManager,
+        RadiusAuthsRepository      $radiusAuthsRepository,
+        RadiusAccountingRepository $radiusAccountingRepository,
+        PgpEncryptionService       $pgpEncryptionService
     )
     {
         $this->mailer = $mailer;
@@ -980,10 +981,12 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(Request     $request, EntityManagerInterface $em,
-                                    GetSettings $getSettings): Response
+    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -1157,6 +1160,9 @@ class AdminController extends AbstractController
     ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -1327,6 +1333,9 @@ class AdminController extends AbstractController
     ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -2775,6 +2784,9 @@ class AdminController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
