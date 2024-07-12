@@ -25,7 +25,7 @@ class LogoutSuccessListener implements EventSubscriberInterface
      * @param GetSettings $getSettings
      * @param UserRepository $userRepository
      * @param SettingRepository $settingRepository
-     * @param EventActions $eventAction
+     * @param EventActions $eventActions
      */
     public function __construct(
         GetSettings       $getSettings,
