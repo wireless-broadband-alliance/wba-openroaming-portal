@@ -2890,11 +2890,11 @@ class AdminController extends AbstractController
             return $value->format('Y-m-d H:i:s');
         }
 
-        $escapedValue = (string) $value;
-        if (preg_match('/^[=+\-@]/', $escapedValue)) {
+        $escapedValue = (string)$value;
+        $specialChars = ['=', '@', '-', '+'];
+        if (in_array($escapedValue[0] ?? '', $specialChars, true)) {
             $escapedValue = "'" . $escapedValue;
         }
-
         return $escapedValue;
     }
 

@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Service\EventActions;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -221,7 +222,7 @@ class GoogleController extends AbstractController
             'platform' => PlatformMode::Live,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
-            'registrationType' => 'GoogleAccount'
+            'registrationType' => UserProvider::GOOGLE_ACCOUNT,
         ];
 
         $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $event_metadata);
