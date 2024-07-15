@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
@@ -28,6 +27,7 @@ class SendSMS
     private GetSettings $getSettings;
     private ParameterBagInterface $parameterBag;
     private EventRepository $eventRepository;
+    private EventActions $eventActions;
 
     /**
      * SendSMS constructor.
@@ -37,13 +37,15 @@ class SendSMS
      * @param GetSettings $getSettings
      * @param ParameterBagInterface $parameterBag
      * @param EventRepository $eventRepository
+     * @param EventActions $eventActions
      */
     public function __construct(
         UserRepository        $userRepository,
         SettingRepository     $settingRepository,
         GetSettings           $getSettings,
         ParameterBagInterface $parameterBag,
-        EventRepository       $eventRepository
+        EventRepository       $eventRepository,
+        EventActions          $eventActions,
     )
     {
         $this->userRepository = $userRepository;
@@ -51,6 +53,7 @@ class SendSMS
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -145,14 +148,13 @@ class SendSMS
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
                     $attempts = 1;
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($user);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
-                    $latestEvent->setEventMetadata([
+                    // Defines the Event to the table
+                    $eventMetadata = [
                         'platform' => PlatformMode::Live,
-                        'phoneNumber' => $user->getPhoneNumber(),
-                    ]);
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'uuid' => $user->getUuid(),
+                    ];
+                    $this->eventActions->saveEvent($user, AnalyticalEventType::USER_SMS_ATTEMPT, new DateTime(), $eventMetadata);
                 } else {
                     // Increment the attempts
                     $attempts = $latestEvent->getVerificationAttempts() + 1;

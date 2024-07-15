@@ -24,6 +24,7 @@ use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
@@ -54,9 +55,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 
-/**
- *
- */
+
 class AdminController extends AbstractController
 {
     private MailerInterface $mailer;
@@ -69,6 +68,7 @@ class AdminController extends AbstractController
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
     private PgpEncryptionService $pgpEncryptionService;
+    private EventActions $eventActions;
 
     /**
      * @param MailerInterface $mailer
@@ -81,17 +81,20 @@ class AdminController extends AbstractController
      * @param RadiusAuthsRepository $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
      * @param PgpEncryptionService $pgpEncryptionService
+     * @param EventActions $eventActions
      */
     public function __construct(
-        MailerInterface             $mailer,
-        UserRepository              $userRepository,
-        ProfileManager              $profileManager,
-        ParameterBagInterface       $parameterBag,
-        GetSettings                 $getSettings,
-        SettingRepository           $settingRepository,
-        EntityManagerInterface      $entityManager,
-        RadiusAuthsRepository       $radiusAuthsRepository,
-        RadiusAccountingRepository  $radiusAccountingRepository, PgpEncryptionService $pgpEncryptionService
+        MailerInterface            $mailer,
+        UserRepository             $userRepository,
+        ProfileManager             $profileManager,
+        ParameterBagInterface      $parameterBag,
+        GetSettings                $getSettings,
+        SettingRepository          $settingRepository,
+        EntityManagerInterface     $entityManager,
+        RadiusAuthsRepository      $radiusAuthsRepository,
+        RadiusAccountingRepository $radiusAccountingRepository,
+        PgpEncryptionService       $pgpEncryptionService,
+        EventActions               $eventActions
     )
     {
         $this->mailer = $mailer;
@@ -104,6 +107,7 @@ class AdminController extends AbstractController
         $this->radiusAuthsRepository = $radiusAuthsRepository;
         $this->radiusAccountingRepository = $radiusAccountingRepository;
         $this->pgpEncryptionService = $pgpEncryptionService;
+        $this->eventActions = $eventActions;
     }
 
     /*
@@ -166,9 +170,9 @@ class AdminController extends AbstractController
         $bannedUsersCount = $userRepository->totalBannedUsers();
 
         // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
+        $exportUsers = $this->parameterBag->get('app.export_users');
         // Check if the delete action has a public PGP key defined
-        $public_PGP_PATH = $this->parameterBag->get('app.pgp_public_key');
+        $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -184,8 +188,8 @@ class AdminController extends AbstractController
             'activeSort' => $sort,
             'activeOrder' => $order,
             'count' => $count,
-            'export_users' => $export_users,
-            'public_pgp_path' => $public_PGP_PATH
+            'export_users' => $exportUsers,
+            'delete_users' => $deleteUsers
         ]);
     }
 
@@ -199,13 +203,15 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportUsers(
-        UserRepository $userRepository
-    ): Response
+    public function exportUsers(UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
-        if ($export_users === EmailConfirmationStrategy::NO_EMAIL) {
+        $exportUsers = $this->parameterBag->get('app.export_users');
+        if ($exportUsers === EmailConfirmationStrategy::NO_EMAIL) {
             $this->addFlash('error_admin', 'This operation is disabled for security reasons');
             return $this->redirectToRoute('admin_page');
         }
@@ -229,24 +235,22 @@ class AdminController extends AbstractController
         $sheet->setCellValue('I1', 'Banned At');
         $sheet->setCellValue('J1', 'Created At');
 
-
         // Apply the data
         $row = 2;
         foreach ($users as $user) {
-            $sheet->setCellValue('A' . $row, $user->getId());
-            $sheet->setCellValue('B' . $row, $user->getUuid());
-            $sheet->setCellValue('C' . $row, $user->getEmail());
-            $sheet->setCellValue('D' . $row, $user->getPhoneNumber());
-            $sheet->setCellValue('E' . $row, $user->getFirstName());
-            $sheet->setCellValue('F' . $row, $user->getLastName());
-            $sheet->setCellValue('G' . $row, $user->isVerified() ? 'Verified' : 'Not Verified');
+            $sheet->setCellValue('A' . $row, $this->escapeSpreadsheetValue($user->getId()));
+            $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($user->getUuid()));
+            $sheet->setCellValue('C' . $row, $this->escapeSpreadsheetValue($user->getEmail()));
+            $sheet->setCellValue('D' . $row, $this->escapeSpreadsheetValue($user->getPhoneNumber()));
+            $sheet->setCellValue('E' . $row, $this->escapeSpreadsheetValue($user->getFirstName()));
+            $sheet->setCellValue('F' . $row, $this->escapeSpreadsheetValue($user->getLastName()));
+            $sheet->setCellValue('G' . $row, $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified'));
             // Determine User Provider
             $userProvider = $this->getUserProvider($user);
-            $sheet->setCellValue('H' . $row, $userProvider);
+            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userProvider));
             // Check if the user is Banned
-            $sheet->setCellValue('I' . $row, $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned');
-            $sheet->setCellValue('J' . $row, $user->getCreatedAt());
-
+            $sheet->setCellValue('I' . $row, $this->escapeSpreadsheetValue($user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'));
+            $sheet->setCellValue('J' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
         }
@@ -256,6 +260,12 @@ class AdminController extends AbstractController
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
+        $eventMetadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST, new DateTime(), $eventMetadata);
+
         // Return the file as a response
         return $this->file($tempFile, 'users.xlsx');
     }
@@ -264,14 +274,14 @@ class AdminController extends AbstractController
     public function getUserProvider(User $user): string
     {
         if ($user->getGoogleId() !== null) {
-            return UserProvider::Google_Account;
+            return UserProvider::GOOGLE_ACCOUNT;
         }
 
         if ($user->getSamlIdentifier() !== null) {
             return UserProvider::SAML;
         }
 
-        return UserProvider::Portal_Account;
+        return UserProvider::PORTAL_ACCOUNT;
     }
 
     /*
@@ -348,12 +358,17 @@ class AdminController extends AbstractController
         $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
-
         $this->disableProfiles($user);
         $em->persist($deletedUserData);
-        $em->persist($event);
         $em->persist($user);
         $em->flush();
+
+        $eventMetadata = [
+            'uuid' => $getUUID,
+            'deletedBy' => $currentUser->getUuid(),
+            'ip' => $_SERVER['REMOTE_ADDR'],
+        ];
+        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::DELETED_USER_BY, new DateTime(), $eventMetadata);
 
         $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
         return $this->redirectToRoute('admin_page');
@@ -428,8 +443,15 @@ class AdminController extends AbstractController
                 $user->setBannedAt(null);
                 $this->enableProfiles($user);
             }
-
             $userRepository->save($user, true);
+
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'edited' => $user->getUuid(),
+                'by' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI, new DateTime(), $eventMetadata);
+
             $email = $user->getEmail();
             $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
 
@@ -457,23 +479,27 @@ class AdminController extends AbstractController
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            $userEmail = $user->getEmail();
-            if ($userEmail) {
-                // Send email to the user with the new password
-                $email = (new Email())
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($userEmail)
-                    ->subject('Your Password Reset Details')
-                    ->html(
-                        $this->renderView(
-                            'email/user_password.html.twig',
-                            ['password' => $newPassword, 'isNewUser' => false]
-                        )
-                    );
-                $mailer->send($email);
-            }
+            // Send email to the user with the new password
+            $email = (new Email())
+                ->from(new Address($emailSender, $nameSender))
+                ->to($user->getEmail())
+                ->subject('Your Password Reset Details')
+                ->html(
+                    $this->renderView(
+                        'email/user_password.html.twig',
+                        ['password' => $newPassword, 'isNewUser' => false]
+                    )
+                );
+            $mailer->send($email);
+            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
 
-            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'edited ' => $user->getUuid(),
+                'by' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI, new DateTime(), $eventMetadata);
+
             return $this->redirectToRoute('admin_page');
         }
 
@@ -521,7 +547,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkPassword(
+    public function checkSettings(
         RequestStack           $requestStack,
         EntityManagerInterface $em,
         string                 $type
@@ -544,6 +570,12 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The setting has been reset successfully!');
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
@@ -559,6 +591,13 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_TERMS_RESET_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
@@ -574,6 +613,13 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
@@ -589,6 +635,18 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The platform mode status has been reset successfully!');
+
+                $event = new Event();
+                $event->setUser($currentUser);
+                $event->setEventDatetime(new DateTime());
+                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
+                $event->setEventMetadata([
+                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid()
+                ]);
+
+                $em->persist($event);
+                $em->flush();
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
@@ -604,6 +662,13 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
@@ -619,6 +684,13 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The CAPPORT settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
@@ -634,6 +706,13 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The authentication settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
@@ -649,6 +728,13 @@ class AdminController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully!');
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST, new DateTime(), $eventMetadata);
+
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
             }
         }
@@ -667,9 +753,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function regenerateCode(
-        string $type
-    ): RedirectResponse
+    public function regenerateCode(string $type, EntityManagerInterface $entityManager): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -822,8 +906,12 @@ class AdminController extends AbstractController
                 $em->persist($privacyPolicySetting);
             }
 
-            // Flush the changes to the database
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_TERMS_REQUEST, new DateTime(), $eventMetadata);
+
 
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_terms');
@@ -847,10 +935,12 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(Request     $request, EntityManagerInterface $em,
-                                    GetSettings $getSettings): Response
+    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -902,8 +992,11 @@ class AdminController extends AbstractController
                     }
                 }
 
-                // Flush the changes to the database
-                $em->flush();
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST, new DateTime(), $eventMetadata);
 
                 $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
@@ -973,9 +1066,14 @@ class AdminController extends AbstractController
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
             }
-
             // Flush the changes to the database
             $em->flush();
+
+            $eventMetadata = [
+                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid()
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST, new DateTime(), $eventMetadata);
 
             $this->addFlash('success_admin', 'The new changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_status');
@@ -1006,6 +1104,9 @@ class AdminController extends AbstractController
     ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -1043,8 +1144,12 @@ class AdminController extends AbstractController
                 }
             }
 
-            // Flush the changes to the database
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_LDAP_CONF_REQUEST, new DateTime(), $eventMetadata);
+
 
             $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_LDAP');
@@ -1127,8 +1232,11 @@ class AdminController extends AbstractController
                 }
             }
 
-            // Flush the changes to the database
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST, new DateTime(), $eventMetadata);
 
             $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_auth');
@@ -1158,6 +1266,9 @@ class AdminController extends AbstractController
     ): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -1192,8 +1303,11 @@ class AdminController extends AbstractController
                 }
             }
 
-            // Flush the changes to the database
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST, new DateTime(), $eventMetadata);
 
             $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_capport');
@@ -1261,8 +1375,11 @@ class AdminController extends AbstractController
                 }
             }
 
-            // Flush the changes to the database
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_SMS_CONF_REQUEST, new DateTime(), $eventMetadata);
 
             $this->addFlash('success_admin', 'New SMS configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_sms');
@@ -1478,14 +1595,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportFreeradius(Request $request): Response
+    public function exportFreeradius(Request $request, EntityManagerInterface $entityManager): Response
     {
-        // Check if the export users operation is enabled
-        $export_freeradius = $this->parameterBag->get('app.export_freeradius_statistics');
-        if ($export_freeradius === EmailConfirmationStrategy::NO_EMAIL) {
-            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
-            return $this->redirectToRoute('admin_page');
-        }
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->query->get('startDate');
@@ -1610,9 +1724,9 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($authData as $data) {
-            $sheet1->setCellValue('A' . $row, $data['auth_date'])
-                ->setCellValue('B' . $row, $data['Accepted'])
-                ->setCellValue('C' . $row, $data['Rejected']);
+            $sheet1->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['auth_date']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['Accepted']))
+                ->setCellValue('C' . $row, $this->escapeSpreadsheetValue($data['Rejected']));
             $row++;
         }
 
@@ -1628,8 +1742,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($sessionData as $data) {
-            $sheet2->setCellValue('A' . $row, $data['session_date'])
-                ->setCellValue('B' . $row, $data['average_time']);
+            $sheet2->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['session_date']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['average_time']));
             $row++;
         }
 
@@ -1644,8 +1758,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($totalTimeData as $data) {
-            $sheet3->setCellValue('A' . $row, $data['session_date'])
-                ->setCellValue('B' . $row, $data['total_time']);
+            $sheet3->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['session_date']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['total_time']));
             $row++;
         }
 
@@ -1663,11 +1777,11 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($trafficData as $data) {
-            $sheet4->setCellValue('A' . $row, $data['realm'])
-                ->setCellValue('B' . $row, $data['total_input_flat'])
-                ->setCellValue('C' . $row, $data['total_input'])
-                ->setCellValue('D' . $row, $data['total_output_flat'])
-                ->setCellValue('E' . $row, $data['total_output']);
+            $sheet4->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['realm']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['total_input_flat']))
+                ->setCellValue('C' . $row, $this->escapeSpreadsheetValue($data['total_input']))
+                ->setCellValue('D' . $row, $this->escapeSpreadsheetValue($data['total_output_flat']))
+                ->setCellValue('E' . $row, $this->escapeSpreadsheetValue($data['total_output']));
             $row++;
         }
 
@@ -1685,8 +1799,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($realmUsageData as $data) {
-            $sheet5->setCellValue('A' . $row, $data['realm'])
-                ->setCellValue('B' . $row, $data['total_count']);
+            $sheet5->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['realm']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['total_count']));
             $row++;
         }
 
@@ -1701,8 +1815,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($apUsageData as $data) {
-            $sheet6->setCellValue('A' . $row, $data['ap_Name'])
-                ->setCellValue('B' . $row, $data['ap_Usage']);
+            $sheet6->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['ap_Name']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['ap_Usage']));
             $row++;
         }
 
@@ -1717,8 +1831,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($wifiStandardsData as $data) {
-            $sheet7->setCellValue('A' . $row, $data['wifi_Standards'])
-                ->setCellValue('B' . $row, $data['wifi_Usage']);
+            $sheet7->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['wifi_Standards']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['wifi_Usage']));
             $row++;
         }
 
@@ -1730,7 +1844,13 @@ class AdminController extends AbstractController
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        // Return the file as a response
+        $eventMetadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST, new DateTime(), $eventMetadata);
+
+
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
 
@@ -2580,6 +2700,9 @@ class AdminController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -2627,8 +2750,11 @@ class AdminController extends AbstractController
 
             $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
 
-            // Flush the changes to the database
-            $em->flush();
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST, new DateTime(), $eventMetadata);
 
             return $this->redirectToRoute('admin_dashboard_customize');
         }
@@ -2751,6 +2877,25 @@ class AdminController extends AbstractController
             return false;
         }
         return true;
+    }
+
+    /**
+     * Escape a value to prevent spreadsheet injection for the export routes (EXPORT USERS || FREERADIUS)
+     * @param mixed $value
+     * @return string
+     */
+    private function escapeSpreadsheetValue($value): string
+    {
+        if ($value instanceof \DateTime) {
+            return $value->format('Y-m-d H:i:s');
+        }
+
+        $escapedValue = (string)$value;
+        $specialChars = ['=', '@', '-', '+'];
+        if (in_array($escapedValue[0] ?? '', $specialChars, true)) {
+            $escapedValue = "'" . $escapedValue;
+        }
+        return $escapedValue;
     }
 
     /**

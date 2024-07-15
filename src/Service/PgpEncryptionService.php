@@ -12,10 +12,16 @@ class PgpEncryptionService
     public function encrypt(string $data): string
     {
         $publicKeyPath = "/var/www/openroaming/pgp_public_key/public_key.asc";
-        $publicKeyContent = file_get_contents($publicKeyPath);
+
+        if (file_exists($publicKeyPath)) {
+            $publicKeyContent = file_get_contents($publicKeyPath);
+        } else {
+            throw new InvalidArgumentException('The file does not exist or is not located in the correct path!
+            Make sure to define a public key in pgp_public_key/public_key.asc');
+        }
 
         if (empty($publicKeyContent)) {
-            throw new InvalidArgumentException('Please define a public key to be able to delete users from the UI.');
+            throw new InvalidArgumentException('Please define a public key to be able to delete users from the UI!');
         }
 
         try {
