@@ -23,6 +23,4 @@ class NoSpecialCharactersValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }
-
 }
-
