@@ -46,12 +46,12 @@ class GoogleController extends AbstractController
      * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
-        ClientRegistry              $clientRegistry,
-        EntityManagerInterface      $entityManager,
+        ClientRegistry $clientRegistry,
+        EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordEncoder,
-        TokenStorageInterface       $tokenStorage,
-        RequestStack                $requestStack,
-        EventDispatcherInterface    $eventDispatcher,
+        TokenStorageInterface $tokenStorage,
+        RequestStack $requestStack,
+        EventDispatcherInterface $eventDispatcher,
     ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
@@ -172,8 +172,12 @@ class GoogleController extends AbstractController
     /**
      * @throws Exception
      */
-    private function findOrCreateGoogleUser(string $googleUserId, string $email, ?string $firstname, ?string $lastname): ?User
-    {
+    private function findOrCreateGoogleUser(
+        string $googleUserId,
+        string $email,
+        ?string $firstname,
+        ?string $lastname
+    ): ?User {
         // Check if a user with the given Google user ID exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
         if ($existingUser) {
@@ -185,7 +189,6 @@ class GoogleController extends AbstractController
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail) {
-
             if ($userWithEmail->getGoogleId() === null) {
                 $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;

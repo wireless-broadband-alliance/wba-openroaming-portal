@@ -32,7 +32,6 @@ class PgpEncryptionService
 
             $gpg->addencryptKey($fingerprint);
             return $gpg->encrypt($data);
-
         } catch (Exception $e) {
             // Catch any exceptions and display the message for debugging
             throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());

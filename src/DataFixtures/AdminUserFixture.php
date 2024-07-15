@@ -15,8 +15,7 @@ class AdminUserFixture extends Fixture
 {
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHashed
-    )
-    {
+    ) {
     }
 
     public function load(ObjectManager $manager): void

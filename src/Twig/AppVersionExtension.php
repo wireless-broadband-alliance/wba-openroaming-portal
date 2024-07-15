@@ -5,19 +5,23 @@ namespace App\Twig;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+
 class AppVersionExtension extends AbstractExtension
 {
     private string $projectDir;
+
     public function __construct(KernelInterface $kernel)
     {
         $this->projectDir = $kernel->getProjectDir();
     }
+
     public function getFunctions(): array
     {
         return [
             new TwigFunction('app_version', [$this, 'getAppVersion']),
         ];
     }
+
     public function getAppVersion(): ?string
     {
         $composerJsonPath = $this->projectDir . '/composer.json';

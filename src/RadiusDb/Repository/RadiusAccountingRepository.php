@@ -5,8 +5,8 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<RadiusAccounting>
@@ -57,7 +57,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function findTrafficPerRealm(?DateTime $startDate, ?DateTime $endDate): Query
     {
         $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('ra.realm, ra.acctStartTime, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output')
+            ->select(
+                'ra.realm, ra.acctStartTime, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output'
+            )
             ->groupBy('ra.realm, ra.acctStartTime');
 
         // Apply date filters if provided

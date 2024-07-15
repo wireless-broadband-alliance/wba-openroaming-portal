@@ -26,8 +26,11 @@ class ForgotPasswordSMSType extends AbstractType
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        GetSettings $getSettings
+    ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
@@ -39,22 +42,22 @@ class ForgotPasswordSMSType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('phoneNumber', TextType::class, [
-                'constraints' => [
-                    new Length([
-                        'min' => 8,
-                        'max' => 15,
-                        'minMessage' => 'Phone number should be at least {{ limit }} characters long.',
-                        'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
-                    ]),
-                    new Regex([
-                        'pattern' => '/^\+\d{1,3}\d{4,14}$/m',
-                        'message' => 'Phone number should contain only digits and must be in international format (e.g., +19700XXXXXX)',
-                    ]),
-                ],
-                'attr' => [
-                    'autocomplete' => 'off',
-                ],
-            ]);
+            'constraints' => [
+                new Length([
+                    'min' => 8,
+                    'max' => 15,
+                    'minMessage' => 'Phone number should be at least {{ limit }} characters long.',
+                    'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
+                ]),
+                new Regex([
+                    'pattern' => '/^\+\d{1,3}\d{4,14}$/m',
+                    'message' => 'Phone number should contain only digits and must be in international format (e.g., +19700XXXXXX)',
+                ]),
+            ],
+            'attr' => [
+                'autocomplete' => 'off',
+            ],
+        ]);
 
         // Check if TURNSTILE_CHECKER value is ON
         if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {

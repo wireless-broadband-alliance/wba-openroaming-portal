@@ -13,21 +13,12 @@ class ProfileManager
     private $userRadiusProfile;
     private $radiusUserRepository;
 
-    public function __construct(UserRadiusProfileRepository $userRadiusProfile, RadiusUserRepository $radiusUserRepository)
-    {
+    public function __construct(
+        UserRadiusProfileRepository $userRadiusProfile,
+        RadiusUserRepository $radiusUserRepository
+    ) {
         $this->userRadiusProfile = $userRadiusProfile;
         $this->radiusUserRepository = $radiusUserRepository;
-    }
-
-    private function updateProfiles(User $user, callable $updateCallback): void
-    {
-        // reducing duplicated code
-        $profiles = $user->getUserRadiusProfiles();
-        foreach ($profiles as $profile) {
-            if ($updateCallback($profile)) {
-                $this->userRadiusProfile->save($profile, true);
-            }
-        }
     }
 
     public function disableProfiles(User $user): void
@@ -45,6 +36,17 @@ class ProfileManager
 
             return true;
         });
+    }
+
+    private function updateProfiles(User $user, callable $updateCallback): void
+    {
+        // reducing duplicated code
+        $profiles = $user->getUserRadiusProfiles();
+        foreach ($profiles as $profile) {
+            if ($updateCallback($profile)) {
+                $this->userRadiusProfile->save($profile, true);
+            }
+        }
     }
 
     public function enableProfiles(User $user): void

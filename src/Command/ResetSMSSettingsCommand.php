@@ -41,7 +41,9 @@ class ResetSMSSettingsCommand extends Command
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the sms configuration settings. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will reset the sms configuration settings. [y/N] ', false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
