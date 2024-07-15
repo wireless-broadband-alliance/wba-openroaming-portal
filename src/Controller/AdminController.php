@@ -235,24 +235,22 @@ class AdminController extends AbstractController
         $sheet->setCellValue('I1', 'Banned At');
         $sheet->setCellValue('J1', 'Created At');
 
-
         // Apply the data
         $row = 2;
         foreach ($users as $user) {
-            $sheet->setCellValue('A' . $row, $user->getId());
-            $sheet->setCellValue('B' . $row, $user->getUuid());
-            $sheet->setCellValue('C' . $row, $user->getEmail());
-            $sheet->setCellValue('D' . $row, $user->getPhoneNumber());
-            $sheet->setCellValue('E' . $row, $user->getFirstName());
-            $sheet->setCellValue('F' . $row, $user->getLastName());
-            $sheet->setCellValue('G' . $row, $user->isVerified() ? 'Verified' : 'Not Verified');
+            $sheet->setCellValue('A' . $row, $this->escapeSpreadsheetValue($user->getId()));
+            $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($user->getUuid()));
+            $sheet->setCellValue('C' . $row, $this->escapeSpreadsheetValue($user->getEmail()));
+            $sheet->setCellValue('D' . $row, $this->escapeSpreadsheetValue($user->getPhoneNumber()));
+            $sheet->setCellValue('E' . $row, $this->escapeSpreadsheetValue($user->getFirstName()));
+            $sheet->setCellValue('F' . $row, $this->escapeSpreadsheetValue($user->getLastName()));
+            $sheet->setCellValue('G' . $row, $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified'));
             // Determine User Provider
             $userProvider = $this->getUserProvider($user);
-            $sheet->setCellValue('H' . $row, $userProvider);
+            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userProvider));
             // Check if the user is Banned
-            $sheet->setCellValue('I' . $row, $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned');
-            $sheet->setCellValue('J' . $row, $user->getCreatedAt());
-
+            $sheet->setCellValue('I' . $row, $this->escapeSpreadsheetValue($user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'));
+            $sheet->setCellValue('J' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
         }
@@ -267,7 +265,6 @@ class AdminController extends AbstractController
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST, new DateTime(), $eventMetadata);
-
 
         // Return the file as a response
         return $this->file($tempFile, 'users.xlsx');
@@ -1727,9 +1724,9 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($authData as $data) {
-            $sheet1->setCellValue('A' . $row, $data['auth_date'])
-                ->setCellValue('B' . $row, $data['Accepted'])
-                ->setCellValue('C' . $row, $data['Rejected']);
+            $sheet1->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['auth_date']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['Accepted']))
+                ->setCellValue('C' . $row, $this->escapeSpreadsheetValue($data['Rejected']));
             $row++;
         }
 
@@ -1745,8 +1742,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($sessionData as $data) {
-            $sheet2->setCellValue('A' . $row, $data['session_date'])
-                ->setCellValue('B' . $row, $data['average_time']);
+            $sheet2->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['session_date']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['average_time']));
             $row++;
         }
 
@@ -1761,8 +1758,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($totalTimeData as $data) {
-            $sheet3->setCellValue('A' . $row, $data['session_date'])
-                ->setCellValue('B' . $row, $data['total_time']);
+            $sheet3->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['session_date']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['total_time']));
             $row++;
         }
 
@@ -1780,11 +1777,11 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($trafficData as $data) {
-            $sheet4->setCellValue('A' . $row, $data['realm'])
-                ->setCellValue('B' . $row, $data['total_input_flat'])
-                ->setCellValue('C' . $row, $data['total_input'])
-                ->setCellValue('D' . $row, $data['total_output_flat'])
-                ->setCellValue('E' . $row, $data['total_output']);
+            $sheet4->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['realm']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['total_input_flat']))
+                ->setCellValue('C' . $row, $this->escapeSpreadsheetValue($data['total_input']))
+                ->setCellValue('D' . $row, $this->escapeSpreadsheetValue($data['total_output_flat']))
+                ->setCellValue('E' . $row, $this->escapeSpreadsheetValue($data['total_output']));
             $row++;
         }
 
@@ -1802,8 +1799,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($realmUsageData as $data) {
-            $sheet5->setCellValue('A' . $row, $data['realm'])
-                ->setCellValue('B' . $row, $data['total_count']);
+            $sheet5->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['realm']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['total_count']));
             $row++;
         }
 
@@ -1818,8 +1815,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($apUsageData as $data) {
-            $sheet6->setCellValue('A' . $row, $data['ap_Name'])
-                ->setCellValue('B' . $row, $data['ap_Usage']);
+            $sheet6->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['ap_Name']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['ap_Usage']));
             $row++;
         }
 
@@ -1834,8 +1831,8 @@ class AdminController extends AbstractController
 
         $row = 2;
         foreach ($wifiStandardsData as $data) {
-            $sheet7->setCellValue('A' . $row, $data['wifi_Standards'])
-                ->setCellValue('B' . $row, $data['wifi_Usage']);
+            $sheet7->setCellValue('A' . $row, $this->escapeSpreadsheetValue($data['wifi_Standards']))
+                ->setCellValue('B' . $row, $this->escapeSpreadsheetValue($data['wifi_Usage']));
             $row++;
         }
 
@@ -2880,6 +2877,25 @@ class AdminController extends AbstractController
             return false;
         }
         return true;
+    }
+
+    /**
+     * Escape a value to prevent spreadsheet injection for the export routes (EXPORT USERS || FREERADIUS)
+     * @param mixed $value
+     * @return string
+     */
+    private function escapeSpreadsheetValue($value): string
+    {
+        if ($value instanceof \DateTime) {
+            return $value->format('Y-m-d H:i:s');
+        }
+
+        $escapedValue = (string) $value;
+        if (preg_match('/^[=+\-@]/', $escapedValue)) {
+            $escapedValue = "'" . $escapedValue;
+        }
+
+        return $escapedValue;
     }
 
     /**
