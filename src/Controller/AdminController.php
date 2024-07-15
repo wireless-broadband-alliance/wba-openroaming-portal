@@ -344,7 +344,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         $event->setEventMetadata([
             'deletedBy' => $currentUser->getUuid(),
-            'isIP' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $_SERVER['REMOTE_ADDR'],
         ]);
 
         $user->setUuid($user->getId());
@@ -641,7 +641,7 @@ class AdminController extends AbstractController
                 $event->setEventDatetime(new DateTime());
                 $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
                 $event->setEventMetadata([
-                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid()
                 ]);
 
@@ -1070,7 +1070,7 @@ class AdminController extends AbstractController
             $em->flush();
 
             $eventMetadata = [
-                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid()
             ];
             $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST, new DateTime(), $eventMetadata);
