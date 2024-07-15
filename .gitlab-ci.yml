@@ -2,8 +2,22 @@ image: docker:latest
 services:
   - docker:dind
 stages:
+  - lint
   - test
   - build
+
+linting-psr12:
+  stage: lint
+  image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
+  script:
+    - phpcs -s -p --colors --extensions=php --standard=PSR12 src/
+
+php-security-checker:
+  stage: lint
+  image: registry.gitlab.com/pipeline-components/php-security-checker:latest
+  script:
+    - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
+
 
 test-phpstan :
   image : "$CI_REGISTRY_IMAGE:tests"
