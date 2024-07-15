@@ -81,7 +81,7 @@ class AdminController extends AbstractController
      * @param RadiusAuthsRepository $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
      * @param PgpEncryptionService $pgpEncryptionService
-     * @param EventActions $eventActions ;
+     * @param EventActions $eventActions
      */
     public function __construct(
         MailerInterface            $mailer,
