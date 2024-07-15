@@ -71,16 +71,16 @@ class AdminController extends AbstractController
     private PgpEncryptionService $pgpEncryptionService;
 
     /**
-     * @param MailerInterface $mailer
-     * @param UserRepository $userRepository
-     * @param ProfileManager $profileManager
-     * @param ParameterBagInterface $parameterBag
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     * @param EntityManagerInterface $entityManager
-     * @param RadiusAuthsRepository $radiusAuthsRepository
+     * @param MailerInterface            $mailer
+     * @param UserRepository             $userRepository
+     * @param ProfileManager             $profileManager
+     * @param ParameterBagInterface      $parameterBag
+     * @param GetSettings                $getSettings
+     * @param SettingRepository          $settingRepository
+     * @param EntityManagerInterface     $entityManager
+     * @param RadiusAuthsRepository      $radiusAuthsRepository
      * @param RadiusAccountingRepository $radiusAccountingRepository
-     * @param PgpEncryptionService $pgpEncryptionService
+     * @param PgpEncryptionService       $pgpEncryptionService
      */
     public function __construct(
         MailerInterface $mailer,
@@ -110,12 +110,12 @@ class AdminController extends AbstractController
     * Dashboard Page Main Route
     */
     /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @param int $count
+     * @param  Request        $request
+     * @param  UserRepository $userRepository
+     * @param  int            $page
+     * @param  string         $sort
+     * @param  string         $order
+     * @param  int            $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -142,19 +142,21 @@ class AdminController extends AbstractController
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Sort the users based on the specified column and order
-        usort($users, static function ($user1, $user2) use ($sort, $order) {
-            // This function is used to sort the arrays uuid and created_at
-            // and compares them with the associated users with the highest number to the lowest id from both arrays
-            $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
-            $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
+        usort(
+            $users, static function ($user1, $user2) use ($sort, $order) {
+                // This function is used to sort the arrays uuid and created_at
+                // and compares them with the associated users with the highest number to the lowest id from both arrays
+                $value1 = $sort === 'createdAt' ? $user1->getCreatedAt() : $user1->getUuid();
+                $value2 = $sort === 'createdAt' ? $user2->getCreatedAt() : $user2->getUuid();
 
-            if ($order === 'asc') { // Check if the order is "asc" or "desc"
-                //and returns the correct result between arrays
-                return $value1 <=> $value2; // -1
+                if ($order === 'asc') { // Check if the order is "asc" or "desc"
+                    //and returns the correct result between arrays
+                    return $value1 <=> $value2; // -1
+                }
+
+                return $value2 <=> $value1; // +1
             }
-
-            return $value2 <=> $value1; // +1
-        });
+        );
 
 
         // Perform pagination manually
@@ -176,7 +178,8 @@ class AdminController extends AbstractController
         // Check if the delete action has a public PGP key defined
         $public_PGP_PATH = $this->parameterBag->get('app.pgp_public_key');
 
-        return $this->render('admin/index.html.twig', [
+        return $this->render(
+            'admin/index.html.twig', [
             'users' => $users,
             'currentPage' => $page,
             'totalPages' => $totalPages,
@@ -192,14 +195,15 @@ class AdminController extends AbstractController
             'count' => $count,
             'export_users' => $export_users,
             'public_pgp_path' => $public_PGP_PATH
-        ]);
+            ]
+        );
     }
 
     /*
     * Handle export of the Users Table on the Main Route
     */
     /**
-     * @param UserRepository $userRepository
+     * @param  UserRepository $userRepository
      * @return Response
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
@@ -286,9 +290,9 @@ class AdminController extends AbstractController
      * Deletes Users from the Project, this only adds a deletedAt date for legal reasons
      */
     /**
-     * @param $id
-     * @param EntityManagerInterface $em
-     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param  $id
+     * @param  EntityManagerInterface      $em
+     * @param  UserPasswordHasherInterface $userPasswordHasher
      * @return Response
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
@@ -297,8 +301,7 @@ class AdminController extends AbstractController
         $id,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $userPasswordHasher,
-    ): Response
-    {
+    ): Response {
         $user = $this->userRepository->find($id);
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -338,12 +341,16 @@ class AdminController extends AbstractController
         $event->setUser($user);
         $event->setEventDatetime(new DateTime());
         $event->setEventName(AnalyticalEventType::DELETED_USER_BY);
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
-        $event->setEventMetadata([
+        $event->setEventMetadata(
+            [
             'deletedBy' => $currentUser->getUuid(),
             'isIP' => $_SERVER['REMOTE_ADDR'],
-        ]);
+            ]
+        );
 
         $user->setUuid($user->getId());
         $user->setEmail('');
@@ -372,7 +379,7 @@ class AdminController extends AbstractController
     */
 
     /**
-     * @param $user
+     * @param  $user
      * @return void
      */
     private function disableProfiles($user): void
@@ -385,12 +392,12 @@ class AdminController extends AbstractController
      */
 
     /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param UserPasswordHasherInterface $passwordHasher
-     * @param EntityManagerInterface $em
-     * @param MailerInterface $mailer
-     * @param $id
+     * @param  Request                     $request
+     * @param  UserRepository              $userRepository
+     * @param  UserPasswordHasherInterface $passwordHasher
+     * @param  EntityManagerInterface      $em
+     * @param  MailerInterface             $mailer
+     * @param  $id
      * @return Response
      * @throws TransportExceptionInterface
      */
@@ -408,7 +415,9 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Get the current logged-in user (admin)
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
 
         if (!$user = $this->userRepository->find($id)) {
@@ -516,7 +525,7 @@ class AdminController extends AbstractController
      */
 
     /**
-     * @param $user
+     * @param  $user
      * @return void
      */
     private function enableProfiles($user): void
@@ -525,7 +534,7 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param string $type Type of action
+     * @param  string $type Type of action
      * @return Response
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
@@ -535,16 +544,18 @@ class AdminController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        return $this->render('admin/confirm.html.twig', [
+        return $this->render(
+            'admin/confirm.html.twig', [
             'data' => $data,
             'type' => $type
-        ]);
+            ]
+        );
     }
 
     /**
-     * @param RequestStack $requestStack
-     * @param EntityManagerInterface $em
-     * @param string $type Type of action
+     * @param  RequestStack           $requestStack
+     * @param  EntityManagerInterface $em
+     * @param  string                 $type         Type of action
      * @return Response
      * @throws Exception
      */
@@ -557,7 +568,9 @@ class AdminController extends AbstractController
     ): Response {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
         if ($enteredCode === $currentUser->getVerificationCode()) {
             if ($type === 'settingCustom') {
@@ -688,7 +701,7 @@ class AdminController extends AbstractController
     /**
      * Regenerate the verification code for the user and send a new email.
      *
-     * @param string $type Type of action
+     * @param  string $type Type of action
      * @return RedirectResponse A redirect response.
      * @throws Exception
      * @throws TransportExceptionInterface
@@ -698,7 +711,9 @@ class AdminController extends AbstractController
     public function regenerateCode(
         string $type
     ): RedirectResponse {
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
         // Regenerate the verification code for the admin to reset settings
 
@@ -764,7 +779,7 @@ class AdminController extends AbstractController
     /**
      * Create an email message with the verification code.
      *
-     * @param string $email The recipient's email address.
+     * @param  string $email The recipient's email address.
      * @return Email The email with the code.
      * @throws Exception
      */
@@ -776,7 +791,9 @@ class AdminController extends AbstractController
         $nameSender = $this->parameterBag->get('app.sender_name');
 
         // If the verification code is not provided, generate a new one
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
         $verificationCode = $this->generateVerificationCode($currentUser);
 
@@ -785,16 +802,18 @@ class AdminController extends AbstractController
             ->to($email)
             ->subject('Your Settings Reset Details')
             ->htmlTemplate('email/admin_reset.html.twig')
-            ->context([
+            ->context(
+                [
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
-            ]);
+                ]
+            );
     }
 
     /**
      * Generate a new verification code for the admin.
      *
-     * @param User $user The user for whom the verification code is generated.
+     * @param  User $user The user for whom the verification code is generated.
      * @return int The generated verification code.
      * @throws Exception
      */
@@ -809,9 +828,9 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
@@ -822,7 +841,9 @@ class AdminController extends AbstractController
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -830,9 +851,11 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(TermsType::class, null, [
+        $form = $this->createForm(
+            TermsType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -872,19 +895,21 @@ class AdminController extends AbstractController
         }
 
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
-        ]);
+            ]
+        );
     }
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
@@ -899,9 +924,11 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(RadiusType::class, null, [
+        $form = $this->createForm(
+            RadiusType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -957,12 +984,14 @@ class AdminController extends AbstractController
             }
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'form' => $form->createView()
-        ]);
+            ]
+        );
     }
 
     protected function isValidDomain($domain)
@@ -978,9 +1007,9 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
@@ -991,16 +1020,20 @@ class AdminController extends AbstractController
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(StatusType::class, null, [
+        $form = $this->createForm(
+            StatusType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -1040,13 +1073,15 @@ class AdminController extends AbstractController
         }
 
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
-        ]);
+            ]
+        );
     }
 
     /**
@@ -1054,9 +1089,9 @@ class AdminController extends AbstractController
      */
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
@@ -1071,9 +1106,11 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(LDAPType::class, null, [
+        $form = $this->createForm(
+            LDAPType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -1111,12 +1148,14 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_LDAP');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'form' => $form->createView()
-        ]);
+            ]
+        );
     }
 
     /**
@@ -1124,9 +1163,9 @@ class AdminController extends AbstractController
      */
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
@@ -1137,16 +1176,20 @@ class AdminController extends AbstractController
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(AuthType::class, null, [
+        $form = $this->createForm(
+            AuthType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -1198,19 +1241,21 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
-        ]);
+            ]
+        );
     }
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
@@ -1225,9 +1270,11 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(CapportType::class, null, [
+        $form = $this->createForm(
+            CapportType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -1262,12 +1309,14 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_capport');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'form' => $form->createView()
-        ]);
+            ]
+        );
     }
 
 
@@ -1276,9 +1325,9 @@ class AdminController extends AbstractController
      */
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
@@ -1289,16 +1338,20 @@ class AdminController extends AbstractController
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
-        /** @var User $currentUser */
+        /**
+ * @var User $currentUser 
+*/
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(SMSType::class, null, [
+        $form = $this->createForm(
+            SMSType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -1335,13 +1388,15 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_sms');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
-        ]);
+            ]
+        );
     }
 
     /**
@@ -1349,7 +1404,7 @@ class AdminController extends AbstractController
      */
 
     /**
-     * @param Request $request
+     * @param  Request $request
      * @return Response
      * @throws \JsonException
      * @throws Exception
@@ -1391,7 +1446,8 @@ class AdminController extends AbstractController
         $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
         $fetchChartSMSEmail = $this->fetchChartSMSEmail($startDate, $endDate);
 
-        return $this->render('admin/statistics.html.twig', [
+        return $this->render(
+            'admin/statistics.html.twig', [
             'data' => $data,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
@@ -1400,7 +1456,8 @@ class AdminController extends AbstractController
             'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
-        ]);
+            ]
+        );
     }
 
     /**
@@ -1432,9 +1489,8 @@ class AdminController extends AbstractController
                 continue; // Skip events with missing dates
             }
 
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
+            if ((!$startDate || $eventDateTime >= $startDate) 
+                && (!$endDate || $eventDateTime <= $endDate)
             ) {
                 $eventMetadata = $event->getEventMetadata();
 
@@ -1495,9 +1551,9 @@ class AdminController extends AbstractController
     /**
      * Generate colors with varying opacities based on data values
      *
-     * @param array $values
-     * @param float $minOpacity
-     * @param float $maxOpacity
+     * @param  array $values
+     * @param  float $minOpacity
+     * @param  float $maxOpacity
      * @return array
      */
     private function generateColorsWithOpacity(array $values, float $minOpacity = 0.4, float $maxOpacity = 1): array
@@ -1543,9 +1599,8 @@ class AdminController extends AbstractController
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
-            if (
-                (!$startDate || $createdAt >= $startDate) &&
-                (!$endDate || $createdAt <= $endDate)
+            if ((!$startDate || $createdAt >= $startDate) 
+                && (!$endDate || $createdAt <= $endDate)
             ) {
                 $samlIdentifier = $user->getSamlIdentifier();
                 $googleId = $user->getGoogleId();
@@ -1587,9 +1642,8 @@ class AdminController extends AbstractController
             if (!$eventDateTime) {
                 continue;
             }
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
+            if ((!$startDate || $eventDateTime >= $startDate) 
+                && (!$endDate || $eventDateTime <= $endDate)
             ) {
                 $eventMetadata = $event->getEventMetadata();
 
@@ -1631,9 +1685,8 @@ class AdminController extends AbstractController
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
-            if (
-                (!$startDate || $createdAt >= $startDate) &&
-                (!$endDate || $createdAt <= $endDate)
+            if ((!$startDate || $createdAt >= $startDate) 
+                && (!$endDate || $createdAt <= $endDate)
             ) {
                 $verification = $user->isVerified();
                 $ban = $user->getBannedAt();
@@ -1676,9 +1729,8 @@ class AdminController extends AbstractController
                 continue; // Skip events with missing dates
             }
 
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
+            if ((!$startDate || $eventDateTime >= $startDate) 
+                && (!$endDate || $eventDateTime <= $endDate)
             ) {
                 $eventMetadata = $event->getEventMetadata();
 
@@ -1697,8 +1749,8 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param int $page
+     * @param  Request $request
+     * @param  int     $page
      * @return Response
      * @throws \JsonException
      */
@@ -1813,7 +1865,8 @@ class AdminController extends AbstractController
         $offset = ($page - 1) * $perPage;
         $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $perPage);
 
-        return $this->render('admin/freeradius_statistics.html.twig', [
+        return $this->render(
+            'admin/freeradius_statistics.html.twig', [
             'data' => $data,
             'current_user' => $user,
             'currentPage' => $page,
@@ -1834,7 +1887,8 @@ class AdminController extends AbstractController
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
-        ]);
+            ]
+        );
     }
 
     /**
@@ -1873,19 +1927,19 @@ class AdminController extends AbstractController
 
             // Determine the time period based on granularity
             switch ($granularity) {
-                case 'year':
-                    $period = $eventDateTime->format('Y');
-                    break;
-                case 'month':
-                    $period = $eventDateTime->format('Y-m');
-                    break;
-                case 'week':
-                    $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
-                    break;
-                case 'day':
-                default:
-                    $period = $eventDateTime->format('Y-m-d');
-                    break;
+            case 'year':
+                $period = $eventDateTime->format('Y');
+                break;
+            case 'month':
+                $period = $eventDateTime->format('Y-m');
+                break;
+            case 'week':
+                $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
+                break;
+            case 'day':
+            default:
+                $period = $eventDateTime->format('Y-m-d');
+                break;
             }
 
             // Initialize the period if not already set
@@ -2007,9 +2061,9 @@ class AdminController extends AbstractController
     /**
      * Determine date range and granularity
      *
-     * @param ?DateTime $startDate
-     * @param ?DateTime $endDate
-     * @param object $repository
+     * @param  ?DateTime $startDate
+     * @param  ?DateTime $endDate
+     * @param  object    $repository
      * @return array
      */
     protected function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
@@ -2104,6 +2158,7 @@ class AdminController extends AbstractController
 
     /**
      * Fetch data related to traffic passed on the freeradius database
+     *
      * @throws Exception
      */
     private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
@@ -2203,15 +2258,19 @@ class AdminController extends AbstractController
     private function generateDatasetsSessionAverage(array $sessionTime): array
     {
         $labels = array_column($sessionTime, 'group');
-        $averageTimes = array_map(function ($item) {
-            return $item['averageSessionTime']; // Keep numerical values for plotting
-        }, $sessionTime);
+        $averageTimes = array_map(
+            function ($item) {
+                return $item['averageSessionTime']; // Keep numerical values for plotting
+            }, $sessionTime
+        );
 
-        $averageTimesReadable = array_map(function ($seconds) {
-            $hours = floor($seconds / 3600);
-            $minutes = floor(($seconds % 3600) / 60);
-            return sprintf('%dh %dm', $hours, $minutes);
-        }, $averageTimes);
+        $averageTimesReadable = array_map(
+            function ($seconds) {
+                $hours = floor($seconds / 3600);
+                $minutes = floor(($seconds % 3600) / 60);
+                return sprintf('%dh %dm', $hours, $minutes);
+            }, $averageTimes
+        );
 
         // Calculate the colors with varying opacities
         $colors = $this->generateColorsWithOpacity($averageTimes);
@@ -2284,15 +2343,19 @@ class AdminController extends AbstractController
     private function generateDatasetsSessionTotal(array $sessionTime): array
     {
         $labels = array_column($sessionTime, 'group');
-        $totalTimes = array_map(function ($item) {
-            return $item['totalSessionTime'];
-        }, $sessionTime);
+        $totalTimes = array_map(
+            function ($item) {
+                return $item['totalSessionTime'];
+            }, $sessionTime
+        );
 
-        $totalTimesReadable = array_map(function ($seconds) {
-            $hours = floor($seconds / 3600);
-            $minutes = floor(($seconds % 3600) / 60);
-            return sprintf('%dh %dm', $hours, $minutes);
-        }, $totalTimes);
+        $totalTimesReadable = array_map(
+            function ($seconds) {
+                $hours = floor($seconds / 3600);
+                $minutes = floor(($seconds % 3600) / 60);
+                return sprintf('%dh %dm', $hours, $minutes);
+            }, $totalTimes
+        );
 
         // Calculate the colors with varying opacities
         $colors = $this->generateColorsWithOpacity($totalTimes);
@@ -2352,28 +2415,29 @@ class AdminController extends AbstractController
 
     /**
      * Map connectInfo_start to Wifi standards
-     * @param string $connectInfo
+     *
+     * @param  string $connectInfo
      * @return string
      */
     protected function mapConnectInfoToWifiStandard(string $connectInfo): string
     {
         switch (true) {
-            case strpos($connectInfo, '802.11be') !== false:
-                return 'Wi-fi 7';
-            case strpos($connectInfo, '802.11ax') !== false:
-                return 'Wi-fi 6';
-            case strpos($connectInfo, '802.11ac') !== false:
-                return 'Wi-fi 5';
-            case strpos($connectInfo, '802.11n') !== false:
-                return 'Wi-fi 4';
-            case strpos($connectInfo, '802.11g') !== false:
-                return 'Wi-fi 3';
-            case strpos($connectInfo, '802.11a') !== false:
-                return 'Wi-fi 2';
-            case strpos($connectInfo, '802.11b') !== false:
-                return 'Wi-fi 1';
-            default:
-                return 'Unknown';
+        case strpos($connectInfo, '802.11be') !== false:
+            return 'Wi-fi 7';
+        case strpos($connectInfo, '802.11ax') !== false:
+            return 'Wi-fi 6';
+        case strpos($connectInfo, '802.11ac') !== false:
+            return 'Wi-fi 5';
+        case strpos($connectInfo, '802.11n') !== false:
+            return 'Wi-fi 4';
+        case strpos($connectInfo, '802.11g') !== false:
+            return 'Wi-fi 3';
+        case strpos($connectInfo, '802.11a') !== false:
+            return 'Wi-fi 2';
+        case strpos($connectInfo, '802.11b') !== false:
+            return 'Wi-fi 1';
+        default:
+            return 'Unknown';
         }
     }
 
@@ -2445,9 +2509,11 @@ class AdminController extends AbstractController
         }
 
         // Sort the result array by the count value with the highest usage
-        usort($result, static function ($highest, $lowest) {
-            return $lowest['count'] <=> $highest['count'];
-        });
+        usort(
+            $result, static function ($highest, $lowest) {
+                return $lowest['count'] <=> $highest['count'];
+            }
+        );
 
         return $result;
     }
@@ -2717,9 +2783,9 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
+     * @param  Request                $request
+     * @param  EntityManagerInterface $em
+     * @param  GetSettings            $getSettings
      * @return Response
      */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
@@ -2733,9 +2799,11 @@ class AdminController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         // Create the form with the CustomType and pass the relevant settings
-        $form = $this->createForm(CustomType::class, null, [
+        $form = $this->createForm(
+            CustomType::class, null, [
             'settings' => $settings,
-        ]);
+            ]
+        );
 
         $form->handleRequest($request);
 
@@ -2758,7 +2826,8 @@ class AdminController extends AbstractController
                         'CONTACT_EMAIL',
                         'CUSTOMER_LOGO_ENABLED'
                     ]
-                )) {
+                )
+                ) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 
@@ -2775,8 +2844,8 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                                'kernel.project_dir'
-                            ) . '/public/resources/uploaded/';
+                            'kernel.project_dir'
+                        ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
@@ -2793,12 +2862,14 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_customize');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render(
+            'admin/settings_actions.html.twig', [
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
             'getSettings' => $getSettings
-        ]);
+            ]
+        );
     }
 
     private function generateDatasetsRealmsTraffic(array $trafficData): array
