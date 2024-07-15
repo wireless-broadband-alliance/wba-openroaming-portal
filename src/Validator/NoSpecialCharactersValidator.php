@@ -17,14 +17,12 @@ class NoSpecialCharactersValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint): void
     {
         /**
- * @var NoSpecialCharacters $constraint 
-*/
+         * @var NoSpecialCharacters $constraint
+         */
         // Compare if he can replace all the inputs for the values specified down bellow to ''
         // If he can, get the confirmation validator message from NoSpecialCharacters.php
         if (preg_replace('/[^<>(_;ç)%]/', '', $value)) {
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }
-
 }
-
