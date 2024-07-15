@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CapportController extends AbstractController
 {
-    #[Route('/capport/json', methods: ['GET'], name: 'api_capport_json')]
+    #[Route('/capport/json', name: 'api_capport_json', methods: ['GET'])]
     public function capportJson(Request $request, SettingRepository $settingRepository): JsonResponse
     {
         if ($settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() !== 'true') {
@@ -24,5 +24,4 @@ class CapportController extends AbstractController
             'venue-info-url' => $settingRepository->findOneBy(['name' => 'CAPPORT_VENUE_INFO_URL'])->getValue()
         ], 200);
     }
-
 }
