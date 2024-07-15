@@ -3,9 +3,9 @@
 namespace App\DataFixtures;
 
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Service\EventActions;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -13,9 +13,14 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AdminUserFixture extends Fixture
 {
+    private EventActions $eventActions;
+
     public function __construct(
-        private readonly UserPasswordHasherInterface $userPasswordHashed
-    ) {
+        private readonly UserPasswordHasherInterface $userPasswordHashed,
+        EventActions                                 $eventActions
+    )
+    {
+        $this->eventActions = $eventActions;
     }
 
     public function load(ObjectManager $manager): void
@@ -29,18 +34,9 @@ class AdminUserFixture extends Fixture
         $admin->setCreatedAt(new DateTime());
         $manager->persist($admin);
 
-        $event = new Event();
-        $event->setEventName(AnalyticalEventType::USER_CREATION);
-        $event->setEventDatetime(new DateTime());
-
-        $event->setUser($admin);
-        $manager->persist($event);
-
-        $event_2 = new Event();
-        $event_2->setEventName(AnalyticalEventType::USER_VERIFICATION);
-        $event_2->setEventDatetime(new DateTime());
-        $event_2->setUser($admin);
-        $manager->persist($event_2);
+        // Save the event Action using the service
+        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION, new DateTime(), []);
+        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION, new DateTime(), []);
 
 
         $manager->flush();

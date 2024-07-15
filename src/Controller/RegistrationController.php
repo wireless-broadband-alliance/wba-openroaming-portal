@@ -7,11 +7,13 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
 use DateTime;
@@ -48,6 +50,7 @@ class RegistrationController extends AbstractController
     private ParameterBagInterface $parameterBag;
     private SendSMS $sendSMS;
     private TokenStorageInterface $tokenStorage;
+    private EventActions $eventActions;
 
     /**
      * Registration constructor.
@@ -55,23 +58,20 @@ class RegistrationController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param ParameterBagInterface $parameterBag
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
+     * @param EventActions $eventActions Used to generate event related to the User creation
      */
-    public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        ParameterBagInterface $parameterBag,
-        SendSMS $sendSMS,
-        TokenStorageInterface $tokenStorage
-    ) {
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag, SendSMS $sendSMS, TokenStorageInterface $tokenStorage, EventActions $eventActions)
+    {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
         $this->sendSMS = $sendSMS;
         $this->tokenStorage = $tokenStorage;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -82,6 +82,7 @@ class RegistrationController extends AbstractController
      * @return Response
      * @throws RandomException
      * @throws TransportExceptionInterface
+     * @throws Exception
      */
     #[Route('/register', name: 'app_register')]
     public function register(
@@ -108,7 +109,6 @@ class RegistrationController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -133,16 +133,14 @@ class RegistrationController extends AbstractController
                     $user->setCreatedAt(new DateTime());
                     $entityManager->persist($user);
 
-                    // Defines the Event to the table
-                    $event->setUser($user);
-                    $event->setEventDatetime(new DateTime());
-                    $event->setEventName(AnalyticalEventType::USER_CREATION);
-                    $event->setEventMetadata([
-                        'platform' => PlatformMode::Live,
-                        'sms' => false,
-                    ]);
-                    $entityManager->persist($event);
-                    $entityManager->flush();
+                // Defines the Event to the table
+                $eventMetaData = [
+                    'platform' => PlatformMode::Live,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'registrationType' => UserProvider::EMAIL,
+                ];
+                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetaData);
 
                     $emailSender = $this->parameterBag->get('app.email_address');
                     $nameSender = $this->parameterBag->get('app.sender_name');
@@ -239,7 +237,6 @@ class RegistrationController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(RegistrationFormSMSType::class, $user);
         $form->handleRequest($request);
 
@@ -264,15 +261,13 @@ class RegistrationController extends AbstractController
                 $entityManager->persist($user);
 
                 // Defines the Event to the table
-                $event->setUser($user);
-                $event->setEventDatetime(new DateTime());
-                $event->setEventName(AnalyticalEventType::USER_CREATION);
-                $event->setEventMetadata([
+                $eventMetadata = [
                     'platform' => PlatformMode::Live,
-                    'sms' => true,
-                ]);
-                $entityManager->persist($event);
-                $entityManager->flush();
+                    'uuid' => $user->getUuid(),
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'registrationType' => UserProvider::PHONE_NUMBER,
+                ];
+                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetadata);
 
                 $verificationCode = $user->getVerificationCode();
 
@@ -310,7 +305,6 @@ class RegistrationController extends AbstractController
      * @param UserRepository $userRepository
      * @param TokenStorageInterface $tokenStorage
      * @param EventDispatcherInterface $eventDispatcher
-     * @param EventRepository $eventRepository
      * @return Response
      * @throws NonUniqueResultException
      */
@@ -320,8 +314,8 @@ class RegistrationController extends AbstractController
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
-        EventRepository $eventRepository
-    ): Response {
+    ): Response
+    {
         // Get the email and verification code from the URL query parameters
         $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
         $verificationCode = $requestStack->getCurrentRequest()->query->get('verificationCode');
@@ -347,11 +341,12 @@ class RegistrationController extends AbstractController
                 $userRepository->save($user, true);
 
                 // Defines the Event to the table
-                $event = new Event();
-                $event->setUser($user);
-                $event->setEventDatetime(new DateTime());
-                $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
-                $eventRepository->save($event, true);
+                $eventMetadata= [
+                    'platform' => PlatformMode::Live,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                ];
+                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_VERIFICATION, new DateTime(), $eventMetadata);
 
                 $this->addFlash('success', 'Your account has been verified!');
 

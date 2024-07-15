@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -17,6 +18,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
 use DateInterval;
@@ -51,6 +53,7 @@ class SiteController extends AbstractController
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
     private EventRepository $eventRepository;
+    private EventActions $eventActions;
 
     /**
      * SiteController constructor.
@@ -61,21 +64,17 @@ class SiteController extends AbstractController
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
+     * @param EventActions $eventActions Used to generate event related to the User creation
      */
-    public function __construct(
-        MailerInterface $mailer,
-        UserRepository $userRepository,
-        ParameterBagInterface $parameterBag,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        EventRepository $eventRepository
-    ) {
+    public function __construct(MailerInterface $mailer, UserRepository $userRepository, ParameterBagInterface $parameterBag, SettingRepository $settingRepository, GetSettings $getSettings, EventRepository $eventRepository, EventActions $eventActions)
+    {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->parameterBag = $parameterBag;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->eventRepository = $eventRepository;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -130,14 +129,12 @@ class SiteController extends AbstractController
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select OS');
-                } else {
-                    if ($this->getUser() === null) {
-                        $user = new User();
-                        $event = new Event();
-                        $form = $this->createForm(RegistrationFormType::class, $user);
-                        $form->handleRequest($request);
-                        if ($form->isSubmitted() && $form->isValid()) {
-                            $user = $form->getData();
+                } else if ($this->getUser() === null) {
+                    $user = new User();
+                    $form = $this->createForm(RegistrationFormType::class, $user);
+                    $form->handleRequest($request);
+                    if ($form->isSubmitted() && $form->isValid()) {
+                        $user = $form->getData();
 
                             $user->setEmail($user->getEmail());
                             $user->setCreatedAt(new \DateTime());
@@ -145,21 +142,21 @@ class SiteController extends AbstractController
                             $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                             $entityManager->persist($user);
 
-                            $event->setUser($user);
-                            $event->setEventDatetime(new DateTime());
-                            $event->setEventName(AnalyticalEventType::USER_CREATION);
-                            $event->setEventMetadata([
-                                'platform' => PlatformMode::Demo,
-                                'sms' => false,
-                            ]);
-                            $entityManager->persist($event);
-                            $entityManager->flush();
-                            $userAuthenticator->authenticateUser(
-                                $user,
-                                $authenticator,
-                                $request
-                            );
-                        }
+                        // Defines the Event to the table
+                        $eventMetadata = [
+                            'platform' => PlatformMode::Demo,
+                            'uuid' => $user->getUuid(),
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'registrationType' => UserProvider::EMAIL,
+                        ];
+                        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetadata);
+
+                        $userAuthenticator->authenticateUser(
+                            $user,
+                            $authenticator,
+                            $request
+                        );
+                    }
 
                         if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
                             return $this->redirectToRoute('app_regenerate_email_code');
@@ -318,13 +315,10 @@ class SiteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $event = new Event();
-
-            $event->setUser($user);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE);
-            $event->setEventMetadata([
+            $eventMetaData = [
                 'platform' => PlatformMode::Live,
+                'uuid' => $user->getUuid(),
+                'ip' => $_SERVER['REMOTE_ADDR'],
                 'Old data' => [
                     'First Name' => $oldFirstName,
                     'Last Name' => $oldLastName,
@@ -333,12 +327,8 @@ class SiteController extends AbstractController
                     'First Name' => $user->getFirstName(),
                     'Last Name' => $user->getLastName(),
                 ],
-            ]);
-
-            $em->persist($event);
-            $em->persist($user);
-
-            $em->flush();
+            ];
+            $this->eventActions->saveEvent($user, AnalyticalEventType::USER_ACCOUNT_UPDATE, new DateTime(), $eventMetaData);
 
             $this->addFlash('success', 'Your account information has been updated');
 
@@ -371,17 +361,16 @@ class SiteController extends AbstractController
             }
 
             $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
-            $event = new Event();
-            $event->setUser($user);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD);
-            $event->setEventMetadata([
-                'platform' => PlatformMode::Live,
-            ]);
 
-            $em->persist($event);
             $em->persist($user);
             $em->flush();
+
+            $eventMetaData = [
+                'platform' => PlatformMode::Live,
+                'uuid' => $user->getUuid(),
+                'ip' => $_SERVER['REMOTE_ADDR'],
+            ];
+            $this->eventActions->saveEvent($user, AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD, new DateTime(), $eventMetaData);
 
             $this->addFlash('success', 'Your password has been updated successfully!');
         }
@@ -447,7 +436,8 @@ class SiteController extends AbstractController
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                         $latestEvent->setEventMetadata([
                             'platform' => PlatformMode::Live,
-                            'email' => $user->getEmail(),
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'uuid' => $user->getUuid(),
                         ]);
                     }
                     $latestEvent->setLastVerificationCodeTime($currentTime);
@@ -562,7 +552,8 @@ class SiteController extends AbstractController
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEvent->setEventMetadata([
                                 'platform' => PlatformMode::Live,
-                                'phoneNumber' => $user->getPhoneNumber(),
+                                'ip' => $_SERVER['REMOTE_ADDR'],
+                                'uuid' => $user->getUuid(),
                             ]);
                         }
                         $latestEvent->setVerificationAttempts($attempts);
@@ -697,17 +688,15 @@ class SiteController extends AbstractController
 
             $user->setPassword($passwordHasher->hashPassword($user, $form->get('newPassword')->getData()));
             $user->setForgotPasswordRequest(false);
-            $event = new Event();
-            $event->setUser($user);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::FORGOT_PASSWORD_REQUEST_ACCEPTED);
-            $event->setEventMetadata([
-                'platform' => PlatformMode::Live,
-            ]);
-
-            $entityManager->persist($event);
             $entityManager->persist($user);
             $entityManager->flush();
+
+            $eventMetadata = [
+                'platform' => PlatformMode::Live,
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED, new DateTime(), $eventMetadata);
 
             $this->addFlash('success', 'Your password has been updated successfully!');
             return $this->redirectToRoute('app_landing');
@@ -761,7 +750,8 @@ class SiteController extends AbstractController
                     $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
                     $latestEvent->setEventMetadata([
                         'platform' => PlatformMode::Live,
-                        'email' => $currentUser->getEmail(),
+                        'uuid' => $currentUser->getEmail(),
+                        'ip' => $_SERVER['REMOTE_ADDR'],
                     ]);
                 }
 
@@ -897,10 +887,12 @@ class SiteController extends AbstractController
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
 
-            $event->setUser($currentUser);
-            $event->setEventDatetime(new DateTime());
-            $event->setEventName(AnalyticalEventType::USER_VERIFICATION);
-            $eventRepository->save($event, true);
+            $eventMetadata = [
+                'platform' => PlatformMode::Live,
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_VERIFICATION, new DateTime(), $eventMetadata);
 
             $this->addFlash('success', 'Your account is now successfully verified');
             return $this->redirectToRoute('app_landing');

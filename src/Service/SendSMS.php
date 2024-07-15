@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
@@ -28,6 +27,7 @@ class SendSMS
     private GetSettings $getSettings;
     private ParameterBagInterface $parameterBag;
     private EventRepository $eventRepository;
+    private EventActions $eventActions;
 
     /**
      * SendSMS constructor.
@@ -37,19 +37,23 @@ class SendSMS
      * @param GetSettings $getSettings
      * @param ParameterBagInterface $parameterBag
      * @param EventRepository $eventRepository
+     * @param EventActions $eventActions
      */
     public function __construct(
         UserRepository $userRepository,
         SettingRepository $settingRepository,
         GetSettings $getSettings,
         ParameterBagInterface $parameterBag,
-        EventRepository $eventRepository
-    ) {
+        EventRepository       $eventRepository,
+        EventActions          $eventActions,
+    )
+    {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -175,5 +179,62 @@ class SendSMS
 
         // Check the number of attempts
         return !$latestEvent || $latestEvent->getVerificationAttempts() < 3;
+    }
+
+    /**
+     * Regenerate the verification code for the user and send a new SMS.
+     *
+     * @param User $user
+     * @return bool
+     * @throws ClientExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \RuntimeException
+     * @throws Exception
+     */
+    public function regenerateSmsCode(User $user): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
+
+        if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+            $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
+            $currentTime = new DateTime();
+
+            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+                if (!$latestEvent) {
+                    // If no previous attempt, set attempts to 1
+                    $attempts = 1;
+                    // Defines the Event to the table
+                    $eventMetadata = [
+                        'platform' => PlatformMode::Live,
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'uuid' => $user->getUuid(),
+                    ];
+                    $this->eventActions->saveEvent($user, AnalyticalEventType::USER_SMS_ATTEMPT, new DateTime(), $eventMetadata);
+                } else {
+                    // Increment the attempts
+                    $attempts = $latestEvent->getVerificationAttempts() + 1;
+                }
+
+                $latestEvent->setVerificationAttempts($attempts);
+                $latestEvent->setLastVerificationCodeTime($currentTime);
+                $this->eventRepository->save($latestEvent, true);
+
+                // Generate a new verification code and resend the SMS
+                $verificationCode = $this->generateVerificationCode($user);
+                $message = 'Your new verification code is: ' . $verificationCode;
+                $this->sendSms($user->getPhoneNumber(), $message);
+                return true;
+            }
+
+            return false;
+        }
+
+        // Throw a generic exception when max attempts are exceeded
+        throw new RuntimeException('SMS resend failed. You have exceed the limits for regeneration. Please contact our support for help.');
     }
 }
