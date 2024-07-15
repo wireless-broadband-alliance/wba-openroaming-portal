@@ -46,24 +46,9 @@ class ProfileController extends AbstractController
         $this->eventActions = $eventActions;
     }
 
-    private function getSettings(SettingRepository $settingRepository): array
-    {
-        $settings = $settingRepository->findAll();
-        return array_reduce($settings, function ($carry, $item) {
-            $carry[$item->getName()] = $item->getValue();
-            return $carry;
-        }, []);
-    }
-
     #[Route('/profile/android', name: 'profile_android')]
-    public function profileAndroid(
-        ManagerRegistry $entityManager,
-        RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
-        UserRadiusProfileRepository $radiusProfileRepository,
-        EventRepository $eventRepository,
-        SettingRepository $settingRepository
-    ): Response {
+    public function profileAndroid(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository, SettingRepository $settingRepository): Response
+    {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
         }
@@ -75,10 +60,7 @@ class ProfileController extends AbstractController
         }
 
         if ($user->getDeletedAt()) {
-            $this->addFlash(
-                'error',
-                'Your account has been deleted. Please, for more information contact our support.'
-            );
+            $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -87,13 +69,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser(
-            $user,
-            $radiusUserRepository,
-            $radiusProfileRepository,
-            $userRepository,
-            $this->settings['RADIUS_REALM_NAME']
-        );
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
         $profile = str_replace([
@@ -111,9 +87,7 @@ class ProfileController extends AbstractController
         ], $profile);
         $profileTemplate = file_get_contents('../profile_templates/android/template.txt');
         $ca = file_get_contents('../signing-keys/ca.pem');
-        $ca = str_replace(["-----BEGIN CERTIFICATE-----\n", "-----END CERTIFICATE-----\n", "-----END CERTIFICATE-----"],
-            '',
-            $ca);
+        $ca = str_replace(["-----BEGIN CERTIFICATE-----\n", "-----END CERTIFICATE-----\n", "-----END CERTIFICATE-----"], '', $ca);
         $profileTemplate = str_replace('@CA@', $ca, $profileTemplate);
         $profileTemplate = str_replace('@PROFILE@', base64_encode($profile), $profileTemplate);
         $response = new Response(base64_encode($profileTemplate));
@@ -133,65 +107,9 @@ class ProfileController extends AbstractController
         return $response;
     }
 
-    private function createOrUpdateRadiusUser(
-        User $user,
-        RadiusUserRepository $radiusUserRepository,
-        UserRadiusProfileRepository $radiusProfileRepository,
-        UserRepository $userRepository,
-        string $realmName
-    ): RadiusUser {
-        $radiusProfile = $radiusProfileRepository->findOneBy(
-            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]
-        );
-        if (!$radiusProfile) {
-            $radiusProfile = new UserRadiusProfile();
-
-            $androidLimit = 32;
-            $realmSize = strlen($realmName) + 1;
-            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
-            $token = $this->generateToken($androidLimit - $realmSize);
-            $radiusProfile->setUser($user);
-            $radiusProfile->setRadiusToken($token);
-            $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
-            $radiusProfile->setIssuedAt(new \DateTimeImmutable());
-
-            $radiusUser = new RadiusUser();
-            $radiusUser->setUsername($username);
-            $radiusUser->setAttribute('Cleartext-Password');
-            $radiusUser->setOp(':=');
-            $radiusUser->setValue($token);
-            $radiusUserRepository->save($radiusUser, true);
-            $radiusProfileRepository->save($radiusProfile, true);
-        } else {
-            $radiusUser = $radiusUserRepository->findOneBy([
-                'username' => $radiusProfile->getRadiusUser(),
-            ]);
-        }
-
-        return $radiusUser;
-    }
-
-    private function generateToken($length = 16)
-    {
-        $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $pieces = [];
-        $max = mb_strlen($stringSpace, '8bit') - 1;
-        for ($i = 0; $i < $length; ++$i) {
-            $pieces[] = $stringSpace[random_int(0, $max)];
-        }
-        return implode('', $pieces);
-    }
-
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
-    public function profileIos(
-        ManagerRegistry $entityManager,
-        RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
-        UserRadiusProfileRepository $radiusProfileRepository,
-        EventRepository $eventRepository,
-        Request $request
-    ): Response {
+    public function profileIos(ManagerRegistry $entityManager, RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository, Request $request): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
@@ -199,10 +117,7 @@ class ProfileController extends AbstractController
         }
 
         if ($user->getDeletedAt()) {
-            $this->addFlash(
-                'error',
-                'Your account has been deleted. Please, for more information contact our support.'
-            );
+            $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -211,13 +126,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser(
-            $user,
-            $radiusUserRepository,
-            $radiusProfileRepository,
-            $userRepository,
-            $this->settings['RADIUS_REALM_NAME']
-        );
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
         $profile = str_replace([
@@ -305,13 +214,8 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/profile/windows', name: 'profile_windows')]
-    public function profileWindows(
-        RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
-        UrlGeneratorInterface $urlGenerator,
-        UserRadiusProfileRepository $radiusProfileRepository,
-        EventRepository $eventRepository
-    ): Response {
+    public function profileWindows(RadiusUserRepository $radiusUserRepository, UserRepository $userRepository, UrlGeneratorInterface $urlGenerator, UserRadiusProfileRepository $radiusProfileRepository, EventRepository $eventRepository): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
@@ -319,10 +223,7 @@ class ProfileController extends AbstractController
         }
 
         if ($user->getDeletedAt()) {
-            $this->addFlash(
-                'error',
-                'Your account has been deleted. Please, for more information contact our support.'
-            );
+            $this->addFlash('error', 'Your account has been deleted. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -331,13 +232,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser(
-            $user,
-            $radiusUserRepository,
-            $radiusProfileRepository,
-            $userRepository,
-            $this->settings['RADIUS_REALM_NAME']
-        );
+        $radiususer = $this->createOrUpdateRadiusUser($user, $radiusUserRepository, $radiusProfileRepository, $userRepository, $this->settings['RADIUS_REALM_NAME']);
         $profile = file_get_contents('../profile_templates/windows/template.xml');
         $profile = str_replace([
             '@USERNAME@',
@@ -396,30 +291,7 @@ class ProfileController extends AbstractController
         // Save the event Action using the service
         $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
 
-        return $this->redirect(
-            'ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate(
-                'profile_windows_serve',
-                ['uuid' => $uuid],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            )
-        );
-    }
-
-    private function generateWindowsUuid()
-    {
-        $format = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x';
-
-        return sprintf(
-            $format,
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff), // 8 hex characters
-            mt_rand(0, 0xffff), // 4 hex characters
-            mt_rand(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
-            mt_rand(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff) // 12 hex characters
-        );
+        return $this->redirect('ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate('profile_windows_serve', ['uuid' => $uuid], UrlGeneratorInterface::ABSOLUTE_URL));
     }
 
     #[Route('/profile/windows_serve', name: 'profile_windows_serve')]
@@ -434,6 +306,71 @@ class ProfileController extends AbstractController
         $response = new Response($profileData);
         $response->headers->set('Content-Type', 'application/xaml+xml');
         return $response;
+    }
+
+    private function generateToken($length = 16)
+    {
+        $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $pieces = [];
+        $max = mb_strlen($stringSpace, '8bit') - 1;
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces[] = $stringSpace[random_int(0, $max)];
+        }
+        return implode('', $pieces);
+    }
+
+    private function generateWindowsUuid()
+    {
+        $format = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x';
+
+        return sprintf($format,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), // 8 hex characters
+            mt_rand(0, 0xffff), // 4 hex characters
+            mt_rand(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
+            mt_rand(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff) // 12 hex characters
+        );
+    }
+
+    private function createOrUpdateRadiusUser(User $user, RadiusUserRepository $radiusUserRepository, UserRadiusProfileRepository $radiusProfileRepository, UserRepository $userRepository, string $realmName): RadiusUser
+    {
+        $radiusProfile = $radiusProfileRepository->findOneBy(['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]);
+        if (!$radiusProfile) {
+            $radiusProfile = new UserRadiusProfile();
+
+            $androidLimit = 32;
+            $realmSize = strlen($realmName) + 1;
+            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
+            $token = $this->generateToken($androidLimit - $realmSize);
+            $radiusProfile->setUser($user);
+            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusUser($username);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setIssuedAt(new \DateTimeImmutable());
+
+            $radiusUser = new RadiusUser();
+            $radiusUser->setUsername($username);
+            $radiusUser->setAttribute('Cleartext-Password');
+            $radiusUser->setOp(':=');
+            $radiusUser->setValue($token);
+            $radiusUserRepository->save($radiusUser, true);
+            $radiusProfileRepository->save($radiusProfile, true);
+        } else {
+            $radiusUser = $radiusUserRepository->findOneBy([
+                'username' => $radiusProfile->getRadiusUser(),
+            ]);
+        }
+
+        return $radiusUser;
+    }
+
+    private function getSettings(SettingRepository $settingRepository): array
+    {
+        $settings = $settingRepository->findAll();
+        return array_reduce($settings, function ($carry, $item) {
+            $carry[$item->getName()] = $item->getValue();
+            return $carry;
+        }, []);
     }
 
 }

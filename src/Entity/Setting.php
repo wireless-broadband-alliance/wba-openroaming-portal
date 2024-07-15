@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SettingRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SettingRepository::class)]

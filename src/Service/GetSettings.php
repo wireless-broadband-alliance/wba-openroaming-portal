@@ -8,6 +8,33 @@ use App\Repository\UserRepository;
 
 class GetSettings
 {
+    private function detectDevice($userAgent)
+    {
+        $os = OSTypes::NONE;
+
+        // Windows
+        if (preg_match('/windows|win32/i', $userAgent)) {
+            $os = OSTypes::WINDOWS;
+        }
+
+        // macOS
+        if (preg_match('/macintosh|mac os x/i', $userAgent)) {
+            $os = OSTypes::MACOS;
+        }
+
+        // iOS
+        if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
+            $os = OSTypes::IOS;
+        }
+
+        // Android
+        if (preg_match('/android/i', $userAgent)) {
+            $os = OSTypes::ANDROID;
+        }
+
+        return $os;
+    }
+
     public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository): array
     {
         $data = [];
@@ -169,8 +196,7 @@ class GetSettings
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue(
-                ) === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
@@ -200,8 +226,7 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue(
-                ) === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
@@ -211,14 +236,12 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(
-            ),
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue(
-                ) === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
@@ -244,8 +267,7 @@ class GetSettings
         ];
 
         $data['code'] = [
-            'value' => ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode(
-            ) : null,
+            'value' => ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null,
             'description' => $this->getSettingDescription('code'),
         ];
 
@@ -363,32 +385,5 @@ class GetSettings
         ];
 
         return $descriptions[$settingName] ?? '';
-    }
-
-    private function detectDevice($userAgent)
-    {
-        $os = OSTypes::NONE;
-
-        // Windows
-        if (preg_match('/windows|win32/i', $userAgent)) {
-            $os = OSTypes::WINDOWS;
-        }
-
-        // macOS
-        if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            $os = OSTypes::MACOS;
-        }
-
-        // iOS
-        if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
-            $os = OSTypes::IOS;
-        }
-
-        // Android
-        if (preg_match('/android/i', $userAgent)) {
-            $os = OSTypes::ANDROID;
-        }
-
-        return $os;
     }
 }

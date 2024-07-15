@@ -40,9 +40,9 @@ class SendSMS
      * @param EventActions $eventActions
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
+        UserRepository        $userRepository,
+        SettingRepository     $settingRepository,
+        GetSettings           $getSettings,
         ParameterBagInterface $parameterBag,
         EventRepository       $eventRepository,
         EventActions          $eventActions,
@@ -54,66 +54,6 @@ class SendSMS
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
-    }
-
-    /**
-     * Regenerate the verification code for the user and send a new SMS.
-     *
-     * @param User $user
-     * @return bool
-     * @throws ClientExceptionInterface
-     * @throws NonUniqueResultException
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws \RuntimeException
-     * @throws Exception
-     */
-    public function regenerateSmsCode(User $user): bool
-    {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-
-        if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
-            $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
-            $currentTime = new DateTime();
-
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
-                if (!$latestEvent) {
-                    // If no previous attempt, set attempts to 1
-                    $attempts = 1;
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($user);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
-                    $latestEvent->setEventMetadata([
-                        'platform' => PlatformMode::Live,
-                        'phoneNumber' => $user->getPhoneNumber(),
-                    ]);
-                } else {
-                    // Increment the attempts
-                    $attempts = $latestEvent->getVerificationAttempts() + 1;
-                }
-
-                $latestEvent->setVerificationAttempts($attempts);
-                $latestEvent->setLastVerificationCodeTime($currentTime);
-                $this->eventRepository->save($latestEvent, true);
-
-                // Generate a new verification code and resend the SMS
-                $verificationCode = $this->generateVerificationCode($user);
-                $message = 'Your new verification code is: ' . $verificationCode;
-                $this->sendSms($user->getPhoneNumber(), $message);
-                return true;
-            }
-
-            return false;
-        }
-
-        // Throw a generic exception when max attempts are exceeded
-        throw new RuntimeException(
-            'SMS resend failed. You have exceed the limits for regeneration. Please contact our support for help.'
-        );
     }
 
     /**

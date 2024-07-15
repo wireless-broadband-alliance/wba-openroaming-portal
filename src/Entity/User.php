@@ -19,26 +19,33 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthenticatedUserInterface
 
 {
-    #[ORM\Column(length: 255, nullable: true)]
-    public ?string $saml_identifier = null;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
+
     #[ORM\Column]
     private array $roles = [];
+
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
     private ?string $password = null;
+
     #[ORM\Column(length: 255)]
     #[Assert\Email]
     private ?string $email = null;
+
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    public ?string $saml_identifier = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
 

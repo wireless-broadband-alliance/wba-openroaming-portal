@@ -75,110 +75,6 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param EntityManagerInterface $entityManager
-     * @param MailerInterface $mailer
-     * @return Response
-     * @throws RandomException
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    #[Route('/register', name: 'app_register')]
-    public function register(
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer
-    ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this authentication method.'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                $this->addFlash(
-                    'warning',
-                    'User with the same email already exists, please try to Login using the link below.'
-                );
-            } else {
-                if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
-                    // Generate a random password
-                    $randomPassword = bin2hex(random_bytes(4));
-
-                    // Hash the password
-                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-
-                    // Set the hashed password for the user
-                    $user->setPassword($hashedPassword);
-                    $user->setUuid($user->getEmail());
-                    $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
-                    $user->setCreatedAt(new DateTime());
-                    $entityManager->persist($user);
-
-                // Defines the Event to the table
-                $eventMetaData = [
-                    'platform' => PlatformMode::Live,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $_SERVER['REMOTE_ADDR'],
-                    'registrationType' => UserProvider::EMAIL,
-                ];
-                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetaData);
-
-                    $emailSender = $this->parameterBag->get('app.email_address');
-                    $nameSender = $this->parameterBag->get('app.sender_name');
-
-                    // Send email to the user with the verification code
-                    $email = (new TemplatedEmail())
-                        ->from(new Address($emailSender, $nameSender))
-                        ->to($user->getEmail())
-                        ->subject('Your OpenRoaming Registration Details')
-                        ->htmlTemplate('email/user_password.html.twig')
-                        ->context([
-                            'uuid' => $user->getUuid(),
-                            'verificationCode' => $user->getVerificationCode(),
-                            'isNewUser' => true,
-                            // This variable lets the template know if the user it's new our if it's just a password reset request
-                            'password' => $randomPassword,
-                        ]);
-
-                    $this->addFlash(
-                        'success',
-                        'We have sent an email with your account password and verification code'
-                    );
-                    $mailer->send($email);
-                }
-            }
-        }
-
-        return $this->render('site/register_landing.html.twig', [
-            'registrationForm' => $form->createView(),
-            'data' => $data,
-        ]);
-    }
-
-    /*
-    * Handle the email registration.
-    */
-
-    /**
      * Generate a new verification code for the user.
      *
      * @param User $user The user for whom the verification code is generated.
@@ -196,9 +92,100 @@ class RegistrationController extends AbstractController
     }
 
     /*
+    * Handle the email registration.
+    */
+    /**
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param EntityManagerInterface $entityManager
+     * @param MailerInterface $mailer
+     * @return Response
+     * @throws RandomException
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/register', name: 'app_register')]
+    public function register(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer
+    ): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $user = new User();
+        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
+                $this->addFlash('warning', 'User with the same email already exists, please try to Login using the link below.');
+            } else if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
+                // Generate a random password
+                $randomPassword = bin2hex(random_bytes(4));
+
+                // Hash the password
+                $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+
+                // Set the hashed password for the user
+                $user->setPassword($hashedPassword);
+                $user->setUuid($user->getEmail());
+                $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
+                $user->setCreatedAt(new DateTime());
+                $entityManager->persist($user);
+
+                // Defines the Event to the table
+                $eventMetaData = [
+                    'platform' => PlatformMode::Live,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'registrationType' => UserProvider::EMAIL,
+                ];
+                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetaData);
+
+                $emailSender = $this->parameterBag->get('app.email_address');
+                $nameSender = $this->parameterBag->get('app.sender_name');
+
+                // Send email to the user with the verification code
+                $email = (new TemplatedEmail())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($user->getEmail())
+                    ->subject('Your OpenRoaming Registration Details')
+                    ->htmlTemplate('email/user_password.html.twig')
+                    ->context([
+                        'uuid' => $user->getUuid(),
+                        'verificationCode' => $user->getVerificationCode(),
+                        'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
+                        'password' => $randomPassword,
+                    ]);
+
+                $this->addFlash('success', 'We have sent an email with your account password and verification code');
+                $mailer->send($email);
+            }
+        }
+
+        return $this->render('site/register_landing.html.twig', [
+            'registrationForm' => $form->createView(),
+            'data' => $data,
+        ]);
+    }
+
+    /*
     * Handle the sms registration.
     */
-
     /**
      * @param Request $request
      * @param UserPasswordHasherInterface $userPasswordHasher
@@ -214,20 +201,18 @@ class RegistrationController extends AbstractController
      */
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
-        Request $request,
+        Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        SessionInterface $session
-    ): Response {
+        EntityManagerInterface      $entityManager,
+        SessionInterface            $session
+    ): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this authentication method.'
-            );
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -242,10 +227,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
-                $this->addFlash(
-                    'warning',
-                    'User with the same phone number already exists, please try to Login using the link below.'
-                );
+                $this->addFlash('warning', 'User with the same phone number already exists, please try to Login using the link below.');
             } else {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -274,10 +256,7 @@ class RegistrationController extends AbstractController
                 // Send SMS
                 $message = "Your account password is: " . $randomPassword . "%0A" . "Verification code is: " . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
-                $this->addFlash(
-                    'success',
-                    'We have sent a message to your phone with your password and verification code'
-                );
+                $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
 
                 // Authenticate the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
@@ -310,9 +289,9 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack $requestStack,
-        UserRepository $userRepository,
-        TokenStorageInterface $tokenStorage,
+        RequestStack             $requestStack,
+        UserRepository           $userRepository,
+        TokenStorageInterface    $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
     ): Response
     {

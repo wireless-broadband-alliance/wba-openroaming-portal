@@ -87,14 +87,8 @@ class SiteController extends AbstractController
      * @return Response
      */
     #[Route('/', name: 'app_landing')]
-    public function landing(
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        UserAuthenticatorInterface $userAuthenticator,
-        PasswordAuthenticator $authenticator,
-        EntityManagerInterface $entityManager,
-        RequestStack $requestStack
-    ): Response {
+    public function landing(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, PasswordAuthenticator $authenticator, EntityManagerInterface $entityManager, RequestStack $requestStack): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -136,11 +130,11 @@ class SiteController extends AbstractController
                     if ($form->isSubmitted() && $form->isValid()) {
                         $user = $form->getData();
 
-                            $user->setEmail($user->getEmail());
-                            $user->setCreatedAt(new \DateTime());
-                            $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
-                            $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                            $entityManager->persist($user);
+                        $user->setEmail($user->getEmail());
+                        $user->setCreatedAt(new \DateTime());
+                        $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                        $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
+                        $entityManager->persist($user);
 
                         // Defines the Event to the table
                         $eventMetadata = [
@@ -158,12 +152,11 @@ class SiteController extends AbstractController
                         );
                     }
 
-                        if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
-                            return $this->redirectToRoute('app_regenerate_email_code');
-                        }
-                        if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
-                            return $this->redirectToRoute('app_landing');
-                        }
+                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
+                        return $this->redirectToRoute('app_regenerate_email_code');
+                    }
+                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
+                        return $this->redirectToRoute('app_landing');
                     }
                 }
 
@@ -178,6 +171,7 @@ class SiteController extends AbstractController
                     } else {
                         $payload['radio-os'] = $payload['detected-os'];
                     }
+
                 }
                 if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
                     /*
@@ -187,43 +181,38 @@ class SiteController extends AbstractController
                     if ($payload['radio-os'] === OSTypes::MACOS) {
                         $payload['radio-os'] = OSTypes::IOS;
                     }
-                    return $this->redirectToRoute(
-                        'profile_' . strtolower($payload['radio-os']),
-                        ['os' => $payload['radio-os']]
-                    );
+                    return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
+
                 }
             }
-        } else {
-            if ($request->isMethod('POST')) {
-                $payload = $request->request->all();
-                if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                    $this->addFlash('error', 'Please select OS');
-                }
-                if (!array_key_exists('radio-os', $payload)) {
-                    if (!array_key_exists('detected-os', $payload)) {
-                        $os = $request->query->get('os');
-                        if (!empty($os)) {
-                            $payload['radio-os'] = $os;
-                        } else {
-                            return $this->redirectToRoute($actionName);
-                        }
+
+        } else if ($request->isMethod('POST')) {
+            $payload = $request->request->all();
+            if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
+                $this->addFlash('error', 'Please select OS');
+            }
+            if (!array_key_exists('radio-os', $payload)) {
+                if (!array_key_exists('detected-os', $payload)) {
+                    $os = $request->query->get('os');
+                    if (!empty($os)) {
+                        $payload['radio-os'] = $os;
                     } else {
-                        $payload['radio-os'] = $payload['detected-os'];
+                        return $this->redirectToRoute($actionName);
                     }
+                } else {
+                    $payload['radio-os'] = $payload['detected-os'];
                 }
-                if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
-                    /*
-                        * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
-                        * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
-                       */
-                    if ($payload['radio-os'] === OSTypes::MACOS) {
-                        $payload['radio-os'] = OSTypes::IOS;
-                    }
-                    return $this->redirectToRoute(
-                        'profile_' . strtolower($payload['radio-os']),
-                        ['os' => $payload['radio-os']]
-                    );
+
+            }
+            if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
+                /*
+                    * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
+                    * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
+                   */
+                if ($payload['radio-os'] === OSTypes::MACOS) {
+                    $payload['radio-os'] = OSTypes::IOS;
                 }
+                return $this->redirectToRoute('profile_' . strtolower($payload['radio-os']), ['os' => $payload['radio-os']]);
             }
         }
 
@@ -253,43 +242,6 @@ class SiteController extends AbstractController
         ]);
     }
 
-    /**
-     * @param $userAgent
-     * @return string
-     */
-    private
-    function detectDevice(
-        $userAgent
-    ) {
-        $os = OSTypes::NONE;
-
-        // Windows
-        if (preg_match('/windows|win32/i', $userAgent)) {
-            $os = OSTypes::WINDOWS;
-        }
-
-        // macOS
-        if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            $os = OSTypes::MACOS;
-        }
-
-        // iOS
-        if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
-            $os = OSTypes::IOS;
-        }
-
-        // Android
-        if (preg_match('/android/i', $userAgent)) {
-            $os = OSTypes::ANDROID;
-        }
-
-        // Linux
-//        if (preg_match('/linux/i', $userAgent)) {
-//            $os = OSTypes::LINUX;
-//        }
-
-        return $os;
-    }
 
     /**
      * Widget with data about the account of the user / upload new password
@@ -300,10 +252,11 @@ class SiteController extends AbstractController
      */
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     public function accountUser(
-        Request $request,
-        EntityManagerInterface $em,
+        Request                     $request,
+        EntityManagerInterface      $em,
         UserPasswordHasherInterface $passwordHasher,
-    ): Response {
+    ): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
@@ -353,10 +306,7 @@ class SiteController extends AbstractController
             }
 
             if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
-                $this->addFlash(
-                    'error',
-                    'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!'
-                );
+                $this->addFlash('error', 'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!');
                 return $this->redirectToRoute('app_landing');
             }
 
@@ -384,11 +334,12 @@ class SiteController extends AbstractController
      */
     #[Route('/forgot-password/email', name: 'app_site_forgot_password_email')]
     public function forgotPasswordUserEmail(
-        Request $request,
+        Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer
-    ): Response {
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer
+    ): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -399,10 +350,7 @@ class SiteController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
-            );
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this verification method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -419,15 +367,13 @@ class SiteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->userRepository->findOneBy(['email' => $user->getEmail(), 'googleId' => null]);
             if ($user) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
-                );
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
                 // Check if enough time has passed since the last attempt
                 if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
                         $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+
                     // Save event with attempt count and current time
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -451,12 +397,7 @@ class SiteController extends AbstractController
                     $entityManager->flush();
 
                     $email = (new TemplatedEmail())
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
+                        ->from(new Address($this->parameterBag->get('app.email_address'), $this->parameterBag->get('app.sender_name')))
                         ->to($user->getEmail())
                         ->subject('Your Openroaming - Password Request')
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
@@ -477,11 +418,9 @@ class SiteController extends AbstractController
                     $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
                 }
             } else {
-                $this->addFlash(
-                    'warning',
-                    'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.'
-                );
+                $this->addFlash('warning', 'This email doesn\'t exist, please submit a valid email from the system! And make sure to only type emails from the platform and not from another providers.');
             }
+
         }
         return $this->render('site/forgot_password_email_landing.html.twig', [
             'forgotPasswordEmailForm' => $form->createView(),
@@ -495,11 +434,12 @@ class SiteController extends AbstractController
      */
     #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
-        Request $request,
+        Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        RequestStack $requestStack,
-    ): Response {
+        EntityManagerInterface      $entityManager,
+        RequestStack                $requestStack,
+    ): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -510,10 +450,7 @@ class SiteController extends AbstractController
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
-            );
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this verification method.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -530,10 +467,7 @@ class SiteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()]);
             if ($user) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST
-                );
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
@@ -585,8 +519,7 @@ class SiteController extends AbstractController
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
                             $domainName = "/login";
-                            $message = "Your account password is: " . $randomPassword . "%0A" . "Login here: " . $requestStack->getCurrentRequest(
-                                )->getSchemeAndHttpHost() . $domainName;
+                            $message = "Your account password is: " . $randomPassword . "%0A" . "Login here: " . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
                             $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
                             $response = $client->request('GET', $apiUrl);
@@ -595,27 +528,17 @@ class SiteController extends AbstractController
                             $content = $response->getContent();
                         }
                         $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
-                        $message = sprintf(
-                            'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $user->getPhoneNumber(),
-                            $attemptsLeft
-                        );
+                        $message = sprintf('We have sent you a message to: %s. You have %d attempt(s) left.', $user->getPhoneNumber(), $attemptsLeft);
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
                         $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
                     }
                 } else {
-                    $this->addFlash(
-                        'warning',
-                        'You have exceed the limits for verification password. Please contact our support for help.'
-                    );
+                    $this->addFlash('warning', 'You have exceed the limits for verification password. Please contact our support for help.');
                 }
             } else {
-                $this->addFlash(
-                    'warning',
-                    'This phone number doesn\'t exist, please submit a valid one from the system!'
-                );
+                $this->addFlash('warning', 'This phone number doesn\'t exist, please submit a valid one from the system!');
             }
         }
         return $this->render('site/forgot_password_sms_landing.html.twig', [
@@ -630,20 +553,18 @@ class SiteController extends AbstractController
      */
     #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
     public function forgotPasswordUserChecker(
-        Request $request,
+        Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer,
+        EntityManagerInterface      $entityManager,
+        MailerInterface             $mailer,
         UserPasswordHasherInterface $passwordHasher,
-    ): Response {
+    ): Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($data['PLATFORM_MODE']['value'] == true) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method!'
-            );
+            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this verification method!');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -679,10 +600,7 @@ class SiteController extends AbstractController
             }
 
             if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
-                $this->addFlash(
-                    'error',
-                    'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!'
-                );
+                $this->addFlash('error', 'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!');
                 return $this->redirectToRoute('app_landing');
             }
 
@@ -708,6 +626,91 @@ class SiteController extends AbstractController
         ]);
     }
 
+
+    /**
+     * @param $userAgent
+     * @return string
+     */
+    private
+    function detectDevice($userAgent)
+    {
+        $os = OSTypes::NONE;
+
+        // Windows
+        if (preg_match('/windows|win32/i', $userAgent)) {
+            $os = OSTypes::WINDOWS;
+        }
+
+        // macOS
+        if (preg_match('/macintosh|mac os x/i', $userAgent)) {
+            $os = OSTypes::MACOS;
+        }
+
+        // iOS
+        if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
+            $os = OSTypes::IOS;
+        }
+
+        // Android
+        if (preg_match('/android/i', $userAgent)) {
+            $os = OSTypes::ANDROID;
+        }
+
+        // Linux
+//        if (preg_match('/linux/i', $userAgent)) {
+//            $os = OSTypes::LINUX;
+//        }
+
+        return $os;
+    }
+
+    /**
+     * Generate a new verification code for the user.
+     *
+     * @param User $user The user for whom the verification code is generated.
+     * @return int The generated verification code.
+     * @throws Exception
+     */
+    protected
+    function generateVerificationCode(User $user): int
+    {
+        // Generate a random verification code with 6 digits
+        $verificationCode = random_int(100000, 999999);
+        $user->setVerificationCode($verificationCode);
+        $this->userRepository->save($user, true);
+
+        return $verificationCode;
+    }
+
+    /**
+     * Create an email message with the verification code.
+     *
+     * @param string $email The recipient's email address.
+     * @return Email The email with the code.
+     * @throws Exception
+     */
+    protected
+    function createEmailCode(string $email): Email
+    {
+        // Get the values from the services.yaml file using $parameterBag on the __construct
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        // If the verification code is not provided, generate a new one
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $verificationCode = $this->generateVerificationCode($currentUser);
+
+        return (new TemplatedEmail())
+            ->from(new Address($emailSender, $nameSender))
+            ->to($email)
+            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
+            ->htmlTemplate('email/user_code.html.twig')
+            ->context([
+                'verificationCode' => $verificationCode,
+            ]);
+    }
+
     /**
      * Regenerate the verification code for the user and send a new email.
      *
@@ -726,16 +729,14 @@ class SiteController extends AbstractController
         $isVerified = $currentUser->isVerified();
 
         if (!$isVerified) {
-            $latestEvent = $eventRepository->findLatestRequestAttemptEvent(
-                $currentUser,
-                AnalyticalEventType::USER_EMAIL_ATTEMPT
-            );
+            $latestEvent = $eventRepository->findLatestRequestAttemptEvent($currentUser, AnalyticalEventType::USER_EMAIL_ATTEMPT);
             $minInterval = new DateInterval('PT2M');
             $currentTime = new DateTime();
 
             // Check if enough time has passed since the last attempt
             if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
                     $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+
                 // Increment the attempt count
                 $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
 
@@ -768,55 +769,6 @@ class SiteController extends AbstractController
         }
 
         return $this->redirectToRoute('app_landing');
-    }
-
-    /**
-     * Create an email message with the verification code.
-     *
-     * @param string $email The recipient's email address.
-     * @return Email The email with the code.
-     * @throws Exception
-     */
-    protected
-    function createEmailCode(
-        string $email
-    ): Email {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        // If the verification code is not provided, generate a new one
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $verificationCode = $this->generateVerificationCode($currentUser);
-
-        return (new TemplatedEmail())
-            ->from(new Address($emailSender, $nameSender))
-            ->to($email)
-            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->htmlTemplate('email/user_code.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-            ]);
-    }
-
-    /**
-     * Generate a new verification code for the user.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected
-    function generateVerificationCode(
-        User $user
-    ): int {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
     }
 
     /**
@@ -858,11 +810,8 @@ class SiteController extends AbstractController
      */
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function verifyCode(
-        RequestStack $requestStack,
-        UserRepository $userRepository,
-        EventRepository $eventRepository
-    ): Response {
+    public function verifyCode(RequestStack $requestStack, UserRepository $userRepository, EventRepository $eventRepository): Response
+    {
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -942,19 +891,12 @@ class SiteController extends AbstractController
                 // Check if $latestEvent to avoid null conflicts
                 if ($latestEvent) {
                     $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
-                    $message = sprintf(
-                        'We have sent you a new code to: %s. You have %d attempt(s) left.',
-                        $currentUser->getPhoneNumber(),
-                        $attemptsLeft
-                    );
+                    $message = sprintf('We have sent you a new code to: %s. You have %d attempt(s) left.', $currentUser->getPhoneNumber(), $attemptsLeft);
                     $this->addFlash('success', $message);
                 }
             } else {
                 // If regeneration failed, show an appropriate error message
-                $this->addFlash(
-                    'error',
-                    'Failed to regenerate SMS code. Please, wait ' . $data['SMS_TIMER_RESEND']['value'] . ' minute(s) before generating a new code.'
-                );
+                $this->addFlash('error', 'Failed to regenerate SMS code. Please, wait ' . $data['SMS_TIMER_RESEND']['value'] . ' minute(s) before generating a new code.');
             }
         } catch (\RuntimeException $e) {
             // Handle generic exception and display a message to the user

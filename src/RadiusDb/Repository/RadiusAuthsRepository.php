@@ -42,6 +42,8 @@ class RadiusAuthsRepository extends ServiceEntityRepository
 
     public function findAuthRequests(DateTime $startDate, DateTime $endDate)
     {
+
+
         // Fetch all data with date filtering
         return $this->createQueryBuilder('u')
             ->where('u.reply IN (:replies)')

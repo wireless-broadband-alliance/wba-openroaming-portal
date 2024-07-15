@@ -22,10 +22,11 @@ class LDAPSyncCommand extends Command
     private ProfileManager $profileManager;
 
     public function __construct(
-        UserRepository $userRepository,
+        UserRepository    $userRepository,
         SettingRepository $settingRepository,
-        ProfileManager $profileManager
-    ) {
+        ProfileManager    $profileManager
+    )
+    {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->profileManager = $profileManager;
@@ -35,6 +36,7 @@ class LDAPSyncCommand extends Command
 
     protected function configure(): void
     {
+
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -61,15 +63,14 @@ class LDAPSyncCommand extends Command
             if ($userLocked) {
                 $io->writeln('User ' . $user->saml_identifier . ' is locked in LDAP, disabling');
                 $this->disableProfiles($user);
+            } else if ($passwordExpired) {
+                $io->writeln('User ' . $user->saml_identifier . ' has an expired password in LDAP, disabling');
+                $this->disableProfiles($user);
             } else {
-                if ($passwordExpired) {
-                    $io->writeln('User ' . $user->saml_identifier . ' has an expired password in LDAP, disabling');
-                    $this->disableProfiles($user);
-                } else {
-                    $io->writeln('User ' . $user->saml_identifier . ' is enabled in LDAP, enabling');
-                    $this->enableProfiles($user);
-                }
+                $io->writeln('User ' . $user->saml_identifier . ' is enabled in LDAP, enabling');
+                $this->enableProfiles($user);
             }
+
         }
 
         return Command::SUCCESS;
@@ -85,11 +86,7 @@ class LDAPSyncCommand extends Command
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 1);
         ldap_bind($ldapConnection, $ldapUsername, $ldapPassword) or die("Could not bind to LDAP server.");
-        $searchFilter = str_replace(
-            "@ID",
-            $identifier,
-            $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue()
-        );
+        $searchFilter = str_replace("@ID", $identifier, $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue());
         $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
         $searchResult = ldap_search($ldapConnection, $searchBaseDN, $searchFilter);
 

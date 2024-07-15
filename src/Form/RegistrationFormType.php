@@ -27,11 +27,8 @@ class RegistrationFormType extends AbstractType
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
-    public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings
-    ) {
+    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings)
+    {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
