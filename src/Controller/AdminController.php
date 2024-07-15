@@ -68,7 +68,7 @@ class AdminController extends AbstractController
     private RadiusAuthsRepository $radiusAuthsRepository;
     private RadiusAccountingRepository $radiusAccountingRepository;
     private PgpEncryptionService $pgpEncryptionService;
-    private EventActions $eventAction;
+    private EventActions $eventActions;
 
     /**
      * @param MailerInterface $mailer
