@@ -447,7 +447,7 @@ class AdminController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $_SERVER['REMOTE_ADDR'],
-                'edited ' => $user->getUuid(),
+                'edited' => $user->getUuid(),
                 'by' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI, new DateTime(), $eventMetadata);
