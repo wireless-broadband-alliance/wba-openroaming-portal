@@ -25,9 +25,9 @@ class SecurityController extends AbstractController
     /**
      * SiteController constructor.
      *
-     * @param UserRepository    $userRepository    The repository for accessing user data.
+     * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings       $getSettings       The instance of GetSettings class.
+     * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
         UserRepository $userRepository,
@@ -86,8 +86,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Wrong credentials');
         }
 
-        return $this->render(
-            'site/login_landing.html.twig', [
+        return $this->render('site/login_landing.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
                 'data' => $data,
