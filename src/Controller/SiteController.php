@@ -315,11 +315,11 @@ class SiteController extends AbstractController
             $em->persist($user);
             $em->flush();
 
-            $eventMetaData->setEventMetadata([
+            $eventMetaData = [
                 'platform' => PlatformMode::Live,
                 'uuid' => $user->getUuid(),
                 'ip' => $_SERVER['REMOTE_ADDR'],
-            ]);
+            ];
             $this->eventActions->saveEvent($user, AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD, new DateTime(), $eventMetaData);
 
             $this->addFlash('success', 'Your password has been updated successfully!');
