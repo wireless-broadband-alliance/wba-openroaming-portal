@@ -33,7 +33,7 @@ class AppVersionExtension extends AbstractExtension
 
         $composerJsonContent = file_get_contents($composerJsonPath);
         /**
- * @noinspection JsonEncodingApiUsageInspection 
+ * @noinspection JsonEncodingApiUsageInspection
 */
         $composerJsonDecoded = json_decode($composerJsonContent, true);
 
