@@ -170,9 +170,9 @@ class AdminController extends AbstractController
         $bannedUsersCount = $userRepository->totalBannedUsers();
 
         // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
+        $exportUsers = $this->parameterBag->get('app.export_users');
         // Check if the delete action has a public PGP key defined
-        $delete_users = $this->parameterBag->get('app.pgp_public_key');
+        $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -188,8 +188,8 @@ class AdminController extends AbstractController
             'activeSort' => $sort,
             'activeOrder' => $order,
             'count' => $count,
-            'export_users' => $export_users,
-            'delete_users' => $delete_users
+            'export_users' => $exportUsers,
+            'delete_users' => $deleteUsers
         ]);
     }
 
@@ -210,8 +210,8 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
 
         // Check if the export users operation is enabled
-        $export_users = $this->parameterBag->get('app.export_users');
-        if ($export_users === EmailConfirmationStrategy::NO_EMAIL) {
+        $exportUsers = $this->parameterBag->get('app.export_users');
+        if ($exportUsers === EmailConfirmationStrategy::NO_EMAIL) {
             $this->addFlash('error_admin', 'This operation is disabled for security reasons');
             return $this->redirectToRoute('admin_page');
         }
