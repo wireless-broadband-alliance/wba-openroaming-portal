@@ -49,15 +49,14 @@ class GoogleController extends AbstractController
      * @param EventActions $eventActions
      */
     public function __construct(
-        ClientRegistry              $clientRegistry,
-        EntityManagerInterface      $entityManager,
+        ClientRegistry $clientRegistry,
+        EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordEncoder,
-        TokenStorageInterface       $tokenStorage,
-        RequestStack                $requestStack,
-        EventDispatcherInterface    $eventDispatcher,
-        EventActions                $eventActions,
-    )
-    {
+        TokenStorageInterface $tokenStorage,
+        RequestStack $requestStack,
+        EventDispatcherInterface $eventDispatcher,
+        EventActions $eventActions,
+    ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->passwordEncoder = $passwordEncoder;
@@ -191,7 +190,6 @@ class GoogleController extends AbstractController
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail) {
-
             if ($userWithEmail->getGoogleId() === null) {
                 $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;
