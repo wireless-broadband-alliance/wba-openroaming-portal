@@ -1,4 +1,5 @@
 <?php
+
 // SPDX-License-Identifier: BSD-3-Clause
 
 declare(strict_types=1);
@@ -11,6 +12,7 @@ use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
 use Symfony\Component\Security\Core\User\UserInterface;
+
 use function is_string;
 
 class CustomSamlUserFactory implements SamlUserFactoryInterface
@@ -24,10 +26,9 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
      */
     public function __construct(
         private readonly string $userClass,
-        private readonly array  $mapping,
-        UserRepository          $userRepository,
-    )
-    {
+        private readonly array $mapping,
+        UserRepository $userRepository,
+    ) {
         $this->userRepository = $userRepository;
     }
 
