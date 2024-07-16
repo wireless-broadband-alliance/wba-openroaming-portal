@@ -195,7 +195,8 @@ class AdminController extends AbstractController
             'activeOrder' => $order,
             'count' => $count,
             'export_users' => $exportUsers,
-            'delete_users' => $deleteUsers
+            'delete_users' => $deleteUsers,
+            'ApUsage' => null
         ]);
     }
 
@@ -1531,7 +1532,9 @@ class AdminController extends AbstractController
         if ($startDateString) {
             $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
         } else {
-            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
+            $startDate = (new DateTime())->modify(
+                '-1 week'
+            ); // return current datetime minus 1 week if he doesn't exist
         }
 
         if ($endDateString) {
@@ -1585,7 +1588,9 @@ class AdminController extends AbstractController
         if ($startDateString) {
             $startDate = new DateTime($startDateString); // convert the value from string to a datetime type
         } else {
-            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if it doesn't exist
+            $startDate = (new DateTime())->modify(
+                '-1 week'
+            ); // return current datetime minus 1 week if it doesn't exist
         }
 
         if ($endDateString) {
