@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Enum\User_Verification_Status;
 use App\Enum\UserProvider;
 use App\Form\AuthType;
 use App\Form\CapportType;
@@ -84,19 +85,18 @@ class AdminController extends AbstractController
      * @param EventActions $eventActions
      */
     public function __construct(
-        MailerInterface            $mailer,
-        UserRepository             $userRepository,
-        ProfileManager             $profileManager,
-        ParameterBagInterface      $parameterBag,
-        GetSettings                $getSettings,
-        SettingRepository          $settingRepository,
-        EntityManagerInterface     $entityManager,
-        RadiusAuthsRepository      $radiusAuthsRepository,
+        MailerInterface $mailer,
+        UserRepository $userRepository,
+        ProfileManager $profileManager,
+        ParameterBagInterface $parameterBag,
+        GetSettings $getSettings,
+        SettingRepository $settingRepository,
+        EntityManagerInterface $entityManager,
+        RadiusAuthsRepository $radiusAuthsRepository,
         RadiusAccountingRepository $radiusAccountingRepository,
-        PgpEncryptionService       $pgpEncryptionService,
-        EventActions               $eventActions
-    )
-    {
+        PgpEncryptionService $pgpEncryptionService,
+        EventActions $eventActions
+    ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->profileManager = $profileManager;
@@ -126,8 +126,14 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
-    public function dashboard(Request $request, UserRepository $userRepository, #[MapQueryParameter] int $page = 1, #[MapQueryParameter] string $sort = 'createdAt', #[MapQueryParameter] string $order = 'desc', #[MapQueryParameter] int $count = 7): Response
-    {
+    public function dashboard(
+        Request $request,
+        UserRepository $userRepository,
+        #[MapQueryParameter] int $page = 1,
+        #[MapQueryParameter] string $sort = 'createdAt',
+        #[MapQueryParameter] string $order = 'desc',
+        #[MapQueryParameter] int $count = 7
+    ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -244,12 +250,20 @@ class AdminController extends AbstractController
             $sheet->setCellValue('D' . $row, $this->escapeSpreadsheetValue($user->getPhoneNumber()));
             $sheet->setCellValue('E' . $row, $this->escapeSpreadsheetValue($user->getFirstName()));
             $sheet->setCellValue('F' . $row, $this->escapeSpreadsheetValue($user->getLastName()));
-            $sheet->setCellValue('G' . $row, $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified'));
+            $sheet->setCellValue(
+                'G' . $row,
+                $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified')
+            );
             // Determine User Provider
             $userProvider = $this->getUserProvider($user);
             $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userProvider));
             // Check if the user is Banned
-            $sheet->setCellValue('I' . $row, $this->escapeSpreadsheetValue($user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'));
+            $sheet->setCellValue(
+                'I' . $row,
+                $this->escapeSpreadsheetValue(
+                    $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'
+                )
+            );
             $sheet->setCellValue('J' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
@@ -264,7 +278,12 @@ class AdminController extends AbstractController
             'ip' => $_SERVER['REMOTE_ADDR'],
             'uuid' => $currentUser->getUuid(),
         ];
-        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST,
+            new DateTime(),
+            $eventMetadata
+        );
 
         // Return the file as a response
         return $this->file($tempFile, 'users.xlsx');
@@ -299,8 +318,7 @@ class AdminController extends AbstractController
         $id,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $userPasswordHasher,
-    ): Response
-    {
+    ): Response {
         $user = $this->userRepository->find($id);
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -331,7 +349,23 @@ class AdminController extends AbstractController
         // Encrypt JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
-
+        if ($pgpEncryptedData[0] == User_Verification_Status::MISSING_PUBLIC_KEY_CONTENT) {
+            $this->addFlash(
+                'error_admin',
+                'The public key is not set.
+             Make sure to define a public key in pgp_public_key/public_key.asc'
+            );
+            return $this->redirectToRoute('admin_page');
+        } else {
+            if ($pgpEncryptedData[0] == User_Verification_Status::EMPTY_PUBLIC_KEY_CONTENT) {
+                $this->addFlash(
+                    'error_admin',
+                    'The public key is empty.
+             Make sure to define content for the public key in pgp_public_key/public_key.asc'
+                );
+                return $this->redirectToRoute('admin_page');
+            }
+        }
         $deletedUserData = new DeletedUserData();
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserData->setUser($user);
@@ -368,7 +402,12 @@ class AdminController extends AbstractController
             'deletedBy' => $currentUser->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
         ];
-        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::DELETED_USER_BY, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::DELETED_USER_BY,
+            new DateTime(),
+            $eventMetadata
+        );
 
         $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
         return $this->redirectToRoute('admin_page');
@@ -390,13 +429,13 @@ class AdminController extends AbstractController
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(
-        Request                     $request,
-        UserRepository              $userRepository,
+        Request $request,
+        UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
-        EntityManagerInterface      $em,
-        MailerInterface             $mailer,
-                                    $id): Response
-    {
+        EntityManagerInterface $em,
+        MailerInterface $mailer,
+        $id
+    ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -450,7 +489,12 @@ class AdminController extends AbstractController
                 'edited' => $user->getUuid(),
                 'by' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
+                new DateTime(),
+                $eventMetadata
+            );
 
             $email = $user->getEmail();
             $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
@@ -498,7 +542,12 @@ class AdminController extends AbstractController
                 'edited ' => $user->getUuid(),
                 'by' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                new DateTime(),
+                $eventMetadata
+            );
 
             return $this->redirectToRoute('admin_page');
         }
@@ -548,11 +597,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
     public function checkSettings(
-        RequestStack           $requestStack,
+        RequestStack $requestStack,
         EntityManagerInterface $em,
-        string                 $type
-    ): Response
-    {
+        string $type
+    ): Response {
         // Get the entered code from the form
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
         /** @var User $currentUser */
@@ -574,7 +622,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
@@ -596,7 +649,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_TERMS_RESET_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_TERMS_RESET_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
@@ -618,7 +676,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
@@ -667,7 +730,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
@@ -689,7 +757,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
@@ -711,7 +784,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
@@ -733,7 +811,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
             }
@@ -827,8 +910,7 @@ class AdminController extends AbstractController
      */
     protected function createEmailAdmin(
         string $email
-    ): Email
-    {
+    ): Email {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
@@ -858,11 +940,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings_terms(
-        Request                $request,
+        Request $request,
         EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
-    {
+        GetSettings $getSettings
+    ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -910,7 +991,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_TERMS_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_TERMS_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
 
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
@@ -980,7 +1066,10 @@ class AdminController extends AbstractController
                     // Check for specific settings that need domain validation
                     if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
                         if (!$this->isValidDomain($value)) {
-                            $this->addFlash('error_admin', "The value for $settingName is not a valid domain or does not resolve to an IP address.");
+                            $this->addFlash(
+                                'error_admin',
+                                "The value for $settingName is not a valid domain or does not resolve to an IP address."
+                            );
                             return $this->redirectToRoute('admin_dashboard_settings_radius');
                         }
                     }
@@ -996,7 +1085,12 @@ class AdminController extends AbstractController
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid(),
                 ];
-                $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
@@ -1020,11 +1114,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings_status(
-        Request                $request,
+        Request $request,
         EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
-    {
+        GetSettings $getSettings
+    ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -1073,7 +1166,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid()
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
             $this->addFlash('success_admin', 'The new changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_status');
@@ -1098,11 +1196,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings_LDAP(
-        Request                $request,
+        Request $request,
         EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
-    {
+        GetSettings $getSettings
+    ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1148,7 +1245,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_LDAP_CONF_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
 
             $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
@@ -1172,11 +1274,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings_auth(
-        Request                $request,
+        Request $request,
         EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
-    {
+        GetSettings $getSettings
+    ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -1236,7 +1337,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
             $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_auth');
@@ -1260,11 +1366,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings_capport(
-        Request                $request,
+        Request $request,
         EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
-    {
+        GetSettings $getSettings
+    ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1307,7 +1412,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
             $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_capport');
@@ -1330,11 +1440,10 @@ class AdminController extends AbstractController
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
     public function settings_sms(
-        Request                $request,
+        Request $request,
         EntityManagerInterface $em,
-        GetSettings            $getSettings
-    ): Response
-    {
+        GetSettings $getSettings
+    ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -1379,7 +1488,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_SMS_CONF_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_SMS_CONF_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
             $this->addFlash('success_admin', 'New SMS configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_sms');
@@ -1415,19 +1529,15 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else if ($startDateString === "") {
-            $startDate = (new DateTime())->modify('-1 week');
+            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
         } else {
-            $startDate = (new DateTime())->modify('-1 week');
+            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else if ($endDateString === "") {
-            $endDate = new DateTime();
+            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
         } else {
-            $endDate = new DateTime();
+            $endDate = new DateTime(); // return current datetime
         }
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
@@ -1460,10 +1570,9 @@ class AdminController extends AbstractController
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
     public function freeradiusStatisticsData(
-        Request                  $request,
+        Request $request,
         #[MapQueryParameter] int $page = 1,
-    ): Response
-    {
+    ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
@@ -1474,19 +1583,15 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else if ($startDateString === "") {
-            $startDate = (new DateTime())->modify('-1 week');
+            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
         } else {
-            $startDate = (new DateTime())->modify('-1 week');
+            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else if ($endDateString === "") {
-            $endDate = new DateTime();
+            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
         } else {
-            $endDate = new DateTime();
+            $endDate = new DateTime(); // return current datetime
         }
 
         // Fetch all the required data, graphics etc...
@@ -1848,7 +1953,12 @@ class AdminController extends AbstractController
             'ip' => $_SERVER['REMOTE_ADDR'],
             'uuid' => $currentUser->getUuid(),
         ];
-        $this->eventActions->saveEvent($currentUser, AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST,
+            new DateTime(),
+            $eventMetadata
+        );
 
 
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
@@ -1935,10 +2045,12 @@ class AdminController extends AbstractController
 
                 if ($samlIdentifier) {
                     $userCounts['SAML']++;
-                } else if ($googleId) {
-                    $userCounts['Google']++;
                 } else {
-                    $userCounts['Portal']++;
+                    if ($googleId) {
+                        $userCounts['Google']++;
+                    } else {
+                        $userCounts['Portal']++;
+                    }
                 }
             }
         }
@@ -2099,12 +2211,14 @@ class AdminController extends AbstractController
         // Determine the appropriate time granularity
         if ($interval->days > 365.2) {
             $granularity = 'year';
-        } else if ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
         } else {
-            $granularity = 'day';
+            if ($interval->days > 90) {
+                $granularity = 'month';
+            } elseif ($interval->days > 30) {
+                $granularity = 'week';
+            } else {
+                $granularity = 'day';
+            }
         }
 
         $authsCounts = [
@@ -2173,7 +2287,11 @@ class AdminController extends AbstractController
      */
     private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+            $startDate,
+            $endDate,
+            $this->radiusAccountingRepository
+        );
 
         $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
 
@@ -2183,7 +2301,9 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $realm = $event['realm'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+            $groupKey = $date->format(
+                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+            );
 
             if (!$realm) {
                 continue;
@@ -2243,7 +2363,11 @@ class AdminController extends AbstractController
      */
     private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+            $startDate,
+            $endDate,
+            $this->radiusAccountingRepository
+        );
 
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
         $realmTraffic = [];
@@ -2254,7 +2378,9 @@ class AdminController extends AbstractController
             $totalInput = $content['total_input'];
             $totalOutput = $content['total_output'];
             $date = $content['acctStartTime'];
-            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+            $groupKey = $date->format(
+                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+            );
 
             if (!isset($realmTraffic[$realm])) {
                 $realmTraffic[$realm] = [];
@@ -2289,7 +2415,11 @@ class AdminController extends AbstractController
      */
     private function fetchChartSessionAverageFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+            $startDate,
+            $endDate,
+            $this->radiusAccountingRepository
+        );
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
@@ -2299,7 +2429,9 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+            $groupKey = $date->format(
+                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+            );
 
             if (!isset($sessionAverageTimes[$groupKey])) {
                 $sessionAverageTimes[$groupKey] = ['totalTime' => 0, 'count' => 0];
@@ -2327,7 +2459,11 @@ class AdminController extends AbstractController
      */
     private function fetchChartSessionTotalFreeradius(?DateTime $startDate, ?DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+            $startDate,
+            $endDate,
+            $this->radiusAccountingRepository
+        );
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
@@ -2337,7 +2473,9 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format($granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d')));
+            $groupKey = $date->format(
+                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+            );
 
             if (!isset($sessionTotalTimes[$groupKey])) {
                 $sessionTotalTimes[$groupKey] = 0;
@@ -2363,7 +2501,11 @@ class AdminController extends AbstractController
      */
     private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+            $startDate,
+            $endDate,
+            $this->radiusAccountingRepository
+        );
 
         $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
@@ -2398,7 +2540,11 @@ class AdminController extends AbstractController
      */
     private function fetchChartApUsage(?DateTime $startDate, ?DateTime $endDate): array
     {
-        list($startDate, $endDate) = $this->determineDateRangeAndGranularity($startDate, $endDate, $this->radiusAccountingRepository);
+        list($startDate, $endDate) = $this->determineDateRangeAndGranularity(
+            $startDate,
+            $endDate,
+            $this->radiusAccountingRepository
+        );
 
         $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
 
@@ -2723,7 +2869,17 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array($settingName, ['WELCOME_TEXT', 'PAGE_TITLE', 'WELCOME_DESCRIPTION', 'ADDITIONAL_LABEL', 'CONTACT_EMAIL', 'CUSTOMER_LOGO_ENABLED'])) {
+                if (in_array(
+                    $settingName,
+                    [
+                        'WELCOME_TEXT',
+                        'PAGE_TITLE',
+                        'WELCOME_DESCRIPTION',
+                        'ADDITIONAL_LABEL',
+                        'CONTACT_EMAIL',
+                        'CUSTOMER_LOGO_ENABLED'
+                    ]
+                )) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 
@@ -2739,7 +2895,9 @@ class AdminController extends AbstractController
                         $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
                         // Set the destination directory based on the setting name
-                        $destinationDirectory = $this->getParameter('kernel.project_dir') . '/public/resources/uploaded/';
+                        $destinationDirectory = $this->getParameter(
+                                'kernel.project_dir'
+                            ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
@@ -2754,7 +2912,12 @@ class AdminController extends AbstractController
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];
-            $this->eventActions->saveEvent($currentUser, AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
 
             return $this->redirectToRoute('admin_dashboard_customize');
         }
