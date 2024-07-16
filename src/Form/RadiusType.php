@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RadiusType extends AbstractType
 {
@@ -65,6 +66,9 @@ class RadiusType extends AbstractType
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    if (isset($config['constraints'])) {
+                        $formFieldOptions['constraints'] = $config['constraints'];
+                    }
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
@@ -72,6 +76,7 @@ class RadiusType extends AbstractType
             $formFieldOptions = [
                 'attr' => [
                     'autocomplete' => 'off',
+                    'required' => true,
                 ],
                 'required' => false,
             ];

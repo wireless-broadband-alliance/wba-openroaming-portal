@@ -60,7 +60,8 @@
 		"symfony/yaml": "6.4.*",
 		"symfonycasts/verify-email-bundle": "^1.13",
 		"twig/extra-bundle": "^2.12|^3.0",
-		"twig/twig": "^2.12|^3.0"
+		"twig/twig": "^2.12|^3.0",
+		"ext-gnupg": "*"
 	},
 	"config": {
 		"allow-plugins": {

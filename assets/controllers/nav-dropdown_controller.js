@@ -9,16 +9,14 @@ export default class extends Controller {
 	}
 
 	toggle() {
-		this.containerTarget.classList.toggle('hidden')
-		this.buttonTarget.classList.toggle('bg-veryDarkButton');
-		this.buttonTarget.classList.toggle('text-white');
+		this.containerTarget.classList.toggle('hidden');
+		this.buttonTarget.classList.toggle('selected');
 	}
 
 	lost_focus() {
-
 		if (!this.containerTarget.matches(":hover")) {
 			this.containerTarget.classList.add('hidden');
-			this.buttonTarget.classList.remove('bg-veryDarkButton', 'text-white');
+			this.buttonTarget.classList.remove('selected');
 		}
 	}
 }

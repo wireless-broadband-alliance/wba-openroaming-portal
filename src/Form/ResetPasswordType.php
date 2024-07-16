@@ -3,11 +3,11 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 
 class ResetPasswordType extends AbstractType
 {
@@ -19,11 +19,19 @@ class ResetPasswordType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter New password',
                 ],
-                /*
                 'constraints' => [
-                    new NoSpecialCharacters(),
+                    new Length([
+                        'min' => 7,
+                        'minMessage' => ' This field cannot be shorter than {{ limit }} characters',
+                    ])
                 ],
-                */
+            ])
+            ->add('confirmPassword', PasswordType::class, [
+                'label' => 'Confirm New Password',
+                'mapped' => false,
+                'attr' => [
+                    'placeholder' => 'Enter the confirmation',
+                ],
             ]);
     }
 

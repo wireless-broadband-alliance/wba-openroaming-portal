@@ -2,11 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
+use App\Service\EventActions;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -36,6 +37,7 @@ class GoogleController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
+    private EventActions $eventActions;
 
     /**
      * @param ClientRegistry $clientRegistry
@@ -44,6 +46,7 @@ class GoogleController extends AbstractController
      * @param TokenStorageInterface $tokenStorage
      * @param RequestStack $requestStack
      * @param EventDispatcherInterface $eventDispatcher
+     * @param EventActions $eventActions
      */
     public function __construct(
         ClientRegistry              $clientRegistry,
@@ -52,13 +55,16 @@ class GoogleController extends AbstractController
         TokenStorageInterface       $tokenStorage,
         RequestStack                $requestStack,
         EventDispatcherInterface    $eventDispatcher,
-    ) {
+        EventActions                $eventActions,
+    )
+    {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -205,28 +211,22 @@ class GoogleController extends AbstractController
             ->setCreatedAt(new DateTime())
             ->setUuid($email);
 
-        $event_create = new Event();
-        $event_create->setUser($user);
-        $event_create->setEventName(AnalyticalEventType::USER_CREATION);
-        $event_create->setEventMetadata([
-            'platform' => PlatformMode::Live,
-        ]);
-        $event_create->setEventDatetime(new DateTime());
-
-        $event_verify = new Event();
-        $event_verify->setUser($user);
-        $event_verify->setEventName(AnalyticalEventType::USER_VERIFICATION);
-        $event_verify->setEventDatetime(new DateTime());
-
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
-        $this->entityManager->persist($event_create);
-        $this->entityManager->persist($event_verify);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
+        $event_metadata = [
+            'platform' => PlatformMode::Live,
+            'uuid' => $user->getUuid(),
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'registrationType' => UserProvider::GOOGLE_ACCOUNT,
+        ];
+
+        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $event_metadata);
+        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_VERIFICATION, new DateTime(), []);
 
         return $user;
     }

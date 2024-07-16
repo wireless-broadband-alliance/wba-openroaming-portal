@@ -50,8 +50,8 @@ class RegistrationFormSMSType extends AbstractType
                         'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
                     ]),
                     new Regex([
-                        'pattern' => '/^\+\d+$/',
-                        'message' => 'Phone number should contain only digits. (The number must be in international format, example: +351965432XXX)',
+                        'pattern' => '/^\+\d{1,3}\d{4,14}$/m',
+                        'message' => 'Phone number should contain only digits and must be in international format (e.g., +19700XXXXXX)',
                     ]),
                 ],
                 'attr' => [

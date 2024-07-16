@@ -5,6 +5,9 @@ namespace App\Command;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OSTypes;
+use App\Repository\EventRepository;
+use App\Service\EventActions;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,10 +26,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class ResetAdminCommand extends Command
 {
     private EntityManagerInterface $entityManager;
+    private EventActions $eventActions;
 
-    public function __construct(EntityManagerInterface $entityManager, private UserPasswordHasherInterface $userPasswordHashed)
+    public function __construct(EntityManagerInterface $entityManager, private UserPasswordHasherInterface $userPasswordHashed, EventActions $eventActions, private readonly EventRepository $eventRepository)
     {
         $this->entityManager = $entityManager;
+        $this->eventActions = $eventActions;
         parent::__construct();
     }
 
@@ -68,22 +73,15 @@ class ResetAdminCommand extends Command
             $admin = new User();
             $admin->setUuid('admin@example.com');
             $admin->setEmail('admin@example.com');
+            $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
             $admin->setRoles(['ROLE_ADMIN']);
             $admin->setIsVerified(true);
             $admin->setCreatedAt(new DateTime());
             $this->entityManager->persist($admin);
 
-            $event = new Event();
-            $event->setEventName(AnalyticalEventType::USER_CREATION);
-            $event->setEventDatetime(new DateTime());
-            $event->setUser($admin);
-            $this->entityManager->persist($event);
-
-            $event_2 = new Event();
-            $event_2->setEventName(AnalyticalEventType::USER_VERIFICATION);
-            $event_2->setEventDatetime(new DateTime());
-            $event_2->setUser($admin);
-            $this->entityManager->persist($event_2);
+            // Save the event Action using the service
+            $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION, new DateTime(), []);
+            $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION, new DateTime(), []);
         }
 
         // Set password
