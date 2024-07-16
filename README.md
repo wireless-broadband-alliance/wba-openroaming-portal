@@ -61,7 +61,7 @@ This section explains the basic concepts behind each portal component.
 
 - **List User** : View a list of all registered users in the system, can be filtered by all/only verified/ only banned
   and sorted by creation date, etc...
-- **Edit User Data** : Edit user information: ![Edit_User_Admin](assets/wba_screenshots/edit_user_admin.png)
+- **Edit User Data** : Edit user information.
 - **Search User**: Find users using various searching is email/uuid.
 - **Delete User**: Remove user accounts from the system, **not permanently**.
 - **Export Users Table** Can export all the user table content, this feature is disabled by default for legal and
