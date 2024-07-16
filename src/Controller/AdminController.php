@@ -1581,8 +1581,14 @@ class AdminController extends AbstractController
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
         // Get the submitted start and end dates from the query parameters
-        $startDateString = $request->query->get('startDate');
-        $endDateString = $request->query->get('endDate');
+        $startDateString = $request->request->get('startDate');
+        $endDateString = $request->request->get('endDate');
+
+        // Get the current date on the URL if the pagination of the AP Table was used
+        if ($startDateString == null || $endDateString == null) {
+            $startDateString = $request->query->get('startDate');
+            $endDateString = $request->query->get('endDate');
+        }
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
