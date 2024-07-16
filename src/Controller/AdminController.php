@@ -3065,11 +3065,13 @@ class AdminController extends AbstractController
             return $value->format('Y-m-d H:i:s');
         }
 
+        // Convert the value to a string
         $escapedValue = (string)$value;
-        $specialChars = ['=', '@', '-', '+'];
-        if (in_array($escapedValue[0] ?? '', $specialChars, true)) {
-            $escapedValue = "'" . $escapedValue;
-        }
+
+        // Remove specific characters
+        $charactersToRemove = ['=', '(', ')'];
+        $escapedValue = str_replace($charactersToRemove, '', $escapedValue);
+
         return $escapedValue;
     }
 
