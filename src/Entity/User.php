@@ -17,7 +17,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
 #[ORM\HasLifecycleCallbacks]
 class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthenticatedUserInterface
-
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -445,6 +444,4 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
         return $this;
     }
-
-
 }
