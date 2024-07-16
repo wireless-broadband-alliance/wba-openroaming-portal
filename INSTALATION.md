@@ -1,7 +1,7 @@
 # ⚙️ Installation Guide
-This guide has the only purpose of helping to set up the OpenRoaming Provisioning Portal, it provides step-by-step instructions for setting up the Portal.
+This guide is intended solely to assist in setting up the OpenRoaming Provisioning Portal. It provides step-by-step instructions for configuring the Portal.
 
-Please follow the instructions below, on the **root** folder of the project, to prepare it:
+Please follow the instructions below, starting from the **root** folder of the project, to prepare it:
 
 1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment
    variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
