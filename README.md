@@ -332,19 +332,6 @@ SAML, Google, and Register authentication.
 The main page provides a smooth and customized experience, allowing users to
 safely and quickly connect to Wi-Fi networks.
 
-### 1.2 Main Page Overview - Demo Mode
-
-![Main_Page_Demo_True](assets/wba_screenshots/main_page_demo_mode.png)
-
-The main page in platform mode (**Demo**) displays the platform's possibilities for users who want to
-browse the portal without creating individual accounts.
-The demo mode displays only the option for "demo login" on the
-page, providing a simplified appearance.
-To show the portal's key functions, SAML and other login methods are disabled,
-allowing users to explore the system's functionalities using a demo profile built based on the given email.
-
-Users are informed via a demo warning that the system is now in demo mode.
-
 ### 2. Verification Step
 
 ![Verification_Step](assets/wba_screenshots/verification_step.png)
@@ -414,11 +401,9 @@ primary features:
 
 ### 1. Admin Login
 
-![Admin_Login](assets/wba_screenshots/admin_login.png)
-
-The admin dashboard is only accessible after a secure login.
+The admin dashboard is only accessible after a secure login, accessible via https://<portalurl>/login
 To access the dashboard, administrators must provide their
-credentials **(admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and private
+credentials **(default is: admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and private
 entry point to control the platform.
 
 ### 2. Admin Page
