@@ -1529,23 +1529,15 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString);
+            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
         } else {
-            if ($startDateString === "") {
-                $startDate = (new DateTime())->modify('-1 week');
-            } else {
-                $startDate = (new DateTime())->modify('-1 week');
-            }
+            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString);
+            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
         } else {
-            if ($endDateString === "") {
-                $endDate = new DateTime();
-            } else {
-                $endDate = new DateTime();
-            }
+            $endDate = new DateTime(); // return current datetime
         }
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
@@ -1591,23 +1583,15 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString);
+            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
         } else {
-            if ($startDateString === "") {
-                $startDate = (new DateTime())->modify('-1 week');
-            } else {
-                $startDate = (new DateTime())->modify('-1 week');
-            }
+            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString);
+            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
         } else {
-            if ($endDateString === "") {
-                $endDate = new DateTime();
-            } else {
-                $endDate = new DateTime();
-            }
+            $endDate = new DateTime(); // return current datetime
         }
 
         // Fetch all the required data, graphics etc...
