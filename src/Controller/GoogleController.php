@@ -177,8 +177,12 @@ class GoogleController extends AbstractController
     /**
      * @throws Exception
      */
-    private function findOrCreateGoogleUser(string $googleUserId, string $email, ?string $firstname, ?string $lastname): ?User
-    {
+    private function findOrCreateGoogleUser(
+        string $googleUserId,
+        string $email,
+        ?string $firstname,
+        ?string $lastname
+    ): ?User {
         // Check if a user with the given Google user ID exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
         if ($existingUser) {
