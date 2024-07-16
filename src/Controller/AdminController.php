@@ -2939,19 +2939,19 @@ class AdminController extends AbstractController
     {
         switch (true) {
             case strpos($connectInfo, '802.11be') !== false:
-                return 'Wi-fi 7';
+                return 'Wi-Fi 7';
             case strpos($connectInfo, '802.11ax') !== false:
-                return 'Wi-fi 6';
+                return 'Wi-Fi 6';
             case strpos($connectInfo, '802.11ac') !== false:
-                return 'Wi-fi 5';
+                return 'Wi-Fi 5';
             case strpos($connectInfo, '802.11n') !== false:
-                return 'Wi-fi 4';
+                return 'Wi-Fi 4';
             case strpos($connectInfo, '802.11g') !== false:
-                return 'Wi-fi 3';
+                return 'Wi-Fi 3';
             case strpos($connectInfo, '802.11a') !== false:
-                return 'Wi-fi 2';
+                return 'Wi-Fi 2';
             case strpos($connectInfo, '802.11b') !== false:
-                return 'Wi-fi 1';
+                return 'Wi-Fi 1';
             default:
                 return 'Unknown';
         }
