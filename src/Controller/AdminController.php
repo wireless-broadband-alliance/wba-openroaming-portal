@@ -1691,6 +1691,7 @@ class AdminController extends AbstractController
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
+            'paginationApUsage' => true
         ]);
     }
 
