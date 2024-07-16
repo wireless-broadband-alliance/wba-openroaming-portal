@@ -127,9 +127,8 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
-## 📞 Contact and Support
-
-We're here to help if you have any problems installing or using the OpenRoaming Provisioning Portal. You request
-assistance by creating an issue in this repository.
+## 📞 Contact and Feedback
 
 Your suggestions and questions will help us improve the platform's usability and experience.
+
+For more information please contact: openroaming@wballiance.com
