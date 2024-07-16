@@ -23,7 +23,8 @@ class CapportController extends AbstractController
                 'captive' => false,
                 'user-portal-url' => $settingRepository->findOneBy(['name' => 'CAPPORT_PORTAL_URL'])->getValue(),
                 'venue-info-url' => $settingRepository->findOneBy(['name' => 'CAPPORT_VENUE_INFO_URL'])->getValue()
-            ], 200
+            ],
+            200
         );
     }
 }
