@@ -221,7 +221,15 @@ Below is an overview of the different variables and their functions:
 - `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
 
 These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
-`SENTRY_DSN`& `TRUSTED_PROXIES`.
+  `SENTRY_DSN`& `TRUSTED_PROXIES`.
+
+- `ENABLE_DELETE_USERS_UI=OFF`: Shows a button on the UI, to be able to remove users from the
+  portal.
+  This action doesn't remove users, only encrypts the data with PGP (Pretty Good Privacy).
+  
+Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc) and,
+  **DO NOT CREATE THE KEYS ON THE PRODUCTION SERVER**.
+
 
 ### Google Authenticator Credentials
 
