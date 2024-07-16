@@ -114,7 +114,7 @@ This page shows data related to the hybrid machine
 
 # ⚙️ Installation Guide
 
-Please click this link if you want to install this project autonomously. [Installation Guide](INSTALATION.md).
+Please click this link if you want to install this project autonomously: [Installation Guide](INSTALATION.md).
 
 # Portal Overview & Baseline Operation
 
@@ -140,6 +140,8 @@ When this mode is activated, **it's not required** to verify the user account se
 
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
+
+Follow this link for a portal user interface overview: [Portal GUI](PORTAL-GUI.md).
 
 ## 🔧 Environment Variables
 

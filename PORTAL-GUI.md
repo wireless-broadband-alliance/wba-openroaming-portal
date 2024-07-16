@@ -101,3 +101,4 @@ other essential data.
 And if needed, they can check all the statistics of the portal.
 Statistics like, profiles downloaded in which device, what method of authentication the users used, among others.
 
+For more information please contact: openroaming@wballiance.com
