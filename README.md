@@ -1,10 +1,14 @@
 # 🌐︎ FreeOpenRoaming Provisioning Portal
 
-OpenRoaming Provisioning Portal is a One-Stop Solution for Automated Device Authentication on Wireless
-Networks! 🚀
-The Portal improves the process of connecting to Wi-Fi in any area by creating a secure and
-unique profile for each user.
-With automatic device authentication, you can enjoy an easy, seamless and secure Wi-Fi experience.
+FreeOpenRoaming Provisioning Portal is a demonstration solution for device provisioning that allow authentication on wireless
+networks that support Passpoint and OpenRoaming! 🚀
+
+It is ind
+
+The Portal improves the process of connecting to Wi-Fi networks securely by creating a secure and
+unique profile for each user. 
+
+With automatic device authentication, users can enjoy an easy, seamless and secure Wi-Fi experience.
 
 ## Why it was created?
 
