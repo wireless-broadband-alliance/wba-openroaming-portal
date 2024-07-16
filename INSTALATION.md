@@ -1,5 +1,5 @@
 # ⚙️ Installation Guide
-This guide has the only purpose of helping to set up the FreeOpenRoaming Provisioning Portal.
+This guide has the only purpose of helping to set up the OpenRoaming Provisioning Portal, it provides step-by-step instructions for setting up the Portal.
 
 Please follow the instructions below, on the **root** folder of the project, to prepare it:
 
