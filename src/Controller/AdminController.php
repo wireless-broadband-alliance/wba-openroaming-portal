@@ -1577,19 +1577,19 @@ class AdminController extends AbstractController
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
-        // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        // Get the submitted start and end dates from the query parameters
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
+            $startDate = new DateTime($startDateString); // convert the value from string to a datetime type
         } else {
-            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
+            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if it doesn't exist
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
+            $endDate = new DateTime($endDateString); // convert the value from string to a datetime type
         } else {
             $endDate = new DateTime(); // return current datetime
         }
