@@ -9,7 +9,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
-use App\Enum\User_Verification_Status;
+use App\Enum\UserVerificationStatus;
 use App\Enum\UserProvider;
 use App\Form\AuthType;
 use App\Form\CapportType;
@@ -348,7 +348,7 @@ class AdminController extends AbstractController
         // Encrypt JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
-        if ($pgpEncryptedData[0] == User_Verification_Status::MISSING_PUBLIC_KEY_CONTENT) {
+        if ($pgpEncryptedData[0] == UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
                 'The public key is not set.
@@ -356,7 +356,7 @@ class AdminController extends AbstractController
             );
             return $this->redirectToRoute('admin_page');
         } else {
-            if ($pgpEncryptedData[0] == User_Verification_Status::EMPTY_PUBLIC_KEY_CONTENT) {
+            if ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
                 $this->addFlash(
                     'error_admin',
                     'The public key is empty.
