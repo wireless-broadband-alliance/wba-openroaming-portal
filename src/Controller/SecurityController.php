@@ -59,7 +59,7 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('admin_page');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
-            if ($platformMode === PlatformMode::Demo) {
+            if ($platformMode === PlatformMode::DEMO) {
                 return $this->redirectToRoute('saml_logout');
             }
             return $this->redirectToRoute('app_landing');

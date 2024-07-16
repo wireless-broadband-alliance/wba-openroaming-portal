@@ -221,7 +221,7 @@ class GoogleController extends AbstractController
         $this->entityManager->flush();
 
         $event_metadata = [
-            'platform' => PlatformMode::Live,
+            'platform' => PlatformMode::LIVE,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
             'registrationType' => UserProvider::GOOGLE_ACCOUNT,

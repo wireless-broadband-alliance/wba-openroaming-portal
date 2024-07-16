@@ -153,7 +153,7 @@ class SiteController extends AbstractController
 
                         // Defines the Event to the table
                         $eventMetadata = [
-                            'platform' => PlatformMode::Demo,
+                            'platform' => PlatformMode::DEMO,
                             'uuid' => $user->getUuid(),
                             'ip' => $_SERVER['REMOTE_ADDR'],
                             'registrationType' => UserProvider::EMAIL,
@@ -290,7 +290,7 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $eventMetaData = [
-                'platform' => PlatformMode::Live,
+                'platform' => PlatformMode::LIVE,
                 'uuid' => $user->getUuid(),
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'Old data' => [
@@ -346,7 +346,7 @@ class SiteController extends AbstractController
             $em->flush();
 
             $eventMetaData = [
-                'platform' => PlatformMode::Live,
+                'platform' => PlatformMode::LIVE,
                 'uuid' => $user->getUuid(),
                 'ip' => $_SERVER['REMOTE_ADDR'],
             ];
@@ -422,7 +422,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventDatetime(new DateTime());
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                         $latestEvent->setEventMetadata([
-                            'platform' => PlatformMode::Live,
+                            'platform' => PlatformMode::LIVE,
                             'ip' => $_SERVER['REMOTE_ADDR'],
                             'uuid' => $user->getUuid(),
                         ]);
@@ -541,7 +541,7 @@ class SiteController extends AbstractController
                             $latestEvent->setEventDatetime(new DateTime());
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEvent->setEventMetadata([
-                                'platform' => PlatformMode::Live,
+                                'platform' => PlatformMode::LIVE,
                                 'ip' => $_SERVER['REMOTE_ADDR'],
                                 'uuid' => $user->getUuid(),
                             ]);
@@ -690,7 +690,7 @@ class SiteController extends AbstractController
             $entityManager->flush();
 
             $eventMetadata = [
-                'platform' => PlatformMode::Live,
+                'platform' => PlatformMode::LIVE,
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $user->getUuid(),
             ];
@@ -836,7 +836,7 @@ class SiteController extends AbstractController
                     $latestEvent->setEventDatetime(new DateTime());
                     $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
                     $latestEvent->setEventMetadata([
-                        'platform' => PlatformMode::Live,
+                        'platform' => PlatformMode::LIVE,
                         'uuid' => $currentUser->getEmail(),
                         'ip' => $_SERVER['REMOTE_ADDR'],
                     ]);
@@ -926,7 +926,7 @@ class SiteController extends AbstractController
             $userRepository->save($currentUser, true);
 
             $eventMetadata = [
-                'platform' => PlatformMode::Live,
+                'platform' => PlatformMode::LIVE,
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid(),
             ];

@@ -150,7 +150,7 @@ class SendSMS
                     $attempts = 1;
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'platform' => PlatformMode::Live,
+                        'platform' => PlatformMode::LIVE,
                         'ip' => $_SERVER['REMOTE_ADDR'],
                         'uuid' => $user->getUuid(),
                     ];

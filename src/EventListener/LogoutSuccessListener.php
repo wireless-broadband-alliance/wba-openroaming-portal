@@ -55,9 +55,9 @@ class LogoutSuccessListener implements EventSubscriberInterface
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         if (!$data['PLATFORM_MODE']['value']) {
-            $platformMode = PlatformMode::Live;
+            $platformMode = PlatformMode::LIVE;
         } else {
-            $platformMode = PlatformMode::Demo;
+            $platformMode = PlatformMode::DEMO;
         }
 
         if ($user instanceof User) {

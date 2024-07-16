@@ -1139,7 +1139,7 @@ class AdminController extends AbstractController
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::Live) ?
+            $emailVerification = ($platformMode === PlatformMode::LIVE) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
