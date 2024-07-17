@@ -33,8 +33,7 @@ These are some of the most important tools used on the development of this proje
 - Knowledge about Linux OS (required to setup the project)
 - Radius DB and a stack IDP prepared to use the portal
 - Docker (required for running the application)
-- Docker-compose (required for managing multiple containers)
-- Node Js 16 or higher (required for building front-end assets)
+- Docker compose (responsible for managing multiple containers)
 - Git (optional, if the user prefers to clone the repository)
 
 ### How to get the Project
