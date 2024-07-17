@@ -537,15 +537,18 @@ class SiteController extends AbstractController
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;
+                $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+                    ? $latestEventMetadata['verificationAttempts']
+                    : 0;
 
-                if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+                if (!$latestEvent || $verificationAttempts < 3) {
                     // Check if enough time has passed since the last attempt
                     if (
                         !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
                             $lastVerificationCodeTime->add($minInterval) < $currentTime)
                     ) {
                         // Increment the attempt count
-                        $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+                        $attempts = $verificationAttempts + 1;
 
                         // Save event with attempt count and current time
                         if (!$latestEvent) {
@@ -561,8 +564,8 @@ class SiteController extends AbstractController
                         }
 
                         $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
-                        $latestEvent->setVerificationAttempts($attempts);
 
                         $user->setForgotPasswordRequest(true);
                         $this->eventRepository->save($latestEvent, true);
@@ -607,7 +610,7 @@ class SiteController extends AbstractController
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
                         }
-                        $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                        $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
                             $user->getPhoneNumber(),
