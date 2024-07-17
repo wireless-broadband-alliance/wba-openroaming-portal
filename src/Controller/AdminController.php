@@ -1530,17 +1530,17 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
+            $startDate = new DateTime($startDateString);
         } else {
             $startDate = (new DateTime())->modify(
                 '-1 week'
-            ); // return current datetime minus 1 week if he doesn't exist
+            );
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
+            $endDate = new DateTime($endDateString);
         } else {
-            $endDate = new DateTime(); // return current datetime
+            $endDate = new DateTime();
         }
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
@@ -1592,17 +1592,17 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString); // convert the value from string to a datetime type
+            $startDate = new DateTime($startDateString);
         } else {
             $startDate = (new DateTime())->modify(
                 '-1 week'
-            ); // return current datetime minus 1 week if it doesn't exist
+            );
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString); // convert the value from string to a datetime type
+            $endDate = new DateTime($endDateString);
         } else {
-            $endDate = new DateTime(); // return current datetime
+            $endDate = new DateTime();
         }
 
         // Fetch all the required data, graphics etc...
@@ -3065,7 +3065,6 @@ class AdminController extends AbstractController
             return $value->format('Y-m-d H:i:s');
         }
 
-        // Convert the value to a string
         $escapedValue = (string)$value;
 
         // Remove specific characters
