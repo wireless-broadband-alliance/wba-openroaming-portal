@@ -2555,7 +2555,7 @@ class AdminController extends AbstractController
         }
 
         // Sort $result array BY DESC
-        usort($result, function($a, $b) {
+        usort($result, function ($a, $b) {
             return $b['count'] <=> $a['count'];
         });
 
