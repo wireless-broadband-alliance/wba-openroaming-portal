@@ -2,7 +2,6 @@
 
 namespace App\DataFixtures;
 
-
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Service\EventActions;
@@ -17,9 +16,8 @@ class AdminUserFixture extends Fixture
 
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHashed,
-        EventActions                                 $eventActions
-    )
-    {
+        EventActions $eventActions
+    ) {
         $this->eventActions = $eventActions;
     }
 
