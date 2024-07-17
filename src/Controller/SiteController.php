@@ -838,12 +838,20 @@ class SiteController extends AbstractController
             $currentTime = new DateTime();
 
             // Check if enough time has passed since the last attempt
+            $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+            $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                : null;
+            $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+                ? $latestEventMetadata['verificationAttempts']
+                : 0;
+
             if (
-                !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+                !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                    $lastVerificationCodeTime->add($minInterval) < $currentTime)
             ) {
                 // Increment the attempt count
-                $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+                $attempts = $verificationAttempts + 1;
 
                 $email = $this->createEmailCode($currentUser->getEmail());
                 $mailer->send($email);
@@ -854,15 +862,17 @@ class SiteController extends AbstractController
                     $latestEvent->setUser($currentUser);
                     $latestEvent->setEventDatetime(new DateTime());
                     $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
-                    $latestEvent->setEventMetadata([
+                    $latestEventMetadata = [
                         'platform' => PlatformMode::LIVE,
                         'uuid' => $currentUser->getEmail(),
                         'ip' => $_SERVER['REMOTE_ADDR'],
-                    ]);
+                    ];
                 }
 
-                $latestEvent->setVerificationAttempts($attempts);
-                $latestEvent->setLastVerificationCodeTime($currentTime);
+                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                $latestEventMetadata['verificationAttempts'] = $attempts;
+                $latestEvent->setEventMetadata($latestEventMetadata);
+
                 $eventRepository->save($latestEvent, true);
 
                 $message = sprintf('We have sent you a new code to: %s.', $currentUser->getEmail());
