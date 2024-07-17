@@ -1000,7 +1000,7 @@ class SiteController extends AbstractController
 
         // Checks if the user has a "forgot_password_request", if yes, return to password reset form
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-            $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+            $this->addFlash('error', 'You need to confirm the new password before downloading a profile!');
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
@@ -1008,12 +1008,17 @@ class SiteController extends AbstractController
             $result = $sendSmsService->regenerateSmsCode($currentUser);
 
             if ($result) {
-                // If he gets true from the service, show the attempts left with a message
+                // If the service returns true, show the attempts left with a message
                 $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
 
                 // Check if $latestEvent to avoid null conflicts
                 if ($latestEvent) {
-                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                    $latestEventMetadata = $latestEvent->getEventMetadata();
+                    $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+                        ? $latestEventMetadata['verificationAttempts']
+                        : 0;
+                    $attemptsLeft = 3 - $verificationAttempts;
+
                     $message = sprintf(
                         'We have sent you a new code to: %s. You have %d attempt(s) left.',
                         $currentUser->getPhoneNumber(),
