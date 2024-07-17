@@ -13,7 +13,6 @@ use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-
 class LogoutSuccessListener implements EventSubscriberInterface
 {
     private GetSettings $getSettings;
@@ -28,12 +27,11 @@ class LogoutSuccessListener implements EventSubscriberInterface
      * @param EventActions $eventActions
      */
     public function __construct(
-        GetSettings       $getSettings,
-        UserRepository    $userRepository,
+        GetSettings $getSettings,
+        UserRepository $userRepository,
         SettingRepository $settingRepository,
-        EventActions      $eventActions,
-    )
-    {
+        EventActions $eventActions,
+    ) {
         $this->getSettings = $getSettings;
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
@@ -69,6 +67,5 @@ class LogoutSuccessListener implements EventSubscriberInterface
             ];
             $this->eventActions->saveEvent($user, AnalyticalEventType::LOGOUT_REQUEST, new DateTime(), $eventMetadata);
         }
-
     }
 }
