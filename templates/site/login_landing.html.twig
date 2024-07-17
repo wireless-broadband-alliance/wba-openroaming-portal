@@ -72,7 +72,7 @@
         <button type="submit" class="w-[220px] btn-primary">
             Log in
         </button>
-        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::Demo') %}
+        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO') %}
             <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
                 Choose Another
             </a>
@@ -81,7 +81,7 @@
 
     {# Divider #}
     <div class="my-[25px] divider"></div>
-    {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::Demo') %}
+    {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO') %}
 
 
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
