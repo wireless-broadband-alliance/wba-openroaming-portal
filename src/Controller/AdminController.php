@@ -195,7 +195,8 @@ class AdminController extends AbstractController
             'activeOrder' => $order,
             'count' => $count,
             'export_users' => $exportUsers,
-            'delete_users' => $deleteUsers
+            'delete_users' => $deleteUsers,
+            'ApUsage' => null
         ]);
     }
 
@@ -1529,15 +1530,17 @@ class AdminController extends AbstractController
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
+            $startDate = new DateTime($startDateString);
         } else {
-            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
+            $startDate = (new DateTime())->modify(
+                '-1 week'
+            );
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
+            $endDate = new DateTime($endDateString);
         } else {
-            $endDate = new DateTime(); // return current datetime
+            $endDate = new DateTime();
         }
 
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
@@ -1577,21 +1580,29 @@ class AdminController extends AbstractController
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
-        // Get the submitted start and end dates from the form
+        // Get the submitted start and end dates from the query parameters
         $startDateString = $request->request->get('startDate');
         $endDateString = $request->request->get('endDate');
 
+        // Get the current date on the URL if the pagination of the AP Table was used
+        if ($startDateString == null || $endDateString == null) {
+            $startDateString = $request->query->get('startDate');
+            $endDateString = $request->query->get('endDate');
+        }
+
         // Convert the date strings to DateTime objects
         if ($startDateString) {
-            $startDate = new DateTime($startDateString); // convert the value from string to a datatime type
+            $startDate = new DateTime($startDateString);
         } else {
-            $startDate = (new DateTime())->modify('-1 week'); // return current datetime minus 1 week if he doesn't exist
+            $startDate = (new DateTime())->modify(
+                '-1 week'
+            );
         }
 
         if ($endDateString) {
-            $endDate = new DateTime($endDateString); // convert the value from string to a datatime type
+            $endDate = new DateTime($endDateString);
         } else {
-            $endDate = new DateTime(); // return current datetime
+            $endDate = new DateTime();
         }
 
         // Fetch all the required data, graphics etc...
@@ -1691,6 +1702,7 @@ class AdminController extends AbstractController
             'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
             'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
+            'paginationApUsage' => true
         ]);
     }
 
@@ -2939,19 +2951,19 @@ class AdminController extends AbstractController
     {
         switch (true) {
             case strpos($connectInfo, '802.11be') !== false:
-                return 'Wi-fi 7';
+                return 'Wi-Fi 7';
             case strpos($connectInfo, '802.11ax') !== false:
-                return 'Wi-fi 6';
+                return 'Wi-Fi 6';
             case strpos($connectInfo, '802.11ac') !== false:
-                return 'Wi-fi 5';
+                return 'Wi-Fi 5';
             case strpos($connectInfo, '802.11n') !== false:
-                return 'Wi-fi 4';
+                return 'Wi-Fi 4';
             case strpos($connectInfo, '802.11g') !== false:
-                return 'Wi-fi 3';
+                return 'Wi-Fi 3';
             case strpos($connectInfo, '802.11a') !== false:
-                return 'Wi-fi 2';
+                return 'Wi-Fi 2';
             case strpos($connectInfo, '802.11b') !== false:
-                return 'Wi-fi 1';
+                return 'Wi-Fi 1';
             default:
                 return 'Unknown';
         }
@@ -3054,10 +3066,11 @@ class AdminController extends AbstractController
         }
 
         $escapedValue = (string)$value;
-        $specialChars = ['=', '@', '-', '+'];
-        if (in_array($escapedValue[0] ?? '', $specialChars, true)) {
-            $escapedValue = "'" . $escapedValue;
-        }
+
+        // Remove specific characters
+        $charactersToRemove = ['=', '(', ')'];
+        $escapedValue = str_replace($charactersToRemove, '', $escapedValue);
+
         return $escapedValue;
     }
 
