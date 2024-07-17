@@ -1,67 +1,66 @@
-# 🌐︎ FreeOpenRoaming Provisioning Portal
+# 🌐︎ OpenRoaming Provisioning Portal
 
-OpenRoaming Provisioning Portal is a One-Stop Solution for Automated Device Authentication on Wireless
-Networks! 🚀
-The Portal improves the process of connecting to Wi-Fi in any area by creating a secure and
-unique profile for each user.
-With automatic device authentication, you can enjoy an easy, seamless and secure Wi-Fi experience.
+Welcome to the OpenRoaming Provisioning Portal! This repository provides a **reference implementation designed to baseline the industry** on the necessary components for developing an enabler component of OpenRoaming.
 
 ## Why it was created?
 
-This Portal was created with the objective of **simplifying Wi-Fi connectivity** and improving security for users in a
-variety of contexts. We think that **everyone should have access to secure Wi-Fi** without having to log in several
-times or use unsecure/open networks. Our goal is to make Wi-Fi connectivity for people and enterprises easier, quicker,
-and more user-friendly.
+The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users across various environments.
+
+The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
 ## How it works?
 
-By design, OpenRoaming is an open standard that has been developed to **enable globally,
-secure, and automatic Wi-Fi connectivity**.
+OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes digital certificates and secure authentication mechanisms to **ensure a seamless and secure connection experience**. This technology allows users to quickly switch between Wi-Fi networks—such as public hotspots, venues, residencies, corporate networks, and other places—without delays or multiple logins.
 
-Users are able to connect to Wi-Fi networks using OpenRoaming without being ask for login credentials.
-Instead, makes use
-of **digital certificates and secure authentication mechanisms**.
-This means that users can **switch quickly between
-Wi-Fi networks, such as public hotspots, corporate networks, and other places, without delays or several logins**.
+Each user is provided with a unique and secure profile that caters to their specific needs and preferences. The OpenRoaming Provisioning Portal simplifies the setup and configuration process for network administrators, acting as a key enabler for OpenRoaming technology.
 
-The technology ensures that each user is **provided with a unique and secure profile** that caters to their specific
-needs and preferences.
+For more information about OpenRoaming Technology please visit: https://openroaming.org
 
-The OpenRoaming Provisioning Portal acts as a **key enabler for OpenRoaming technology by simplifying the setup and
-configuration process** for network administrators.
+## 🛠️ Tools Used
 
-You are taking an **important step** toward **improving Wi-Fi connection** for your users by providing a safe and *
-*user-friendly experience for everybody** by utilizing the OpenRoaming Provisioning Portal.
+These are some of the most important tools used on the development of this project:
 
-### Benefits
+- **PHP**: Open source general-purpose scripting language that is especially suited for web development.
+- **Symfony Framework**: The core of the portal, the Symfony framework provides a solid and scalable base for web
+  applications.
+- **Twig Templating Engine**: Generates consistent, responsive views by separating logic.
+- **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
+- **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
-- **Seamless Wi-Fi Connectivity**: Say goodbye to manual login problems and connect to Wi-Fi networks with simplicity.
-  📶
-- **Improved Security**: Have peace of mind knowing that your personal information is safe with secure profile
-  encryption. 🔒
-- **Personalization**: Each user gets a unique profile tailored to their specific needs and preferences. 🎯
-- **Scalability**: Because the portal is built for a high number of users and devices, it is excellent for both local
-  and large-scale installations. 🌟
+### Prerequisites:
 
-### Use Cases
+- Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
+- Knowledge about Linux OS (required to setup the project)
+- Radius DB and a stack IDP prepared to use the portal
+- Docker (required for running the application)
+- Docker compose (responsible for managing multiple containers)
+- Git (optional, if the user prefers to clone the repository)
 
-- **Public Wi-Fi Hotspots**: Simplify the login method for users accessing Wi-Fi in coffee shops, airports, hotels, and
-  other public locations. ☕️✈
-- **Corporate Networks**: Facilitate employee onboarding and Wi-Fi access in workplaces while maintaining secure
-  connectivity for all devices. 💼
-- **Events and Conferences**: Provide seamless Wi-Fi access to attendees with personalized profiles, enhancing the
-  overall event experience. 🎉
+### How to get the Project
 
-Whether you're our solution aims to exceed your expectations and make Wi-Fi connectivity better. Let's embark on this
-journey together and redefine how we connect wirelessly! 🚀
+There are two options to retrieve the project:
+
+1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains
+   only the required components to run the OpenRoaming Provisioning Portal,
+   including `.env.sample`, `docker-compose.yml`, and other necessary files.
+
+
+2. **Clone the Repository**: If the user is familiar with Git and want to access the complete source code, can clone the
+   repository using the following command:
+
+```bash
+- git clone <repository-url>
+```
 
 ## 📖 Features
 
+This section explains the basic concepts behind each portal component.
+
 ### User Management:
 
-- **List User** : View a list of all registered users in the system, can be filtered by all/only verified/ only banned
-  and sorted by creation date, etc...
-- **Edit User Data** : Edit user information: ![Edit_User_Admin](assets/wba_screenshots/edit_user_admin.png)
+- **List User** : View a list of all registered users in the system, can be filtered by all/only verified/only banned
+  and sorted by creation date, among others.
+- **Edit User Data** : Edit user information.
 - **Search User**: Find users using various searching is email/uuid.
 - **Delete User**: Remove user accounts from the system, **not permanently**.
 - **Export Users Table** Can export all the user table content, this feature is disabled by default for legal and
@@ -112,59 +111,15 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
-## 🛠️ Tools Used
-
-These are some of the most important tools used on the development of this project.
-
-- **PHP**: Open source general-purpose scripting language that is especially suited for web development.
-- **Symfony Framework**: The core of the portal, the Symfony framework provides a solid and scalable base for web
-  applications.
-- **Twig Templating Engine**: Generates consistent, responsive views by separating logic.
-- **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
-- **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
-
-## Getting Started - Setup Guide
-
-In this guide, we'll lead you through the setup of the OpenRoaming Provisioning Portal step by step.
-
-To understand how it works, you'll get basic knowledge behind each stage. You will possess a fully working automatic
-device authentication for your wireless networks by the end of this guide. Let's get started! 🚀
-
-### Prerequisites:
-
-- Ubuntu 22.04 LTS
-- Knowledge about Linux OS (required to setup the project)
-- Radius db and a stack IDP prepared to use the portal
-- Docker (required for running the application)
-- Docker-compose (required for managing multiple containers)
-- Node Js 16 or higher (required for building front-end assets)
-- Git (optional, if you prefer to clone the repository)
-
-### How to get the Project
-
-You have two options to get the project:
-
-1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains
-   only the required components to run the OpenRoaming Provisioning Portal,
-   including `.env.sample`, `docker-compose.yml`, and other necessary files.
-
-
-2. **Clone the Repository**: If you're familiar with Git and want to access the complete source code, you can clone the
-   repository using the following command:
-
-```bash
-- git clone <repository-url>
-```
-
 # ⚙️ Installation Guide
 
-Please click this link if you want to install this project on your own. [Installation Guide](INSTALATION.md).
+Follow this link for more information on installing this project: [Installation Guide](INSTALATION.md).
 
-# How it Looks and How it Works?
+# Portal Overview & Baseline Operation
 
-Now we will show how the project looks, and give you some base information about how it works.
+The objective is for the user to get familiarized with the project and its baseline features.
 
-## Platform Mode Demo or Live
+## Platform Mode (Demo or Live)
 
 The project provides two modes: Platform mode set to **DEMO** or **LIVE**, each serving to different needs.
 
@@ -173,17 +128,19 @@ The project provides two modes: Platform mode set to **DEMO** or **LIVE**, each 
   This allows users to explore and test the portal's functionality without the need to create a user account. In demo
   mode, only "demo login" is displayed, and SAML and other login methods are disabled, regardless of other settings. A
   demo warning is also displayed, indicating that the system is in demo mode. **PLEASE DO NOT USE THIS IN PRODUCTION.**
-  This mode can't be used because of legal specification in this type of environment.
+  This mode can't be used because externally due to legal implications in this type of environment.
 
 When this mode is activated, **it's not required** to verify the user account several times.
 
-- **Platform Mode (Live)**: On the other hand, when demo mode is set to FALSE, profiles are generated based on
+- **Platform Mode (Live)**: When platform mode is set to LIVE, profiles are generated based on
   individual user accounts inside the project. This offers a completely customized and secure Wi-Fi experience adapted
   to the interests and needs of each user. Users can set up accounts in production mode and use all available login
   methods, including SAML and Google authentication.
 
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
+
+Follow this link for a portal user interface overview: [Portal GUI](PORTALGUI.md).
 
 ## 🔧 Environment Variables
 
@@ -212,12 +169,19 @@ Below is an overview of the different variables and their functions:
 - `SENDER_NAME`: Entity sender name
 - `BUDGETSMS_API_URL`: This env manages the budget SMS link of the API, is not necessary to change this env.
 - `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default
-  for
-  legal and security reasons.
+  for legal and security reasons.
 - `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
 
 These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
-`SENTRY_DSN`& `TRUSTED_PROXIES`.
+  `SENTRY_DSN`& `TRUSTED_PROXIES`.
+
+- `ENABLE_DELETE_USERS_UI=OFF`: Shows a button on the UI, to be able to remove users from the
+  portal.
+  This action doesn't remove users, only encrypts the data with PGP (Pretty Good Privacy).
+  
+Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc) 
+  **do not create keys on the production server**.
+
 
 ### Google Authenticator Credentials
 
@@ -351,120 +315,4 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
-# How the Platform Works
-
-## Main Page
-
-### 1. Main Page Overview - Live Mode
-
-![Main_Page_Demo_False](assets/wba_screenshots/main_page_live_mode.png)
-
-The main page in platform mode (**Live**) provides a user-friendly interface for users with
-individual accounts.
-The page welcomes visitors with a customisable banner that includes the company logo, welcome text,
-and a brief summary of the portal's features.
-
-Depending on the settings made by the administrator, users can log in using multiple authentication methods such as
-SAML, Google, and Register authentication.
-The main page provides a smooth and customized experience, allowing users to
-safely and quickly connect to Wi-Fi networks.
-
-### 1.2 Main Page Overview - Demo Mode
-
-![Main_Page_Demo_True](assets/wba_screenshots/main_page_demo_mode.png)
-
-The main page in platform mode (**Demo**) displays the platform's possibilities for users who want to
-browse the portal without creating individual accounts.
-The demo mode displays only the option for "demo login" on the
-page, providing a simplified appearance.
-To show the portal's key functions, SAML and other login methods are disabled,
-allowing users to explore the system's functionalities using a demo profile built based on the given email.
-
-Users are informed via a demo warning that the system is now in demo mode.
-
-### 2. Verification Step
-
-![Verification_Step](assets/wba_screenshots/verification_step.png)
-
-The platform begins the verification procedure to validate the user after registration or when in demo mode. The
-verification system sends an email or sms to the user's provided email or phone number address.
-This procedure contains a unique verification link
-or code that the user must click to complete the verification process.
-
-The verification phase is a critical to validate the user's identity and makes sure their email or phone number
-address is valid on the portal.
-The user validates ownership of the email account and shows permission to use the OpenRoaming
-Provisioning Portal by clicking the verification link or by submitting the code given on the email. This procedure
-improves the platform's security by preventing unwanted access.
-
-### 3. After Verification
-
-![After_Verification](assets/wba_screenshots/after_verification.png)
-
-After successfully completing the verification process, the user will be directed to this page.
-The actions taken during the verification process depend on the mode in
-which the user created their account.
-
-#### 3.1 Live Mode
-
-If the user created an account in live mode (platform mode set to **Live**), they will receive an email with
-essential account information. The email includes a link to return to the verified portal, a verification code, and a
-randomly generated password. With this information, the user can log in securely to the OpenRoaming Provisioning Portal.
-
-#### 3.2 Demo Mode
-
-Users who registered an account in demo mode (platform mode set to **Demo**) can access the verified portal instantly.
-Because
-demo mode allows users to explore the site without registering individual accounts, the verification procedure makes
-sure that the user's session is safe.
-Based on the submitted email, the system creates a demo profile that grants access
-to the portal's features while keeping user data secure.
-
-### 4. Download Profile
-
-At the final stage of the process, users have the option to download a profile customized for their specific operating
-system.
-The OpenRoaming Provisioning Portal has intelligent auto-detection that identifies the type of device being
-used.
-
-When the user clicks the "Download" button, the portal generates a profile with information based on the user's account
-information.
-This profile is designed to improve the Wi-Fi experience by providing smooth connectivity and increased
-security.
-
-The downloaded profile includes all the essential settings and variables to make connecting to Wi-Fi networks easier.
-The OpenRoaming Provisioning Portal improves Wi-Fi connectivity by giving a user-specific profile, making it easier and
-more convenient for consumers and companies.
-
-With this final step, users can effortlessly connect to Wi-Fi networks in various contexts, whether it's in public
-hotspots, corporate networks, or events and conferences, experiencing the full benefits of the OpenRoaming Provisioning
-Portal.
-Say goodbye to manual login problems and enjoy a seamless, secure, and personalized Wi-Fi experience! 📶🔒🌐
-
-## Admin Dashboard Overview
-
-The OpenRoaming Provisioning Portal also has an easy and intuitive admin interface, allowing administrators to easily
-administer and customize the platform.
-The admin dashboard includes a number of features and tools that help simplify
-the Wi-Fi provisioning process and guarantee that it runs smoothly. Here's an overview of the admin dashboard and its
-primary features:
-
-### 1. Admin Login
-
-![Admin_Login](assets/wba_screenshots/admin_login.png)
-
-The admin dashboard is only accessible after a secure login.
-To access the dashboard, administrators must provide their
-credentials **(admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and private
-entry point to control the platform.
-
-### 2. Admin Page
-
-![Admin_Page](assets/wba_screenshots/admin_page.png)
-
-Administrators are presented with the dashboard overview after successfully logging in.
-Administrators may quickly
-access/search information about the users on the portal, the system customization, the current applied settings and
-other essential data.
-And if needed, they can check all the statistics of the portal.
-Statistics like, profiles downloaded in which device, what method of authentication the users used, etc...
+For more information please contact: openroaming@wballiance.com

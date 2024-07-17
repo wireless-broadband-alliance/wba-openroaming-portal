@@ -8,7 +8,7 @@ services:
       - .env
     volumes:
       - ./:/var/www/openroaming
-      - ./pgp_public_keys/:/var/www/openroaming/pgp_public_keys/
+      - ./pgp_public_key/:/var/www/openroaming/pgp_public_key/
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
