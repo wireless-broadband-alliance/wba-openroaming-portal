@@ -9,7 +9,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
-use App\Enum\User_Verification_Status;
+use App\Enum\UserVerificationStatus;
 use App\Enum\UserProvider;
 use App\Form\AuthType;
 use App\Form\CapportType;
@@ -55,7 +55,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
-
 
 class AdminController extends AbstractController
 {
@@ -350,7 +349,7 @@ class AdminController extends AbstractController
         // Encrypt JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
-        if ($pgpEncryptedData[0] == User_Verification_Status::MISSING_PUBLIC_KEY_CONTENT) {
+        if ($pgpEncryptedData[0] == UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
                 'The public key is not set.
@@ -358,7 +357,7 @@ class AdminController extends AbstractController
             );
             return $this->redirectToRoute('admin_page');
         } else {
-            if ($pgpEncryptedData[0] == User_Verification_Status::EMPTY_PUBLIC_KEY_CONTENT) {
+            if ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
                 $this->addFlash(
                     'error_admin',
                     'The public key is empty.
@@ -379,7 +378,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         $event->setEventMetadata([
             'deletedBy' => $currentUser->getUuid(),
-            'isIP' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $_SERVER['REMOTE_ADDR'],
         ]);
 
         $user->setUuid($user->getId());
@@ -470,7 +469,7 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
             }
 
-            // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value on the db
+            // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 // Check if the admin is trying to ban himself
                 if ($currentUser->getId() === $user->getId()) {
@@ -705,7 +704,7 @@ class AdminController extends AbstractController
                 $event->setEventDatetime(new DateTime());
                 $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
                 $event->setEventMetadata([
-                    'isIP' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $_SERVER['REMOTE_ADDR'],
                     'uuid' => $currentUser->getUuid()
                 ]);
 
@@ -940,7 +939,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_terms(
+    public function settingsTerms(
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings
@@ -1022,7 +1021,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_radius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
         // Get the current logged-in user (admin)
@@ -1114,7 +1113,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_status(
+    public function settingsStatus(
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings
@@ -1141,7 +1140,8 @@ class AdminController extends AbstractController
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::Live) ? EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
+            $emailVerification = ($platformMode === PlatformMode::LIVE) ?
+                EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {
@@ -1164,7 +1164,7 @@ class AdminController extends AbstractController
             $em->flush();
 
             $eventMetadata = [
-                'isIP' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $currentUser->getUuid()
             ];
             $this->eventActions->saveEvent(
@@ -1196,7 +1196,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_LDAP(
+    public function settingsLDAP(
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings
@@ -1274,7 +1274,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_auth(
+    public function settingsAuths(
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings
@@ -1366,7 +1366,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_capport(
+    public function settingsCAPPORT(
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings
@@ -1440,7 +1440,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settings_sms(
+    public function settingsSMS(
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings
@@ -2270,7 +2270,10 @@ class AdminController extends AbstractController
             $timestamp = $eventDateTime->format('Y-m-d H:i:s');
 
             // Track unique timestamps within the period
-            if (!isset($authsCounts['Accepted'][$period][$timestamp]) && !isset($authsCounts['Rejected'][$period][$timestamp])) {
+            if (
+                !isset($authsCounts['Accepted'][$period][$timestamp]) &&
+                !isset($authsCounts['Rejected'][$period][$timestamp])
+            ) {
                 $reply = $event->getReply();
                 if ($reply === 'Access-Accept') {
                     $authsCounts['Accepted'][$period][$timestamp] = true;
@@ -2314,7 +2317,9 @@ class AdminController extends AbstractController
             $realm = $event['realm'];
             $date = $event['acctStartTime'];
             $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+                $granularity === 'year' ? 'Y' :
+                    ($granularity === 'month' ? 'Y-m' :
+                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
             );
 
             if (!$realm) {
@@ -2391,7 +2396,9 @@ class AdminController extends AbstractController
             $totalOutput = $content['total_output'];
             $date = $content['acctStartTime'];
             $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+                $granularity === 'year' ? 'Y' :
+                    ($granularity === 'month' ? 'Y-m' :
+                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
             );
 
             if (!isset($realmTraffic[$realm])) {
@@ -2442,7 +2449,9 @@ class AdminController extends AbstractController
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
             $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+                $granularity === 'year' ? 'Y' :
+                    ($granularity === 'month' ? 'Y-m' :
+                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
             );
 
             if (!isset($sessionAverageTimes[$groupKey])) {
@@ -2486,7 +2495,9 @@ class AdminController extends AbstractController
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
             $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' : ($granularity === 'month' ? 'Y-m' : ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
+                $granularity === 'year' ? 'Y' :
+                    ($granularity === 'month' ? 'Y-m' :
+                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
             );
 
             if (!isset($sessionTotalTimes[$groupKey])) {
@@ -2881,17 +2892,19 @@ class AdminController extends AbstractController
                 $settingName = $setting->getName();
 
                 // Check if the setting is in the allowed settings for customization
-                if (in_array(
-                    $settingName,
-                    [
-                        'WELCOME_TEXT',
-                        'PAGE_TITLE',
-                        'WELCOME_DESCRIPTION',
-                        'ADDITIONAL_LABEL',
-                        'CONTACT_EMAIL',
-                        'CUSTOMER_LOGO_ENABLED'
-                    ]
-                )) {
+                if (
+                    in_array(
+                        $settingName,
+                        [
+                            'WELCOME_TEXT',
+                            'PAGE_TITLE',
+                            'WELCOME_DESCRIPTION',
+                            'ADDITIONAL_LABEL',
+                            'CONTACT_EMAIL',
+                            'CUSTOMER_LOGO_ENABLED'
+                        ]
+                    )
+                ) {
                     // Get the value from the submitted form data
                     $submittedValue = $submittedData[$settingName];
 
@@ -2908,13 +2921,14 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                                'kernel.project_dir'
-                            ) . '/public/resources/uploaded/';
+                            'kernel.project_dir'
+                        ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
                     }
-                    // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
+                    // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER
+                    // chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
                 }
             }
 

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
@@ -10,7 +9,6 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -63,8 +61,15 @@ class RegistrationController extends AbstractController
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings, ParameterBagInterface $parameterBag, SendSMS $sendSMS, TokenStorageInterface $tokenStorage, EventActions $eventActions)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        GetSettings $getSettings,
+        ParameterBagInterface $parameterBag,
+        SendSMS $sendSMS,
+        TokenStorageInterface $tokenStorage,
+        EventActions $eventActions
+    ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
@@ -106,18 +111,20 @@ class RegistrationController extends AbstractController
      */
     #[Route('/register', name: 'app_register')]
     public function register(
-        Request                     $request,
+        Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface      $entityManager,
-        MailerInterface             $mailer
-    ): Response
-    {
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer
+    ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
+            $this->addFlash(
+                'error',
+                'The portal is in Demo mode - it is not possible to use this authentication method.'
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -132,8 +139,11 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
-                $this->addFlash('warning', 'User with the same email already exists, please try to Login using the link below.');
-            } else if ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
+                $this->addFlash(
+                    'warning',
+                    'User with the same email already exists, please try to Login using the link below.'
+                );
+            } elseif ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -149,12 +159,17 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetaData = [
-                    'platform' => PlatformMode::Live,
+                    'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'registrationType' => UserProvider::EMAIL,
                 ];
-                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetaData);
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_CREATION,
+                    new DateTime(),
+                    $eventMetaData
+                );
 
                 $emailSender = $this->parameterBag->get('app.email_address');
                 $nameSender = $this->parameterBag->get('app.sender_name');
@@ -168,7 +183,8 @@ class RegistrationController extends AbstractController
                     ->context([
                         'uuid' => $user->getUuid(),
                         'verificationCode' => $user->getVerificationCode(),
-                        'isNewUser' => true, // This variable lets the template know if the user it's new our if it's just a password reset request
+                        'isNewUser' => true,
+                        // This variable informs if the user it's new our if it's just a password reset request
                         'password' => $randomPassword,
                     ]);
 
@@ -201,18 +217,20 @@ class RegistrationController extends AbstractController
      */
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
-        Request                     $request,
+        Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface      $entityManager,
-        SessionInterface            $session
-    ): Response
-    {
+        EntityManagerInterface $entityManager,
+        SessionInterface $session
+    ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash('error', 'The portal is in Demo mode - it is not possible to use this authentication method.');
+            $this->addFlash(
+                'error',
+                'The portal is in Demo mode - it is not possible to use this authentication method.'
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -227,7 +245,10 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
-                $this->addFlash('warning', 'User with the same phone number already exists, please try to Login using the link below.');
+                $this->addFlash(
+                    'warning',
+                    'User with the same phone number already exists, please try to Login using the link below.'
+                );
             } else {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
@@ -244,19 +265,31 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::Live,
+                    'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
                     'ip' => $_SERVER['REMOTE_ADDR'],
                     'registrationType' => UserProvider::PHONE_NUMBER,
                 ];
-                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_CREATION,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 $verificationCode = $user->getVerificationCode();
 
                 // Send SMS
-                $message = "Your account password is: " . $randomPassword . "%0A" . "Verification code is: " . $verificationCode;
+                $message = "Your account password is: "
+                    . $randomPassword
+                    . "%0A"
+                    . "Verification code is: "
+                    . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
-                $this->addFlash('success', 'We have sent a message to your phone with your password and verification code');
+                $this->addFlash(
+                    'success',
+                    'We have sent a message to your phone with your password and verification code'
+                );
 
                 // Authenticate the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
@@ -289,12 +322,11 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack             $requestStack,
-        UserRepository           $userRepository,
-        TokenStorageInterface    $tokenStorage,
+        RequestStack $requestStack,
+        UserRepository $userRepository,
+        TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
-    ): Response
-    {
+    ): Response {
         // Get the email and verification code from the URL query parameters
         $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
         $verificationCode = $requestStack->getCurrentRequest()->query->get('verificationCode');
@@ -320,12 +352,17 @@ class RegistrationController extends AbstractController
                 $userRepository->save($user, true);
 
                 // Defines the Event to the table
-                $eventMetadata= [
-                    'platform' => PlatformMode::Live,
+                $eventMetadata = [
+                    'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
                     'ip' => $_SERVER['REMOTE_ADDR'],
                 ];
-                $this->eventActions->saveEvent($user, AnalyticalEventType::USER_VERIFICATION, new DateTime(), $eventMetadata);
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_VERIFICATION,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 $this->addFlash('success', 'Your account has been verified!');
 

@@ -61,5 +61,4 @@ class RadiusAuths
     {
         return $this->class;
     }
-
 }

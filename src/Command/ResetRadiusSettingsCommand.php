@@ -40,7 +40,10 @@ class ResetRadiusSettingsCommand extends Command
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the radius configuration settings. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will reset the radius configuration settings. [y/N] ',
+                false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -56,7 +59,10 @@ class ResetRadiusSettingsCommand extends Command
             ['name' => 'DOMAIN_NAME', 'value' => 'EditMe'],
             ['name' => 'RADIUS_TLS_NAME', 'value' => 'EditMe'],
             ['name' => 'NAI_REALM', 'value' => 'EditMe'],
-            ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
+            [
+                'name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'
+            ],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
         ];
 

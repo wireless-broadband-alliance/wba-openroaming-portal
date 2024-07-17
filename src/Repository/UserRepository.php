@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
-use App\Enum\User_Verification_Status;
+use App\Enum\UserVerificationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -100,10 +100,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === User_Verification_Status::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED) {
             $qb->andWhere('u.isVerified = :isVerified')
                 ->setParameter('isVerified', true);
-        } elseif ($filter === User_Verification_Status::BANNED) {
+        } elseif ($filter === UserVerificationStatus::BANNED) {
             $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
         }
 
@@ -117,10 +117,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->where('u.roles NOT LIKE :role')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === User_Verification_Status::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED) {
             $qb->andWhere('u.isVerified = :verified')
-                ->setParameter(User_Verification_Status::VERIFIED, true);
-        } elseif ($filter === User_Verification_Status::BANNED) {
+                ->setParameter(UserVerificationStatus::VERIFIED, true);
+        } elseif ($filter === UserVerificationStatus::BANNED) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
@@ -197,7 +197,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->where('u.isVerified = :verified')
             ->andWhere('u.roles NOT LIKE :adminRole')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->setParameter(User_Verification_Status::VERIFIED, true)
+            ->setParameter(UserVerificationStatus::VERIFIED, true)
             ->setParameter('adminRole', '%ROLE_ADMIN%');
 
         if ($searchTerm !== null) {

@@ -49,15 +49,14 @@ class GoogleController extends AbstractController
      * @param EventActions $eventActions
      */
     public function __construct(
-        ClientRegistry              $clientRegistry,
-        EntityManagerInterface      $entityManager,
+        ClientRegistry $clientRegistry,
+        EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordEncoder,
-        TokenStorageInterface       $tokenStorage,
-        RequestStack                $requestStack,
-        EventDispatcherInterface    $eventDispatcher,
-        EventActions                $eventActions,
-    )
-    {
+        TokenStorageInterface $tokenStorage,
+        RequestStack $requestStack,
+        EventDispatcherInterface $eventDispatcher,
+        EventActions $eventActions,
+    ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->passwordEncoder = $passwordEncoder;
@@ -178,8 +177,12 @@ class GoogleController extends AbstractController
     /**
      * @throws Exception
      */
-    private function findOrCreateGoogleUser(string $googleUserId, string $email, ?string $firstname, ?string $lastname): ?User
-    {
+    private function findOrCreateGoogleUser(
+        string $googleUserId,
+        string $email,
+        ?string $firstname,
+        ?string $lastname
+    ): ?User {
         // Check if a user with the given Google user ID exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
         if ($existingUser) {
@@ -191,7 +194,6 @@ class GoogleController extends AbstractController
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail) {
-
             if ($userWithEmail->getGoogleId() === null) {
                 $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;
@@ -219,7 +221,7 @@ class GoogleController extends AbstractController
         $this->entityManager->flush();
 
         $event_metadata = [
-            'platform' => PlatformMode::Live,
+            'platform' => PlatformMode::LIVE,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
             'registrationType' => UserProvider::GOOGLE_ACCOUNT,

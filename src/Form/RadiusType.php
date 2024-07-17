@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\Profile_Type;
+use App\Enum\ProfileType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -59,8 +59,8 @@ class RadiusType extends AbstractType
                     $formFieldOptions['data'] = $setting->getValue();
                     if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
                         $formFieldOptions['choices'] = [
-                            'WPA 2' => Profile_Type::WPA2,
-                            'WPA 3' => Profile_Type::WPA3,
+                            'WPA 2' => ProfileType::WPA2,
+                            'WPA 3' => ProfileType::WPA3,
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                         $formFieldOptions['required'] = true;

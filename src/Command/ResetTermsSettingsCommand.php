@@ -40,7 +40,10 @@ class ResetTermsSettingsCommand extends Command
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the terms and conditions settings. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will reset the terms and conditions settings. [y/N] ',
+                false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');

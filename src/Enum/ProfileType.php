@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum Profile_Type
+enum ProfileType
 {
     public const WPA2 = 'WPA2';
     public const WPA3 = 'WPA3';

@@ -40,14 +40,13 @@ class SendSMS
      * @param EventActions $eventActions
      */
     public function __construct(
-        UserRepository        $userRepository,
-        SettingRepository     $settingRepository,
-        GetSettings           $getSettings,
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        GetSettings $getSettings,
         ParameterBagInterface $parameterBag,
-        EventRepository       $eventRepository,
-        EventActions          $eventActions,
-    )
-    {
+        EventRepository $eventRepository,
+        EventActions $eventActions,
+    ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
@@ -143,18 +142,25 @@ class SendSMS
             $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)) {
+            if (
+                !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+            ) {
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
                     $attempts = 1;
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'platform' => PlatformMode::Live,
+                        'platform' => PlatformMode::LIVE,
                         'ip' => $_SERVER['REMOTE_ADDR'],
                         'uuid' => $user->getUuid(),
                     ];
-                    $this->eventActions->saveEvent($user, AnalyticalEventType::USER_SMS_ATTEMPT, new DateTime(), $eventMetadata);
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        new DateTime(),
+                        $eventMetadata
+                    );
                 } else {
                     // Increment the attempts
                     $attempts = $latestEvent->getVerificationAttempts() + 1;
@@ -175,6 +181,8 @@ class SendSMS
         }
 
         // Throw a generic exception when max attempts are exceeded
-        throw new RuntimeException('SMS resend failed. You have exceed the limits for regeneration. Please contact our support for help.');
+        throw new RuntimeException(
+            'SMS resend failed. You have exceed the limits for regeneration. Please contact our support for help.'
+        );
     }
 }

@@ -55,7 +55,10 @@ class ResetCustomSettingsCommand extends Command
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
+            [
+                'name' => 'WELCOME_DESCRIPTION',
+                'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'
+            ],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label is used to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
         ];

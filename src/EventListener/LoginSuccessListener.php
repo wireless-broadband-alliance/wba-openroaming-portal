@@ -14,7 +14,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
-
 class LoginSuccessListener implements EventSubscriberInterface
 {
     private GetSettings $getSettings;
@@ -29,12 +28,11 @@ class LoginSuccessListener implements EventSubscriberInterface
      * @param EventActions $eventActions
      */
     public function __construct(
-        GetSettings       $getSettings,
-        UserRepository    $userRepository,
+        GetSettings $getSettings,
+        UserRepository $userRepository,
         SettingRepository $settingRepository,
-        EventActions      $eventActions
-    )
-    {
+        EventActions $eventActions
+    ) {
         $this->getSettings = $getSettings;
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
@@ -54,9 +52,9 @@ class LoginSuccessListener implements EventSubscriberInterface
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         if (!$data['PLATFORM_MODE']['value']) {
-            $platformMode = PlatformMode::Live;
+            $platformMode = PlatformMode::LIVE;
         } else {
-            $platformMode = PlatformMode::Demo;
+            $platformMode = PlatformMode::DEMO;
         }
 
         if ($user instanceof User) {
@@ -66,7 +64,12 @@ class LoginSuccessListener implements EventSubscriberInterface
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $user->getUuid(),
             ];
-            $this->eventActions->saveEvent($user, AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+                new DateTime(),
+                $eventMetadata
+            );
         }
     }
 }

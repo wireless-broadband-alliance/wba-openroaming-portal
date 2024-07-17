@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Enum\User_Verification_Status;
+use App\Enum\UserVerificationStatus;
 use Exception;
 use gnupg;
 use RuntimeException;
@@ -17,7 +17,7 @@ class PgpEncryptionService
             $publicKeyContent = file_get_contents($publicKeyPath);
         } else {
             return [
-                User_Verification_Status::MISSING_PUBLIC_KEY_CONTENT,
+                UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT,
                 'The file does not exist or is not located in the correct path!
             Make sure to define a public key in pgp_public_key/public_key.asc'
             ];
@@ -25,7 +25,7 @@ class PgpEncryptionService
 
         if (empty($publicKeyContent)) {
             return [
-                User_Verification_Status::EMPTY_PUBLIC_KEY_CONTENT,
+                UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT,
                 'The file does not exist or is not located in the correct path!
             Make sure to define a public key in pgp_public_key/public_key.asc'
             ];
