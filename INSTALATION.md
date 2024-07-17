@@ -1,7 +1,7 @@
 # ⚙️ Installation Guide
-This guide has the only purpose of helping to set up the FreeOpenRoaming Provisioning Portal.
+This guide is intended solely to assist in setting up the OpenRoaming Provisioning Portal. It provides step-by-step instructions for configuring the Portal.
 
-Please follow the instructions below, on the **root** folder of the project, to prepare it:
+Please follow the instructions below, starting from the **root** folder of the project, to prepare it:
 
 1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment
    variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
@@ -127,9 +127,8 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
-## 📞 Contact and Support
-
-We're here to help if you have any problems installing or using the OpenRoaming Provisioning Portal. You request
-assistance by creating an issue in this repository.
+## 📞 Contact and Feedback
 
 Your suggestions and questions will help us improve the platform's usability and experience.
+
+For more information please contact: openroaming@wballiance.com
