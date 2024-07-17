@@ -9,8 +9,8 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
-use App\Enum\UserVerificationStatus;
 use App\Enum\UserProvider;
+use App\Enum\UserVerificationStatus;
 use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\CustomType;
@@ -522,20 +522,21 @@ class AdminController extends AbstractController
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $em->flush();
-
-            // Send email to the user with the new password
-            $email = (new Email())
-                ->from(new Address($emailSender, $nameSender))
-                ->to($user->getEmail())
-                ->subject('Your Password Reset Details')
-                ->html(
-                    $this->renderView(
-                        'email/user_password.html.twig',
-                        ['password' => $newPassword, 'isNewUser' => false]
-                    )
-                );
-            $mailer->send($email);
-            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getEmail()));
+            if ($user->getEmail()) {
+                // Send email to the user with the new password
+                $email = (new Email())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($user->getEmail())
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email/user_password.html.twig',
+                            ['password' => $newPassword, 'isNewUser' => false]
+                        )
+                    );
+                $mailer->send($email);
+            }
+            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
 
             $eventMetadata = [
                 'ip' => $_SERVER['REMOTE_ADDR'],
@@ -2921,8 +2922,8 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                            'kernel.project_dir'
-                        ) . '/public/resources/uploaded/';
+                                'kernel.project_dir'
+                            ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
