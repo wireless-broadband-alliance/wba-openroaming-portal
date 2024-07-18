@@ -1,0 +1,36 @@
+{% set title = "Phone Number" %}
+{% set label = "phone number" %}
+{% set code_path = path('app_regenerate_sms_code') %}
+
+{% if app.user and app.user.email is defined and app.user.email is not empty %}
+    {% set title = "Email" %}
+    {% set label = "email" %}
+    {% set code_path = path('app_regenerate_email_code') %}
+{% endif %}
+
+{# Divider #}
+<div class="my-[25px] divider"></div>
+
+<div class="leading-7">
+    <p class="font-bold text-lg">{{ title }} Activation</p>
+    <p>A code has been sent to your {{ label }}. Please enter the code or generate a new one.</p>
+</div>
+
+<form action="{{ path('app_check_email_code') }}" method="post">
+    <div class="mt-10 relative">
+        <label for="code" class="form-label">Code</label>
+        <input type="number" id="code" name="code" class="form-widget"
+               oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+               maxlength="6">
+
+        <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
+            <button type="submit" class="btn-primary">
+                Validate
+            </button>
+
+            <a href="{{ code_path }}" class="btn-secondary">
+                Resend Code
+            </a>
+        </div>
+    </div>
+</form>

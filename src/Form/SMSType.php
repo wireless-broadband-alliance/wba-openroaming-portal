@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 
 class SMSType extends AbstractType
 {
@@ -32,14 +33,21 @@ class SMSType extends AbstractType
             ],
             'SMS_FROM' => [
                 'type' => TextType::class,
-                'options' => [
-                    'max_length' => 15,
+                'attr' => ['maxlength' => 11],
+                'constraints' => [
+                    new Length([
+                        'max' => 11,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
                 ],
             ],
             'SMS_TIMER_RESEND' => [
                 'type' => IntegerType::class,
-                'options' => [
-                    'maxlength' => 3,
+                'constraints' => [
+                    new Length([
+                        'max' => 3,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
                 ],
             ],
         ];
@@ -50,13 +58,16 @@ class SMSType extends AbstractType
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    if (array_key_exists('attr', $config) && array_key_exists('maxlength', $config['attr'])) {
+                        $formFieldOptions['attr']['maxlength'] = $config['attr']['maxlength'];
+                    }
+                    $formFieldOptions['constraints'] = $config['constraints'] ?? [];
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showIconRadios',
                     'autocomplete' => 'off',
                 ],
                 'required' => true,

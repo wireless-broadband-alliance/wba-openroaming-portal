@@ -3,6 +3,7 @@
 namespace App\RadiusDb\Repository;
 
 use App\RadiusDb\Entity\RadiusAuths;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,4 +40,17 @@ class RadiusAuthsRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAuthRequests(DateTime $startDate, DateTime $endDate)
+    {
+        // Fetch all data with date filtering
+        return $this->createQueryBuilder('u')
+            ->where('u.reply IN (:replies)')
+            ->andWhere('u.authdate >= :startDate')
+            ->andWhere('u.authdate <= :endDate')
+            ->setParameter('replies', ['Access-Accept', 'Access-Reject'])
+            ->setParameter('startDate', $startDate->format('Y-m-d H:i:s'))
+            ->setParameter('endDate', $endDate->format('Y-m-d H:i:s'))
+            ->getQuery()
+            ->getResult();
+    }
 }

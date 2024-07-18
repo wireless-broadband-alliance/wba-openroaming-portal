@@ -2,18 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Enum\PlatformMode;
+use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
+use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-
 
 class SecurityController extends AbstractController
 {
@@ -28,8 +30,11 @@ class SecurityController extends AbstractController
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
-    public function __construct(UserRepository $userRepository, SettingRepository $settingRepository, GetSettings $getSettings)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        GetSettings $getSettings
+    ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
@@ -44,14 +49,17 @@ class SecurityController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $user_sigin = new User();
+        $form = $this->createForm(LoginFormType::class, $user_sigin);
+        $form->handleRequest($request);
+
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
             if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('admin_page');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
-            $traditionalLoginEnabled = $data['LOGIN_TRADITIONAL_ENABLED']['value'];
-            if ($platformMode === PlatformMode::Demo || !$traditionalLoginEnabled) {
+            if ($platformMode === PlatformMode::DEMO) {
                 return $this->redirectToRoute('saml_logout');
             }
             return $this->redirectToRoute('app_landing');
@@ -83,12 +91,15 @@ class SecurityController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
+            'form' => $form,
         ]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
     {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        throw new LogicException(
+            'This method can be blank - it will be intercepted by the logout key on your firewall.'
+        );
     }
 }

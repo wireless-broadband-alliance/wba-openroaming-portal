@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
@@ -28,6 +27,7 @@ class SendSMS
     private GetSettings $getSettings;
     private ParameterBagInterface $parameterBag;
     private EventRepository $eventRepository;
+    private EventActions $eventActions;
 
     /**
      * SendSMS constructor.
@@ -37,20 +37,22 @@ class SendSMS
      * @param GetSettings $getSettings
      * @param ParameterBagInterface $parameterBag
      * @param EventRepository $eventRepository
+     * @param EventActions $eventActions
      */
     public function __construct(
-        UserRepository        $userRepository,
-        SettingRepository     $settingRepository,
-        GetSettings           $getSettings,
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
+        GetSettings $getSettings,
         ParameterBagInterface $parameterBag,
-        EventRepository       $eventRepository
-    )
-    {
+        EventRepository $eventRepository,
+        EventActions $eventActions,
+    ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -115,7 +117,7 @@ class SendSMS
         $latestEvent = $eventRepository->findLatestSmsAttemptEvent($user);
 
         // Check the number of attempts
-        return !$latestEvent || $latestEvent->getVerificationAttemptSms() < 3;
+        return !$latestEvent || $latestEvent->getVerificationAttempts() < 3;
     }
 
     /**
@@ -136,30 +138,36 @@ class SendSMS
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
-        if (!$latestEvent || $latestEvent->getVerificationAttemptSms() < 3) {
+        if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
             $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
-            if (!$latestEvent || ($latestEvent->getLastVerificationCodeTimeSms() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTimeSms()->add($minInterval) < $currentTime)) {
+            if (
+                !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
+                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+            ) {
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
                     $attempts = 1;
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($user);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
-                    $latestEvent->setEventMetadata([
-                        'platform' => PlatformMode::Live,
-                        'phoneNumber' => $user->getPhoneNumber(),
-                    ]);
+                    // Defines the Event to the table
+                    $eventMetadata = [
+                        'platform' => PlatformMode::LIVE,
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'uuid' => $user->getUuid(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        new DateTime(),
+                        $eventMetadata
+                    );
                 } else {
                     // Increment the attempts
-                    $attempts = $latestEvent->getVerificationAttemptSms() + 1;
+                    $attempts = $latestEvent->getVerificationAttempts() + 1;
                 }
 
-                $latestEvent->setVerificationAttemptSms($attempts);
-                $latestEvent->setLastVerificationCodeTimeSms($currentTime);
+                $latestEvent->setVerificationAttempts($attempts);
+                $latestEvent->setLastVerificationCodeTime($currentTime);
                 $this->eventRepository->save($latestEvent, true);
 
                 // Generate a new verification code and resend the SMS
@@ -173,6 +181,8 @@ class SendSMS
         }
 
         // Throw a generic exception when max attempts are exceeded
-        throw new RuntimeException('SMS regeneration failed. You have exceed the limits for regeneration. Please content your support for help.');
+        throw new RuntimeException(
+            'SMS resend failed. You have exceed the limits for regeneration. Please contact our support for help.'
+        );
     }
 }

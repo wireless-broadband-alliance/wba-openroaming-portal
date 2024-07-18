@@ -1,19 +1,43 @@
-{% extends 'base.html.twig' %}
+{% extends '/admin/base.html.twig' %}
 
 {% block title %}Admin Page WBA{% endblock %}
 
-{% block body %}
-    <section class="flex text-veryDarkPurple" data-controller="sidebar">
-        {% include 'admin/partials/_sidebar.html.twig' %}
-        <div class="p-7 w-full bg-lightGray">
-            {# Header section #}
-            <div class="flex flew-row items-center justify-between pb-10" id="header_page">
-                {# Header - Title and Buttons #}
-                {% include 'admin/partials/_header_admin.html.twig' %}
+{% block container %}
+    <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
+        {% if type in ['settingMain', 'settingCustom', 'settingTerms', 'settingRadius', 'settingStatus', 'settingLDAP', 'settingCAPPORT', 'settingAUTH', 'settingSMS'] %}
+            <form action="{{ path('admin_confirm_checker', {'type': type}) }}"
+                  method="post">
+                <p class="block text-center text-lg mb-6">
+                    Enter the verification code from your email
+                </p>
+
+                <div class="relative">
+                    <label for="code" class="form-label">Code</label>
+
+                    <input type="number" id="code" name="code" class="form-widget"
+                           oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                           maxlength="6">
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-center md:justify-between space-x-2 space-y-2 mt-4">
+                    <div class="flex justify-start items-end pb-2">
+                        <p>Click
+                            <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': type}) }}"
+                               class="font-bold underline text-primary">here</a>
+                            to generate a new email with a new code
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-[200px]">
+                        Verify
+                    </button>
+                </div>
+            </form>
+
+        {% else %}
+            <div>
+                Not a valid setting.
             </div>
-            <div class="p-5">
-                {% include 'admin/partials/_confirm_reset.html.twig' %}
-            </div>
-        </div>
-    </section>
+        {% endif %}
+    </div>
 {% endblock %}

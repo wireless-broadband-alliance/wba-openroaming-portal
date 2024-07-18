@@ -1,0 +1,104 @@
+{# Table Content #}
+<tr class="bg-white text-xs whitespace-nowrap">
+    {# UUID #}
+    <td class="px-12 py-4 font-medium">
+        {{ user.uuid is defined ? user.uuid : 'No information' }}
+    </td>
+
+    {# Email #}
+    <td class="px-4 py-4 -ml-4">
+        {% if user.email is not null %}
+            {{ user.email }}
+        {% else %}
+            <span class="font-semibold  p-1 pill-error">No Information</span>
+        {% endif %}
+    </td>
+
+    {# User Provider #}
+    <td class="px-4 py-4">
+        <p class="text-left ml-1 p-1">
+            {% if user.googleId is defined and user.googleId %}
+                Google Account
+            {% elseif user.saml_identifier is defined and user.saml_identifier %}
+                SAML
+            {% else %}
+                Portal Account
+            {% endif %}
+        </p>
+    </td>
+
+    {# User Verification #}
+    <td class="px-4 py-4 ">
+        <p class="font-semibold p-1">
+            {% if user.isVerified is defined and user.isVerified == 0 %}
+                <span class="pill-error">
+					Not Verified
+				</span>
+            {% else %}
+                <span class="pill-success">
+					Verified
+				</span>
+            {% endif %}
+        </p>
+    </td>
+
+    {# Banned At #}
+    <td class="px-4 py-4 text-left">
+        <p class="font-semibold p-1">
+            {% if user.getBannedAt %}
+                <span class="pill-error">
+					{{ user.bannedat|date('d/m/Y H:i') }}
+				</span>
+            {% else %}
+                <span class="pill-success">
+					Not Banned
+				</span>
+            {% endif %}
+        </p>
+    </td>
+
+    {# Created At #}
+    <td class="px-6 py-4 font-medium">
+        {{ user.createdat|date('d/m/Y H:i') }}
+    </td>
+
+    {# Actions Buttons #}
+    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+        {# Items Button Dropdown #}
+        <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                {{ stimulus_target('nav-submenu', 'button') }}>
+            <twig:ux:icon name="wba:menu-dots" class="w-5 h-5"/>
+        </button>
+
+        {# Items List Dropdown #}
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                {{ stimulus_target('nav-submenu', 'container') }}>
+            <ul class="p-2 text-gray-700 gap-y-2">
+                <li>
+                    <a href="{{ path('admin_update', {id : user.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 rounded p-2 cursor-pointer hover:shadow hover:text-lightGreen">
+                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
+
+                        Edit
+                    </a>
+                </li>
+                {% if delete_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                <li {{ stimulus_controller('alert') }}>
+                    <form action="{{ path('admin_delete', {id: user.id}) }}"
+                          method="post" {{ stimulus_target('alert', 'form') }}>
+                        <input type="hidden" name="_method" value="DELETE">
+
+                        <a href="javascript:void(0)" data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}"
+                                {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
+                                class="flex flex-row items-center px-2 py-2 duration-100 rounded p-2 cursor-pointer hover:shadow hover:text-lightGreen">
+                            <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                            Delete
+                        </a>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </td>
+</tr>

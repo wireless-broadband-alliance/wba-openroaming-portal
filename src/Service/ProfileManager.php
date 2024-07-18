@@ -10,11 +10,13 @@ use App\Repository\UserRadiusProfileRepository;
 
 class ProfileManager
 {
-    private $userRadiusProfile;
-    private $radiusUserRepository;
+    private UserRadiusProfileRepository $userRadiusProfile;
+    private RadiusUserRepository $radiusUserRepository;
 
-    public function __construct(UserRadiusProfileRepository $userRadiusProfile, RadiusUserRepository $radiusUserRepository)
-    {
+    public function __construct(
+        UserRadiusProfileRepository $userRadiusProfile,
+        RadiusUserRepository $radiusUserRepository
+    ) {
         $this->userRadiusProfile = $userRadiusProfile;
         $this->radiusUserRepository = $radiusUserRepository;
     }

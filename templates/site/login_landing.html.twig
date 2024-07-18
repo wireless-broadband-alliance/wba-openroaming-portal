@@ -1,109 +1,124 @@
-{% extends 'base.html.twig' %}
+{% extends '/site/base.html.twig' %}
 
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
 
-{% block title %}{{ data.title.value }}{% endblock %}
+{% block second_col %}
+    {# Form Column #}
 
-{% block body %}
-
-    <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
-        {# First Column #}
-        <div class="object-cover w-[100%] lg:w-1/2 bg-landing bg-center bg-no-repeat bg-cover bg-scroll p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
-             style="background-image: url('{{ data.wallpaperImageName.value }}');">
-            <div class="h-[100%] w-[100%] flex flex-col justify-between">
-                <img class="mt-16 lg:mt-36 w-96"
-                     src="{{ data.openroamingLogoName.value }}"
-                     alt="OpenRoaming Logo"/>
-
-                <h1 class="text-2xl lg:text-6xl font-roboto text-primary mt-16 font-bold">{{ data.welcomeText.value }}</h1>
-
-                <p class="text-white font-medium text-sm lg:text-lg mt-5 lg:mt-12 lg:pr-12 xl:pr-24">{{ data.welcomeDescription.value }}</p>
-
-                <p class="text-white font-light text-xs lg:text-base mt-6 mb-6">If you encounter any
-                    questions, please contact
-                    <a href="mailto:{{ data.contactEmail.value }}"
-                       class="font-semibold underline">{{ data.contactEmail.value }}</a>
-                </p>
-            </div>
-        </div>
-
-        {# Form Column #}
-        <div class="w-[100%] lg:w-1/2 p-8 lg:px-[7%] lg:py-[5%] xl:px-[8%] xl:py-[3%]"
-                {{ stimulus_controller('visibility') }}>
-            <div>
-                <img class="mt-8 lg:mt-0"
-                     src="{{ data.customerLogoName.value }}"
-                     alt="Logo"/>
-
-                <div class="space-y-4 mt-16 pr-0 lg:mt-8 lg:pr-6 xl:pr-24 xl:mt-20">
-                    <p class="text-[#757575] font-medium text-2xl lg:text-4xl">Welcome Back</p>
-                    <p class="text-[#B4B4B4] font-light text-xs lg:text-base">You have selected the traditional login
-                        method, please insert your credential, to install a profile.</p>
-                </div>
-
-                {# Flash error message  #}
-                {% for message in app.session.flashbag.get('error') %}
-                    <div class="text-white text-base bg-red-600 border-red-600 mt-5 rounded-md p-2 text-center">{{ message }}</div>
-                {% endfor %}
-
-                <form method="POST" action="{{ path('app_login') }}">
-                    {# Email && Phone Number #}
-                    <div class="relative mt-10 lg:mt-6 xl:mt-12">
-                        <label for="uuid"
-                               class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Email or Phone number</label>
-                        <input id="uuid"
-                               name="uuid"
-                               type="text"
-                               value="{{ last_username }}"
-                               class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
-                               placeholder="Enter your email or phone number"
-                               required
-                               autofocus/>
-                    </div>
-                    {# Password #}
-                    <div class="relative mt-10 lg:mt-6 xl:mt-12">
-                        <label for="password"
-                               class="absolute left-4 -top-2.5 lg:-top-3 z-10 bg-neutral-100 text-[#656565] px-1 font-medium text-sm lg:text-lg">Password</label>
-                        <input id="inputPassword"
-                               name="password"
-                               type="password"
-                               class="w-[100%] xl:w-11/12 border px-5 py-2.5 text-[#656565] font-medium text-sm lg:text-lg bg-neutral-100 placeholder-[#757575] placeholder-opacity-40 bg-transparent rounded-lg border-[#757575] appearance-none focus:outline-none focus:ring-0 focus:border-[#7db928]"
-                               placeholder="Enter your password"
-                               autocomplete="current-password"
-                               required/>
-                    </div>
-                    <input type="hidden"
-                           name="_csrf_token"
-                           value="{{ csrf_token('authenticate') }}">
-                    <div class="mt-5 flex justify-center">
-                        <button type="submit"
-                                class="rounded-lg bg-[#7DB928] hover:bg-[#7DB928]/90 focus:ring-4 focus:outline-none focus:ring-[#7DB928]/50 text-white font-medium text-sm px-5 py-2.5 lg:px-8 lg:py-3 inline-flex items-center justify-center dark:focus:ring-[#7DB928]/55 mr-2 mb-2">
-                            Log in
-                        </button>
-                        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::Demo') %}
-                            <a href="{{ path('app_landing') }}"
-                               class="rounded-lg bg-[#E1E4E6] hover:bg-[#E1E4E6]/90 focus:ring-[#E1E4E6]/50  focus:ring-4 focus:outline-none text-[#3F474D] font-medium text-sm px-5 py-2.5 lg:px-8 lg:py-3 inline-flex items-center justify-center mr-2 mb-2">
-                                Choose Another
-                            </a>
-                        {% endif %}
-                    </div>
-                    <div class="text-center">
-                        {% if data.EMAIL_REGISTER_ENABLED.value == true or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == true %}
-                            {% if data.EMAIL_REGISTER_ENABLED.value == true %}
-                                <p class="text-sm font-thin text-gray-800 mt-2">You don't have an account? <a
-                                            href="{{ path('app_register') }}"
-                                            class="text-lg font-thin text-[#3F474D] hover:underline mt-2 inline-block hover:text-[#7DB928] text-center">Register</a>
-                                    here with your email!</p>
-                            {% endif %}
-                            {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == true %}
-                                <p class="text-sm font-thin text-gray-800 mt-2">You don't have an account? <a
-                                            href="{{ path('app_register_sms') }}"
-                                            class="text-lg font-thin text-[#3F474D] hover:underline mt-2 inline-block hover:text-[#7DB928] text-center">Register</a>
-                                    here with your <strong class="text-base">phone number</strong>!</p>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                </form>
-            </div>
-        </div>
+    {# Toasts  #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {# Flash error message  #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
     </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Welcome back</p>
+        <p class="text-lg">You have selected to login via email and password. Once you are logged in, please install the
+            profile onto
+            your device.</p>
+    </div>
+    {{ form_start(form) }}
+
+    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+        {% set label = 'Email or Phone Number' %}
+    {% elseif data.EMAIL_REGISTER_ENABLED.value %}
+        {% set label = 'Email' %}
+    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+        {% set label = 'Phone Number' %}
+    {% endif %}
+
+    {# UUID #}
+    <div class="relative mt-[32px]">
+        {{ form_label(form.uuid, label, { 'label_attr': {'class': 'form-label'} }) }}
+        {{ form_widget(form.uuid, {
+            'attr': {
+                'class': 'form-widget',
+                'placeholder': 'Enter your '~label|lower,
+            },
+            'full_name' : 'uuid',
+        }) }}
+    </div>
+
+    {# Password #}
+    <div class="relative mt-[32px]">
+        {{ form_label(form.password, null, { 'label_attr': {'class': 'form-label'} }) }}
+        {{ form_widget(form.password, {
+            'attr': {
+                'class': 'form-widget',
+                'placeholder': 'Enter your password',
+            },
+            'full_name' : 'password',
+        }) }}
+    </div>
+
+    {# Turnstile Checker #}
+    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        <div class="ml-3 mt-5">
+            {{ form_row(form.security, {'full_name': 'security'}) }}
+        </div>
+    {% endif %}
+
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+    <div class="my-[32px] flex justify-start gap-4">
+        <button type="submit" class="w-[220px] btn-primary">
+            Log in
+        </button>
+        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO') %}
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
+                Choose Another
+            </a>
+        {% endif %}
+    </div>
+
+    {# Divider #}
+    <div class="my-[25px] divider"></div>
+    {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO') %}
+
+
+        {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+            <p class="mt-2 text-sm">Did you forget your password? Get a new one for your
+
+            {% if data.EMAIL_REGISTER_ENABLED.value %}
+                <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
+            {% endif %}
+
+            {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
+
+            {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                <a href="{{ path('app_site_forgot_password_sms') }}"
+                   class="font-semibold text-primary underline">phone number</a>.
+            {% endif %}
+
+
+            {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+
+                <p class="mt-2 text-sm">You don't have an account? Register with
+
+                    {% if data.EMAIL_REGISTER_ENABLED.value %}
+                        <a href="{{ path('app_register') }}"
+                           class="font-semibold text-primary underline">email</a>
+                    {% endif %}
+
+                    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
+
+                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                        <a href="{{ path('app_register_sms') }}"
+                           class="font-semibold text-primary underline">phone number</a>.
+                    {% endif %}
+                </p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
 {% endblock %}

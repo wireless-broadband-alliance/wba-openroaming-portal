@@ -18,19 +18,29 @@ class SettingFixture extends Fixture
             ['name' => 'DOMAIN_NAME', 'value' => 'EditMe'],
             ['name' => 'RADIUS_TLS_NAME', 'value' => 'EditMe'],
             ['name' => 'NAI_REALM', 'value' => 'EditMe'],
-            ['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'],
+            [
+                'name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'
+            ],
 
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
+            ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
+
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
+            ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
             ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
-            ['name' => 'WELCOME_DESCRIPTION', 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
+            [
+                'name' => 'WELCOME_DESCRIPTION',
+                'value' => 'This portal allows you to download and install an OpenRoaming profile tailored 
+                to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.'
+            ],
+            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label is used to add extra content if necessary'],
+            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming@wballiance.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
@@ -67,7 +77,7 @@ class SettingFixture extends Fixture
             ['name' => 'SMS_USERNAME', 'value' => ''],
             ['name' => 'SMS_USER_ID', 'value' => ''],
             ['name' => 'SMS_HANDLE', 'value' => ''],
-            ['name' => 'SMS_FROM', 'value' => 'OR_PROVISIONING'],
+            ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
         ];
 

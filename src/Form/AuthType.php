@@ -91,7 +91,8 @@ class AuthType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'AUTH_METHOD_SAML_ENABLED' ||
+                    if (
+                        $settingName === 'AUTH_METHOD_SAML_ENABLED' ||
                         $settingName === 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' ||
                         $settingName === 'AUTH_METHOD_REGISTER_ENABLED' ||
                         $settingName === 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' ||
@@ -111,9 +112,6 @@ class AuthType extends AbstractType
                 }
             }
             $formFieldOptions = [
-                'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showIconRadiosAuth',
-                ],
                 'required' => false,
             ];
         }

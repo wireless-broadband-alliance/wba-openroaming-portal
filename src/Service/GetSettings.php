@@ -35,7 +35,7 @@ class GetSettings
         return $os;
     }
 
-    public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository)
+    public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository): array
     {
         $data = [];
 
@@ -119,6 +119,11 @@ class GetSettings
             'description' => $this->getSettingDescription('PAGE_TITLE'),
         ];
 
+        $data['CUSTOMER_LOGO_ENABLED'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO_ENABLED'])->getValue(),
+            'description' => $this->getSettingDescription('CUSTOMER_LOGO_ENABLED'),
+        ];
+
         $data['customerLogoName'] = [
             'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue(),
             'description' => $this->getSettingDescription('CUSTOMER_LOGO'),
@@ -159,6 +164,14 @@ class GetSettings
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
+        $turnstile_checker = $settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        if ($turnstile_checker !== null) {
+            $data['TURNSTILE_CHECKER'] = [
+                'value' => $turnstile_checker->getValue(),
+                'description' => $this->getSettingDescription('TURNSTILE_CHECKER'),
+            ];
+        }
+
         $user_verification = $settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
         if ($user_verification !== null) {
             $data['USER_VERIFICATION'] = [
@@ -183,7 +196,8 @@ class GetSettings
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue(
+            ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
@@ -213,7 +227,8 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue() === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue(
+            ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
@@ -223,12 +238,14 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(),
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(
+            ),
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue(
+            ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
@@ -254,7 +271,8 @@ class GetSettings
         ];
 
         $data['code'] = [
-            'value' => ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode() : null,
+            'value' => ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode(
+            ) : null,
             'description' => $this->getSettingDescription('code'),
         ];
 
@@ -311,20 +329,34 @@ class GetSettings
         $descriptions = [
             'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
             'DISPLAY_NAME' => 'The name used on the profiles',
-            'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles. This is only used to create iOS/macOS profiles.',
+            'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles. 
+            This is only used to create iOS/macOS profiles.',
             'OPERATOR_NAME' => 'The operator name used on the profiles',
             'DOMAIN_NAME' => 'The domain name used for the service',
             'RADIUS_TLS_NAME' => 'The hostname of your RADIUS server used for TLS',
             'NAI_REALM' => 'The realm used for Network Access Identifier (NAI)',
-            'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => 'The SHA1 hash of your RADIUS server\'s trusted root CA (Defaults to LetsEncrypt CA)',
 
-            'PLATFORM_MODE' => 'Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.',
-            'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system. This system requires all the users to verify is own account before they download any profile',
+            'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => 'The SHA1 hash of your RADIUS server\'s trusted root CA 
+            (Defaults to LetsEncrypt CA)',
+
+            'PLATFORM_MODE' => 'Live || Demo. When demo, only "demo login" is displayed, 
+            and SAML and other login methods are disabled regardless of other settings. 
+            A demo warning will also be displayed.',
+
+            'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system.
+            This system requires all the users to verify is own account before they download any profile',
+
+            'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to between genuine users and bots.
+             This can be used in Live or Demo modes.',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
+            'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',
             'CUSTOMER_LOGO' => 'The resource path or URL to the customer\'s logo image',
             'OPENROAMING_LOGO' => 'The resource path or URL to the OpenRoaming logo image',
-            'WALLPAPER_IMAGE' => 'The resource path or URL to the wallpaper image',
+
+            'WALLPAPER_IMAGE' => 'The resource path or URL to the wallpaper image. 
+            Is recommended to use an image with a ratio of 13 : 14',
+
             'WELCOME_TEXT' => 'The welcome text displayed on the user interface',
             'WELCOME_DESCRIPTION' => 'The description text displayed under the welcome text',
             'ADDITIONAL_LABEL' => 'Additional label displayed on the landing page for more, if necessary, information',
@@ -339,23 +371,35 @@ class GetSettings
             'AUTH_METHOD_REGISTER_ENABLED' => 'Enable or disable Register authentication method',
             'AUTH_METHOD_REGISTER_LABEL' => 'The label for Register authentication button on the login page',
             'AUTH_METHOD_REGISTER_DESCRIPTION' => 'The description for Register authentication on the login page',
-            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => 'Enable or disable Login with phone Number or Email',
+
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => 'Enable or disable Login with 
+            phone Number or Email',
+
             'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => 'The label for Login authentication button on the login page',
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => 'The description for Login authentication on the login page',
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => 'Enable or disable authentication register with the phone number',
-            'AUTH_METHOD_SMS_REGISTER_LABEL' => 'The label for authentication with the phone number, on button of the login page',
-            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => 'The description for authentication with the phone number on the login page',
+
+            'AUTH_METHOD_SMS_REGISTER_LABEL' => 'The label for authentication with the phone number,
+             on button of the login page',
+
+            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => 'The description for authentication with the 
+            phone number on the login page',
 
             'SYNC_LDAP_ENABLED' => 'Enable or disable synchronization with LDAP',
             'SYNC_LDAP_SERVER' => 'The LDAP server\'s URL',
             'SYNC_LDAP_BIND_USER_DN' => 'The Distinguished Name (DN) used to bind to the LDAP server',
             'SYNC_LDAP_BIND_USER_PASSWORD' => 'The password for the bind user on the LDAP server',
             'SYNC_LDAP_SEARCH_BASE_DN' => 'The base DN used when searching the LDAP directory',
-            'SYNC_LDAP_SEARCH_FILTER' => 'The filter used when searching the LDAP directory. The placeholder `@ID` is replaced with the user\'s ID',
+
+            'SYNC_LDAP_SEARCH_FILTER' => 'The filter used when searching the LDAP directory.
+             The placeholder `@ID` is replaced with the user\'s ID',
 
             'TOS_LINK' => 'Terms and Conditions URL',
             'PRIVACY_POLICY_LINK' => 'Privacy policy URL',
-            'VALID_DOMAINS_GOOGLE_LOGIN' => 'When this is empty, it allows all the domains to authenticate. Please only type the domains you want to be able to authenticate',
+
+            'VALID_DOMAINS_GOOGLE_LOGIN' => 'When this is empty, it allows all the domains to authenticate. 
+            Please only type the domains you want to be able to authenticate',
+
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => 'Type of encryption defined for the creation of the profiles',
 
             'CAPPORT_ENABLED' => 'Enable or disable Capport DHCP configuration',

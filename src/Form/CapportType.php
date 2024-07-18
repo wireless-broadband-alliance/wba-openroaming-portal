@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class CapportType extends AbstractType
 {
@@ -27,9 +28,21 @@ class CapportType extends AbstractType
             ],
             'CAPPORT_PORTAL_URL' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
+                ],
             ],
             'CAPPORT_VENUE_INFO_URL' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
+                ],
             ],
         ];
 
@@ -47,13 +60,13 @@ class CapportType extends AbstractType
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+                    $formFieldOptions['constraints'] = $config['constraints'] ?? [];
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
             }
             $formFieldOptions = [
                 'attr' => [
-                    'data-controller' => 'descriptionCard cardsAction showInfoMessage showIconRadios',
                     'autocomplete' => 'off',
                 ],
                 'required' => false,

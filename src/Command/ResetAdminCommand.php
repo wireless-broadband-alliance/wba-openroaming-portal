@@ -2,9 +2,10 @@
 
 namespace App\Command;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Repository\EventRepository;
+use App\Service\EventActions;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,10 +24,16 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class ResetAdminCommand extends Command
 {
     private EntityManagerInterface $entityManager;
+    private EventActions $eventActions;
 
-    public function __construct(EntityManagerInterface $entityManager, private UserPasswordHasherInterface $userPasswordHashed)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        private UserPasswordHasherInterface $userPasswordHashed,
+        EventActions $eventActions,
+        private readonly EventRepository $eventRepository
+    ) {
         $this->entityManager = $entityManager;
+        $this->eventActions = $eventActions;
         parent::__construct();
     }
 
@@ -43,7 +50,10 @@ class ResetAdminCommand extends Command
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the admin credentials to its default state without deleting any data. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will reset the admin credentials to its default state without deleting any data. [y/N] ',
+                false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -68,22 +78,15 @@ class ResetAdminCommand extends Command
             $admin = new User();
             $admin->setUuid('admin@example.com');
             $admin->setEmail('admin@example.com');
+            $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
             $admin->setRoles(['ROLE_ADMIN']);
             $admin->setIsVerified(true);
             $admin->setCreatedAt(new DateTime());
             $this->entityManager->persist($admin);
 
-            $event = new Event();
-            $event->setEventName(AnalyticalEventType::USER_CREATION);
-            $event->setEventDatetime(new DateTime());
-            $event->setUser($admin);
-            $this->entityManager->persist($event);
-
-            $event_2 = new Event();
-            $event_2->setEventName(AnalyticalEventType::USER_VERIFICATION);
-            $event_2->setEventDatetime(new DateTime());
-            $event_2->setUser($admin);
-            $this->entityManager->persist($event_2);
+            // Save the event Action using the service
+            $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION, new DateTime(), []);
+            $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION, new DateTime(), []);
         }
 
         // Set password
@@ -91,5 +94,4 @@ class ResetAdminCommand extends Command
 
         $this->entityManager->flush();
     }
-
 }

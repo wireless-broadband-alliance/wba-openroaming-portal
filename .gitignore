@@ -51,3 +51,6 @@ public/resources/uploaded/*
 assets/styles/randomRealmsColors.css
 
 Dockerfile-dev
+
+pgp_public_key/*
+!pgp_public_key/.gitkeep

@@ -8,21 +8,21 @@ use Symfony\Component\Validator\ConstraintValidator;
 class NoSpecialCharactersValidator extends ConstraintValidator
 {
     /**
-     * @param $value
-     * @param Constraint $constraint
+     * @param  $value
+     * @param  Constraint $constraint
      * @return void
      * This validator finds emoji characters in the input string.
      * If emojis are present, it indicates a violation using the NoSpecialCharacters constraint's stated error message.
      */
     public function validate($value, Constraint $constraint): void
     {
-        /** @var NoSpecialCharacters $constraint */
+        /**
+         * @var NoSpecialCharacters $constraint
+         */
         // Compare if he can replace all the inputs for the values specified down bellow to ''
         // If he can, get the confirmation validator message from NoSpecialCharacters.php
         if (preg_replace('/[^<>(_;ç)%]/', '', $value)) {
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }
-
 }
-

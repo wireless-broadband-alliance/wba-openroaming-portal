@@ -1,4 +1,5 @@
 <?php
+
 // src/Twig/AppVersionExtension.php
 
 namespace App\Twig;

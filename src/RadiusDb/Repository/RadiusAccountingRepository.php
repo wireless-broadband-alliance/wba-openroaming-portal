@@ -5,8 +5,8 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<RadiusAccounting>
@@ -57,8 +57,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function findTrafficPerRealm(?DateTime $startDate, ?DateTime $endDate): Query
     {
         $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('ra.realm, SUM(ra.acctInputOctets) AS total_input, SUM(ra.acctOutputOctets) AS total_output')
-            ->groupBy('ra.realm');
+            ->select(
+                'ra.realm, ra.acctStartTime, 
+                SUM(ra.acctInputOctets) AS total_input, 
+                SUM(ra.acctOutputOctets) AS total_output'
+            )
+            ->groupBy('ra.realm, ra.acctStartTime');
 
         // Apply date filters if provided
         if ($startDate && $endDate) {
@@ -124,7 +128,75 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctSessionTime');
+            ->select('DISTINCT ra.realm, ra.acctSessionTime, ra.acctStartTime, ra.acctStopTime');
+
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        } elseif ($startDate) {
+            // If only start date is provided, search from start date to now
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->setParameter('startDate', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, search from end date to the past
+            $queryBuilder
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('endDate', $endDate);
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     * @return array
+     */
+    public function findWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        $queryBuilder = $this->createQueryBuilder('ra')
+            ->select('DISTINCT ra.realm, ra.connectInfo_start, ra.acctStartTime, ra.acctStopTime');
+
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+        } elseif ($startDate) {
+            // If only start date is provided, search from start date to now
+            $queryBuilder
+                ->andWhere('ra.acctStartTime >= :startDate')
+                ->setParameter('startDate', $startDate);
+        } elseif ($endDate) {
+            // If only end date is provided, search from end date to the past
+            $queryBuilder
+                ->andWhere('ra.acctStopTime <= :endDate')
+                ->setParameter('endDate', $endDate);
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     * @return array
+     */
+    public function findApUsage(?DateTime $startDate, ?DateTime $endDate): array
+    {
+        $queryBuilder = $this->createQueryBuilder('ra')
+            ->select('ra.calledStationId');
 
         // Apply date filters if provided
         if ($startDate && $endDate) {
