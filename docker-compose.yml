@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: registry.tetrapi.pt/tcs/cc/cc-openroaming-provisioning-web:1.3.1
+    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.4.0
     env_file:
       - .env
     volumes:
