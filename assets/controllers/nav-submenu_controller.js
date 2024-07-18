@@ -15,6 +15,13 @@ export default class extends Controller {
 		}
 	}
 
+	toggleReverse() {
+		this.containerTarget.classList.toggle('hidden');
+		if (this.hasIconTarget) {
+			this.iconTarget.classList.toggle('-rotate-90');
+		}
+	}
+
 	lost_focus() {
 		if (!this.containerTarget.matches(":hover")) {
 			this.containerTarget.classList.add('hidden');
