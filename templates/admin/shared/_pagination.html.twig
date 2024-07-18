@@ -1,5 +1,5 @@
 <div class="flex flex-col sm:flex-row items-center justify-start mt-5 gap-y-6">
-
+    {#
     {% if count is defined %}
         <div class="flex flex-row justify-start items-center gap-4">
             <label for="count">{{ label }}</label>
@@ -12,7 +12,7 @@
             </select>
         </div>
     {% endif %}
-
+    #}
     {% if ApUsage %}
         {% if totalPages > 1 %}
             <div class="sm:ml-auto flex flex-row text-base cursor-default">

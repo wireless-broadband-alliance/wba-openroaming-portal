@@ -2554,6 +2554,11 @@ class AdminController extends AbstractController
             ];
         }
 
+        // Sort $result array BY DESC
+        usort($result, function ($a, $b) {
+            return $b['count'] <=> $a['count'];
+        });
+
         return $this->generateDatasetsWifiTags($result);
     }
 
