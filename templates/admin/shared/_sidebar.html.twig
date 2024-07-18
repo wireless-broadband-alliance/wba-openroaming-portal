@@ -164,22 +164,21 @@
         {# Options - Submenu (only shows on lower resolutions) #}
         <div class="block relative xl:hidden" {{ stimulus_controller('nav-submenu') }}>
             <button type="button"
-                    class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen" {{ stimulus_action('nav-submenu', 'toggle') }}>
+                    class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen"
+                    {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <twig:ux:icon name="wba:cog" class="w-5 mr-2" fill="none"/>
-
                     Options
                 </div>
-
                 <twig:ux:icon name="wba:right" class="w-4 transition ease-in" fill="none" data-nav-submenu-target="icon"/>
             </button>
-            <div class="hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow" {{ stimulus_target('nav-submenu', 'container') }}>
+            <div class="absolute -top-2 left-0 transform -translate-y-full hidden px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow z-50"
+                    {{ stimulus_target('nav-submenu', 'container') }}>
                 <ul class="mx-2">
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('admin_update', {id : app.user.id}) }}">
                             <twig:ux:icon name="wba:user-circle" class="w-5 mr-4" fill="none"/>
-
                             Account Settings
                         </a>
                     </li>
@@ -187,7 +186,6 @@
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('app_landing') }}">
                             <twig:ux:icon name="wba:file-download" class="w-5 mr-4" fill="none"/>
-
                             Download Profile
                         </a>
                     </li>
@@ -195,7 +193,6 @@
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('saml_logout') }}" onclick="return confirm('Are you sure you to leave?')">
                             <twig:ux:icon name="wba:logout" class="w-5 mr-4" fill="none"/>
-
                             Logout
                         </a>
                     </li>
