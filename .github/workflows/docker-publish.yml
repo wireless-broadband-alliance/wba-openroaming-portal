@@ -25,6 +25,9 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
+        contents: read
+        packages: write
+    permissions:
       contents: read
       packages: write
       # This is used to complete the identity challenge
