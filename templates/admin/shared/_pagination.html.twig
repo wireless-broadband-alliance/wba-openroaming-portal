@@ -1,9 +1,14 @@
 <div class="flex flex-col sm:flex-row items-center justify-start mt-5 gap-y-6">
     <form method="get" action="{{ path('admin_page') }}">
         {% if count is defined %}
-            <div class="flex flex-row justify-start items-center gap-4">
+            <div
+                    data-controller="update-url"
+                    data-update-url-target="select"
+                    class="flex flex-row justify-start items-center gap-4"
+            >
                 <label for="count">{{ label }}</label>
-                <select class="form-select" name="count" id="count" onchange="this.form.submit()">
+
+                <select class="form-select" name="count" id="count" data-update-url-target="select">
                     <option value="7" {% if count == 7 %} selected {% endif %}>7</option>
                     <option value="20" {% if count == 20 %} selected {% endif %}>20</option>
                     <option value="50" {% if count == 50 %} selected {% endif %}>50</option>
