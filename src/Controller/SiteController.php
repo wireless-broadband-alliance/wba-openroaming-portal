@@ -104,6 +104,8 @@ class SiteController extends AbstractController
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         // Check if the user is logged in and verification of the user
         // And Check if the user dont have a forgot_password_request active
@@ -112,10 +114,7 @@ class SiteController extends AbstractController
             $data["USER_VERIFICATION"]["value"] === EmailConfirmationStrategy::EMAIL &&
             $this->getUser()
         ) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
             $verification = $currentUser->isVerified();
-
             // Check if the user is verified
             if (!$verification) {
                 $this->addFlash('error', 'Your account is not verified to download a profile!');
@@ -137,7 +136,7 @@ class SiteController extends AbstractController
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                    $this->addFlash('error', 'Please select OS');
+                    $this->addFlash('error', 'Please select Operating System!');
                 } elseif ($this->getUser() === null) {
                     $user = new User();
                     $form = $this->createForm(RegistrationFormType::class, $user);
@@ -209,7 +208,7 @@ class SiteController extends AbstractController
         } elseif ($request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                $this->addFlash('error', 'Please select OS');
+                $this->addFlash('error', 'Please select Operating System!');
             }
             if (!array_key_exists('radio-os', $payload)) {
                 if (!array_key_exists('detected-os', $payload)) {
@@ -251,6 +250,10 @@ class SiteController extends AbstractController
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
         ];
+
+        if ($data['os']['selected'] == OSTypes::NONE && $currentUser && $currentUser->isVerified()) {
+            $this->addFlash('error', 'Please select Operating System!');
+        }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
