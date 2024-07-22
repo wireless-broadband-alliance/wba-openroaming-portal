@@ -3,6 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,7 +16,15 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     description: "The Setting entity returns configuration options for the application. 
     Each setting consists of a name and an optional value, 
-    which can be used to store and return configuration parameters required for  the API."
+    which can be used to store and return configuration parameters required for  the API.",
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Put(),
+        new Patch(),
+        new Delete()
+    ]
 )]
 class Setting
 {
