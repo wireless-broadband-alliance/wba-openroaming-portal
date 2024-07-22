@@ -4,7 +4,6 @@ namespace App\Api\V1\Controller;
 
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -27,13 +26,24 @@ class ConfigController extends AbstractController
         $this->settingRepository = $settingRepository;
     }
 
-
+    /**
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @return JsonResponse
+     */
     #[Route('/config', name: 'get_config', methods: ['GET'])]
     public function getConfig(
         AuthorizationCheckerInterface $authorizationChecker,
     ): JsonResponse {
         if (!$authorizationChecker->isGranted('ROLE_USER')) {
-            throw new RuntimeException(403, 'Access Denied');
+            return new JsonResponse([
+                'errors' => [
+                    [
+                        'status' => '403',
+                        'title' => 'Access Denied',
+                        'detail' => 'You do not have permission to access this resource.'
+                    ]
+                ]
+            ], 403);
         }
 
         $excludedNames = [
@@ -59,22 +69,24 @@ class ConfigController extends AbstractController
         ];
 
         $settings = $this->settingRepository->findAllExcept($excludedNames);
-        $config = [];
-
-        foreach ($settings as $setting) {
-            $config[] = [
-                'id' => $setting->getId(),
-                'name' => $setting->getName(),
-                'value' => $setting->getValue(),
-                'description' => $this->getSettings->getSettingDescription($setting->getName()),
+        $data = array_map(function ($setting) {
+            return [
+                'type' => 'setting',
+                'id' => (string)$setting->getId(),
+                'attributes' => [
+                    'name' => $setting->getName(),
+                    'value' => $setting->getValue(),
+                    'description' => $this->getSettings->getSettingDescription($setting->getName()),
+                ]
             ];
-        }
+        }, $settings);
 
-        // return status code and data content
+        // Return status code and data content
         return new JsonResponse([
-            'status' => true,
-            'type' => 'setting', // return object structure
-            'data' => $config
+            'data' => $data,
+            'meta' => [
+                'total' => count($settings)
+            ]
         ], 200);
     }
 }
