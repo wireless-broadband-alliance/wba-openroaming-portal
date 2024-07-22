@@ -53,6 +53,7 @@ class ConfigController extends AbstractController
             'SYNC_LDAP_BIND_USER_PASSWORD',
             'SYNC_LDAP_SEARCH_BASE_DN',
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
+            'SMS_HANDLE',
             'SMS_USERNAME',
             'SMS_USER_ID',
             'SMS_FROM',
@@ -68,15 +69,14 @@ class ConfigController extends AbstractController
                 'name' => $setting->getName(),
                 'value' => $setting->getValue(),
                 'description' => $this->getSettings->getSettingDescription($setting->getName()),
-                'type' => 'setting' // return object structure
             ];
         }
 
         // return status code and data content
         return new JsonResponse([
             'status' => true,
+            'type' => 'setting', // return object structure
             'data' => $config
-        ], 200
-        );
+        ], 200);
     }
 }
