@@ -3,15 +3,29 @@
 namespace App\Api\V1\Controller;
 
 use App\Repository\SettingRepository;
+use http\Env\Request;
+use HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class ConfigController extends AbstractController
 {
+    /**
+     * @throws HttpException
+     */
     #[Route('/config', name: 'get_config', methods: ['GET'])]
-    public function getConfig(SettingRepository $settingRepository): JsonResponse
-    {
+    public function getConfig(
+        SettingRepository $settingRepository,
+        AuthorizationCheckerInterface $authorizationChecker,
+        Request $request
+    ): JsonResponse {
+
+        if (!$authorizationChecker->isGranted('ROLE_USER')) {
+            throw new HttpException(403, 'Access Denied');
+        }
+
         $excludedNames = [
             'RADIUS_REALM_NAME',
             'DISPLAY_NAME',
@@ -32,7 +46,7 @@ class ConfigController extends AbstractController
             'SMS_FROM',
             'SMS_TIMER_RESEND'
         ];
-        
+
         $settings = $settingRepository->findAllExcept($excludedNames);
         $config = [];
 
