@@ -4,7 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
-use HttpException;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -27,15 +27,13 @@ class ConfigController extends AbstractController
         $this->settingRepository = $settingRepository;
     }
 
-    /**
-     * @throws HttpException
-     */
+
     #[Route('/config', name: 'get_config', methods: ['GET'])]
     public function getConfig(
         AuthorizationCheckerInterface $authorizationChecker,
     ): JsonResponse {
         if (!$authorizationChecker->isGranted('ROLE_USER')) {
-            throw new HttpException(403, 'Access Denied');
+            throw new RuntimeException(403, 'Access Denied');
         }
 
         $excludedNames = [
