@@ -7,7 +7,11 @@ use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    description: "The Setting entity returns configuration options for the application. 
+    Each setting consists of a name and an optional value, 
+    which can be used to store and return configuration parameters required for  the API."
+)]
 class Setting
 {
     #[ORM\Id]
