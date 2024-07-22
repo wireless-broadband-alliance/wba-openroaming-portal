@@ -83,10 +83,12 @@ class ConfigController extends AbstractController
 
         // Return status code and data content
         return new JsonResponse([
-            'data' => $data,
+            'type' => 'setting',
+            'status' => true,
             'meta' => [
                 'total' => count($settings)
-            ]
+            ],
+            'data' => $data,
         ], 200);
     }
 }
