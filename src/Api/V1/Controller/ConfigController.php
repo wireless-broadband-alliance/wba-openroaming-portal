@@ -4,7 +4,6 @@ namespace App\Api\V1\Controller;
 
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
-use OpenApi\Annotations as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,55 +27,10 @@ class ConfigController extends AbstractController
     }
 
     /**
-     *
-     * @OA\Get(
-     *      path="/api/v1/config",
-     *      summary="Get public configuration setting entity",
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful response",
-     *          @OA\JsonContent(
-     *              type="object",
-     *              @OA\Property(property="type", type="string"),
-     *              @OA\Property(property="status", type="integer"),
-     *              @OA\Property(property="meta", type="object", @OA\Property(property="total", type="integer")),
-     *              @OA\Property(
-     *                  property="data",
-     *                  type="array",
-     *                  @OA\Items(
-     *                      type="object",
-     *                      @OA\Property(property="type", type="string"),
-     *                      @OA\Property(property="id", type="string"),
-     *                      @OA\Property(
-     *                          property="attributes",
-     *                          type="object",
-     *                          @OA\Property(property="name", type="string"),
-     *                          @OA\Property(property="value", type="string"),
-     *                          @OA\Property(property="description", type="string")
-     *                      )
-     *                  )
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Access Denied",
-     *          @OA\JsonContent(
-     *              type="object",
-     *              @OA\Property(property="errors", type="array", @OA\Items(
-     *                  type="object",
-     *                  @OA\Property(property="status", type="string"),
-     *                  @OA\Property(property="title", type="string"),
-     *                  @OA\Property(property="detail", type="string")
-     *              ))
-     *          )
-     *      )
-     *  )
-     * /
      * @param AuthorizationCheckerInterface $authorizationChecker
      * @return JsonResponse
      */
-    #[Route('/config', name: 'get_config', methods: ['GET'])]
+    #[Route('/config/json', name: 'api_get_config_json', methods: ['GET'])]
     public function getConfig(
         AuthorizationCheckerInterface $authorizationChecker,
     ): JsonResponse {
