@@ -3,7 +3,7 @@
 namespace App\Api\V1\Controller;
 
 use App\Repository\SettingRepository;
-use http\Env\Request;
+use App\Service\GetSettings;
 use HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,16 +12,28 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class ConfigController extends AbstractController
 {
+    private GetSettings $getSettings;
+    private SettingRepository $settingRepository;
+
+    /**
+     * @param GetSettings $getSettings
+     * @param SettingRepository $settingRepository
+     */
+    public function __construct(
+        GetSettings $getSettings,
+        SettingRepository $settingRepository,
+    ) {
+        $this->getSettings = $getSettings;
+        $this->settingRepository = $settingRepository;
+    }
+
     /**
      * @throws HttpException
      */
     #[Route('/config', name: 'get_config', methods: ['GET'])]
     public function getConfig(
-        SettingRepository $settingRepository,
         AuthorizationCheckerInterface $authorizationChecker,
-        Request $request
     ): JsonResponse {
-
         if (!$authorizationChecker->isGranted('ROLE_USER')) {
             throw new HttpException(403, 'Access Denied');
         }
@@ -47,13 +59,24 @@ class ConfigController extends AbstractController
             'SMS_TIMER_RESEND'
         ];
 
-        $settings = $settingRepository->findAllExcept($excludedNames);
+        $settings = $this->settingRepository->findAllExcept($excludedNames);
         $config = [];
 
         foreach ($settings as $setting) {
-            $config[$setting->getName()] = $setting->getValue();
+            $config[] = [
+                'id' => $setting->getId(),
+                'name' => $setting->getName(),
+                'value' => $setting->getValue(),
+                'description' => $this->getSettings->getSettingDescription($setting->getName()),
+                'type' => 'setting' // return object structure
+            ];
         }
 
-        return new JsonResponse($config);
+        // return status code and data content
+        return new JsonResponse([
+            'status' => true,
+            'data' => $config
+        ], 200
+        );
     }
 }
