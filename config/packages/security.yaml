@@ -1,5 +1,6 @@
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    enable_authenticator_manager: true
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
@@ -15,10 +16,22 @@ security:
                 user_class: 'App\Entity\User'
                 default_roles: ['ROLE_USER']
     firewalls:
+        api:
+            pattern: ^/api/
+            stateless: true
+            jwt: ~
+
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
+            json_login:
+                check_path: /authentication_token
+                username_path: uuid
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
             lazy: true
             provider: app_user_provider
             form_login:
@@ -53,7 +66,8 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
-
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 when@test:
     security:
         password_hashers:
