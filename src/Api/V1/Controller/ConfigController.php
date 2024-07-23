@@ -20,7 +20,7 @@ class ConfigController extends AbstractController
 
     public function __invoke(): JsonResponse
     {
-        // The rest of your logic
+        // The excluded private settings
         $excludedNames = [
             'RADIUS_REALM_NAME',
             'DISPLAY_NAME',
@@ -43,6 +43,7 @@ class ConfigController extends AbstractController
             'SMS_TIMER_RESEND'
         ];
 
+        // fetch all the settings excluding the ones on top
         $settings = $this->settingRepository->findAllExcept($excludedNames);
         $data = array_map(function ($setting) {
             return [
