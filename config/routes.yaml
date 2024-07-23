@@ -10,3 +10,7 @@ api_v1:
     prefix: /api/v1
     resource: '../src/Api/V1/Controller/'
     type: annotation
+
+api_login_check:
+    path: /api/login_check
+    methods: ['POST']

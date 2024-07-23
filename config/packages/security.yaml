@@ -21,7 +21,7 @@ security:
             security: false
         main:
             json_login:
-                check_path: /authentication_token
+                check_path: /api/login_check
                 username_path: uuid
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -62,6 +62,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
