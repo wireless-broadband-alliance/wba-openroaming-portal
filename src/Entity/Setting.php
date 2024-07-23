@@ -14,8 +14,14 @@ use Doctrine\ORM\Mapping as ORM;
     Each setting consists of a name and an optional value, 
     which can be used to store and return configuration parameters required for  the API.",
     operations: [
-        new GetCollection(),
-    ]
+        new GetCollection(
+            uriTemplate: '/v1/config',
+            controller: ConfigController::class,
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "You don't have permission to access this resource",
+            name: 'ConfigSettings'
+        ),
+    ],
 )]
 class Setting
 {
@@ -24,9 +30,15 @@ class Setting
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * The settings name
+     */
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    /**
+     * The settings value
+     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $value = null;
 

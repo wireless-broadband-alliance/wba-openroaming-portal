@@ -6,46 +6,21 @@ use App\Repository\SettingRepository;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class ConfigController extends AbstractController
 {
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
 
-    /**
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     */
-    public function __construct(
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-    ) {
+    public function __construct(SettingRepository $settingRepository, GetSettings $getSettings)
+    {
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
     }
 
-    /**
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @return JsonResponse
-     */
-    #[Route('/config/json', name: 'api_get_config_json', methods: ['GET'])]
-    public function getConfig(
-        AuthorizationCheckerInterface $authorizationChecker,
-    ): JsonResponse {
-        if (!$authorizationChecker->isGranted('ROLE_USER')) {
-            return new JsonResponse([
-                'errors' => [
-                    [
-                        'status' => '403',
-                        'title' => 'Access Denied',
-                        'detail' => 'You do not have permission to access this resource.'
-                    ]
-                ]
-            ], 403);
-        }
-
+    public function __invoke(): JsonResponse
+    {
+        // The rest of your logic
         $excludedNames = [
             'RADIUS_REALM_NAME',
             'DISPLAY_NAME',
@@ -71,7 +46,7 @@ class ConfigController extends AbstractController
         $settings = $this->settingRepository->findAllExcept($excludedNames);
         $data = array_map(function ($setting) {
             return [
-                'type' => 'setting',
+                'Entity' => 'Setting',
                 'id' => (string)$setting->getId(),
                 'attributes' => [
                     'name' => $setting->getName(),
@@ -81,9 +56,8 @@ class ConfigController extends AbstractController
             ];
         }, $settings);
 
-        // Return status code and data content
         return new JsonResponse([
-            'type' => 'setting',
+            'Entity' => 'Setting',
             'status' => 200,
             'meta' => [
                 'total' => count($settings)
