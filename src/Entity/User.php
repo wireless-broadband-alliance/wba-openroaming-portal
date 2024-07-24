@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use App\Api\V1\Controller\GetCurrentUser;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,6 +17,20 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ApiResource(
+    description: "The User entity returns values related to the current user.",
+    operations: [
+        new GetCollection(
+            uriTemplate: '/v1/users',
+            controller: GetCurrentUser::class,
+            shortName: 'GetCurrentUser',
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "You don't have permission to access this resource",
+            description: 'Returns current authenticated user values from the User entity',
+            name: 'app_get_current_user',
+        ),
+    ],
+)]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
 #[ORM\HasLifecycleCallbacks]
 class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthenticatedUserInterface
@@ -22,10 +39,14 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
+    /**
+     * The User Unique Identification Definition
+     */
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
-
+    /**
+     * The Associated Roles
+     */
     #[ORM\Column]
     private array $roles = [];
 
@@ -34,53 +55,85 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
      */
     #[ORM\Column]
     private ?string $password = null;
-
+    /**
+     * The user email (not mandatory)
+     */
     #[ORM\Column(length: 255)]
     #[Assert\Email]
     private ?string $email = null;
-
+    /**
+     * The system verification status
+     */
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
-
+    /**
+     * The user saml identifier (not mandatory, only if it's a SAML account)
+     */
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
-
+    /**
+     * The user first name
+     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
-
+    /**
+     * The user last name
+     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $last_name = null;
-
+    /**
+     * The user radius account identifier to generate passpoint provisioning profiles (foreign key)
+     */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
     private Collection $userRadiusProfiles;
-
+    /**
+     * The user radius account identifier for authentications request (foreign key)
+     */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
-
+    /**
+     * The user last verification code
+     */
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
-
+    /**
+     * The user google account identificationr (not mandatoru, only if it's a google account)
+     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleId = null;
-
+    /**
+     * The user creation date
+     */
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
-
+    /**
+     * The user ban date
+     */
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
-
+    /**
+     * The user event identifcation logger (foreign key)
+     */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
     private Collection $event;
-
+    /**
+     * The user deletion date
+     */
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
-
+    /**
+     * The user phone number (not mandatory, only if it's a phone number account)
+     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phoneNumber = null;
-
+    /**
+     * The user forgot_passsowrd_request
+     */
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
-
+    /**
+     * The user deleted data identification (foreign key)
+     */
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?DeletedUserData $deletedUserData = null;
 
