@@ -17,10 +17,10 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
-            shortName: 'GetPublicSettings',
+            shortName: 'Setting',
+            description: 'Returns public values from the Setting entity',
             security: "is_granted('ROLE_ADMIN')",
             securityMessage: "You don't have permission to access this resource",
-            description: 'Returns public values from the Setting entity',
             name: 'app_config_settings',
         ),
     ],

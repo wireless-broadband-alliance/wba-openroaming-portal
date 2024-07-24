@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             uriTemplate: '/v1/users',
             controller: GetCurrentUser::class,
-            shortName: 'GetCurrentUser',
+            shortName: 'User',
             security: "is_granted('ROLE_ADMIN')",
             securityMessage: "You don't have permission to access this resource",
             description: 'Returns current authenticated user values from the User entity',
