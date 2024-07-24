@@ -28,12 +28,6 @@ class Event
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $verification_attempts = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTimeInterface $last_verification_code_time = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -83,30 +77,6 @@ class Event
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    public function getVerificationAttempts(): ?int
-    {
-        return $this->verification_attempts;
-    }
-
-    public function setVerificationAttempts(?int $verification_attempts): static
-    {
-        $this->verification_attempts = $verification_attempts;
-
-        return $this;
-    }
-
-    public function getLastVerificationCodeTime(): ?DateTimeInterface
-    {
-        return $this->last_verification_code_time;
-    }
-
-    public function setLastVerificationCodeTime(?DateTimeInterface $last_verification_code_time): static
-    {
-        $this->last_verification_code_time = $last_verification_code_time;
 
         return $this;
     }
