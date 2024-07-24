@@ -104,6 +104,8 @@ class SiteController extends AbstractController
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         // Check if the user is logged in and verification of the user
         // And Check if the user dont have a forgot_password_request active
@@ -112,10 +114,7 @@ class SiteController extends AbstractController
             $data["USER_VERIFICATION"]["value"] === EmailConfirmationStrategy::EMAIL &&
             $this->getUser()
         ) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
             $verification = $currentUser->isVerified();
-
             // Check if the user is verified
             if (!$verification) {
                 $this->addFlash('error', 'Your account is not verified to download a profile!');
@@ -137,7 +136,7 @@ class SiteController extends AbstractController
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                    $this->addFlash('error', 'Please select OS');
+                    $this->addFlash('error', 'Please select Operating System!');
                 } elseif ($this->getUser() === null) {
                     $user = new User();
                     $form = $this->createForm(RegistrationFormType::class, $user);
@@ -209,7 +208,7 @@ class SiteController extends AbstractController
         } elseif ($request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                $this->addFlash('error', 'Please select OS');
+                $this->addFlash('error', 'Please select Operating System!');
             }
             if (!array_key_exists('radio-os', $payload)) {
                 if (!array_key_exists('detected-os', $payload)) {
@@ -251,6 +250,10 @@ class SiteController extends AbstractController
                 OSTypes::ANDROID => ['alt' => 'Android Logo']
             ]
         ];
+
+        if ($data['os']['selected'] == OSTypes::NONE && $currentUser && $currentUser->isVerified()) {
+            $this->addFlash('error', 'Please select Operating System!');
+        }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
@@ -411,9 +414,14 @@ class SiteController extends AbstractController
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
                 // Check if enough time has passed since the last attempt
+                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                    : null;
+
                 if (
-                    !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                        $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+                    !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                        $lastVerificationCodeTime->add($minInterval) < $currentTime)
                 ) {
                     // Save event with attempt count and current time
                     if (!$latestEvent) {
@@ -421,13 +429,16 @@ class SiteController extends AbstractController
                         $latestEvent->setUser($user);
                         $latestEvent->setEventDatetime(new DateTime());
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-                        $latestEvent->setEventMetadata([
+                        $latestEventMetadata = [
                             'platform' => PlatformMode::LIVE,
                             'ip' => $_SERVER['REMOTE_ADDR'],
                             'uuid' => $user->getUuid(),
-                        ]);
+                        ];
                     }
-                    $latestEvent->setLastVerificationCodeTime($currentTime);
+
+                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                    $latestEvent->setEventMetadata($latestEventMetadata);
+
                     $user->setForgotPasswordRequest(true);
                     $this->eventRepository->save($latestEvent, true);
 
@@ -525,14 +536,22 @@ class SiteController extends AbstractController
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
-                if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                    : null;
+                $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+                    ? $latestEventMetadata['verificationAttempts']
+                    : 0;
+
+                if (!$latestEvent || $verificationAttempts < 3) {
                     // Check if enough time has passed since the last attempt
                     if (
-                        !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                            $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+                        !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                            $lastVerificationCodeTime->add($minInterval) < $currentTime)
                     ) {
                         // Increment the attempt count
-                        $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+                        $attempts = $verificationAttempts + 1;
 
                         // Save event with attempt count and current time
                         if (!$latestEvent) {
@@ -540,14 +559,17 @@ class SiteController extends AbstractController
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
-                            $latestEvent->setEventMetadata([
+                            $latestEventMetadata = [
                                 'platform' => PlatformMode::LIVE,
                                 'ip' => $_SERVER['REMOTE_ADDR'],
                                 'uuid' => $user->getUuid(),
-                            ]);
+                            ];
                         }
-                        $latestEvent->setVerificationAttempts($attempts);
-                        $latestEvent->setLastVerificationCodeTime($currentTime);
+
+                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEventMetadata['verificationAttempts'] = $attempts;
+                        $latestEvent->setEventMetadata($latestEventMetadata);
+
                         $user->setForgotPasswordRequest(true);
                         $this->eventRepository->save($latestEvent, true);
 
@@ -591,7 +613,7 @@ class SiteController extends AbstractController
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
                         }
-                        $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                        $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
                             $user->getPhoneNumber(),
@@ -605,7 +627,7 @@ class SiteController extends AbstractController
                 } else {
                     $this->addFlash(
                         'warning',
-                        'You have exceed the limits for verification password. Please contact our support for help.'
+                        'You have exceeded the limits for verification password. Please contact our support for help.'
                     );
                 }
             } else {
@@ -819,12 +841,20 @@ class SiteController extends AbstractController
             $currentTime = new DateTime();
 
             // Check if enough time has passed since the last attempt
+            $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+            $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                : null;
+            $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+                ? $latestEventMetadata['verificationAttempts']
+                : 0;
+
             if (
-                !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+                !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                    $lastVerificationCodeTime->add($minInterval) < $currentTime)
             ) {
                 // Increment the attempt count
-                $attempts = (!$latestEvent) ? 1 : $latestEvent->getVerificationAttempts() + 1;
+                $attempts = $verificationAttempts + 1;
 
                 $email = $this->createEmailCode($currentUser->getEmail());
                 $mailer->send($email);
@@ -835,15 +865,17 @@ class SiteController extends AbstractController
                     $latestEvent->setUser($currentUser);
                     $latestEvent->setEventDatetime(new DateTime());
                     $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
-                    $latestEvent->setEventMetadata([
+                    $latestEventMetadata = [
                         'platform' => PlatformMode::LIVE,
                         'uuid' => $currentUser->getEmail(),
                         'ip' => $_SERVER['REMOTE_ADDR'],
-                    ]);
+                    ];
                 }
 
-                $latestEvent->setVerificationAttempts($attempts);
-                $latestEvent->setLastVerificationCodeTime($currentTime);
+                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                $latestEventMetadata['verificationAttempts'] = $attempts;
+                $latestEvent->setEventMetadata($latestEventMetadata);
+
                 $eventRepository->save($latestEvent, true);
 
                 $message = sprintf('We have sent you a new code to: %s.', $currentUser->getEmail());
@@ -971,7 +1003,7 @@ class SiteController extends AbstractController
 
         // Checks if the user has a "forgot_password_request", if yes, return to password reset form
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-            $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+            $this->addFlash('error', 'You need to confirm the new password before downloading a profile!');
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
@@ -979,12 +1011,17 @@ class SiteController extends AbstractController
             $result = $sendSmsService->regenerateSmsCode($currentUser);
 
             if ($result) {
-                // If he gets true from the service, show the attempts left with a message
+                // If the service returns true, show the attempts left with a message
                 $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
 
                 // Check if $latestEvent to avoid null conflicts
                 if ($latestEvent) {
-                    $attemptsLeft = 3 - $latestEvent->getVerificationAttempts();
+                    $latestEventMetadata = $latestEvent->getEventMetadata();
+                    $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+                        ? $latestEventMetadata['verificationAttempts']
+                        : 0;
+                    $attemptsLeft = 3 - $verificationAttempts;
+
                     $message = sprintf(
                         'We have sent you a new code to: %s. You have %d attempt(s) left.',
                         $currentUser->getPhoneNumber(),
