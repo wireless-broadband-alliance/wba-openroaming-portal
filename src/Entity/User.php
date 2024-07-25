@@ -40,12 +40,12 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?int $id = null;
     /**
-     * The User Unique Identification Definition
+     * User Unique Identification Definition
      */
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
     /**
-     * The Associated Roles
+     *  Associated Roles
      */
     #[ORM\Column]
     private array $roles = [];
@@ -56,83 +56,83 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?string $password = null;
     /**
-     * The user email (not mandatory)
+     *  User email (not mandatory)
      */
     #[ORM\Column(length: 255)]
     #[Assert\Email]
     private ?string $email = null;
     /**
-     * The system verification status
+     * System verification status
      */
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
     /**
-     * The user saml identifier (not mandatory, only if it's a SAML account)
+     * User saml identifier (not mandatory, only if it's a SAML account)
      */
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
     /**
-     * The user first name
+     * User first name
      */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
     /**
-     * The user last name
+     * User last name
      */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $last_name = null;
     /**
-     * The user radius account identifier to generate passpoint provisioning profiles (foreign key)
+     * User radius account identifier to generate passpoint provisioning profiles (foreign key)
      */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
     private Collection $userRadiusProfiles;
     /**
-     * The user radius account identifier for authentications request (foreign key)
+     * User radius account identifier for authentications request (foreign key)
      */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
     /**
-     * The user last verification code
+     * User last verification code
      */
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
     /**
-     * The user google account identificationr (not mandatoru, only if it's a google account)
+     * User google account identificationr (not mandatoru, only if it's a google account)
      */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleId = null;
     /**
-     * The user creation date
+     * User creation date
      */
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
     /**
-     * The user ban date
+     * User ban date
      */
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
     /**
-     * The user event identifcation logger (foreign key)
+     * User event identifcation logger (foreign key)
      */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
     private Collection $event;
     /**
-     * The user deletion date
+     * User deletion date
      */
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
     /**
-     * The user phone number (not mandatory, only if it's a phone number account)
+     * User phone number (not mandatory, only if it's a phone number account)
      */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phoneNumber = null;
     /**
-     * The user forgot_passsowrd_request
+     * User forgot_passsowrd_request
      */
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
     /**
-     * The user deleted data identification (foreign key)
+     * User deleted data identification (foreign key)
      */
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?DeletedUserData $deletedUserData = null;
