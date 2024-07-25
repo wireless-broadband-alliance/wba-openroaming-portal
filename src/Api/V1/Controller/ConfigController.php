@@ -30,11 +30,22 @@ class ConfigController extends AbstractController
             'ALL_AUTHS_JUST_ENABLED_VALUES',
             'TOS_LINK',
             'PRIVACY_POLICY_LINK',
+            'AUTH_METHOD_SAML_ENABLED',
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+            'AUTH_METHOD_REGISTER_ENABLED',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+            'AUTH_METHOD_SMS_REGISTER_ENABLED'
         ];
 
         // Envs variables
         $includedNamesEnvs = [
             'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key'),
+            'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
+            'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn'),
+            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
+            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
+            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
+            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
         ];
 
         $settings = $this->settingRepository->findAllIn($includedNamesSetting);
