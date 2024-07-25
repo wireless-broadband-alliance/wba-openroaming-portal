@@ -21,10 +21,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     description: "The User entity returns values related to the current user.",
     operations: [
         new GetCollection(
-            uriTemplate: '/v1/users',
+            uriTemplate: '/v1/user',
             controller: GetCurrentUser::class,
             shortName: 'User',
-            security: "is_granted('ROLE_ADMIN')",
+            security: "is_granted('ROLE_USER')",
             securityMessage: "You don't have permission to access this resource",
             description: 'Returns current authenticated user values from the User entity',
             name: 'app_get_current_user',

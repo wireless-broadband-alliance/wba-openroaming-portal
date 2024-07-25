@@ -15,22 +15,7 @@ class GetCurrentUser extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        if (!$currentUser) {
-            $response = new BaseResponse(403, [
-                'errors' => [
-                    [
-                        'status' => '403',
-                        'title' => 'Access Denied',
-                        'detail' => 'You are not authenticated.',
-                    ]
-                ]
-            ]);
-            return $response->toResponse();
-        }
-
         $content = [
-            'Entity' => 'User',
-            'id' => (string)$currentUser->getId(),
             'attributes' => [
                 'uuid' => $currentUser->getUuid(),
                 'email' => $currentUser->getEmail(),
@@ -51,12 +36,6 @@ class GetCurrentUser extends AbstractController
             ]
         ];
 
-        $response = new BaseResponse(200, [
-            'Entity' => 'User',
-            'status' => 200,
-            'content' => $content,
-        ]);
-
-        return $response->toResponse();
+        return (new BaseResponse(200, $content))->toResponse();
     }
 }
