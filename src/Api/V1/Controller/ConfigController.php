@@ -5,56 +5,52 @@ namespace App\Api\V1\Controller;
 use App\Api\V1\BaseResponse;
 use App\Repository\SettingRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ConfigController extends AbstractController
 {
     private SettingRepository $settingRepository;
+    private ParameterBagInterface $parameterBag;
 
-    public function __construct(SettingRepository $settingRepository)
+    public function __construct(SettingRepository $settingRepository, ParameterBagInterface $parameterBag)
     {
         $this->settingRepository = $settingRepository;
+        $this->parameterBag = $parameterBag;
     }
 
     public function __invoke(): JsonResponse
     {
-        // The excluded private settings
-        $excludedNames = [
-            'RADIUS_REALM_NAME',
-            'DISPLAY_NAME',
-            'PAYLOAD_IDENTIFIER',
-            'OPERATOR_NAME',
-            'DOMAIN_NAME',
-            'RADIUS_TLS_NAME',
-            'NAI_REALM',
-            'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
-            'SYNC_LDAP_ENABLED',
-            'SYNC_LDAP_SERVER',
-            'SYNC_LDAP_BIND_USER_DN',
-            'SYNC_LDAP_BIND_USER_PASSWORD',
-            'SYNC_LDAP_SEARCH_BASE_DN',
-            'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
-            'SMS_HANDLE',
-            'SMS_USERNAME',
-            'SMS_USER_ID',
-            'SMS_FROM',
-            'SMS_TIMER_RESEND'
+        // The included settings
+        $includedNamesSetting = [
+            'PLATFORM_MODE',
+            'USER_VERIFICATION',
+            'TURNSTILE_CHECKER',
+            'CONTACT_EMAIL',
+            'ALL_AUTHS_JUST_ENABLED_VALUES',
+            'TOS_LINK',
+            'PRIVACY_POLICY_LINK',
         ];
 
-        // fetch all the settings excluding the ones on top
-        $settings = $this->settingRepository->findAllExcept($excludedNames);
-        $content = array_map(static function ($setting) {
-            return [
-                'name' => $setting->getName(),
-                'value' => $setting->getValue(),
-            ];
-        }, $settings);
+        // Envs variables
+        $includedNamesEnvs = [
+            'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key'),
+        ];
 
-        $response = new BaseResponse(200, [
-            'status' => 200,
-            'content' => $content,
-        ]);
+        $settings = $this->settingRepository->findAllIn($includedNamesSetting);
+        $content = [];
 
-        return $response->toResponse();
+        // Map the settings into a single associative array
+        foreach ($settings as $setting) {
+            $content[$setting->getName()] = $setting->getValue();
+        }
+
+        // Add the environmental settings to the content
+        foreach ($includedNamesEnvs as $name => $value) {
+            $content[$name] = $value;
+        }
+
+        // Create the response
+        return (new BaseResponse(200, $content))->toResponse();
     }
 }

@@ -66,14 +66,14 @@ class SettingRepository extends ServiceEntityRepository
 
     /**
      * Find all settings except those specified by name
-     * @param array $excludedNames
+     * @param array $includedNames
      * @return array
      */
-    public function findAllExcept(array $excludedNames): array
+    public function findAllIn(array $includedNames): array
     {
         $qb = $this->createQueryBuilder('u')
-            ->where('u.name NOT IN (:excludeNames)')
-            ->setParameter('excludeNames', $excludedNames);
+            ->where('u.name IN (:includeNames)')
+            ->setParameter('includeNames', $includedNames);
 
 
         return $qb->getQuery()->getResult();

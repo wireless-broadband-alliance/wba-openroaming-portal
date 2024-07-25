@@ -10,6 +10,7 @@ parameters:
   app.export_users: '%env(EXPORT_USERS)%'
   app.export_freeradius_statistics: '%env(EXPORT_FREERADIUS_STATISTICS)%'
   app.pgp_public_key: '%env(ENABLE_DELETE_USERS_UI)%'
+  app.turnstile_key: '%env(TURNSTILE_KEY)%'
 services:
   App\Form\Transformer\BooleanToDateTimeTransformer: ~
   #Things to make the login with Google work
