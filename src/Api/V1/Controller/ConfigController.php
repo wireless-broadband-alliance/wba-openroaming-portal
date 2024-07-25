@@ -21,8 +21,8 @@ class ConfigController extends AbstractController
 
     public function __invoke(): JsonResponse
     {
-        // The included settings
-        $includedNamesSetting = [
+        // Settings to fetch
+        $includedSettings = [
             'PLATFORM_MODE',
             'USER_VERIFICATION',
             'TURNSTILE_CHECKER',
@@ -37,28 +37,51 @@ class ConfigController extends AbstractController
             'AUTH_METHOD_SMS_REGISTER_ENABLED'
         ];
 
-        // Envs variables
-        $includedNamesEnvs = [
-            'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key'),
-            'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
-            'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn'),
-            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
+        // Envs variables organized by provider
+        $envs = [
+            'turnstile' => [
+                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key'),
+            ],
+            'google' => [
+                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
+            ],
+            'sentry' => [
+                'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn'),
+            ],
+            'saml' => [
+                'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
+                'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
+                'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
+                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
+            ],
         ];
 
-        $settings = $this->settingRepository->findAllIn($includedNamesSetting);
+        $settings = $this->settingRepository->findAllIn($includedSettings);
         $content = [];
+
+        // Convert string values to boolean
+        function convertToBoolean($value) {
+            $trueValues = ['ON', 'TRUE', '1', 1, true];
+            $falseValues = ['OFF', 'FALSE', '0', 0, false];
+            if (in_array(strtoupper($value), $trueValues, true)) {
+                return true;
+            }
+            if (in_array(strtoupper($value), $falseValues, true)) {
+                return false;
+            }
+            return $value;
+        }
 
         // Map the settings into a single associative array
         foreach ($settings as $setting) {
-            $content[$setting->getName()] = $setting->getValue();
+            $content[$setting->getName()] = convertToBoolean($setting->getValue());
         }
 
         // Add the environmental settings to the content
-        foreach ($includedNamesEnvs as $name => $value) {
-            $content[$name] = $value;
+        foreach ($envs as $provider => $envSettings) {
+            foreach ($envSettings as $name => $value) {
+                $content[$provider][$name] = $value;
+            }
         }
 
         // Create the response
