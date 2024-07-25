@@ -10,6 +10,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use RuntimeException;
@@ -116,8 +117,17 @@ class SendSMS
     {
         $latestEvent = $eventRepository->findLatestSmsAttemptEvent($user);
 
-        // Check the number of attempts
-        return !$latestEvent || $latestEvent->getVerificationAttempts() < 3;
+        if (!$latestEvent) {
+            return true;
+        }
+
+        // Retrieve verification attempts from metadata
+        $latestEventMetadata = $latestEvent->getEventMetadata();
+        $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+            ? (int)$latestEventMetadata['verificationAttempts']
+            : 0;
+
+        return $verificationAttempts < 3;
     }
 
     /**
@@ -130,7 +140,7 @@ class SendSMS
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws \RuntimeException
+     * @throws RuntimeException
      * @throws Exception
      */
     public function regenerateSmsCode(User $user): bool
@@ -138,13 +148,20 @@ class SendSMS
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
-        if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+        // Retrieve metadata from the latest event
+        $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+        $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+            ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+            : null;
+        $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+
+        if (!$latestEvent || $verificationAttempts < 3) {
             $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
             if (
-                !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+                !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                    $lastVerificationCodeTime->add($minInterval) < $currentTime)
             ) {
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
@@ -154,6 +171,8 @@ class SendSMS
                         'platform' => PlatformMode::LIVE,
                         'ip' => $_SERVER['REMOTE_ADDR'],
                         'uuid' => $user->getUuid(),
+                        'verificationAttempts' => 0,
+                        'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM)
                     ];
                     $this->eventActions->saveEvent(
                         $user,
@@ -163,12 +182,12 @@ class SendSMS
                     );
                 } else {
                     // Increment the attempts
-                    $attempts = $latestEvent->getVerificationAttempts() + 1;
+                    $attempts = $verificationAttempts + 1;
+                    $latestEventMetadata['verificationAttempts'] = $attempts;
+                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
+                    $latestEvent->setEventMetadata($latestEventMetadata);
+                    $this->eventRepository->save($latestEvent, true);
                 }
-
-                $latestEvent->setVerificationAttempts($attempts);
-                $latestEvent->setLastVerificationCodeTime($currentTime);
-                $this->eventRepository->save($latestEvent, true);
 
                 // Generate a new verification code and resend the SMS
                 $verificationCode = $this->generateVerificationCode($user);
