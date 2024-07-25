@@ -14,3 +14,7 @@ api_v1:
 api_auth_local:
     path: /api/auth/local
     methods: ['POST']
+
+api_get_current_user:
+    path: /api/v1/user
+    methods: ['GET']
