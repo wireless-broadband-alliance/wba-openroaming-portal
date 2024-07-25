@@ -54,3 +54,7 @@ Dockerfile-dev
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###

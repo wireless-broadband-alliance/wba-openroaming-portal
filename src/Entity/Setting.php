@@ -19,8 +19,6 @@ use Doctrine\ORM\Mapping as ORM;
             controller: ConfigController::class,
             shortName: 'Setting',
             description: 'Returns public values from the Setting entity',
-            security: "is_granted('ROLE_ADMIN')",
-            securityMessage: "You don't have permission to access this resource",
             name: 'app_config_settings',
         ),
     ],
