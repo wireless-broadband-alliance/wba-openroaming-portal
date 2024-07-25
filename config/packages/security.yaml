@@ -21,7 +21,7 @@ security:
             security: false
         main:
             json_login:
-                check_path: /api/login_check
+                check_path: /api/auth/local
                 username_path: uuid
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -58,12 +58,11 @@ security:
         api:
             pattern: ^/api/
             stateless: true
+
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
-        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

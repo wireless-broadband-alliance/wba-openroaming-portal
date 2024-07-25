@@ -4,18 +4,15 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Repository\SettingRepository;
-use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ConfigController extends AbstractController
 {
-    private GetSettings $getSettings;
     private SettingRepository $settingRepository;
 
-    public function __construct(SettingRepository $settingRepository, GetSettings $getSettings)
+    public function __construct(SettingRepository $settingRepository)
     {
-        $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
     }
 
@@ -46,24 +43,15 @@ class ConfigController extends AbstractController
 
         // fetch all the settings excluding the ones on top
         $settings = $this->settingRepository->findAllExcept($excludedNames);
-        $content = array_map(function ($setting) {
+        $content = array_map(static function ($setting) {
             return [
-                'Entity' => 'Setting',
-                'id' => (string)$setting->getId(),
-                'attributes' => [
-                    'name' => $setting->getName(),
-                    'value' => $setting->getValue(),
-                    'description' => $this->getSettings->getSettingDescription($setting->getName()),
-                ]
+                'name' => $setting->getName(),
+                'value' => $setting->getValue(),
             ];
         }, $settings);
 
         $response = new BaseResponse(200, [
-            'Entity' => 'Setting',
             'status' => 200,
-            'meta' => [
-                'total' => count($settings)
-            ],
             'content' => $content,
         ]);
 
