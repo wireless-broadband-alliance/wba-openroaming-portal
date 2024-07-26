@@ -61,7 +61,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
                     'provider' => UserProvider::GOOGLE_ACCOUNT,
                     'provider_id' => $googleId,
                 ]);
-                dd($userExternalAuth);
+
                 if ($userExternalAuth) {
                     // Existing user found
                     $existingUser = $userExternalAuth->getUser();
