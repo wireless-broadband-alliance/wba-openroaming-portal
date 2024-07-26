@@ -20,6 +20,7 @@ use App\Form\ResetPasswordType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
+use App\Form\UserExternalAuthType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
@@ -580,11 +581,49 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        // Fetch the first `UserExternalAuth` instance or create a new one if it does not exist
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+        if (!$userExternalAuth) {
+            $userExternalAuth = new UserExternalAuth();
+            $userExternalAuth->setUser($user);
+        }
+
+        $formExternalAuth = $this->createForm(UserExternalAuthType::class, $userExternalAuth);
+        $formExternalAuth->handleRequest($request);
+
+        if ($formExternalAuth->isSubmitted() && $formExternalAuth->isValid()) {
+            // Get the updated `UserExternalAuth` instance
+            $updatedExternalAuth = $formExternalAuth->getData();
+
+            // Perform necessary operations (e.g., saving the entity)
+            $em->persist($updatedExternalAuth);
+            $em->flush();
+
+            // Logging and flash messages
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'edited' => $user->getUuid(),
+                'by' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            $uuid = $user->getUuid();
+            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
+
+            return $this->redirectToRoute('admin_page');
+        }
+
         return $this->render(
             'admin/edit.html.twig',
             [
                 'form' => $form->createView(),
                 'formReset' => $formReset->createView(),
+                'formExternalAuth' => $formExternalAuth->createView(),
                 'user' => $user,
                 'data' => $data,
                 'current_user' => $currentUser,
