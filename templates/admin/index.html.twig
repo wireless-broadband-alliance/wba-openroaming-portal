@@ -31,8 +31,8 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {'filter': 'verified'}) }}"
-                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
+                        <a href="{{ path('admin_page', {'filter': constant('App\\Enum\\UserVerificationStatus::VERIFIED') }) }}"
+                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 Verified
                             </h1>
@@ -40,8 +40,8 @@
                                 {{ verifiedUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {'filter': 'banned'}) }}"
-                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
+                        <a href="{{ path('admin_page', {'filter': constant('App\\Enum\\UserVerificationStatus::BANNED')}) }}"
+                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 Banned
                             </h1>
@@ -143,9 +143,9 @@
                                         <div class="pill-error">
                                             {% if searchTerm %}
                                                 No users found with "{{ searchTerm }}"
-                                            {% elseif app.request.query.get('filter') == 'verified' %}
+                                            {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}
                                                 There are no verified users in the system
-                                            {% elseif app.request.query.get('filter') == 'banned' %}
+                                            {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}
                                                 There are no banned users in the system
                                             {% else %}
                                                 There are no users in the system
