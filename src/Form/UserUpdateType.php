@@ -27,16 +27,7 @@ class UserUpdateType extends AbstractType
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'required' => true,
-            ])
-            ->add('samlIdentifier', TextType::class, [
-                'label' => 'SAML Identifier',
                 'required' => false,
-                /*
-                'constraints' => [
-                    new NoSpecialCharacters(),
-                ],
-                */
             ])
             ->add('firstName', TextType::class, [
                 'label' => 'First Name',

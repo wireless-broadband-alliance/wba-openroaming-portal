@@ -35,7 +35,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Email]
     private ?string $email = null;
 
@@ -167,7 +167,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 

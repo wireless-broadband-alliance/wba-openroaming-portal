@@ -523,8 +523,8 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
-            $email = $user->getEmail();
-            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
+            $uuid = $user->getUuid();
+            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
 
             return $this->redirectToRoute('admin_page');
         }
