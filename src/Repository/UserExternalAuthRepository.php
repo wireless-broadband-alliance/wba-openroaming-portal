@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -44,11 +45,11 @@ class UserExternalAuthRepository extends ServiceEntityRepository
      * Fetch portal users counts based on the providerId within a date range.
      *
      * @param string $provider
-     * @param \DateTime|null $startDate
-     * @param \DateTime|null $endDate
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
      * @return array
      */
-    public function getPortalUserCounts(string $provider, ?\DateTime $startDate, ?\DateTime $endDate): array
+    public function getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate): array
     {
         $qb = $this->createQueryBuilder('uea')
             ->innerJoin('uea.user', 'u')
