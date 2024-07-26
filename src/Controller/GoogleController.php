@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -183,41 +184,54 @@ class GoogleController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Google user ID exists
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
-        if ($existingUser) {
-            // If a user with the given Google user ID exists, return the user
-            return $existingUser;
+        // Check if a user with the given Google user ID exists in UserExternalAuth
+        $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
+            'provider' => UserProvider::GOOGLE_ACCOUNT,
+            'provider_id' => $googleUserId
+        ]);
+
+        if ($userExternalAuth) {
+            // If a user with the given Google user ID exists, return the associated user
+            return $userExternalAuth->getUser();
         }
 
         // Check if a user with the given email exists
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail) {
-            if ($userWithEmail->getGoogleId() === null) {
+            $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
+                'user' => $userWithEmail
+            ]);
+
+            if (!$existingUserAuth) {
                 $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;
             }
 
-            // Return the correct user to authenticate
+            // If a user with the given email exists and they don't have an external auth entry, return the user
             return $userWithEmail;
         }
 
-        // If no user exists, create a new user with a new set of Events
+        // If no user exists, create a new user and a corresponding UserExternalAuth entry
         $user = new User();
-        $user->setGoogleId($googleUserId)
-            ->setIsVerified(true)
+        $user->setIsVerified(true)
             ->setEmail($email)
             ->setFirstName($firstname)
             ->setLastName($lastname)
             ->setCreatedAt(new DateTime())
             ->setUuid($email);
 
+        $userAuth = new UserExternalAuth();
+        $userAuth->setUser($user)
+            ->setProvider(UserProvider::GOOGLE_ACCOUNT)
+            ->setProviderId($googleUserId);
+
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
         $this->entityManager->persist($user);
+        $this->entityManager->persist($userAuth);
         $this->entityManager->flush();
 
         $event_metadata = [
