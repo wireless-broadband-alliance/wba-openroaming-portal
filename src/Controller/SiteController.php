@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
@@ -28,6 +29,7 @@ use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security\UserAuthenticator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -139,6 +141,7 @@ class SiteController extends AbstractController
                     $this->addFlash('error', 'Please select Operating System!');
                 } elseif ($this->getUser() === null) {
                     $user = new User();
+                    $userAuths = new UserExternalAuth();
                     $form = $this->createForm(RegistrationFormType::class, $user);
                     $form->handleRequest($request);
                     if ($form->isSubmitted() && $form->isValid()) {
@@ -148,8 +151,11 @@ class SiteController extends AbstractController
                         $user->setCreatedAt(new \DateTime());
                         $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
+                        $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
+                        $userAuths->setProviderId(UserProvider::EMAIL);
+                        $userAuths->setUser($user);
                         $entityManager->persist($user);
-
+                        $entityManager->persist($userAuths);
                         // Defines the Event to the table
                         $eventMetadata = [
                             'platform' => PlatformMode::DEMO,
