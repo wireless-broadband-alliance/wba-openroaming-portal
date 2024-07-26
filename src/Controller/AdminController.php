@@ -6,6 +6,7 @@ use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
@@ -2063,25 +2064,26 @@ class AdminController extends AbstractController
     }
 
     /**
-     * Fetch data related to types of authentication
-     */
-    /**
+     * Fetch data related to types of authentication.
+     *
      * @throws Exception
      */
     private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
+        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
 
+        // Fetch all users excluding admin
         /* @phpstan-ignore-next-line */
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            'SAML' => 0,
-            'Google' => 0,
-            'Portal' => 0,
+            UserProvider::SAML => 0,
+            UserProvider::GOOGLE_ACCOUNT => 0,
+            UserProvider::PORTAL_ACCOUNT => 0,
         ];
 
-        // Loop through the users and categorize them based on saml_identifier and google_id
+        // Loop through the users and categorize them based on the provider
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
@@ -2089,16 +2091,17 @@ class AdminController extends AbstractController
                 (!$startDate || $createdAt >= $startDate) &&
                 (!$endDate || $createdAt <= $endDate)
             ) {
-                $samlIdentifier = $user->getSamlIdentifier();
-                $googleId = $user->getGoogleId();
+                // Fetch UserExternalAuth entities associated with the user
+                $userExternalAuths = $userExternalAuthRepository->findBy(['user' => $user]);
 
-                if ($samlIdentifier) {
-                    $userCounts['SAML']++;
-                } else {
-                    if ($googleId) {
-                        $userCounts['Google']++;
+                foreach ($userExternalAuths as $userExternalAuth) {
+                    $provider = $userExternalAuth->getProvider();
+
+                    if (isset($userCounts[$provider])) {
+                        $userCounts[$provider]++;
                     } else {
-                        $userCounts['Portal']++;
+                        // Optionally handle unknown providers
+                        $userCounts[$provider] = 1;
                     }
                 }
             }
