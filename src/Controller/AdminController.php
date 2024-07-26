@@ -150,6 +150,13 @@ class AdminController extends AbstractController
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
+        // Fetch UserExternalAuth entities for the paginated users
+        $userExternalAuths = [];
+        foreach ($users as $user) {
+            $auths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+            $userExternalAuths[$user->getId()] = $auths;
+        }
+
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
             // This function is used to sort the arrays uuid and created_at
@@ -187,6 +194,7 @@ class AdminController extends AbstractController
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
+            'userExternalAuths' => $userExternalAuths,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'perPage' => $perPage,
