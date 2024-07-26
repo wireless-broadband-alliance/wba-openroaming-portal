@@ -271,8 +271,11 @@ class AdminController extends AbstractController
                 $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified')
             );
             // Determine User Provider
-            $userProvider = $this->getUserProvider($user);
-            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userProvider));
+
+            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+
+            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userExternalAuth->getProvider()));
             // Check if the user is Banned
             $sheet->setCellValue(
                 'I' . $row,
@@ -303,20 +306,6 @@ class AdminController extends AbstractController
 
         // Return the file as a response
         return $this->file($tempFile, 'users.xlsx');
-    }
-
-    // Determine user provider
-    public function getUserProvider(User $user): string
-    {
-        if ($user->getGoogleId() !== null) {
-            return UserProvider::GOOGLE_ACCOUNT;
-        }
-
-        if ($user->getSamlIdentifier() !== null) {
-            return UserProvider::SAML;
-        }
-
-        return UserProvider::PORTAL_ACCOUNT;
     }
 
     /*
@@ -2940,8 +2929,8 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                                'kernel.project_dir'
-                            ) . '/public/resources/uploaded/';
+                            'kernel.project_dir'
+                        ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
