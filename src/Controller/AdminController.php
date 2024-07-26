@@ -24,6 +24,7 @@ use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -60,6 +61,7 @@ class AdminController extends AbstractController
 {
     private MailerInterface $mailer;
     private UserRepository $userRepository;
+    private UserExternalAuthRepository $userExternalAuthRepository;
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
     private GetSettings $getSettings;
@@ -73,6 +75,7 @@ class AdminController extends AbstractController
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
+     * @param UserExternalAuthRepository $userExternalAuthRepository
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
@@ -86,6 +89,7 @@ class AdminController extends AbstractController
     public function __construct(
         MailerInterface $mailer,
         UserRepository $userRepository,
+        UserExternalAuthRepository $userExternalAuthRepository,
         ProfileManager $profileManager,
         ParameterBagInterface $parameterBag,
         GetSettings $getSettings,
@@ -98,6 +102,7 @@ class AdminController extends AbstractController
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
@@ -304,8 +309,8 @@ class AdminController extends AbstractController
     }
 
     /*
-     * Deletes Users from the Project, this only adds a deletedAt date for legal reasons
-     */
+    * Deletes Users from the Portal, encrypts the data before delete and saves it
+    */
     /**
      * @param $id
      * @param EntityManagerInterface $em
@@ -317,9 +322,11 @@ class AdminController extends AbstractController
     public function deleteUsers(
         $id,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher,
+        UserPasswordHasherInterface $userPasswordHasher
     ): Response {
         $user = $this->userRepository->find($id);
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
+
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
@@ -331,41 +338,56 @@ class AdminController extends AbstractController
 
         $getUUID = $user->getUuid();
 
+        // Prepare user data for encryption
         $deletedUserData = [
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail() ?? 'This value is empty',
             'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
-            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
-            'googleId' => $user->getGoogleId() ?? 'This value is empty',
-            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
+            'firstName' => $user->getFirstName() ?? 'This value is empty',
             'lastName' => $user->getLastName() ?? 'This value is empty',
             'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
             'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
             'deletedAt' => new DateTime(),
         ];
 
-        $jsonData = json_encode($deletedUserData);
+        // Prepare external auth data for encryption
+        $deletedUserExternalAuthData = [];
+        foreach ($userExternalAuths as $externalAuth) {
+            $deletedUserExternalAuthData[] = [
+                'provider' => $externalAuth->getProvider(),
+                'providerId' => $externalAuth->getProviderId()
+            ];
+        }
 
-        // Encrypt JSON data using PGP encryption
+        // Combine user data and external auth data
+        $combinedData = [
+            'user' => $deletedUserData,
+            'externalAuths' => $deletedUserExternalAuthData,
+        ];
+        $jsonDataCombined = json_encode($combinedData);
+
+        // Encrypt combined JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
-        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
+
+        // Handle encryption errors
         if ($pgpEncryptedData[0] == UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
-                'The public key is not set.
-             Make sure to define a public key in pgp_public_key/public_key.asc'
+                'The public key is not set. 
+            Make sure to define a public key in pgp_public_key/public_key.asc'
             );
             return $this->redirectToRoute('admin_page');
-        } else {
-            if ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
-                $this->addFlash(
-                    'error_admin',
-                    'The public key is empty.
-             Make sure to define content for the public key in pgp_public_key/public_key.asc'
-                );
-                return $this->redirectToRoute('admin_page');
-            }
+        } elseif ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
+            $this->addFlash(
+                'error_admin',
+                'The public key is empty. 
+            Make sure to define content for the public key in pgp_public_key/public_key.asc'
+            );
+            return $this->redirectToRoute('admin_page');
         }
+
+        // Persist encrypted data
         $deletedUserData = new DeletedUserData();
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserData->setUser($user);
@@ -381,22 +403,27 @@ class AdminController extends AbstractController
             'ip' => $_SERVER['REMOTE_ADDR'],
         ]);
 
+        // Update user entity
         $user->setUuid($user->getId());
         $user->setEmail('');
         $user->setPhoneNumber('');
         $user->setPassword($user->getId());
-        $user->setSamlIdentifier(null);
         $user->setFirstName(null);
         $user->setLastName(null);
-        $user->setGoogleId(null);
-        $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
+        // Update external auth entity
+        foreach ($userExternalAuths as $externalAuth) {
+            $em->remove($externalAuth);
+        }
+
+        // Persist changes
         $this->disableProfiles($user);
         $em->persist($deletedUserData);
         $em->persist($user);
         $em->flush();
 
+        // Save deletion event
         $eventMetadata = [
             'uuid' => $getUUID,
             'deletedBy' => $currentUser->getUuid(),
