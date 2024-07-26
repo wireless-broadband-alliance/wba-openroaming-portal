@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\UserExternalAuth;
+use App\Enum\UserProvider;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,6 +40,52 @@ class UserExternalAuthRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Fetch portal users counts based on the providerId within a date range.
+     *
+     * @param string $provider
+     * @param \DateTime|null $startDate
+     * @param \DateTime|null $endDate
+     * @return array
+     */
+    public function getPortalUserCounts(string $provider, ?\DateTime $startDate, ?\DateTime $endDate): array
+    {
+        $qb = $this->createQueryBuilder('uea')
+            ->innerJoin('uea.user', 'u')
+            ->select('uea.provider_id')
+            ->where('uea.provider = :provider')
+            ->setParameter('provider', $provider);
+
+        if ($startDate) {
+            $qb->andWhere('u.createdAt >= :startDate')
+                ->setParameter('startDate', $startDate);
+        }
+
+        if ($endDate) {
+            $qb->andWhere('u.createdAt <= :endDate')
+                ->setParameter('endDate', $endDate);
+        }
+
+        $results = $qb->getQuery()->getResult();
+
+        // Initialize counts
+        $counts = [
+            UserProvider::PHONE_NUMBER => 0,
+            UserProvider::EMAIL => 0,
+        ];
+
+        // Count occurrences of each providerId
+        foreach ($results as $result) {
+            $providerId = $result['provider_id'];
+            if ($providerId === UserProvider::EMAIL) {
+                $counts[UserProvider::EMAIL]++;
+            } elseif ($providerId === UserProvider::PHONE_NUMBER) {
+                $counts[UserProvider::PHONE_NUMBER]++;
+            }
+        }
+
+        return $counts;
+    }
 //    /**
 //     * @return UserExternalAuth[] Returns an array of UserExternalAuth objects
 //     */

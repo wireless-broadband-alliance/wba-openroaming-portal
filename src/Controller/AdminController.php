@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
@@ -2029,10 +2030,10 @@ class AdminController extends AbstractController
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
-            'Android' => 0,
-            'Windows' => 0,
-            'macOS' => 0,
-            'iOS' => 0,
+            OSTypes::ANDROID => 0,
+            OSTypes::WINDOWS => 0,
+            OSTypes::MACOS => 0,
+            OSTypes::IOS => 0,
         ];
 
         // Filter and count profile types based on the date criteria
@@ -2124,8 +2125,8 @@ class AdminController extends AbstractController
         $events = $repository->findBy(['event_name' => 'USER_CREATION']);
 
         $statusCounts = [
-            'Live' => 0,
-            'Demo' => 0,
+            PlatformMode::LIVE => 0,
+            PlatformMode::DEMO => 0,
         ];
 
         // Loop through the events and count the status of the user when created
@@ -2169,9 +2170,9 @@ class AdminController extends AbstractController
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            'Verified' => 0,
-            'Need Verification' => 0,
-            'Banned' => 0,
+            UserVerificationStatus::VERIFIED => 0,
+            UserVerificationStatus::NEED_VERIFICATON => 0,
+            UserVerificationStatus::BANNED => 0,
         ];
 
         // Loop through the users and categorize them based on isVerified and bannedAt
@@ -2186,13 +2187,13 @@ class AdminController extends AbstractController
                 $ban = $user->getBannedAt();
 
                 if ($verification) {
-                    $userCounts['Verified']++;
+                    $userCounts[UserVerificationStatus::VERIFIED]++;
                 } else {
-                    $userCounts['Need Verification']++;
+                    $userCounts[UserVerificationStatus::NEED_VERIFICATON]++;
                 }
 
                 if ($ban) {
-                    $userCounts['Banned']++;
+                    $userCounts[UserVerificationStatus::BANNED]++;
                 }
             }
         }
@@ -2201,49 +2202,22 @@ class AdminController extends AbstractController
     }
 
     /**
-     * Fetch data related to User created on the portal with email or sms
-     */
-    /**
+     * Fetch data related to users with portal accounts, categorized by email or phone number.
+     *
      * @throws Exception
      */
     private function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        $repository = $this->entityManager->getRepository(Event::class);
+        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
 
-        // Fetch all data without date filtering
-        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
+        // Call the repository method to get portal user counts
+        $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
+            UserProvider::PORTAL_ACCOUNT,
+            $startDate,
+            $endDate
+        );
 
-        $PortalUsersCounts = [
-            'Phone Number' => 0,
-            'Email' => 0,
-        ];
-
-        // Filter and count users created with email or phone number based on the event USER_CREATION
-        foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
-
-            if (!$eventDateTime) {
-                continue; // Skip events with missing dates
-            }
-
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $eventMetadata = $event->getEventMetadata();
-
-                if (isset($eventMetadata['sms'])) {
-                    // When 'sms' is true, increment sms
-                    if ($eventMetadata['sms'] === true) {
-                        $PortalUsersCounts['Phone Number']++;
-                    } else {
-                        $PortalUsersCounts['Email']++;
-                    }
-                }
-            }
-        }
-
-        return $this->generateDatasets($PortalUsersCounts);
+        return $this->generateDatasets($portalUsersCounts);
     }
 
     /**
@@ -2966,8 +2940,8 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                            'kernel.project_dir'
-                        ) . '/public/resources/uploaded/';
+                                'kernel.project_dir'
+                            ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
