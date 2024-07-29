@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
@@ -134,6 +135,7 @@ class RegistrationController extends AbstractController
         }
 
         $user = new User();
+        $userAuths = new UserExternalAuth();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -155,7 +157,11 @@ class RegistrationController extends AbstractController
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
                 $user->setCreatedAt(new DateTime());
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
+                $userAuths->setProviderId(UserProvider::EMAIL);
+                $userAuths->setUser($user);
                 $entityManager->persist($user);
+                $entityManager->persist($userAuths);
 
                 // Defines the Event to the table
                 $eventMetaData = [
@@ -240,6 +246,7 @@ class RegistrationController extends AbstractController
         }
 
         $user = new User();
+        $userAuths = new UserExternalAuth();
         $form = $this->createForm(RegistrationFormSMSType::class, $user);
         $form->handleRequest($request);
 
@@ -261,7 +268,11 @@ class RegistrationController extends AbstractController
                 $user->setUuid($user->getPhoneNumber());
                 $user->setVerificationCode($this->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
+                $userAuths->setProviderId(UserProvider::PHONE_NUMBER);
+                $userAuths->setUser($user);
                 $entityManager->persist($user);
+                $entityManager->persist($userAuths);
 
                 // Defines the Event to the table
                 $eventMetadata = [

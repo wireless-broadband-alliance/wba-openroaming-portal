@@ -44,7 +44,6 @@ services:
         email: $email
         first_name: $givenName
         last_name: $surname
-        saml_identifier: $sAMAccountName
         isVerified: 1
         roles: [ ]
   Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory: '@saml_user_factory'

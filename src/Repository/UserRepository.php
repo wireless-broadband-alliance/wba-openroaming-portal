@@ -118,7 +118,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter('role', '%ROLE_ADMIN%');
 
         if ($filter === UserVerificationStatus::VERIFIED) {
-            $qb->andWhere('u.isVerified = :verified')
+            $qb->andWhere('u.isVerified = :Verified')
                 ->setParameter(UserVerificationStatus::VERIFIED, true);
         } elseif ($filter === UserVerificationStatus::BANNED) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
@@ -194,7 +194,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
-            ->where('u.isVerified = :verified')
+            ->where('u.isVerified = :Verified')
             ->andWhere('u.roles NOT LIKE :adminRole')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->setParameter(UserVerificationStatus::VERIFIED, true)

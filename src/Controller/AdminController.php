@@ -6,8 +6,10 @@ use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
@@ -20,10 +22,12 @@ use App\Form\ResetPasswordType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
+use App\Form\UserExternalAuthType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -60,6 +64,7 @@ class AdminController extends AbstractController
 {
     private MailerInterface $mailer;
     private UserRepository $userRepository;
+    private UserExternalAuthRepository $userExternalAuthRepository;
     private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
     private GetSettings $getSettings;
@@ -73,6 +78,7 @@ class AdminController extends AbstractController
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
+     * @param UserExternalAuthRepository $userExternalAuthRepository
      * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
@@ -86,6 +92,7 @@ class AdminController extends AbstractController
     public function __construct(
         MailerInterface $mailer,
         UserRepository $userRepository,
+        UserExternalAuthRepository $userExternalAuthRepository,
         ProfileManager $profileManager,
         ParameterBagInterface $parameterBag,
         GetSettings $getSettings,
@@ -98,6 +105,7 @@ class AdminController extends AbstractController
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
@@ -144,6 +152,13 @@ class AdminController extends AbstractController
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
+        // Fetch UserExternalAuth entities for the paginated users
+        $userExternalAuths = [];
+        foreach ($users as $user) {
+            $auths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+            $userExternalAuths[$user->getId()] = $auths;
+        }
+
         // Sort the users based on the specified column and order
         usort($users, static function ($user1, $user2) use ($sort, $order) {
             // This function is used to sort the arrays uuid and created_at
@@ -181,6 +196,7 @@ class AdminController extends AbstractController
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
+            'userExternalAuths' => $userExternalAuths,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'perPage' => $perPage,
@@ -255,8 +271,11 @@ class AdminController extends AbstractController
                 $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified')
             );
             // Determine User Provider
-            $userProvider = $this->getUserProvider($user);
-            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userProvider));
+
+            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+
+            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userExternalAuth->getProvider()));
             // Check if the user is Banned
             $sheet->setCellValue(
                 'I' . $row,
@@ -289,23 +308,9 @@ class AdminController extends AbstractController
         return $this->file($tempFile, 'users.xlsx');
     }
 
-    // Determine user provider
-    public function getUserProvider(User $user): string
-    {
-        if ($user->getGoogleId() !== null) {
-            return UserProvider::GOOGLE_ACCOUNT;
-        }
-
-        if ($user->getSamlIdentifier() !== null) {
-            return UserProvider::SAML;
-        }
-
-        return UserProvider::PORTAL_ACCOUNT;
-    }
-
     /*
-     * Deletes Users from the Project, this only adds a deletedAt date for legal reasons
-     */
+    * Deletes Users from the Portal, encrypts the data before delete and saves it
+    */
     /**
      * @param $id
      * @param EntityManagerInterface $em
@@ -317,9 +322,11 @@ class AdminController extends AbstractController
     public function deleteUsers(
         $id,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher,
+        UserPasswordHasherInterface $userPasswordHasher
     ): Response {
         $user = $this->userRepository->find($id);
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
+
         if (!$user) {
             throw new NotFoundHttpException('User not found');
         }
@@ -331,41 +338,56 @@ class AdminController extends AbstractController
 
         $getUUID = $user->getUuid();
 
+        // Prepare user data for encryption
         $deletedUserData = [
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail() ?? 'This value is empty',
             'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
-            'samlIdentifier' => $user->getSamlIdentifier() ?? 'This value is empty',
-            'googleId' => $user->getGoogleId() ?? 'This value is empty',
-            'fisrtName' => $user->getFirstName() ?? 'This value is empty',
+            'firstName' => $user->getFirstName() ?? 'This value is empty',
             'lastName' => $user->getLastName() ?? 'This value is empty',
             'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
             'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
             'deletedAt' => new DateTime(),
         ];
 
-        $jsonData = json_encode($deletedUserData);
+        // Prepare external auth data for encryption
+        $deletedUserExternalAuthData = [];
+        foreach ($userExternalAuths as $externalAuth) {
+            $deletedUserExternalAuthData[] = [
+                'provider' => $externalAuth->getProvider(),
+                'providerId' => $externalAuth->getProviderId()
+            ];
+        }
 
-        // Encrypt JSON data using PGP encryption
+        // Combine user data and external auth data
+        $combinedData = [
+            'user' => $deletedUserData,
+            'externalAuths' => $deletedUserExternalAuthData,
+        ];
+        $jsonDataCombined = json_encode($combinedData);
+
+        // Encrypt combined JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
-        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonData);
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
+
+        // Handle encryption errors
         if ($pgpEncryptedData[0] == UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
-                'The public key is not set.
-             Make sure to define a public key in pgp_public_key/public_key.asc'
+                'The public key is not set. 
+            Make sure to define a public key in pgp_public_key/public_key.asc'
             );
             return $this->redirectToRoute('admin_page');
-        } else {
-            if ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
-                $this->addFlash(
-                    'error_admin',
-                    'The public key is empty.
-             Make sure to define content for the public key in pgp_public_key/public_key.asc'
-                );
-                return $this->redirectToRoute('admin_page');
-            }
+        } elseif ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
+            $this->addFlash(
+                'error_admin',
+                'The public key is empty. 
+            Make sure to define content for the public key in pgp_public_key/public_key.asc'
+            );
+            return $this->redirectToRoute('admin_page');
         }
+
+        // Persist encrypted data
         $deletedUserData = new DeletedUserData();
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserData->setUser($user);
@@ -381,22 +403,27 @@ class AdminController extends AbstractController
             'ip' => $_SERVER['REMOTE_ADDR'],
         ]);
 
+        // Update user entity
         $user->setUuid($user->getId());
         $user->setEmail('');
         $user->setPhoneNumber('');
         $user->setPassword($user->getId());
-        $user->setSamlIdentifier(null);
         $user->setFirstName(null);
         $user->setLastName(null);
-        $user->setGoogleId(null);
-        $user->setBannedAt(null);
         $user->setDeletedAt(new DateTime());
 
+        // Update external auth entity
+        foreach ($userExternalAuths as $externalAuth) {
+            $em->remove($externalAuth);
+        }
+
+        // Persist changes
         $this->disableProfiles($user);
         $em->persist($deletedUserData);
         $em->persist($user);
         $em->flush();
 
+        // Save deletion event
         $eventMetadata = [
             'uuid' => $getUUID,
             'deletedBy' => $currentUser->getUuid(),
@@ -496,8 +523,8 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
-            $email = $user->getEmail();
-            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $email));
+            $uuid = $user->getUuid();
+            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
 
             return $this->redirectToRoute('admin_page');
         }
@@ -1992,10 +2019,10 @@ class AdminController extends AbstractController
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
-            'Android' => 0,
-            'Windows' => 0,
-            'macOS' => 0,
-            'iOS' => 0,
+            OSTypes::ANDROID => 0,
+            OSTypes::WINDOWS => 0,
+            OSTypes::MACOS => 0,
+            OSTypes::IOS => 0,
         ];
 
         // Filter and count profile types based on the date criteria
@@ -2027,25 +2054,26 @@ class AdminController extends AbstractController
     }
 
     /**
-     * Fetch data related to types of authentication
-     */
-    /**
+     * Fetch data related to types of authentication.
+     *
      * @throws Exception
      */
     private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $repository = $this->entityManager->getRepository(User::class);
+        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
 
+        // Fetch all users excluding admin
         /* @phpstan-ignore-next-line */
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            'SAML' => 0,
-            'Google' => 0,
-            'Portal' => 0,
+            UserProvider::SAML => 0,
+            UserProvider::GOOGLE_ACCOUNT => 0,
+            UserProvider::PORTAL_ACCOUNT => 0,
         ];
 
-        // Loop through the users and categorize them based on saml_identifier and google_id
+        // Loop through the users and categorize them based on the provider
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
@@ -2053,16 +2081,17 @@ class AdminController extends AbstractController
                 (!$startDate || $createdAt >= $startDate) &&
                 (!$endDate || $createdAt <= $endDate)
             ) {
-                $samlIdentifier = $user->getSamlIdentifier();
-                $googleId = $user->getGoogleId();
+                // Fetch UserExternalAuth entities associated with the user
+                $userExternalAuths = $userExternalAuthRepository->findBy(['user' => $user]);
 
-                if ($samlIdentifier) {
-                    $userCounts['SAML']++;
-                } else {
-                    if ($googleId) {
-                        $userCounts['Google']++;
+                foreach ($userExternalAuths as $userExternalAuth) {
+                    $provider = $userExternalAuth->getProvider();
+
+                    if (isset($userCounts[$provider])) {
+                        $userCounts[$provider]++;
                     } else {
-                        $userCounts['Portal']++;
+                        // Optionally handle unknown providers
+                        $userCounts[$provider] = 1;
                     }
                 }
             }
@@ -2085,8 +2114,8 @@ class AdminController extends AbstractController
         $events = $repository->findBy(['event_name' => 'USER_CREATION']);
 
         $statusCounts = [
-            'Live' => 0,
-            'Demo' => 0,
+            PlatformMode::LIVE => 0,
+            PlatformMode::DEMO => 0,
         ];
 
         // Loop through the events and count the status of the user when created
@@ -2130,9 +2159,9 @@ class AdminController extends AbstractController
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            'Verified' => 0,
-            'Need Verification' => 0,
-            'Banned' => 0,
+            UserVerificationStatus::VERIFIED => 0,
+            UserVerificationStatus::NEED_VERIFICATON => 0,
+            UserVerificationStatus::BANNED => 0,
         ];
 
         // Loop through the users and categorize them based on isVerified and bannedAt
@@ -2147,13 +2176,13 @@ class AdminController extends AbstractController
                 $ban = $user->getBannedAt();
 
                 if ($verification) {
-                    $userCounts['Verified']++;
+                    $userCounts[UserVerificationStatus::VERIFIED]++;
                 } else {
-                    $userCounts['Need Verification']++;
+                    $userCounts[UserVerificationStatus::NEED_VERIFICATON]++;
                 }
 
                 if ($ban) {
-                    $userCounts['Banned']++;
+                    $userCounts[UserVerificationStatus::BANNED]++;
                 }
             }
         }
@@ -2162,49 +2191,22 @@ class AdminController extends AbstractController
     }
 
     /**
-     * Fetch data related to User created on the portal with email or sms
-     */
-    /**
+     * Fetch data related to users with portal accounts, categorized by email or phone number.
+     *
      * @throws Exception
      */
     private function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
-        $repository = $this->entityManager->getRepository(Event::class);
+        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+        // Call the repository method to get portal user counts
+        /** @var UserExternalAuthRepository $userExternalAuthRepository */
+        $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
+            UserProvider::PORTAL_ACCOUNT,
+            $startDate,
+            $endDate
+        );
 
-        // Fetch all data without date filtering
-        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
-
-        $PortalUsersCounts = [
-            'Phone Number' => 0,
-            'Email' => 0,
-        ];
-
-        // Filter and count users created with email or phone number based on the event USER_CREATION
-        foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
-
-            if (!$eventDateTime) {
-                continue; // Skip events with missing dates
-            }
-
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $eventMetadata = $event->getEventMetadata();
-
-                if (isset($eventMetadata['sms'])) {
-                    // When 'sms' is true, increment sms
-                    if ($eventMetadata['sms'] === true) {
-                        $PortalUsersCounts['Phone Number']++;
-                    } else {
-                        $PortalUsersCounts['Email']++;
-                    }
-                }
-            }
-        }
-
-        return $this->generateDatasets($PortalUsersCounts);
+        return $this->generateDatasets($portalUsersCounts);
     }
 
     /**
