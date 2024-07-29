@@ -2198,8 +2198,8 @@ class AdminController extends AbstractController
     private function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
     {
         $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
-
         // Call the repository method to get portal user counts
+        /** @var UserExternalAuthRepository $userExternalAuthRepository */
         $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
             UserProvider::PORTAL_ACCOUNT,
             $startDate,
