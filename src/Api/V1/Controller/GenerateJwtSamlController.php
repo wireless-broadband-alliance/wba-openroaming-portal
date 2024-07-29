@@ -5,12 +5,13 @@ namespace App\Api\V1\Controller;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
-class GenerateJwtSamlController
+class GenerateJwtSamlController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private JWTTokenManagerInterface $jwtTokenManager;
@@ -21,24 +22,23 @@ class GenerateJwtSamlController
         $this->jwtTokenManager = $jwtTokenManager;
     }
 
-    #[Route('/api/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
-    public function samlLogin(Request $request): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
         // Decode JSON request body
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $samlAccountName = $data['sAMAccountName'] ?? null;
+        $samlUuid = $data['samlUuid'] ?? null;
 
-        // Check if sAMAccountName is present
-        if (!$samlAccountName) {
-            throw new BadCredentialsException('sAMAccountName is missing');
+        // Check if samlUuid is present
+        if (!$samlUuid) {
+            throw new BadRequestHttpException('SAML UUID is missing');
         }
 
-        // Find the user by sAMAccountName
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['saml_identifier' => $samlAccountName]);
+        // Find the user by SAML UUID
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $samlUuid]);
 
         // Check if user exists
         if (!$user) {
-            throw new BadCredentialsException('Invalid sAMAccountName');
+            throw new BadCredentialsException('Invalid SAML UUID');
         }
 
         // Generate JWT token
