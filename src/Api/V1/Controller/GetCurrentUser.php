@@ -4,6 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +29,16 @@ class GetCurrentUser extends AbstractController
             /** @var User $currentUser */
             $currentUser = $token->getUser();
 
+            // Get user external auth details
+            $userExternalAuths = $currentUser->getUserExternalAuths()->map(
+                function (UserExternalAuth $userExternalAuth) {
+                    return [
+                        'provider' => $userExternalAuth->getProvider(),
+                        'provider_id' => $userExternalAuth->getProviderId(),
+                    ];
+                }
+            )->toArray();
+
             // Construct the response content with user details
             $content = [
                 'attributes' => [
@@ -35,13 +46,11 @@ class GetCurrentUser extends AbstractController
                     'email' => $currentUser->getEmail(),
                     'roles' => $currentUser->getRoles(),
                     'isVerified' => $currentUser->isVerified(),
-                    'saml_identifier' => $currentUser->getSamlIdentifier(),
-                    'google_id' => $currentUser->getGoogleId(),
                     'phone_number' => $currentUser->getPhoneNumber(),
                     'first_name' => $currentUser->getFirstName(),
                     'last_name' => $currentUser->getLastName(),
                     'user_radius_profiles' => $currentUser->getUserRadiusProfiles(),
-                    'user_external_auths' => $currentUser->getUserExternalAuths(),
+                    'user_external_auths' => $userExternalAuths,
                     'verification_code' => $currentUser->getVerificationCode(),
                     'created_at' => $currentUser->getCreatedAt(),
                     'banned_at' => $currentUser->getBannedAt(),
