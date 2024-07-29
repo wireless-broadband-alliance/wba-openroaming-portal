@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
-class GetCurrentUser extends AbstractController
+class GetCurrentUserController extends AbstractController
 {
     private TokenStorageInterface $tokenStorage;
 

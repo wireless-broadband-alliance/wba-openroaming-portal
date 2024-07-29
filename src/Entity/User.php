@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use App\Api\V1\Controller\GetCurrentUser;
+use App\Api\V1\Controller\GenerateJwtSamlController;
+use App\Api\V1\Controller\GetCurrentUserController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -22,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new GetCollection(
             uriTemplate: '/v1/user',
-            controller: GetCurrentUser::class,
+            controller: GetCurrentUserController::class,
             shortName: 'User',
             security: "is_granted('ROLE_USER')",
             securityMessage: "You don't have permission to access this resource",
