@@ -3,8 +3,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Repository\UserRepository;
@@ -30,6 +30,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             securityMessage: "You don't have permission to access this resource",
             description: 'Returns current authenticated user values from the User entity',
             name: 'app_get_current_user',
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/saml',
+            controller: GenerateJwtSamlController::class,
+            read: false,
+            name: 'app_auth_saml'
         ),
     ],
 )]
