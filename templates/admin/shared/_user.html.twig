@@ -17,12 +17,13 @@
     {# User Provider #}
     <td class="px-4 py-4">
         <p class="text-left ml-1 p-1">
-            {% if user.googleId is defined and user.googleId %}
-                Google Account
-            {% elseif user.saml_identifier is defined and user.saml_identifier %}
-                SAML
+            {% if userExternalAuths[user.id] is not empty %}
+                {% for auth in userExternalAuths[user.id] %}
+                    {{ auth.provider }}
+                    {% if not loop.last %}, {% endif %}
+                {% endfor %}
             {% else %}
-                Portal Account
+                <span>No providers found</span>
             {% endif %}
         </p>
     </td>

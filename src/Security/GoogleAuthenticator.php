@@ -3,6 +3,8 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
+use App\Enum\UserProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
@@ -46,37 +48,47 @@ class GoogleAuthenticator extends OAuth2Authenticator
 
         return new SelfValidatingPassport(
             new UserBadge($accessToken->getToken(), function () use ($accessToken, $client) {
-                    /**
-                     * @var GoogleUser $googleUser
-                     */
-                    $googleUser = $client->fetchUserFromToken($accessToken);
+                /**
+                 * @var GoogleUser $googleUser
+                 */
+                $googleUser = $client->fetchUserFromToken($accessToken);
 
-                    $email = $googleUser->getEmail();
+                $email = $googleUser->getEmail();
+                $googleId = $googleUser->getId();
 
-                    // have they logged in with Google before? Easy!
-                    $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(
-                        ['googleId' => $googleUser->getId()]
-                    );
+                // Fetch the existing user by provider and provider ID
+                $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
+                    'provider' => UserProvider::GOOGLE_ACCOUNT,
+                    'provider_id' => $googleId,
+                ]);
 
-                    //User doesn't exist, we create it!
-                if (!$existingUser) {
+                if ($userExternalAuth) {
+                    // Existing user found
+                    $existingUser = $userExternalAuth->getUser();
+                } else {
+                    // User doesn't exist, create a new User and UserExternalAuth
                     $existingUser = new User();
                     $existingUser->setEmail($email);
-                    $existingUser->setGoogleId($googleUser->getId());
-                    $this->entityManager->persist($existingUser);
-                }
-                    $this->entityManager->flush();
 
-                    return $existingUser;
+                    $userExternalAuth = new UserExternalAuth();
+                    $userExternalAuth->setProvider('google');
+                    $userExternalAuth->setProviderId($googleId);
+                    $userExternalAuth->setUser($existingUser);
+
+                    $this->entityManager->persist($existingUser);
+                    $this->entityManager->persist($userExternalAuth);
+                    $this->entityManager->flush();
+                }
+
+                return $existingUser;
             })
         );
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // change "app_dashboard" to some route in your app
         return new RedirectResponse(
-            $this->router->generate('app_index')
+            $this->router->generate('app_landing')
         );
 
         // or, on success, let the request continue to be handled by the controller

@@ -19,42 +19,18 @@ class UserUpdateType extends AbstractType
             ->add('uuid', TextType::class, [
                 'label' => 'UUID',
                 'required' => true,
-                /*
-                'constraints' => [
-                    new NoSpecialCharacters(),
-                ],
-                */
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'required' => true,
-            ])
-            ->add('samlIdentifier', TextType::class, [
-                'label' => 'SAML Identifier',
                 'required' => false,
-                /*
-                'constraints' => [
-                    new NoSpecialCharacters(),
-                ],
-                */
             ])
             ->add('firstName', TextType::class, [
                 'label' => 'First Name',
                 'required' => false,
-                /*
-                'constraints' => [
-                    new NoSpecialCharacters(),
-                ],
-                */
             ])
             ->add('lastName', TextType::class, [
                 'label' => 'Last Name',
                 'required' => false,
-                /*
-                'constraints' => [
-                    new NoSpecialCharacters(),
-                ],
-                */
             ])
             ->add('bannedAt', CheckboxType::class, [
                 'label' => 'Banned',
