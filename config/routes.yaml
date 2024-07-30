@@ -17,7 +17,7 @@ api_auth_local:
 
 api_auth_saml:
     path: /api/v1/auth/saml
-    controller: App\Api\V1\Controller\GenerateJwtSamlController::generateJwtToken
+    controller: App\Api\V1\Controller\GenerateTokenController::generateJwtToken
     methods: ['POST']
 
 api_get_current_user:
