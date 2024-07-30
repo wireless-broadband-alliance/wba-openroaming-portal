@@ -37,6 +37,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: LocalRegistrationController::class,
             shortName: 'User',
             name: 'api_auth_local_register'
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/sms/register/',
+            controller: LocalRegistrationController::class,
+            shortName: 'User',
+            name: 'api_auth_sms_register'
         )
     ],
 )]

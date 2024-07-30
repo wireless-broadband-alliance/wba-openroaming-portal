@@ -26,5 +26,10 @@ api_get_current_user:
 
 api_auth_local_register:
     path: /api/v1/auth/local/register/
-    controller: App\Api\V1\Controller\LocalRegistrationController::register
+    controller: App\Api\V1\Controller\LocalRegistrationController::localRegister
+    methods: ['POST']
+
+api_auth_sms_register:
+    path: /api/v1/auth/sms/register/
+    controller: App\Api\V1\Controller\LocalRegistrationController::smsRegister
     methods: ['POST']
