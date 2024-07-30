@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
 class GenerateJwtSamlController extends AbstractController
@@ -22,11 +23,23 @@ class GenerateJwtSamlController extends AbstractController
         $this->jwtTokenManager = $jwtTokenManager;
     }
 
-    public function __invoke(Request $request): JsonResponse
+    /**
+     * @throws \JsonException
+     * @SWG\Tag(name="Auth")
+     * @SWG\Parameter(
+     *     name="sAMAccountName",
+     *     in="body",
+     *     description="The SAML UUID",
+     *     required=true,
+     *     type="string"
+     * )
+     * @Route('/api/v1/auth/saml', name="generate_token_saml", methods={"POST"})
+     */
+    public function generateJwtToken(Request $request): JsonResponse
     {
         // Decode JSON request body
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $samlUuid = $data['samlUuid'] ?? null;
+        $samlUuid = $data['sAMAccountName'] ?? null;
 
         // Check if samlUuid is present
         if (!$samlUuid) {

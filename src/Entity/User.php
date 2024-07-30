@@ -31,12 +31,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             description: 'Returns current authenticated user values from the User entity',
             name: 'app_get_current_user',
         ),
-        new Post(
-            uriTemplate: '/v1/auth/saml',
-            controller: GenerateJwtSamlController::class,
-            read: false,
-            name: 'app_auth_saml'
-        ),
     ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
