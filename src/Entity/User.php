@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
+use App\Api\V1\Controller\LocalRegistrationController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,8 +30,14 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: "is_granted('ROLE_USER')",
             securityMessage: "You don't have permission to access this resource",
             description: 'Returns current authenticated user values from the User entity',
-            name: 'app_get_current_user',
+            name: 'api_get_current_user',
         ),
+        new Post(
+            uriTemplate: '/v1/auth/local/register/',
+            controller: LocalRegistrationController::class,
+            shortName: 'User',
+            name: 'api_auth_local_register'
+        )
     ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]

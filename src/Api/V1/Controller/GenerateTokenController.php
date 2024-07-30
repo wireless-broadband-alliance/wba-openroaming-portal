@@ -17,7 +17,7 @@ class GenerateTokenController extends AbstractController
         $this->tokenGenerator = $tokenGenerator;
     }
 
-    #[Route('/api/v1/auth/saml', name: 'generate_token_saml', methods: ['POST'])]
+    #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function generateJwtToken(): JsonResponse
     {
         // Get the authenticated user
