@@ -67,7 +67,7 @@ security:
     access_control:
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/user, roles: ROLE_USER }
-        - { path: ^/api/v1/auth/saml, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/v1/auth/saml, roles: PUBLIC_ACCESS }
 when@test:
     security:
         password_hashers:

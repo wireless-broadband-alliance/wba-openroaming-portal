@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Api\V1\Controller;
 
 use App\Service\JWTTokenGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
