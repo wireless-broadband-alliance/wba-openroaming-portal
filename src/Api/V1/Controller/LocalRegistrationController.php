@@ -45,11 +45,11 @@ class LocalRegistrationController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['uuid'], $data['password'], $data['email'])) {
-            return new JsonResponse(['error' => 'Invalid data'], AnalyticalEventType::BAD_REQUEST);
+            return new JsonResponse(['error' => 'Invalid data'], 422);
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['uuid']])) {
-            return new JsonResponse(['error' => 'This User already exists'], AnalyticalEventType::BAD_REQUEST);
+            return new JsonResponse(['error' => 'This User already exists'], 403);
         }
 
         $user = new User();
@@ -66,6 +66,11 @@ class LocalRegistrationController extends AbstractController
         $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
         $userExternalAuth->setProviderId(UserProvider::EMAIL);
 
+
+        $this->entityManager->persist($user);
+        $this->entityManager->persist($userExternalAuth);
+        $this->entityManager->flush();
+
         // Defines the Event to the table
         $eventMetaData = [
             'uuid' => $user->getUuid(),
@@ -77,9 +82,6 @@ class LocalRegistrationController extends AbstractController
             new DateTime(),
             $eventMetaData
         );
-        $this->entityManager->persist($user);
-        $this->entityManager->persist($userExternalAuth);
-        $this->entityManager->flush();
 
         return new JsonResponse(['message' => 'User registered successfully'], AnalyticalEventType::USER_CREATION);
     }
