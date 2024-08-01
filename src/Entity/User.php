@@ -24,12 +24,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     description: "The User entity returns values related to the current user.",
     operations: [
-        new Post(
-            uriTemplate: '/v1/auth/local',
-            controller: LocalAuthController::class,
-            shortName: 'User Auth',
-            name: 'api_auth_local'
-        ),
         new GetCollection(
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,
@@ -40,15 +34,21 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_get_current_user',
         ),
         new Post(
+            uriTemplate: '/v1/auth/local',
+            controller: LocalAuthController::class,
+            shortName: 'User Auth',
+            name: 'api_auth_local'
+        ),
+        new Post(
             uriTemplate: '/v1/auth/local/register/',
             controller: LocalRegistrationController::class,
-            shortName: 'User',
+            shortName: 'User Auth',
             name: 'api_auth_local_register'
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/register/',
             controller: LocalRegistrationController::class,
-            shortName: 'User',
+            shortName: 'User Auth',
             name: 'api_auth_sms_register'
         )
     ],
