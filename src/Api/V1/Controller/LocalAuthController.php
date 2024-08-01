@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controller;
 
+use App\Entity\UserExternalAuth;
 use App\Repository\UserRepository;
 use App\Service\JWTTokenGenerator;
 use Exception;
@@ -45,6 +46,16 @@ class LocalAuthController extends AbstractController
             return new JsonResponse(['error' => 'Invalid credentials - Missing User'], 404);
         }
 
+        // Get user external auth details
+        $userExternalAuths = $user->getUserExternalAuths()->map(
+            function (UserExternalAuth $userExternalAuth) {
+                return [
+                    'provider' => $userExternalAuth->getProvider(),
+                    'provider_id' => $userExternalAuth->getProviderId(),
+                ];
+            }
+        )->toArray();
+
         $token = $this->tokenGenerator->generateToken($user);
 
         $responseData = [
@@ -57,6 +68,7 @@ class LocalAuthController extends AbstractController
                 'last_name' => $user->getLastName(),
                 'isVerified' => $user->isVerified(),
                 'createdAt' => $user->getCreatedAt(),
+                'user_external_auths' => $userExternalAuths,
             ]
         ];
 
