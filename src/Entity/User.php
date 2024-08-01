@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
+use App\Api\V1\Controller\LocalAuthController;
 use App\Api\V1\Controller\LocalRegistrationController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
@@ -23,6 +24,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     description: "The User entity returns values related to the current user.",
     operations: [
+        new Post(
+            uriTemplate: '/v1/auth/local',
+            controller: LocalAuthController::class,
+            shortName: 'User Auth',
+            name: 'api_auth_local'
+        ),
         new GetCollection(
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,

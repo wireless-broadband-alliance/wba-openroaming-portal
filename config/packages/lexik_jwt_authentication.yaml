@@ -4,8 +4,3 @@ lexik_jwt_authentication:
     pass_phrase: '%env(JWT_PASSPHRASE)%'
     user_identity_field: uuid
     token_ttl: 3600
-
-    api_platform:
-        check_path: /api/v1/auth/local
-        username_path: uuid
-        password_path: password
