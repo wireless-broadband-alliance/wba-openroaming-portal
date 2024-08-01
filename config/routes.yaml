@@ -20,10 +20,6 @@ api_auth_saml:
     controller: App\Api\V1\Controller\GenerateTokenController::generateJwtToken
     methods: ['POST']
 
-api_get_current_user:
-    path: /api/v1/user
-    methods: ['GET']
-
 api_auth_local_register:
     path: /api/v1/auth/local/register/
     controller: App\Api\V1\Controller\LocalRegistrationController::localRegister
