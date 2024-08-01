@@ -139,8 +139,12 @@ class AdminController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] string $sort = 'createdAt',
         #[MapQueryParameter] string $order = 'desc',
-        #[MapQueryParameter] int $count = 7
+        #[MapQueryParameter] ?int $count = 7
     ): Response {
+        if (!is_int($count) || $count <= 0) {
+            return $this->redirectToRoute('admin_page');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
