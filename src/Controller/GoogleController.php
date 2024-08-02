@@ -8,7 +8,10 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -39,6 +42,9 @@ class GoogleController extends AbstractController
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
     private EventActions $eventActions;
+    private GetSettings $getSettings;
+    private UserRepository $userRepository;
+    private SettingRepository $settingRepository;
 
     /**
      * @param ClientRegistry $clientRegistry
@@ -48,6 +54,9 @@ class GoogleController extends AbstractController
      * @param RequestStack $requestStack
      * @param EventDispatcherInterface $eventDispatcher
      * @param EventActions $eventActions
+     * @param GetSettings $getSettings
+     * @param UserRepository $userRepository
+     * @param SettingRepository $settingRepository
      */
     public function __construct(
         ClientRegistry $clientRegistry,
@@ -57,6 +66,9 @@ class GoogleController extends AbstractController
         RequestStack $requestStack,
         EventDispatcherInterface $eventDispatcher,
         EventActions $eventActions,
+        GetSettings $getSettings,
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
     ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
@@ -65,6 +77,9 @@ class GoogleController extends AbstractController
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
         $this->eventActions = $eventActions;
+        $this->getSettings = $getSettings;
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
     }
 
     /**
@@ -73,6 +88,18 @@ class GoogleController extends AbstractController
     #[Route('/connect/google', name: 'connect_google')]
     public function connectAction(): RedirectResponse
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash(
+                'error',
+                'The portal is in Demo mode - it is not possible to use this verification method.'
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
 
