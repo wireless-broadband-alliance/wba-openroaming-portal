@@ -136,11 +136,16 @@ class SiteController extends AbstractController
             }
         }
 
-        // Fetch UserExternalAuth entity to get the provider name
-        $userExternalAuths = [];
-        foreach ($this->userExternalAuthRepository->findBy(['user' => $currentUser]) as $userExternalAuth) {
-            if ($userExternalAuth->getProvider() === UserProvider::SAML) {
-                $userExternalAuths[$currentUser->getId()] = $userExternalAuth->getProviderId();
+        // Check if the current user has a provider
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+        $externalAuthsData = [];
+        if (!empty($userExternalAuths)) {
+            // Populate the externalAuthsData array
+            foreach ($userExternalAuths as $userExternalAuth) {
+                $externalAuthsData[$currentUser->getId()][] = [
+                    'provider' => $userExternalAuth->getProvider(),
+                    'providerId' => $userExternalAuth->getProviderId(),
+                ];
             }
         }
 
@@ -282,7 +287,7 @@ class SiteController extends AbstractController
             'formPassword' => $formPassword->createView(),
             'registrationFormDemo' => $formResgistrationDemo->createView(),
             'data' => $data,
-            'userExternalAuths' => $userExternalAuths,
+            'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser
         ]);
     }

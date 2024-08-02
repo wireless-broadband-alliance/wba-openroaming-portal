@@ -105,12 +105,9 @@
 
             <p class="text-[#212529] text-opacity-40 text-sm">
                 You are currently authenticated as
-                {% if userExternalAuths[user.id] is not empty %}
-                    {{ userExternalAuths[user.id] }}
-                {% else %}
-                    {{ app.user.uuid }}
-                {% endif %}
+                {{ app.user.uuid }}
             </p>
+
         {% endif %}
 
         {# Profile selector  #}
@@ -147,8 +144,12 @@
 
                     <p class="text-[#212529] text-opacity-40 text-sm">
                         You are currently authenticated as
-                        {% if userExternalAuths[user.id] is not empty %}
-                            {{ userExternalAuths[user.id] }}
+                        {% if userExternalAuths[user.id] is defined %}
+                            {% for auth in userExternalAuths[user.id] %}
+                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}
+                                    {{ auth.providerId }}
+                                {% endif %}
+                            {% endfor %}
                         {% else %}
                             {{ app.user.uuid }}
                         {% endif %}
