@@ -531,7 +531,7 @@ class SiteController extends AbstractController
          */
         #[
         Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
-    public function forgotPasswordUserSMS(
+        public function forgotPasswordUserSMS(
             Request $request,
             UserPasswordHasherInterface $userPasswordHasher,
             EntityManagerInterface $entityManager,
