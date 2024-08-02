@@ -284,8 +284,7 @@
             {# AccessPoints Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('admin/shared/_pagination.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
-
+                {{ include('admin/shared/_pagination_ApUsage.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
             </div>
         </div>
     </div>
