@@ -17,6 +17,7 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
@@ -29,7 +30,6 @@ use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security\UserAuthenticator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -51,6 +51,7 @@ class SiteController extends AbstractController
 {
     private MailerInterface $mailer;
     private UserRepository $userRepository;
+    private UserExternalAuthRepository $userExternalAuthRepository;
     private ParameterBagInterface $parameterBag;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
@@ -62,6 +63,7 @@ class SiteController extends AbstractController
      *
      * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
+     * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
@@ -71,6 +73,7 @@ class SiteController extends AbstractController
     public function __construct(
         MailerInterface $mailer,
         UserRepository $userRepository,
+        UserExternalAuthRepository $userExternalAuthRepository,
         ParameterBagInterface $parameterBag,
         SettingRepository $settingRepository,
         GetSettings $getSettings,
@@ -79,6 +82,7 @@ class SiteController extends AbstractController
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->parameterBag = $parameterBag;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
@@ -129,6 +133,19 @@ class SiteController extends AbstractController
             }
             if ($currentUser->getDeletedAt()) {
                 return $this->redirectToRoute('saml_logout');
+            }
+        }
+
+        // Check if the current user has a provider
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+        $externalAuthsData = [];
+        if (!empty($userExternalAuths)) {
+            // Populate the externalAuthsData array
+            foreach ($userExternalAuths as $userExternalAuth) {
+                $externalAuthsData[$currentUser->getId()][] = [
+                    'provider' => $userExternalAuth->getProvider(),
+                    'providerId' => $userExternalAuth->getProviderId(),
+                ];
             }
         }
 
@@ -269,7 +286,9 @@ class SiteController extends AbstractController
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
             'registrationFormDemo' => $formResgistrationDemo->createView(),
-            'data' => $data
+            'data' => $data,
+            'userExternalAuths' => $externalAuthsData,
+            'user' => $currentUser
         ]);
     }
 
@@ -411,81 +430,96 @@ class SiteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['email' => $user->getEmail(), 'googleId' => null]);
+            $user = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
             if ($user) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
-                );
-                $minInterval = new DateInterval('PT2M');
-                $currentTime = new DateTime();
-                // Check if enough time has passed since the last attempt
-                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
-                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                    : null;
-
-                if (
-                    !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
-                        $lastVerificationCodeTime->add($minInterval) < $currentTime)
-                ) {
-                    // Save event with attempt count and current time
-                    if (!$latestEvent) {
-                        $latestEvent = new Event();
-                        $latestEvent->setUser($user);
-                        $latestEvent->setEventDatetime(new DateTime());
-                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-                        $latestEventMetadata = [
-                            'platform' => PlatformMode::LIVE,
-                            'ip' => $_SERVER['REMOTE_ADDR'],
-                            'uuid' => $user->getUuid(),
-                        ];
+                // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
+                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+                $hasValidPortalAccount = false;
+                // Check if the user has an external auth with PortalAccount and a valid email as providerId
+                foreach ($userExternalAuths as $auth) {
+                    if (
+                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
+                        $auth->getProviderId() === UserProvider::EMAIL
+                    ) {
+                        $hasValidPortalAccount = true;
+                        break;
                     }
-
-                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
-                    $latestEvent->setEventMetadata($latestEventMetadata);
-
-                    $user->setForgotPasswordRequest(true);
-                    $this->eventRepository->save($latestEvent, true);
-
-                    $randomPassword = bin2hex(random_bytes(4));
-                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-                    $user->setPassword($hashedPassword);
-                    $entityManager->persist($user);
-                    $entityManager->flush();
-
-                    $email = (new TemplatedEmail())
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($user->getEmail())
-                        ->subject('Your Openroaming - Password Request')
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $user->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getVerificationCode(),
-                        ]);
-
-                    $mailer->send($email);
-
-                    $message = sprintf('We have sent you a new email to: %s.', $user->getEmail());
-                    $this->addFlash('success', $message);
-                } else {
-                    // Inform the user to wait before trying again
-                    $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
                 }
-            } else {
-                $this->addFlash(
-                    'warning',
-                    'This email doesn\'t exist, please submit a valid email from the system! 
-                    And make sure to only type emails from the platform and not from another providers.'
-                );
+                if ($hasValidPortalAccount) {
+                    $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                        $user,
+                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
+                    );
+                    $minInterval = new DateInterval('PT2M');
+                    $currentTime = new DateTime();
+                    // Check if enough time has passed since the last attempt
+                    $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                    $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                        ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                        : null;
+
+                    if (
+                        !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                            $lastVerificationCodeTime->add($minInterval) < $currentTime)
+                    ) {
+                        // Save event with attempt count and current time
+                        if (!$latestEvent) {
+                            $latestEvent = new Event();
+                            $latestEvent->setUser($user);
+                            $latestEvent->setEventDatetime(new DateTime());
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                            $latestEventMetadata = [
+                                'platform' => PlatformMode::LIVE,
+                                'ip' => $_SERVER['REMOTE_ADDR'],
+                                'uuid' => $user->getUuid(),
+                            ];
+                        }
+
+                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEvent->setEventMetadata($latestEventMetadata);
+
+                        $user->setForgotPasswordRequest(true);
+                        $this->eventRepository->save($latestEvent, true);
+
+                        $randomPassword = bin2hex(random_bytes(4));
+                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                        $user->setPassword($hashedPassword);
+                        $entityManager->persist($user);
+                        $entityManager->flush();
+
+                        $email = (new TemplatedEmail())
+                            ->from(
+                                new Address(
+                                    $this->parameterBag->get('app.email_address'),
+                                    $this->parameterBag->get('app.sender_name')
+                                )
+                            )
+                            ->to($user->getEmail())
+                            ->subject('Your Openroaming - Password Request')
+                            ->htmlTemplate('email/user_forgot_password_request.html.twig')
+                            ->context([
+                                'password' => $randomPassword,
+                                'forgotPasswordUser' => true,
+                                'uuid' => $user->getUuid(),
+                                'currentPassword' => $randomPassword,
+                                'verificationCode' => $user->getVerificationCode(),
+                            ]);
+
+                        $mailer->send($email);
+
+                        $message = sprintf('We have sent you a new email to: %s.', $user->getEmail());
+                        $this->addFlash('success', $message);
+                    } else {
+                        // Inform the user to wait before trying again
+                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
+                    }
+                } else {
+                    $this->addFlash(
+                        'warning',
+                        'This email doesn\'t exist, please submit a valid email from the system! 
+                    And make sure to only type emails from the platform and not from another provider.'
+                    );
+                }
             }
         }
         return $this->render('site/forgot_password_email_landing.html.twig', [
@@ -498,7 +532,8 @@ class SiteController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
+    #[
+        Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -633,7 +668,8 @@ class SiteController extends AbstractController
                 } else {
                     $this->addFlash(
                         'warning',
-                        'You have exceeded the limits for verification password. Please contact our support for help.'
+                        'You have exceeded the limits for verification password. 
+                            Please contact our support for help.'
                     );
                 }
             } else {
