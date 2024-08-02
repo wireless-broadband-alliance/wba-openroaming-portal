@@ -104,9 +104,10 @@
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
 
             <p class="text-[#212529] text-opacity-40 text-sm">
-                You are currently authenticated
-                as
-                {% if app.user.samlIdentifier %}{{ app.user.samlIdentifier }}{% else %}
+                You are currently authenticated as
+                {% if userExternalAuths[user.id] is not empty %}
+                    {{ userExternalAuths[user.id] }}
+                {% else %}
                     {{ app.user.uuid }}
                 {% endif %}
             </p>
@@ -146,7 +147,9 @@
 
                     <p class="text-[#212529] text-opacity-40 text-sm">
                         You are currently authenticated as
-                        {% if app.user.samlIdentifier %}{{ app.user.samlIdentifier }}{% else %}
+                        {% if userExternalAuths[user.id] is not empty %}
+                            {{ userExternalAuths[user.id] }}
+                        {% else %}
                             {{ app.user.uuid }}
                         {% endif %}
                     </p>

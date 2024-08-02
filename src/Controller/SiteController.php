@@ -17,6 +17,7 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
@@ -29,7 +30,6 @@ use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security\UserAuthenticator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -51,6 +51,7 @@ class SiteController extends AbstractController
 {
     private MailerInterface $mailer;
     private UserRepository $userRepository;
+    private UserExternalAuthRepository $userExternalAuthRepository;
     private ParameterBagInterface $parameterBag;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
@@ -62,6 +63,7 @@ class SiteController extends AbstractController
      *
      * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
+     * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
@@ -71,6 +73,7 @@ class SiteController extends AbstractController
     public function __construct(
         MailerInterface $mailer,
         UserRepository $userRepository,
+        UserExternalAuthRepository $userExternalAuthRepository,
         ParameterBagInterface $parameterBag,
         SettingRepository $settingRepository,
         GetSettings $getSettings,
@@ -79,6 +82,7 @@ class SiteController extends AbstractController
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->parameterBag = $parameterBag;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
@@ -129,6 +133,14 @@ class SiteController extends AbstractController
             }
             if ($currentUser->getDeletedAt()) {
                 return $this->redirectToRoute('saml_logout');
+            }
+        }
+
+        // Fetch UserExternalAuth entity to get the provider name
+        $userExternalAuths = [];
+        foreach ($this->userExternalAuthRepository->findBy(['user' => $currentUser]) as $userExternalAuth) {
+            if ($userExternalAuth->getProvider() === UserProvider::SAML) {
+                $userExternalAuths[$currentUser->getId()] = $userExternalAuth->getProviderId();
             }
         }
 
@@ -269,7 +281,9 @@ class SiteController extends AbstractController
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
             'registrationFormDemo' => $formResgistrationDemo->createView(),
-            'data' => $data
+            'data' => $data,
+            'userExternalAuths' => $userExternalAuths,
+            'user' => $currentUser
         ]);
     }
 
