@@ -3,7 +3,9 @@
 namespace App\Command;
 
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\UserProvider;
 use App\Repository\EventRepository;
 use App\Service\EventActions;
 use DateTime;
@@ -83,6 +85,13 @@ class ResetAdminCommand extends Command
             $admin->setIsVerified(true);
             $admin->setCreatedAt(new DateTime());
             $this->entityManager->persist($admin);
+
+            // Create and set up the UserExternalAuth entity
+            $userExternalAuth = new UserExternalAuth();
+            $userExternalAuth->setUser($admin);
+            $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
+            $userExternalAuth->setProviderId(UserProvider::EMAIL);
+            $this->entityManager->persist($userExternalAuth);
 
             // Save the event Action using the service
             $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION, new DateTime(), []);
