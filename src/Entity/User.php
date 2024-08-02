@@ -7,7 +7,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
-use App\Api\V1\Controller\LocalAuthController;
+use App\Api\V1\Controller\AuthsController;
 use App\Api\V1\Controller\LocalRegistrationController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
@@ -35,9 +35,15 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/local',
-            controller: LocalAuthController::class,
+            controller: AuthsController::class,
             shortName: 'User Auth',
             name: 'api_auth_local'
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/saml',
+            controller: AuthsController::class,
+            shortName: 'User Auth',
+            name: 'api_auth_saml'
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register/',

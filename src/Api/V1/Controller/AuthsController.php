@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-class LocalAuthController extends AbstractController
+class AuthsController extends AbstractController
 {
     private UserRepository $userRepository;
     private UserPasswordHasherInterface $passwordHasher;
@@ -73,5 +73,14 @@ class LocalAuthController extends AbstractController
         ];
 
         return new JsonResponse($responseData, 200);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
+    public function authSaml(Request $request): JsonResponse
+    {
+        return $this->json('Rabo is here :D');
     }
 }
