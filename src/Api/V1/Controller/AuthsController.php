@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controller;
 
 use App\Entity\UserExternalAuth;
+use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use App\Service\JWTTokenGenerator;
 use Exception;
@@ -44,6 +45,18 @@ class AuthsController extends AbstractController
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
             return new JsonResponse(['error' => 'Invalid credentials - Missing User'], 404);
+        }
+
+        $hasPortalAccount = false;
+        foreach ($user->getUserExternalAuths() as $userExternalAuth) {
+            if ($userExternalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT) {
+                $hasPortalAccount = true;
+                break;
+            }
+        }
+
+        if (!$hasPortalAccount) {
+            return new JsonResponse(['error' => 'Invalid credentials - Provider not allowed'], 403);
         }
 
         // Get user external auth details
