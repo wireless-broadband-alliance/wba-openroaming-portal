@@ -6,10 +6,11 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\GetSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
@@ -23,21 +24,29 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
     private UserRepository $userRepository;
     private EntityManagerInterface $entityManager;
+    private GetSettings $getSettings;
+    private SettingRepository $settingRepository;
 
     /**
      * @param class-string<UserInterface> $userClass
      * @param array<string, mixed> $mapping
      * @param UserRepository $userRepository
      * @param EntityManagerInterface $entityManager
+     * @param GetSettings $getSettings
+     * @param SettingRepository $settingRepository
      */
     public function __construct(
         private readonly string $userClass,
         private readonly array $mapping,
         UserRepository $userRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        GetSettings $getSettings,
+        SettingRepository $settingRepository,
     ) {
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
+        $this->getSettings = $getSettings;
+        $this->settingRepository = $settingRepository;
     }
 
     /**
@@ -45,6 +54,14 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            throw new RuntimeException("Get Away. 
+            It's impossible to use this authentication method in demo mode");
+        }
+
         $uuid = $this->getAttributeValue($attributes, 'samlUuid');
         $samlIdentifier = $this->getAttributeValue($attributes, 'sAMAccountName');
 
