@@ -61,26 +61,12 @@ class ConfigController extends AbstractController
 
         $content = [];
 
-        // Convert string values to boolean
-        function convertToBoolean($value)
-        {
-            $trueValues = ['ON', 'TRUE', '1', 1, true];
-            $falseValues = ['OFF', 'FALSE', '0', 0, false];
-            if (in_array(strtoupper($value), $trueValues, true)) {
-                return true;
-            }
-            if (in_array(strtoupper($value), $falseValues, true)) {
-                return false;
-            }
-            return $value;
-        }
-
         // Map the settings into a single associative array with boolean conversion
         foreach ($settings as $category => $settingsArray) {
             foreach ($settingsArray as $settingName) {
                 $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
-                    $content[$category][$settingName] = convertToBoolean($setting->getValue());
+                    $content[$category][$settingName] = $this->convertToBoolean($setting->getValue());
                 }
             }
         }
@@ -94,5 +80,19 @@ class ConfigController extends AbstractController
 
         // Create the response
         return (new BaseResponse(200, $content))->toResponse();
+    }
+
+    // Convert string values to boolean
+    protected function convertToBoolean($value): bool
+    {
+        $trueValues = ['ON', 'TRUE', '1', 1, true];
+        $falseValues = ['OFF', 'FALSE', '0', 0, false];
+        if (in_array(strtoupper($value), $trueValues, true)) {
+            return true;
+        }
+        if (in_array(strtoupper($value), $falseValues, true)) {
+            return false;
+        }
+        return $value;
     }
 }
