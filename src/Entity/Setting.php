@@ -17,6 +17,52 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
+            openapiContext: [
+                'summary' => 'Get configuration settings',
+                'description' => 'This endpoint returns public values from the Setting entity and environment variables 
+                categorized by platform and provider.',
+                'responses' => [
+                    '200' => [
+                        'description' => 'Configuration settings retrieved successfully',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'platform' => [
+                                        'PLATFORM_MODE' => true,
+                                        'USER_VERIFICATION' => false,
+                                        'TURNSTILE_CHECKER' => true,
+                                        'CONTACT_EMAIL' => 'support@example.com',
+                                        'TOS_LINK' => 'https://example.com/tos',
+                                        'PRIVACY_POLICY_LINK' => 'https://example.com/privacy',
+                                    ],
+                                    'auth' => [
+                                        'AUTH_METHOD_SAML_ENABLED' => true,
+                                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => true,
+                                        'AUTH_METHOD_REGISTER_ENABLED' => true,
+                                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => true,
+                                        'AUTH_METHOD_SMS_REGISTER_ENABLED' => false,
+                                    ],
+                                    'turnstile' => [
+                                        'TURNSTILE_KEY' => 'turnstile_key',
+                                    ],
+                                    'google' => [
+                                        'GOOGLE_CLIENT_ID' => 'google_client_id',
+                                    ],
+                                    'sentry' => [
+                                        'SENTRY_DSN' => 'sentry_dsn',
+                                    ],
+                                    'saml' => [
+                                        'SAML_IDP_ENTITY_ID' => 'saml_idp_entity_id',
+                                        'SAML_IDP_SSO_URL' => 'saml_idp_sso_url',
+                                        'SAML_IDP_X509_CERT' => 'saml_idp_x509_cert',
+                                        'SAML_SP_ENTITY_ID' => 'saml_sp_entity_id',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             shortName: 'Setting',
             description: 'Returns public values from the Setting entity',
             name: 'app_config_settings',
