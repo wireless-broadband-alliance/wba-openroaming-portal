@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
-    description: "The User entity returns values related to the current user.",
+    description: "The User entity returns values related to a user.",
     operations: [
         new GetCollection(
             uriTemplate: '/v1/user',
@@ -44,6 +44,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: AuthsController::class,
             shortName: 'User Auth',
             name: 'api_auth_saml'
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/google',
+            controller: AuthsController::class,
+            shortName: 'User Auth',
+            name: 'api_auth_google'
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register/',

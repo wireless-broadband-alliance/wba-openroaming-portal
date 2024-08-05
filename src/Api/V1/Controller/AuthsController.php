@@ -116,7 +116,10 @@ class AuthsController extends AbstractController
             return new JsonResponse(['error' => 'This user does not have a provider associated'], 404);
         }
 
+        $token = $this->tokenGenerator->generateToken($user);
+
         $responseData = [
+            'token' => $token,
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
@@ -138,5 +141,14 @@ class AuthsController extends AbstractController
         ];
 
         return new JsonResponse($responseData, 200);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/v1/auth/google', name: 'api_auth_google', methods: ['POST'])]
+    public function authGoogle(): JsonResponse
+    {
+        return $this->json('Rabo is here, again :D');
     }
 }
