@@ -30,8 +30,60 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User',
             security: "is_granted('ROLE_USER')",
             securityMessage: "You don't have permission to access this resource",
-            description: 'Returns current authenticated user values from the User entity',
             name: 'api_get_current_user',
+            openapiContext: [
+                'summary' => 'Retrieve current authenticated user',
+                'description' => 'This endpoint returns the details of the currently authenticated user.',
+                'responses' => [
+                    '200' => [
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'id' => ['type' => 'integer'],
+                                        'email' => ['type' => 'string'],
+                                        'uuid' => ['type' => 'string'],
+                                        'roles' => [
+                                            'type' => 'array',
+                                            'items' => ['type' => 'string']
+                                        ],
+                                        'isVerified' => ['type' => 'boolean'],
+                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
+                                    ],
+                                ],
+                                'example' => [
+                                    'id' => 1,
+                                    'email' => 'user@example.com',
+                                    'uuid' => 'abc123',
+                                    'roles' => ['ROLE_USER'],
+                                    'isVerified' => true,
+                                    'createdAt' => '2023-01-01T00:00:00+00:00',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'Unauthorized',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'security' => [
+                    [
+                        'BearerAuth' => [
+                            'scheme' => 'Bearer',
+                            'bearerFormat' => 'JWT',
+                            'example' => 'Bearer <JWT_TOKEN>',
+                        ],
+                    ],
+                ],
+            ],
         ),
         new Post(
             uriTemplate: '/v1/auth/local',
