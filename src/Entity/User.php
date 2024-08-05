@@ -310,7 +310,115 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/v1/auth/google',
             controller: AuthsController::class,
             shortName: 'User Auth',
-            name: 'api_auth_google'
+            name: 'api_auth_google',
+            openapiContext: [
+                'summary' => 'Authenticate a user via Google',
+                'description' => 'This endpoint authenticates a user using their Google account ID.',
+                'requestBody' => [
+                    'description' => 'Google account ID',
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'googleId' => ['type' => 'string', 'example' => 'google-account-id-example'],
+                                ],
+                                'required' => ['googleId'],
+                            ],
+                        ],
+                    ],
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Authenticated user details and JWT token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'token' => ['type' => 'string', 'example' => 'jwt-token-example'],
+                                        'user' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'integer', 'example' => 1],
+                                                'email' => ['type' => 'string', 'example' => 'user@example.com'],
+                                                'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => ['type' => 'string'],
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => ['type' => 'string', 'example' => 'John'],
+                                                'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                                'isVerified' => ['type' => 'boolean', 'example' => true],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => ['type' => 'string', 'example' => 'Google'],
+                                                            'provider_id' => ['type' => 'string', 'example' => 'google-id-example'],
+                                                        ],
+                                                    ],
+                                                ],
+                                                'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01 00:00:00'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'token' => 'jwt-token-example',
+                                    'user' => [
+                                        'id' => 1,
+                                        'email' => 'user@example.com',
+                                        'uuid' => 'user-uuid-example',
+                                        'roles' => ['ROLE_USER'],
+                                        'first_name' => 'John',
+                                        'last_name' => 'Doe',
+                                        'isVerified' => true,
+                                        'user_external_auths' => [
+                                            [
+                                                'provider' => 'Google',
+                                                'provider_id' => 'google-id-example',
+                                            ],
+                                        ],
+                                        'createdAt' => '2023-01-01 00:00:00',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '400' => [
+                        'description' => 'Invalid data',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'Invalid data',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '404' => [
+                        'description' => 'User not found or provider not associated',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'User not found',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'security' => [
+                    [
+                        'BearerAuth' => [
+                            'scheme' => 'bearer',
+                            'bearerFormat' => 'JWT',
+                            'example' => 'Bearer <JWT_TOKEN>',
+                        ],
+                    ],
+                ],
+            ],
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register/',
