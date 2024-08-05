@@ -418,7 +418,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email and password.',
+                'description' => 'This endpoint registers a new user using their email.',
                 'requestBody' => [
                     'description' => 'User registration data',
                     'content' => [
@@ -481,10 +481,73 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
         ),
         new Post(
-            uriTemplate: '/v1/auth/sms/register/',
+            uriTemplate: '/v1/auth/sms/register',
             controller: LocalRegistrationController::class,
             shortName: 'User Auth Register',
-            name: 'api_auth_sms_register'
+            name: 'api_auth_sms_register',
+            openapiContext: [
+                'summary' => 'Register a new user via SMS authentication',
+                'description' => 'This endpoint registers a new user using their phone number.',
+                'requestBody' => [
+                    'description' => 'User registration data',
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'uuid' => ['type' => 'string', 'example' => '+1234567890'],
+                                    'password' => ['type' => 'string', 'example' => 'strongpassword'],
+                                    'phoneNumber' => ['type' => 'string', 'example' => '+1234567890'],
+                                    'isVerified' => ['type' => 'boolean', 'example' => false],
+                                    'first_name' => ['type' => 'string', 'example' => 'John'],
+                                    'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                    'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01 00:00:00'],
+                                ],
+                                'required' => ['uuid', 'password', 'phoneNumber'],
+                            ],
+                        ],
+                    ],
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'User registered successfully',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'message' => 'SMS User Account Registered Successfully',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '422' => [
+                        'description' => 'Invalid data',
+                        'content' => [
+                            'application/json' => [
+                                'examples' => [
+                                    'missing_data' => [
+                                        'summary' => 'Missing required data',
+                                        'value' => ['error' => 'Invalid data. Make sure to set all the inputs!'],
+                                    ],
+                                    'mismatch_data' => [
+                                        'summary' => 'UUID and phone number mismatch',
+                                        'value' => ['error' => 'Invalid data. Make sure to type both with the same content!'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'User already exists',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'This User already exists',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         )
     ],
 )]
