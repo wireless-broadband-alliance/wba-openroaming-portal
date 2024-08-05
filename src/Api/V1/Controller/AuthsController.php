@@ -147,8 +147,50 @@ class AuthsController extends AbstractController
      * @throws Exception
      */
     #[Route('/api/v1/auth/google', name: 'api_auth_google', methods: ['POST'])]
-    public function authGoogle(): JsonResponse
+    public function authGoogle(Request $request): JsonResponse
     {
-        return $this->json('Rabo is here, again :D');
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['googleId'])) {
+            return new JsonResponse(['error' => 'Invalid data'], 400);
+        }
+
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
+
+        if (!$userExternalAuth) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        $user = $userExternalAuth->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'This user does not have a provider associated'], 404);
+        }
+
+        $token = $this->tokenGenerator->generateToken($user);
+
+        $responseData = [
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'uuid' => $user->getUuid(),
+                'roles' => $user->getRoles(),
+                'first_name' => $user->getFirstName(),
+                'last_name' => $user->getLastName(),
+                'isVerified' => $user->isVerified(),
+                'user_external_auths' => $user->getUserExternalAuths()->map(
+                    function (UserExternalAuth $userExternalAuth) {
+                        return [
+                            'provider' => $userExternalAuth->getProvider(),
+                            'provider_id' => $userExternalAuth->getProviderId(),
+                        ];
+                    }
+                )->toArray(),
+                'createdAt' => $user->getCreatedAt() ? $user->getCreatedAt()->format('Y-m-d H:i:s') : null,
+            ]
+        ];
+
+        return new JsonResponse($responseData, 200);
     }
 }
