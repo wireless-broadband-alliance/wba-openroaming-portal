@@ -4,6 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\JWTTokenGenerator;
 use Exception;
@@ -18,15 +19,18 @@ class AuthsController extends AbstractController
     private UserRepository $userRepository;
     private UserPasswordHasherInterface $passwordHasher;
     private jwtTokenGenerator $tokenGenerator;
+    private UserExternalAuthRepository $userExternalAuthRepository;
 
     public function __construct(
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         jwtTokenGenerator $tokenGenerator,
+        UserExternalAuthRepository $userExternalAuthRepository,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
         $this->tokenGenerator = $tokenGenerator;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
     }
 
     /**
@@ -94,6 +98,45 @@ class AuthsController extends AbstractController
     #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request): JsonResponse
     {
-        return $this->json('Rabo is here :D');
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['sAMAccountName'])) {
+            return new JsonResponse(['error' => 'Invalid data'], 400);
+        }
+
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['sAMAccountName']]);
+
+        if (!$userExternalAuth) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        $user = $userExternalAuth->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'This user does not have a provider associated'], 404);
+        }
+
+        $responseData = [
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'uuid' => $user->getUuid(),
+                'roles' => $user->getRoles(),
+                'first_name' => $user->getFirstName(),
+                'last_name' => $user->getLastName(),
+                'isVerified' => $user->isVerified(),
+                'user_external_auths' => $user->getUserExternalAuths()->map(
+                    function (UserExternalAuth $userExternalAuth) {
+                        return [
+                            'provider' => $userExternalAuth->getProvider(),
+                            'provider_id' => $userExternalAuth->getProviderId(),
+                        ];
+                    }
+                )->toArray(),
+                'createdAt' => $user->getCreatedAt() ? $user->getCreatedAt()->format('Y-m-d H:i:s') : null,
+            ]
+        ];
+
+        return new JsonResponse($responseData, 200);
     }
 }
