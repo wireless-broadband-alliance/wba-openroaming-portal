@@ -101,7 +101,105 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/v1/auth/local',
             controller: AuthsController::class,
             shortName: 'User Auth',
-            name: 'api_auth_local'
+            name: 'api_auth_local',
+            openapiContext: [
+                'summary' => 'Authenticate a user locally',
+                'description' => 'This endpoint authenticates a user using their UUID and password.',
+                'requestBody' => [
+                    'description' => 'User credentials',
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
+                                    'password' => ['type' => 'string', 'example' => 'user-password-example'],
+                                ],
+                                'required' => ['uuid', 'password'],
+                            ],
+                        ],
+                    ],
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Authenticated user details and JWT token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'token' => ['type' => 'string', 'example' => 'jwt-token-example'],
+                                        'user' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
+                                                'email' => ['type' => 'string', 'example' => 'user@example.com'],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => ['type' => 'string'],
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => ['type' => 'string', 'example' => 'John'],
+                                                'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                                'isVerified' => ['type' => 'boolean', 'example' => true],
+                                                'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01T00:00:00+00:00'],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => ['type' => 'string', 'example' => 'PortalAccount'],
+                                                            'provider_id' => ['type' => 'string', 'example' => 'provider-id-example'],
+                                                        ],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'token' => 'jwt-token-example',
+                                    'user' => [
+                                        'uuid' => 'user-uuid-example',
+                                        'email' => 'user@example.com',
+                                        'roles' => ['ROLE_USER'],
+                                        'first_name' => 'John',
+                                        'last_name' => 'Doe',
+                                        'isVerified' => true,
+                                        'createdAt' => '2023-01-01T00:00:00+00:00',
+                                        'user_external_auths' => [
+                                            [
+                                                'provider' => 'PortalAccount',
+                                                'provider_id' => 'provider-id-example',
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '404' => [
+                        'description' => 'Invalid data or credentials',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'Invalid data',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'Provider not allowed',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'Invalid credentials - Provider not allowed',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ),
         new Post(
             uriTemplate: '/v1/auth/saml',
