@@ -286,6 +286,15 @@ class RegistrationController extends AbstractController
 
 
     /**
+     * @throws Exception
+     */
+    #[Route('/api/v1/auth/sms/reset/', name: 'api_auth_sms_reset', methods: ['POST'])]
+    public function smsReset(): JsonResponse
+    {
+        return new JsonResponse(['message' => 'Rabo message received :D'], 200);
+    }
+
+    /**
      * Generate a new verification code for the admin.
      *
      * @param User $user The user for whom the verification code is generated.

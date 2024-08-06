@@ -40,3 +40,8 @@ api_auth_sms_register:
     path: /api/v1/auth/sms/register/
     controller: App\Api\V1\Controller\RegistrationController::smsRegister
     methods: ['POST']
+
+api_auth_sms_reset:
+    path: /api/v1/auth/sms/reset/
+    controller: App\Api\V1\Controller\RegistrationController::smsReset
+    methods: ['POST']

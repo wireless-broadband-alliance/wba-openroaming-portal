@@ -600,7 +600,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
                 It checks if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
                 then proceeds with the password reset if the conditions are met.',
-                'tags' => ['Authentication'],
                 'responses' => [
                     '200' => [
                         'description' => 'Password reset email sent successfully',
@@ -678,6 +677,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
             ],
         ),
+        new Post(
+            uriTemplate: '/v1/auth/sms/reset',
+            controller: AuthsController::class,
+            shortName: 'User Auth Reset',
+            name: 'api_auth_sms_reset',
+            openapiContext: [
+                'security' => [
+                    [
+                        'BearerAuth' => [
+                            'type' => 'http',
+                            'scheme' => 'bearer',
+                            'bearerFormat' => 'JWT',
+                        ],
+                    ],
+                ],
+            ],
+        )
     ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
