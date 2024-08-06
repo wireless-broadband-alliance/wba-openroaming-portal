@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -23,17 +25,20 @@ class RegistrationController extends AbstractController
     private EntityManagerInterface $entityManager;
     private UserPasswordHasherInterface $passwordHasher;
     private EventActions $eventActions;
+    private TokenStorageInterface $tokenStorage;
 
     public function __construct(
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
         EventActions $eventActions,
+        TokenStorageInterface $tokenStorage,
     ) {
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
         $this->eventActions = $eventActions;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -100,7 +105,30 @@ class RegistrationController extends AbstractController
     #[Route('/api/v1/auth/local/reset/', name: 'api_auth_local_reset', methods: ['POST'])]
     public function localReset(Request $request): JsonResponse
     {
-        return new JsonResponse('My name is rabo, and I always come back :3');
+        $token = $this->tokenStorage->getToken();
+
+        // Check if the token is present and is of the correct type
+        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
+            /** @var User $currentUser */
+            $currentUser = $token->getUser();
+
+            // Get user external auth details
+            $userExternalAuths = $currentUser->getUserExternalAuths()->map(
+                function (UserExternalAuth $userExternalAuth) {
+                    return [
+                        'provider' => $userExternalAuth->getProvider(),
+                        'provider_id' => $userExternalAuth->getProviderId(),
+                    ];
+                }
+            )->toArray();
+            $content = [
+               'user' => $currentUser,
+               'providers' => $userExternalAuths,
+            ];
+            return new JsonResponse($content, 200);
+        }
+
+        return new JsonResponse('Pls put the token on the correct place');
     }
 
     /**
