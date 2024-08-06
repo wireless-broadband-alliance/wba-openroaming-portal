@@ -548,7 +548,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                 ],
             ],
-        )
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/local/reset',
+            controller: AuthsController::class,
+            shortName: 'User Auth Reset',
+            name: 'api_auth_local_reset',
+            openapiContext: [
+                'summary' => 'Retrieve password reset trigger from a local auth account',
+                'description' => 'This endpoint returns password reset trigger from a local auth account.',
+                'security' => [
+                    [
+                        'BearerAuth' => [
+                            'scheme' => 'Bearer',
+                            'bearerFormat' => 'JWT',
+                            'example' => 'Bearer <JWT_TOKEN>',
+                        ],
+                    ],
+                ],
+            ],
+        ),
     ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]

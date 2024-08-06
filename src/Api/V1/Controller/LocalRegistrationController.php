@@ -97,6 +97,15 @@ class LocalRegistrationController extends AbstractController
     /**
      * @throws Exception
      */
+    #[Route('/api/v1/auth/local/reset/', name: 'api_auth_local_reset', methods: ['POST'])]
+    public function localReset(Request $request): JsonResponse
+    {
+        return new JsonResponse('My name is rabo, and I always come back :3');
+    }
+
+    /**
+     * @throws Exception
+     */
     #[Route('/api/v1/auth/sms/register/', name: 'api_auth_sms_register', methods: ['POST'])]
     public function smsRegister(Request $request): JsonResponse
     {
