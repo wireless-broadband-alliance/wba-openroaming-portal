@@ -5,9 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Api\V1\Controller\AuthsController;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
-use App\Api\V1\Controller\AuthsController;
 use App\Api\V1\Controller\RegistrationController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
@@ -142,14 +142,24 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'first_name' => ['type' => 'string', 'example' => 'John'],
                                                 'last_name' => ['type' => 'string', 'example' => 'Doe'],
                                                 'isVerified' => ['type' => 'boolean', 'example' => true],
-                                                'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01T00:00:00+00:00'],
+                                                'createdAt' => [
+                                                    'type' => 'string',
+                                                    'format' => 'date-time',
+                                                    'example' => '2023-01-01T00:00:00+00:00'
+                                                ],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
                                                         'type' => 'object',
                                                         'properties' => [
-                                                            'provider' => ['type' => 'string', 'example' => 'PortalAccount'],
-                                                            'provider_id' => ['type' => 'string', 'example' => 'provider-id-example'],
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'PortalAccount'
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'provider-id-example'
+                                                            ],
                                                         ],
                                                     ],
                                                 ],
@@ -251,12 +261,22 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'items' => [
                                                         'type' => 'object',
                                                         'properties' => [
-                                                            'provider' => ['type' => 'string', 'example' => 'PortalAccount'],
-                                                            'provider_id' => ['type' => 'string', 'example' => 'provider-id-example'],
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'PortalAccount'
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'provider-id-example'
+                                                            ],
                                                         ],
                                                     ],
                                                 ],
-                                                'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01 00:00:00'],
+                                                'createdAt' => [
+                                                    'type' => 'string',
+                                                    'format' => 'date-time',
+                                                    'example' => '2023-01-01 00:00:00'
+                                                ],
                                             ],
                                         ],
                                     ],
@@ -357,11 +377,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'type' => 'object',
                                                         'properties' => [
                                                             'provider' => ['type' => 'string', 'example' => 'Google'],
-                                                            'provider_id' => ['type' => 'string', 'example' => 'google-id-example'],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'google-id-example'
+                                                            ],
                                                         ],
                                                     ],
                                                 ],
-                                                'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01 00:00:00'],
+                                                'createdAt' => [
+                                                    'type' => 'string',
+                                                    'format' => 'date-time',
+                                                    'example' => '2023-01-01 00:00:00'
+                                                ],
                                             ],
                                         ],
                                     ],
@@ -432,7 +459,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'isVerified' => ['type' => 'boolean', 'example' => false],
                                     'first_name' => ['type' => 'string', 'example' => 'John'],
                                     'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                    'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01 00:00:00'],
+                                    'createdAt' => [
+                                        'type' => 'string',
+                                        'format' => 'date-time',
+                                        'example' => '2023-01-01 00:00:00'
+                                    ],
                                 ],
                                 'required' => ['uuid', 'password', 'email'],
                             ],
@@ -461,7 +492,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and email mismatch',
-                                        'value' => ['error' => 'Invalid data. Make sure to type both with the same content!'],
+                                        'value' => [
+                                            'error' => 'Invalid data.
+                                         Make sure to type both with the same content!'
+                                        ],
                                     ],
                                 ],
                             ],
@@ -501,7 +535,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'isVerified' => ['type' => 'boolean', 'example' => false],
                                     'first_name' => ['type' => 'string', 'example' => 'John'],
                                     'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                    'createdAt' => ['type' => 'string', 'format' => 'date-time', 'example' => '2023-01-01 00:00:00'],
+                                    'createdAt' => [
+                                        'type' => 'string',
+                                        'format' => 'date-time',
+                                        'example' => '2023-01-01 00:00:00'
+                                    ],
                                 ],
                                 'required' => ['uuid', 'password', 'phoneNumber'],
                             ],
@@ -530,7 +568,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and phone number mismatch',
-                                        'value' => ['error' => 'Invalid data. Make sure to type both with the same content!'],
+                                        'value' => [
+                                            'error' => 'Invalid data. 
+                                        Make sure to type both with the same content!'
+                                        ],
                                     ],
                                 ],
                             ],
@@ -555,14 +596,83 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
-                'summary' => 'Retrieve password reset trigger from a local auth account',
-                'description' => 'This endpoint returns password reset trigger from a local auth account.',
+                'summary' => 'Trigger a password reset for a local auth account',
+                'description' => 'This endpoint triggers a password reset for a local auth account. 
+                It checks if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
+                then proceeds with the password reset if the conditions are met.',
+                'tags' => ['Authentication'],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Password reset email sent successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'We have sent you a new email to: user@example.com.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '400' => [
+                        'description' => 'Bad Request',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Please make sure to place the JWT token',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'Forbidden',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials - Provider not allowed',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '429' => [
+                        'description' => 'Too Many Requests',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Please wait 2 minutes before trying again.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
                 'security' => [
                     [
                         'BearerAuth' => [
-                            'scheme' => 'Bearer',
+                            'type' => 'http',
+                            'scheme' => 'bearer',
                             'bearerFormat' => 'JWT',
-                            'example' => 'Bearer <JWT_TOKEN>',
                         ],
                     ],
                 ],

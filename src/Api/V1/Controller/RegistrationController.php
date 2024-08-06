@@ -301,5 +301,4 @@ class RegistrationController extends AbstractController
 
         return $verificationCode;
     }
-
 }
