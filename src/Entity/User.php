@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Post;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\AuthsController;
-use App\Api\V1\Controller\LocalRegistrationController;
+use App\Api\V1\Controller\RegistrationController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -413,7 +413,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register',
-            controller: LocalRegistrationController::class,
+            controller: RegistrationController::class,
             shortName: 'User Auth Register',
             name: 'api_auth_local_register',
             openapiContext: [
@@ -482,7 +482,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/register',
-            controller: LocalRegistrationController::class,
+            controller: RegistrationController::class,
             shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
             openapiContext: [

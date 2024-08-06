@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-class LocalRegistrationController extends AbstractController
+class RegistrationController extends AbstractController
 {
     private UserRepository $userRepository;
     private EntityManagerInterface $entityManager;
