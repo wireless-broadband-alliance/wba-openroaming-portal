@@ -9,9 +9,12 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
+use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\GetSettings;
+use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -40,6 +43,10 @@ class RegistrationController extends AbstractController
     private EventActions $eventActions;
     private TokenStorageInterface $tokenStorage;
     private ParameterBagInterface $parameterBag;
+    private SendSMS $sendSMSService;
+    private GetSettings $getSettings;
+    private SettingRepository $settingRepository;
+    private UserPasswordHasherInterface $userPasswordHasher;
 
 
     public function __construct(
@@ -51,6 +58,10 @@ class RegistrationController extends AbstractController
         EventActions $eventActions,
         TokenStorageInterface $tokenStorage,
         ParameterBagInterface $parameterBag,
+        SendSMS $sendSMSService,
+        GetSettings $getSettings,
+        SettingRepository $settingRepository,
+        UserPasswordHasherInterface $userPasswordHasher,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -60,6 +71,10 @@ class RegistrationController extends AbstractController
         $this->eventActions = $eventActions;
         $this->tokenStorage = $tokenStorage;
         $this->parameterBag = $parameterBag;
+        $this->sendSMSService = $sendSMSService;
+        $this->getSettings = $getSettings;
+        $this->settingRepository = $settingRepository;
+        $this->userPasswordHasher = $userPasswordHasher;
     }
 
     /**
@@ -286,12 +301,97 @@ class RegistrationController extends AbstractController
 
 
     /**
-     * @throws Exception
+     * @throws Exception|\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/sms/reset/', name: 'api_auth_sms_reset', methods: ['POST'])]
     public function smsReset(): JsonResponse
     {
-        return new JsonResponse(['message' => 'Rabo message received :D'], 200);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $token = $this->tokenStorage->getToken();
+
+        // Check if the token is present and is of the correct type
+        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
+            /** @var User $currentUser */
+            $currentUser = $token->getUser();
+
+            // Check if the user has an external auth with PortalAccount and a valid phone number as providerId
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+            $hasValidPortalAccount = false;
+
+            foreach ($userExternalAuths as $auth) {
+                if (
+                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
+                    $auth->getProviderId() === UserProvider::PHONE_NUMBER
+                ) {
+                    $hasValidPortalAccount = true;
+                    break;
+                }
+            }
+
+            if ($hasValidPortalAccount) {
+                try {
+                    $randomPassword = bin2hex(random_bytes(4));
+                    // Generate hashed password to be sent via SMS
+                    $hashedPassword = $this->userPasswordHasher->hashPassword($currentUser, $randomPassword);
+
+                    // Send SMS
+                    $message = "Your account password is: "
+                        . $randomPassword
+                        . "%0AVerification code is: "
+                        . $currentUser->getVerificationCode();
+
+                    $result = $this->sendSMSService->sendSms($currentUser->getPhoneNumber(), $message);
+
+                    if ($result) {
+                        // If the service returns true, show the attempts left with a message
+                        $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($currentUser);
+
+                        if ($latestEvent) {
+                            $latestEventMetadata = $latestEvent->getEventMetadata();
+                            $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+                            $attemptsLeft = 3 - $verificationAttempts;
+                            $currentUser->setPassword($hashedPassword);
+                            $this->entityManager->persist($currentUser);
+                            $this->entityManager->flush();
+
+                            $message = sprintf(
+                                'We have sent you a new code to: %s. You have %d attempt(s) left.',
+                                $currentUser->getPhoneNumber(),
+                                $attemptsLeft
+                            );
+                        }
+
+                        $attempts = 1;
+                        $currentTime = new DateTime();
+                        // Defines the Event to the table
+                        $eventMetadata = [
+                            'platform' => PlatformMode::LIVE,
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'uuid' => $currentUser->getUuid(),
+                            'verificationAttempts' => 0,
+                            'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM)
+                        ];
+
+                        $this->eventActions->saveEvent(
+                            $currentUser,
+                            AnalyticalEventType::USER_SMS_ATTEMPT,
+                            new DateTime(),
+                            $eventMetadata
+                        );
+                    } else {
+                        return new JsonResponse([
+                            'error' => 'Failed to regenerate SMS code. Please, wait '
+                                . $data['SMS_TIMER_RESEND']['value']
+                                . ' minute(s) before generating a new code.'
+                        ], 400);
+                    }
+                } catch (\RuntimeException $e) {
+                    return new JsonResponse(['error' => $e->getMessage()], 400);
+                }
+            }
+            return new JsonResponse(['error' => 'Invalid Credentials, Provider not allowed'], 400);
+        }
+        return new JsonResponse(['error' => 'Please make sure to place the JWT token'], 400);
     }
 
     /**

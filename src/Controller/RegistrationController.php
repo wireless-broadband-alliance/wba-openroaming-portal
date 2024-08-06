@@ -220,6 +220,7 @@ class RegistrationController extends AbstractController
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws Exception
      */
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
