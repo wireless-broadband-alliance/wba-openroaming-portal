@@ -182,8 +182,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -340,11 +340,12 @@ class RegistrationController extends AbstractController
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($currentUser);
 
                     // Retrieve the SMS resend interval from the settings
-                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                    $maxAttempts = 3;
+                    $maxAttempts = 4;
                     $currentTime = new DateTime();
 
+                    // Initialize attempts left
                     $attemptsLeft = $maxAttempts;
 
                     if ($latestEvent) {
@@ -354,45 +355,59 @@ class RegistrationController extends AbstractController
                             ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                             : null;
 
-                        // Check if the time since the last code request is less than the minimum interval
-                        if ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add($minInterval) > $currentTime) {
-                            // Calculate attempts left
-                            $attemptsLeft = $maxAttempts - $verificationAttempts;
-                            if ($attemptsLeft <= 0) {
-                                // Notify the user that they need to wait before retrying
-                                $waitTime = $lastVerificationCodeTime->add($minInterval)->diff($currentTime);
-                                $waitMinutes = $waitTime->i; // Get the wait time in minutes
+                        if ($lastVerificationCodeTime instanceof DateTime) {
+                            $allowedTime = $lastVerificationCodeTime->add($minInterval);
 
+                            if ($allowedTime > $currentTime) {
                                 return new JsonResponse([
-                                    'error' => 'You have reached the maximum number of attempts. Please wait '
-                                        . $waitMinutes
+                                    'error' => 'Please wait '
+                                        . $data['SMS_TIMER_RESEND']['value']
                                         . ' minute(s) before trying again.'
                                 ], 429);
                             }
-                        }
 
-                        // Increment the attempt count if allowed
-                        $verificationAttempts++;
+                            // Time interval has passed, update attempt count
+                            $verificationAttempts++;
+                            $attemptsLeft = $maxAttempts - $verificationAttempts;
+
+                            if ($attemptsLeft <= 0) {
+                                return new JsonResponse([
+                                'error' => 'You have exceed the limits for regeneration. Contact our support for help.'
+                                ], 429);
+                            }
+                        } else {
+                            // No previous attempt record found, set attemptsLeft correctly
+                            $verificationAttempts = 1;
+                            $attemptsLeft = $maxAttempts - $verificationAttempts;
+                        }
                     } else {
+                        // No previous event, this is the first attempt
                         $verificationAttempts = 1;
+                        $attemptsLeft = $maxAttempts - $verificationAttempts;
                     }
 
                     // Update or create the event record
                     if (!$latestEvent) {
-                        $eventMetadata = [
-                            'ip' => $_SERVER['REMOTE_ADDR'],
-                            'uuid' => $currentUser->getUuid(),
-                            'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
-                            'verificationAttempts' => $verificationAttempts,
-                        ];
-
-                        $this->eventActions->saveEvent(
-                            $currentUser,
-                            AnalyticalEventType::USER_SMS_ATTEMPT,
-                            $currentTime,
-                            $eventMetadata
-                        );
+                        $latestEvent = new Event();
+                        $latestEvent->setUser($currentUser);
+                        $latestEvent->setEventDatetime($currentTime);
+                        $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
                     }
+
+                    $eventMetadata = [
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'uuid' => $currentUser->getUuid(),
+                        'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
+                        'verificationAttempts' => $verificationAttempts,
+                    ];
+                    $latestEvent->setEventMetadata($eventMetadata);
+
+                    $this->eventActions->saveEvent(
+                        $currentUser,
+                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        $currentTime,
+                        $eventMetadata
+                    );
 
                     // Set the hashed password for the user
                     $currentUser->setPassword($hashedPassword);
@@ -412,7 +427,7 @@ class RegistrationController extends AbstractController
                             'success' => sprintf(
                                 'We have sent a new code to: %s. You have %d attempt(s) left.',
                                 $currentUser->getPhoneNumber(),
-                                $attemptsLeft - 1
+                                $attemptsLeft
                             )
                         ], 200);
                     }
@@ -420,6 +435,7 @@ class RegistrationController extends AbstractController
                     return new JsonResponse(['error' => $e->getMessage()], 400);
                 }
             }
+
             return new JsonResponse(['error' => 'Invalid Credentials, Provider not allowed'], 400);
         }
         return new JsonResponse(['error' => 'Please make sure to place the JWT token'], 400);
