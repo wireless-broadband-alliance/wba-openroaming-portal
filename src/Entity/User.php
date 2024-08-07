@@ -683,6 +683,61 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
             openapiContext: [
+                'summary' => 'Trigger a password reset for a SMS auth account',
+                'description' => 'This endpoint sends an SMS with a new verification code if the user has a valid 
+                PortalAccount and has not exceeded the SMS request limits. 
+                It also checks if the required time interval has passed before allowing a new request.',
+                'responses' => [
+                    '200' => [
+                        'description' => 'Successfully sent the SMS with the new verification code',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'string',
+                                            'example' => 'We have sent a new code to: +1234567890. 
+                                            You have 3 attempt(s) left.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '400' => [
+                        'description' => 'Bad Request - Invalid credentials or other errors',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid Credentials, Provider not allowed',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '429' => [
+                        'description' => 'Too Many Requests - Rate limit exceeded or attempt limit reached',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Please wait 2 minute(s) before trying again.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
                 'security' => [
                     [
                         'BearerAuth' => [
