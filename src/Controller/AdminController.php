@@ -2938,8 +2938,8 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                                'kernel.project_dir'
-                            ) . '/public/resources/uploaded/';
+                            'kernel.project_dir'
+                        ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);

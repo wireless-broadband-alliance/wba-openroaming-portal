@@ -182,8 +182,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -258,9 +258,8 @@ class RegistrationController extends AbstractController
 
         if ($data['uuid'] !== $data['phoneNumber']) {
             return new JsonResponse([
-                'error' => 'Invalid data. 
-            Make sure to type both with the same content!'
-            ], 422);
+                'error' => 'Invalid data. Make sure to type both with the same content!'
+            ], 400);
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['uuid']])) {
@@ -335,8 +334,70 @@ class RegistrationController extends AbstractController
             if ($hasValidPortalAccount) {
                 try {
                     $randomPassword = bin2hex(random_bytes(4));
-                    // Generate hashed password to be sent via SMS
                     $hashedPassword = $this->userPasswordHasher->hashPassword($currentUser, $randomPassword);
+
+                    // Retrieve the latest SMS attempt event for the user
+                    $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($currentUser);
+
+                    // Retrieve the SMS resend interval from the settings
+                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                    $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
+                    $maxAttempts = 3;
+                    $currentTime = new DateTime();
+
+                    $attemptsLeft = $maxAttempts;
+
+                    if ($latestEvent) {
+                        $latestEventMetadata = $latestEvent->getEventMetadata();
+                        $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+                        $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                            ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                            : null;
+
+                        // Check if the time since the last code request is less than the minimum interval
+                        if ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add($minInterval) > $currentTime) {
+                            // Calculate attempts left
+                            $attemptsLeft = $maxAttempts - $verificationAttempts;
+                            if ($attemptsLeft <= 0) {
+                                // Notify the user that they need to wait before retrying
+                                $waitTime = $lastVerificationCodeTime->add($minInterval)->diff($currentTime);
+                                $waitMinutes = $waitTime->i; // Get the wait time in minutes
+
+                                return new JsonResponse([
+                                    'error' => 'You have reached the maximum number of attempts. Please wait '
+                                        . $waitMinutes
+                                        . ' minute(s) before trying again.'
+                                ], 429);
+                            }
+                        }
+
+                        // Increment the attempt count if allowed
+                        $verificationAttempts++;
+                    } else {
+                        $verificationAttempts = 1;
+                    }
+
+                    // Update or create the event record
+                    if (!$latestEvent) {
+                        $eventMetadata = [
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'uuid' => $currentUser->getUuid(),
+                            'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
+                            'verificationAttempts' => $verificationAttempts,
+                        ];
+
+                        $this->eventActions->saveEvent(
+                            $currentUser,
+                            AnalyticalEventType::USER_SMS_ATTEMPT,
+                            $currentTime,
+                            $eventMetadata
+                        );
+                    }
+
+                    // Set the hashed password for the user
+                    $currentUser->setPassword($hashedPassword);
+                    $this->entityManager->persist($currentUser);
+                    $this->entityManager->flush();
 
                     // Send SMS
                     $message = "Your account password is: "
@@ -347,47 +408,13 @@ class RegistrationController extends AbstractController
                     $result = $this->sendSMSService->sendSms($currentUser->getPhoneNumber(), $message);
 
                     if ($result) {
-                        // If the service returns true, show the attempts left with a message
-                        $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($currentUser);
-
-                        if ($latestEvent) {
-                            $latestEventMetadata = $latestEvent->getEventMetadata();
-                            $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                            $attemptsLeft = 3 - $verificationAttempts;
-                            $currentUser->setPassword($hashedPassword);
-                            $this->entityManager->persist($currentUser);
-                            $this->entityManager->flush();
-
-                            $message = sprintf(
-                                'We have sent you a new code to: %s. You have %d attempt(s) left.',
-                                $currentUser->getPhoneNumber(),
-                                $attemptsLeft
-                            );
-                        }
-
-                        $attempts = 1;
-                        $currentTime = new DateTime();
-                        // Defines the Event to the table
-                        $eventMetadata = [
-                            'platform' => PlatformMode::LIVE,
-                            'ip' => $_SERVER['REMOTE_ADDR'],
-                            'uuid' => $currentUser->getUuid(),
-                            'verificationAttempts' => 0,
-                            'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM)
-                        ];
-
-                        $this->eventActions->saveEvent(
-                            $currentUser,
-                            AnalyticalEventType::USER_SMS_ATTEMPT,
-                            new DateTime(),
-                            $eventMetadata
-                        );
-                    } else {
                         return new JsonResponse([
-                            'error' => 'Failed to regenerate SMS code. Please, wait '
-                                . $data['SMS_TIMER_RESEND']['value']
-                                . ' minute(s) before generating a new code.'
-                        ], 400);
+                            'success' => sprintf(
+                                'We have sent a new code to: %s. You have %d attempt(s) left.',
+                                $currentUser->getPhoneNumber(),
+                                $attemptsLeft - 1
+                            )
+                        ], 200);
                     }
                 } catch (\RuntimeException $e) {
                     return new JsonResponse(['error' => $e->getMessage()], 400);

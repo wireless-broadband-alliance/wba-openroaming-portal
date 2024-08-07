@@ -537,8 +537,7 @@ class SiteController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    #[
-        Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
+    #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -579,7 +578,9 @@ class SiteController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST
                 );
-                $minInterval = new DateInterval('PT2M');
+                // Retrieve the SMS resend interval from the settings
+                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
                 $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
@@ -668,7 +669,7 @@ class SiteController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
+                        $this->addFlash('warning', "Please wait " . $data['SMS_TIMER_RESEND']['value'] . " minutes before trying again.");
                     }
                 } else {
                     $this->addFlash(
