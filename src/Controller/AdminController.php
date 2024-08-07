@@ -33,6 +33,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
+use App\Service\VerificationCodeGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -74,6 +75,7 @@ class AdminController extends AbstractController
     private RadiusAccountingRepository $radiusAccountingRepository;
     private PgpEncryptionService $pgpEncryptionService;
     private EventActions $eventActions;
+    private VerificationCodeGenerator $verificationCodeGenerator;
 
     /**
      * @param MailerInterface $mailer
@@ -88,6 +90,7 @@ class AdminController extends AbstractController
      * @param RadiusAccountingRepository $radiusAccountingRepository
      * @param PgpEncryptionService $pgpEncryptionService
      * @param EventActions $eventActions
+     * @param VerificationCodeGenerator $verificationCodeGenerator
      */
     public function __construct(
         MailerInterface $mailer,
@@ -101,7 +104,8 @@ class AdminController extends AbstractController
         RadiusAuthsRepository $radiusAuthsRepository,
         RadiusAccountingRepository $radiusAccountingRepository,
         PgpEncryptionService $pgpEncryptionService,
-        EventActions $eventActions
+        EventActions $eventActions,
+        VerificationCodeGenerator $verificationCodeGenerator
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -115,6 +119,7 @@ class AdminController extends AbstractController
         $this->radiusAccountingRepository = $radiusAccountingRepository;
         $this->pgpEncryptionService = $pgpEncryptionService;
         $this->eventActions = $eventActions;
+        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /*
@@ -950,7 +955,7 @@ class AdminController extends AbstractController
         // If the verification code is not provided, generate a new one
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $verificationCode = $this->generateVerificationCode($currentUser);
+        $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
 
         return (new TemplatedEmail())
             ->from(new Address($emailSender, $nameSender))
@@ -2933,8 +2938,8 @@ class AdminController extends AbstractController
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter(
-                            'kernel.project_dir'
-                        ) . '/public/resources/uploaded/';
+                                'kernel.project_dir'
+                            ) . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
@@ -3049,22 +3054,6 @@ class AdminController extends AbstractController
         }
     }
 
-    /**
-     * Generate a new verification code for the admin.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
-    }
 
     // Validate domain names and check if they resolve to an IP address
     // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
