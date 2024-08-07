@@ -11,10 +11,12 @@ use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
+use App\Service\VerificationCodeGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -50,6 +52,7 @@ class RegistrationController extends AbstractController
     private SendSMS $sendSMS;
     private TokenStorageInterface $tokenStorage;
     private EventActions $eventActions;
+    private VerificationCodeGenerator $verificationCodeGenerator;
 
     /**
      * Registration constructor.
@@ -61,6 +64,7 @@ class RegistrationController extends AbstractController
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
+     * @param VerificationCodeGenerator $verificationCodeGenerator
      */
     public function __construct(
         UserRepository $userRepository,
@@ -69,7 +73,8 @@ class RegistrationController extends AbstractController
         ParameterBagInterface $parameterBag,
         SendSMS $sendSMS,
         TokenStorageInterface $tokenStorage,
-        EventActions $eventActions
+        EventActions $eventActions,
+        VerificationCodeGenerator $verificationCodeGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
@@ -78,23 +83,7 @@ class RegistrationController extends AbstractController
         $this->sendSMS = $sendSMS;
         $this->tokenStorage = $tokenStorage;
         $this->eventActions = $eventActions;
-    }
-
-    /**
-     * Generate a new verification code for the user.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
+        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /*
@@ -155,7 +144,7 @@ class RegistrationController extends AbstractController
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
-                $user->setVerificationCode($this->generateVerificationCode($user)); // Set the verification code
+                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
                 $userAuths->setProviderId(UserProvider::EMAIL);
@@ -267,7 +256,7 @@ class RegistrationController extends AbstractController
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getPhoneNumber());
-                $user->setVerificationCode($this->generateVerificationCode($user));
+                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER);

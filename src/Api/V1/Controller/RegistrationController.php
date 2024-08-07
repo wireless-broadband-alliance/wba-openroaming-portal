@@ -15,6 +15,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
+use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -47,6 +48,7 @@ class RegistrationController extends AbstractController
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
     private UserPasswordHasherInterface $userPasswordHasher;
+    private VerificationCodeGenerator $verificationCodeGenerator;
 
 
     public function __construct(
@@ -62,6 +64,7 @@ class RegistrationController extends AbstractController
         GetSettings $getSettings,
         SettingRepository $settingRepository,
         UserPasswordHasherInterface $userPasswordHasher,
+        VerificationCodeGenerator $verificationCodeGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -75,6 +78,7 @@ class RegistrationController extends AbstractController
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
         $this->userPasswordHasher = $userPasswordHasher;
+        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /**
@@ -105,7 +109,7 @@ class RegistrationController extends AbstractController
         $user->setEmail($data['email']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
         $user->setIsVerified($data['isVerified'] ?? false);
-        $user->setVerificationCode($this->generateVerificationCode($user));
+        $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime($data['createdAt']));
@@ -268,7 +272,7 @@ class RegistrationController extends AbstractController
         $user->setPhoneNumber($data['phoneNumber']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
         $user->setIsVerified($data['isVerified'] ?? false);
-        $user->setVerificationCode($this->generateVerificationCode($user));
+        $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime($data['createdAt']));
@@ -392,22 +396,5 @@ class RegistrationController extends AbstractController
             return new JsonResponse(['error' => 'Invalid Credentials, Provider not allowed'], 400);
         }
         return new JsonResponse(['error' => 'Please make sure to place the JWT token'], 400);
-    }
-
-    /**
-     * Generate a new verification code for the admin.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
     }
 }
