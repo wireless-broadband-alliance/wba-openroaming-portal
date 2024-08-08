@@ -1,5 +1,5 @@
 api_platform:
-    title: Openroaming Portal API
+    title: OpenRoaming Portal API
     version: 1.0.0
     formats:
         jsonld: ['application/ld+json']
