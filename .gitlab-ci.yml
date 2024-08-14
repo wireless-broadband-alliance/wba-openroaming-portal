@@ -24,7 +24,7 @@ test-phpstan :
   allow_failure : false
   before_script:
   - cp .env.sample .env
-  - COMPOSER_CACHE_DIR=composer-cache composer install
+  - COMPOSER_CACHE_DIR=composer-cache composer install --ignore-platform-req=ext-gnupg
   script:
   - php -d memory_limit=4G vendor/bin/phpstan analyse .
 
