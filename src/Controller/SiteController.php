@@ -133,7 +133,10 @@ class SiteController extends AbstractController
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-                $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+                $this->addFlash(
+                    'error',
+                    'You need to confirm the new password before download a profile!'
+                );
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
             if ($currentUser->getDeletedAt()) {
@@ -669,7 +672,10 @@ class SiteController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $this->addFlash('warning', "Please wait " . $data['SMS_TIMER_RESEND']['value'] . " minutes before trying again.");
+                        $this->addFlash(
+                            'warning',
+                            "Please wait " . $data['SMS_TIMER_RESEND']['value'] . " minutes before trying again."
+                        );
                     }
                 } else {
                     $this->addFlash(
