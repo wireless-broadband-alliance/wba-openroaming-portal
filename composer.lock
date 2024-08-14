@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e04e29b329e868daa201583c9fa0b95",
+    "content-hash": "279d20ec046d3c0021cb31b6a579be5b",
     "packages": [
         {
             "name": "api-platform/core",
@@ -4134,55 +4134,6 @@
                 "source": "https://github.com/Pixel-Open/cloudflare-turnstile-bundle/tree/0.3.0"
             },
             "time": "2023-12-08T07:41:00+00:00"
-        },
-        {
-            "name": "placetopay/php-gnupg",
-            "version": "0.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/placetopay/php-gnupg.git",
-                "reference": "9074d06ad6aa89b3479e3b67f01c38416f32a1f8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/placetopay/php-gnupg/zipball/9074d06ad6aa89b3479e3b67f01c38416f32a1f8",
-                "reference": "9074d06ad6aa89b3479e3b67f01c38416f32a1f8",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.4|^8.0"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.0",
-                "phpunit/phpunit": "^9.0",
-                "symfony/var-dumper": "^5.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "PlacetoPay\\GnuPG\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Enrique Garcia",
-                    "email": "enrique.garcia@placetopay.com"
-                },
-                {
-                    "name": "Diego Calle",
-                    "email": "diego.calle@placetopay.com"
-                }
-            ],
-            "description": "A library to encrypt and decrypt with GnuPG",
-            "support": {
-                "issues": "https://github.com/placetopay/php-gnupg/issues",
-                "source": "https://github.com/placetopay/php-gnupg/tree/0.2.0"
-            },
-            "time": "2021-10-13T21:06:08+00:00"
         },
         {
             "name": "psr/cache",
