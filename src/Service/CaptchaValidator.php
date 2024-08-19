@@ -30,6 +30,15 @@ class CaptchaValidator
      */
     public function validate(string $token, ?string $clientIp): bool
     {
+        /* Test Mode: Simulate CAPTCHA validation result
+        if ($token === 'valid') {
+            return true;
+        }
+
+        if ($token === 'invalid') {
+            return false;
+        }
+        */
         $response = $this->httpClient->request('POST', 'https://challenges.cloudflare.com/turnstile/v0/siteverify', [
             'body' => [
                 'secret' => $this->parameterBag->get('app.turnstile_key'),
