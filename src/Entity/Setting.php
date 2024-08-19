@@ -19,9 +19,11 @@ use Doctrine\ORM\Mapping as ORM;
             controller: ConfigController::class,
             openapiContext: [
                 'summary' => 'Get configuration settings',
-                'description' => 'This endpoint returns public values from the Setting entity and environment variables categorized by platform and provider. It requires a valid CAPTCHA token.',
+                'description' => 'This endpoint returns public values from the Setting entity and 
+                environment variables categorized by platform and provider. It requires a valid CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'CAPTCHA validation token is required in the request body to retrieve configuration settings.',
+                    'description' => 'CAPTCHA validation token is required in the 
+                    request body to retrieve configuration settings.',
                     'required' => true,
                     'content' => [
                         'application/json' => [
