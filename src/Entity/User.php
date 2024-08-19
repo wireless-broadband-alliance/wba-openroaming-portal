@@ -33,7 +33,30 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_get_current_user',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
-                'description' => 'This endpoint returns the details of the currently authenticated user.',
+                'description' => 'This endpoint returns the details of the currently authenticated user and 
+                requires a valid CAPTCHA token.',
+                'requestBody' => [
+                    'description' => 'CAPTCHA validation token is required in the request body to retrieve 
+                    the current authenticated user.',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                    ],
+                                ],
+                                'required' => ['cf-turnstile-response'],
+                            ],
+                            'example' => [
+                                'cf-turnstile-response' => 'valid_test_token',
+                            ],
+                        ],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'content' => [
@@ -75,6 +98,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    '400' => [
+                        'description' => 'Bad Request due to CAPTCHA validation failure',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'CAPTCHA validation failed.',
+                                ],
+                            ],
+                        ],
+                    ],
                     '401' => [
                         'description' => 'Unauthorized',
                         'content' => [
@@ -104,9 +137,11 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local',
             openapiContext: [
                 'summary' => 'Authenticate a user locally',
-                'description' => 'This endpoint authenticates a user using their UUID and password.',
+                'description' => 'This endpoint authenticates a user using their UUID, password, 
+                and a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'User credentials',
+                    'description' => 'User credentials and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
@@ -114,8 +149,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
                                     'password' => ['type' => 'string', 'example' => 'user-password-example'],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
                                 ],
-                                'required' => ['uuid', 'password'],
+                                'required' => ['uuid', 'password', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -188,8 +228,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    '400' => [
+                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'CAPTCHA validation failed or invalid data',
+                                ],
+                            ],
+                        ],
+                    ],
                     '404' => [
-                        'description' => 'Invalid data or credentials',
+                        'description' => 'User not found or invalid credentials',
                         'content' => [
                             'application/json' => [
                                 'example' => [
@@ -199,7 +249,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'Provider not allowed',
+                        'description' => 'Invalid credentials - Provider not allowed',
                         'content' => [
                             'application/json' => [
                                 'example' => [
@@ -218,17 +268,27 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML account name.',
+                'description' => 'This endpoint authenticates a user using their SAML account name 
+                and a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'SAML account name',
+                    'description' => 'SAML account name and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'sAMAccountName' => ['type' => 'string', 'example' => 'saml-account-name-example'],
+                                    'sAMAccountName' => [
+                                        'type' => 'string',
+                                        'example' => 'saml-account-name-example'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
                                 ],
-                                'required' => ['sAMAccountName'],
+                                'required' => ['sAMAccountName', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -304,11 +364,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Invalid data',
+                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
                                 'example' => [
-                                    'error' => 'Invalid data',
+                                    'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
                             ],
                         ],
@@ -333,17 +393,24 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account ID.',
+                'description' => 'This endpoint authenticates a user using their Google account ID. 
+                It also requires CAPTCHA validation.',
                 'requestBody' => [
-                    'description' => 'Google account ID',
+                    'description' => 'Google account ID and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
                                     'googleId' => ['type' => 'string', 'example' => 'google-account-id-example'],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
                                 ],
-                                'required' => ['googleId'],
+                                'required' => ['googleId', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -387,7 +454,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'createdAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
-                                                    'example' => '2023-01-01 00:00:00'
+                                                    'example' => '2023-01-01 00:00:00',
                                                 ],
                                             ],
                                         ],
@@ -416,11 +483,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Invalid data',
+                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
                                 'example' => [
-                                    'error' => 'Invalid data',
+                                    'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
                             ],
                         ],
@@ -445,27 +512,59 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email.',
+                'description' => 'This endpoint registers a new user using their email 
+                and validates the request with a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'User registration data',
+                    'description' => 'User registration data and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => ['type' => 'string', 'example' => 'user@example.com'],
-                                    'password' => ['type' => 'string', 'example' => 'strongpassword'],
-                                    'email' => ['type' => 'string', 'example' => 'user@example.com'],
-                                    'isVerified' => ['type' => 'boolean', 'example' => false],
-                                    'first_name' => ['type' => 'string', 'example' => 'John'],
-                                    'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com',
+                                        'description' => 'User UUID, typically the same as the email'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'The user password, must be strong and secure'
+                                    ],
+                                    'email' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com',
+                                        'description' => 'User email address'
+                                    ],
+                                    'first_name' => [
+                                        'type' => 'string',
+                                        'example' => 'John',
+                                        'description' => 'First name of the user'
+                                    ],
+                                    'last_name' => [
+                                        'type' => 'string',
+                                        'example' => 'Doe',
+                                        'description' => 'Last name of the user'
+                                    ],
+                                    'isVerified' => [
+                                        'type' => 'boolean',
+                                        'example' => false,
+                                        'description' => 'Indicates if the user\'s email is verified'
+                                    ],
                                     'createdAt' => [
                                         'type' => 'string',
                                         'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00'
+                                        'example' => '2023-01-01 00:00:00',
+                                        'description' => 'Account creation date and time'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'email'],
+                                'required' => ['uuid', 'password', 'email', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -488,13 +587,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Invalid data'],
+                                        'value' => ['error' => 'Invalid data: Missing required fields'],
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and email mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data.
-                                         Make sure to type both with the same content!'
+                                            'error' => 'Invalid data: UUID and email do not match. 
+                                            Ensure both fields contain the same content!',
+                                        ],
+                                    ],
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
                                 ],
@@ -521,27 +626,59 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_register',
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number.',
+                'description' => 'This endpoint registers a new user using their phone number 
+                and validates the request with a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'User registration data',
+                    'description' => 'User registration data and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => ['type' => 'string', 'example' => '+1234567890'],
-                                    'password' => ['type' => 'string', 'example' => 'strongpassword'],
-                                    'phoneNumber' => ['type' => 'string', 'example' => '+1234567890'],
-                                    'isVerified' => ['type' => 'boolean', 'example' => false],
-                                    'first_name' => ['type' => 'string', 'example' => 'John'],
-                                    'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'example' => '+1234567890',
+                                        'description' => 'User UUID, typically the same as the phone number'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'The user password, must be strong and secure'
+                                    ],
+                                    'phoneNumber' => [
+                                        'type' => 'string',
+                                        'example' => '+1234567890',
+                                        'description' => 'User phone number'
+                                    ],
+                                    'first_name' => [
+                                        'type' => 'string',
+                                        'example' => 'John',
+                                        'description' => 'First name of the user'
+                                    ],
+                                    'last_name' => [
+                                        'type' => 'string',
+                                        'example' => 'Doe',
+                                        'description' => 'Last name of the user'
+                                    ],
+                                    'isVerified' => [
+                                        'type' => 'boolean',
+                                        'example' => false,
+                                        'description' => 'Indicates if the user\'s phone number is verified'
+                                    ],
                                     'createdAt' => [
                                         'type' => 'string',
                                         'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00'
+                                        'example' => '2023-01-01 00:00:00',
+                                        'description' => 'Account creation date and time'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'phoneNumber'],
+                                'required' => ['uuid', 'password', 'phoneNumber', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -564,13 +701,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Invalid data. Make sure to set all the inputs!'],
+                                        'value' => ['error' => 'Invalid data: Missing required fields'],
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and phone number mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data. 
-                                        Make sure to type both with the same content!'
+                                            'error' => 'Invalid data: UUID and phone number do not match. 
+                                            Ensure both fields contain the same content!',
+                                        ],
+                                    ],
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
                                 ],
@@ -598,8 +741,27 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Trigger a password reset for a local auth account',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-                It checks if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
+                It verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
                 then proceeds with the password reset if the conditions are met.',
+                'requestBody' => [
+                    'description' => 'Password reset request data including CAPTCHA validation token',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['cf-turnstile-response'],
+                            ],
+                        ],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'Password reset email sent successfully',
@@ -618,15 +780,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request',
+                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'example' => 'Please make sure to place the JWT token',
+                                'examples' => [
+                                    'missing_data' => [
+                                        'summary' => 'Missing required data',
+                                        'value' => [
+                                            'error' => 'Invalid Data. Please make sure to place the JWT Token',
+                                        ],
+                                    ],
+                                    'captcha_invalid' => [
+                                        'summary' => 'Invalid CAPTCHA token',
+                                        'value' => [
+                                            'error' => 'Invalid CAPTCHA token. Please try again.',
                                         ],
                                     ],
                                 ],
@@ -683,10 +850,29 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
             openapiContext: [
-                'summary' => 'Trigger a password reset for a SMS auth account',
-                'description' => 'This endpoint sends an SMS with a new verification code if the user has a valid 
-                PortalAccount and has not exceeded the SMS request limits. 
-                It also checks if the required time interval has passed before allowing a new request.',
+                'summary' => 'Trigger a password reset for an SMS auth account',
+                'description' => 'This endpoint sends an SMS with a new verification code if the user
+                 has a valid PortalAccount and has not exceeded the SMS request limits. 
+                 It also checks if the required time interval has passed before allowing a new request.',
+                'requestBody' => [
+                    'description' => 'Password reset request data including CAPTCHA validation token',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['cf-turnstile-response'],
+                            ],
+                        ],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'Successfully sent the SMS with the new verification code',
@@ -706,15 +892,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request - Invalid credentials or other errors',
+                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'example' => 'Invalid Credentials, Provider not allowed',
+                                'examples' => [
+                                    'missing_data' => [
+                                        'summary' => 'Missing required data',
+                                        'value' => [
+                                            'error' => 'Invalid Credentials, Provider not allowed',
+                                        ],
+                                    ],
+                                    'captcha_invalid' => [
+                                        'summary' => 'Invalid CAPTCHA token',
+                                        'value' => [
+                                            'error' => 'Invalid CAPTCHA token. Please try again.',
                                         ],
                                     ],
                                 ],

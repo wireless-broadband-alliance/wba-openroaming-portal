@@ -12,6 +12,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
@@ -20,12 +21,15 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -33,6 +37,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -49,6 +57,7 @@ class RegistrationController extends AbstractController
     private SettingRepository $settingRepository;
     private UserPasswordHasherInterface $userPasswordHasher;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private CaptchaValidator $captchaValidator;
 
 
     public function __construct(
@@ -65,6 +74,7 @@ class RegistrationController extends AbstractController
         SettingRepository $settingRepository,
         UserPasswordHasherInterface $userPasswordHasher,
         VerificationCodeGenerator $verificationCodeGenerator,
+        CaptchaValidator $captchaValidator,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -79,15 +89,35 @@ class RegistrationController extends AbstractController
         $this->settingRepository = $settingRepository;
         $this->userPasswordHasher = $userPasswordHasher;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->captchaValidator = $captchaValidator;
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/register/', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
 
         if (!isset($data['uuid'], $data['password'], $data['email'])) {
             return new JsonResponse(['error' => 'Invalid data'], 422);
@@ -141,12 +171,40 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @throws Exception
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param MailerInterface $mailer
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws Exception
+     * @throws RandomException
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/reset/', name: 'api_auth_local_reset', methods: ['POST'])]
-    public function localReset(UserPasswordHasherInterface $userPasswordHasher, MailerInterface $mailer): JsonResponse
-    {
+    public function localReset(
+        UserPasswordHasherInterface $userPasswordHasher,
+        MailerInterface $mailer,
+        Request $request
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
+
         $token = $this->tokenStorage->getToken();
 
         // Check if the token is present and is of the correct type
@@ -245,12 +303,31 @@ class RegistrationController extends AbstractController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/sms/register/', name: 'api_auth_sms_register', methods: ['POST'])]
     public function smsRegister(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
 
         if (!isset($data['uuid'], $data['password'], $data['phoneNumber'])) {
             return new JsonResponse(['error' => 'Invalid data. Make sure to set all the inputs!'], 422);
@@ -304,11 +381,34 @@ class RegistrationController extends AbstractController
 
 
     /**
-     * @throws Exception|\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws RandomException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/sms/reset/', name: 'api_auth_sms_reset', methods: ['POST'])]
-    public function smsReset(): JsonResponse
+    public function smsReset(Request $request): JsonResponse
     {
+        $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($dataRequest['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($dataRequest['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $token = $this->tokenStorage->getToken();
 
@@ -372,7 +472,8 @@ class RegistrationController extends AbstractController
 
                             if ($attemptsLeft <= 0) {
                                 return new JsonResponse([
-                                'error' => 'You have exceed the limits for regeneration. Contact our support for help.'
+                                    'error' => 'You have exceed the limits for regeneration. 
+                                    Contact our support for help.'
                                 ], 429);
                             }
                         } else {
