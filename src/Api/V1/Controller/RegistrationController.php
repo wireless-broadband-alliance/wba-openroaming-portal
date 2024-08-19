@@ -21,7 +21,9 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -169,12 +171,40 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @throws Exception
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param MailerInterface $mailer
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws Exception
+     * @throws RandomException
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/reset/', name: 'api_auth_local_reset', methods: ['POST'])]
-    public function localReset(UserPasswordHasherInterface $userPasswordHasher, MailerInterface $mailer): JsonResponse
-    {
+    public function localReset(
+        UserPasswordHasherInterface $userPasswordHasher,
+        MailerInterface $mailer,
+        Request $request
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
+
         $token = $this->tokenStorage->getToken();
 
         // Check if the token is present and is of the correct type
@@ -419,7 +449,8 @@ class RegistrationController extends AbstractController
 
                             if ($attemptsLeft <= 0) {
                                 return new JsonResponse([
-                                'error' => 'You have exceed the limits for regeneration. Contact our support for help.'
+                                    'error' => 'You have exceed the limits for regeneration. 
+                                    Contact our support for help.'
                                 ], 429);
                             }
                         } else {

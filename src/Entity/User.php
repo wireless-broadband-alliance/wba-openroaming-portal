@@ -741,8 +741,32 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Trigger a password reset for a local auth account',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-                It checks if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
+                It verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
                 then proceeds with the password reset if the conditions are met.',
+                'requestBody' => [
+                    'description' => 'Password reset request data including CAPTCHA validation token',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'email' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com',
+                                        'description' => 'The email address associated with the user account'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['email', 'cf-turnstile-response'],
+                            ],
+                        ],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'Password reset email sent successfully',
