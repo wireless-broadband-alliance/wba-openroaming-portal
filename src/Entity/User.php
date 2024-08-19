@@ -751,18 +751,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'email' => [
-                                        'type' => 'string',
-                                        'example' => 'user@example.com',
-                                        'description' => 'The email address associated with the user account'
-                                    ],
                                     'cf-turnstile-response' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['email', 'cf-turnstile-response'],
+                                'required' => ['cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -785,15 +780,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request',
+                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'example' => 'Please make sure to place the JWT token',
+                                'examples' => [
+                                    'missing_data' => [
+                                        'summary' => 'Missing required data',
+                                        'value' => [
+                                            'error' => 'Invalid Data. Please make sure to place the JWT Token',
+                                        ],
+                                    ],
+                                    'captcha_invalid' => [
+                                        'summary' => 'Invalid CAPTCHA token',
+                                        'value' => [
+                                            'error' => 'Invalid CAPTCHA token. Please try again.',
                                         ],
                                     ],
                                 ],
@@ -850,10 +850,29 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
             openapiContext: [
-                'summary' => 'Trigger a password reset for a SMS auth account',
-                'description' => 'This endpoint sends an SMS with a new verification code if the user has a valid 
-                PortalAccount and has not exceeded the SMS request limits. 
-                It also checks if the required time interval has passed before allowing a new request.',
+                'summary' => 'Trigger a password reset for an SMS auth account',
+                'description' => 'This endpoint sends an SMS with a new verification code if the user
+                 has a valid PortalAccount and has not exceeded the SMS request limits. 
+                 It also checks if the required time interval has passed before allowing a new request.',
+                'requestBody' => [
+                    'description' => 'Password reset request data including CAPTCHA validation token',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['cf-turnstile-response'],
+                            ],
+                        ],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'Successfully sent the SMS with the new verification code',
@@ -873,15 +892,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request - Invalid credentials or other errors',
+                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'example' => 'Invalid Credentials, Provider not allowed',
+                                'examples' => [
+                                    'missing_data' => [
+                                        'summary' => 'Missing required data',
+                                        'value' => [
+                                            'error' => 'Invalid Credentials, Provider not allowed',
+                                        ],
+                                    ],
+                                    'captcha_invalid' => [
+                                        'summary' => 'Invalid CAPTCHA token',
+                                        'value' => [
+                                            'error' => 'Invalid CAPTCHA token. Please try again.',
                                         ],
                                     ],
                                 ],

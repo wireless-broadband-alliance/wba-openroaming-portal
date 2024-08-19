@@ -381,11 +381,34 @@ class RegistrationController extends AbstractController
 
 
     /**
-     * @throws Exception|\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws RandomException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/sms/reset/', name: 'api_auth_sms_reset', methods: ['POST'])]
-    public function smsReset(): JsonResponse
+    public function smsReset(Request $request): JsonResponse
     {
+        $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($dataRequest['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($dataRequest['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $token = $this->tokenStorage->getToken();
 
