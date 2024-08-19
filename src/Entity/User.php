@@ -267,17 +267,26 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML account name.',
+                'description' => 'This endpoint authenticates a user using their SAML account name and a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'SAML account name',
+                    'description' => 'SAML account name and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'sAMAccountName' => ['type' => 'string', 'example' => 'saml-account-name-example'],
+                                    'sAMAccountName' => [
+                                        'type' => 'string',
+                                        'example' => 'saml-account-name-example'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
                                 ],
-                                'required' => ['sAMAccountName'],
+                                'required' => ['sAMAccountName', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -353,11 +362,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Invalid data',
+                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
                                 'example' => [
-                                    'error' => 'Invalid data',
+                                    'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
                             ],
                         ],

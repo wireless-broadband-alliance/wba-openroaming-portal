@@ -123,12 +123,31 @@ class AuthsController extends AbstractController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      * @throws Exception
      */
     #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
 
         if (!isset($data['sAMAccountName'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
