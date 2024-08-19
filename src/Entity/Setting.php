@@ -12,15 +12,35 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     description: "The Setting entity returns configuration options for the application. 
     Each setting consists of a name and an optional value, 
-    which can be used to store and return configuration parameters required for  the API.",
+    which can be used to store and return configuration parameters required for the API.",
     operations: [
         new GetCollection(
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
             openapiContext: [
                 'summary' => 'Get configuration settings',
-                'description' => 'This endpoint returns public values from the Setting entity and environment variables 
-                categorized by platform and provider.',
+                'description' => 'This endpoint returns public values from the Setting entity and environment variables categorized by platform and provider. It requires a valid CAPTCHA token.',
+                'requestBody' => [
+                    'description' => 'CAPTCHA validation token is required in the request body to retrieve configuration settings.',
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                    ],
+                                ],
+                                'required' => ['cf-turnstile-response'],
+                            ],
+                            'example' => [
+                                'cf-turnstile-response' => 'valid_test_token',
+                            ],
+                        ],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'Configuration settings retrieved successfully',
@@ -57,6 +77,16 @@ use Doctrine\ORM\Mapping as ORM;
                                         'SAML_IDP_X509_CERT' => 'saml_idp_x509_cert',
                                         'SAML_SP_ENTITY_ID' => 'saml_sp_entity_id',
                                     ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '400' => [
+                        'description' => 'Bad Request due to CAPTCHA validation failure',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'CAPTCHA validation failed.',
                                 ],
                             ],
                         ],
