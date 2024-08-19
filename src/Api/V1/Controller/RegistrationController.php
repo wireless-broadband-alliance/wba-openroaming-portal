@@ -12,6 +12,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
@@ -26,6 +27,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -33,6 +35,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -49,6 +55,7 @@ class RegistrationController extends AbstractController
     private SettingRepository $settingRepository;
     private UserPasswordHasherInterface $userPasswordHasher;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private CaptchaValidator $captchaValidator;
 
 
     public function __construct(
@@ -65,6 +72,7 @@ class RegistrationController extends AbstractController
         SettingRepository $settingRepository,
         UserPasswordHasherInterface $userPasswordHasher,
         VerificationCodeGenerator $verificationCodeGenerator,
+        CaptchaValidator $captchaValidator,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -79,15 +87,33 @@ class RegistrationController extends AbstractController
         $this->settingRepository = $settingRepository;
         $this->userPasswordHasher = $userPasswordHasher;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->captchaValidator = $captchaValidator;
     }
 
     /**
-     * @throws Exception
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      */
     #[Route('/api/v1/auth/local/register/', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
 
         if (!isset($data['uuid'], $data['password'], $data['email'])) {
             return new JsonResponse(['error' => 'Invalid data'], 422);

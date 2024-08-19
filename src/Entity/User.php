@@ -512,27 +512,58 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email.',
+                'description' => 'This endpoint registers a new user using their email and validates the request with a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'User registration data',
+                    'description' => 'User registration data and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => ['type' => 'string', 'example' => 'user@example.com'],
-                                    'password' => ['type' => 'string', 'example' => 'strongpassword'],
-                                    'email' => ['type' => 'string', 'example' => 'user@example.com'],
-                                    'isVerified' => ['type' => 'boolean', 'example' => false],
-                                    'first_name' => ['type' => 'string', 'example' => 'John'],
-                                    'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com',
+                                        'description' => 'User UUID, typically the same as the email'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'The user password, must be strong and secure'
+                                    ],
+                                    'email' => [
+                                        'type' => 'string',
+                                        'example' => 'user@example.com',
+                                        'description' => 'User email address'
+                                    ],
+                                    'first_name' => [
+                                        'type' => 'string',
+                                        'example' => 'John',
+                                        'description' => 'First name of the user'
+                                    ],
+                                    'last_name' => [
+                                        'type' => 'string',
+                                        'example' => 'Doe',
+                                        'description' => 'Last name of the user'
+                                    ],
+                                    'isVerified' => [
+                                        'type' => 'boolean',
+                                        'example' => false,
+                                        'description' => 'Indicates if the user\'s email is verified'
+                                    ],
                                     'createdAt' => [
                                         'type' => 'string',
                                         'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00'
+                                        'example' => '2023-01-01 00:00:00',
+                                        'description' => 'Account creation date and time'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'email'],
+                                'required' => ['uuid', 'password', 'email', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -555,13 +586,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Invalid data'],
+                                        'value' => ['error' => 'Invalid data: Missing required fields'],
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and email mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data.
-                                         Make sure to type both with the same content!'
+                                            'error' => 'Invalid data: UUID and email do not match. Ensure both fields contain the same content!',
+                                        ],
+                                    ],
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
                                 ],
