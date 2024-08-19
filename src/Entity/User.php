@@ -137,7 +137,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local',
             openapiContext: [
                 'summary' => 'Authenticate a user locally',
-                'description' => 'This endpoint authenticates a user using their UUID, password, and a Turnstile CAPTCHA token.',
+                'description' => 'This endpoint authenticates a user using their UUID, password, 
+                and a Turnstile CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User credentials and CAPTCHA validation token',
                     'required' => true,
@@ -267,7 +268,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML account name and a Turnstile CAPTCHA token.',
+                'description' => 'This endpoint authenticates a user using their SAML account name 
+                and a Turnstile CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'SAML account name and CAPTCHA validation token',
                     'required' => true,
@@ -391,7 +393,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account ID. It also requires CAPTCHA validation.',
+                'description' => 'This endpoint authenticates a user using their Google account ID. 
+                It also requires CAPTCHA validation.',
                 'requestBody' => [
                     'description' => 'Google account ID and CAPTCHA validation token',
                     'required' => true,
@@ -401,7 +404,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'type' => 'object',
                                 'properties' => [
                                     'googleId' => ['type' => 'string', 'example' => 'google-account-id-example'],
-                                    'cf-turnstile-response' => ['type' => 'string', 'description' => 'The CAPTCHA validation token', 'example' => 'valid_test_token'],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
                                 ],
                                 'required' => ['googleId', 'cf-turnstile-response'],
                             ],
@@ -437,7 +444,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'type' => 'object',
                                                         'properties' => [
                                                             'provider' => ['type' => 'string', 'example' => 'Google'],
-                                                            'provider_id' => ['type' => 'string', 'example' => 'google-id-example'],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'google-id-example'
+                                                            ],
                                                         ],
                                                     ],
                                                 ],
