@@ -512,7 +512,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email and validates the request with a Turnstile CAPTCHA token.',
+                'description' => 'This endpoint registers a new user using their email 
+                and validates the request with a Turnstile CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -591,7 +592,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'mismatch_data' => [
                                         'summary' => 'UUID and email mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data: UUID and email do not match. Ensure both fields contain the same content!',
+                                            'error' => 'Invalid data: UUID and email do not match. 
+                                            Ensure both fields contain the same content!',
                                         ],
                                     ],
                                     'captcha_failed' => [
@@ -624,7 +626,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_register',
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number and validates the request with a Turnstile CAPTCHA token.',
+                'description' => 'This endpoint registers a new user using their phone number 
+                and validates the request with a Turnstile CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -703,7 +706,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'mismatch_data' => [
                                         'summary' => 'UUID and phone number mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data: UUID and phone number do not match. Ensure both fields contain the same content!',
+                                            'error' => 'Invalid data: UUID and phone number do not match. 
+                                            Ensure both fields contain the same content!',
                                         ],
                                     ],
                                     'captcha_failed' => [
