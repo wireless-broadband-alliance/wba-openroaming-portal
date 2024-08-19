@@ -137,9 +137,10 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local',
             openapiContext: [
                 'summary' => 'Authenticate a user locally',
-                'description' => 'This endpoint authenticates a user using their UUID and password.',
+                'description' => 'This endpoint authenticates a user using their UUID, password, and a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'User credentials',
+                    'description' => 'User credentials and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
@@ -147,8 +148,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
                                     'password' => ['type' => 'string', 'example' => 'user-password-example'],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
                                 ],
-                                'required' => ['uuid', 'password'],
+                                'required' => ['uuid', 'password', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -221,8 +227,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    '400' => [
+                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'error' => 'CAPTCHA validation failed or invalid data',
+                                ],
+                            ],
+                        ],
+                    ],
                     '404' => [
-                        'description' => 'Invalid data or credentials',
+                        'description' => 'User not found or invalid credentials',
                         'content' => [
                             'application/json' => [
                                 'example' => [
@@ -232,7 +248,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'Provider not allowed',
+                        'description' => 'Invalid credentials - Provider not allowed',
                         'content' => [
                             'application/json' => [
                                 'example' => [
