@@ -624,27 +624,58 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_register',
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number.',
+                'description' => 'This endpoint registers a new user using their phone number and validates the request with a Turnstile CAPTCHA token.',
                 'requestBody' => [
-                    'description' => 'User registration data',
+                    'description' => 'User registration data and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => ['type' => 'string', 'example' => '+1234567890'],
-                                    'password' => ['type' => 'string', 'example' => 'strongpassword'],
-                                    'phoneNumber' => ['type' => 'string', 'example' => '+1234567890'],
-                                    'isVerified' => ['type' => 'boolean', 'example' => false],
-                                    'first_name' => ['type' => 'string', 'example' => 'John'],
-                                    'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'example' => '+1234567890',
+                                        'description' => 'User UUID, typically the same as the phone number'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'The user password, must be strong and secure'
+                                    ],
+                                    'phoneNumber' => [
+                                        'type' => 'string',
+                                        'example' => '+1234567890',
+                                        'description' => 'User phone number'
+                                    ],
+                                    'first_name' => [
+                                        'type' => 'string',
+                                        'example' => 'John',
+                                        'description' => 'First name of the user'
+                                    ],
+                                    'last_name' => [
+                                        'type' => 'string',
+                                        'example' => 'Doe',
+                                        'description' => 'Last name of the user'
+                                    ],
+                                    'isVerified' => [
+                                        'type' => 'boolean',
+                                        'example' => false,
+                                        'description' => 'Indicates if the user\'s phone number is verified'
+                                    ],
                                     'createdAt' => [
                                         'type' => 'string',
                                         'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00'
+                                        'example' => '2023-01-01 00:00:00',
+                                        'description' => 'Account creation date and time'
+                                    ],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'phoneNumber'],
+                                'required' => ['uuid', 'password', 'phoneNumber', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -667,13 +698,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Invalid data. Make sure to set all the inputs!'],
+                                        'value' => ['error' => 'Invalid data: Missing required fields'],
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and phone number mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data. 
-                                        Make sure to type both with the same content!'
+                                            'error' => 'Invalid data: UUID and phone number do not match. Ensure both fields contain the same content!',
+                                        ],
+                                    ],
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
                                 ],

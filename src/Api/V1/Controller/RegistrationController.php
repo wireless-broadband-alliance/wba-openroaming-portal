@@ -97,6 +97,8 @@ class RegistrationController extends AbstractController
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/register/', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(Request $request): JsonResponse
@@ -271,12 +273,31 @@ class RegistrationController extends AbstractController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/sms/register/', name: 'api_auth_sms_register', methods: ['POST'])]
     public function smsRegister(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+            );
+        }
 
         if (!isset($data['uuid'], $data['password'], $data['phoneNumber'])) {
             return new JsonResponse(['error' => 'Invalid data. Make sure to set all the inputs!'], 422);
