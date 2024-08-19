@@ -366,17 +366,19 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account ID.',
+                'description' => 'This endpoint authenticates a user using their Google account ID. It also requires CAPTCHA validation.',
                 'requestBody' => [
-                    'description' => 'Google account ID',
+                    'description' => 'Google account ID and CAPTCHA validation token',
+                    'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
                                     'googleId' => ['type' => 'string', 'example' => 'google-account-id-example'],
+                                    'cf-turnstile-response' => ['type' => 'string', 'description' => 'The CAPTCHA validation token', 'example' => 'valid_test_token'],
                                 ],
-                                'required' => ['googleId'],
+                                'required' => ['googleId', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -410,17 +412,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'type' => 'object',
                                                         'properties' => [
                                                             'provider' => ['type' => 'string', 'example' => 'Google'],
-                                                            'provider_id' => [
-                                                                'type' => 'string',
-                                                                'example' => 'google-id-example'
-                                                            ],
+                                                            'provider_id' => ['type' => 'string', 'example' => 'google-id-example'],
                                                         ],
                                                     ],
                                                 ],
                                                 'createdAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
-                                                    'example' => '2023-01-01 00:00:00'
+                                                    'example' => '2023-01-01 00:00:00',
                                                 ],
                                             ],
                                         ],
@@ -449,11 +448,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Invalid data',
+                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
                                 'example' => [
-                                    'error' => 'Invalid data',
+                                    'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
                             ],
                         ],
