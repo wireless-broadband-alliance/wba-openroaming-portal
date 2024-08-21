@@ -1405,4 +1405,29 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
         return $this;
     }
+
+    public function toApiResponse(array $additionalData = []): array
+    {
+        $userExternalAuths = $this->getUserExternalAuths()->map(
+            function (UserExternalAuth $userExternalAuth) {
+                return [
+                    'provider' => $userExternalAuth->getProvider(),
+                    'provider_id' => $userExternalAuth->getProviderId(),
+                ];
+            }
+        )->toArray();
+
+        $responseData = [
+            'uuid' => $this->getUuid(),
+            'email' => $this->getEmail(),
+            'roles' => $this->getRoles(),
+            'first_name' => $this->getFirstName(),
+            'last_name' => $this->getLastName(),
+            'isVerified' => $this->isVerified(),
+            'createdAt' => $this->getCreatedAt(),
+            'user_external_auths' => $userExternalAuths,
+        ];
+
+        return array_merge($responseData, $additionalData);
+    }
 }

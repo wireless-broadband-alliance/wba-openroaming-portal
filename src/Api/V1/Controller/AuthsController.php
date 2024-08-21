@@ -60,25 +60,21 @@ class AuthsController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
-            );
+            throw new BadRequestHttpException('CAPTCHA validation failed!');
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
-            );
+            throw new BadRequestHttpException('CAPTCHA validation failed!');
         }
 
         if (!isset($data['uuid'], $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 404);
+            return new JsonResponse(['error' => 'Invalid data'], 422);
         }
 
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid credentials - Missing User'], 404);
+            return new JsonResponse(['error' => 'Invalid credentials'], 422);
         }
 
         $hasPortalAccount = false;
@@ -90,34 +86,14 @@ class AuthsController extends AbstractController
         }
 
         if (!$hasPortalAccount) {
-            return new JsonResponse(['error' => 'Invalid credentials - Provider not allowed'], 403);
+            return new JsonResponse(['error' => 'Invalid credentials'], 422);
         }
-
-        // Get user external auth details
-        $userExternalAuths = $user->getUserExternalAuths()->map(
-            function (UserExternalAuth $userExternalAuth) {
-                return [
-                    'provider' => $userExternalAuth->getProvider(),
-                    'provider_id' => $userExternalAuth->getProviderId(),
-                ];
-            }
-        )->toArray();
 
         $token = $this->tokenGenerator->generateToken($user);
 
-        $responseData = [
+        $responseData = $user->toApiResponse([
             'token' => $token,
-            'user' => [
-                'uuid' => $user->getUuid(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-                'first_name' => $user->getFirstName(),
-                'last_name' => $user->getLastName(),
-                'isVerified' => $user->isVerified(),
-                'createdAt' => $user->getCreatedAt(),
-                'user_external_auths' => $userExternalAuths,
-            ]
-        ];
+        ]);
 
         return new JsonResponse($responseData, 200);
     }
@@ -139,18 +115,18 @@ class AuthsController extends AbstractController
 
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA validation failed!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
         if (!isset($data['sAMAccountName'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400);
+            return new JsonResponse(['error' => 'Invalid data'], 422);
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['sAMAccountName']]);
@@ -208,18 +184,18 @@ class AuthsController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['googleId'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400);
+            return new JsonResponse(['error' => 'Invalid data'], 422);
         }
 
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA validation failed!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
@@ -232,7 +208,7 @@ class AuthsController extends AbstractController
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'This user does not have a provider associated'], 404);
+            return new JsonResponse(['error' => 'Provider not found'], 404);
         }
 
         $token = $this->tokenGenerator->generateToken($user);
