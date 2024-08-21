@@ -52,6 +52,6 @@ COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d
-# COPY --chown=www-data:www-data . /var/www/openroaming
+COPY --chown=www-data:www-data . /var/www/openroaming
 RUN mkdir /run/php
 CMD ["/usr/bin/supervisord"]
