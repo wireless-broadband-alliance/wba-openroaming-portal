@@ -7,20 +7,22 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\JWTTokenGenerator;
-use DOMDocument;
 use Exception;
+use OneLogin\Saml2\Auth;
+use OneLogin\Saml2\Error;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use OneLogin\Saml2\Auth;
 
 class AuthsController extends AbstractController
 {
@@ -124,14 +126,11 @@ class AuthsController extends AbstractController
             return new JsonResponse(['error' => 'SAML Response not found'], 422);
         }
 
-        // Decode Base64 SAML Response
-        $samlResponseXml = base64_decode($samlResponseBase64);
-
         try {
-            // Pass the decoded XML to the SAML Auth object
-            $samlAuth->processResponse($samlResponseXml);
+            // Load and validate the SAML response
+            $samlAuth->processResponse();
 
-            // Handle errors
+            // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
                 return new JsonResponse([
                     'error' => 'Invalid SAML assertion',
@@ -139,35 +138,41 @@ class AuthsController extends AbstractController
                 ], 401);
             }
 
-            // Ensure authentication is successful
+            // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                return new JsonResponse(['error' => 'Authentication failed'], 401);
+                throw new BadCredentialsException('Authentication failed');
             }
 
-            // Extract user information from SAML assertion
             $sAMAccountName = $samlAuth->getNameId();
 
-            // Look up the user
+            // Find the user in your local database
             $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $sAMAccountName]);
-
             if (!$userExternalAuth) {
-                return new JsonResponse(['error' => 'User not found'], 404);
+                throw new AccessDeniedException('User not found');
             }
 
             $user = $userExternalAuth->getUser();
             if (!$user) {
-                return new JsonResponse(['error' => 'Provider not found'], 404);
+                throw new AccessDeniedException('Provider not found');
             }
 
             // Generate JWT token
             $token = $this->tokenGenerator->generateToken($user);
 
-            // Create API response
+            // Prepare the API response
             $responseData = $user->toApiResponse(['token' => $token]);
 
             return new JsonResponse($responseData, 200);
+        } catch (Error $e) {
+            return new JsonResponse([
+                'error' => 'SAML processing error',
+                'details' => $e->getMessage()
+            ], 500);
         } catch (Exception $e) {
-            return new JsonResponse(['error' => 'SAML processing error', 'details' => $e->getMessage()], 500);
+            return new JsonResponse([
+                'error' => 'Unexpected error',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
 
