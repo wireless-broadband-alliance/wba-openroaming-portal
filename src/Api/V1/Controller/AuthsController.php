@@ -114,15 +114,11 @@ class AuthsController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
+            throw new BadRequestHttpException('CAPTCHA validation failed!');
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
+            throw new BadRequestHttpException('CAPTCHA validation failed!');
         }
 
         if (!isset($data['sAMAccountName'])) {
@@ -143,27 +139,8 @@ class AuthsController extends AbstractController
 
         $token = $this->tokenGenerator->generateToken($user);
 
-        $responseData = [
-            'token' => $token,
-            'user' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'uuid' => $user->getUuid(),
-                'roles' => $user->getRoles(),
-                'first_name' => $user->getFirstName(),
-                'last_name' => $user->getLastName(),
-                'isVerified' => $user->isVerified(),
-                'user_external_auths' => $user->getUserExternalAuths()->map(
-                    function (UserExternalAuth $userExternalAuth) {
-                        return [
-                            'provider' => $userExternalAuth->getProvider(),
-                            'provider_id' => $userExternalAuth->getProviderId(),
-                        ];
-                    }
-                )->toArray(),
-                'createdAt' => $user->getCreatedAt() ? $user->getCreatedAt()->format('Y-m-d H:i:s') : null,
-            ]
-        ];
+        // Use the toApiResponse method to generate the response
+        $responseData = $user->toApiResponse(['token' => $token]);
 
         return new JsonResponse($responseData, 200);
     }
