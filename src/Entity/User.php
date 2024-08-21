@@ -278,7 +278,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'sAMAccountName' => [
+                                    'SAMLResponse' => [
                                         'type' => 'string',
                                         'example' => 'saml-account-name-example'
                                     ],
@@ -288,7 +288,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['sAMAccountName', 'cf-turnstile-response'],
+                                'required' => ['SAMLResponse', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
