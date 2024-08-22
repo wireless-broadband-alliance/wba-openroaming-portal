@@ -71,13 +71,13 @@ class AuthsController extends AbstractController
         }
 
         if (!isset($data['uuid'], $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 422);
+            return new JsonResponse(['error' => 'Invalid data'], 400); # Bad Request Response
         }
 
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid credentials'], 422);
+            return new JsonResponse(['error' => 'Invalid credentials'], 401);# Unauthorized Request Response
         }
 
         $hasPortalAccount = false;
@@ -89,7 +89,7 @@ class AuthsController extends AbstractController
         }
 
         if (!$hasPortalAccount) {
-            return new JsonResponse(['error' => 'Invalid credentials'], 422);
+            return new JsonResponse(['error' => 'Invalid data'], 400); # Bad Request Response
         }
 
         $token = $this->tokenGenerator->generateToken($user);
@@ -106,24 +106,16 @@ class AuthsController extends AbstractController
      * @param Auth $samlAuth
      * @return JsonResponse
      * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
      */
     #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
-        // Validate CAPTCHA
-        $captchaResponse = $request->request->get('cf-turnstile-response');
-        if (!$captchaResponse || !$this->captchaValidator->validate($captchaResponse, $request->getClientIp())) {
-            throw new BadRequestHttpException('CAPTCHA validation failed!');
-        }
-
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
         if (!$samlResponseBase64) {
-            return new JsonResponse(['error' => 'SAML Response not found'], 422);
+            return new JsonResponse(['error' => 'SAML Response not found'], 400);# Bad Request Response
         }
 
         try {
@@ -133,19 +125,18 @@ class AuthsController extends AbstractController
             // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
                 return new JsonResponse([
-                    'error' => 'Invalid SAML assertion',
+                    'error' => 'Invalid SAML Assertion',
                     'details' => $samlAuth->getLastErrorReason()
                 ], 401);
             }
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                throw new BadCredentialsException('Authentication failed');
+                throw new BadCredentialsException('Authentication Failed!');
             }
 
             $sAMAccountName = $samlAuth->getNameId();
 
-            // Find the user in your local database
             $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $sAMAccountName]);
             if (!$userExternalAuth) {
                 throw new AccessDeniedException('User not found');
@@ -192,7 +183,7 @@ class AuthsController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['googleId'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 422);
+            return new JsonResponse(['error' => 'Invalid data'], 400);# Bad Request Response
         }
 
         if (!isset($data['cf-turnstile-response'])) {
@@ -206,13 +197,13 @@ class AuthsController extends AbstractController
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
 
         if (!$userExternalAuth) {
-            return new JsonResponse(['error' => 'User not found'], 404);
+            return new JsonResponse(['error' => 'Authentication Failed!'], 404);# User not found
         }
 
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'Provider not found'], 404);
+            return new JsonResponse(['error' => 'Provider not found'], 404);# User Provider not found
         }
 
         $token = $this->tokenGenerator->generateToken($user);
