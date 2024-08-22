@@ -268,10 +268,9 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML account name 
-                and a Turnstile CAPTCHA token.',
+                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile CAPTCHA token. It validates the CAPTCHA response, processes the SAML assertion, and returns user details along with a JWT token if authentication is successful.',
                 'requestBody' => [
-                    'description' => 'SAML account name and CAPTCHA validation token',
+                    'description' => 'SAML response and CAPTCHA validation token',
                     'required' => true,
                     'content' => [
                         'application/json' => [
@@ -280,12 +279,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'SAMLResponse' => [
                                         'type' => 'string',
-                                        'example' => 'saml-account-name-example'
+                                        'description' => 'Base64-encoded SAML response',
+                                        'example' => 'saml-response-example',
                                     ],
                                     'cf-turnstile-response' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
+                                        'example' => 'valid_test_token',
                                     ],
                                 ],
                                 'required' => ['SAMLResponse', 'cf-turnstile-response'],
@@ -301,21 +301,52 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'token' => ['type' => 'string', 'example' => 'jwt-token-example'],
+                                        'token' => [
+                                            'type' => 'string',
+                                            'description' => 'JWT token for the authenticated user',
+                                            'example' => 'jwt-token-example',
+                                        ],
                                         'user' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'id' => ['type' => 'integer', 'example' => 1],
-                                                'email' => ['type' => 'string', 'example' => 'user@example.com'],
-                                                'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
+                                                'id' => [
+                                                    'type' => 'integer',
+                                                    'description' => 'User ID',
+                                                    'example' => 1,
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User email address',
+                                                    'example' => 'user@example.com',
+                                                ],
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User UUID',
+                                                    'example' => 'user-uuid-example',
+                                                ],
                                                 'roles' => [
                                                     'type' => 'array',
-                                                    'items' => ['type' => 'string'],
+                                                    'items' => [
+                                                        'type' => 'string',
+                                                    ],
+                                                    'description' => 'List of user roles',
                                                     'example' => ['ROLE_USER'],
                                                 ],
-                                                'first_name' => ['type' => 'string', 'example' => 'John'],
-                                                'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                                'isVerified' => ['type' => 'boolean', 'example' => true],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User first name',
+                                                    'example' => 'John',
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User last name',
+                                                    'example' => 'Doe',
+                                                ],
+                                                'isVerified' => [
+                                                    'type' => 'boolean',
+                                                    'description' => 'Whether the user is verified',
+                                                    'example' => true,
+                                                ],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -323,19 +354,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'properties' => [
                                                             'provider' => [
                                                                 'type' => 'string',
-                                                                'example' => 'PortalAccount'
+                                                                'description' => 'Auth provider name',
+                                                                'example' => 'PortalAccount',
                                                             ],
                                                             'provider_id' => [
                                                                 'type' => 'string',
-                                                                'example' => 'provider-id-example'
+                                                                'description' => 'Auth provider ID',
+                                                                'example' => 'provider-id-example',
                                                             ],
                                                         ],
                                                     ],
+                                                    'description' => 'External authentication details',
                                                 ],
                                                 'createdAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
-                                                    'example' => '2023-01-01 00:00:00'
+                                                    'description' => 'Account creation timestamp',
+                                                    'example' => '2023-01-01T00:00:00Z',
                                                 ],
                                             ],
                                         ],
@@ -357,7 +392,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'provider_id' => 'provider-id-example',
                                             ],
                                         ],
-                                        'createdAt' => '2023-01-01 00:00:00',
+                                        'createdAt' => '2023-01-01T00:00:00Z',
                                     ],
                                 ],
                             ],
@@ -367,6 +402,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'CAPTCHA validation failed or invalid data',
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
                                     'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
@@ -377,8 +422,44 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'User not found or provider not associated',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the resource was not found',
+                                            'example' => 'User not found',
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
                                     'error' => 'User not found',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '500' => [
+                        'description' => 'Server error while processing the SAML response',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the server error occurred',
+                                            'example' => 'SAML processing error',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Detailed error information',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'error' => 'SAML processing error',
+                                    'details' => 'Detailed error information',
                                 ],
                             ],
                         ],
