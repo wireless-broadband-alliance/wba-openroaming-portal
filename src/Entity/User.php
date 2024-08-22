@@ -268,7 +268,9 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile CAPTCHA token. It validates the CAPTCHA response, processes the SAML assertion, and returns user details along with a JWT token if authentication is successful.',
+                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile 
+                CAPTCHA token. It validates the CAPTCHA response, processes the SAML assertion, and returns user 
+                details along with a JWT token if authentication is successful.',
                 'requestBody' => [
                     'description' => 'SAML response and CAPTCHA validation token',
                     'required' => true,
