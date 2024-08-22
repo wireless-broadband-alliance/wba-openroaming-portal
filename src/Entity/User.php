@@ -268,10 +268,10 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile CAPTCHA 
-                token. It validates the CAPTCHA response, processes the SAML assertion, and returns user details along
-                with a JWT token if authentication is successful. If the user is not found, a new user will be created
-                based on the SAML assertion.',
+                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile 
+                CAPTCHA token. It validates the CAPTCHA response, processes the SAML assertion, and returns user 
+                details along with a JWT token if authentication is successful. 
+                If the user is not found, a new user will be created based on the SAML assertion.',
                 'requestBody' => [
                     'description' => 'SAML response and CAPTCHA validation token',
                     'required' => true,
@@ -402,7 +402,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request due to missing SAML response or CAPTCHA validation failure',
+                        'description' => 'Bad Request due to missing SAML response',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -411,12 +411,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the request failed',
-                                            'example' => 'SAML Response not found or CAPTCHA validation failed',
+                                            'example' => 'SAML Response not found',
                                         ],
                                     ],
                                 ],
                                 'example' => [
-                                    'error' => 'SAML Response not found or CAPTCHA validation failed',
+                                    'error' => 'SAML Response not found',
                                 ],
                             ],
                         ],
