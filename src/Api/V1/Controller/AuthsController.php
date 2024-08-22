@@ -2,12 +2,14 @@
 
 namespace App\Api\V1\Controller;
 
+use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
-use App\Security\CustomSamlUserFactory;
 use App\Service\CaptchaValidator;
 use App\Service\JWTTokenGenerator;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
@@ -31,23 +33,30 @@ class AuthsController extends AbstractController
     private jwtTokenGenerator $tokenGenerator;
     private UserExternalAuthRepository $userExternalAuthRepository;
     private CaptchaValidator $captchaValidator;
-    private CustomSamlUserFactory $samlUserFactory;
+    private EntityManagerInterface $entityManager;
 
-
+    /**
+     * @param UserRepository $userRepository
+     * @param UserPasswordHasherInterface $passwordHasher
+     * @param JWTTokenGenerator $tokenGenerator
+     * @param UserExternalAuthRepository $userExternalAuthRepository
+     * @param CaptchaValidator $captchaValidator
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         jwtTokenGenerator $tokenGenerator,
         UserExternalAuthRepository $userExternalAuthRepository,
         CaptchaValidator $captchaValidator,
-        CustomSamlUserFactory $samlUserFactory,
+        EntityManagerInterface $entityManager,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
         $this->tokenGenerator = $tokenGenerator;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->captchaValidator = $captchaValidator;
-        $this->samlUserFactory = $samlUserFactory;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -108,9 +117,6 @@ class AuthsController extends AbstractController
      * @param Request $request
      * @param Auth $samlAuth
      * @return JsonResponse
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
      */
     #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
@@ -141,14 +147,54 @@ class AuthsController extends AbstractController
             $sAMAccountName = $samlAuth->getNameId();
             $attributes = $samlAuth->getAttributes();
 
-            // Use CustomSamlUserFactory to create or find the user
-            $user = $this->samlUserFactory->createUser($sAMAccountName, $attributes);
+            // Extract necessary attributes
+            $uuid = $attributes['samlUuid'][0] ?? null;
+            $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
+            $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;
+            $lastName = $attributes['urn:oid:2.5.4.4'][0] ?? null;
 
-            // Generate JWT token
+            // Retrieve or create user based on SAML attributes
+            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+
+            if (!$user) {
+                // User does not exist, create a new user
+                $user = new User();
+                $user->setEmail($email);
+                $user->setFirstName($firstName);
+                $user->setLastName($lastName);
+                $user->setUuid($uuid);
+                $user->setRoles([]); // Set roles if needed or keep empty
+
+                // Persist the new user
+                $this->entityManager->persist($user);
+
+                // Create and persist the UserExternalAuth entity
+                $userAuth = new UserExternalAuth();
+                $userAuth->setUser($user)
+                    ->setProvider(UserProvider::SAML)
+                    ->setProviderId($sAMAccountName);
+
+                $this->entityManager->persist($userAuth);
+                $this->entityManager->flush();
+            }
+
+            // Generate JWT token for the user
             $token = $this->tokenGenerator->generateToken($user);
 
             // Prepare the API response
-            $responseData = $user->toApiResponse(['token' => $token]);
+            $responseData = [
+                'user' => [
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'uuid' => $user->getUuid(),
+                    'roles' => $user->getRoles(),
+                    'first_name' => $user->getFirstName(),
+                    'last_name' => $user->getLastName(),
+                    'isVerified' => $user->isVerified(),
+                    'createdAt' => $user->getCreatedAt()
+                ],
+                'token' => $token,
+            ];
 
             return new JsonResponse($responseData, 200);
         } catch (Error $e) {
