@@ -268,30 +268,26 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile 
-                CAPTCHA token. It validates the CAPTCHA response, processes the SAML assertion, and returns user 
-                details along with a JWT token if authentication is successful. 
-                If the user is not found, a new user will be created based on the SAML assertion.',
+                'description' => 'This endpoint authenticates a user using their SAML response. 
+                If the user is not found in the database, a new user will be created based on the SAML assertion. 
+                The response includes user details along with a JWT token if authentication is successful.',
                 'requestBody' => [
-                    'description' => 'SAML response and CAPTCHA validation token',
+                    'description' => 'SAML response required for user authentication. 
+                The request should be sent as `multipart/form-data` with the SAML response included as a file upload.',
                     'required' => true,
                     'content' => [
-                        'application/json' => [
+                        'multipart/form-data' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
                                     'SAMLResponse' => [
                                         'type' => 'string',
                                         'description' => 'Base64-encoded SAML response',
+                                        'format' => 'binary',
                                         'example' => 'saml-response-example',
                                     ],
-                                    'cf-turnstile-response' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token',
-                                    ],
                                 ],
-                                'required' => ['SAMLResponse', 'cf-turnstile-response'],
+                                'required' => ['SAMLResponse'],
                             ],
                         ],
                     ],
@@ -304,11 +300,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'token' => [
-                                            'type' => 'string',
-                                            'description' => 'JWT token for the authenticated user',
-                                            'example' => 'jwt-token-example',
-                                        ],
                                         'user' => [
                                             'type' => 'object',
                                             'properties' => [
@@ -350,25 +341,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'description' => 'Whether the user is verified',
                                                     'example' => true,
                                                 ],
-                                                'user_external_auths' => [
-                                                    'type' => 'array',
-                                                    'items' => [
-                                                        'type' => 'object',
-                                                        'properties' => [
-                                                            'provider' => [
-                                                                'type' => 'string',
-                                                                'description' => 'Auth provider name',
-                                                                'example' => 'PortalAccount',
-                                                            ],
-                                                            'provider_id' => [
-                                                                'type' => 'string',
-                                                                'description' => 'Auth provider ID',
-                                                                'example' => 'provider-id-example',
-                                                            ],
-                                                        ],
-                                                    ],
-                                                    'description' => 'External authentication details',
-                                                ],
                                                 'createdAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
@@ -377,10 +349,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                             ],
                                         ],
+                                        'token' => [
+                                            'type' => 'string',
+                                            'description' => 'JWT token for the authenticated user',
+                                            'example' => 'jwt-token-example',
+                                        ],
                                     ],
                                 ],
                                 'example' => [
-                                    'token' => 'jwt-token-example',
                                     'user' => [
                                         'id' => 1,
                                         'email' => 'user@example.com',
@@ -389,14 +365,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
                                         'isVerified' => true,
-                                        'user_external_auths' => [
-                                            [
-                                                'provider' => 'PortalAccount',
-                                                'provider_id' => 'provider-id-example',
-                                            ],
-                                        ],
                                         'createdAt' => '2023-01-01T00:00:00Z',
                                     ],
+                                    'token' => 'jwt-token-example',
                                 ],
                             ],
                         ],
@@ -443,27 +414,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'error' => 'Invalid SAML Assertion',
                                     'details' => 'Detailed error information from SAML assertion',
-                                ],
-                            ],
-                        ],
-                    ],
-                    '404' => [
-                        'description' => 'User not found or provider not associated',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message explaining why the 
-                                            user or provider was not found',
-                                            'example' => 'User not found',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'error' => 'User not found',
                                 ],
                             ],
                         ],
