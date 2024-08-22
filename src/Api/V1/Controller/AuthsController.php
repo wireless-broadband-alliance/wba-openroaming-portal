@@ -5,13 +5,13 @@ namespace App\Api\V1\Controller;
 use App\Enum\UserProvider;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Security\CustomSamlUserFactory;
 use App\Service\CaptchaValidator;
 use App\Service\JWTTokenGenerator;
 use Exception;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -31,6 +31,7 @@ class AuthsController extends AbstractController
     private jwtTokenGenerator $tokenGenerator;
     private UserExternalAuthRepository $userExternalAuthRepository;
     private CaptchaValidator $captchaValidator;
+    private CustomSamlUserFactory $samlUserFactory;
 
 
     public function __construct(
@@ -39,12 +40,14 @@ class AuthsController extends AbstractController
         jwtTokenGenerator $tokenGenerator,
         UserExternalAuthRepository $userExternalAuthRepository,
         CaptchaValidator $captchaValidator,
+        CustomSamlUserFactory $samlUserFactory,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
         $this->tokenGenerator = $tokenGenerator;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->captchaValidator = $captchaValidator;
+        $this->samlUserFactory = $samlUserFactory;
     }
 
     /**
@@ -115,7 +118,7 @@ class AuthsController extends AbstractController
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
         if (!$samlResponseBase64) {
-            return new JsonResponse(['error' => 'SAML Response not found'], 400);# Bad Request Response
+            return new JsonResponse(['error' => 'SAML Response not found'], 400); // Bad Request
         }
 
         try {
@@ -127,7 +130,7 @@ class AuthsController extends AbstractController
                 return new JsonResponse([
                     'error' => 'Invalid SAML Assertion',
                     'details' => $samlAuth->getLastErrorReason()
-                ], 401);
+                ], 401); // Unauthorized
             }
 
             // Ensure the authentication was successful
@@ -136,16 +139,10 @@ class AuthsController extends AbstractController
             }
 
             $sAMAccountName = $samlAuth->getNameId();
+            $attributes = $samlAuth->getAttributes();
 
-            $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $sAMAccountName]);
-            if (!$userExternalAuth) {
-                throw new AccessDeniedException('User not found');
-            }
-
-            $user = $userExternalAuth->getUser();
-            if (!$user) {
-                throw new AccessDeniedException('Provider not found');
-            }
+            // Use CustomSamlUserFactory to create or find the user
+            $user = $this->samlUserFactory->createUser($sAMAccountName, $attributes);
 
             // Generate JWT token
             $token = $this->tokenGenerator->generateToken($user);
@@ -158,12 +155,12 @@ class AuthsController extends AbstractController
             return new JsonResponse([
                 'error' => 'SAML processing error',
                 'details' => $e->getMessage()
-            ], 500);
+            ], 500); // Internal Server Error
         } catch (Exception $e) {
             return new JsonResponse([
                 'error' => 'Unexpected error',
                 'details' => $e->getMessage()
-            ], 500);
+            ], 500); // Internal Server Error
         }
     }
 

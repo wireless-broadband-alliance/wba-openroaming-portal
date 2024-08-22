@@ -268,9 +268,10 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile 
-                CAPTCHA token. It validates the CAPTCHA response, processes the SAML assertion, and returns user 
-                details along with a JWT token if authentication is successful.',
+                'description' => 'This endpoint authenticates a user using their SAML response and a Turnstile CAPTCHA 
+                token. It validates the CAPTCHA response, processes the SAML assertion, and returns user details along
+                with a JWT token if authentication is successful. If the user is not found, a new user will be created
+                based on the SAML assertion.',
                 'requestBody' => [
                     'description' => 'SAML response and CAPTCHA validation token',
                     'required' => true,
@@ -401,7 +402,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
+                        'description' => 'Bad Request due to missing SAML response or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -410,12 +411,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the request failed',
-                                            'example' => 'CAPTCHA validation failed or invalid data',
+                                            'example' => 'SAML Response not found or CAPTCHA validation failed',
                                         ],
                                     ],
                                 ],
                                 'example' => [
-                                    'error' => 'CAPTCHA validation failed or invalid data',
+                                    'error' => 'SAML Response not found or CAPTCHA validation failed',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized due to invalid SAML assertion',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why authentication failed',
+                                            'example' => 'Invalid SAML Assertion',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Detailed error information from SAML assertion',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'error' => 'Invalid SAML Assertion',
+                                    'details' => 'Detailed error information from SAML assertion',
                                 ],
                             ],
                         ],
@@ -429,7 +456,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'properties' => [
                                         'error' => [
                                             'type' => 'string',
-                                            'description' => 'Error message explaining why the resource was not found',
+                                            'description' => 'Error message explaining why the 
+                                            user or provider was not found',
                                             'example' => 'User not found',
                                         ],
                                     ],
