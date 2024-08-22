@@ -203,7 +203,7 @@ class AuthsController extends AbstractController
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'Provider not found'], 404);# User Provider not found
+            return new JsonResponse(['error' => 'Authentication Failed!'], 404);# User Provider not found
         }
 
         $token = $this->tokenGenerator->generateToken($user);
