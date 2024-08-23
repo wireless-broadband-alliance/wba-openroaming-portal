@@ -162,6 +162,7 @@ class AuthsController extends AbstractController
                 $user->setEmail($email);
                 $user->setFirstName($firstName);
                 $user->setLastName($lastName);
+                $user->setPassword('notused');
                 $user->setUuid($uuid);
                 $user->setRoles([]); // Set roles if needed or keep empty
 
