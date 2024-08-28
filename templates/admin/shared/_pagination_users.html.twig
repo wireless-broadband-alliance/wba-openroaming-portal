@@ -25,16 +25,36 @@
             </div>
 
             <div class="flex space-x-2.5">
-                {# Previous page navigation #}
-                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage - 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
-                        class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
+                {# First Page navigation #}
+                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to First Page">
                     <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
+                    <span class="sr-only">First Page</span>
                 </a>
 
-                {# Next page navigation #}
+                {# Previous Page navigation #}
+                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage - 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to Previous Page">
+                    <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
+                    <span class="sr-only">Previous Page</span>
+                </a>
+
+                {# Next Page navigation #}
                 <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage + 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
-                        class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to Next Page">
                     <twig:ux:icon name="wba:right" class="w-4" fill="none"/>
+                    <span class="sr-only">Next Page</span>
+                </a>
+
+                {# Last Page navigation #}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': totalPages, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to Last Page">
+                    <twig:ux:icon name="wba:doubleRight" class="w-4" fill="none"/>
+                    <span class="sr-only">Last Page</span>
                 </a>
             </div>
         </div>
