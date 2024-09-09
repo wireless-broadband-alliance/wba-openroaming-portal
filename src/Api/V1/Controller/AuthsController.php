@@ -170,27 +170,12 @@ class AuthsController extends AbstractController
             // Generate JWT token for the user
             $token = $this->tokenGenerator->generateToken($user);
 
-            // Prepare the API response
-            $responseData = [
-                'user' => [
-                    'id' => $user->getId(),
-                    'email' => $user->getEmail(),
-                    'uuid' => $user->getUuid(),
-                    'roles' => $user->getRoles(),
-                    'first_name' => $user->getFirstName(),
-                    'last_name' => $user->getLastName(),
-                    'isVerified' => $user->isVerified(),
-                    'createdAt' => $user->getCreatedAt()
-                ],
+            // Use the toApiResponse method to generate the response
+            $responseData = $user->toApiResponse([
                 'token' => $token,
-            ];
-
+            ]);
             return new JsonResponse($responseData, 200);
-        } catch (Error $e) {
-            return new JsonResponse([
-                'error' => 'SAML processing error',
-                'details' => $e->getMessage()
-            ], 500); // Internal Server Error
+
         } catch (Exception $e) {
             return new JsonResponse([
                 'error' => 'Unexpected error',
