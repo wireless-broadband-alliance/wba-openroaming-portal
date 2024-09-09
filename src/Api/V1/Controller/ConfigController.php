@@ -46,75 +46,61 @@ class ConfigController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA token is missing!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
-        // Settings organized by category
-        $settings = [
+        // Static structure to hold the settings and envs
+        $content = [
             'platform' => [
-                'PLATFORM_MODE',
-                'USER_VERIFICATION',
-                'TURNSTILE_CHECKER',
-                'CONTACT_EMAIL',
-                'TOS_LINK',
-                'PRIVACY_POLICY_LINK'
+                'PLATFORM_MODE' => $this->getSettingValue('PLATFORM_MODE'),
+                'USER_VERIFICATION' => $this->getSettingValue('USER_VERIFICATION'),
+                'TURNSTILE_CHECKER' => $this->getSettingValue('TURNSTILE_CHECKER'),
+                'CONTACT_EMAIL' => $this->getSettingValue('CONTACT_EMAIL'),
+                'TOS_LINK' => $this->getSettingValue('TOS_LINK'),
+                'PRIVACY_POLICY_LINK' => $this->getSettingValue('PRIVACY_POLICY_LINK')
             ],
             'auth' => [
-                'AUTH_METHOD_SAML_ENABLED',
-                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
-                'AUTH_METHOD_REGISTER_ENABLED',
-                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
-                'AUTH_METHOD_SMS_REGISTER_ENABLED'
-            ]
-        ];
-
-        // Envs variables organized by provider
-        $envs = [
+                'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValue('AUTH_METHOD_SAML_ENABLED'),
+                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValue('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
+                'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValue('AUTH_METHOD_REGISTER_ENABLED'),
+                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValue(
+                    'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                ),
+                'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValue('AUTH_METHOD_SMS_REGISTER_ENABLED')
+            ],
             'turnstile' => [
-                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key'),
+                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
             ],
             'google' => [
-                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
+                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
             ],
             'sentry' => [
-                'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn'),
+                'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn')
             ],
             'saml' => [
                 'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
                 'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
                 'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
-            ],
+                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
+            ]
         ];
-
-        $content = [];
-
-        // Map the settings into a single associative array with boolean conversion
-        foreach ($settings as $category => $settingsArray) {
-            foreach ($settingsArray as $settingName) {
-                $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
-                    $content[$category][$settingName] = $this->convertToBoolean($setting->getValue());
-                }
-            }
-        }
-
-        // Add the environmental settings to the content
-        foreach ($envs as $provider => $envSettings) {
-            foreach ($envSettings as $name => $value) {
-                $content[$provider][$name] = $value;
-            }
-        }
 
         // Create the response
         return (new BaseResponse(200, $content))->toResponse();
+    }
+
+    // Get and convert the setting value
+    private function getSettingValue(string $settingName): bool
+    {
+        $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+        return $setting && $this->convertToBoolean($setting->getValue());
     }
 
     // Convert string values to boolean
@@ -128,6 +114,6 @@ class ConfigController extends AbstractController
         if (in_array(strtoupper($value), $falseValues, true)) {
             return false;
         }
-        return $value;
+        return (bool)$value;
     }
 }
