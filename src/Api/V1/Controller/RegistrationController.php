@@ -109,13 +109,13 @@ class RegistrationController extends AbstractController
 
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA token is missing!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
@@ -195,13 +195,13 @@ class RegistrationController extends AbstractController
 
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA token is missing!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
@@ -319,13 +319,13 @@ class RegistrationController extends AbstractController
 
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA token is missing!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
@@ -399,13 +399,13 @@ class RegistrationController extends AbstractController
 
         if (!isset($dataRequest['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA token is missing!'
             );
         }
 
         if (!$this->captchaValidator->validate($dataRequest['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 
