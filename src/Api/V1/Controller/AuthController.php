@@ -12,7 +12,6 @@ use App\Service\JWTTokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use OneLogin\Saml2\Auth;
-use OneLogin\Saml2\Error;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -91,7 +90,7 @@ class AuthController extends AbstractController
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
             return new JsonResponse(['error' => 'Invalid credentials'], 401);# Unauthorized Request Response
         }
-        
+
         $token = $this->tokenGenerator->generateToken($user);
 
         $responseData = $user->toApiResponse([
@@ -175,7 +174,6 @@ class AuthController extends AbstractController
                 'token' => $token,
             ]);
             return new JsonResponse($responseData, 200);
-
         } catch (Exception $e) {
             return new JsonResponse([
                 'error' => 'Unexpected error',
@@ -214,13 +212,13 @@ class AuthController extends AbstractController
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
 
         if (!$userExternalAuth) {
-            return new JsonResponse(['error' => 'Authentication Failed!'], 404);# User not found
+            return new JsonResponse(['error' => 'Authentication Failed!'], 401); // Unauthorized - Provider not Allowed
         }
 
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'Authentication Failed!'], 404);# User Provider not found
+            return new JsonResponse(['error' => 'Authentication Failed!'], 401); // Unauthorized - Provider not Allowed
         }
 
         $token = $this->tokenGenerator->generateToken($user);
