@@ -125,13 +125,12 @@ class RegistrationController extends AbstractController
 
         if ($data['uuid'] !== $data['email']) {
             return new JsonResponse([
-                'error' => 'Invalid data. 
-            Make sure to type both with the same content!'
-            ], 422);
+                'error' => 'Invalid data!'
+            ], 400);
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['uuid']])) {
-            return new JsonResponse(['error' => 'This User already exists'], 403);
+            return new JsonResponse(['error' => 'This User already exists'], 409);
         }
 
         $user = new User();
@@ -239,8 +238,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
