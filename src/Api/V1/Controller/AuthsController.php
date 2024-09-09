@@ -91,13 +91,7 @@ class AuthsController extends AbstractController
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
             return new JsonResponse(['error' => 'Invalid credentials'], 401);# Unauthorized Request Response
         }
-
-        foreach ($user->getUserExternalAuths() as $userExternalAuth) {
-            if ($userExternalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT) {
-                break;
-            }
-        }
-
+        
         $token = $this->tokenGenerator->generateToken($user);
 
         $responseData = $user->toApiResponse([
