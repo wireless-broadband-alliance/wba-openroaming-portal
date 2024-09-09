@@ -44,13 +44,13 @@ class GetCurrentUserController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         if (!isset($data['cf-turnstile-response'])) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" is missing!'
+                'CAPTCHA token is missing!'
             );
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             throw new BadRequestHttpException(
-                'CAPTCHA validation failed. The "cf-turnstile-response" token is invalid!'
+                'CAPTCHA validation failed!'
             );
         }
 

@@ -142,13 +142,12 @@ class RegistrationController extends AbstractController
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime($data['createdAt']));
+        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
         $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
         $userExternalAuth->setProviderId(UserProvider::EMAIL);
-
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userExternalAuth);
@@ -351,7 +350,7 @@ class RegistrationController extends AbstractController
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime($data['createdAt']));
+        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);

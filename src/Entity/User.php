@@ -5,7 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use App\Api\V1\Controller\AuthsController;
+use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
@@ -132,7 +132,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/local',
-            controller: AuthsController::class,
+            controller: AuthController::class,
             shortName: 'User Auth',
             name: 'api_auth_local',
             openapiContext: [
@@ -263,7 +263,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/saml',
-            controller: AuthsController::class,
+            controller: AuthController::class,
             shortName: 'User Auth',
             name: 'api_auth_saml',
             openapiContext: [
@@ -449,7 +449,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/google',
-            controller: AuthsController::class,
+            controller: AuthController::class,
             shortName: 'User Auth',
             name: 'api_auth_google',
             openapiContext: [
@@ -796,7 +796,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/local/reset',
-            controller: AuthsController::class,
+            controller: AuthController::class,
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
@@ -907,7 +907,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/reset',
-            controller: AuthsController::class,
+            controller: AuthController::class,
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
             openapiContext: [
