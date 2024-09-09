@@ -336,7 +336,8 @@ class RegistrationController extends AbstractController
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['uuid']])) {
-            return new JsonResponse(['error' => 'This User already exists'], 409); // Conflict with user that already uses the same phoneNumber
+            // Error - Conflict user that already exists with the same phoneNumber
+            return new JsonResponse(['error' => 'This User already exists'], 409);
         }
 
         $user = new User();
@@ -359,7 +360,7 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        // Defines the Event to the table
+        // Defines the event to the table
         $eventMetaData = [
             'uuid' => $user->getUuid(),
             'Provider' => UserProvider::PORTAL_ACCOUNT,
@@ -467,8 +468,7 @@ class RegistrationController extends AbstractController
 
                             if ($attemptsLeft <= 0) {
                                 return new JsonResponse([
-                                    'error' => 'You have exceed the limits for regeneration. 
-                                    Contact our support for help.'
+                                    'error' => 'Limit of trys exceeded for regeneration. Contact our support for help.'
                                 ], 429);
                             }
                         } else {
@@ -528,7 +528,7 @@ class RegistrationController extends AbstractController
                         ], 200);
                     }
                 } catch (\RuntimeException $e) {
-                    return new JsonResponse(['error' => $e->getMessage()], 400);
+                    return new JsonResponse(['error' => $e->getMessage()], 500); // Internal Server Error
                 }
             }
 
