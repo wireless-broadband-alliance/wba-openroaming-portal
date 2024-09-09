@@ -88,7 +88,7 @@ class AuthController extends AbstractController
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid credentials'], 401);# Unauthorized Request Response
+            return new JsonResponse(['error' => 'Invalid credentials'], 401); # Unauthorized Request Response
         }
 
         $token = $this->tokenGenerator->generateToken($user);

@@ -238,22 +238,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '404' => [
+                    '401' => [
                         'description' => 'User not found or invalid credentials',
                         'content' => [
                             'application/json' => [
                                 'example' => [
-                                    'error' => 'Invalid data',
-                                ],
-                            ],
-                        ],
-                    ],
-                    '403' => [
-                        'description' => 'Invalid credentials - Provider not allowed',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'Invalid credentials - Provider not allowed',
+                                    'error' => 'Invalid credentials',
                                 ],
                             ],
                         ],
@@ -553,12 +543,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '404' => [
-                        'description' => 'User not found or provider not associated',
+                    '401' => [
+                        'description' => 'Authentication failed due to invalid external auth or provider issues',
                         'content' => [
                             'application/json' => [
                                 'example' => [
-                                    'error' => 'User not found',
+                                    'error' => 'Authentication Failed',
                                 ],
                             ],
                         ],
@@ -641,34 +631,27 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '422' => [
-                        'description' => 'Invalid data',
+                    '400' => [
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Invalid data: Missing required fields'],
+                                        'value' => ['error' => 'Missing data'],
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and email mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data: UUID and email do not match. 
-                                            Ensure both fields contain the same content!',
-                                        ],
-                                    ],
-                                    'captcha_failed' => [
-                                        'summary' => 'CAPTCHA validation failed',
-                                        'value' => [
-                                            'error' => 'CAPTCHA validation failed',
+                                            'error' => 'Invalid data! UUID and email do not match!',
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                     ],
-                    '403' => [
-                        'description' => 'User already exists',
+                    '409' => [
+                        'description' => 'Conflict due to user already existing',
                         'content' => [
                             'application/json' => [
                                 'example' => [
@@ -755,34 +738,27 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '422' => [
-                        'description' => 'Invalid data',
+                    '400' => [
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Invalid data: Missing required fields'],
+                                        'value' => ['error' => 'Missing data!'],
                                     ],
                                     'mismatch_data' => [
                                         'summary' => 'UUID and phone number mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data: UUID and phone number do not match. 
-                                            Ensure both fields contain the same content!',
-                                        ],
-                                    ],
-                                    'captcha_failed' => [
-                                        'summary' => 'CAPTCHA validation failed',
-                                        'value' => [
-                                            'error' => 'CAPTCHA validation failed',
+                                            'error' => 'Invalid data! UUID and phone number do not match!',
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                     ],
-                    '403' => [
-                        'description' => 'User already exists',
+                    '409' => [
+                        'description' => 'Conflict due to user already existing',
                         'content' => [
                             'application/json' => [
                                 'example' => [
@@ -985,6 +961,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'example' => 'Please wait 2 minute(s) before trying again.',
                                         ],
                                     ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '500' => [
+                        'description' => 'Server error while processing the request',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the server error occurred',
+                                            'example' => 'An unexpected error occurred while processing the request',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'error' => 'An unexpected error occurred while processing the request',
                                 ],
                             ],
                         ],
