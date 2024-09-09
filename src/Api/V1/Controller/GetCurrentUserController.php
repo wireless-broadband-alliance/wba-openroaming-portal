@@ -52,6 +52,6 @@ class GetCurrentUserController extends AbstractController
         }
 
         // Handle the case where the user is not authenticated
-        return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        return new JsonResponse(['error' => 'Unauthorized'], 401);
     }
 }
