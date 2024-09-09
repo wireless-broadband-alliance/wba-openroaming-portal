@@ -271,7 +271,7 @@ class RegistrationController extends AbstractController
                             )
                         )
                         ->to($currentUser->getEmail())
-                        ->subject('Openroaming Portal - Password Request')
+                        ->subject('OpenRoaming Portal - Password Request')
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,
@@ -292,10 +292,10 @@ class RegistrationController extends AbstractController
                 return new JsonResponse(['error' => 'Please wait 2 minutes before trying again.'], 429);
             }
 
-            return new JsonResponse(['error' => 'Invalid credentials - Provider not allowed'], 403);
+            return new JsonResponse(['error' => 'Invalid credentials - Provider not allowed.'], 403);
         }
 
-        return new JsonResponse(['error' => 'Please make sure to place the JWT token'], 400);
+        return new JsonResponse(['error' => 'Please make sure to include the JWT token.'], 400);
     }
 
     /**
