@@ -326,7 +326,7 @@ class RegistrationController extends AbstractController
         }
 
         if (!isset($data['uuid'], $data['password'], $data['phoneNumber'])) {
-            return new JsonResponse(['error' => 'Invalid data!'], 422);
+            return new JsonResponse(['error' => 'Missing data!'], 400);
         }
 
         if ($data['uuid'] !== $data['phoneNumber']) {
@@ -336,7 +336,7 @@ class RegistrationController extends AbstractController
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['uuid']])) {
-            return new JsonResponse(['error' => 'This User already exists'], 403);
+            return new JsonResponse(['error' => 'This User already exists'], 409); // Conflict with user that already uses the same phoneNumber
         }
 
         $user = new User();
