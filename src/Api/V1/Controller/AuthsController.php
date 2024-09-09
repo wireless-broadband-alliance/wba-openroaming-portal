@@ -92,16 +92,10 @@ class AuthsController extends AbstractController
             return new JsonResponse(['error' => 'Invalid credentials'], 401);# Unauthorized Request Response
         }
 
-        $hasPortalAccount = false;
         foreach ($user->getUserExternalAuths() as $userExternalAuth) {
             if ($userExternalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT) {
-                $hasPortalAccount = true;
                 break;
             }
-        }
-
-        if (!$hasPortalAccount) {
-            return new JsonResponse(['error' => 'Invalid data'], 400); # Bad Request Response
         }
 
         $token = $this->tokenGenerator->generateToken($user);
