@@ -152,7 +152,7 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        // Defines the Event to the table
+        // Defines the event to the table
         $eventMetaData = [
             'uuid' => $user->getUuid(),
             'Provider' => UserProvider::PORTAL_ACCOUNT,
@@ -248,7 +248,7 @@ class RegistrationController extends AbstractController
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                         $latestEventMetadata = [
                             'platform' => PlatformMode::LIVE,
-                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'ip' => $request->getClientIp(),
                             'uuid' => $currentUser->getUuid(),
                         ];
                     }
@@ -494,7 +494,7 @@ class RegistrationController extends AbstractController
                     }
 
                     $eventMetadata = [
-                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'ip' => $request->getClientIp(),
                         'uuid' => $currentUser->getUuid(),
                         'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
                         'verificationAttempts' => $verificationAttempts,
