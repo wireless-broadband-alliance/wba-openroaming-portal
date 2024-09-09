@@ -120,7 +120,7 @@ class RegistrationController extends AbstractController
         }
 
         if (!isset($data['uuid'], $data['password'], $data['email'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 422);
+            return new JsonResponse(['error' => 'Missing data'], 400);
         }
 
         if ($data['uuid'] !== $data['email']) {
@@ -330,12 +330,12 @@ class RegistrationController extends AbstractController
         }
 
         if (!isset($data['uuid'], $data['password'], $data['phoneNumber'])) {
-            return new JsonResponse(['error' => 'Invalid data. Make sure to set all the inputs!'], 422);
+            return new JsonResponse(['error' => 'Invalid data!'], 422);
         }
 
         if ($data['uuid'] !== $data['phoneNumber']) {
             return new JsonResponse([
-                'error' => 'Invalid data. Make sure to type both with the same content!'
+                'error' => 'Invalid data!'
             ], 400);
         }
 
