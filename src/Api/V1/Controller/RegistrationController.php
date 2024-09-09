@@ -23,7 +23,6 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
-use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -180,7 +179,6 @@ class RegistrationController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws NonUniqueResultException
      * @throws Exception
-     * @throws RandomException
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/reset/', name: 'api_auth_local_reset', methods: ['POST'])]
@@ -238,8 +236,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -384,7 +382,6 @@ class RegistrationController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
-     * @throws RandomException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws Exception
