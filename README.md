@@ -111,6 +111,18 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
+### OpenRoaming Portal API
+
+This page shows data related to the endpoints in the project required for user authentication, management, and
+configuration within the OpenRoaming Portal. It includes detailed descriptions of each endpoint, highlighting their
+purpose, required inputs, and expected outputs.
+
+Additionally, the documentation shows the necessary security measures,
+such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
+
+For more information on how to use these endpoints, please refer to the full API documentation provided in this README.
+Or check this [Guide](APIGUI.md).
+
 # ⚙️ Installation Guide
 
 Follow this link for more information on installing this project: [Installation Guide](INSTALATION.md).
