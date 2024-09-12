@@ -154,7 +154,7 @@ class RegistrationController extends AbstractController
         // Defines the event to the table
         $eventMetaData = [
             'uuid' => $user->getUuid(),
-            'Provider' => UserProvider::PORTAL_ACCOUNT,
+            'provider' => UserProvider::PORTAL_ACCOUNT,
             'registrationType' => UserProvider::EMAIL,
         ];
         $this->eventActions->saveEvent(
