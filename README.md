@@ -120,8 +120,7 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-For more information on how to use these endpoints, please refer to the full API documentation provided in this README.
-Or check this [Guide](APIGUI.md).
+Follow this link for more information on API documentation: [Api Guide](APIGUI.md)
 
 # ⚙️ Installation Guide
 

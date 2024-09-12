@@ -1,20 +1,20 @@
+# API Endpoints
+
 This document provides an overview of the key API endpoints introduced in this project. Each endpoint is designed to
 improve user authentication and management processes, with integrated CAPTCHA validation to ensure security.
 
-## API Endpoints
-
-### Setting
+## Setting
 
 - **Public Settings Configuration**
     - Returns public values from the Setting entity and environment variables.
     - Data is categorized by platform and provider.
 
-### User
+## User
 
 - **Retrieve Current Authenticated User**
     - Returns details of the currently authenticated user.
 
-### User Auth
+## User Auth
 
 - **Local Authentication**
     - Authenticates a user using their UUID and password.
@@ -28,7 +28,7 @@ improve user authentication and management processes, with integrated CAPTCHA va
 - **Google Authentication**
     - Authenticates a user using their Google account ID.
 
-### User Auth Register
+## User Auth Register
 
 - **Local Registration**
     - Registers a new user via local authentication using their email.
@@ -38,7 +38,7 @@ improve user authentication and management processes, with integrated CAPTCHA va
     - Registers a new user via SMS authentication using their phone number.
     - Requires Turnstile CAPTCHA token validation.
 
-### User Auth Reset
+## User Auth Reset
 
 - **Local Password Reset**
     - Triggers a password reset for a local authentication account.
@@ -50,7 +50,7 @@ improve user authentication and management processes, with integrated CAPTCHA va
     - Checks if the user has a valid PortalAccount and ensures SMS request limits and time intervals are respected.
     - Requires Turnstile CAPTCHA token validation.
 
-## Notes
+### Notes
 
 - Most of the endpoints above are integrated with CAPTCHA validation to increase security.
 - Please refer to the [API documentation](docs/index.html) generated with OpenAPI via Swagger UI for detailed usage
