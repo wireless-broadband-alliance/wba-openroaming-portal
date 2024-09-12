@@ -56,7 +56,6 @@ class ConfigController extends AbstractController
             );
         }
 
-        // Static structure to hold the settings and envs
         $content = [
             'platform' => [
                 'PLATFORM_MODE' => $this->getSettingValue('PLATFORM_MODE'),
