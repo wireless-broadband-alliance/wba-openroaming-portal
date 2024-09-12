@@ -151,7 +151,7 @@ When this mode is activated, **it's not required** to verify the user account se
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
 
-Follow this link for a portal user interface overview: [Portal GUI](PORTALGUI.md).
+Follow this link for a portal user interface overview: [Portal Guide](PORTALGUI.md).
 
 ## 🔧 Environment Variables
 
