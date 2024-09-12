@@ -53,5 +53,5 @@ improve user authentication and management processes, with integrated CAPTCHA va
 ## Notes
 
 - Most of the endpoints above are integrated with CAPTCHA validation to increase security.
-- Please refer to the [API documentation](place git repo here) generated with OpenAPI via Swagger UI for detailed usage
+- Please refer to the [API documentation](docs/index.html) generated with OpenAPI via Swagger UI for detailed usage
   instructions and examples.
