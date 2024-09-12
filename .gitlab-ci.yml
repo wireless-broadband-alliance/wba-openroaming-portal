@@ -41,12 +41,3 @@ build_image:
 include :
   - template : Security/Dependency-Scanning.gitlab-ci.yml
   - template : Security/Secret-Detection.gitlab-ci.yml
-
-pages:
-  stage: deploy
-  script:
-    - mkdir .public
-    - cp -r project_name/docs/* .public/
-  artifacts:
-    paths:
-      - .public
