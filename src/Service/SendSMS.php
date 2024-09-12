@@ -8,6 +8,7 @@ use App\Enum\PlatformMode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -29,6 +30,7 @@ class SendSMS
     private ParameterBagInterface $parameterBag;
     private EventRepository $eventRepository;
     private EventActions $eventActions;
+    private VerificationCodeGenerator $verificationCodeGenerator;
 
     /**
      * SendSMS constructor.
@@ -39,6 +41,7 @@ class SendSMS
      * @param ParameterBagInterface $parameterBag
      * @param EventRepository $eventRepository
      * @param EventActions $eventActions
+     * @param VerificationCodeGenerator $verificationCodeGenerator
      */
     public function __construct(
         UserRepository $userRepository,
@@ -47,6 +50,7 @@ class SendSMS
         ParameterBagInterface $parameterBag,
         EventRepository $eventRepository,
         EventActions $eventActions,
+        VerificationCodeGenerator $verificationCodeGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
@@ -54,23 +58,7 @@ class SendSMS
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
-    }
-
-    /**
-     * Generate a new verification code for the user.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
+        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /**
@@ -190,7 +178,7 @@ class SendSMS
                 }
 
                 // Generate a new verification code and resend the SMS
-                $verificationCode = $this->generateVerificationCode($user);
+                $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($user);
                 $message = 'Your new verification code is: ' . $verificationCode;
                 $this->sendSms($user->getPhoneNumber(), $message);
                 return true;

@@ -29,6 +29,16 @@
         <env name="TURNSTILE_KEY" value="3x00000000000000000000FF"/>
         <env name="TURNSTILE_SECRET" value="1x0000000000000000000000000000000AA"/>
         <!-- ###- pixelopen/cloudflare-turnstile-bundle ### -->
+
+        <!-- ###+ nelmio/cors-bundle ### -->
+        <env name="CORS_ALLOW_ORIGIN" value="'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'"/>
+        <!-- ###- nelmio/cors-bundle ### -->
+
+        <!-- ###+ lexik/jwt-authentication-bundle ### -->
+        <env name="JWT_SECRET_KEY" value="%kernel.project_dir%/config/jwt/private.pem"/>
+        <env name="JWT_PUBLIC_KEY" value="%kernel.project_dir%/config/jwt/public.pem"/>
+        <env name="JWT_PASSPHRASE" value="411c891aecc8e4e86c5d1f6a7647cd6b89a614ad2b41d6717ac3edde39d82d98"/>
+        <!-- ###- lexik/jwt-authentication-bundle ### -->
     </php>
 
     <testsuites>

@@ -23,6 +23,7 @@ use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
+use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,6 +58,7 @@ class SiteController extends AbstractController
     private GetSettings $getSettings;
     private EventRepository $eventRepository;
     private EventActions $eventActions;
+    private VerificationCodeGenerator $verificationCodeGenerator;
 
     /**
      * SiteController constructor.
@@ -69,6 +71,7 @@ class SiteController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
+     * @param VerificationCodeGenerator $verificationCodeGenerator
      */
     public function __construct(
         MailerInterface $mailer,
@@ -78,7 +81,8 @@ class SiteController extends AbstractController
         SettingRepository $settingRepository,
         GetSettings $getSettings,
         EventRepository $eventRepository,
-        EventActions $eventActions
+        EventActions $eventActions,
+        VerificationCodeGenerator $verificationCodeGenerator
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -88,6 +92,7 @@ class SiteController extends AbstractController
         $this->getSettings = $getSettings;
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
+        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /**
@@ -128,7 +133,10 @@ class SiteController extends AbstractController
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-                $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+                $this->addFlash(
+                    'error',
+                    'You need to confirm the new password before download a profile!'
+                );
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
             if ($currentUser->getDeletedAt()) {
@@ -532,8 +540,7 @@ class SiteController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws Exception
      */
-    #[
-        Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
+    #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -574,7 +581,9 @@ class SiteController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST
                 );
-                $minInterval = new DateInterval('PT2M');
+                // Retrieve the SMS resend interval from the settings
+                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
                 $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
@@ -663,7 +672,10 @@ class SiteController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
+                        $this->addFlash(
+                            'warning',
+                            "Please wait " . $data['SMS_TIMER_RESEND']['value'] . " minutes before trying again."
+                        );
                     }
                 } else {
                     $this->addFlash(
@@ -813,23 +825,6 @@ class SiteController extends AbstractController
     }
 
     /**
-     * Generate a new verification code for the user.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
-    }
-
-    /**
      * Create an email message with the verification code.
      *
      * @param string $email The recipient's email address.
@@ -845,7 +840,7 @@ class SiteController extends AbstractController
         // If the verification code is not provided, generate a new one
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $verificationCode = $this->generateVerificationCode($currentUser);
+        $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
 
         return (new TemplatedEmail())
             ->from(new Address($emailSender, $nameSender))
@@ -954,6 +949,7 @@ class SiteController extends AbstractController
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'data' => $data,
+                'user' => $currentUser
             ]);
         }
 

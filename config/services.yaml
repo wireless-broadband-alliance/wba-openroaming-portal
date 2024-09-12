@@ -10,6 +10,13 @@ parameters:
   app.export_users: '%env(EXPORT_USERS)%'
   app.export_freeradius_statistics: '%env(EXPORT_FREERADIUS_STATISTICS)%'
   app.pgp_public_key: '%env(ENABLE_DELETE_USERS_UI)%'
+  app.turnstile_key: '%env(TURNSTILE_KEY)%'
+  app.google_client_id: '%env(GOOGLE_CLIENT_ID)%'
+  app.sentry_dsn: '%env(SENTRY_DSN)%'
+  app.saml_idp_entity_id: '%env(SAML_IDP_ENTITY_ID)%'
+  app.saml_idp_sso_url: '%env(SAML_IDP_SSO_URL)%'
+  app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
+  app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
 services:
   App\Form\Transformer\BooleanToDateTimeTransformer: ~
   #Things to make the login with Google work

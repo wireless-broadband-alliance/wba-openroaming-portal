@@ -111,6 +111,17 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
+### OpenRoaming Portal API
+
+This page shows data related to the endpoints in the project required for user authentication, management, and
+configuration within the OpenRoaming Portal. It includes detailed descriptions of each endpoint, highlighting their
+purpose, required inputs, and expected outputs.
+
+Additionally, the documentation shows the necessary security measures,
+such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
+
+Follow this link for more information on API documentation: [Api Guide](APIGUI.md)
+
 # ⚙️ Installation Guide
 
 Follow this link for more information on installing this project: [Installation Guide](INSTALATION.md).
@@ -140,7 +151,7 @@ When this mode is activated, **it's not required** to verify the user account se
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
 
-Follow this link for a portal user interface overview: [Portal GUI](PORTALGUI.md).
+Follow this link for a portal user interface overview: [Portal Guide](PORTALGUI.md).
 
 ## 🔧 Environment Variables
 

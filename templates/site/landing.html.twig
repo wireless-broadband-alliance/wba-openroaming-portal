@@ -152,6 +152,9 @@
                                 {% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}
                                     {{ app.user.uuid }}
                                 {% endif %}
+                                {% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}
+                                    {{ app.user.uuid }}
+                                {% endif %}
                             {% endfor %}
                         {% else %}
                             {{ app.user.uuid }}
