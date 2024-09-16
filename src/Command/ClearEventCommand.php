@@ -40,7 +40,7 @@ class ClearEventCommand extends Command
         // Confirmation prompt if --yes option is not provided
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(
+            $question = new ConfirmationQuestion( // phpcs:ignore Generic.Files.LineLength.TooLong
                 'This action will delete all records from the Event entity where any field is null. Do you want to proceed? [y/N] ',
                 false
             );
