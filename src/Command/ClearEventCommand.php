@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\Event;
+use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,10 +20,12 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class ClearEventCommand extends Command
 {
     private EntityManagerInterface $entityManager;
+    private EventRepository $eventRepository;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, EventRepository $eventRepository)
     {
         $this->entityManager = $entityManager;
+        $this->eventRepository = $eventRepository;
         parent::__construct();
     }
 
@@ -56,31 +58,20 @@ class ClearEventCommand extends Command
         $this->entityManager->beginTransaction();
 
         try {
-            $eventRepository = $this->entityManager->getRepository(Event::class);
-            $events = $eventRepository->findAll();
-
+            $events = $this->eventRepository->findEventsWithNullOrEmptyFields();
             $deletedCount = 0;
 
             foreach ($events as $event) {
-                if (
-                    $event->getEventDatetime() === null ||
-                    $event->getEventDatetime() === "" ||
-                    $event->getEventName() === null ||
-                    $event->getEventName() === "" ||
-                    $event->getEventMetadata() === null ||
-                    $event->getEventMetadata() === "" ||
-                    $event->getUser() === null ||
-                    $event->getUser() === ""
-                ) {
-                    $this->entityManager->remove($event);
-                    $deletedCount++;
-                }
+                $this->entityManager->remove($event);
+                $deletedCount++;
             }
 
             $this->entityManager->flush();
             $this->entityManager->commit();
 
-            $output->writeln("<info>Success:</info> $deletedCount event(s) with null values have been deleted.");
+            $output->writeln(
+                "<info>Success:</info> $deletedCount event(s) with null or empty values have been deleted."
+            );
         } catch (Exception $e) {
             // Handle any exceptions and roll back in case of an error
             $this->entityManager->rollback();
