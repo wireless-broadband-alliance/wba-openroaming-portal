@@ -1,5 +1,7 @@
 # ⚙️ Installation Guide
-This guide is intended solely to assist in setting up the OpenRoaming Provisioning Portal. It provides step-by-step instructions for configuring the Portal.
+
+This guide is intended solely to assist in setting up the OpenRoaming Provisioning Portal. It provides step-by-step
+instructions for configuring the Portal.
 
 Please follow the instructions below, starting from the **root** folder of the project, to prepare it:
 
@@ -17,7 +19,9 @@ the database.
 ```bash
 - docker compose up -d
 ```
+
 or, only for local usage and testing,
+
 ```bash
 - docker compose -f docker-compose-local.yml up -d
 ```
@@ -30,7 +34,8 @@ or, only for local usage and testing,
 ```
 
 4. **Upload Certificates**:
-   Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles based on your certificates.
+   Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles
+   based on your certificates.
    You can either upload the certs to this folder, inside/outside the container web, but off course before creating it.
 
 5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
@@ -69,16 +74,54 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
+7. **Generate JWT Keys**
+
+This step is required for the **API** configuration. To enable JWT authentication, you need to generate a key pair (
+private and public keys). Make sure to run the
+following command on the root folder of the project to generate these keys:
+
+```bash
+php bin/console lexik:jwt:generate-keypair 
+```
+
+This command will create the following files in the `config/jwt` directory:
+
+- `private.pem` – the private key used to sign tokens.
+- `public.pem` – the public key used to verify tokens.
+
+Make sure to keep these keys secure, especially the private key.
+
+8. **Configure JWT and CORS in the `.env` File**
+   Next, configure the JWT and CORS environment variables in your `.env` file:
+
+```env
+JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+JWT_PASSPHRASE= # Update this to your actual passphrase
+
+###> nelmio/cors-bundle ###
+CORS_ALLOW_ORIGIN='^https?://(localhost|127.0.0.1)(:[0-9]+)?$'
+###< nelmio/cors-bundle ###
+```
+
+Replace `openroaming` with the passphrase you used when generating the JWT keys from the last step.
+
+The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` during local development.
+Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
+environment.
+
 ### 🛑 Important Security Note after Installation 🛑
 
 **It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
 information and debug logs to possible attackers**, providing serious risks for security.
 
-And it's **recommended** to follow standard security practices, including:
+It's **recommended** to follow standard security practices, including:
 
 - Properly configuring **firewalls** to **protect database servers** and another critical infrastructure.
 - Ensuring all **software** and **dependencies** are **up to date** with the latest security patches.
+
+And again, please **do not share** any of your generated keys from these installations steps and keep as safe as possible.
 
 ## 🎉 Congratulations! 🎉
 
