@@ -92,7 +92,7 @@ This command will create the following files in the `config/jwt` directory:
 Make sure to keep these keys secure, especially the private key.
 
 8. **Configure JWT and CORS in the `.env` File**
-Next, configure the JWT and CORS environment variables in your `.env` file:
+   Next, configure the JWT and CORS environment variables in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
@@ -116,10 +116,12 @@ environment.
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
 information and debug logs to possible attackers**, providing serious risks for security.
 
-And it's **recommended** to follow standard security practices, including:
+It's **recommended** to follow standard security practices, including:
 
 - Properly configuring **firewalls** to **protect database servers** and another critical infrastructure.
 - Ensuring all **software** and **dependencies** are **up to date** with the latest security patches.
+
+And again, please **do not share** any of your generated keys from these installations steps and keep as safe as possible.
 
 ## 🎉 Congratulations! 🎉
 
