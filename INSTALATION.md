@@ -97,7 +97,7 @@ Make sure to keep these keys secure, especially the private key.
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
 JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
-JWT_PASSPHRASE=openroaming # Change this to your actual passphrase
+JWT_PASSPHRASE= # Update this to your actual passphrase
 
 ###> nelmio/cors-bundle ###
 CORS_ALLOW_ORIGIN='^https?://(localhost|127.0.0.1)(:[0-9]+)?$'
