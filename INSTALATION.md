@@ -69,6 +69,31 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
+
+7. **Generate JWT Keys**
+
+To enable JWT authentication, you need to generate a key pair (private and public keys). Run make sure to run the following command on the root folder of the project to generate these keys:
+
+```bash
+php bin/console lexik:jwt:generate-keypair 
+```
+
+After that don't forgot to setup the following env from the ".env.sample"
+
+###> lexik/jwt-authentication-bundle ###
+### required for API logic with authentication keys
+JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+JWT_PASSPHRASE=MAKE_SURE_TO_DEFINE_THIS_FIELD
+
+
+###> nelmio/cors-bundle ###
+CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+###< nelmio/cors-bundle ###
+
+
+
+
 ### 🛑 Important Security Note after Installation 🛑
 
 **It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
