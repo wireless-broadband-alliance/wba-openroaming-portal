@@ -488,7 +488,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                                 'first_name' => ['type' => 'string', 'example' => 'John'],
                                                 'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                                'isVerified' => ['type' => 'boolean', 'example' => true],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -501,11 +500,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                             ],
                                                         ],
                                                     ],
-                                                ],
-                                                'createdAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'example' => '2023-01-01 00:00:00',
                                                 ],
                                             ],
                                         ],
@@ -520,14 +514,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'isVerified' => true,
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'Google',
                                                 'provider_id' => 'google-id-example',
                                             ],
                                         ],
-                                        'createdAt' => '2023-01-01 00:00:00',
                                     ],
                                 ],
                             ],
@@ -1462,8 +1454,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             'roles' => $this->getRoles(),
             'first_name' => $this->getFirstName(),
             'last_name' => $this->getLastName(),
-            'isVerified' => $this->isVerified(),
-            'createdAt' => $this->getCreatedAt(),
             'user_external_auths' => $userExternalAuths,
         ];
 
