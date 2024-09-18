@@ -524,10 +524,15 @@ class SiteController extends AbstractController
                 } else {
                     $this->addFlash(
                         'warning',
-                        'This email doesn\'t exist, please submit a valid email from the system! 
+                        'This email doesn\'t have a valid account, please submit a valid email from the system! 
                     And make sure to only type emails from the platform and not from another provider.'
                     );
                 }
+            } else {
+                $this->addFlash(
+                    'warning',
+                    'This email doesn\'t exist, please make sure to create a account with a email on the platform!'
+                );
             }
         }
         return $this->render('site/forgot_password_email_landing.html.twig', [

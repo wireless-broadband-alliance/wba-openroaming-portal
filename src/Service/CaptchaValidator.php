@@ -17,8 +17,11 @@ class CaptchaValidator
     private ParameterBagInterface $parameterBag;
     private KernelInterface $kernel;
 
-    public function __construct(HttpClientInterface $httpClient, ParameterBagInterface $parameterBag, KernelInterface $kernel)
-    {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $parameterBag,
+        KernelInterface $kernel
+    ) {
         $this->httpClient = $httpClient;
         $this->parameterBag = $parameterBag;
         $this->kernel = $kernel;
@@ -33,7 +36,6 @@ class CaptchaValidator
      */
     public function validate(string $token, ?string $clientIp): bool
     {
-
         if ($token === 'openroaming' && $this->kernel->getEnvironment() === 'dev') {
             return true;
         }

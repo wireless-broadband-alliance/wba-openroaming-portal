@@ -265,8 +265,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
