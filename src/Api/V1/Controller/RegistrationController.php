@@ -357,7 +357,7 @@ class RegistrationController extends AbstractController
             );
         }
 
-        if (!isset($data['uuid'], $data['password'], $data['phoneNumber'])) {
+        if (!isset($data['uuid'], $data['phoneNumber'])) {
             return new JsonResponse(['error' => 'Missing data!'], 400);
         }
 

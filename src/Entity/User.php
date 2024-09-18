@@ -640,11 +640,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => '+1234567890',
                                         'description' => 'User UUID, typically the same as the phone number'
                                     ],
-                                    'password' => [
-                                        'type' => 'string',
-                                        'example' => 'strongpassword',
-                                        'description' => 'The user password, must be strong and secure'
-                                    ],
                                     'phoneNumber' => [
                                         'type' => 'string',
                                         'example' => '+1234567890',
@@ -659,17 +654,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'type' => 'string',
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
-                                    ],
-                                    'isVerified' => [
-                                        'type' => 'boolean',
-                                        'example' => false,
-                                        'description' => 'Indicates if the user\'s phone number is verified'
-                                    ],
-                                    'createdAt' => [
-                                        'type' => 'string',
-                                        'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00',
-                                        'description' => 'Account creation date and time'
                                     ],
                                     'cf-turnstile-response' => [
                                         'type' => 'string',
