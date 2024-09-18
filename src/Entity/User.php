@@ -760,10 +760,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
-                'summary' => 'Trigger a password reset for a local auth account',
+                'summary' => 'Trigger a password reset for a local auth account (Requires Authorization)',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-                It verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
-                then proceeds with the password reset if the conditions are met.',
+                The user must be authenticated using a Bearer token. To use this endpoint, 
+                click on the "Authorize" button at the top of the Swagger UI and provide your JWT token in the format: 
+                `Bearer JWT_Token`. The endpoint verifies if the user has an external auth with "PortalAccount" and
+                 "EMAIL" providerId, then proceeds with the password reset if the conditions are met.',
                 'requestBody' => [
                     'description' => 'Password reset request data including CAPTCHA validation token',
                     'required' => true,
@@ -856,11 +858,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
                 'security' => [
                     [
-                        'BearerAuth' => [
-                            'type' => 'http',
-                            'scheme' => 'bearer',
-                            'bearerFormat' => 'JWT',
-                        ],
+                        'BearerAuth' => [] // This will require the user to authorize using JWT
                     ],
                 ],
             ],
