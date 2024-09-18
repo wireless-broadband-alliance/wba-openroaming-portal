@@ -34,28 +34,13 @@ class ConfigController extends AbstractController
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA token is missing!'
-            );
-        }
-
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
-        }
-
         $content = [
             'platform' => [
                 'PLATFORM_MODE' => $this->getSettingValue('PLATFORM_MODE'),

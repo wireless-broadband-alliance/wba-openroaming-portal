@@ -35,28 +35,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'summary' => 'Retrieve current authenticated user',
                 'description' => 'This endpoint returns the details of the currently authenticated user and 
                 requires a valid CAPTCHA token.',
-                'requestBody' => [
-                    'description' => 'CAPTCHA validation token is required in the request body to retrieve 
-                    the current authenticated user.',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'cf-turnstile-response' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                    ],
-                                ],
-                                'required' => ['cf-turnstile-response'],
-                            ],
-                            'example' => [
-                                'cf-turnstile-response' => 'valid_test_token',
-                            ],
-                        ],
-                    ],
-                ],
                 'responses' => [
                     '200' => [
                         'content' => [
@@ -94,16 +72,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'bannedAt' => '2023-01-01T00:00:00+00:00',
                                     'deletedAt' => '2023-01-01T00:00:00+00:00',
                                     'forgot_password_request' => false
-                                ],
-                            ],
-                        ],
-                    ],
-                    '400' => [
-                        'description' => 'Bad Request due to CAPTCHA validation failure',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'CAPTCHA validation failed.',
                                 ],
                             ],
                         ],
