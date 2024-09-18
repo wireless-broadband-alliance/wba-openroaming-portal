@@ -181,12 +181,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                                 'first_name' => ['type' => 'string', 'example' => 'John'],
                                                 'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                                'isVerified' => ['type' => 'boolean', 'example' => true],
-                                                'createdAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'example' => '2023-01-01T00:00:00+00:00'
-                                                ],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -215,8 +209,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'isVerified' => true,
-                                        'createdAt' => '2023-01-01T00:00:00+00:00',
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'PortalAccount',
