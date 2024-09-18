@@ -329,6 +329,7 @@ class RegistrationController extends AbstractController
 
     /**
      * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
      * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -338,8 +339,10 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/sms/register', name: 'api_auth_sms_register', methods: ['POST'])]
-    public function smsRegister(Request $request): JsonResponse
-    {
+    public function smsRegister(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
@@ -372,8 +375,11 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($data['uuid']);
         $user->setPhoneNumber($data['phoneNumber']);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
-        $user->setIsVerified($data['isVerified'] ?? false);
+        $randomPassword = bin2hex(random_bytes(4));
+        // Hash the password
+        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+        $user->setPassword($hashedPassword);
+        $user->setIsVerified(false);
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
@@ -383,7 +389,6 @@ class RegistrationController extends AbstractController
         $userExternalAuth->setUser($user);
         $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
         $userExternalAuth->setProviderId(UserProvider::PHONE_NUMBER);
-
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userExternalAuth);
@@ -395,6 +400,7 @@ class RegistrationController extends AbstractController
             'provider' => UserProvider::PORTAL_ACCOUNT,
             'registrationType' => UserProvider::PHONE_NUMBER,
         ];
+
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::USER_CREATION,
