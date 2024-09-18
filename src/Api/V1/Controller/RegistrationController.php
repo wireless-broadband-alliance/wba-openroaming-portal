@@ -93,13 +93,17 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @param Request $request
      * @param UserPasswordHasherInterface $userPasswordHasher
      * @param MailerInterface $mailer
+     * @param Request $request
      * @return JsonResponse
-     * @throws RandomException
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/register', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(
@@ -108,6 +112,18 @@ class RegistrationController extends AbstractController
         MailerInterface $mailer
     ): JsonResponse {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!isset($data['cf-turnstile-response'])) {
+            throw new BadRequestHttpException(
+                'CAPTCHA token is missing!'
+            );
+        }
+
+        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+            throw new BadRequestHttpException(
+                'CAPTCHA validation failed!'
+            );
+        }
 
         if (!isset($data['uuid'], $data['email'])) {
             return new JsonResponse(['error' => 'Missing data'], 400);

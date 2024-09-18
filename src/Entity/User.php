@@ -578,11 +578,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'user@example.com',
                                         'description' => 'User UUID, typically the same as the email'
                                     ],
-                                    'password' => [
-                                        'type' => 'string',
-                                        'example' => 'strongpassword',
-                                        'description' => 'The user password, must be strong and secure'
-                                    ],
                                     'email' => [
                                         'type' => 'string',
                                         'example' => 'user@example.com',
@@ -598,48 +593,53 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
                                     ],
-                                ],
-                                'required' => ['uuid', 'password', 'email'],
-                            ],
-                        ],
-                    ],
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'User registered successfully',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'message' => 'Local User Account Registered Successfully',
-                                ],
-                            ],
-                        ],
-                    ],
-                    '400' => [
-                        'description' => 'Invalid request data',
-                        'content' => [
-                            'application/json' => [
-                                'examples' => [
-                                    'missing_data' => [
-                                        'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Missing data'],
+                                    'cf-turnstile-response' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
                                     ],
-                                    'mismatch_data' => [
-                                        'summary' => 'UUID and email mismatch',
-                                        'value' => [
-                                            'error' => 'Invalid data! UUID and email do not match!',
+                                ],
+                                'required' => ['uuid', 'email', 'cf-turnstile-response'],
+                            ],
+                        ],
+                    ],
+                    'responses' => [
+                        '200' => [
+                            'description' => 'User registered successfully',
+                            'content' => [
+                                'application/json' => [
+                                    'example' => [
+                                        'message' => 'Local User Account Registered Successfully',
+                                    ],
+                                ],
+                            ],
+                        ],
+                        '400' => [
+                            'description' => 'Invalid request data',
+                            'content' => [
+                                'application/json' => [
+                                    'examples' => [
+                                        'missing_data' => [
+                                            'summary' => 'Missing required data',
+                                            'value' => ['error' => 'Missing data'],
+                                        ],
+                                        'mismatch_data' => [
+                                            'summary' => 'UUID and email mismatch',
+                                            'value' => [
+                                                'error' => 'Invalid data! UUID and email do not match!',
+                                            ],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
-                    ],
-                    '409' => [
-                        'description' => 'Conflict due to user already existing',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'This User already exists',
+                        '409' => [
+                            'description' => 'Conflict due to user already existing',
+                            'content' => [
+                                'application/json' => [
+                                    'example' => [
+                                        'error' => 'This User already exists',
+                                    ],
                                 ],
                             ],
                         ],
