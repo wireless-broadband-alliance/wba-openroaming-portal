@@ -106,18 +106,6 @@ class RegistrationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA token is missing!'
-            );
-        }
-
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
-        }
-
         if (!isset($data['uuid'], $data['password'], $data['email'])) {
             return new JsonResponse(['error' => 'Missing data'], 400);
         }
@@ -136,7 +124,7 @@ class RegistrationController extends AbstractController
         $user->setUuid($data['uuid']);
         $user->setEmail($data['email']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
-        $user->setIsVerified($data['isVerified'] ?? false);
+        $user->setIsVerified(false);
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);

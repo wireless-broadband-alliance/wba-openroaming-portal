@@ -598,24 +598,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
                                     ],
-                                    'isVerified' => [
-                                        'type' => 'boolean',
-                                        'example' => false,
-                                        'description' => 'Indicates if the user\'s email is verified'
-                                    ],
-                                    'createdAt' => [
-                                        'type' => 'string',
-                                        'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00',
-                                        'description' => 'Account creation date and time'
-                                    ],
-                                    'cf-turnstile-response' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
-                                    ],
                                 ],
-                                'required' => ['uuid', 'password', 'email', 'cf-turnstile-response'],
+                                'required' => ['uuid', 'password', 'email'],
                             ],
                         ],
                     ],
