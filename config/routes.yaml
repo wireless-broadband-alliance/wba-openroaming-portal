@@ -27,21 +27,21 @@ api_auth_google:
     methods: ['POST']
 
 api_auth_local_register:
-    path: /api/v1/auth/local/register/
+    path: /api/v1/auth/local/register
     controller: App\Api\V1\Controller\RegistrationController::localRegister
     methods: ['POST']
 
 api_auth_local_reset:
-    path: /api/v1/auth/local/reset/
+    path: /api/v1/auth/local/reset
     controller: App\Api\V1\Controller\RegistrationController::localReset
     methods: ['POST']
 
 api_auth_sms_register:
-    path: /api/v1/auth/sms/register/
+    path: /api/v1/auth/sms/register
     controller: App\Api\V1\Controller\RegistrationController::smsRegister
     methods: ['POST']
 
 api_auth_sms_reset:
-    path: /api/v1/auth/sms/reset/
+    path: /api/v1/auth/sms/reset
     controller: App\Api\V1\Controller\RegistrationController::smsReset
     methods: ['POST']
