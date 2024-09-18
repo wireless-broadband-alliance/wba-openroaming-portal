@@ -251,11 +251,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
                 'description' => 'This endpoint authenticates a user using their SAML response. 
-                If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful.',
+        If the user is not found in the database, a new user will be created based on the SAML assertion. 
+        The response includes user details along with a JWT token if authentication is successful.',
                 'requestBody' => [
                     'description' => 'SAML response required for user authentication. 
-                The request should be sent as `multipart/form-data` with the SAML response included as a file upload.',
+        The request should be sent as `multipart/form-data` with the SAML response included as a form field 
+        (not a file).',
                     'required' => true,
                     'content' => [
                         'multipart/form-data' => [
@@ -264,9 +265,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'SAMLResponse' => [
                                         'type' => 'string',
-                                        'description' => 'Base64-encoded SAML response',
-                                        'format' => 'binary',
-                                        'example' => 'saml-response-example',
+                                        'description' => 'Base64-encoded SAML response included in the form data',
+                                        'example' => 'base64-encoded-saml-assertion',
                                     ],
                                 ],
                                 'required' => ['SAMLResponse'],
@@ -318,17 +318,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'description' => 'User last name',
                                                     'example' => 'Doe',
                                                 ],
-                                                'isVerified' => [
-                                                    'type' => 'boolean',
-                                                    'description' => 'Whether the user is verified',
-                                                    'example' => true,
-                                                ],
-                                                'createdAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'description' => 'Account creation timestamp',
-                                                    'example' => '2023-01-01T00:00:00Z',
-                                                ],
                                             ],
                                         ],
                                         'token' => [
@@ -346,8 +335,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'isVerified' => true,
-                                        'createdAt' => '2023-01-01T00:00:00Z',
                                     ],
                                     'token' => 'jwt-token-example',
                                 ],
