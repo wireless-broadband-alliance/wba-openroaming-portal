@@ -23,6 +23,7 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -93,20 +94,22 @@ class RegistrationController extends AbstractController
 
     /**
      * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param MailerInterface $mailer
      * @return JsonResponse
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
+     * @throws RandomException
+     * @throws TransportExceptionInterface
      * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/register', name: 'api_auth_local_register', methods: ['POST'])]
-    public function localRegister(Request $request): JsonResponse
-    {
+    public function localRegister(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        MailerInterface $mailer
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($data['uuid'], $data['password'], $data['email'])) {
+        if (!isset($data['uuid'], $data['email'])) {
             return new JsonResponse(['error' => 'Missing data'], 400);
         }
 
@@ -123,7 +126,10 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($data['uuid']);
         $user->setEmail($data['email']);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
+        $randomPassword = bin2hex(random_bytes(4));
+        // Hash the password
+        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+        $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
@@ -151,6 +157,25 @@ class RegistrationController extends AbstractController
             new DateTime(),
             $eventMetaData
         );
+
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        // Send email to the user with the verification code
+        $email = (new TemplatedEmail())
+            ->from(new Address($emailSender, $nameSender))
+            ->to($user->getEmail())
+            ->subject('Your OpenRoaming Registration Details')
+            ->htmlTemplate('email/user_password.html.twig')
+            ->context([
+                'uuid' => $user->getUuid(),
+                'verificationCode' => $user->getVerificationCode(),
+                'isNewUser' => true,
+                'password' => $randomPassword,
+            ]);
+
+        $this->addFlash('success', 'We have sent an email with your account password and verification code');
+        $mailer->send($email);
 
         return new JsonResponse(['message' => 'Local User Account Registered Successfully'], 200);
     }
@@ -224,8 +249,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
