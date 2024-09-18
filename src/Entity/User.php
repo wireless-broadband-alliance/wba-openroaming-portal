@@ -208,6 +208,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
+                'security' => [
+                    [
+                        'bearerAuth' => [],
+                    ],
+                ],
             ],
         ),
         new Post(
@@ -901,6 +906,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
             ],
         )
+    ],
+    openapiContext: [
+        'components' => [
+            'securitySchemes' => [
+                'bearerAuth' => [
+                    'type' => 'http',
+                    'scheme' => 'bearer',
+                    'bearerFormat' => 'JWT',
+                    'description' => 'JWT Authorization header using the Bearer scheme.',
+                ],
+            ],
+        ],
+        'security' => [
+            [
+                'bearerAuth' => [],
+            ],
+        ],
     ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
