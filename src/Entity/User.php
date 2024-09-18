@@ -33,8 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_get_current_user',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
-                'description' => 'This endpoint returns the details of the currently authenticated user and 
-                requires a valid CAPTCHA token.',
+                'description' => 'This endpoint returns the details of the currently authenticated user.',
                 'responses' => [
                     '200' => [
                         'content' => [
@@ -912,14 +911,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-    /**
-     * User Unique Identification Definition
-     */
+
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
-    /**
-     *  Associated Roles
-     */
+
     #[ORM\Column]
     private array $roles = [];
 
@@ -932,79 +927,49 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Email]
     private ?string $email = null;
-    /**
-     * System verification status
-     */
+
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
-    /**
-     * User saml identifier (not mandatory, only if it's a SAML account)
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
-    /**
-     * User first name
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
-    /**
-     * User last name
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $last_name = null;
-    /**
-     * User radius account identifier to generate passpoint provisioning profiles (foreign key)
-     */
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
     private Collection $userRadiusProfiles;
-    /**
-     * User radius account identifier for authentications request (foreign key)
-     */
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
-    /**
-     * User last verification code
-     */
+
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
-    /**
-     * User google account identificationr (not mandatoru, only if it's a google account)
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleId = null;
-    /**
-     * User creation date
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
-    /**
-     * User ban date
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
-    /**
-     * User event identifcation logger (foreign key)
-     */
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
     private Collection $event;
-    /**
-     * User deletion date
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
-    /**
-     * User phone number (not mandatory, only if it's a phone number account)
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phoneNumber = null;
-    /**
-     * User forgot_passsowrd_request
-     */
+
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
-    /**
-     * User deleted data identification (foreign key)
-     */
+
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?DeletedUserData $deletedUserData = null;
 

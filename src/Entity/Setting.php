@@ -129,15 +129,9 @@ class Setting
     #[ORM\Column]
     private ?int $id = null;
 
-    /**
-     * The settings name
-     */
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    /**
-     * The settings value
-     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $value = null;
 
