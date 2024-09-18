@@ -20,12 +20,65 @@ use Doctrine\ORM\Mapping as ORM;
             openapiContext: [
                 'summary' => 'Get configuration settings',
                 'description' => 'This endpoint returns public values from the Setting entity and 
-                environment variables categorized by platform and provider. It requires a valid CAPTCHA token.',
+                environment variables categorized by platform and provider.',
                 'responses' => [
                     '200' => [
                         'description' => 'Configuration settings retrieved successfully',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'platform' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'PLATFORM_MODE' => ['type' => 'boolean'],
+                                                'USER_VERIFICATION' => ['type' => 'boolean'],
+                                                'TURNSTILE_CHECKER' => ['type' => 'boolean'],
+                                                'CONTACT_EMAIL' => ['type' => 'string'],
+                                                'TOS_LINK' => ['type' => 'string'],
+                                                'PRIVACY_POLICY_LINK' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'auth' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'AUTH_METHOD_SAML_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_SMS_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                            ],
+                                        ],
+                                        'turnstile' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'TURNSTILE_KEY' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'google' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'GOOGLE_CLIENT_ID' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'sentry' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'SENTRY_DSN' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'saml' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'SAML_IDP_ENTITY_ID' => ['type' => 'string'],
+                                                'SAML_IDP_SSO_URL' => ['type' => 'string'],
+                                                'SAML_IDP_X509_CERT' => ['type' => 'string'],
+                                                'SAML_SP_ENTITY_ID' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
                                     'platform' => [
                                         'PLATFORM_MODE' => true,
