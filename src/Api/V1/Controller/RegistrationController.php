@@ -249,8 +249,8 @@ class RegistrationController extends AbstractController
                 // Check if enough time has passed since the last password reset request
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -409,11 +409,11 @@ class RegistrationController extends AbstractController
         $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($dataRequest['cf-turnstile-response'])) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($dataRequest['cf-turnstile-response'], $request->getClientIp())) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -424,7 +424,7 @@ class RegistrationController extends AbstractController
             /** @var User $currentUser */
             $currentUser = $token->getUser();
 
-            // Check if the user has an external auth with PortalAccount and a valid phone number as providerId
+            // Check if the user has a valid phone number as providerId in external auth
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             $hasValidPortalAccount = false;
 
@@ -445,14 +445,10 @@ class RegistrationController extends AbstractController
 
                     // Retrieve the latest SMS attempt event for the user
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($currentUser);
-
-                    // Retrieve the SMS resend interval from the settings
                     $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                     $maxAttempts = 4;
                     $currentTime = new DateTime();
-
-                    // Initialize attempts left
                     $attemptsLeft = $maxAttempts;
 
                     if ($latestEvent) {
@@ -466,29 +462,29 @@ class RegistrationController extends AbstractController
                             $allowedTime = $lastVerificationCodeTime->add($minInterval);
 
                             if ($allowedTime > $currentTime) {
-                                return new JsonResponse([
-                                    'error' => 'Please wait '
-                                        . $data['SMS_TIMER_RESEND']['value']
-                                        . ' minute(s) before trying again.'
-                                ], 429);
+                                return (new BaseResponse(
+                                    429, null, sprintf(
+                                    'Please wait %d minute(s) before trying again.',
+                                    $data['SMS_TIMER_RESEND']['value']
+                                )
+                                ))->toResponse();
                             }
 
-                            // Time interval has passed, update attempt count
                             $verificationAttempts++;
                             $attemptsLeft = $maxAttempts - $verificationAttempts;
 
                             if ($attemptsLeft <= 0) {
-                                return new JsonResponse([
-                                    'error' => 'Limit of trys exceeded for regeneration. Contact our support for help.'
-                                ], 429);
+                                return (new BaseResponse(
+                                    429,
+                                    null,
+                                    'Limit of tries exceeded for regeneration. Contact support.'
+                                ))->toResponse();
                             }
                         } else {
-                            // No previous attempt record found, set attemptsLeft correctly
                             $verificationAttempts = 1;
                             $attemptsLeft = $maxAttempts - $verificationAttempts;
                         }
                     } else {
-                        // No previous event, this is the first attempt
                         $verificationAttempts = 1;
                         $attemptsLeft = $maxAttempts - $verificationAttempts;
                     }
@@ -522,29 +518,31 @@ class RegistrationController extends AbstractController
                     $this->entityManager->flush();
 
                     // Send SMS
-                    $message = "Your account password is: "
-                        . $randomPassword
-                        . "\n Verification code is: "
-                        . $currentUser->getVerificationCode();
+                    $message = sprintf(
+                        "Your account password is: %s\nVerification code is: %s",
+                        $randomPassword,
+                        $currentUser->getVerificationCode()
+                    );
 
                     $result = $this->sendSMSService->sendSms($currentUser->getPhoneNumber(), $message);
 
                     if ($result) {
-                        return new JsonResponse([
+                        return (new BaseResponse(200, [
                             'success' => sprintf(
                                 'We have sent a new code to: %s. You have %d attempt(s) left.',
                                 $currentUser->getPhoneNumber(),
                                 $attemptsLeft
                             )
-                        ], 200);
+                        ]))->toResponse();
                     }
                 } catch (\RuntimeException $e) {
-                    return new JsonResponse(['error' => $e->getMessage()], 500); // Internal Server Error
+                    return (new BaseResponse(500, null, $e->getMessage()))->toResponse(); // Internal Server Error
                 }
             }
 
-            return new JsonResponse(['error' => 'Invalid Credentials, Provider not allowed'], 400);
+            return (new BaseResponse(400, null, 'Invalid Credentials, Provider not allowed'))->toResponse();
         }
-        return new JsonResponse(['error' => 'Please make sure to place the JWT token'], 400);
+
+        return (new BaseResponse(400, null, 'Please make sure to place the JWT token'))->toResponse();
     }
 }
