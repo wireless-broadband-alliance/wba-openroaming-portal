@@ -395,8 +395,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account ID. 
-                It also requires CAPTCHA validation.',
+                'description' => 'This endpoint authenticates a user using their Google account ID.',
                 'requestBody' => [
                     'description' => 'Google account ID and CAPTCHA validation token',
                     'required' => true,
@@ -472,16 +471,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             ],
                                         ],
                                     ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '400' => [
-                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
                             ],
                         ],
