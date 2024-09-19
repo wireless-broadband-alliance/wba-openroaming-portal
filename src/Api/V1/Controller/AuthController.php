@@ -84,14 +84,16 @@ class AuthController extends AbstractController
             return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
-        if (!isset($data['uuid'])) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing fields: uuid'))->toResponse(
-            ); // Bad Request Response
-        }
 
-        if (!isset($data['password'])) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing fields: password'))->toResponse(
-            );// Bad Request Response
+        // Check for missing fields and add them to the array errors
+        if (empty($data['uuid'])) {
+            $errors[] = 'uuid';
+        }
+        if (empty($data['password'])) {
+            $errors[] = 'password';
+        }
+        if (!empty($errors)) {
+            return (new BaseResponse(400, ['fields_missing' => $errors], 'Invalid data: Missing required fields.'))->toResponse();
         }
 
         // Check if user exists are valid
