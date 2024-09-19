@@ -34,53 +34,68 @@ class ConfigController extends AbstractController
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $content = [
-            'platform' => [
-                'PLATFORM_MODE' => $this->getSettingValue('PLATFORM_MODE'),
-                'USER_VERIFICATION' => $this->getSettingValue('USER_VERIFICATION'),
-                'TURNSTILE_CHECKER' => $this->getSettingValue('TURNSTILE_CHECKER'),
-                'CONTACT_EMAIL' => $this->getSettingValue('CONTACT_EMAIL'),
-                'TOS_LINK' => $this->getSettingValue('TOS_LINK'),
-                'PRIVACY_POLICY_LINK' => $this->getSettingValue('PRIVACY_POLICY_LINK')
-            ],
-            'auth' => [
-                'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValue('AUTH_METHOD_SAML_ENABLED'),
-                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValue('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
-                'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValue('AUTH_METHOD_REGISTER_ENABLED'),
-                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValue(
-                    'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
-                ),
-                'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValue('AUTH_METHOD_SMS_REGISTER_ENABLED')
-            ],
-            'turnstile' => [
-                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
-            ],
-            'google' => [
-                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
-            ],
-            'sentry' => [
-                'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn')
-            ],
-            'saml' => [
-                'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-                'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-                'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
-            ]
-        ];
+        $settings = $this->getSettings();
 
-        // Create the response
-        return (new BaseResponse(200, $content))->toResponse();
+        return (new BaseResponse(200, $settings))->toResponse();
     }
 
-    // Get and convert the setting value
-    private function getSettingValue(string $settingName): bool
+    private function getSettings(): array
+    {
+        $data = [];
+
+        $data['platform'] = [
+            'PLATFORM_MODE' => $this->getSettingValueRaw('PLATFORM_MODE'),
+            'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
+            'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
+            'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
+            'TOS_LINK' => $this->getSettingValueRaw('TOS_LINK'),
+            'PRIVACY_POLICY_LINK' => $this->getSettingValueRaw('PRIVACY_POLICY_LINK')
+        ];
+
+        $data['auth'] = [
+            'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SAML_ENABLED'),
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
+            'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_REGISTER_ENABLED'),
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValueConverted(
+                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+            ),
+            'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SMS_REGISTER_ENABLED')
+        ];
+
+        $data['turnstile'] = [
+            'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
+        ];
+
+        $data['google'] = [
+            'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
+        ];
+
+        $data['sentry'] = [
+            'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn')
+        ];
+
+        $data['saml'] = [
+            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
+            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
+            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
+            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
+        ];
+
+        return $data;
+    }
+
+    private function getSettingValueRaw(string $settingName): string
+    {
+        $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+        return $setting ? $setting->getValue() : '';
+    }
+
+    private function getSettingValueConverted(string $settingName): bool
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
         return $setting && $this->convertToBoolean($setting->getValue());
     }
 
-    // Convert string values to boolean
     protected function convertToBoolean($value): bool
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];

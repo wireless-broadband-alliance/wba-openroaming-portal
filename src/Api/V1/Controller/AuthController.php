@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controller;
 
+use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
@@ -15,10 +16,8 @@ use OneLogin\Saml2\Auth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -71,33 +70,55 @@ class AuthController extends AbstractController
     #[Route('/api/v1/auth/local', name: 'api_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, 'Invalid JSON format'))->toResponse(); # Bad Request Response
+        }
 
         if (!isset($data['cf-turnstile-response'])) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
-        if (!isset($data['uuid'], $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400); # Bad Request Response
+        // Define required fields
+        $requiredFields = ['uuid', 'password'];
+        $missingFields = [];
+        $invalidFields = [];
+
+        // Check for missing fields
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                $missingFields[] = $field;
+            }
         }
 
+        // If there are missing fields, return an error response with details
+        if (!empty($missingFields)) {
+            $errorMessage = 'Invalid data: Missing fields: ' . implode(', ', $missingFields);
+            return (new BaseResponse(400, $errorMessage))->toResponse(); # Bad Request Response
+        }
+
+        // Check if credentials are valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid credentials'], 401); # Unauthorized Request Response
+            return (new BaseResponse(401, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
         }
 
+        // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
 
+        // Prepare response data
         $responseData = $user->toApiResponse([
             'token' => $token,
         ]);
 
-        return new JsonResponse($responseData, 200);
+        // Return success response using BaseResponse
+        return (new BaseResponse(200, $responseData))->toResponse(); # Success Response
     }
 
     /**
@@ -111,7 +132,7 @@ class AuthController extends AbstractController
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
         if (!$samlResponseBase64) {
-            return new JsonResponse(['error' => 'SAML Response not found'], 400); // Bad Request
+            return (new BaseResponse(400, null, 'SAML Response not found'))->toResponse(); // Bad Request
         }
 
         try {
@@ -120,15 +141,14 @@ class AuthController extends AbstractController
 
             // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
-                return new JsonResponse([
-                    'error' => 'Invalid SAML Assertion',
+                return (new BaseResponse(401, null, 'Invalid SAML Assertion', [
                     'details' => $samlAuth->getLastErrorReason()
-                ], 401); // Unauthorized
+                ]))->toResponse(); // Unauthorized
             }
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                throw new BadCredentialsException('Authentication Failed!');
+                return (new BaseResponse(401, null, 'Authentication Failed'))->toResponse(); // Unauthorized
             }
 
             $sAMAccountName = $samlAuth->getNameId();
@@ -173,12 +193,12 @@ class AuthController extends AbstractController
             $responseData = $user->toApiResponse([
                 'token' => $token,
             ]);
-            return new JsonResponse($responseData, 200);
+
+            return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
-            return new JsonResponse([
-                'error' => 'Unexpected error',
+            return (new BaseResponse(500, null, 'Unexpected error', [
                 'details' => $e->getMessage()
-            ], 500); // Internal Server Error
+            ]))->toResponse(); // Internal Server Error
         }
     }
 
@@ -196,19 +216,21 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['googleId'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400);# Bad Request Response
+            return (new BaseResponse(400, null, 'Invalid data'))->toResponse(); // Bad Request Response
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
 
         if (!$userExternalAuth) {
-            return new JsonResponse(['error' => 'Authentication Failed!'], 401); // Unauthorized - Provider not Allowed
+            // Unauthorized - Provider not allowed
+            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
         }
 
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'Authentication Failed!'], 401); // Unauthorized - Provider not Allowed
+            // Unauthorized - User not found
+            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
         }
 
         $token = $this->tokenGenerator->generateToken($user);
@@ -216,6 +238,6 @@ class AuthController extends AbstractController
         // Use the toApiResponse method to generate the response
         $responseData = $user->toApiResponse(['token' => $token]);
 
-        return new JsonResponse($responseData, 200);
+        return (new BaseResponse(200, $responseData))->toResponse(); // Success
     }
 }

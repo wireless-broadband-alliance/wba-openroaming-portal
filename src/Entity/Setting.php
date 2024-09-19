@@ -29,86 +29,100 @@ use Doctrine\ORM\Mapping as ORM;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'platform' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'PLATFORM_MODE' => ['type' => 'boolean'],
-                                                'USER_VERIFICATION' => ['type' => 'boolean'],
-                                                'TURNSTILE_CHECKER' => ['type' => 'boolean'],
-                                                'CONTACT_EMAIL' => ['type' => 'string'],
-                                                'TOS_LINK' => ['type' => 'string'],
-                                                'PRIVACY_POLICY_LINK' => ['type' => 'string'],
-                                            ],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
                                         ],
-                                        'auth' => [
+                                        'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'AUTH_METHOD_SAML_ENABLED' => ['type' => 'boolean'],
-                                                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ['type' => 'boolean'],
-                                                'AUTH_METHOD_REGISTER_ENABLED' => ['type' => 'boolean'],
-                                                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => ['type' => 'boolean'],
-                                                'AUTH_METHOD_SMS_REGISTER_ENABLED' => ['type' => 'boolean'],
-                                            ],
-                                        ],
-                                        'turnstile' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'TURNSTILE_KEY' => ['type' => 'string'],
-                                            ],
-                                        ],
-                                        'google' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'GOOGLE_CLIENT_ID' => ['type' => 'string'],
-                                            ],
-                                        ],
-                                        'sentry' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'SENTRY_DSN' => ['type' => 'string'],
-                                            ],
-                                        ],
-                                        'saml' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'SAML_IDP_ENTITY_ID' => ['type' => 'string'],
-                                                'SAML_IDP_SSO_URL' => ['type' => 'string'],
-                                                'SAML_IDP_X509_CERT' => ['type' => 'string'],
-                                                'SAML_SP_ENTITY_ID' => ['type' => 'string'],
+                                                'platform' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'PLATFORM_MODE' => ['type' => 'boolean'],
+                                                        'USER_VERIFICATION' => ['type' => 'boolean'],
+                                                        'TURNSTILE_CHECKER' => ['type' => 'boolean'],
+                                                        'CONTACT_EMAIL' => ['type' => 'string'],
+                                                        'TOS_LINK' => ['type' => 'string'],
+                                                        'PRIVACY_POLICY_LINK' => ['type' => 'string'],
+                                                    ],
+                                                ],
+                                                'auth' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'AUTH_METHOD_SAML_ENABLED' => ['type' => 'boolean'],
+                                                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ['type' => 'boolean'],
+                                                        'AUTH_METHOD_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => ['type' => 'boolean'],
+                                                        // phpcs:enable
+                                                        'AUTH_METHOD_SMS_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                                    ],
+                                                ],
+                                                'turnstile' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'TURNSTILE_KEY' => ['type' => 'string'],
+                                                    ],
+                                                ],
+                                                'google' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'GOOGLE_CLIENT_ID' => ['type' => 'string'],
+                                                    ],
+                                                ],
+                                                'sentry' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'SENTRY_DSN' => ['type' => 'string'],
+                                                    ],
+                                                ],
+                                                'saml' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'SAML_IDP_ENTITY_ID' => ['type' => 'string'],
+                                                        'SAML_IDP_SSO_URL' => ['type' => 'string'],
+                                                        'SAML_IDP_X509_CERT' => ['type' => 'string'],
+                                                        'SAML_SP_ENTITY_ID' => ['type' => 'string'],
+                                                    ],
+                                                ],
                                             ],
                                         ],
                                     ],
                                 ],
                                 'example' => [
-                                    'platform' => [
-                                        'PLATFORM_MODE' => true,
-                                        'USER_VERIFICATION' => false,
-                                        'TURNSTILE_CHECKER' => true,
-                                        'CONTACT_EMAIL' => 'support@example.com',
-                                        'TOS_LINK' => 'https://example.com/tos',
-                                        'PRIVACY_POLICY_LINK' => 'https://example.com/privacy',
-                                    ],
-                                    'auth' => [
-                                        'AUTH_METHOD_SAML_ENABLED' => true,
-                                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => true,
-                                        'AUTH_METHOD_REGISTER_ENABLED' => true,
-                                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => true,
-                                        'AUTH_METHOD_SMS_REGISTER_ENABLED' => false,
-                                    ],
-                                    'turnstile' => [
-                                        'TURNSTILE_KEY' => 'turnstile_key',
-                                    ],
-                                    'google' => [
-                                        'GOOGLE_CLIENT_ID' => 'google_client_id',
-                                    ],
-                                    'sentry' => [
-                                        'SENTRY_DSN' => 'sentry_dsn',
-                                    ],
-                                    'saml' => [
-                                        'SAML_IDP_ENTITY_ID' => 'saml_idp_entity_id',
-                                        'SAML_IDP_SSO_URL' => 'saml_idp_sso_url',
-                                        'SAML_IDP_X509_CERT' => 'saml_idp_x509_cert',
-                                        'SAML_SP_ENTITY_ID' => 'saml_sp_entity_id',
+                                    'success' => true,
+                                    'data' => [
+                                        'platform' => [
+                                            'PLATFORM_MODE' => true,
+                                            'USER_VERIFICATION' => true,
+                                            'TURNSTILE_CHECKER' => true,
+                                            'CONTACT_EMAIL' => 'support@example.com',
+                                            'TOS_LINK' => 'https://example.com/tos',
+                                            'PRIVACY_POLICY_LINK' => 'https://example.com/privacy',
+                                        ],
+                                        'auth' => [
+                                            'AUTH_METHOD_SAML_ENABLED' => true,
+                                            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => true,
+                                            'AUTH_METHOD_REGISTER_ENABLED' => true,
+                                            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => true,
+                                            'AUTH_METHOD_SMS_REGISTER_ENABLED' => true,
+                                        ],
+                                        'turnstile' => [
+                                            'TURNSTILE_KEY' => 'example_turnstile_key',
+                                        ],
+                                        'google' => [
+                                            'GOOGLE_CLIENT_ID' => 'example_google_client_id',
+                                        ],
+                                        'sentry' => [
+                                            'SENTRY_DSN' => 'example_sentry_dsn',
+                                        ],
+                                        'saml' => [
+                                            'SAML_IDP_ENTITY_ID' => 'https://example.com/saml/metadata',
+                                            'SAML_IDP_SSO_URL' => 'https://example.com/saml/sso',
+                                            'SAML_IDP_X509_CERT' => 'MIIC...AB',
+                                            'SAML_SP_ENTITY_ID' => 'https://example.com/saml/sp',
+                                        ],
                                     ],
                                 ],
                             ],
