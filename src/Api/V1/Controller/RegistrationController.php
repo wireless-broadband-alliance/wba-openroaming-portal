@@ -327,31 +327,28 @@ class RegistrationController extends AbstractController
     #[Route('/api/v1/auth/sms/register', name: 'api_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
+        UserPasswordHasherInterface $userPasswordHasher
     ): JsonResponse {
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         if (!isset($data['uuid'], $data['phoneNumber'])) {
-            return new JsonResponse(['error' => 'Missing data!'], 400);
+            return (new BaseResponse(400, null, 'Missing data!'))->toResponse(); // Bad Request Response
         }
 
         if ($data['uuid'] !== $data['phoneNumber']) {
-            return new JsonResponse([
-                'error' => 'Invalid data!'
-            ], 400);
+            return (new BaseResponse(400, null, 'Invalid data!'))->toResponse(); // Bad Request Response
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['uuid']])) {
-            // Error - Conflict user that already exists with the same phoneNumber
-            return new JsonResponse(['error' => 'This User already exists'], 409);
+            return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
         }
 
         $user = new User();
@@ -376,7 +373,7 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        // Defines the event to the table
+        // Save user creation event
         $eventMetaData = [
             'uuid' => $user->getUuid(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
@@ -390,7 +387,8 @@ class RegistrationController extends AbstractController
             $eventMetaData
         );
 
-        return new JsonResponse(['message' => 'SMS User Account Registered Successfully'], 200);
+        // Return success response
+        return (new BaseResponse(200, ['message' => 'SMS User Account Registered Successfully']))->toResponse();
     }
 
 
