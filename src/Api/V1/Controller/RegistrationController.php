@@ -323,7 +323,13 @@ class RegistrationController extends AbstractController
         }
 
         if (!isset($data['phoneNumber'])) {
-            return (new BaseResponse(400, null, 'Missing data!'))->toResponse(); // Bad Request Response
+            return (new BaseResponse(400, null, 'Invalid data: Missing fields: phoneNumber!'))->toResponse(
+            ); // Bad Request Response
+        }
+
+        if (!isset($data['password'])) {
+            return (new BaseResponse(400, null, 'Invalid data: Missing fields: password!'))->toResponse(
+            ); // Bad Request Response
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['phoneNumber']])) {
@@ -333,9 +339,8 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($data['phoneNumber']);
         $user->setPhoneNumber($data['phoneNumber']);
-        $randomPassword = bin2hex(random_bytes(4));
         // Hash the password
-        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+        $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
