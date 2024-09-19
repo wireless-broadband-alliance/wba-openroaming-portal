@@ -23,7 +23,6 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
-use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -48,7 +47,6 @@ class RegistrationController extends AbstractController
     private UserExternalAuthRepository $userExternalAuthRepository;
     private EventRepository $eventRepository;
     private EntityManagerInterface $entityManager;
-    private UserPasswordHasherInterface $passwordHasher;
     private EventActions $eventActions;
     private TokenStorageInterface $tokenStorage;
     private ParameterBagInterface $parameterBag;
@@ -65,7 +63,6 @@ class RegistrationController extends AbstractController
         UserExternalAuthRepository $userExternalAuthRepository,
         EventRepository $eventRepository,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher,
         EventActions $eventActions,
         TokenStorageInterface $tokenStorage,
         ParameterBagInterface $parameterBag,
@@ -80,7 +77,6 @@ class RegistrationController extends AbstractController
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->eventRepository = $eventRepository;
         $this->entityManager = $entityManager;
-        $this->passwordHasher = $passwordHasher;
         $this->eventActions = $eventActions;
         $this->tokenStorage = $tokenStorage;
         $this->parameterBag = $parameterBag;
@@ -114,15 +110,11 @@ class RegistrationController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA token is missing!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!isset($data['uuid'], $data['email'])) {
@@ -219,17 +211,12 @@ class RegistrationController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA token is missing!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
-
         $token = $this->tokenStorage->getToken();
 
         // Check if the token is present and is of the correct type
@@ -265,8 +252,8 @@ class RegistrationController extends AbstractController
 
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -346,15 +333,11 @@ class RegistrationController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA token is missing!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!isset($data['uuid'], $data['phoneNumber'])) {
@@ -429,15 +412,11 @@ class RegistrationController extends AbstractController
         $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($dataRequest['cf-turnstile-response'])) {
-            throw new BadRequestHttpException(
-                'CAPTCHA token is missing!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($dataRequest['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException(
-                'CAPTCHA validation failed!'
-            );
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
