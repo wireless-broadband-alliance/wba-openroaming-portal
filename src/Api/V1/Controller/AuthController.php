@@ -118,7 +118,7 @@ class AuthController extends AbstractController
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
         if (!$samlResponseBase64) {
-            return new JsonResponse(['error' => 'SAML Response not found'], 400); // Bad Request
+            return (new BaseResponse(400, null, 'SAML Response not found'))->toResponse(); // Bad Request
         }
 
         try {
@@ -127,15 +127,14 @@ class AuthController extends AbstractController
 
             // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
-                return new JsonResponse([
-                    'error' => 'Invalid SAML Assertion',
+                return (new BaseResponse(401, null, 'Invalid SAML Assertion', [
                     'details' => $samlAuth->getLastErrorReason()
-                ], 401); // Unauthorized
+                ]))->toResponse(); // Unauthorized
             }
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                throw new BadCredentialsException('Authentication Failed!');
+                return (new BaseResponse(401, null, 'Authentication Failed'))->toResponse(); // Unauthorized
             }
 
             $sAMAccountName = $samlAuth->getNameId();
@@ -180,12 +179,12 @@ class AuthController extends AbstractController
             $responseData = $user->toApiResponse([
                 'token' => $token,
             ]);
-            return new JsonResponse($responseData, 200);
+
+            return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
-            return new JsonResponse([
-                'error' => 'Unexpected error',
+            return (new BaseResponse(500, null, 'Unexpected error', [
                 'details' => $e->getMessage()
-            ], 500); // Internal Server Error
+            ]))->toResponse(); // Internal Server Error
         }
     }
 
