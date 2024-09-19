@@ -693,7 +693,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_register',
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number and validates the request with a CAPTCHA token.',
+                'description' => 'This endpoint registers a new user using their phone number and validates 
+                the request with a CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -779,7 +780,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'details' => [
                                             'type' => 'string',
                                             'description' => 'Detailed error message',
-                                            'example' => 'Detailed error information about missing fields or data validation issues',
+                                            'example' => 'Error information about missing fields or data validation',
                                         ],
                                     ],
                                 ],
@@ -817,7 +818,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'description' => 'Error message explaining why the user could not be registered',
+                                            'description' => 'Error message for why the user could not be registered',
                                             'example' => 'This User already exists',
                                         ],
                                         'details' => [
@@ -846,10 +847,11 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Trigger a password reset for a local auth account (Requires Authorization)',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-                The user must be authenticated using a Bearer token. To use this endpoint, 
-                click on the "Authorize" button at the top of the Swagger UI and provide your JWT token in the format: 
-                `Bearer JWT_Token`. The endpoint verifies if the user has an external auth with "PortalAccount" and
-                 "EMAIL" providerId, then proceeds with the password reset if the conditions are met.',
+                The user must be authenticated using a Bearer token. 
+                To use this endpoint, click on the "Authorize" button at the top of the Swagger UI and
+                 provide your JWT token in the format: `Bearer JWT_Token`. 
+                 The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
+                 then proceeds with the password reset if the conditions are met.',
                 'requestBody' => [
                     'description' => 'Password reset request data including CAPTCHA validation token',
                     'required' => true,
@@ -877,10 +879,25 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'message' => [
-                                            'type' => 'string',
-                                            'example' => 'We have sent you a new email to: user@example.com.',
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
                                         ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    'example' => 'We have sent you a new email to: user@example.com.',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    'data' => [
+                                        'message' => 'We have sent you a new email to: user@example.com.',
                                     ],
                                 ],
                             ],
@@ -890,17 +907,40 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Invalid Data',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Invalid data or CAPTCHA validation failed.',
+                                        ],
+                                    ],
+                                ],
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
                                         'value' => [
-                                            'error' => 'Invalid Data. Please make sure to place the JWT Token',
+                                            'success' => false,
+                                            'error' => 'Invalid Data',
+                                            'details' => 'Please make sure to include the CAPTCHA token.',
                                         ],
                                     ],
                                     'captcha_invalid' => [
                                         'summary' => 'Invalid CAPTCHA token',
                                         'value' => [
-                                            'error' => 'Invalid CAPTCHA token. Please try again.',
+                                            'success' => false,
+                                            'error' => 'Invalid CAPTCHA token',
+                                            'details' => 'The CAPTCHA token provided is invalid. Please try again.',
                                         ],
                                     ],
                                 ],
@@ -908,33 +948,63 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'Forbidden',
+                        'description' => 'Forbidden - Invalid credentials or provider not allowed',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
+                                            'description' => 'Error message explaining why the request was forbidden',
                                             'example' => 'Invalid credentials - Provider not allowed',
                                         ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Invalid credentials or provider is not allowed to reset.',
+                                        ],
                                     ],
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'Invalid credentials - Provider not allowed',
+                                    'details' => 'Forbidden due to invalid credentials or the provider is not allowed.',
                                 ],
                             ],
                         ],
                     ],
                     '429' => [
-                        'description' => 'Too Many Requests',
+                        'description' => 'Too Many Requests - Rate limit exceeded',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
+                                            'description' => 'Error message explaining why the rate limit was exceeded',
+                                            'example' => 'Too Many Requests',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
                                             'example' => 'Please wait 2 minutes before trying again.',
                                         ],
                                     ],
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'Too Many Requests',
+                                    'details' => 'Please wait 2 minutes before trying again.',
                                 ],
                             ],
                         ],
