@@ -208,13 +208,15 @@ class AuthController extends AbstractController
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
 
         if (!$userExternalAuth) {
-            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse(); // Unauthorized - Provider not allowed
+            // Unauthorized - Provider not allowed
+            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
         }
 
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse(); // Unauthorized - User not found
+            // Unauthorized - User not found
+            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
         }
 
         $token = $this->tokenGenerator->generateToken($user);

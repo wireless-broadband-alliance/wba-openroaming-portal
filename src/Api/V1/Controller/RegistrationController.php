@@ -29,7 +29,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -181,7 +180,8 @@ class RegistrationController extends AbstractController
 
         $mailer->send($email);
 
-        return (new BaseResponse(200, ['message' => 'Local User Account Registered Successfully']))->toResponse(); // Success Response
+        return (new BaseResponse(200, ['message' => 'Local User Account Registered Successfully']))->toResponse(
+        ); // Success Response
     }
 
     /**
@@ -193,10 +193,10 @@ class RegistrationController extends AbstractController
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
      * @throws NonUniqueResultException
      * @throws Exception
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/reset', name: 'api_auth_local_reset', methods: ['POST'])]
     public function localReset(
@@ -207,27 +207,27 @@ class RegistrationController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
         $token = $this->tokenStorage->getToken();
 
-        // Check if the token is present and is of the correct type
+        // Check if the token is present and of the correct type
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
             /** @var User $currentUser */
             $currentUser = $token->getUser();
 
-            // Check if the user has an external auth with PortalAccount and a valid email as providerId
+            // Check for valid external auth
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             $hasValidPortalAccount = false;
 
             foreach ($userExternalAuths as $auth) {
                 if (
-                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT && $auth->getProviderId(
-                    ) === UserProvider::EMAIL
+                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
+                    $auth->getProviderId() === UserProvider::EMAIL
                 ) {
                     $hasValidPortalAccount = true;
                     break;
@@ -246,6 +246,7 @@ class RegistrationController extends AbstractController
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;
 
+                // Check if enough time has passed since the last password reset request
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
                         $minInterval
@@ -295,19 +296,21 @@ class RegistrationController extends AbstractController
 
                     $mailer->send($email);
 
-                    return new JsonResponse(
-                        ['message' => sprintf('We have sent you a new email to: %s.', $currentUser->getEmail())],
-                        200
-                    );
+                    return (new BaseResponse(200, [
+                        'message' => sprintf('We have sent you a new email to: %s.', $currentUser->getEmail())
+                    ]))->toResponse();
                 }
 
-                return new JsonResponse(['error' => 'Please wait 2 minutes before trying again.'], 429);
+                return (new BaseResponse(429, null, 'Please wait 2 minutes before trying again.'))->toResponse(
+                ); // Too Many Requests Response
             }
 
-            return new JsonResponse(['error' => 'Invalid credentials - Provider not allowed.'], 403);
+            return (new BaseResponse(403, null, 'Invalid credentials - Provider not allowed.'))->toResponse(
+            ); // Forbidden Response
         }
 
-        return new JsonResponse(['error' => 'Please make sure to include the JWT token.'], 400);
+        return (new BaseResponse(400, null, 'Please make sure to include the JWT token.'))->toResponse(
+        ); // Bad Request Response
     }
 
     /**
