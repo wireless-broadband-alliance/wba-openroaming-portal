@@ -638,14 +638,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'message' => [
-                                            'type' => 'string',
-                                            'example' => 'Local User Account Registered Successfully',
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Local User Account Registered Successfully',
+                                                ],
+                                            ],
                                         ],
                                     ],
                                 ],
                                 'example' => [
-                                    'message' => 'Local User Account Registered Successfully',
+                                    'success' => true,
+                                    'data' => [
+                                        'message' => 'Local User Account Registered Successfully',
+                                    ],
                                 ],
                             ],
                         ],
@@ -657,10 +669,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message for why the request failed',
-                                            'example' => 'Missing required fields or invalid data',
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'error' => [
+                                                    'type' => 'string',
+                                                    'description' => 'Error message for why the request failed',
+                                                    'example' => 'Missing required fields or invalid data',
+                                                ],
+                                            ],
                                         ],
                                     ],
                                 ],
@@ -668,13 +689,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
                                         'value' => [
-                                            'error' => 'Missing required fields: email, cf-turnstile-response',
+                                            'success' => false,
+                                            'data' => [
+                                                'error' => 'Missing required fields: email, cf-turnstile-response',
+                                            ],
                                         ],
                                     ],
                                     'invalid_data' => [
                                         'summary' => 'Invalid data format',
                                         'value' => [
-                                            'error' => 'Invalid data format for fields',
+                                            'success' => false,
+                                            'data' => [
+                                                'error' => 'Invalid data format for fields',
+                                            ],
                                         ],
                                     ],
                                 ],
@@ -688,15 +715,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message for why the user could not be registered',
-                                            'example' => 'This User already exists',
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'error' => [
+                                                    'type' => 'string',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'description' => 'Error message when the user could not be registered',
+                                                    // phpcs:enable
+                                                    'example' => 'This User already exists',
+                                                ],
+                                            ],
                                         ],
                                     ],
                                 ],
                                 'example' => [
-                                    'error' => 'This User already exists',
+                                    'success' => false,
+                                    'data' => [
+                                        'error' => 'This User already exists',
+                                    ],
                                 ],
                             ],
                         ],

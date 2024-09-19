@@ -118,7 +118,8 @@ class RegistrationController extends AbstractController
         }
 
         if (!isset($data['email'])) {
-            return (new BaseResponse(400, null, 'Missing data'))->toResponse(); // Bad Request Response
+            return (new BaseResponse(400, null, 'Invalid data: Missing fields: email'))->toResponse(
+            ); // Bad Request Response
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
