@@ -405,13 +405,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'type' => 'object',
                                 'properties' => [
                                     'googleId' => ['type' => 'string', 'example' => 'google-account-id-example'],
-                                    'cf-turnstile-response' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
-                                    ],
                                 ],
-                                'required' => ['googleId', 'cf-turnstile-response'],
+                                'required' => ['googleId'],
                             ],
                         ],
                     ],
