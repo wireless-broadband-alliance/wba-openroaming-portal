@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controller;
 
+use App\Api\V1\BaseResponse;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
@@ -110,32 +111,29 @@ class RegistrationController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
         if (!isset($data['uuid'], $data['email'])) {
-            return new JsonResponse(['error' => 'Missing data'], 400);
+            return (new BaseResponse(400, null, 'Missing data'))->toResponse(); // Bad Request Response
         }
 
         if ($data['uuid'] !== $data['email']) {
-            return new JsonResponse([
-                'error' => 'Invalid data!'
-            ], 400);
+            return (new BaseResponse(400, null, 'Invalid data!'))->toResponse(); // Bad Request Response
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['uuid']])) {
-            return new JsonResponse(['error' => 'This User already exists'], 409);
+            return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
         }
 
         $user = new User();
         $user->setUuid($data['uuid']);
         $user->setEmail($data['email']);
         $randomPassword = bin2hex(random_bytes(4));
-        // Hash the password
         $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
@@ -153,7 +151,7 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        // Defines the event to the table
+        // Save user creation event
         $eventMetaData = [
             'uuid' => $user->getUuid(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
@@ -169,7 +167,6 @@ class RegistrationController extends AbstractController
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        // Send email to the user with the verification code
         $email = (new TemplatedEmail())
             ->from(new Address($emailSender, $nameSender))
             ->to($user->getEmail())
@@ -182,10 +179,9 @@ class RegistrationController extends AbstractController
                 'password' => $randomPassword,
             ]);
 
-        $this->addFlash('success', 'We have sent an email with your account password and verification code');
         $mailer->send($email);
 
-        return new JsonResponse(['message' => 'Local User Account Registered Successfully'], 200);
+        return (new BaseResponse(200, ['message' => 'Local User Account Registered Successfully']))->toResponse(); // Success Response
     }
 
     /**
