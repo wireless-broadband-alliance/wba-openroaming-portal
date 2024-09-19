@@ -116,14 +116,15 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!isset($data['email'])) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing fields: email'))->toResponse(
-            ); // Bad Request Response
+        // Check for missing fields and add them to the array errors
+        if (empty($data['email'])) {
+            $errors[] = 'email';
         }
-
-        if (!isset($data['password'])) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing fields: password'))->toResponse(
-            ); // Bad Request Response
+        if (empty($data['password'])) {
+            $errors[] = 'password';
+        }
+        if (!empty($errors)) {
+            return (new BaseResponse(400, ['fields_missing' => $errors], 'Invalid data: Missing required fields.'))->toResponse();
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
