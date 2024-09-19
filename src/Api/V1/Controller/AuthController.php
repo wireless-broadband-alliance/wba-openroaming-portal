@@ -202,19 +202,19 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['googleId'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400);# Bad Request Response
+            return (new BaseResponse(400, null, 'Invalid data'))->toResponse(); // Bad Request Response
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
 
         if (!$userExternalAuth) {
-            return new JsonResponse(['error' => 'Authentication Failed!'], 401); // Unauthorized - Provider not Allowed
+            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse(); // Unauthorized - Provider not allowed
         }
 
         $user = $userExternalAuth->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'Authentication Failed!'], 401); // Unauthorized - Provider not Allowed
+            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse(); // Unauthorized - User not found
         }
 
         $token = $this->tokenGenerator->generateToken($user);
@@ -222,6 +222,6 @@ class AuthController extends AbstractController
         // Use the toApiResponse method to generate the response
         $responseData = $user->toApiResponse(['token' => $token]);
 
-        return new JsonResponse($responseData, 200);
+        return (new BaseResponse(200, $responseData))->toResponse(); // Success
     }
 }
