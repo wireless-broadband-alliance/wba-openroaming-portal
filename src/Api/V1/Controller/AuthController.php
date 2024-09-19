@@ -103,7 +103,7 @@ class AuthController extends AbstractController
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, null,'Invalid data: Invalid Password'))->toResponse(
+            return (new BaseResponse(401, null, 'Invalid data: Invalid Password'))->toResponse(
             ); # Unauthorized Request Response
         }
 
