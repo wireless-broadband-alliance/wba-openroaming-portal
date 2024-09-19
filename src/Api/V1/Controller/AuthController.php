@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controller;
 
+use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
@@ -15,7 +16,6 @@ use OneLogin\Saml2\Auth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
@@ -71,33 +71,40 @@ class AuthController extends AbstractController
     #[Route('/api/v1/auth/local', name: 'api_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); # Bad Request Response
+        }
 
         if (!isset($data['cf-turnstile-response'])) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
         if (!isset($data['uuid'], $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400); # Bad Request Response
+            return (new BaseResponse(400, null, 'Invalid data'))->toResponse(); # Bad Request Response
         }
 
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse(['error' => 'Invalid credentials'], 401); # Unauthorized Request Response
+            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
         }
 
+        // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
 
+        // Prepare response data
         $responseData = $user->toApiResponse([
             'token' => $token,
         ]);
 
-        return new JsonResponse($responseData, 200);
+        // Return success response using BaseResponse
+        return (new BaseResponse(200, $responseData))->toResponse(); # Success Response
     }
 
     /**
