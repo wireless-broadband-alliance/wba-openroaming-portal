@@ -249,8 +249,8 @@ class RegistrationController extends AbstractController
                 // Check if enough time has passed since the last password reset request
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -463,10 +463,12 @@ class RegistrationController extends AbstractController
 
                             if ($allowedTime > $currentTime) {
                                 return (new BaseResponse(
-                                    429, null, sprintf(
-                                    'Please wait %d minute(s) before trying again.',
-                                    $data['SMS_TIMER_RESEND']['value']
-                                )
+                                    429,
+                                    null,
+                                    sprintf(
+                                        'Please wait %d minute(s) before trying again.',
+                                        $data['SMS_TIMER_RESEND']['value']
+                                    )
                                 ))->toResponse();
                             }
 

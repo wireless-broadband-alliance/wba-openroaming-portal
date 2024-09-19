@@ -104,8 +104,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local',
             openapiContext: [
                 'summary' => 'Authenticate a user locally',
-                'description' => 'This endpoint authenticates a user using their UUID, password, 
-                and a Turnstile CAPTCHA token.',
+                'description' => 'This endpoint authenticates a user using their UUID, password, and a Turnstile CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User credentials and CAPTCHA validation token',
                     'required' => true,
@@ -135,11 +134,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'token' => ['type' => 'string', 'example' => 'jwt-token-example'],
-                                        'user' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
+                                                'uuid' => ['type' => 'string', 'example' => 'user@example.com'],
                                                 'email' => ['type' => 'string', 'example' => 'user@example.com'],
                                                 'roles' => [
                                                     'type' => 'array',
@@ -155,31 +154,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'properties' => [
                                                             'provider' => [
                                                                 'type' => 'string',
-                                                                'example' => 'PortalAccount'
+                                                                'example' => 'Portal Account'
                                                             ],
-                                                            'provider_id' => [
-                                                                'type' => 'string',
-                                                                'example' => 'provider-id-example'
-                                                            ],
+                                                            'provider_id' => ['type' => 'string', 'example' => 'Email'],
                                                         ],
                                                     ],
                                                 ],
-                                            ],
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'token' => 'jwt-token-example',
-                                    'user' => [
-                                        'uuid' => 'user-uuid-example',
-                                        'email' => 'user@example.com',
-                                        'roles' => ['ROLE_USER'],
-                                        'first_name' => 'John',
-                                        'last_name' => 'Doe',
-                                        'user_external_auths' => [
-                                            [
-                                                'provider' => 'PortalAccount',
-                                                'provider_id' => 'provider-id-example',
+                                                'token' => [
+                                                    'type' => 'string',
+                                                    'example' => 'jwt_token'
+                                                ],
                                             ],
                                         ],
                                     ],
@@ -191,8 +175,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'error' => ['type' => 'string', 'example' => 'CAPTCHA validation failed or invalid data'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
-                                    'error' => 'CAPTCHA validation failed or invalid data',
+                                    'success' => false,
+                                    'data' => [
+                                        'error' => 'CAPTCHA validation failed or invalid data',
+                                    ],
                                 ],
                             ],
                         ],
@@ -201,8 +200,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'User not found or invalid credentials',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'error' => ['type' => 'string', 'example' => 'Invalid credentials'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
-                                    'error' => 'Invalid credentials',
+                                    'success' => false,
+                                    'data' => [
+                                        'error' => 'Invalid credentials',
+                                    ],
                                 ],
                             ],
                         ],
