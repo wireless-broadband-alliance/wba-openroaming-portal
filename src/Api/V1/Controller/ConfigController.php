@@ -45,8 +45,8 @@ class ConfigController extends AbstractController
 
         $data['platform'] = [
             'PLATFORM_MODE' => $this->getSettingValueRaw('PLATFORM_MODE'),
-            'USER_VERIFICATION' => $this->getSettingValueRaw('USER_VERIFICATION'),
-            'TURNSTILE_CHECKER' => $this->getSettingValueRaw('TURNSTILE_CHECKER'),
+            'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
+            'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
             'TOS_LINK' => $this->getSettingValueRaw('TOS_LINK'),
             'PRIVACY_POLICY_LINK' => $this->getSettingValueRaw('PRIVACY_POLICY_LINK')
