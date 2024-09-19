@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -14,11 +15,16 @@ class CaptchaValidator
 {
     private HttpClientInterface $httpClient;
     private ParameterBagInterface $parameterBag;
+    private KernelInterface $kernel;
 
-    public function __construct(HttpClientInterface $httpClient, ParameterBagInterface $parameterBag)
-    {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $parameterBag,
+        KernelInterface $kernel
+    ) {
         $this->httpClient = $httpClient;
         $this->parameterBag = $parameterBag;
+        $this->kernel = $kernel;
     }
 
     /**
@@ -30,15 +36,10 @@ class CaptchaValidator
      */
     public function validate(string $token, ?string $clientIp): bool
     {
-        /* Test Mode: Simulate CAPTCHA validation result
-        if ($token === 'valid') {
+        if ($token === 'openroaming' && $this->kernel->getEnvironment() === 'dev') {
             return true;
         }
 
-        if ($token === 'invalid') {
-            return false;
-        }
-        */
         $response = $this->httpClient->request('POST', 'https://challenges.cloudflare.com/turnstile/v0/siteverify', [
             'body' => [
                 'secret' => $this->parameterBag->get('app.turnstile_key'),

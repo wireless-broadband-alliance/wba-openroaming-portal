@@ -33,30 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_get_current_user',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
-                'description' => 'This endpoint returns the details of the currently authenticated user and 
-                requires a valid CAPTCHA token.',
-                'requestBody' => [
-                    'description' => 'CAPTCHA validation token is required in the request body to retrieve 
-                    the current authenticated user.',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'cf-turnstile-response' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                    ],
-                                ],
-                                'required' => ['cf-turnstile-response'],
-                            ],
-                            'example' => [
-                                'cf-turnstile-response' => 'valid_test_token',
-                            ],
-                        ],
-                    ],
-                ],
+                'description' => 'This endpoint returns the details of the currently authenticated user.',
                 'responses' => [
                     '200' => [
                         'content' => [
@@ -94,16 +71,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'bannedAt' => '2023-01-01T00:00:00+00:00',
                                     'deletedAt' => '2023-01-01T00:00:00+00:00',
                                     'forgot_password_request' => false
-                                ],
-                            ],
-                        ],
-                    ],
-                    '400' => [
-                        'description' => 'Bad Request due to CAPTCHA validation failure',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'CAPTCHA validation failed.',
                                 ],
                             ],
                         ],
@@ -181,12 +148,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                                 'first_name' => ['type' => 'string', 'example' => 'John'],
                                                 'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                                'isVerified' => ['type' => 'boolean', 'example' => true],
-                                                'createdAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'example' => '2023-01-01T00:00:00+00:00'
-                                                ],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -215,8 +176,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'isVerified' => true,
-                                        'createdAt' => '2023-01-01T00:00:00+00:00',
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'PortalAccount',
@@ -249,6 +208,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
+                'security' => [
+                    [
+                        'bearerAuth' => [],
+                    ],
+                ],
             ],
         ),
         new Post(
@@ -259,11 +223,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
                 'description' => 'This endpoint authenticates a user using their SAML response. 
-                If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful.',
+        If the user is not found in the database, a new user will be created based on the SAML assertion. 
+        The response includes user details along with a JWT token if authentication is successful.',
                 'requestBody' => [
                     'description' => 'SAML response required for user authentication. 
-                The request should be sent as `multipart/form-data` with the SAML response included as a file upload.',
+        The request should be sent as `multipart/form-data` with the SAML response included as a form field 
+        (not a file).',
                     'required' => true,
                     'content' => [
                         'multipart/form-data' => [
@@ -272,9 +237,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'SAMLResponse' => [
                                         'type' => 'string',
-                                        'description' => 'Base64-encoded SAML response',
-                                        'format' => 'binary',
-                                        'example' => 'saml-response-example',
+                                        'description' => 'Base64-encoded SAML response included in the form data',
+                                        'example' => 'base64-encoded-saml-assertion',
                                     ],
                                 ],
                                 'required' => ['SAMLResponse'],
@@ -326,17 +290,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'description' => 'User last name',
                                                     'example' => 'Doe',
                                                 ],
-                                                'isVerified' => [
-                                                    'type' => 'boolean',
-                                                    'description' => 'Whether the user is verified',
-                                                    'example' => true,
-                                                ],
-                                                'createdAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'description' => 'Account creation timestamp',
-                                                    'example' => '2023-01-01T00:00:00Z',
-                                                ],
                                             ],
                                         ],
                                         'token' => [
@@ -354,8 +307,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'isVerified' => true,
-                                        'createdAt' => '2023-01-01T00:00:00Z',
                                     ],
                                     'token' => 'jwt-token-example',
                                 ],
@@ -444,8 +395,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account ID. 
-                It also requires CAPTCHA validation.',
+                'description' => 'This endpoint authenticates a user using their Google account ID.',
                 'requestBody' => [
                     'description' => 'Google account ID and CAPTCHA validation token',
                     'required' => true,
@@ -488,7 +438,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                                 'first_name' => ['type' => 'string', 'example' => 'John'],
                                                 'last_name' => ['type' => 'string', 'example' => 'Doe'],
-                                                'isVerified' => ['type' => 'boolean', 'example' => true],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -501,11 +450,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                             ],
                                                         ],
                                                     ],
-                                                ],
-                                                'createdAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'example' => '2023-01-01 00:00:00',
                                                 ],
                                             ],
                                         ],
@@ -520,25 +464,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'isVerified' => true,
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'Google',
                                                 'provider_id' => 'google-id-example',
                                             ],
                                         ],
-                                        'createdAt' => '2023-01-01 00:00:00',
                                     ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '400' => [
-                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'CAPTCHA validation failed or invalid data',
                                 ],
                             ],
                         ],
@@ -578,11 +510,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'user@example.com',
                                         'description' => 'User UUID, typically the same as the email'
                                     ],
-                                    'password' => [
-                                        'type' => 'string',
-                                        'example' => 'strongpassword',
-                                        'description' => 'The user password, must be strong and secure'
-                                    ],
                                     'email' => [
                                         'type' => 'string',
                                         'example' => 'user@example.com',
@@ -598,64 +525,53 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
                                     ],
-                                    'isVerified' => [
-                                        'type' => 'boolean',
-                                        'example' => false,
-                                        'description' => 'Indicates if the user\'s email is verified'
-                                    ],
-                                    'createdAt' => [
-                                        'type' => 'string',
-                                        'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00',
-                                        'description' => 'Account creation date and time'
-                                    ],
                                     'cf-turnstile-response' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'email', 'cf-turnstile-response'],
+                                'required' => ['uuid', 'email', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'User registered successfully',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'message' => 'Local User Account Registered Successfully',
+                    'responses' => [
+                        '200' => [
+                            'description' => 'User registered successfully',
+                            'content' => [
+                                'application/json' => [
+                                    'example' => [
+                                        'message' => 'Local User Account Registered Successfully',
+                                    ],
                                 ],
                             ],
                         ],
-                    ],
-                    '400' => [
-                        'description' => 'Invalid request data',
-                        'content' => [
-                            'application/json' => [
-                                'examples' => [
-                                    'missing_data' => [
-                                        'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Missing data'],
-                                    ],
-                                    'mismatch_data' => [
-                                        'summary' => 'UUID and email mismatch',
-                                        'value' => [
-                                            'error' => 'Invalid data! UUID and email do not match!',
+                        '400' => [
+                            'description' => 'Invalid request data',
+                            'content' => [
+                                'application/json' => [
+                                    'examples' => [
+                                        'missing_data' => [
+                                            'summary' => 'Missing required data',
+                                            'value' => ['error' => 'Missing data'],
+                                        ],
+                                        'mismatch_data' => [
+                                            'summary' => 'UUID and email mismatch',
+                                            'value' => [
+                                                'error' => 'Invalid data! UUID and email do not match!',
+                                            ],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
-                    ],
-                    '409' => [
-                        'description' => 'Conflict due to user already existing',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'This User already exists',
+                        '409' => [
+                            'description' => 'Conflict due to user already existing',
+                            'content' => [
+                                'application/json' => [
+                                    'example' => [
+                                        'error' => 'This User already exists',
+                                    ],
                                 ],
                             ],
                         ],
@@ -685,11 +601,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => '+1234567890',
                                         'description' => 'User UUID, typically the same as the phone number'
                                     ],
-                                    'password' => [
-                                        'type' => 'string',
-                                        'example' => 'strongpassword',
-                                        'description' => 'The user password, must be strong and secure'
-                                    ],
                                     'phoneNumber' => [
                                         'type' => 'string',
                                         'example' => '+1234567890',
@@ -704,17 +615,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'type' => 'string',
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
-                                    ],
-                                    'isVerified' => [
-                                        'type' => 'boolean',
-                                        'example' => false,
-                                        'description' => 'Indicates if the user\'s phone number is verified'
-                                    ],
-                                    'createdAt' => [
-                                        'type' => 'string',
-                                        'format' => 'date-time',
-                                        'example' => '2023-01-01 00:00:00',
-                                        'description' => 'Account creation date and time'
                                     ],
                                     'cf-turnstile-response' => [
                                         'type' => 'string',
@@ -776,10 +676,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
-                'summary' => 'Trigger a password reset for a local auth account',
+                'summary' => 'Trigger a password reset for a local auth account (Requires Authorization)',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-                It verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId, 
-                then proceeds with the password reset if the conditions are met.',
+                The user must be authenticated using a Bearer token. To use this endpoint, 
+                click on the "Authorize" button at the top of the Swagger UI and provide your JWT token in the format: 
+                `Bearer JWT_Token`. The endpoint verifies if the user has an external auth with "PortalAccount" and
+                 "EMAIL" providerId, then proceeds with the password reset if the conditions are met.',
                 'requestBody' => [
                     'description' => 'Password reset request data including CAPTCHA validation token',
                     'required' => true,
@@ -872,11 +774,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
                 'security' => [
                     [
-                        'BearerAuth' => [
-                            'type' => 'http',
-                            'scheme' => 'bearer',
-                            'bearerFormat' => 'JWT',
-                        ],
+                        'BearerAuth' => [] // This will require the user to authorize using JWT
                     ],
                 ],
             ],
@@ -920,8 +818,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'properties' => [
                                         'success' => [
                                             'type' => 'string',
-                                            'example' => 'We have sent a new code to: +1234567890. 
-                                            You have 3 attempt(s) left.',
+                                            // phpcs:disable Generic.Files,LineLenght.TooLong
+                                            'example' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -998,6 +897,23 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
         )
     ],
+    openapiContext: [
+        'components' => [
+            'securitySchemes' => [
+                'bearerAuth' => [
+                    'type' => 'http',
+                    'scheme' => 'bearer',
+                    'bearerFormat' => 'JWT',
+                    'description' => 'JWT Authorization header using the Bearer scheme.',
+                ],
+            ],
+        ],
+        'security' => [
+            [
+                'bearerAuth' => [],
+            ],
+        ],
+    ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
 #[ORM\HasLifecycleCallbacks]
@@ -1007,14 +923,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-    /**
-     * User Unique Identification Definition
-     */
+
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
-    /**
-     *  Associated Roles
-     */
+
     #[ORM\Column]
     private array $roles = [];
 
@@ -1027,79 +939,49 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Email]
     private ?string $email = null;
-    /**
-     * System verification status
-     */
+
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
-    /**
-     * User saml identifier (not mandatory, only if it's a SAML account)
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
-    /**
-     * User first name
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
-    /**
-     * User last name
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $last_name = null;
-    /**
-     * User radius account identifier to generate passpoint provisioning profiles (foreign key)
-     */
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
     private Collection $userRadiusProfiles;
-    /**
-     * User radius account identifier for authentications request (foreign key)
-     */
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
-    /**
-     * User last verification code
-     */
+
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
-    /**
-     * User google account identificationr (not mandatoru, only if it's a google account)
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleId = null;
-    /**
-     * User creation date
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
-    /**
-     * User ban date
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
-    /**
-     * User event identifcation logger (foreign key)
-     */
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
     private Collection $event;
-    /**
-     * User deletion date
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
-    /**
-     * User phone number (not mandatory, only if it's a phone number account)
-     */
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phoneNumber = null;
-    /**
-     * User forgot_passsowrd_request
-     */
+
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
-    /**
-     * User deleted data identification (foreign key)
-     */
+
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?DeletedUserData $deletedUserData = null;
 
@@ -1480,8 +1362,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             'roles' => $this->getRoles(),
             'first_name' => $this->getFirstName(),
             'last_name' => $this->getLastName(),
-            'isVerified' => $this->isVerified(),
-            'createdAt' => $this->getCreatedAt(),
             'user_external_auths' => $userExternalAuths,
         ];
 

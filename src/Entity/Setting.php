@@ -20,34 +20,65 @@ use Doctrine\ORM\Mapping as ORM;
             openapiContext: [
                 'summary' => 'Get configuration settings',
                 'description' => 'This endpoint returns public values from the Setting entity and 
-                environment variables categorized by platform and provider. It requires a valid CAPTCHA token.',
-                'requestBody' => [
-                    'description' => 'CAPTCHA validation token is required in the 
-                    request body to retrieve configuration settings.',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'cf-turnstile-response' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                    ],
-                                ],
-                                'required' => ['cf-turnstile-response'],
-                            ],
-                            'example' => [
-                                'cf-turnstile-response' => 'valid_test_token',
-                            ],
-                        ],
-                    ],
-                ],
+                environment variables categorized by platform and provider.',
                 'responses' => [
                     '200' => [
                         'description' => 'Configuration settings retrieved successfully',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'platform' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'PLATFORM_MODE' => ['type' => 'boolean'],
+                                                'USER_VERIFICATION' => ['type' => 'boolean'],
+                                                'TURNSTILE_CHECKER' => ['type' => 'boolean'],
+                                                'CONTACT_EMAIL' => ['type' => 'string'],
+                                                'TOS_LINK' => ['type' => 'string'],
+                                                'PRIVACY_POLICY_LINK' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'auth' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'AUTH_METHOD_SAML_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => ['type' => 'boolean'],
+                                                'AUTH_METHOD_SMS_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                            ],
+                                        ],
+                                        'turnstile' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'TURNSTILE_KEY' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'google' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'GOOGLE_CLIENT_ID' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'sentry' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'SENTRY_DSN' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                        'saml' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'SAML_IDP_ENTITY_ID' => ['type' => 'string'],
+                                                'SAML_IDP_SSO_URL' => ['type' => 'string'],
+                                                'SAML_IDP_X509_CERT' => ['type' => 'string'],
+                                                'SAML_SP_ENTITY_ID' => ['type' => 'string'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
                                     'platform' => [
                                         'PLATFORM_MODE' => true,
@@ -83,16 +114,6 @@ use Doctrine\ORM\Mapping as ORM;
                             ],
                         ],
                     ],
-                    '400' => [
-                        'description' => 'Bad Request due to CAPTCHA validation failure',
-                        'content' => [
-                            'application/json' => [
-                                'example' => [
-                                    'error' => 'CAPTCHA validation failed.',
-                                ],
-                            ],
-                        ],
-                    ],
                 ],
             ],
             shortName: 'Setting',
@@ -108,15 +129,9 @@ class Setting
     #[ORM\Column]
     private ?int $id = null;
 
-    /**
-     * The settings name
-     */
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    /**
-     * The settings value
-     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $value = null;
 

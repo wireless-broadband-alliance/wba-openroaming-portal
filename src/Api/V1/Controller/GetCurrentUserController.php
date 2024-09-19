@@ -41,6 +41,7 @@ class GetCurrentUserController extends AbstractController
             // Utilize the toApiResponse method to generate the response content
             $content = $currentUser->toApiResponse([
                 'phone_number' => $currentUser->getPhoneNumber(),
+                'isVerified' => $currentUser->isVerified(),
                 'user_radius_profiles' => $currentUser->getUserRadiusProfiles(),
                 'verification_code' => $currentUser->getVerificationCode(),
                 'banned_at' => $currentUser->getBannedAt(),

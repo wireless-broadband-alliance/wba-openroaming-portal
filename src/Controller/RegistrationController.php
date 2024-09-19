@@ -11,7 +11,6 @@ use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
 use App\Repository\SettingRepository;
-use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;

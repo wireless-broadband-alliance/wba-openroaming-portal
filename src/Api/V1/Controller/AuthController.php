@@ -74,11 +74,11 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException('CAPTCHA validation failed!');
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException('CAPTCHA validation failed!');
+            return new JsonResponse(['error' => 'CAPTCHA validation failed!'], 400); # Bad Request Response
         }
 
         if (!isset($data['uuid'], $data['password'])) {
@@ -187,10 +187,8 @@ class AuthController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
      */
     #[Route('/api/v1/auth/google', name: 'api_auth_google', methods: ['POST'])]
     public function authGoogle(Request $request): JsonResponse
@@ -199,14 +197,6 @@ class AuthController extends AbstractController
 
         if (!isset($data['googleId'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);# Bad Request Response
-        }
-
-        if (!isset($data['cf-turnstile-response'])) {
-            throw new BadRequestHttpException('CAPTCHA validation failed!');
-        }
-
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            throw new BadRequestHttpException('CAPTCHA validation failed!');
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
