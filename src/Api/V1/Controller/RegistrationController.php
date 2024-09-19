@@ -124,7 +124,13 @@ class RegistrationController extends AbstractController
             $errors[] = 'password';
         }
         if (!empty($errors)) {
-            return (new BaseResponse(400, ['fields_missing' => $errors], 'Invalid data: Missing required fields.'))->toResponse();
+            return (
+            new BaseResponse(
+                400,
+                ['fields_missing' => $errors],
+                'Invalid data: Missing required fields.'
+            )
+            )->toResponse();
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
@@ -322,14 +328,20 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!isset($data['phoneNumber'])) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing fields: phoneNumber!'))->toResponse(
-            ); // Bad Request Response
+        // Check for missing fields and add them to the array errors
+        if (empty($data['phoneNumber'])) {
+            $errors[] = 'phoneNumber';
         }
-
-        if (!isset($data['password'])) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing fields: password!'))->toResponse(
-            ); // Bad Request Response
+        if (empty($data['password'])) {
+            $errors[] = 'password';
+        }
+        if (!empty($errors)) {
+            return (
+            new BaseResponse(
+                400,
+                ['fields_missing' => $errors],
+                'Invalid data: Missing required fields.'
+            ))->toResponse();
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['phoneNumber']])) {

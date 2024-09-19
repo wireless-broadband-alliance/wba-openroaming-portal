@@ -93,7 +93,13 @@ class AuthController extends AbstractController
             $errors[] = 'password';
         }
         if (!empty($errors)) {
-            return (new BaseResponse(400, ['fields_missing' => $errors], 'Invalid data: Missing required fields.'))->toResponse();
+            return (
+            new BaseResponse(
+                400,
+                ['fields_missing' => $errors],
+                'Invalid data: Missing required fields.'
+            )
+            )->toResponse();
         }
 
         // Check if user exists are valid
