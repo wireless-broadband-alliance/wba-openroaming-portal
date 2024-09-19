@@ -122,15 +122,19 @@ class RegistrationController extends AbstractController
             ); // Bad Request Response
         }
 
+        if (!isset($data['password'])) {
+            return (new BaseResponse(400, null, 'Invalid data: Missing fields: password'))->toResponse(
+            ); // Bad Request Response
+        }
+
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
-            return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
+            return (new BaseResponse(409, null, 'This User already exists'))->toResponse();
         }
 
         $user = new User();
         $user->setUuid($data['email']);
         $user->setEmail($data['email']);
-        $randomPassword = bin2hex(random_bytes(4));
-        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+        $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
@@ -160,25 +164,7 @@ class RegistrationController extends AbstractController
             $eventMetaData
         );
 
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        $email = (new TemplatedEmail())
-            ->from(new Address($emailSender, $nameSender))
-            ->to($user->getEmail())
-            ->subject('Your OpenRoaming Registration Details')
-            ->htmlTemplate('email/user_password.html.twig')
-            ->context([
-                'uuid' => $user->getUuid(),
-                'verificationCode' => $user->getVerificationCode(),
-                'isNewUser' => true,
-                'password' => $randomPassword,
-            ]);
-
-        $mailer->send($email);
-
-        return (new BaseResponse(200, ['message' => 'Local User Account Registered Successfully']))->toResponse(
-        ); // Success Response
+        return (new BaseResponse(200, ['message' => 'Local User Account Registered Successfully']))->toResponse();
     }
 
     /**
