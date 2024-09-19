@@ -1024,9 +1024,9 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_reset',
             openapiContext: [
                 'summary' => 'Trigger a password reset for an SMS auth account',
-                'description' => 'This endpoint sends an SMS with a new verification code if the user
-                 has a valid PortalAccount and has not exceeded the SMS request limits. 
-                 It also checks if the required time interval has passed before allowing a new request.',
+                'description' => 'This endpoint sends an SMS with a new verification code if the user has a valid
+                 PortalAccount and has not exceeded the SMS request limits. It also checks if the required time
+                  interval has passed before allowing a new request.',
                 'requestBody' => [
                     'description' => 'Password reset request data including CAPTCHA validation token',
                     'required' => true,
@@ -1038,7 +1038,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'cf-turnstile-response' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
+                                        'example' => 'valid_test_token',
                                     ],
                                 ],
                                 'required' => ['cf-turnstile-response'],
@@ -1055,11 +1055,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => [
-                                            'type' => 'string',
-                                            // phpcs:disable Generic.Files,LineLenght.TooLong
-                                            'example' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
-                                            // phpcs:enable
+                                            'type' => 'boolean',
+                                            'example' => true,
                                         ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'example' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
+                                                    // phpcs:enable
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    'data' => [
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'message' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
+                                        // phpcs:enable
                                     ],
                                 ],
                             ],
@@ -1069,17 +1086,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid data or CAPTCHA validation failed',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid data or CAPTCHA token.',
+                                        ],
+                                    ],
+                                ],
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
                                         'value' => [
-                                            'error' => 'Invalid Credentials, Provider not allowed',
+                                            'success' => false,
+                                            'error' => 'Invalid data',
+                                            'details' => 'Please include the CAPTCHA token.',
                                         ],
                                     ],
                                     'captcha_invalid' => [
                                         'summary' => 'Invalid CAPTCHA token',
                                         'value' => [
-                                            'error' => 'Invalid CAPTCHA token. Please try again.',
+                                            'success' => false,
+                                            'error' => 'Invalid CAPTCHA token',
+                                            'details' => 'The CAPTCHA token provided is invalid. Please try again.',
                                         ],
                                     ],
                                 ],
@@ -1093,11 +1131,24 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Rate limit exceeded',
+                                        ],
+                                        'details' => [
                                             'type' => 'string',
                                             'example' => 'Please wait 2 minute(s) before trying again.',
                                         ],
                                     ],
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'Rate limit exceeded',
+                                    'details' => 'Please wait 2 minute(s) before trying again.',
                                 ],
                             ],
                         ],
@@ -1109,15 +1160,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the server error occurred',
                                             'example' => 'An unexpected error occurred while processing the request',
                                         ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'An unexpected error occurred while processing the request.',
+                                        ],
                                     ],
                                 ],
                                 'example' => [
+                                    'success' => false,
                                     'error' => 'An unexpected error occurred while processing the request',
+                                    'details' => 'An unexpected error occurred while processing the request.',
                                 ],
                             ],
                         ],
@@ -1133,7 +1195,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                 ],
             ],
-        )
+        ),
     ],
     openapiContext: [
         'components' => [
@@ -1168,9 +1230,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
