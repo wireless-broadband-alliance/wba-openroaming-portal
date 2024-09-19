@@ -829,8 +829,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'properties' => [
                                         'success' => [
                                             'type' => 'string',
-                                            'example' => 'We have sent a new code to: +1234567890. 
-                                            You have 3 attempt(s) left.',
+                                            // phpcs:disable Generic.Files,LineLenght.TooLong
+                                            'example' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
