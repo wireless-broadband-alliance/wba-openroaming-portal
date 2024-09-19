@@ -335,20 +335,16 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!isset($data['uuid'], $data['phoneNumber'])) {
+        if (!isset($data['phoneNumber'])) {
             return (new BaseResponse(400, null, 'Missing data!'))->toResponse(); // Bad Request Response
         }
 
-        if ($data['uuid'] !== $data['phoneNumber']) {
-            return (new BaseResponse(400, null, 'Invalid data!'))->toResponse(); // Bad Request Response
-        }
-
-        if ($this->userRepository->findOneBy(['phoneNumber' => $data['uuid']])) {
+        if ($this->userRepository->findOneBy(['phoneNumber' => $data['phoneNumber']])) {
             return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
         }
 
         $user = new User();
-        $user->setUuid($data['uuid']);
+        $user->setUuid($data['phoneNumber']);
         $user->setPhoneNumber($data['phoneNumber']);
         $randomPassword = bin2hex(random_bytes(4));
         // Hash the password
@@ -371,7 +367,7 @@ class RegistrationController extends AbstractController
 
         // Save user creation event
         $eventMetaData = [
-            'uuid' => $user->getUuid(),
+            'uuid' => $user->getPhoneNumber(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
             'registrationType' => UserProvider::PHONE_NUMBER,
         ];

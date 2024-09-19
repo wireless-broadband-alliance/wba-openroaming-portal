@@ -693,8 +693,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_register',
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number 
-                and validates the request with a CAPTCHA token.',
+                'description' => 'This endpoint registers a new user using their phone number and validates the request with a CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -703,11 +702,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => [
-                                        'type' => 'string',
-                                        'example' => '+1234567890',
-                                        'description' => 'User UUID, typically the same as the phone number'
-                                    ],
                                     'phoneNumber' => [
                                         'type' => 'string',
                                         'example' => '+1234567890',
@@ -729,7 +723,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'phoneNumber', 'cf-turnstile-response'],
+                                'required' => ['phoneNumber', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -739,8 +733,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'User registered successfully',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    'example' => 'SMS User Account Registered Successfully',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
-                                    'message' => 'SMS User Account Registered Successfully',
+                                    'success' => true,
+                                    'data' => [
+                                        'message' => 'SMS User Account Registered Successfully',
+                                    ],
                                 ],
                             ],
                         ],
@@ -749,15 +764,40 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Detailed error information about missing fields or data validation issues',
+                                        ],
+                                    ],
+                                ],
                                 'examples' => [
                                     'missing_data' => [
                                         'summary' => 'Missing required data',
-                                        'value' => ['error' => 'Missing data!'],
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing data',
+                                            'details' => 'Missing required fields: phoneNumber, cf-turnstile-response',
+                                        ],
                                     ],
                                     'mismatch_data' => [
-                                        'summary' => 'UUID and phone number mismatch',
+                                        'summary' => 'Phone number and data mismatch',
                                         'value' => [
-                                            'error' => 'Invalid data! UUID and phone number do not match!',
+                                            'success' => false,
+                                            'error' => 'Invalid data',
+                                            'details' => 'Phone number or other data is invalid or does not match',
                                         ],
                                     ],
                                 ],
@@ -768,8 +808,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                         'description' => 'Conflict due to user already existing',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the user could not be registered',
+                                            'example' => 'This User already exists',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'User with the provided phone number already exists',
+                                        ],
+                                    ],
+                                ],
                                 'example' => [
+                                    'success' => false,
                                     'error' => 'This User already exists',
+                                    'details' => 'User with the provided phone number already exists',
                                 ],
                             ],
                         ],
