@@ -36,51 +36,69 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'description' => 'This endpoint returns the details of the currently authenticated user.',
                 'responses' => [
                     '200' => [
+                        'description' => 'User details retrieved successfully',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'uuid' => ['type' => 'string'],
-                                        'email' => ['type' => 'string'],
-                                        'roles' => [
-                                            'type' => 'array',
-                                            'items' => ['type' => 'string']
+                                        'success' => ['type' => 'boolean'],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'uuid' => ['type' => 'string'],
+                                                'email' => ['type' => 'string'],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => ['type' => 'string']
+                                                ],
+                                                'isVerified' => ['type' => 'boolean'],
+                                                'phone_number' => ['type' => 'string'],
+                                                'firstName' => ['type' => 'string'],
+                                                'lastName' => ['type' => 'string'],
+                                                'verification_code' => ['type' => 'integer'],
+                                                'createdAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'bannedAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'deletedAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'forgot_password_request' => ['type' => 'boolean'],
+                                            ],
                                         ],
-                                        'isVerified' => ['type' => 'boolean'],
-                                        'phone_number' => ['type' => 'string'],
-                                        'firstName' => ['type' => 'string'],
-                                        'lastName' => ['type' => 'string'],
-                                        'verification_code' => ['type' => 'int'],
-                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'bannedAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'deletedAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'forgot_password_request' => ['type' => 'boolean'],
                                     ],
                                 ],
                                 'example' => [
-                                    'uuid' => 'abc123',
-                                    'email' => 'user@example.com',
-                                    'roles' => ["ROLE_USER"],
-                                    'isVerified' => true,
-                                    'phone_number' => '+19700XXXXXX',
-                                    'firstName' => 'John',
-                                    'lastName' => 'Doe',
-                                    'verification_code' => 123456,
-                                    'createdAt' => '2023-01-01T00:00:00+00:00',
-                                    'bannedAt' => '2023-01-01T00:00:00+00:00',
-                                    'deletedAt' => '2023-01-01T00:00:00+00:00',
-                                    'forgot_password_request' => false
+                                    'success' => true,
+                                    'data' => [
+                                        'uuid' => 'abc123',
+                                        'email' => 'user@example.com',
+                                        'roles' => ['ROLE_USER'],
+                                        'isVerified' => true,
+                                        'phone_number' => '+19700XXXXXX',
+                                        'firstName' => 'John',
+                                        'lastName' => 'Doe',
+                                        'verification_code' => 123456,
+                                        'createdAt' => '2023-01-01T00:00:00+00:00',
+                                        'bannedAt' => '2023-01-01T00:00:00+00:00',
+                                        'deletedAt' => '2023-01-01T00:00:00+00:00',
+                                        'forgot_password_request' => false,
+                                    ],
                                 ],
                             ],
                         ],
                     ],
                     '401' => [
-                        'description' => 'Unauthorized',
+                        'description' => 'Unauthorized - Access token is missing or invalid',
                         'content' => [
                             'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'error' => ['type' => 'string'],
+                                    ],
+                                ],
                                 'example' => [
-                                    'error' => 'Unauthorized',
+                                    'success' => false,
+                                    'error' => 'Unauthorized - You do not have permission to access this resource.',
                                 ],
                             ],
                         ],
