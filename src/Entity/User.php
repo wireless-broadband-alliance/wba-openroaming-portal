@@ -576,8 +576,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email 
-                and validates the request with a CAPTCHA token.',
+                'description' => 'This endpoint registers a new user using their email and validates 
+                the request with a CAPTCHA token.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -586,11 +586,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => [
-                                        'type' => 'string',
-                                        'example' => 'user@example.com',
-                                        'description' => 'User UUID, typically the same as the email'
-                                    ],
                                     'email' => [
                                         'type' => 'string',
                                         'example' => 'user@example.com',
@@ -612,47 +607,78 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'email', 'cf-turnstile-response'],
+                                'required' => ['email', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
-                    'responses' => [
-                        '200' => [
-                            'description' => 'User registered successfully',
-                            'content' => [
-                                'application/json' => [
-                                    'example' => [
-                                        'message' => 'Local User Account Registered Successfully',
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'User registered successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Local User Account Registered Successfully',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'message' => 'Local User Account Registered Successfully',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '400' => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message for why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'missing_data' => [
+                                        'summary' => 'Missing required data',
+                                        'value' => [
+                                            'error' => 'Missing required fields: email, cf-turnstile-response',
+                                        ],
+                                    ],
+                                    'invalid_data' => [
+                                        'summary' => 'Invalid data format',
+                                        'value' => [
+                                            'error' => 'Invalid data format for fields',
+                                        ],
                                     ],
                                 ],
                             ],
                         ],
-                        '400' => [
-                            'description' => 'Invalid request data',
-                            'content' => [
-                                'application/json' => [
-                                    'examples' => [
-                                        'missing_data' => [
-                                            'summary' => 'Missing required data',
-                                            'value' => ['error' => 'Missing data'],
-                                        ],
-                                        'mismatch_data' => [
-                                            'summary' => 'UUID and email mismatch',
-                                            'value' => [
-                                                'error' => 'Invalid data! UUID and email do not match!',
-                                            ],
+                    ],
+                    '409' => [
+                        'description' => 'Conflict due to user already existing',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message for why the user could not be registered',
+                                            'example' => 'This User already exists',
                                         ],
                                     ],
                                 ],
-                            ],
-                        ],
-                        '409' => [
-                            'description' => 'Conflict due to user already existing',
-                            'content' => [
-                                'application/json' => [
-                                    'example' => [
-                                        'error' => 'This User already exists',
-                                    ],
+                                'example' => [
+                                    'error' => 'This User already exists',
                                 ],
                             ],
                         ],
