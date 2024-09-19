@@ -18,7 +18,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -74,25 +73,40 @@ class AuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); # Bad Request Response
+            return (new BaseResponse(400, 'Invalid JSON format'))->toResponse(); # Bad Request Response
         }
 
         if (!isset($data['cf-turnstile-response'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
+            return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
+            return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
-        if (!isset($data['uuid'], $data['password'])) {
-            return (new BaseResponse(400, null, 'Invalid data'))->toResponse(); # Bad Request Response
+        // Define required fields
+        $requiredFields = ['uuid', 'password'];
+        $missingFields = [];
+        $invalidFields = [];
+
+        // Check for missing fields
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                $missingFields[] = $field;
+            }
         }
 
+        // If there are missing fields, return an error response with details
+        if (!empty($missingFields)) {
+            $errorMessage = 'Invalid data: Missing fields: ' . implode(', ', $missingFields);
+            return (new BaseResponse(400, $errorMessage))->toResponse(); # Bad Request Response
+        }
+
+        // Check if credentials are valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
+            return (new BaseResponse(401, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
         }
 
         // Generate JWT Token
