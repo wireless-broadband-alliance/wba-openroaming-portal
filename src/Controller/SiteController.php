@@ -524,8 +524,9 @@ class SiteController extends AbstractController
                 } else {
                     $this->addFlash(
                         'warning',
-                        'This email doesn\'t have a valid account, please submit a valid email from the system! 
-                    And make sure to only type emails from the platform and not from another provider.'
+                        'This email is not associated with a valid account. 
+                        Please submit a valid email from the system, 
+                        ensuring it is from the platform and not from another provider.'
                     );
                 }
             } else {
