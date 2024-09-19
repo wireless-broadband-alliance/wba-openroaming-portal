@@ -84,29 +84,35 @@ class AuthController extends AbstractController
             return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
-        // Define required fields
-        $requiredFields = ['uuid', 'password'];
-        $missingFields = [];
-        $invalidFields = [];
 
-        // Check for missing fields
-        foreach ($requiredFields as $field) {
-            if (!isset($data[$field])) {
-                $missingFields[] = $field;
-            }
+        // Check for missing fields and add them to the array errors
+        if (empty($data['uuid'])) {
+            $errors[] = 'uuid';
+        }
+        if (empty($data['password'])) {
+            $errors[] = 'password';
+        }
+        if (!empty($errors)) {
+            return (
+            new BaseResponse(
+                400,
+                ['fields_missing' => $errors],
+                'Invalid data: Missing required fields.'
+            )
+            )->toResponse();
         }
 
-        // If there are missing fields, return an error response with details
-        if (!empty($missingFields)) {
-            $errorMessage = 'Invalid data: Missing fields: ' . implode(', ', $missingFields);
-            return (new BaseResponse(400, $errorMessage))->toResponse(); # Bad Request Response
-        }
-
-        // Check if credentials are valid
+        // Check if user exists are valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
-        if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
+        if (!$user) {
+            return (new BaseResponse(400, null, 'Invalid data: Missing User'))->toResponse();
+            // Bad Request Response
+        }
+
+        if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
+            return (new BaseResponse(401, null, 'Invalid data: Invalid Password'))->toResponse(
+            ); # Unauthorized Request Response
         }
 
         // Generate JWT Token

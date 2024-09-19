@@ -609,6 +609,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'user@example.com',
                                         'description' => 'User email address'
                                     ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'User password'
+                                    ],
                                     'first_name' => [
                                         'type' => 'string',
                                         'example' => 'John',
@@ -625,7 +630,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['email', 'cf-turnstile-response'],
+                                'required' => ['email', 'password', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -691,7 +696,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'data' => [
-                                                'error' => 'Missing required fields: email, cf-turnstile-response',
+                                                // phpcs:disable Generic.Files.LineLength.TooLong
+                                                'error' => 'Missing required fields: email, password or cf-turnstile-response',
+                                                // phpcs:enable
                                             ],
                                         ],
                                     ],
@@ -767,6 +774,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => '+1234567890',
                                         'description' => 'User phone number'
                                     ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'User password'
+                                    ],
                                     'first_name' => [
                                         'type' => 'string',
                                         'example' => 'John',
@@ -783,7 +795,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['phoneNumber', 'cf-turnstile-response'],
+                                'required' => ['phoneNumber', 'password', 'cf-turnstile-response'],
                             ],
                         ],
                     ],
@@ -849,7 +861,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Missing data',
-                                            'details' => 'Missing required fields: phoneNumber, cf-turnstile-response',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'details' => 'Missing required fields: phoneNumber, password or cf-turnstile-response',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'mismatch_data' => [
