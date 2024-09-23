@@ -130,7 +130,7 @@ use Doctrine\ORM\Mapping as ORM;
                     ],
                 ],
             ],
-            shortName: 'Setting',
+            shortName: '🔓 Setting',
             description: 'Returns public values from the Setting entity',
             name: 'app_config_settings',
         ),
