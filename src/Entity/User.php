@@ -154,13 +154,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
                                     'password' => ['type' => 'string', 'example' => 'user-password-example'],
-                                    'cf-turnstile-response' => [
+                                    'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'cf-turnstile-response'],
+                                'required' => ['uuid', 'password', 'turnstileToken'],
                             ],
                         ],
                     ],
@@ -645,13 +645,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
                                     ],
-                                    'cf-turnstile-response' => [
+                                    'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['email', 'password', 'cf-turnstile-response'],
+                                'required' => ['email', 'password', 'turnstileToken'],
                             ],
                         ],
                     ],
@@ -718,7 +718,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'success' => false,
                                             'data' => [
                                                 // phpcs:disable Generic.Files.LineLength.TooLong
-                                                'error' => 'Missing required fields: email, password or cf-turnstile-response',
+                                                'error' => 'Missing required fields: email, password or turnstileToken',
                                                 // phpcs:enable
                                             ],
                                         ],
@@ -810,13 +810,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
                                     ],
-                                    'cf-turnstile-response' => [
+                                    'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['phoneNumber', 'password', 'cf-turnstile-response'],
+                                'required' => ['phoneNumber', 'password', 'turnstileToken'],
                             ],
                         ],
                     ],
@@ -883,7 +883,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'success' => false,
                                             'error' => 'Missing data',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'details' => 'Missing required fields: phoneNumber, password or cf-turnstile-response',
+                                            'details' => 'Missing required fields: phoneNumber, password or turnstileToken',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -954,13 +954,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'cf-turnstile-response' => [
+                                    'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['cf-turnstile-response'],
+                                'required' => ['turnstileToken'],
                             ],
                         ],
                     ],
@@ -1129,13 +1129,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'cf-turnstile-response' => [
+                                    'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['cf-turnstile-response'],
+                                'required' => ['turnstileToken'],
                             ],
                         ],
                     ],
@@ -1742,7 +1742,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             function (UserExternalAuth $userExternalAuth) {
                 return [
                     'provider' => $userExternalAuth->getProvider(),
-                    'provider_id' => $userExternalAuth->getProviderId(),
+                    'providerId' => $userExternalAuth->getProviderId(),
                 ];
             }
         )->toArray();
@@ -1751,9 +1751,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             'uuid' => $this->getUuid(),
             'email' => $this->getEmail(),
             'roles' => $this->getRoles(),
-            'first_name' => $this->getFirstName(),
-            'last_name' => $this->getLastName(),
-            'user_external_auths' => $userExternalAuths,
+            'firstName' => $this->getFirstName(),
+            'lastName' => $this->getLastName(),
+            'userExternalAuths' => $userExternalAuths,
         ];
 
         return array_merge($responseData, $additionalData);

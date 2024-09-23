@@ -35,7 +35,6 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -48,7 +47,6 @@ class RegistrationController extends AbstractController
     private EventRepository $eventRepository;
     private EntityManagerInterface $entityManager;
     private EventActions $eventActions;
-    private TokenStorageInterface $tokenStorage;
     private ParameterBagInterface $parameterBag;
     private SendSMS $sendSMSService;
     private GetSettings $getSettings;
@@ -64,7 +62,6 @@ class RegistrationController extends AbstractController
         EventRepository $eventRepository,
         EntityManagerInterface $entityManager,
         EventActions $eventActions,
-        TokenStorageInterface $tokenStorage,
         ParameterBagInterface $parameterBag,
         SendSMS $sendSMSService,
         GetSettings $getSettings,
@@ -78,7 +75,6 @@ class RegistrationController extends AbstractController
         $this->eventRepository = $eventRepository;
         $this->entityManager = $entityManager;
         $this->eventActions = $eventActions;
-        $this->tokenStorage = $tokenStorage;
         $this->parameterBag = $parameterBag;
         $this->sendSMSService = $sendSMSService;
         $this->getSettings = $getSettings;
@@ -110,11 +106,11 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
-        if (!isset($data['cf-turnstile-response'])) {
+        if (!isset($data['turnstileToken'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
@@ -129,7 +125,7 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fields_missing' => $errors],
+                ['fieldsMissing' => $errors],
                 'Invalid data: Missing required fields.'
             )
             )->toResponse();
@@ -208,16 +204,16 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fields_missing' => $errors],
+                ['fieldsMissing' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
 
-        if (!isset($data['cf-turnstile-response'])) {
+        if (!isset($data['turnstileToken'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
@@ -333,11 +329,11 @@ class RegistrationController extends AbstractController
         } catch (\JsonException $e) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
-        if (!isset($data['cf-turnstile-response'])) {
+        if (!isset($data['turnstileToken'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
@@ -352,7 +348,7 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fields_missing' => $errors],
+                ['fieldsMissing' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
@@ -428,16 +424,16 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fields_missing' => $errors],
+                ['fieldsMissing' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
 
-        if (!isset($dataRequest['cf-turnstile-response'])) {
+        if (!isset($dataRequest['turnstileToken'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($dataRequest['cf-turnstile-response'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($dataRequest['turnstileToken'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
