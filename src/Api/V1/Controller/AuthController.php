@@ -3,15 +3,17 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\Controller\GoogleController;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
-use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\JWTTokenGenerator;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use OneLogin\Saml2\Auth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,32 +31,32 @@ class AuthController extends AbstractController
     private UserRepository $userRepository;
     private UserPasswordHasherInterface $passwordHasher;
     private jwtTokenGenerator $tokenGenerator;
-    private UserExternalAuthRepository $userExternalAuthRepository;
     private CaptchaValidator $captchaValidator;
     private EntityManagerInterface $entityManager;
+    private GoogleController $googleController;
 
     /**
      * @param UserRepository $userRepository
      * @param UserPasswordHasherInterface $passwordHasher
      * @param JWTTokenGenerator $tokenGenerator
-     * @param UserExternalAuthRepository $userExternalAuthRepository
      * @param CaptchaValidator $captchaValidator
      * @param EntityManagerInterface $entityManager
+     * @param GoogleController $googleController
      */
     public function __construct(
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         jwtTokenGenerator $tokenGenerator,
-        UserExternalAuthRepository $userExternalAuthRepository,
         CaptchaValidator $captchaValidator,
         EntityManagerInterface $entityManager,
+        GoogleController $googleController,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
         $this->tokenGenerator = $tokenGenerator;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->captchaValidator = $captchaValidator;
         $this->entityManager = $entityManager;
+        $this->googleController = $googleController;
     }
 
     /**
@@ -208,42 +210,61 @@ class AuthController extends AbstractController
         }
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     */
     #[Route('/api/v1/auth/google', name: 'api_auth_google', methods: ['POST'])]
     public function authGoogle(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-
-        if (!isset($data['googleId'])) {
-            return (new BaseResponse(400, null, 'Invalid data'))->toResponse(); // Bad Request Response
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
 
-        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
-
-        if (!$userExternalAuth) {
-            // Unauthorized - Provider not allowed
-            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
+        if (!isset($data['code'])) {
+            return (new BaseResponse(400, null, 'Missing authorization code!'))->toResponse();
         }
 
-        $user = $userExternalAuth->getUser();
+        // Define a dummy code for testing purposes
+        $dummyCode = 'openroaming';
 
-        if (!$user) {
-            // Unauthorized - User not found
-            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
+        try {
+            // Simulate a user for testing purposes if the dummy code is provided
+            if ($data['code'] === $dummyCode) {
+                $user = new User();
+                $user->setUuid('john_doe@example.com')
+                    ->setEmail('john_doe@example.com')
+                    ->setFirstname('John')
+                    ->setLastname('Doe')
+                    ->setCreatedAt(new DateTime());
+
+                $userExternalAuth = new UserExternalAuth();
+                $userExternalAuth->setProvider(UserProvider::GOOGLE_ACCOUNT)
+                    ->setProviderId('DUMMY_GOOGLE_USER_ACCOUNT');
+
+                $user->addUserExternalAuth($userExternalAuth);
+            } else {
+                // Fetch real user info from Google using the provided authorization code
+                $user = $this->googleController->fetchUserFromGoogle($data['code']);
+            }
+
+            // If user retrieval fails
+            if ($user === null) {
+                return (new BaseResponse(400, null, 'User creation failed or email is not allowed.'))->toResponse();
+            }
+
+            // Authenticate the user using custom Google authentication function already on the project
+            $this->googleController->authenticateUserGoogle($user);
+
+            $token = $this->tokenGenerator->generateToken($user);
+
+            $formattedUserData = $user->toApiResponse(['token' => $token]);
+
+            return (new BaseResponse(200, $formattedUserData, null))->toResponse();
+        } catch (IdentityProviderException $e) {
+            // Handle OAuth identity provider-specific errors
+            return (new BaseResponse(500, null, 'Authentication failed: ' . $e->getMessage()))->toResponse();
+        } catch (Exception $e) {
+            // Handle any other general errors
+            return (new BaseResponse(500, null, 'An error occurred: ' . $e->getMessage()))->toResponse();
         }
-
-        $token = $this->tokenGenerator->generateToken($user);
-
-        // Use the toApiResponse method to generate the response
-        $responseData = $user->toApiResponse(['token' => $token]);
-
-        return (new BaseResponse(200, $responseData))->toResponse(); // Success
     }
 }

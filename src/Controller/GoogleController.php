@@ -162,7 +162,7 @@ class GoogleController extends AbstractController
         }
 
         // Authenticate the user
-        $this->authenticateUser($user);
+        $this->authenticateUserGoogle($user);
 
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
@@ -279,7 +279,7 @@ class GoogleController extends AbstractController
      * @param User $user
      * @return void
      */
-    private function authenticateUser(User $user): void
+    public function authenticateUserGoogle(User $user): void
     {
         // Get the current request from the request stack
         $request = $this->requestStack->getCurrentRequest();
@@ -310,5 +310,28 @@ class GoogleController extends AbstractController
             $this->redirectToRoute('app_landing');
             return;
         }
+    }
+
+    /**
+     * @throws IdentityProviderException
+     * @throws Exception
+     */
+    public function fetchUserFromGoogle(string $code): ?User
+    {
+        $client = $this->clientRegistry->getClient('google');
+
+        // Exchange the authorization code for an access token
+        $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
+            'code' => $code,
+        ]);
+
+        // Fetch user info from Google
+        $resourceOwner = $client->fetchUserFromToken($accessToken);
+        $googleUserId = $resourceOwner->getId();
+        $email = $resourceOwner->getEmail();
+        $firstname = $resourceOwner->getFirstname();
+        $lastname = $resourceOwner->getLastname();
+
+        return $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
     }
 }
