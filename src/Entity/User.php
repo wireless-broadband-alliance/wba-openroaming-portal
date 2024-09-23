@@ -154,11 +154,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
-                                    'password' => ['type' => 'string', 'example' => 'user-password-example'],
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'description' => 'Unique identifier of the user',
+                                        'example' => 'user-uuid-example'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'description' => 'Password of the user',
+                                        'example' => 'user-password-example'
+                                    ],
                                     'turnstileToken' => [
                                         'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
+                                        'description' => 'CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
@@ -179,15 +187,32 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'uuid' => ['type' => 'string', 'example' => 'user@example.com'],
-                                                'email' => ['type' => 'string', 'example' => 'user@example.com'],
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'example' => 'user@example.com',
+                                                    'description' => 'UUID of the authenticated user'
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'example' => 'user@example.com',
+                                                    'description' => 'Email of the authenticated user'
+                                                ],
                                                 'roles' => [
                                                     'type' => 'array',
                                                     'items' => ['type' => 'string'],
                                                     'example' => ['ROLE_USER'],
+                                                    'description' => 'Roles assigned to the user'
                                                 ],
-                                                'first_name' => ['type' => 'string', 'example' => 'John'],
-                                                'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'John',
+                                                    'description' => 'First name of the user'
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Doe',
+                                                    'description' => 'Last name of the user'
+                                                ],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -195,15 +220,22 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'properties' => [
                                                             'provider' => [
                                                                 'type' => 'string',
-                                                                'example' => 'Portal Account'
+                                                                'example' => 'Portal Account',
+                                                                'description' => 'Authentication provider'
                                                             ],
-                                                            'provider_id' => ['type' => 'string', 'example' => 'Email'],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'Email',
+                                                                'description' => 'Provider identifier'
+                                                            ],
                                                         ],
                                                     ],
+                                                    'description' => 'External authentication details'
                                                 ],
                                                 'token' => [
                                                     'type' => 'string',
-                                                    'example' => 'jwt_token'
+                                                    'example' => 'jwt_token',
+                                                    'description' => 'JWT token for the authenticated session'
                                                 ],
                                             ],
                                         ],
@@ -225,16 +257,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'properties' => [
                                                 'error' => [
                                                     'type' => 'string',
-                                                    'example' => 'CAPTCHA validation failed or invalid data'
+                                                    'example' => 'CAPTCHA validation failed or invalid data',
+                                                    'description' => 'Details of the error'
                                                 ],
                                             ],
                                         ],
                                     ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'data' => [
-                                        'error' => 'CAPTCHA validation failed or invalid data',
+                                    'example' => [
+                                        'success' => false,
+                                        'data' => [
+                                            'error' => 'CAPTCHA validation failed or invalid data',
+                                        ],
                                     ],
                                 ],
                             ],
@@ -251,15 +284,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'error' => ['type' => 'string', 'example' => 'Invalid credentials'],
+                                                'error' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Invalid credentials',
+                                                    'description' => 'Details of the authentication failure'
+                                                ],
                                             ],
                                         ],
                                     ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'data' => [
-                                        'error' => 'Invalid credentials',
+                                    'example' => [
+                                        'success' => false,
+                                        'data' => [
+                                            'error' => 'Invalid credentials',
+                                        ],
                                     ],
                                 ],
                             ],
@@ -1755,7 +1792,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             'firstName' => $this->getFirstName(),
             'lastName' => $this->getLastName(),
             'userExternalAuths' => $userExternalAuths,
-            'createdAt' => $this->getCreatedAt()?->format(DATE_ATOM),
         ];
 
         return array_merge($responseData, $additionalData);
