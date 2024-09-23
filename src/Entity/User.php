@@ -28,15 +28,21 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,
             shortName: 'User',
-            security: 'is_granted("IS_AUTHENTICATED_FULLY")',
-            securityMessage: "You don't have permission to access this resource",
             paginationEnabled: false,
             name: 'api_get_current_user',
+            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            securityMessage: 'Sorry, but you are not the book owner.',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
                 'description' => 'This endpoint returns the details of the currently authenticated user.',
                 'security' => [
-                    ['BearerAuth' => []]
+                    [
+                        'BearerAuth' => [
+                            'scheme' => 'Bearer',
+                            'bearerFormat' => 'JWT',
+                            'example' => 'Bearer <JWT_TOKEN>',
+                        ],
+                    ],
                 ],
                 'responses' => [
                     '200' => [
