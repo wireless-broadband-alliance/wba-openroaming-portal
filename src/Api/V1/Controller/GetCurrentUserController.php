@@ -51,7 +51,8 @@ class GetCurrentUserController extends AbstractController
             if ($currentUser->getBannedAt()) {
                 return (
                 new BaseResponse(
-                    401, null,
+                    401,
+                    null,
                     'User account is banned from the system.'
                 ))->toResponse();
             }
