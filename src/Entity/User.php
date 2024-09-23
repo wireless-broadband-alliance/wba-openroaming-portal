@@ -68,7 +68,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'phone_number' => ['type' => 'string', 'nullable' => true],
                                                 'isVerified' => ['type' => 'boolean'],
                                                 'user_radius_profiles' => ['type' => 'object'],
-                                                'verification_code' => ['type' => 'string'],
                                                 'banned_at' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
@@ -101,7 +100,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'phone_number' => null,
                                         'isVerified' => true,
                                         'user_radius_profiles' => [],
-                                        'verification_code' => '000000',
                                         'banned_at' => null,
                                         'deleted_at' => null,
                                         'forgot_password_request' => false,
