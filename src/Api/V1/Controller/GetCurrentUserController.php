@@ -63,7 +63,6 @@ class GetCurrentUserController extends AbstractController
                 'phoneNumber' => $currentUser->getPhoneNumber(),
                 'isVerified' => $currentUser->isVerified(),
                 'createdAt' => $currentUser->getCreatedAt()?->format(DATE_ATOM),
-                'bannedAt' => $currentUser->getBannedAt()?->format(DATE_ATOM),
                 'forgotPasswordRequest' => $currentUser->isForgotPasswordRequest(),
             ]);
             return (new BaseResponse(Response::HTTP_OK, $content))->toResponse();

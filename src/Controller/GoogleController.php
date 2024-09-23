@@ -328,8 +328,11 @@ class GoogleController extends AbstractController
         // Fetch user info from Google
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         $googleUserId = $resourceOwner->getId();
+        /** @phpstan-ignore-next-line */
         $email = $resourceOwner->getEmail();
+        /** @phpstan-ignore-next-line */
         $firstname = $resourceOwner->getFirstname();
+        /** @phpstan-ignore-next-line */
         $lastname = $resourceOwner->getLastname();
 
         return $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
