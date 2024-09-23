@@ -131,6 +131,7 @@ use Doctrine\ORM\Mapping as ORM;
                 ],
             ],
             shortName: 'Setting',
+            paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
             name: 'app_config_settings',
         ),
