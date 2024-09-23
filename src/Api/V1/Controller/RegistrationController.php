@@ -565,6 +565,6 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return (new BaseResponse(400, null, 'Please make sure to place the JWT token'))->toResponse();
+        return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
     }
 }
