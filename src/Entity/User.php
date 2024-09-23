@@ -313,12 +313,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
                 'description' => 'This endpoint authenticates a user using their SAML response. 
-                If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful.',
+            If the user is not found in the database, a new user will be created based on the SAML assertion. 
+            The response includes user details along with a JWT token if authentication is successful.',
                 'requestBody' => [
-                    'description' => 'SAML response required for user authentication.
-                     The request should be sent as `multipart/form-data` with the SAML response included as a 
-                     form field (not a file).',
+                    'description' => 'SAML response required for user authentication. 
+                The request should be sent as `multipart/form-data` with the SAML response 
+                included as a form field (not a file).',
                     'required' => true,
                     'content' => [
                         'multipart/form-data' => [
@@ -521,7 +521,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account. A valid Google OAuth authorization code is required.',
+                'description' => 'This endpoint authenticates a user using their Google account. 
+                A valid Google OAuth authorization code is required.',
                 'requestBody' => [
                     'description' => 'Google authorization code',
                     'required' => true,
@@ -557,8 +558,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'type' => 'object',
                                                     'properties' => [
                                                         'id' => ['type' => 'integer', 'example' => 1],
-                                                        'email' => ['type' => 'string', 'example' => 'john_doe@example.com'],
-                                                        'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
+                                                        'email' => [
+                                                            'type' => 'string',
+                                                            'example' => 'john_doe@example.com'
+                                                        ],
+                                                        'uuid' => [
+                                                            'type' => 'string',
+                                                            'example' => 'user-uuid-example'
+                                                        ],
                                                         'roles' => [
                                                             'type' => 'array',
                                                             'items' => ['type' => 'string'],
