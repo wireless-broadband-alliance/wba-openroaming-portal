@@ -90,7 +90,6 @@ class RegistrationController extends AbstractController
 
     /**
      * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param MailerInterface $mailer
      * @param Request $request
      * @return JsonResponse
      * @throws ClientExceptionInterface
@@ -104,9 +103,12 @@ class RegistrationController extends AbstractController
     public function localRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        MailerInterface $mailer
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+        }
 
         if (!isset($data['cf-turnstile-response'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
@@ -193,7 +195,11 @@ class RegistrationController extends AbstractController
         MailerInterface $mailer,
         Request $request
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+        }
 
         if (!isset($data['cf-turnstile-response'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
@@ -318,8 +324,11 @@ class RegistrationController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+        }
         if (!isset($data['cf-turnstile-response'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
@@ -402,7 +411,11 @@ class RegistrationController extends AbstractController
     #[Route('/api/v1/auth/sms/reset', name: 'api_auth_sms_reset', methods: ['POST'])]
     public function smsReset(Request $request): JsonResponse
     {
-        $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+        }
 
         if (!isset($dataRequest['cf-turnstile-response'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
