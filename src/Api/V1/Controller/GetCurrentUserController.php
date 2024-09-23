@@ -62,7 +62,6 @@ class GetCurrentUserController extends AbstractController
                 'phone_number' => $currentUser->getPhoneNumber(),
                 'isVerified' => $currentUser->isVerified(),
                 'user_radius_profiles' => $currentUser->getUserRadiusProfiles(),
-                'verification_code' => $currentUser->getVerificationCode(),
                 'banned_at' => $currentUser->getBannedAt(),
                 'deleted_at' => $currentUser->getDeletedAt(),
                 'forgot_password_request' => $currentUser->isForgotPasswordRequest(),
