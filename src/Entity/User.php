@@ -484,18 +484,21 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account ID.',
+                'description' => 'This endpoint authenticates a user using their Google account. A valid Google OAuth authorization code is required.',
                 'requestBody' => [
-                    'description' => 'Google account ID and CAPTCHA validation token',
+                    'description' => 'Google authorization code',
                     'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'googleId' => ['type' => 'string', 'example' => 'google-account-id-example'],
+                                    'code' => [
+                                        'type' => 'string',
+                                        'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR'
+                                    ],
                                 ],
-                                'required' => ['googleId'],
+                                'required' => ['code'],
                             ],
                         ],
                     ],
@@ -517,21 +520,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'type' => 'object',
                                                     'properties' => [
                                                         'id' => ['type' => 'integer', 'example' => 1],
-                                                        'email' => [
-                                                            'type' => 'string',
-                                                            'example' => 'user@example.com'
-                                                        ],
-                                                        'uuid' => [
-                                                            'type' => 'string',
-                                                            'example' => 'user-uuid-example'
-                                                        ],
+                                                        'email' => ['type' => 'string', 'example' => 'john_doe@example.com'],
+                                                        'uuid' => ['type' => 'string', 'example' => 'user-uuid-example'],
                                                         'roles' => [
                                                             'type' => 'array',
                                                             'items' => ['type' => 'string'],
                                                             'example' => ['ROLE_USER'],
                                                         ],
-                                                        'first_name' => ['type' => 'string', 'example' => 'John'],
-                                                        'last_name' => ['type' => 'string', 'example' => 'Doe'],
+                                                        'firstname' => ['type' => 'string', 'example' => 'John'],
+                                                        'lastname' => ['type' => 'string', 'example' => 'Doe'],
                                                         'user_external_auths' => [
                                                             'type' => 'array',
                                                             'items' => [
@@ -553,22 +550,22 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             ],
                                         ],
                                     ],
-                                ],
-                                'example' => [
-                                    'success' => true,
-                                    'data' => [
-                                        'token' => 'jwt-token-example',
-                                        'user' => [
-                                            'id' => 1,
-                                            'email' => 'user@example.com',
-                                            'uuid' => 'user-uuid-example',
-                                            'roles' => ['ROLE_USER'],
-                                            'first_name' => 'John',
-                                            'last_name' => 'Doe',
-                                            'user_external_auths' => [
-                                                [
-                                                    'provider' => 'Google',
-                                                    'provider_id' => 'google-id-example',
+                                    'example' => [
+                                        'success' => true,
+                                        'data' => [
+                                            'token' => 'jwt-token-example',
+                                            'user' => [
+                                                'id' => 1,
+                                                'email' => 'john_doe@example.com',
+                                                'uuid' => 'user-uuid-example',
+                                                'roles' => ['ROLE_USER'],
+                                                'firstname' => 'John',
+                                                'lastname' => 'Doe',
+                                                'user_external_auths' => [
+                                                    [
+                                                        'provider' => 'Google',
+                                                        'provider_id' => 'google-id-example',
+                                                    ],
                                                 ],
                                             ],
                                         ],
@@ -577,27 +574,65 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '401' => [
-                        'description' => 'Authentication failed due to invalid external auth or provider issues',
+                    '400' => [
+                        'description' => 'Bad request due to missing or invalid parameters',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => ['type' => 'boolean', 'example' => false],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => ['type' => 'string', 'example' => 'Authentication Failed'],
-                                            ],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Missing authorization code!',
                                         ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
-                                    'data' => [
-                                        'error' => 'Authentication Failed',
+                                    'message' => 'Missing authorization code!',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '401' => [
+                        'description' => 'Authentication failed due to invalid Google credentials',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Authentication Failed: Invalid Google credentials.',
+                                        ],
                                     ],
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'message' => 'Authentication Failed: Invalid Google credentials.',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '500' => [
+                        'description' => 'Server error due to internal issues or Google API failure',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'An error occurred: Could not connect to Google API.',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'message' => 'An error occurred: Could not connect to Google API.',
                                 ],
                             ],
                         ],
@@ -1720,6 +1755,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             'firstName' => $this->getFirstName(),
             'lastName' => $this->getLastName(),
             'userExternalAuths' => $userExternalAuths,
+            'createdAt' => $this->getCreatedAt()?->format(DATE_ATOM),
         ];
 
         return array_merge($responseData, $additionalData);
