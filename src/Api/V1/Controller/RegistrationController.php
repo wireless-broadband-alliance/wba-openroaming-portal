@@ -107,7 +107,7 @@ class RegistrationController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
         if (!isset($data['cf-turnstile-response'])) {
@@ -198,7 +198,7 @@ class RegistrationController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
         if (!isset($data['cf-turnstile-response'])) {
@@ -327,7 +327,7 @@ class RegistrationController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
         if (!isset($data['cf-turnstile-response'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
@@ -414,7 +414,7 @@ class RegistrationController extends AbstractController
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Syntax error: Invalid JSON'))->toResponse(); // Invalid Json
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
         if (!isset($dataRequest['cf-turnstile-response'])) {
