@@ -28,13 +28,16 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,
             shortName: 'User',
-            security: "is_granted('ROLE_USER') and object.owner == user",
+            security: 'is_granted("IS_AUTHENTICATED_FULLY")',
             securityMessage: "You don't have permission to access this resource",
             paginationEnabled: false,
             name: 'api_get_current_user',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
                 'description' => 'This endpoint returns the details of the currently authenticated user.',
+                'security' => [
+                    ['BearerAuth' => []]
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'User details retrieved successfully',
@@ -88,8 +91,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'uuid' => 'user@example.com',
                                         'email' => 'user@example.com',
                                         'roles' => ['ROLE_USER'],
-                                        'firstName' => 'Nbo',
-                                        'lastName' => 'Saltitante',
+                                        'firstName' => 'John',
+                                        'lastName' => 'Doe',
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'Portal Account',
@@ -107,7 +110,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'description' => 'Unauthorized - Access token is missing, invalid, or user account is unverified/banned.',
+                        // phpcs:enable
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -122,15 +127,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'error' => 'Unauthorized - You do not have permission to access this resource.',
                                 ],
                             ],
-                        ],
-                    ],
-                ],
-                'security' => [
-                    [
-                        'BearerAuth' => [
-                            'scheme' => 'Bearer',
-                            'bearerFormat' => 'JWT',
-                            'example' => 'Bearer <JWT_TOKEN>',
                         ],
                     ],
                 ],
@@ -261,15 +257,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                             ],
-                        ],
-                    ],
-                ],
-                'security' => [
-                    [
-                        'BearerAuth' => [
-                            'scheme' => 'Bearer',
-                            'bearerFormat' => 'JWT',
-                            'example' => 'Bearer <JWT_TOKEN>',
                         ],
                     ],
                 ],
@@ -1108,11 +1095,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-                'security' => [
-                    [
-                        'BearerAuth' => [] // This will require the user to authorize using JWT
-                    ],
-                ],
             ],
         ),
         new Post(
@@ -1283,34 +1265,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-                'security' => [
-                    [
-                        'BearerAuth' => [
-                            'type' => 'http',
-                            'scheme' => 'bearer',
-                            'bearerFormat' => 'JWT',
-                        ],
-                    ],
-                ],
             ],
         ),
-    ],
-    openapiContext: [
-        'components' => [
-            'securitySchemes' => [
-                'bearerAuth' => [
-                    'type' => 'http',
-                    'scheme' => 'bearer',
-                    'bearerFormat' => 'JWT',
-                    'description' => 'JWT Authorization header using the Bearer scheme.',
-                ],
-            ],
-        ],
-        'security' => [
-            [
-                'bearerAuth' => [],
-            ],
-        ],
     ],
 )]
 #[UniqueEntity(fields: ['uuid'], message: 'There is already an account with this uuid')]
