@@ -4,6 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use DateTime;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,14 +37,22 @@ class GetCurrentUserController extends AbstractController
 
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
             /** @var User $currentUser */
-
             $currentUser = $token->getUser();
+
             if (!$currentUser->isVerified()) {
                 return (
                 new BaseResponse(
                     401,
                     ['verification code' => $currentUser->getVerificationCode()],
                     'User account is not verified.'
+                ))->toResponse();
+            }
+
+            if ($currentUser->getBannedAt()) {
+                return (
+                new BaseResponse(
+                    401,
+                    'User account is banned from the system.'
                 ))->toResponse();
             }
 
