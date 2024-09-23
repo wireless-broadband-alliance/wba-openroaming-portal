@@ -1015,13 +1015,11 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
-                'summary' => 'Trigger a password reset for a local auth account (Requires Authorization)',
+                'summary' => 'Trigger a password reset for a local auth account',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-        The user must be authenticated using a Bearer token. 
-        To use this endpoint, click on the "Authorize" button at the top of the Swagger UI and
-         provide your JWT token in the format: `Bearer JWT_Token`. 
-         The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
-         then proceeds with the password reset if the conditions are met.',
+        The user must provide their email and a CAPTCHA validation token. 
+        The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
+        then proceeds with the password reset if the conditions are met.',
                 'requestBody' => [
                     'description' => 'Password reset request data, including CAPTCHA validation token and user email',
                     'required' => true,
@@ -1033,7 +1031,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
+                                        'example' => 'valid_test_token',
                                     ],
                                     'email' => [
                                         'type' => 'string',
@@ -1227,31 +1225,36 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_sms_reset',
             openapiContext: [
                 'summary' => 'Trigger a password reset for an SMS auth account',
-                'description' => 'This endpoint sends an SMS with a new verification code if the user has a valid
-                 PortalAccount and has not exceeded the SMS request limits. It also checks if the required time
-                  interval has passed before allowing a new request.',
+                'description' => 'This endpoint sends an SMS with a new password and verification code 
+        if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also
+        enforces the time interval between requests and limits the number of attempts allowed.',
                 'requestBody' => [
-                    'description' => 'Password reset request data including CAPTCHA validation token',
+                    'description' => 'Password reset request data including CAPTCHA token and user phone number.',
                     'required' => true,
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
+                                    'phoneNumber' => [
+                                        'type' => 'string',
+                                        'description' => 'The phone number of the user requesting password reset',
+                                        'example' => '+1234567890',
+                                    ],
                                     'turnstileToken' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['turnstileToken'],
+                                'required' => ['phoneNumber', 'turnstileToken'],
                             ],
                         ],
                     ],
                 ],
                 'responses' => [
                     '200' => [
-                        'description' => 'Successfully sent the SMS with the new verification code',
+                        'description' => 'Successfully sent the SMS with a new password and verification code.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1286,7 +1289,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
+                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1298,11 +1301,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'Invalid data or CAPTCHA validation failed',
+                                            'example' => 'Invalid data or CAPTCHA validation failed.',
                                         ],
                                         'details' => [
                                             'type' => 'string',
-                                            'example' => 'Invalid data or CAPTCHA token.',
+                                            'example' => 'Please include the required phoneNumber and CAPTCHA token.',
                                         ],
                                     ],
                                 ],
@@ -1312,7 +1315,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid data',
-                                            'details' => 'Please include the CAPTCHA token.',
+                                            'details' => 'Please include the phone number and CAPTCHA token.',
                                         ],
                                     ],
                                     'captcha_invalid' => [
@@ -1327,8 +1330,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '429' => [
-                        'description' => 'Too Many Requests - Rate limit exceeded or attempt limit reached',
+                    '404' => [
+                        'description' => 'User with the provided phone number not found.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1340,7 +1343,27 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'Rate limit exceeded',
+                                            'example' => 'User with provider phone number not found!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '429' => [
+                        'description' => 'Too Many Requests - Rate limit exceeded or attempt limit reached.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Rate limit exceeded.',
                                         ],
                                         'details' => [
                                             'type' => 'string',
@@ -1357,7 +1380,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '500' => [
-                        'description' => 'Server error while processing the request',
+                        'description' => 'Server error while processing the request.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1370,7 +1393,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the server error occurred',
-                                            'example' => 'An unexpected error occurred while processing the request',
+                                            'example' => 'An unexpected error occurred while processing the request.',
                                         ],
                                         'details' => [
                                             'type' => 'string',
