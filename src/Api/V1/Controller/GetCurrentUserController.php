@@ -36,7 +36,16 @@ class GetCurrentUserController extends AbstractController
 
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
             /** @var User $currentUser */
+
             $currentUser = $token->getUser();
+            if (!$currentUser->isVerified()) {
+                return (
+                new BaseResponse(
+                    401,
+                    ['verification code' => $currentUser->getVerificationCode()],
+                    'User account is not verified.'
+                ))->toResponse();
+            }
 
             // Utilize the toApiResponse method to generate the response content
             $content = $currentUser->toApiResponse([
