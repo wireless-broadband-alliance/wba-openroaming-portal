@@ -30,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: '🔒 User',
             security: "is_granted('ROLE_USER')",
             securityMessage: "You don't have permission to access this resource",
+            paginationEnabled: false,
             name: 'api_get_current_user',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
@@ -46,20 +47,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'uuid' => ['type' => 'string'],
-                                                'email' => ['type' => 'string'],
-                                                'roles' => [
+                                                'phone_number' => ['type' => 'string'],
+                                                'isVerified' => ['type' => 'boolean'],
+                                                'user_radius_profiles' => [
                                                     'type' => 'array',
                                                     'items' => ['type' => 'string']
                                                 ],
-                                                'isVerified' => ['type' => 'boolean'],
-                                                'phone_number' => ['type' => 'string'],
-                                                'firstName' => ['type' => 'string'],
-                                                'lastName' => ['type' => 'string'],
                                                 'verification_code' => ['type' => 'integer'],
-                                                'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                                'bannedAt' => ['type' => 'string', 'format' => 'date-time'],
-                                                'deletedAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'banned_at' => ['type' => 'string', 'format' => 'date-time'],
+                                                'deleted_at' => ['type' => 'string', 'format' => 'date-time'],
                                                 'forgot_password_request' => ['type' => 'boolean'],
                                             ],
                                         ],
@@ -68,17 +64,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => true,
                                     'data' => [
-                                        'uuid' => 'abc123',
-                                        'email' => 'user@example.com',
-                                        'roles' => ['ROLE_USER'],
-                                        'isVerified' => true,
                                         'phone_number' => '+19700XXXXXX',
-                                        'firstName' => 'John',
-                                        'lastName' => 'Doe',
+                                        'isVerified' => true,
+                                        'user_radius_profiles' => ['profile1', 'profile2'],
                                         'verification_code' => 123456,
-                                        'createdAt' => '2023-01-01T00:00:00+00:00',
-                                        'bannedAt' => '2023-01-01T00:00:00+00:00',
-                                        'deletedAt' => '2023-01-01T00:00:00+00:00',
+                                        'banned_at' => '2023-01-01T00:00:00+00:00',
+                                        'deleted_at' => '2023-01-01T00:00:00+00:00',
                                         'forgot_password_request' => false,
                                     ],
                                 ],
@@ -86,7 +77,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'Unauthorized - Access token is missing or invalid',
+                        'description' => 'Unauthorized - Access token is missing, invalid, or user account is unverified/banned.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -96,9 +87,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'Unauthorized - You do not have permission to access this resource.',
+                                'examples' => [
+                                    'unverified_user' => [
+                                        'summary' => 'Unverified User',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified.',
+                                            'verification_code' => 123456,
+                                        ],
+                                    ],
+                                    'banned_user' => [
+                                        'summary' => 'Banned User',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system.',
+                                        ],
+                                    ],
+                                    'unauthenticated_user' => [
+                                        'summary' => 'Unauthenticated User',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Unauthorized - You do not have permission to access this resource.',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
