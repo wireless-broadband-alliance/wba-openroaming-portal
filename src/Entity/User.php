@@ -47,15 +47,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'phone_number' => ['type' => 'string'],
-                                                'isVerified' => ['type' => 'boolean'],
-                                                'user_radius_profiles' => [
+                                                'uuid' => ['type' => 'string'],
+                                                'email' => ['type' => 'string'],
+                                                'roles' => [
                                                     'type' => 'array',
                                                     'items' => ['type' => 'string']
                                                 ],
-                                                'verification_code' => ['type' => 'integer'],
-                                                'banned_at' => ['type' => 'string', 'format' => 'date-time'],
-                                                'deleted_at' => ['type' => 'string', 'format' => 'date-time'],
+                                                'first_name' => ['type' => 'string'],
+                                                'last_name' => ['type' => 'string'],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => ['type' => 'string'],
+                                                            'provider_id' => ['type' => 'string']
+                                                        ]
+                                                    ]
+                                                ],
+                                                'phone_number' => ['type' => 'string', 'nullable' => true],
+                                                'isVerified' => ['type' => 'boolean'],
+                                                'user_radius_profiles' => ['type' => 'object'],
+                                                'verification_code' => ['type' => 'string'],
+                                                'banned_at' => [
+                                                    'type' => 'string',
+                                                    'format' => 'date-time',
+                                                    'nullable' => true
+                                                ],
+                                                'deleted_at' => [
+                                                    'type' => 'string',
+                                                    'format' => 'date-time',
+                                                    'nullable' => true
+                                                ],
                                                 'forgot_password_request' => ['type' => 'boolean'],
                                             ],
                                         ],
@@ -64,12 +87,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => true,
                                     'data' => [
-                                        'phone_number' => '+19700XXXXXX',
+                                        'uuid' => 'user@example.com',
+                                        'email' => 'user@example.com',
+                                        'roles' => ['ROLE_USER'],
+                                        'first_name' => 'Nbo',
+                                        'last_name' => 'Saltitante',
+                                        'user_external_auths' => [
+                                            [
+                                                'provider' => 'Portal Account',
+                                                'provider_id' => 'Email || Phone Number'
+                                            ],
+                                        ],
+                                        'phone_number' => null,
                                         'isVerified' => true,
-                                        'user_radius_profiles' => ['profile1', 'profile2'],
-                                        'verification_code' => 123456,
-                                        'banned_at' => '2023-01-01T00:00:00+00:00',
-                                        'deleted_at' => '2023-01-01T00:00:00+00:00',
+                                        'user_radius_profiles' => [],
+                                        'verification_code' => '000000',
+                                        'banned_at' => null,
+                                        'deleted_at' => null,
                                         'forgot_password_request' => false,
                                     ],
                                 ],
@@ -87,29 +121,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'examples' => [
-                                    'unverified_user' => [
-                                        'summary' => 'Unverified User',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified.',
-                                            'verification_code' => 123456,
-                                        ],
-                                    ],
-                                    'banned_user' => [
-                                        'summary' => 'Banned User',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is banned from the system.',
-                                        ],
-                                    ],
-                                    'unauthenticated_user' => [
-                                        'summary' => 'Unauthenticated User',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Unauthorized - You do not have permission to access this resource.',
-                                        ],
-                                    ],
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'Unauthorized - You do not have permission to access this resource.',
                                 ],
                             ],
                         ],
