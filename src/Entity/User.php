@@ -691,10 +691,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email and validates 
-                the request with a CAPTCHA token.',
+                'description' => 'This endpoint registers a new user using their email and password,
+                 with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
+                 and CAPTCHA verification. If the user already exists, it returns a conflict error.',
                 'requestBody' => [
-                    'description' => 'User registration data and CAPTCHA validation token',
+                    'description' => 'User registration data and CAPTCHA validation token. 
+                    The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
                     'required' => true,
                     'content' => [
                         'application/json' => [
@@ -704,27 +706,27 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'email' => [
                                         'type' => 'string',
                                         'example' => 'user@example.com',
-                                        'description' => 'User email address'
+                                        'description' => 'User email address',
                                     ],
                                     'password' => [
                                         'type' => 'string',
                                         'example' => 'strongpassword',
-                                        'description' => 'User password'
+                                        'description' => 'User password',
                                     ],
                                     'first_name' => [
                                         'type' => 'string',
                                         'example' => 'John',
-                                        'description' => 'First name of the user'
+                                        'description' => 'First name of the user',
                                     ],
                                     'last_name' => [
                                         'type' => 'string',
                                         'example' => 'Doe',
-                                        'description' => 'Last name of the user'
+                                        'description' => 'Last name of the user',
                                     ],
                                     'turnstileToken' => [
                                         'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
+                                        'description' => 'The CAPTCHA validation token from Turnstile',
+                                        'example' => 'valid_test_token',
                                     ],
                                 ],
                                 'required' => ['email', 'password', 'turnstileToken'],
@@ -780,8 +782,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'properties' => [
                                                 'error' => [
                                                     'type' => 'string',
-                                                    'description' => 'Error message for why the request failed',
-                                                    'example' => 'Missing required fields or invalid data',
+                                                    'description' => 'Error message for invalid data',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'example' => 'Missing required fields: email, password or turnstileToken',
+                                                    // phpcs:enable
                                                 ],
                                             ],
                                         ],
@@ -789,13 +793,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 ],
                                 'examples' => [
                                     'missing_data' => [
-                                        'summary' => 'Missing required data',
+                                        'summary' => 'Missing required fields',
                                         'value' => [
                                             'success' => false,
                                             'data' => [
-                                                // phpcs:disable Generic.Files.LineLength.TooLong
                                                 'error' => 'Missing required fields: email, password or turnstileToken',
-                                                // phpcs:enable
                                             ],
                                         ],
                                     ],
@@ -828,9 +830,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'properties' => [
                                                 'error' => [
                                                     'type' => 'string',
-                                                    // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'description' => 'Error message when the user could not be registered',
-                                                    // phpcs:enable
+                                                    'description' => 'Error when the user already exists',
                                                     'example' => 'This User already exists',
                                                 ],
                                             ],
