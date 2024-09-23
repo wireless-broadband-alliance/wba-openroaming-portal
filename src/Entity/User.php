@@ -27,8 +27,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,
-            shortName: '🔒 User',
-            security: "is_granted('ROLE_USER')",
+            shortName: 'User',
+            security: 'is_granted("ROLE_USER")',
             securityMessage: "You don't have permission to access this resource",
             paginationEnabled: false,
             name: 'api_get_current_user',
@@ -139,7 +139,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/local',
             controller: AuthController::class,
-            shortName: '🔓 User Auth',
+            shortName: 'User Auth',
             name: 'api_auth_local',
             openapiContext: [
                 'summary' => 'Authenticate a user locally',
@@ -266,7 +266,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
                 'security' => [
                     [
-                        'bearerAuth' => [],
+                        'BearerAuth' => [
+                            'scheme' => 'Bearer',
+                            'bearerFormat' => 'JWT',
+                            'example' => 'Bearer <JWT_TOKEN>',
+                        ],
                     ],
                 ],
             ],
@@ -274,7 +278,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/saml',
             controller: AuthController::class,
-            shortName: '🔓 User Auth',
+            shortName: 'User Auth',
             name: 'api_auth_saml',
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
@@ -483,7 +487,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/google',
             controller: AuthController::class,
-            shortName: '🔓 User Auth',
+            shortName: 'User Auth',
             name: 'api_auth_google',
             openapiContext: [
                 'summary' => 'Authenticate a user via Google',
@@ -611,7 +615,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/local/register',
             controller: RegistrationController::class,
-            shortName: '🔓 User Auth Register',
+            shortName: 'User Auth Register',
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
@@ -776,7 +780,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/sms/register',
             controller: RegistrationController::class,
-            shortName: '🔓 User Auth Register',
+            shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
@@ -936,7 +940,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/local/reset',
             controller: AuthController::class,
-            shortName: '🔓 User Auth Reset',
+            shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
                 'summary' => 'Trigger a password reset for a local auth account (Requires Authorization)',
@@ -1114,7 +1118,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/v1/auth/sms/reset',
             controller: AuthController::class,
-            shortName: '🔓 User Auth Reset',
+            shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
             openapiContext: [
                 'summary' => 'Trigger a password reset for an SMS auth account',
