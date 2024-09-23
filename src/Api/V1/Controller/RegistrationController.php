@@ -201,6 +201,18 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
+        if (empty($data['email'])) {
+            $errors[] = 'email';
+        }
+        if (!empty($errors)) {
+            return (
+            new BaseResponse(
+                400,
+                ['fields_missing' => $errors],
+                'Invalid data: Missing required fields.'
+            ))->toResponse();
+        }
+
         if (!isset($data['cf-turnstile-response'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
@@ -208,104 +220,96 @@ class RegistrationController extends AbstractController
         if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
-        $token = $this->tokenStorage->getToken();
 
-        // Check if the token is present and of the correct type
-        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
-            /** @var User $currentUser */
-            $currentUser = $token->getUser();
+        $user = $this->userRepository->findOneBy(['email' => $data['email']]);
+        if (!$user) {
+            return (new BaseResponse(404, null, 'User with provider email nor found!'))->toResponse();
+        }
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+        $hasValidPortalAccount = false;
 
-            // Check for valid external auth
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
-            $hasValidPortalAccount = false;
-
-            foreach ($userExternalAuths as $auth) {
-                if (
-                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
-                    $auth->getProviderId() === UserProvider::EMAIL
-                ) {
-                    $hasValidPortalAccount = true;
-                    break;
-                }
+        foreach ($userExternalAuths as $auth) {
+            if (
+                $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
+                $auth->getProviderId() === UserProvider::EMAIL
+            ) {
+                $hasValidPortalAccount = true;
+                break;
             }
-
-            if ($hasValidPortalAccount) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $currentUser,
-                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
-                );
-                $minInterval = new DateInterval('PT2M');
-                $currentTime = new DateTime();
-                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
-                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                    : null;
-
-                // Check if enough time has passed since the last password reset request
-                if (
-                    !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
-                ) {
-                    if (!$latestEvent) {
-                        $latestEvent = new Event();
-                        $latestEvent->setUser($currentUser);
-                        $latestEvent->setEventDatetime(new DateTime());
-                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
-                        $latestEventMetadata = [
-                            'platform' => PlatformMode::LIVE,
-                            'ip' => $request->getClientIp(),
-                            'uuid' => $currentUser->getUuid(),
-                        ];
-                    }
-
-                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
-                    $latestEvent->setEventMetadata($latestEventMetadata);
-
-                    $currentUser->setForgotPasswordRequest(true);
-                    $this->eventRepository->save($latestEvent, true);
-
-                    $randomPassword = bin2hex(random_bytes(4));
-                    $hashedPassword = $userPasswordHasher->hashPassword($currentUser, $randomPassword);
-                    $currentUser->setPassword($hashedPassword);
-                    $this->entityManager->persist($currentUser);
-                    $this->entityManager->flush();
-
-                    $email = (new TemplatedEmail())
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($currentUser->getEmail())
-                        ->subject('OpenRoaming Portal - Password Request')
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $currentUser->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $currentUser->getVerificationCode(),
-                        ]);
-
-                    $mailer->send($email);
-
-                    return (new BaseResponse(200, [
-                        'message' => sprintf('We have sent you a new email to: %s.', $currentUser->getEmail())
-                    ]))->toResponse();
-                }
-
-                return (new BaseResponse(429, null, 'Please wait 2 minutes before trying again.'))->toResponse(
-                ); // Too Many Requests Response
-            }
-
-            return (new BaseResponse(403, null, 'Invalid credentials - Provider not allowed.'))->toResponse(
-            ); // Forbidden Response
         }
 
-        return (new BaseResponse(400, null, 'Please make sure to include the JWT token.'))->toResponse(
-        ); // Bad Request Response
+        if ($hasValidPortalAccount) {
+            $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                $user,
+                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
+            );
+            $minInterval = new DateInterval('PT2M');
+            $currentTime = new DateTime();
+            $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+            $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                : null;
+
+            // Check if enough time has passed since the last password reset request
+            if (
+                !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
+                    $minInterval
+                ) < $currentTime)
+            ) {
+                if (!$latestEvent) {
+                    $latestEvent = new Event();
+                    $latestEvent->setUser($user);
+                    $latestEvent->setEventDatetime(new DateTime());
+                    $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                    $latestEventMetadata = [
+                        'platform' => PlatformMode::LIVE,
+                        'ip' => $request->getClientIp(),
+                        'uuid' => $user->getUuid(),
+                    ];
+                }
+
+                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
+                $latestEvent->setEventMetadata($latestEventMetadata);
+
+                $user->setForgotPasswordRequest(true);
+                $this->eventRepository->save($latestEvent, true);
+
+                $randomPassword = bin2hex(random_bytes(4));
+                $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                $user->setPassword($hashedPassword);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+
+                $email = (new TemplatedEmail())
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject('OpenRoaming Portal - Password Request')
+                    ->htmlTemplate('email/user_forgot_password_request.html.twig')
+                    ->context([
+                        'password' => $randomPassword,
+                        'forgotPasswordUser' => true,
+                        'uuid' => $user->getUuid(),
+                        'currentPassword' => $randomPassword,
+                        'verificationCode' => $user->getVerificationCode(),
+                    ]);
+
+                $mailer->send($email);
+
+                return (new BaseResponse(200, [
+                    'message' => sprintf('We have sent you a new email to: %s.', $user->getEmail())
+                ]))->toResponse();
+            }
+
+            return (new BaseResponse(429, null, 'Please wait 2 minutes before trying again.'))->toResponse(
+            ); // Too Many Requests Response
+        }
+
+        return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
     }
 
     /**
