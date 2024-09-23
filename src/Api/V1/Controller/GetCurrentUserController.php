@@ -61,7 +61,6 @@ class GetCurrentUserController extends AbstractController
             $content = $currentUser->toApiResponse([
                 'phone_number' => $currentUser->getPhoneNumber(),
                 'isVerified' => $currentUser->isVerified(),
-                'user_radius_profiles' => $currentUser->getUserRadiusProfiles(),
                 'banned_at' => $currentUser->getBannedAt(),
                 'deleted_at' => $currentUser->getDeletedAt(),
                 'forgot_password_request' => $currentUser->isForgotPasswordRequest(),
