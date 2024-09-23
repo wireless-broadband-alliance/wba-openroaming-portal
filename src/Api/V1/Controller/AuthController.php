@@ -117,6 +117,24 @@ class AuthController extends AbstractController
             ); # Unauthorized Request Response
         }
 
+        if (!$user->isVerified()) {
+            return (
+            new BaseResponse(
+                401,
+                ['verification code' => $user->getVerificationCode()],
+                'User account is not verified.'
+            ))->toResponse();
+        }
+
+        if ($user->getBannedAt()) {
+            return (
+            new BaseResponse(
+                401,
+                null,
+                'User account is banned from the system.'
+            ))->toResponse();
+        }
+
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
 
@@ -194,6 +212,15 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
+            if ($user->getBannedAt()) {
+                return (
+                new BaseResponse(
+                    401,
+                    null,
+                    'User account is banned from the system.'
+                ))->toResponse();
+            }
+
             // Generate JWT token for the user
             $token = $this->tokenGenerator->generateToken($user);
 
@@ -249,6 +276,15 @@ class AuthController extends AbstractController
             // If user retrieval fails
             if ($user === null) {
                 return (new BaseResponse(400, null, 'User creation failed or email is not allowed.'))->toResponse();
+            }
+
+            if ($user->getBannedAt()) {
+                return (
+                new BaseResponse(
+                    401,
+                    null,
+                    'User account is banned from the system.'
+                ))->toResponse();
             }
 
             // Authenticate the user using custom Google authentication function already on the project
