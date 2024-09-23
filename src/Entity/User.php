@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,
             shortName: 'User',
-            security: 'is_granted("ROLE_USER")',
+            security: "is_granted('ROLE_USER') and object.owner == user",
             securityMessage: "You don't have permission to access this resource",
             paginationEnabled: false,
             name: 'api_get_current_user',
