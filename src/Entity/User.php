@@ -31,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             paginationEnabled: false,
             name: 'api_get_current_user',
             security: "is_granted('IS_AUTHENTICATED_FULLY')",
-            securityMessage: 'Sorry, but you are not the book owner.',
+            securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
             openapiContext: [
                 'summary' => 'Retrieve current authenticated user',
                 'description' => 'This endpoint returns the details of the currently authenticated user.',
