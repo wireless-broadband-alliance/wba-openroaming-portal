@@ -60,8 +60,8 @@ class GetCurrentUserController extends AbstractController
             $content = $currentUser->toApiResponse([
                 'phoneNumber' => $currentUser->getPhoneNumber(),
                 'isVerified' => $currentUser->isVerified(),
-                'bannedAT' => $currentUser->getBannedAt(),
-                'deletedAt' => $currentUser->getDeletedAt(),
+                'bannedAT' => $currentUser->getBannedAt()?->format(DATE_ATOM),
+                'deletedAt' => $currentUser->getDeletedAt()?->format(DATE_ATOM),
                 'forgotPasswordRequest' => $currentUser->isForgotPasswordRequest(),
             ]);
 
