@@ -53,8 +53,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'type' => 'array',
                                                     'items' => ['type' => 'string']
                                                 ],
-                                                'first_name' => ['type' => 'string'],
-                                                'last_name' => ['type' => 'string'],
+                                                'firstName' => ['type' => 'string'],
+                                                'lastName' => ['type' => 'string'],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -65,14 +65,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         ]
                                                     ]
                                                 ],
-                                                'phone_number' => ['type' => 'string', 'nullable' => true],
+                                                'phoneNumber' => ['type' => 'string', 'nullable' => true],
                                                 'isVerified' => ['type' => 'boolean'],
-                                                'banned_at' => [
+                                                'bannedAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
                                                     'nullable' => true
                                                 ],
-                                                'deleted_at' => [
+                                                'deletedAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
                                                     'nullable' => true
@@ -88,18 +88,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'uuid' => 'user@example.com',
                                         'email' => 'user@example.com',
                                         'roles' => ['ROLE_USER'],
-                                        'first_name' => 'Nbo',
-                                        'last_name' => 'Saltitante',
+                                        'firstName' => 'Nbo',
+                                        'lastName' => 'Saltitante',
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'Portal Account',
                                                 'provider_id' => 'Email || Phone Number'
                                             ],
                                         ],
-                                        'phone_number' => null,
+                                        'phoneNumber' => null,
                                         'isVerified' => true,
-                                        'banned_at' => null,
-                                        'deleted_at' => null,
+                                        'bannedAt' => null,
+                                        'deletedAt' => null,
                                         'forgot_password_request' => false,
                                     ],
                                 ],
