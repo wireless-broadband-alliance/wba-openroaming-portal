@@ -1017,13 +1017,13 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Trigger a password reset for a local auth account (Requires Authorization)',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
-                The user must be authenticated using a Bearer token. 
-                To use this endpoint, click on the "Authorize" button at the top of the Swagger UI and
-                 provide your JWT token in the format: `Bearer JWT_Token`. 
-                 The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
-                 then proceeds with the password reset if the conditions are met.',
+        The user must be authenticated using a Bearer token. 
+        To use this endpoint, click on the "Authorize" button at the top of the Swagger UI and
+         provide your JWT token in the format: `Bearer JWT_Token`. 
+         The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
+         then proceeds with the password reset if the conditions are met.',
                 'requestBody' => [
-                    'description' => 'Password reset request data including CAPTCHA validation token',
+                    'description' => 'Password reset request data, including CAPTCHA validation token and user email',
                     'required' => true,
                     'content' => [
                         'application/json' => [
@@ -1035,8 +1035,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
+                                    'email' => [
+                                        'type' => 'string',
+                                        'description' => 'The email of the user requesting the password reset',
+                                        'example' => 'user@example.com',
+                                    ],
                                 ],
-                                'required' => ['turnstileToken'],
+                                'required' => ['turnstileToken', 'email'],
                             ],
                         ],
                     ],
@@ -1087,22 +1092,22 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the request failed',
-                                            'example' => 'Invalid Data',
+                                            'example' => 'Invalid data or CAPTCHA validation failed',
                                         ],
                                         'details' => [
                                             'type' => 'string',
                                             'description' => 'Detailed error message',
-                                            'example' => 'Invalid data or CAPTCHA validation failed.',
+                                            'example' => 'Please make sure to include the required fields.',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'missing_data' => [
-                                        'summary' => 'Missing required data',
+                                        'summary' => 'Missing required fields',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid Data',
-                                            'details' => 'Please make sure to include the CAPTCHA token.',
+                                            'details' => 'Please include both email and CAPTCHA token.',
                                         ],
                                     ],
                                     'captcha_invalid' => [
@@ -1118,7 +1123,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'Forbidden - Invalid credentials or provider not allowed',
+                        'description' => 'Forbidden - User email or provider not allowed',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1136,14 +1141,47 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'details' => [
                                             'type' => 'string',
                                             'description' => 'Detailed error message',
-                                            'example' => 'Invalid credentials or provider is not allowed to reset.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Invalid credentials or provider is not allowed to reset the password.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
                                     'error' => 'Invalid credentials - Provider not allowed',
-                                    'details' => 'Forbidden due to invalid credentials or the provider is not allowed.',
+                                    'details' => 'The portal account does not allow password reset for this email.',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '404' => [
+                        'description' => 'User not found',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message indicating the user was not found',
+                                            'example' => 'User not found',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'No user found with the provided email.',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'User not found',
+                                    'details' => 'No user found with email: user@example.com.',
                                 ],
                             ],
                         ],
