@@ -1208,6 +1208,35 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    '401' => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'description' => 'Invalid account verification.',
+                        // phpcs:enable
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'error' => ['type' => 'string'],
+                                        'verification_code' => [
+                                            'type' => 'integer',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification_code' => '000000',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     '403' => [
                         'description' => 'Forbidden - User email or provider not allowed',
                         'content' => [
@@ -1412,6 +1441,35 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'success' => false,
                                             'error' => 'Invalid CAPTCHA token',
                                             'details' => 'The CAPTCHA token provided is invalid. Please try again.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '401' => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'description' => 'Invalid account verification.',
+                        // phpcs:enable
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'error' => ['type' => 'string'],
+                                        'verification_code' => [
+                                            'type' => 'integer',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification_code' => '000000',
                                         ],
                                     ],
                                 ],
