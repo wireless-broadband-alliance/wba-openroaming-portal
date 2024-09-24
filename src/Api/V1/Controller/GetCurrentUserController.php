@@ -2,15 +2,12 @@
 
 namespace App\Api\V1\Controller;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -65,10 +62,14 @@ class GetCurrentUserController extends AbstractController
                 'createdAt' => $currentUser->getCreatedAt()?->format(DATE_ATOM),
                 'forgotPasswordRequest' => $currentUser->isForgotPasswordRequest(),
             ]);
-            return (new BaseResponse(Response::HTTP_OK, $content))->toResponse();
+            return (new BaseResponse(200, $content))->toResponse();
         }
 
         // Handle the case where the user is not authenticated
-        return new JsonResponse(['error' => 'Unauthorized'], 401);
+        return (new BaseResponse(
+            401,
+            null,
+            'Unauthorized - You do not have permission to access this resource'
+        ))->toResponse(); // Bad Request Response
     }
 }
