@@ -83,11 +83,11 @@ class AuthController extends AbstractController
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); # Bad Request Response
         }
 
-        if (!isset($data['turnstileToken'])) {
+        if (!isset($data['turnstile_token'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 

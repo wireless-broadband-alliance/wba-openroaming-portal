@@ -109,11 +109,11 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
-        if (!isset($data['turnstileToken'])) {
+        if (!isset($data['turnstile_token'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
@@ -212,11 +212,11 @@ class RegistrationController extends AbstractController
             ))->toResponse();
         }
 
-        if (!isset($data['turnstileToken'])) {
+        if (!isset($data['turnstile_token'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
@@ -338,11 +338,11 @@ class RegistrationController extends AbstractController
         } catch (\JsonException $e) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
-        if (!isset($data['turnstileToken'])) {
+        if (!isset($data['turnstile_token'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['turnstileToken'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
@@ -438,11 +438,11 @@ class RegistrationController extends AbstractController
             ))->toResponse();
         }
 
-        if (!isset($dataRequest['turnstileToken'])) {
+        if (!isset($dataRequest['turnstile_token'])) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($dataRequest['turnstileToken'], $request->getClientIp())) {
+        if (!$this->captchaValidator->validate($dataRequest['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 

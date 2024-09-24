@@ -193,13 +193,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'Password of the user',
                                         'example' => 'user-password-example'
                                     ],
-                                    'turnstileToken' => [
+                                    'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['uuid', 'password', 'turnstileToken'],
+                                'required' => ['uuid', 'password', 'turnstile_token'],
                             ],
                         ],
                     ],
@@ -811,13 +811,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user',
                                     ],
-                                    'turnstileToken' => [
+                                    'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token from Turnstile',
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['email', 'password', 'turnstileToken'],
+                                'required' => ['email', 'password', 'turnstile_token'],
                             ],
                         ],
                     ],
@@ -872,7 +872,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'type' => 'string',
                                                     'description' => 'Error message for invalid data',
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'Missing required fields: email, password or turnstileToken',
+                                                    'example' => 'Missing required fields: email, password or turnstile_token',
                                                     // phpcs:enable
                                                 ],
                                             ],
@@ -885,7 +885,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'data' => [
-                                                'error' => 'Missing required fields: email, password or turnstileToken',
+                                                'error' => 'Missing required fields: email, password or turnstile_token',
                                             ],
                                         ],
                                     ],
@@ -974,13 +974,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'Doe',
                                         'description' => 'Last name of the user'
                                     ],
-                                    'turnstileToken' => [
+                                    'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['phoneNumber', 'password', 'turnstileToken'],
+                                'required' => ['phoneNumber', 'password', 'turnstile_token'],
                             ],
                         ],
                     ],
@@ -1047,7 +1047,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'success' => false,
                                             'error' => 'Missing data',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'details' => 'Missing required fields: phoneNumber, password or turnstileToken',
+                                            'details' => 'Missing required fields: phoneNumber, password or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1116,7 +1116,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'turnstileToken' => [
+                                    'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token',
@@ -1127,7 +1127,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'user@example.com',
                                     ],
                                 ],
-                                'required' => ['turnstileToken', 'email'],
+                                'required' => ['turnstile_token', 'email'],
                             ],
                         ],
                     ],
@@ -1358,13 +1358,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'The phone number of the user requesting password reset',
                                         'example' => '+1234567890',
                                     ],
-                                    'turnstileToken' => [
+                                    'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phoneNumber', 'turnstileToken'],
+                                'required' => ['phoneNumber', 'turnstile_token'],
                             ],
                         ],
                     ],
