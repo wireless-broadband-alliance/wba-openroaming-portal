@@ -28,4 +28,17 @@ class UserStatusChecker
 
         return null;
     }
+
+    public function checkUserVerification(User $user): ?BaseResponse
+    {
+        if (!$user->isVerified()) {
+            return new BaseResponse(
+                401,
+                ['verification code' => $user->getVerificationCode()],
+                'User account is not verified.'
+            );
+        }
+
+        return null;
+    }
 }

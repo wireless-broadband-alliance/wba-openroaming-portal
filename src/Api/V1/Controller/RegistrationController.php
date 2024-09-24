@@ -17,6 +17,7 @@ use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SendSMS;
+use App\Service\UserStatusChecker;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
@@ -34,7 +35,6 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -54,6 +54,7 @@ class RegistrationController extends AbstractController
     private UserPasswordHasherInterface $userPasswordHasher;
     private VerificationCodeGenerator $verificationCodeGenerator;
     private CaptchaValidator $captchaValidator;
+    private UserStatusChecker $userStatusChecker;
 
 
     public function __construct(
@@ -69,6 +70,7 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         VerificationCodeGenerator $verificationCodeGenerator,
         CaptchaValidator $captchaValidator,
+        UserStatusChecker $userStatusChecker,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -82,6 +84,7 @@ class RegistrationController extends AbstractController
         $this->userPasswordHasher = $userPasswordHasher;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->captchaValidator = $captchaValidator;
+        $this->userStatusChecker = $userStatusChecker;
     }
 
     /**
@@ -221,6 +224,12 @@ class RegistrationController extends AbstractController
         if (!$user) {
             return (new BaseResponse(404, null, 'User with provider email not found!'))->toResponse();
         }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserVerification($user);
+        if ($statusCheckerResponse !== null) {
+            return $statusCheckerResponse->toResponse();
+        }
+
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
         $hasValidPortalAccount = false;
 
@@ -442,6 +451,12 @@ class RegistrationController extends AbstractController
         if (!$user) {
             return (new BaseResponse(404, null, 'User with provider phone number not found!'))->toResponse();
         }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserVerification($user);
+        if ($statusCheckerResponse !== null) {
+            return $statusCheckerResponse->toResponse();
+        }
+
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
         $hasValidPortalAccount = false;
 
