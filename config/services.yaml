@@ -22,6 +22,7 @@ services:
     tags:
       - { name: 'kernel.event_subscriber' }
   App\Form\Transformer\BooleanToDateTimeTransformer: ~
+  App\Service\UserStatusChecker: ~
   #Things to make the login with Google work
   App\Controller\GoogleController:
     arguments:

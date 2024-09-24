@@ -10,6 +10,7 @@ use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\JWTTokenGenerator;
+use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -34,6 +35,7 @@ class AuthController extends AbstractController
     private CaptchaValidator $captchaValidator;
     private EntityManagerInterface $entityManager;
     private GoogleController $googleController;
+    private UserStatusChecker $userStatusChecker;
 
     /**
      * @param UserRepository $userRepository
@@ -42,6 +44,7 @@ class AuthController extends AbstractController
      * @param CaptchaValidator $captchaValidator
      * @param EntityManagerInterface $entityManager
      * @param GoogleController $googleController
+     * @param UserStatusChecker $userStatusChecker
      */
     public function __construct(
         UserRepository $userRepository,
@@ -50,6 +53,7 @@ class AuthController extends AbstractController
         CaptchaValidator $captchaValidator,
         EntityManagerInterface $entityManager,
         GoogleController $googleController,
+        UserStatusChecker $userStatusChecker,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
@@ -57,6 +61,7 @@ class AuthController extends AbstractController
         $this->captchaValidator = $captchaValidator;
         $this->entityManager = $entityManager;
         $this->googleController = $googleController;
+        $this->userStatusChecker = $userStatusChecker;
     }
 
     /**
@@ -117,22 +122,9 @@ class AuthController extends AbstractController
             ); # Unauthorized Request Response
         }
 
-        if (!$user->isVerified()) {
-            return (
-            new BaseResponse(
-                401,
-                ['verification code' => $user->getVerificationCode()],
-                'User account is not verified.'
-            ))->toResponse();
-        }
-
-        if ($user->getBannedAt()) {
-            return (
-            new BaseResponse(
-                401,
-                null,
-                'User account is banned from the system.'
-            ))->toResponse();
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+        if ($statusCheckerResponse !== null) {
+            return $statusCheckerResponse->toResponse();
         }
 
         // Generate JWT Token
@@ -212,13 +204,9 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            if ($user->getBannedAt()) {
-                return (
-                new BaseResponse(
-                    401,
-                    null,
-                    'User account is banned from the system.'
-                ))->toResponse();
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse !== null) {
+                return $statusCheckerResponse->toResponse();
             }
 
             // Generate JWT token for the user
@@ -278,13 +266,9 @@ class AuthController extends AbstractController
                 return (new BaseResponse(400, null, 'User creation failed or email is not allowed.'))->toResponse();
             }
 
-            if ($user->getBannedAt()) {
-                return (
-                new BaseResponse(
-                    401,
-                    null,
-                    'User account is banned from the system.'
-                ))->toResponse();
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse !== null) {
+                return $statusCheckerResponse->toResponse();
             }
 
             // Authenticate the user using custom Google authentication function already on the project
