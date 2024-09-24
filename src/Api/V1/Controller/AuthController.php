@@ -109,7 +109,7 @@ class AuthController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fieldsMissing' => $errors],
+                ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             )
             )->toResponse();

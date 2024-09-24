@@ -109,9 +109,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'Access token is missing, or user account is unverified/banned.',
-                        // phpcs:enable
+                        'description' => 'Access token is missing.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -121,7 +119,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'examples' => [
+                                'example' => [
                                     'missing_token' => [
                                         'summary' => 'Missing JWT Token',
                                         'value' => [
@@ -129,27 +127,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'JWT Token not found!',
                                         ],
                                     ],
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
-                                            'verification code' => '000000'
-                                        ],
-                                    ],
-                                    'banned_account' => [
-                                        'summary' => 'User account is banned',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is banned from the system!',
-                                        ],
-                                    ],
                                 ],
                             ],
                         ],
                     ],
                     '403' => [
-                        'description' => 'Unauthorized access - Invalid JWT Token.',
+                        'description' => 'Unauthorized Access - Invalid JWT Token - Account unverified/banned',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -174,6 +157,21 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'JWT Token is invalid!',
+                                        ],
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification code' => '000000'
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
                                         ],
                                     ],
                                 ],
@@ -319,9 +317,36 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'User not found, invalid credentials, account not verified, or account banned.',
-                        // phpcs:enable
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure'
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'invalid_credentials' => [
+                                        'summary' => 'Invalid credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'Account unverified/banned',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -338,13 +363,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'invalid_credentials' => [
-                                        'summary' => 'Invalid credentials',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid credentials',
-                                        ],
-                                    ],
                                     'invalid_verification' => [
                                         'summary' => 'User account is not verified',
                                         'value' => [
@@ -514,7 +532,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'Unauthorized due to invalid SAML assertion or user account issues.',
+                        'description' => 'Unauthorized due to invalid SAML assertion.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -538,7 +556,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'examples' => [
+                                'example' => [
                                     'invalid_saml' => [
                                         'summary' => 'Invalid SAML Assertion',
                                         'value' => [
@@ -549,6 +567,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             ],
                                         ],
                                     ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'Account unverified/banned',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
                                     'invalid_verification' => [
                                         'summary' => 'User account is not verified',
                                         'value' => [
@@ -686,9 +726,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'Authentication failed due to invalid Google credentials or user account issues.',
-                        // phpcs:enable
+                        'description' => 'Authentication failed due to invalid Google credentials.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -701,7 +739,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'examples' => [
+                                'example' => [
                                     'invalid_google_credentials' => [
                                         'summary' => 'Invalid Google credentials',
                                         'value' => [
@@ -709,12 +747,34 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'message' => 'Authentication Failed: Invalid Google credentials.',
                                         ],
                                     ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'Account unverified/banned',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
                                     'invalid_verification' => [
                                         'summary' => 'User account is not verified',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification code' => '000000',
+                                            'verification_code' => '000000',
                                         ],
                                     ],
                                     'banned_account' => [
@@ -1190,37 +1250,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '401' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'Invalid account verification.',
-                        // phpcs:enable
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => ['type' => 'boolean'],
-                                        'error' => ['type' => 'string'],
-                                        'verification_code' => [
-                                            'type' => 'integer',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
-                                            'verification_code' => '000000',
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
                     '403' => [
-                        'description' => 'Forbidden - User email or provider not allowed',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'description' => 'User email or provider not allowed - Invalid account verification',
+                        // phpcs:enable
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1244,10 +1277,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'Invalid credentials - Provider not allowed',
-                                    'details' => 'The portal account does not allow password reset for this email.',
+                                'examples' => [
+                                    'Invalid credentials' => [
+                                        'success' => false,
+                                        'error' => 'Invalid credentials - Provider not allowed',
+                                        'details' => 'The portal account does not allow password reset for this email.',
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification_code' => '000000',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -1429,10 +1472,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '401' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
+                    '403' => [
                         'description' => 'Invalid account verification.',
-                        // phpcs:enable
                         'content' => [
                             'application/json' => [
                                 'schema' => [
