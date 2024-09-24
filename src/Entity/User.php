@@ -145,6 +145,21 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification code' => 000000
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
