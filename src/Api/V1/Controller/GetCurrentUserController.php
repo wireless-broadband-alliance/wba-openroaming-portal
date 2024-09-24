@@ -93,7 +93,7 @@ class GetCurrentUserController extends AbstractController
 
         // Handle the case where the user is not authenticated
         return (new BaseResponse(
-            401,
+            403,
             null,
             'Unauthorized - You do not have permission to access this resource'
         ))->toResponse(); // Bad Request Response

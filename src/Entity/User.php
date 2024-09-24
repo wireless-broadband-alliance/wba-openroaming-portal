@@ -110,7 +110,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                     '401' => [
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'Unauthorized - Access token is missing, or user account is unverified/banned.',
+                        'description' => 'Access token is missing, or user account is unverified/banned.',
                         // phpcs:enable
                         'content' => [
                             'application/json' => [
@@ -127,15 +127,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'JWT Token not found!',
-                                        ],
-                                    ],
-                                    'unauthorized_access' => [
-                                        'summary' => 'Unauthorized Access',
-                                        'value' => [
-                                            'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Unauthorized - You do not have permission to access this resource.',
-                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_verification' => [
@@ -158,7 +149,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'Invalid JWT Token - Access token is invalid.',
+                        'description' => 'Unauthorized access - Invalid JWT Token.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -168,7 +159,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'example' => [
+                                'examples' => [
+                                    'unauthorized_access' => [
+                                        'summary' => 'Unauthorized Access',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
                                     'invalid_token' => [
                                         'summary' => 'Invalid JWT Token',
                                         'value' => [
