@@ -4,6 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Service\JWTTokenGenerator;
 use App\Service\UserStatusChecker;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,11 +20,16 @@ class GetCurrentUserController extends AbstractController
 {
     private TokenStorageInterface $tokenStorage;
     private UserStatusChecker $userStatusChecker;
+    private JWTTokenGenerator $JWTTokenGenerator;
 
-    public function __construct(TokenStorageInterface $tokenStorage, UserStatusChecker $userStatusChecker)
-    {
+    public function __construct(
+        TokenStorageInterface $tokenStorage,
+        UserStatusChecker $userStatusChecker,
+        JWTTokenGenerator $JWTTokenGenerator
+    ) {
         $this->tokenStorage = $tokenStorage;
         $this->userStatusChecker = $userStatusChecker;
+        $this->JWTTokenGenerator = $JWTTokenGenerator;
     }
 
     /**
@@ -39,6 +45,16 @@ class GetCurrentUserController extends AbstractController
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
             /** @var User $currentUser */
             $currentUser = $token->getUser();
+            /** @phpstan-ignore-next-line */ // This line is begin ignore because the getCredentials belongs to another service
+            $jwtTokenString = $token->getCredentials();
+
+            if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
+                return (new BaseResponse(
+                    401,
+                    null,
+                    'Unauthorized - Invalid JWT token'
+                ))->toResponse();
+            }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
             if ($statusCheckerResponse !== null) {
