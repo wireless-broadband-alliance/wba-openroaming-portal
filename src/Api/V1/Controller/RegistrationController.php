@@ -128,7 +128,7 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fieldsMissing' => $errors],
+                ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             )
             )->toResponse();
@@ -207,7 +207,7 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fieldsMissing' => $errors],
+                ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
@@ -347,8 +347,8 @@ class RegistrationController extends AbstractController
         }
 
         // Check for missing fields and add them to the array errors
-        if (empty($data['phoneNumber'])) {
-            $errors[] = 'phoneNumber';
+        if (empty($data['phone_number'])) {
+            $errors[] = 'phone_number';
         }
         if (empty($data['password'])) {
             $errors[] = 'password';
@@ -357,18 +357,18 @@ class RegistrationController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fieldsMissing' => $errors],
+                ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
 
-        if ($this->userRepository->findOneBy(['phoneNumber' => $data['phoneNumber']])) {
+        if ($this->userRepository->findOneBy(['phoneNumber' => $data['phone_number']])) {
             return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
         }
 
         $user = new User();
-        $user->setUuid($data['phoneNumber']);
-        $user->setPhoneNumber($data['phoneNumber']);
+        $user->setUuid($data['phone_number']);
+        $user->setPhoneNumber($data['phone_number']);
         // Hash the password
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
@@ -426,14 +426,14 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
 
-        if (empty($dataRequest['phoneNumber'])) {
-            $errors[] = 'phoneNumber';
+        if (empty($dataRequest['phone_number'])) {
+            $errors[] = 'phone_number';
         }
         if (!empty($errors)) {
             return (
             new BaseResponse(
                 400,
-                ['fieldsMissing' => $errors],
+                ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
@@ -446,7 +446,7 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
         }
 
-        $user = $this->userRepository->findOneBy(['phoneNumber' => $dataRequest['phoneNumber']]);
+        $user = $this->userRepository->findOneBy(['phoneNumber' => $dataRequest['phone_number']]);
 
         if (!$user) {
             return (new BaseResponse(404, null, 'User with provider phone number not found!'))->toResponse();

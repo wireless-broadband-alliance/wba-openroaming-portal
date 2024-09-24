@@ -62,8 +62,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'type' => 'array',
                                                     'items' => ['type' => 'string']
                                                 ],
-                                                'firstName' => ['type' => 'string'],
-                                                'lastName' => ['type' => 'string'],
+                                                'first_name' => ['type' => 'string'],
+                                                'last_name' => ['type' => 'string'],
                                                 'user_external_auths' => [
                                                     'type' => 'array',
                                                     'items' => [
@@ -74,9 +74,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         ]
                                                     ]
                                                 ],
-                                                'phoneNumber' => ['type' => 'string', 'nullable' => true],
-                                                'isVerified' => ['type' => 'boolean'],
-                                                'createdAt' => [
+                                                'phone_number' => ['type' => 'string', 'nullable' => true],
+                                                'is_verified' => ['type' => 'boolean'],
+                                                'created_at' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
                                                 ],
@@ -91,17 +91,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'uuid' => 'user@example.com',
                                         'email' => 'user@example.com',
                                         'roles' => ['ROLE_USER'],
-                                        'firstName' => 'John',
-                                        'lastName' => 'Doe',
+                                        'first_name' => 'John',
+                                        'last_name' => 'Doe',
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'Portal Account',
                                                 'provider_id' => 'Email || Phone Number'
                                             ],
                                         ],
-                                        'phoneNumber' => null,
-                                        'isVerified' => true,
-                                        'createdAt' => "0000-00-00T00:00:00+00:00",
+                                        'phone_number' => null,
+                                        'is_verified' => true,
+                                        'created_at' => "0000-00-00T00:00:00+00:00",
                                         'forgot_password_request' => false,
                                     ],
                                 ],
@@ -110,7 +110,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                     '401' => [
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'Unauthorized - Access token is missing, invalid, or user account is unverified/banned.',
+                        'description' => 'Unauthorized - Access token is missing, or user account is unverified/banned.',
                         // phpcs:enable
                         'content' => [
                             'application/json' => [
@@ -127,13 +127,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'JWT Token not found!',
-                                        ],
-                                    ],
-                                    'invalid_token' => [
-                                        'summary' => 'Invalid JWT Token',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'JWT Token is invalid!',
                                         ],
                                     ],
                                     'unauthorized_access' => [
@@ -158,6 +151,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    '403' => [
+                        'description' => 'Invalid JWT Token - Access token is invalid.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'error' => ['type' => 'string'],
+                                    ],
+                                ],
+                                'example' => [
+                                    'invalid_token' => [
+                                        'summary' => 'Invalid JWT Token',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token is invalid!',
                                         ],
                                     ],
                                 ],
@@ -430,6 +446,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                             'description' => 'User last name',
                                                             'example' => 'Doe',
                                                         ],
+                                                        'user_external_auths' => [
+                                                            [
+                                                                'provider' => 'SAML Account',
+                                                                'provider_id' => 'saml_account_name',
+                                                            ],
+                                                        ],
                                                     ],
                                                 ],
                                                 'token' => [
@@ -451,6 +473,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'roles' => ['ROLE_USER'],
                                             'first_name' => 'John',
                                             'last_name' => 'Doe',
+                                            'user_external_auth' => [
+                                                'provider' => 'SAML Account',
+                                                'provider_id' => 'userExampleAccountName'
+                                            ]
                                         ],
                                         'token' => 'jwt-token-example',
                                     ],
@@ -614,52 +640,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
-                                    'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => true],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'token' => ['type' => 'string', 'example' => 'jwt-token-example'],
-                                                'user' => [
-                                                    'type' => 'object',
-                                                    'properties' => [
-                                                        'id' => ['type' => 'integer', 'example' => 1],
-                                                        'email' => [
-                                                            'type' => 'string',
-                                                            'example' => 'john_doe@example.com'
-                                                        ],
-                                                        'uuid' => [
-                                                            'type' => 'string',
-                                                            'example' => 'user-uuid-example'
-                                                        ],
-                                                        'roles' => [
-                                                            'type' => 'array',
-                                                            'items' => ['type' => 'string'],
-                                                            'example' => ['ROLE_USER'],
-                                                        ],
-                                                        'firstname' => ['type' => 'string', 'example' => 'John'],
-                                                        'lastname' => ['type' => 'string', 'example' => 'Doe'],
-                                                        'user_external_auths' => [
-                                                            'type' => 'array',
-                                                            'items' => [
-                                                                'type' => 'object',
-                                                                'properties' => [
-                                                                    'provider' => [
-                                                                        'type' => 'string',
-                                                                        'example' => 'Google'
-                                                                    ],
-                                                                    'provider_id' => [
-                                                                        'type' => 'string',
-                                                                        'example' => 'google-id-example'
-                                                                    ],
-                                                                ],
-                                                            ],
-                                                        ],
-                                                    ],
-                                                ],
-                                            ],
-                                        ],
-                                    ],
                                     'example' => [
                                         'success' => true,
                                         'data' => [
@@ -669,12 +649,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'email' => 'john_doe@example.com',
                                                 'uuid' => 'user-uuid-example',
                                                 'roles' => ['ROLE_USER'],
-                                                'firstname' => 'John',
-                                                'lastname' => 'Doe',
+                                                'first_name' => 'John',
+                                                'last_name' => 'Doe',
                                                 'user_external_auths' => [
                                                     [
-                                                        'provider' => 'Google',
-                                                        'provider_id' => 'google-id-example',
+                                                        'provider' => 'Google Account',
+                                                        'provider_id' => 'google_id_example',
                                                     ],
                                                 ],
                                             ],
@@ -885,7 +865,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'data' => [
+                                                // phpcs:disable Generic.Files.LineLength.TooLong
                                                 'error' => 'Missing required fields: email, password or turnstile_token',
+                                                // phpcs:enable
                                             ],
                                         ],
                                     ],
@@ -954,7 +936,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'phoneNumber' => [
+                                    'phone_number' => [
                                         'type' => 'string',
                                         'example' => '+1234567890',
                                         'description' => 'User phone number'
@@ -980,7 +962,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token'
                                     ],
                                 ],
-                                'required' => ['phoneNumber', 'password', 'turnstile_token'],
+                                'required' => ['phone_number', 'password', 'turnstile_token'],
                             ],
                         ],
                     ],
@@ -1047,7 +1029,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'success' => false,
                                             'error' => 'Missing data',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'details' => 'Missing required fields: phoneNumber, password or turnstile_token',
+                                            'details' => 'Missing required fields: phone_number, password or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1056,7 +1038,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid data',
-                                            'details' => 'Phone number or other data is invalid or does not match',
+                                            'details' => 'Phone number or other data is invalid',
                                         ],
                                     ],
                                 ],
@@ -1082,7 +1064,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'details' => [
                                             'type' => 'string',
                                             'description' => 'Detailed error message',
-                                            'example' => 'User with the provided phone number already exists',
+                                            'example' => 'User with the provided phone_number already exists',
                                         ],
                                     ],
                                 ],
@@ -1353,7 +1335,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'phoneNumber' => [
+                                    'phone_number' => [
                                         'type' => 'string',
                                         'description' => 'The phone number of the user requesting password reset',
                                         'example' => '+1234567890',
@@ -1364,7 +1346,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phoneNumber', 'turnstile_token'],
+                                'required' => ['phone_number', 'turnstile_token'],
                             ],
                         ],
                     ],
@@ -1422,7 +1404,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'details' => [
                                             'type' => 'string',
-                                            'example' => 'Please include the required phoneNumber and CAPTCHA token.',
+                                            'example' => 'Please include the required phone_number and CAPTCHA token.',
                                         ],
                                     ],
                                 ],
@@ -1432,7 +1414,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid data',
-                                            'details' => 'Please include the phone number and CAPTCHA token.',
+                                            'details' => 'Please include the phone_number and CAPTCHA token.',
                                         ],
                                     ],
                                     'captcha_invalid' => [
@@ -1477,7 +1459,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '404' => [
-                        'description' => 'User with the provided phone number not found.',
+                        'description' => 'User with the provided phone_number not found.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1489,7 +1471,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'User with provider phone number not found!',
+                                            'example' => 'User with provider phone_number not found!',
                                         ],
                                     ],
                                 ],
@@ -1994,7 +1976,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             function (UserExternalAuth $userExternalAuth) {
                 return [
                     'provider' => $userExternalAuth->getProvider(),
-                    'providerId' => $userExternalAuth->getProviderId(),
+                    'provider_id' => $userExternalAuth->getProviderId(),
                 ];
             }
         )->toArray();
@@ -2003,9 +1985,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             'uuid' => $this->getUuid(),
             'email' => $this->getEmail(),
             'roles' => $this->getRoles(),
-            'firstName' => $this->getFirstName(),
-            'lastName' => $this->getLastName(),
-            'userExternalAuths' => $userExternalAuths,
+            'first_name' => $this->getFirstName(),
+            'last_name' => $this->getLastName(),
+            'user_external_auths' => $userExternalAuths,
         ];
 
         return array_merge($responseData, $additionalData);

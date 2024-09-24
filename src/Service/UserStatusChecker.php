@@ -12,7 +12,7 @@ class UserStatusChecker
         if (!$user->isVerified()) {
             return new BaseResponse(
                 401,
-                ['verification code' => $user->getVerificationCode()],
+                ['verification_code' => $user->getVerificationCode()],
                 'User account is not verified.'
             );
         }
@@ -34,7 +34,7 @@ class UserStatusChecker
         if (!$user->isVerified()) {
             return new BaseResponse(
                 401,
-                ['verification code' => $user->getVerificationCode()],
+                ['verification_code' => $user->getVerificationCode()],
                 'User account is not verified.'
             );
         }

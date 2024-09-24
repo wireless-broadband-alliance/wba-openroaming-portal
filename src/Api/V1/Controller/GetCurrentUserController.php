@@ -47,10 +47,10 @@ class GetCurrentUserController extends AbstractController
 
             // Utilize the toApiResponse method to generate the response content
             $content = $currentUser->toApiResponse([
-                'phoneNumber' => $currentUser->getPhoneNumber(),
-                'isVerified' => $currentUser->isVerified(),
-                'createdAt' => $currentUser->getCreatedAt()?->format(DATE_ATOM),
-                'forgotPasswordRequest' => $currentUser->isForgotPasswordRequest(),
+                'phone_number' => $currentUser->getPhoneNumber(),
+                'is_verified' => $currentUser->isVerified(),
+                'created_at' => $currentUser->getCreatedAt()?->format(DATE_ATOM),
+                'forgot_password_request' => $currentUser->isForgotPasswordRequest(),
             ]);
             return (new BaseResponse(200, $content))->toResponse();
         }
