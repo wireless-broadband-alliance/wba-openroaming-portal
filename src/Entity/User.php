@@ -334,7 +334,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000', // Example verification code
+                                            'verification_code' => '000000',
                                         ],
                                     ],
                                     'banned_account' => [
@@ -528,7 +528,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000', // Example verification code
+                                            'verification_code' => '000000',
                                         ],
                                     ],
                                     'banned_account' => [
@@ -706,7 +706,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'Authentication failed due to invalid Google credentials',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'description' => 'Authentication failed due to invalid Google credentials or user account issues.',
+                        // phpcs:enable
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -719,9 +721,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'message' => 'Authentication Failed: Invalid Google credentials.',
+                                'examples' => [
+                                    'invalid_google_credentials' => [
+                                        'summary' => 'Invalid Google credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'message' => 'Authentication Failed: Invalid Google credentials.',
+                                        ],
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification code' => '000000',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
