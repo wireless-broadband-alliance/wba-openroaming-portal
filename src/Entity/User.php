@@ -488,7 +488,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'Unauthorized due to invalid SAML assertion',
+                        'description' => 'Unauthorized due to invalid SAML assertion or user account issues.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -512,11 +512,31 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'data' => [
-                                        'error' => 'Invalid SAML Assertion',
-                                        'details' => 'Detailed error information from SAML assertion',
+                                'examples' => [
+                                    'invalid_saml' => [
+                                        'summary' => 'Invalid SAML Assertion',
+                                        'value' => [
+                                            'success' => false,
+                                            'data' => [
+                                                'error' => 'Invalid SAML Assertion',
+                                                'details' => 'Detailed error information from SAML assertion',
+                                            ],
+                                        ],
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification_code' => '000000', // Example verification code
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
                                     ],
                                 ],
                             ],
