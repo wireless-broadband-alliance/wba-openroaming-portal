@@ -6,9 +6,11 @@ use App\Api\V1\BaseResponse;
 use App\Controller\GoogleController;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
+use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\UserStatusChecker;
 use DateTime;
@@ -36,6 +38,7 @@ class AuthController extends AbstractController
     private EntityManagerInterface $entityManager;
     private GoogleController $googleController;
     private UserStatusChecker $userStatusChecker;
+    private EventActions $eventActions;
 
     /**
      * @param UserRepository $userRepository
@@ -45,6 +48,7 @@ class AuthController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param GoogleController $googleController
      * @param UserStatusChecker $userStatusChecker
+     * @param EventActions $eventActions
      */
     public function __construct(
         UserRepository $userRepository,
@@ -54,6 +58,7 @@ class AuthController extends AbstractController
         EntityManagerInterface $entityManager,
         GoogleController $googleController,
         UserStatusChecker $userStatusChecker,
+        EventActions $eventActions,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
@@ -62,6 +67,7 @@ class AuthController extends AbstractController
         $this->entityManager = $entityManager;
         $this->googleController = $googleController;
         $this->userStatusChecker = $userStatusChecker;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -134,6 +140,19 @@ class AuthController extends AbstractController
         $responseData = $user->toApiResponse([
             'token' => $token,
         ]);
+
+        // Defines the Event to the table
+        $eventMetadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $user->getUuid(),
+        ];
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::AUTH_LOCAL_API,
+            new DateTime(),
+            $eventMetadata
+        );
 
         // Return success response using BaseResponse
         return (new BaseResponse(200, $responseData))->toResponse(); # Success Response
@@ -217,6 +236,19 @@ class AuthController extends AbstractController
                 'token' => $token,
             ]);
 
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::AUTH_SAML_API,
+                new DateTime(),
+                $eventMetadata
+            );
+
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
             return (new BaseResponse(500, null, 'Unexpected error', [
@@ -238,31 +270,8 @@ class AuthController extends AbstractController
             return (new BaseResponse(400, null, 'Missing authorization code!'))->toResponse();
         }
 
-        // Define a dummy code for testing purposes
-        $dummyCode = 'openroaming';
-
         try {
-            // Simulate a user for testing purposes if the dummy code is provided
-            if ($data['code'] === $dummyCode) {
-                $user = new User();
-                $user->setUuid('john_doe@example.com')
-                    ->setEmail('john_doe@example.com')
-                    ->setFirstname('John')
-                    ->setLastname('Doe')
-                    ->setIsVerified(true)
-                    ->setCreatedAt(new DateTime());
-
-                $userExternalAuth = new UserExternalAuth();
-                $userExternalAuth->setProvider(UserProvider::GOOGLE_ACCOUNT)
-                    ->setProviderId('DUMMY_GOOGLE_USER_ACCOUNT');
-
-                $user->addUserExternalAuth($userExternalAuth);
-            } else {
-                // Fetch real user info from Google using the provided authorization code
-                $user = $this->googleController->fetchUserFromGoogle($data['code']);
-            }
-
-            // If user retrieval fails
+            $user = $this->googleController->fetchUserFromGoogle($data['code']);
             if ($user === null) {
                 return (new BaseResponse(400, null, 'User creation failed or email is not allowed.'))->toResponse();
             }
@@ -278,6 +287,19 @@ class AuthController extends AbstractController
             $token = $this->tokenGenerator->generateToken($user);
 
             $formattedUserData = $user->toApiResponse(['token' => $token]);
+
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::AUTH_GOOGLE_API,
+                new DateTime(),
+                $eventMetadata
+            );
 
             return (new BaseResponse(200, $formattedUserData, null))->toResponse();
         } catch (IdentityProviderException $e) {
