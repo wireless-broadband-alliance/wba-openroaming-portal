@@ -150,7 +150,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification code' => 000000
+                                            'verification code' => '000000'
                                         ],
                                     ],
                                     'banned_account' => [
@@ -303,28 +303,45 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'User not found or invalid credentials',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'description' => 'User not found, invalid credentials, account not verified, or account banned.',
+                        // phpcs:enable
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => ['type' => 'boolean', 'example' => false],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'example' => 'Invalid credentials',
-                                                    'description' => 'Details of the authentication failure'
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure'
                                         ],
                                     ],
-                                    'example' => [
-                                        'success' => false,
-                                        'data' => [
+                                ],
+                                'examples' => [
+                                    'invalid_credentials' => [
+                                        'summary' => 'Invalid credentials',
+                                        'value' => [
+                                            'success' => false,
                                             'error' => 'Invalid credentials',
+                                        ],
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                            'verification_code' => '000000', // Example verification code
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
                                         ],
                                     ],
                                 ],
