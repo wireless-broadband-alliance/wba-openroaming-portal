@@ -4,6 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Service\UserStatusChecker;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,10 +18,12 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 class GetCurrentUserController extends AbstractController
 {
     private TokenStorageInterface $tokenStorage;
+    private UserStatusChecker $userStatusChecker;
 
-    public function __construct(TokenStorageInterface $tokenStorage)
+    public function __construct(TokenStorageInterface $tokenStorage, UserStatusChecker $userStatusChecker)
     {
         $this->tokenStorage = $tokenStorage;
+        $this->userStatusChecker = $userStatusChecker;
     }
 
     /**
@@ -37,22 +40,9 @@ class GetCurrentUserController extends AbstractController
             /** @var User $currentUser */
             $currentUser = $token->getUser();
 
-            if (!$currentUser->isVerified()) {
-                return (
-                new BaseResponse(
-                    401,
-                    ['verification code' => $currentUser->getVerificationCode()],
-                    'User account is not verified.'
-                ))->toResponse();
-            }
-
-            if ($currentUser->getBannedAt()) {
-                return (
-                new BaseResponse(
-                    401,
-                    null,
-                    'User account is banned from the system.'
-                ))->toResponse();
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            if ($statusCheckerResponse !== null) {
+                return $statusCheckerResponse->toResponse();
             }
 
             // Utilize the toApiResponse method to generate the response content
