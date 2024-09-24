@@ -305,6 +305,19 @@ class RegistrationController extends AbstractController
 
                 $mailer->send($email);
 
+                // Defines the Event to the table
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $user->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
                 return (new BaseResponse(200, [
                     'message' => sprintf('We have sent you a new email to: %s.', $user->getEmail())
                 ]))->toResponse();
@@ -561,6 +574,19 @@ class RegistrationController extends AbstractController
                 );
 
                 $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+
+                // Defines the Event to the table
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'uuid' => $user->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
                 if ($result) {
                     return (new BaseResponse(200, [

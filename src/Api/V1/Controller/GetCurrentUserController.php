@@ -4,8 +4,11 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\UserStatusChecker;
+use DateTime;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,15 +24,18 @@ class GetCurrentUserController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private UserStatusChecker $userStatusChecker;
     private JWTTokenGenerator $JWTTokenGenerator;
+    private EventActions $eventActions;
 
     public function __construct(
         TokenStorageInterface $tokenStorage,
         UserStatusChecker $userStatusChecker,
-        JWTTokenGenerator $JWTTokenGenerator
+        JWTTokenGenerator $JWTTokenGenerator,
+        EventActions $eventActions
     ) {
         $this->tokenStorage = $tokenStorage;
         $this->userStatusChecker = $userStatusChecker;
         $this->JWTTokenGenerator = $JWTTokenGenerator;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -68,6 +74,20 @@ class GetCurrentUserController extends AbstractController
                 'created_at' => $currentUser->getCreatedAt()?->format(DATE_ATOM),
                 'forgot_password_request' => $currentUser->isForgotPasswordRequest(),
             ]);
+
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::GET_USER_API,
+                new DateTime(),
+                $eventMetadata
+            );
+
             return (new BaseResponse(200, $content))->toResponse();
         }
 

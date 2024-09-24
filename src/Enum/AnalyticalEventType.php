@@ -42,4 +42,6 @@ enum AnalyticalEventType
     public const AUTH_LOCAL_API = 'AUTH_LOCAL_API';
     public const AUTH_SAML_API = 'AUTH_SAML_API';
     public const AUTH_GOOGLE_API = 'AUTH_GOOGLE_API';
+    public const GET_USER_API = 'GET_USER_API';
+    public const USER_ACCOUNT_PASSWORD_RESET_API = 'USER_ACCOUNT_PASSWORD_RESET_API';
 }
