@@ -249,6 +249,7 @@ class AuthController extends AbstractController
                     ->setEmail('john_doe@example.com')
                     ->setFirstname('John')
                     ->setLastname('Doe')
+                    ->setIsVerified(true)
                     ->setCreatedAt(new DateTime());
 
                 $userExternalAuth = new UserExternalAuth();
