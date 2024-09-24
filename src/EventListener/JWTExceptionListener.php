@@ -14,7 +14,6 @@ class JWTExceptionListener implements EventSubscriberInterface
         return [
             'lexik_jwt_authentication.on_jwt_not_found' => 'onJWTNotFound',
             'lexik_jwt_authentication.on_jwt_invalid' => 'onJWTInvalid',
-
         ];
     }
 
@@ -33,7 +32,7 @@ class JWTExceptionListener implements EventSubscriberInterface
     {
         $response =
             new BaseResponse(
-                401,
+                403,
                 null,
                 'JWT Token is invalid!'
             );
