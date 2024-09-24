@@ -76,15 +76,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                                 'phoneNumber' => ['type' => 'string', 'nullable' => true],
                                                 'isVerified' => ['type' => 'boolean'],
-                                                'bannedAt' => [
+                                                'createdAt' => [
                                                     'type' => 'string',
                                                     'format' => 'date-time',
-                                                    'nullable' => true
-                                                ],
-                                                'deletedAt' => [
-                                                    'type' => 'string',
-                                                    'format' => 'date-time',
-                                                    'nullable' => true
                                                 ],
                                                 'forgot_password_request' => ['type' => 'boolean'],
                                             ],
@@ -107,8 +101,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'phoneNumber' => null,
                                         'isVerified' => true,
-                                        'bannedAt' => null,
-                                        'deletedAt' => null,
+                                        'createdAt' => "0000-00-00T00:00:00+00:00",
                                         'forgot_password_request' => false,
                                     ],
                                 ],
@@ -128,9 +121,30 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'Unauthorized - You do not have permission to access this resource.',
+                                'examples' => [
+                                    'missing_token' => [
+                                        'summary' => 'Missing JWT Token',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token not found!',
+                                        ],
+                                    ],
+                                    'invalid_token' => [
+                                        'summary' => 'Invalid JWT Token',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token is invalid!',
+                                        ],
+                                    ],
+                                    'unauthorized_access' => [
+                                        'summary' => 'Unauthorized Access',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
