@@ -51,7 +51,8 @@ class GetCurrentUserController extends AbstractController
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
             /** @var User $currentUser */
             $currentUser = $token->getUser();
-            /** @phpstan-ignore-next-line */ // This line is begin ignore because the getCredentials belongs to another service
+            // This line is begin ignore because the getCredentials belongs to another service
+            /** @phpstan-ignore-next-line */
             $jwtTokenString = $token->getCredentials();
 
             if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
