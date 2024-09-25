@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -28,14 +29,16 @@ class RegistrationEmailGenerator
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendRegistrationEmail($user, $randomPassword): void
+    public function sendRegistrationEmail(User $user, $password): void
     {
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
         // Send email to the user with the verification code
         $email = (new TemplatedEmail())
-            ->from(new Address($emailSender, $nameSender))
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
             ->to($user->getEmail())
             ->subject('Your OpenRoaming Registration Details')
             ->htmlTemplate('email/user_password.html.twig')
@@ -44,7 +47,7 @@ class RegistrationEmailGenerator
                 'verificationCode' => $user->getVerificationCode(),
                 'isNewUser' => true,
                 // This variable informs if the user it's new our if it's just a password reset request
-                'password' => $randomPassword,
+                'password' => $password,
             ]);
 
         $this->mailer->send($email);

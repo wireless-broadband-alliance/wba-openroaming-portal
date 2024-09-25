@@ -16,8 +16,8 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\UserStatusChecker;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
@@ -54,6 +54,7 @@ class RegistrationController extends AbstractController
     private UserPasswordHasherInterface $userPasswordHasher;
     private VerificationCodeGenerator $verificationCodeGenerator;
     private CaptchaValidator $captchaValidator;
+    private RegistrationEmailGenerator $emailGenerator;
 
 
     public function __construct(
@@ -69,6 +70,7 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         VerificationCodeGenerator $verificationCodeGenerator,
         CaptchaValidator $captchaValidator,
+        RegistrationEmailGenerator $emailGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -82,6 +84,7 @@ class RegistrationController extends AbstractController
         $this->userPasswordHasher = $userPasswordHasher;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->captchaValidator = $captchaValidator;
+        $this->emailGenerator = $emailGenerator;
     }
 
     /**
@@ -94,6 +97,7 @@ class RegistrationController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws Exception
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/register', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(
@@ -155,7 +159,8 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        // Save user creation event
+        $this->emailGenerator->sendRegistrationEmail($user, $data['password']);
+
         $eventMetaData = [
             'uuid' => $user->getEmail(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
