@@ -208,7 +208,8 @@ class AuthController extends AbstractController
                 $user->setLastName($lastName);
                 $user->setPassword('notused');
                 $user->setUuid($uuid);
-                $user->setRoles([]); // Set roles if needed or keep empty
+                $user->setIsVerified(true);
+                $user->setRoles([]);
 
                 // Persist the new user
                 $this->entityManager->persist($user);
