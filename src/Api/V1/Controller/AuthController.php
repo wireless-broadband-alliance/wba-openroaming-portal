@@ -252,7 +252,7 @@ class AuthController extends AbstractController
 
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
-            return (new BaseResponse(500, null, 'Unexpected error', [
+            return (new BaseResponse(500, ['details' => $e->getMessage()], 'Unexpected error', [
                 'details' => $e->getMessage()
             ]))->toResponse(); // Internal Server Error
         }
