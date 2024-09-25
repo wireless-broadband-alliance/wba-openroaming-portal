@@ -639,7 +639,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'code' => [
                                         'type' => 'string',
-                                        'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR'
+                                        'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
                                     ],
                                 ],
                                 'required' => ['code'],
@@ -654,21 +654,55 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
-                                    'example' => [
-                                        'success' => true,
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
                                         'data' => [
-                                            'uuid' => 'user-uuid-example',
-                                            'email' => 'john_doe@example.com',
-                                            'roles' => ['ROLE_USER'],
-                                            'first_name' => 'John',
-                                            'last_name' => 'Doe',
-                                            'user_external_auths' => [
-                                                [
-                                                    'provider' => 'Google Account',
-                                                    'provider_id' => 'google_id_example',
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'example' => 'user-uuid-example',
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'example' => 'john_doe@example.com',
+                                                ],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'string',
+                                                    ],
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'John',
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Doe',
+                                                ],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'Google Account',
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'google_id_example',
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],
+                                                'token' => [
+                                                    'type' => 'string',
+                                                    'example' => 'jwt-token-example',
                                                 ],
                                             ],
-                                            'token' => 'jwt-token-example',
                                         ],
                                     ],
                                 ],
@@ -730,14 +764,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
                                             // phpcs:enable
-                                            'description' => 'Details of the authentication failure'
+                                            'description' => 'Details of the authentication failure',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'invalid_verification' => [
-                                        'success' => false,
-                                        'error' => 'User account is not verified!',
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
                                     ],
                                     'banned_account' => [
                                         'summary' => 'User account is banned',
@@ -762,18 +799,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'type' => 'string',
                                             'example' => 'An error occurred: Could not connect to Google API.',
                                         ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'example' => 'Some details about the error',
+                                        ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Authentication failed' => [
                                         'success' => false,
-                                        'error' => 'An error occurred: Could not connect to Google API.',
-                                        'details' => ''
+                                        'message' => 'An error occurred: Could not connect to Google API.',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'details' => 'The API request timed out while trying to connect to Google services.',
+                                        // phpcs:enable
                                     ],
                                     'Server related' => [
                                         'success' => false,
-                                        'error' => 'An error occurred: Generic server related error.',
-                                        'details' => ''
+                                        'message' => 'An error occurred: Generic server related error.',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'details' => 'The server encountered an unexpected condition which prevented it from fulfilling the request.',
+                                        // phpcs:enable
                                     ],
                                 ],
                             ],
