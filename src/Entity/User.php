@@ -1359,7 +1359,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also
         enforces the time interval between requests and limits the number of attempts allowed.',
                 'requestBody' => [
-                    'description' => 'Password reset request data including CAPTCHA token and user phone number.',
+                    'description' => 'Password reset request data including CAPTCHA token and user phone number',
                     'required' => true,
                     'content' => [
                         'application/json' => [
@@ -1384,7 +1384,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
                 'responses' => [
                     '200' => [
-                        'description' => 'Successfully sent the SMS with a new password and verification code.',
+                        'description' => 'Successfully sent the SMS with a new password and verification code',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1419,7 +1419,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed.',
+                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1435,7 +1435,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'details' => [
                                             'type' => 'string',
-                                            'example' => 'Please include the required phone_number and CAPTCHA token.',
+                                            'example' => 'Invalid data: Missing required fields.',
                                         ],
                                     ],
                                 ],
@@ -1445,7 +1445,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid data',
-                                            'details' => 'Please include the phone_number and CAPTCHA token.',
+                                            'details' => 'Invalid data: Missing required fields.',
                                         ],
                                     ],
                                     'captcha_invalid' => [
@@ -1453,7 +1453,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid CAPTCHA token',
-                                            'details' => 'The CAPTCHA token provided is invalid. Please try again.',
+                                            'details' => 'The CAPTCHA token provided is invalid.',
                                         ],
                                     ],
                                 ],
@@ -1472,13 +1472,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'example' => [
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
-                                        ],
-                                    ],
+                                    'success' => false,
+                                    'error' => 'User account is not verified!',
                                 ],
                             ],
                         ],
@@ -1546,19 +1541,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the server error occurred',
-                                            'example' => 'An unexpected error occurred while processing the request.',
+                                            'example' => 'An unexpected error occurred while processing the request',
                                         ],
                                         'details' => [
                                             'type' => 'string',
                                             'description' => 'Detailed error message',
-                                            'example' => 'An unexpected error occurred while processing the request.',
+                                            'example' => 'Detailed message',
                                         ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
                                     'error' => 'An unexpected error occurred while processing the request',
-                                    'details' => 'An unexpected error occurred while processing the request.',
+                                    'details' => 'Detailed message',
                                 ],
                             ],
                         ],
