@@ -428,47 +428,40 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'user' => [
-                                                    'type' => 'object',
-                                                    'properties' => [
-                                                        'id' => [
-                                                            'type' => 'integer',
-                                                            'description' => 'User ID',
-                                                            'example' => 1,
-                                                        ],
-                                                        'email' => [
+                                                'type' => 'object',
+                                                'properties' => [
+                                                    'uuid' => [
+                                                        'type' => 'string',
+                                                        'description' => 'User UUID',
+                                                        'example' => 'user-uuid-example',
+                                                    ],
+                                                    'email' => [
+                                                        'type' => 'string',
+                                                        'description' => 'User email address',
+                                                        'example' => 'user@example.com',
+                                                    ],
+                                                    'roles' => [
+                                                        'type' => 'array',
+                                                        'items' => [
                                                             'type' => 'string',
-                                                            'description' => 'User email address',
-                                                            'example' => 'user@example.com',
                                                         ],
-                                                        'uuid' => [
-                                                            'type' => 'string',
-                                                            'description' => 'User UUID',
-                                                            'example' => 'user-uuid-example',
-                                                        ],
-                                                        'roles' => [
-                                                            'type' => 'array',
-                                                            'items' => [
-                                                                'type' => 'string',
-                                                            ],
-                                                            'description' => 'List of user roles',
-                                                            'example' => ['ROLE_USER'],
-                                                        ],
-                                                        'first_name' => [
-                                                            'type' => 'string',
-                                                            'description' => 'User first name',
-                                                            'example' => 'John',
-                                                        ],
-                                                        'last_name' => [
-                                                            'type' => 'string',
-                                                            'description' => 'User last name',
-                                                            'example' => 'Doe',
-                                                        ],
-                                                        'user_external_auths' => [
-                                                            [
-                                                                'provider' => 'SAML Account',
-                                                                'provider_id' => 'saml_account_name',
-                                                            ],
+                                                        'description' => 'List of user roles',
+                                                        'example' => ['ROLE_USER'],
+                                                    ],
+                                                    'first_name' => [
+                                                        'type' => 'string',
+                                                        'description' => 'User first name',
+                                                        'example' => 'John',
+                                                    ],
+                                                    'last_name' => [
+                                                        'type' => 'string',
+                                                        'description' => 'User last name',
+                                                        'example' => 'Doe',
+                                                    ],
+                                                    'user_external_auths' => [
+                                                        [
+                                                            'provider' => 'SAML Account',
+                                                            'provider_id' => 'saml_account_name',
                                                         ],
                                                     ],
                                                 ],
@@ -484,17 +477,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => true,
                                     'data' => [
-                                        'user' => [
-                                            'id' => 1,
-                                            'email' => 'user@example.com',
-                                            'uuid' => 'user-uuid-example',
-                                            'roles' => ['ROLE_USER'],
-                                            'first_name' => 'John',
-                                            'last_name' => 'Doe',
-                                            'user_external_auth' => [
-                                                'provider' => 'SAML Account',
-                                                'provider_id' => 'userExampleAccountName'
-                                            ]
+                                        'uuid' => 'user-uuid-example',
+                                        'email' => 'user@example.com',
+                                        'roles' => ['ROLE_USER'],
+                                        'first_name' => 'John',
+                                        'last_name' => 'Doe',
+                                        'user_external_auth' => [
+                                            'provider' => 'SAML Account',
+                                            'provider_id' => 'userExampleAccountName'
                                         ],
                                         'token' => 'jwt-token-example',
                                     ],
@@ -683,21 +673,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'example' => [
                                         'success' => true,
                                         'data' => [
-                                            'token' => 'jwt-token-example',
-                                            'user' => [
-                                                'id' => 1,
-                                                'email' => 'john_doe@example.com',
-                                                'uuid' => 'user-uuid-example',
-                                                'roles' => ['ROLE_USER'],
-                                                'first_name' => 'John',
-                                                'last_name' => 'Doe',
-                                                'user_external_auths' => [
-                                                    [
-                                                        'provider' => 'Google Account',
-                                                        'provider_id' => 'google_id_example',
-                                                    ],
+                                            'uuid' => 'user-uuid-example',
+                                            'email' => 'john_doe@example.com',
+                                            'roles' => ['ROLE_USER'],
+                                            'first_name' => 'John',
+                                            'last_name' => 'Doe',
+                                            'user_external_auths' => [
+                                                [
+                                                    'provider' => 'Google Account',
+                                                    'provider_id' => 'google_id_example',
                                                 ],
                                             ],
+                                            'token' => 'jwt-token-example',
                                         ],
                                     ],
                                 ],
