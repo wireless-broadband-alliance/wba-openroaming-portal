@@ -254,8 +254,8 @@ class RegistrationController extends AbstractController
             // Check if enough time has passed since the last password reset request
             if (
                 !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                    $minInterval
+                ) < $currentTime)
             ) {
                 if (!$latestEvent) {
                     $latestEvent = new Event();
