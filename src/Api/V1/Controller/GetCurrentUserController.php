@@ -4,11 +4,15 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Service\EventActions;
+use App\Service\JWTTokenGenerator;
+use App\Service\UserStatusChecker;
+use DateTime;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -18,10 +22,20 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 class GetCurrentUserController extends AbstractController
 {
     private TokenStorageInterface $tokenStorage;
+    private UserStatusChecker $userStatusChecker;
+    private JWTTokenGenerator $JWTTokenGenerator;
+    private EventActions $eventActions;
 
-    public function __construct(TokenStorageInterface $tokenStorage)
-    {
+    public function __construct(
+        TokenStorageInterface $tokenStorage,
+        UserStatusChecker $userStatusChecker,
+        JWTTokenGenerator $JWTTokenGenerator,
+        EventActions $eventActions
+    ) {
         $this->tokenStorage = $tokenStorage;
+        $this->userStatusChecker = $userStatusChecker;
+        $this->JWTTokenGenerator = $JWTTokenGenerator;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -37,22 +51,52 @@ class GetCurrentUserController extends AbstractController
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
             /** @var User $currentUser */
             $currentUser = $token->getUser();
+            // This line is begin ignore because the getCredentials belongs to another service
+            /** @phpstan-ignore-next-line */
+            $jwtTokenString = $token->getCredentials();
+
+            if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
+                return (new BaseResponse(
+                    401,
+                    null,
+                    'Unauthorized - Invalid JWT token'
+                ))->toResponse();
+            }
+
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            if ($statusCheckerResponse !== null) {
+                return $statusCheckerResponse->toResponse();
+            }
 
             // Utilize the toApiResponse method to generate the response content
             $content = $currentUser->toApiResponse([
                 'phone_number' => $currentUser->getPhoneNumber(),
-                'isVerified' => $currentUser->isVerified(),
-                'user_radius_profiles' => $currentUser->getUserRadiusProfiles(),
-                'verification_code' => $currentUser->getVerificationCode(),
-                'banned_at' => $currentUser->getBannedAt(),
-                'deleted_at' => $currentUser->getDeletedAt(),
+                'is_verified' => $currentUser->isVerified(),
+                'created_at' => $currentUser->getCreatedAt()?->format(DATE_ATOM),
                 'forgot_password_request' => $currentUser->isForgotPasswordRequest(),
             ]);
 
-            return (new BaseResponse(Response::HTTP_OK, $content))->toResponse();
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $currentUser->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::GET_USER_API,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            return (new BaseResponse(200, $content))->toResponse();
         }
 
         // Handle the case where the user is not authenticated
-        return new JsonResponse(['error' => 'Unauthorized'], 401);
+        return (new BaseResponse(
+            403,
+            null,
+            'Unauthorized - You do not have permission to access this resource'
+        ))->toResponse(); // Bad Request Response
     }
 }

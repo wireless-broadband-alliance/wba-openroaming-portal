@@ -3,15 +3,20 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\Controller\GoogleController;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
-use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
+use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
+use App\Service\UserStatusChecker;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use OneLogin\Saml2\Auth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,32 +34,40 @@ class AuthController extends AbstractController
     private UserRepository $userRepository;
     private UserPasswordHasherInterface $passwordHasher;
     private jwtTokenGenerator $tokenGenerator;
-    private UserExternalAuthRepository $userExternalAuthRepository;
     private CaptchaValidator $captchaValidator;
     private EntityManagerInterface $entityManager;
+    private GoogleController $googleController;
+    private UserStatusChecker $userStatusChecker;
+    private EventActions $eventActions;
 
     /**
      * @param UserRepository $userRepository
      * @param UserPasswordHasherInterface $passwordHasher
      * @param JWTTokenGenerator $tokenGenerator
-     * @param UserExternalAuthRepository $userExternalAuthRepository
      * @param CaptchaValidator $captchaValidator
      * @param EntityManagerInterface $entityManager
+     * @param GoogleController $googleController
+     * @param UserStatusChecker $userStatusChecker
+     * @param EventActions $eventActions
      */
     public function __construct(
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         jwtTokenGenerator $tokenGenerator,
-        UserExternalAuthRepository $userExternalAuthRepository,
         CaptchaValidator $captchaValidator,
         EntityManagerInterface $entityManager,
+        GoogleController $googleController,
+        UserStatusChecker $userStatusChecker,
+        EventActions $eventActions,
     ) {
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
         $this->tokenGenerator = $tokenGenerator;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->captchaValidator = $captchaValidator;
         $this->entityManager = $entityManager;
+        $this->googleController = $googleController;
+        $this->userStatusChecker = $userStatusChecker;
+        $this->eventActions = $eventActions;
     }
 
     /**
@@ -73,15 +86,15 @@ class AuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, 'Invalid JSON format'))->toResponse(); # Bad Request Response
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); # Bad Request Response
         }
 
-        if (!isset($data['cf-turnstile-response'])) {
-            return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
+        if (!isset($data['turnstile_token'])) {
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
-        if (!$this->captchaValidator->validate($data['cf-turnstile-response'], $request->getClientIp())) {
-            return (new BaseResponse(400, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
+        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
         }
 
 
@@ -96,7 +109,7 @@ class AuthController extends AbstractController
             return (
             new BaseResponse(
                 400,
-                ['fields_missing' => $errors],
+                ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             )
             )->toResponse();
@@ -115,6 +128,11 @@ class AuthController extends AbstractController
             ); # Unauthorized Request Response
         }
 
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+        if ($statusCheckerResponse !== null) {
+            return $statusCheckerResponse->toResponse();
+        }
+
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
 
@@ -122,6 +140,19 @@ class AuthController extends AbstractController
         $responseData = $user->toApiResponse([
             'token' => $token,
         ]);
+
+        // Defines the Event to the table
+        $eventMetadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'uuid' => $user->getUuid(),
+        ];
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::AUTH_LOCAL_API,
+            new DateTime(),
+            $eventMetadata
+        );
 
         // Return success response using BaseResponse
         return (new BaseResponse(200, $responseData))->toResponse(); # Success Response
@@ -192,6 +223,11 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse !== null) {
+                return $statusCheckerResponse->toResponse();
+            }
+
             // Generate JWT token for the user
             $token = $this->tokenGenerator->generateToken($user);
 
@@ -199,6 +235,19 @@ class AuthController extends AbstractController
             $responseData = $user->toApiResponse([
                 'token' => $token,
             ]);
+
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::AUTH_SAML_API,
+                new DateTime(),
+                $eventMetadata
+            );
 
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
@@ -208,42 +257,57 @@ class AuthController extends AbstractController
         }
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     */
     #[Route('/api/v1/auth/google', name: 'api_auth_google', methods: ['POST'])]
     public function authGoogle(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-
-        if (!isset($data['googleId'])) {
-            return (new BaseResponse(400, null, 'Invalid data'))->toResponse(); // Bad Request Response
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
 
-        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $data['googleId']]);
-
-        if (!$userExternalAuth) {
-            // Unauthorized - Provider not allowed
-            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
+        if (!isset($data['code'])) {
+            return (new BaseResponse(400, null, 'Missing authorization code!'))->toResponse();
         }
 
-        $user = $userExternalAuth->getUser();
+        try {
+            $user = $this->googleController->fetchUserFromGoogle($data['code']);
+            if ($user === null) {
+                return (new BaseResponse(400, null, 'User creation failed or email is not allowed.'))->toResponse();
+            }
 
-        if (!$user) {
-            // Unauthorized - User not found
-            return (new BaseResponse(401, null, 'Authentication Failed!'))->toResponse();
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse !== null) {
+                return $statusCheckerResponse->toResponse();
+            }
+
+            // Authenticate the user using custom Google authentication function already on the project
+            $this->googleController->authenticateUserGoogle($user);
+
+            $token = $this->tokenGenerator->generateToken($user);
+
+            $formattedUserData = $user->toApiResponse(['token' => $token]);
+
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'uuid' => $user->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::AUTH_GOOGLE_API,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            return (new BaseResponse(200, $formattedUserData, null))->toResponse();
+        } catch (IdentityProviderException $e) {
+            // Handle OAuth identity provider-specific errors
+            return (new BaseResponse(500, null, 'Authentication failed: ' . $e->getMessage()))->toResponse();
+        } catch (Exception $e) {
+            // Handle any other general errors
+            return (new BaseResponse(500, null, 'An error occurred: ' . $e->getMessage()))->toResponse();
         }
-
-        $token = $this->tokenGenerator->generateToken($user);
-
-        // Use the toApiResponse method to generate the response
-        $responseData = $user->toApiResponse(['token' => $token]);
-
-        return (new BaseResponse(200, $responseData))->toResponse(); // Success
     }
 }
