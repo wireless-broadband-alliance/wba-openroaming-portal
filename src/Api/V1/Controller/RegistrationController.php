@@ -54,7 +54,6 @@ class RegistrationController extends AbstractController
     private UserPasswordHasherInterface $userPasswordHasher;
     private VerificationCodeGenerator $verificationCodeGenerator;
     private CaptchaValidator $captchaValidator;
-    private UserStatusChecker $userStatusChecker;
 
 
     public function __construct(
@@ -70,7 +69,6 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         VerificationCodeGenerator $verificationCodeGenerator,
         CaptchaValidator $captchaValidator,
-        UserStatusChecker $userStatusChecker,
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -84,7 +82,6 @@ class RegistrationController extends AbstractController
         $this->userPasswordHasher = $userPasswordHasher;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->captchaValidator = $captchaValidator;
-        $this->userStatusChecker = $userStatusChecker;
     }
 
     /**
