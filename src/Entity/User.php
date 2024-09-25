@@ -312,7 +312,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'error' => [
                                             'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'description' => 'Details of the authentication failure'
                                         ],
                                         'details' => [
@@ -339,23 +341,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'User account is not verified or is banned.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'invalid_verification' => [
-                                            'summary' => 'User account is not verified',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'User account is not verified!',
-                                            ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
                                         ],
-                                        'banned_account' => [
-                                            'summary' => 'User account is banned',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'User account is banned from the system!',
-                                            ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
                                         ],
                                     ],
                                 ],
@@ -373,12 +378,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Authenticate a user via SAML',
                 'description' => 'This endpoint authenticates a user using their SAML response. 
-            If the user is not found in the database, a new user will be created based on the SAML assertion. 
-            The response includes user details along with a JWT token if authentication is successful.',
+        If the user is not found in the database, a new user will be created based on the SAML assertion. 
+        The response includes user details along with a JWT token if authentication is successful.',
                 'requestBody' => [
                     'description' => 'SAML response required for user authentication. 
-                The request should be sent as `multipart/form-data` with the SAML response 
-                included as a form field (not a file).',
+            The request should be sent as `multipart/form-data` with the SAML response 
+            included as a form field (not a file).',
                     'required' => true,
                     'content' => [
                         'multipart/form-data' => [
@@ -408,40 +413,49 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'data' => [
                                             'type' => 'object',
                                             'properties' => [
-                                                'type' => 'object',
-                                                'properties' => [
-                                                    'uuid' => [
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User UUID',
+                                                    'example' => 'user-uuid-example',
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User email address',
+                                                    'example' => 'user@example.com',
+                                                ],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => [
                                                         'type' => 'string',
-                                                        'description' => 'User UUID',
-                                                        'example' => 'user-uuid-example',
                                                     ],
-                                                    'email' => [
-                                                        'type' => 'string',
-                                                        'description' => 'User email address',
-                                                        'example' => 'user@example.com',
-                                                    ],
-                                                    'roles' => [
-                                                        'type' => 'array',
-                                                        'items' => [
-                                                            'type' => 'string',
-                                                        ],
-                                                        'description' => 'List of user roles',
-                                                        'example' => ['ROLE_USER'],
-                                                    ],
-                                                    'first_name' => [
-                                                        'type' => 'string',
-                                                        'description' => 'User first name',
-                                                        'example' => 'John',
-                                                    ],
-                                                    'last_name' => [
-                                                        'type' => 'string',
-                                                        'description' => 'User last name',
-                                                        'example' => 'Doe',
-                                                    ],
-                                                    'user_external_auths' => [
-                                                        [
-                                                            'provider' => 'SAML Account',
-                                                            'provider_id' => 'saml_account_name',
+                                                    'description' => 'List of user roles',
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User first name',
+                                                    'example' => 'John',
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'description' => 'User last name',
+                                                    'example' => 'Doe',
+                                                ],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'SAML Account',
+                                                                'description' => 'Authentication provider',
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'saml_account_name',
+                                                                'description' => 'Provider identifier',
+                                                            ],
                                                         ],
                                                     ],
                                                 ],
@@ -462,9 +476,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'roles' => ['ROLE_USER'],
                                         'first_name' => 'John',
                                         'last_name' => 'Doe',
-                                        'user_external_auth' => [
-                                            'provider' => 'SAML Account',
-                                            'provider_id' => 'userExampleAccountName'
+                                        'user_external_auths' => [
+                                            [
+                                                'provider' => 'SAML Account',
+                                                'provider_id' => 'userExampleAccountName',
+                                            ],
                                         ],
                                         'token' => 'jwt-token-example',
                                     ],
@@ -480,15 +496,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => ['type' => 'boolean', 'example' => false],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Error message explaining why the request failed',
-                                                    'example' => 'SAML Response not found',
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'SAML Response not found',
                                         ],
                                     ],
                                 ],
@@ -512,26 +523,21 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => ['type' => 'boolean', 'example' => false],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Error message for why authentication failed',
-                                                    'example' => 'Invalid SAML Assertion',
-                                                ],
-                                                'details' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Detailed error message',
-                                                    'example' => 'Detailed error information from SAML assertion',
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message for why authentication failed',
+                                            'example' => 'Invalid SAML Assertion',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Detailed error information from SAML assertion',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Invalid SAML Assertion' => [
-                                        'summary' => ['Invalid SAML Assertion'],
+                                        'summary' => 'Invalid SAML Assertion',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid SAML Assertion',
@@ -555,7 +561,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
                                             // phpcs:enable
-                                            'description' => 'Details of the authentication failure'
+                                            'description' => 'Details of the authentication failure',
                                         ],
                                     ],
                                 ],
@@ -586,20 +592,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => ['type' => 'boolean', 'example' => false],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Error message for why the server error occurred',
-                                                    'example' => 'SAML processing error',
-                                                ],
-                                                'details' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Detailed error message',
-                                                    'example' => 'Detailed error information',
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message for why the server error occurred',
+                                            'example' => 'SAML processing error',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Detailed error information',
                                         ],
                                     ],
                                 ],
