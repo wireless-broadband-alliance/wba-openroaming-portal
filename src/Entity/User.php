@@ -327,10 +327,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
+                                'examples' => [
                                     'invalid_credentials' => [
-                                        'success' => false,
-                                        'error' => 'Invalid credentials',
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials',
+                                        ],
                                     ],
                                 ],
                             ],
@@ -502,10 +505,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'data' => [
-                                        'error' => 'SAML Response not found',
+                                'examples' => [
+                                    'saml_response_not_found' => [
+                                        'summary' => 'SAML Response not found',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'SAML Response not found',
+                                        ],
                                     ],
                                 ],
                             ],
@@ -536,15 +542,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'invalid_saml' => [
-                                        'summary' => 'Invalid SAML Assertion',
+                                'examples' => [
+                                    'Invalid SAML Assertion' => [
+                                        'summary' => ['Invalid SAML Assertion'],
                                         'value' => [
                                             'success' => false,
-                                            'data' => [
-                                                'error' => 'Invalid SAML Assertion',
-                                                'details' => 'Detailed error information from SAML assertion',
-                                            ],
+                                            'error' => 'Invalid SAML Assertion',
+                                            'details' => 'Detailed error information from SAML assertion',
                                         ],
                                     ],
                                 ],
@@ -612,11 +616,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'data' => [
-                                        'error' => 'SAML processing error',
-                                        'details' => 'Detailed error information',
+                                'examples' => [
+                                    'saml_processing_error' => [
+                                        'summary' => 'SAML processing error',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'SAML processing error',
+                                            'details' => 'Detailed error information',
+                                        ],
                                     ],
                                 ],
                             ],
@@ -716,13 +723,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'example' => [
-                                    'invalid_google_credentials' => [
-                                        'summary' => 'Invalid Google credentials',
-                                        'value' => [
-                                            'success' => false,
-                                            'message' => 'Authentication Failed: Invalid Google credentials.',
-                                        ],
-                                    ],
+                                    'success' => false,
+                                    'message' => 'Authentication Failed: Invalid Google credentials.',
                                 ],
                             ],
                         ],
@@ -746,11 +748,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 ],
                                 'examples' => [
                                     'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
-                                        ],
+                                        'success' => false,
+                                        'error' => 'User account is not verified!',
                                     ],
                                     'banned_account' => [
                                         'summary' => 'User account is banned',
@@ -777,9 +776,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'message' => 'An error occurred: Could not connect to Google API.',
+                                'examples' => [
+                                    'Authentication failed' => [
+                                        'success' => false,
+                                        'error' => 'An error occurred: Could not connect to Google API.',
+                                        'details' => ''
+                                    ],
+                                    'Server related' => [
+                                        'success' => false,
+                                        'error' => 'An error occurred: Generic server related error.',
+                                        'details' => ''
+                                    ],
                                 ],
                             ],
                         ],
@@ -899,18 +906,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'missing_data' => [
-                                        'summary' => 'Missing required fields',
-                                        'value' => [
-                                            'success' => false,
-                                            'data' => [
-                                                // phpcs:disable Generic.Files.LineLength.TooLong
-                                                'error' => 'Missing required fields: email, password or turnstile_token',
-                                                // phpcs:enable
-                                            ],
-                                        ],
+                                    'Missing Fields' => [
+                                        'success' => false,
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'error' => 'Missing required fields: email, password or turnstile_token',
+                                        // phpcs:enable
                                     ],
-                                    'invalid_data' => [
+                                    'Invalid Data' => [
                                         'summary' => 'Invalid data format',
                                         'value' => [
                                             'success' => false,
