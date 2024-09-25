@@ -225,9 +225,8 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(404, null, 'User with provider email not found!'))->toResponse();
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserVerification($user);
-        if ($statusCheckerResponse !== null) {
-            return $statusCheckerResponse->toResponse();
+        if (!$user->isVerified()) {
+            return (new BaseResponse(400, null, 'User account is not verified!'))->toResponse();
         }
 
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -258,8 +257,8 @@ class RegistrationController extends AbstractController
             // Check if enough time has passed since the last password reset request
             if (
                 !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                    $minInterval
-                ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
             ) {
                 if (!$latestEvent) {
                     $latestEvent = new Event();
@@ -465,9 +464,8 @@ class RegistrationController extends AbstractController
             return (new BaseResponse(404, null, 'User with provider phone number not found!'))->toResponse();
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserVerification($user);
-        if ($statusCheckerResponse !== null) {
-            return $statusCheckerResponse->toResponse();
+        if (!$user->isVerified()) {
+            return (new BaseResponse(400, null, 'User account is not verified!'))->toResponse();
         }
 
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
