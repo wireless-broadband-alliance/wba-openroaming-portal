@@ -282,21 +282,39 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request due to invalid data or CAPTCHA validation failure',
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'CAPTCHA validation failed or invalid data',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
                                         ],
                                     ],
-                                    'example' => [
-                                        'success' => false,
-                                        'error' => 'CAPTCHA validation failed or invalid data',
+                                ],
+                                'examples' => [
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'CAPTCHA validation failed',
+                                        ],
+                                    ],
+                                    'missing_fields' => [
+                                        'summary' => 'Missing Fields',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
+                                            // phpcs:enable
+                                        ],
                                     ],
                                 ],
                             ],
@@ -314,7 +332,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'type' => 'string',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            // phpcs:enable
                                             'description' => 'Details of the authentication failure'
                                         ],
                                         'details' => [
@@ -536,7 +554,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'Invalid SAML Assertion' => [
+                                    'invalid_saml_assertion' => [
                                         'summary' => 'Invalid SAML Assertion',
                                         'value' => [
                                             'success' => false,
@@ -932,15 +950,25 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'Missing Fields' => [
-                                        'success' => false,
-                                        'error' => 'Missing required fields: email, password or turnstile_token',
-                                    ],
-                                    'Invalid Data' => [
-                                        'summary' => 'Invalid data format',
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid data format for fields',
+                                            'error' => 'CAPTCHA validation failed',
+                                        ],
+                                    ],
+                                    'missing_fields' => [
+                                        'summary' => 'Missing Fields',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required fields: email, password or turnstile_token',
+                                        ],
+                                    ],
+                                    'invalid_porta_account' => [
+                                        'summary' => 'Invalid portal account',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid portal account',
                                         ],
                                     ],
                                 ],
@@ -1076,18 +1104,27 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'missing_data' => [
-                                        'summary' => 'Missing required data',
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Missing data',
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
-                                    'mismatch_data' => [
-                                        'summary' => 'Invalid data format for fields',
+                                    'missing_fields' => [
+                                        'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid data format for fields',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_porta_account' => [
+                                        'summary' => 'Invalid portal account',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid portal account',
                                         ],
                                     ],
                                 ],
@@ -1227,7 +1264,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1240,30 +1277,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the request failed',
-                                            'example' => 'Invalid data or CAPTCHA validation failed',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Please make sure to include the required fields.',
+                                            'example' => 'Missing required fields or invalid data',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
-                                    'missing_data' => [
-                                        'summary' => 'Missing required fields',
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid Data',
-                                            'details' => 'Please include both email and CAPTCHA token.',
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
-                                    'captcha_invalid' => [
-                                        'summary' => 'Invalid CAPTCHA token',
+                                    'missing_fields' => [
+                                        'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid CAPTCHA token',
-                                            'details' => 'The CAPTCHA token provided is invalid. Please try again.',
+                                            'error' => 'Missing required fields: email, password or turnstile_token',
                                         ],
                                     ],
                                 ],
@@ -1288,18 +1318,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message explaining why the request was forbidden',
                                             'example' => 'Invalid credentials',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Invalid credentials.',
-                                        ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Invalid credentials' => [
                                         'success' => false,
                                         'error' => 'Invalid credentials',
-                                        'details' => 'The portal account does not allow password reset for this email.',
                                     ],
                                     'invalid_verification' => [
                                         'summary' => 'User account is not verified',
@@ -1448,7 +1472,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad Request - Invalid data or CAPTCHA validation failed',
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1460,29 +1484,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'Invalid data or CAPTCHA validation failed.',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'example' => 'Invalid data: Missing required fields.',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
-                                    'missing_data' => [
-                                        'summary' => 'Missing required data',
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid data',
-                                            'details' => 'Invalid data: Missing required fields.',
+                                            'error' => 'CAPTCHA validation failed',
                                         ],
                                     ],
-                                    'captcha_invalid' => [
-                                        'summary' => 'Invalid CAPTCHA token',
+                                    'missing_fields' => [
+                                        'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid CAPTCHA token',
-                                            'details' => 'The CAPTCHA token provided is invalid.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -1490,19 +1511,45 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'Invalid account verification.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'description' => 'User phone number or provider not allowed - Invalid account verification',
+                        // phpcs:enable
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean'],
-                                        'error' => ['type' => 'string'],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request was forbidden',
+                                            'example' => 'Invalid credentials',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Invalid credentials.',
+                                        ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'User account is not verified!',
+                                'examples' => [
+                                    'invalid_credentials' => [
+                                        'success' => false,
+                                        'error' => 'Invalid credentials',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'details' => 'The portal account does not allow password reset for this phone number.',
+                                        // phpcs:enable
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
