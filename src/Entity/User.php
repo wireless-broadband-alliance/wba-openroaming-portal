@@ -834,12 +834,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_auth_local_register',
             openapiContext: [
                 'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email and password,
-                 with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
-                 and CAPTCHA verification. Also sends an email to the user with basic instructions for the portal.',
+                'description' => 'This endpoint registers a new user using their email and password, 
+            with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
+            and CAPTCHA verification. Also sends an email to the user with basic instructions for the portal.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token. 
-                    The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
+            The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
                     'required' => true,
                     'content' => [
                         'application/json' => [
@@ -924,34 +924,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'type' => 'boolean',
                                             'example' => false,
                                         ],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Error message for invalid data',
-                                                    // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'Missing required fields: email, password or turnstile_token',
-                                                    // phpcs:enable
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message for invalid data',
+                                            'example' => 'Missing required fields: email, password or turnstile_token',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Missing Fields' => [
                                         'success' => false,
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
                                         'error' => 'Missing required fields: email, password or turnstile_token',
-                                        // phpcs:enable
                                     ],
                                     'Invalid Data' => [
                                         'summary' => 'Invalid data format',
                                         'value' => [
                                             'success' => false,
-                                            'data' => [
-                                                'error' => 'Invalid data format for fields',
-                                            ],
+                                            'error' => 'Invalid data format for fields',
                                         ],
                                     ],
                                 ],
@@ -969,23 +958,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'type' => 'boolean',
                                             'example' => false,
                                         ],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'description' => 'Error when the user already exists',
-                                                    'example' => 'This User already exists',
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error when the user already exists',
+                                            'example' => 'This User already exists',
                                         ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
-                                    'data' => [
-                                        'error' => 'This User already exists',
-                                    ],
+                                    'error' => 'This User already exists',
                                 ],
                             ],
                         ],
