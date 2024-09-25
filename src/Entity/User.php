@@ -866,7 +866,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'properties' => [
                                                 'message' => [
                                                     'type' => 'string',
-                                                    'example' => 'Local User Account Registered Successfully',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'example' => 'Registration successful. Please check your email for further instructions',
+                                                    // phpcs:enable
                                                 ],
                                             ],
                                         ],
@@ -875,7 +877,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => true,
                                     'data' => [
-                                        'message' => 'Local User Account Registered Successfully',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'message' => 'Registration successful. Please check your email for further instructions',
+                                        // phpcs:enable
                                     ],
                                 ],
                             ],

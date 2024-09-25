@@ -173,7 +173,10 @@ class RegistrationController extends AbstractController
             $eventMetaData
         );
 
-        return (new BaseResponse(200, ['message' => 'Local User Account Registered Successfully']))->toResponse();
+        return (new BaseResponse(
+            200,
+            ['message' => 'Registration successful. Please check your email for further instructions']
+        ))->toResponse();
     }
 
     /**
@@ -259,8 +262,8 @@ class RegistrationController extends AbstractController
             // Check if enough time has passed since the last password reset request
             if (
                 !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                    $minInterval
+                ) < $currentTime)
             ) {
                 if (!$latestEvent) {
                     $latestEvent = new Event();
