@@ -259,8 +259,8 @@ class RegistrationController extends AbstractController
             // Check if enough time has passed since the last password reset request
             if (
                 !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                    $minInterval
-                ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
             ) {
                 if (!$latestEvent) {
                     $latestEvent = new Event();
@@ -332,15 +332,13 @@ class RegistrationController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @return JsonResponse
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws Exception
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws Exception
      */
     #[Route('/api/v1/auth/sms/register', name: 'api_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
@@ -415,8 +413,30 @@ class RegistrationController extends AbstractController
             $eventMetaData
         );
 
-        // Return success response
-        return (new BaseResponse(200, ['message' => 'SMS User Account Registered Successfully']))->toResponse();
+        // Send SMS
+        try {
+            $message = "Your account password is: "
+                . $data['password']
+                . "%0A"
+                . "Verification code is: "
+                . $user->getVerificationCode();
+
+            $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+
+            if ($result) {
+                return (new BaseResponse(200, [
+                    // phpcs:disable Generic.Files.LineLength.TooLong
+                    'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
+                    // phpcs:enable
+                ]))->toResponse();
+            }
+        } catch (\RuntimeException $e) {
+            return (new BaseResponse(500, null, 'Failed to send SMS: ' . $e->getMessage()))->toResponse(
+            ); // Internal Server Error
+        }
+
+        // Return fallback response
+        return (new BaseResponse(500, null, 'User registered but SMS could not be sent.'))->toResponse();
     }
 
 
