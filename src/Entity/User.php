@@ -805,7 +805,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'summary' => 'Register a new user via local authentication',
                 'description' => 'This endpoint registers a new user using their email and password,
                  with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
-                 and CAPTCHA verification. If the user already exists, it returns a conflict error.',
+                 and CAPTCHA verification. Also sends an email to the user with basic instructions for the portal.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token. 
                     The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
@@ -973,9 +973,10 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
             openapiContext: [
-                'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number and validates 
-                the request with a CAPTCHA token.',
+                'summary' => 'This endpoint registers a new user using their phone number and password,
+                 with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
+                 and CAPTCHA verification. 
+                 Also sends an sms message to the user with basic instructions for the portal.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
