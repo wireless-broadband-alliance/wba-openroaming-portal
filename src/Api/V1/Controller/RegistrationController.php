@@ -484,146 +484,143 @@ class RegistrationController extends AbstractController
 
         $user = $this->userRepository->findOneBy(['phoneNumber' => $dataRequest['phone_number']]);
 
-        if (!$user) {
-            return (new BaseResponse(404, null, 'User with provider phone number not found!'))->toResponse();
-        }
-
-        if (!$user->isVerified()) {
-            return (new BaseResponse(400, null, 'User account is not verified!'))->toResponse();
-        }
-
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-        $hasValidPortalAccount = false;
-
-        foreach ($userExternalAuths as $auth) {
-            if (
-                $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
-                $auth->getProviderId() === UserProvider::PHONE_NUMBER
-            ) {
-                $hasValidPortalAccount = true;
-                break;
+        if ($user) {
+            if (!$user->isVerified()) {
+                return (new BaseResponse(400, null, 'User account is not verified!'))->toResponse();
             }
-        }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+            $hasValidPortalAccount = false;
 
-        if ($hasValidPortalAccount) {
-            try {
-                $randomPassword = bin2hex(random_bytes(4));
-                $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
+            foreach ($userExternalAuths as $auth) {
+                if (
+                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
+                    $auth->getProviderId() === UserProvider::PHONE_NUMBER
+                ) {
+                    $hasValidPortalAccount = true;
+                    break;
+                }
+            }
 
-                // Retrieve the latest SMS attempt event for the user
-                $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
-                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                $maxAttempts = 4;
-                $currentTime = new DateTime();
-                $attemptsLeft = $maxAttempts;
+            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-                if ($latestEvent) {
-                    $latestEventMetadata = $latestEvent->getEventMetadata();
-                    $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                    $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                        ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                        : null;
+            if ($hasValidPortalAccount) {
+                try {
+                    $randomPassword = bin2hex(random_bytes(4));
+                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
-                    if ($lastVerificationCodeTime instanceof DateTime) {
-                        $allowedTime = $lastVerificationCodeTime->add($minInterval);
+                    // Retrieve the latest SMS attempt event for the user
+                    $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
+                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
+                    $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
+                    $maxAttempts = 4;
+                    $currentTime = new DateTime();
+                    $attemptsLeft = $maxAttempts;
 
-                        if ($allowedTime > $currentTime) {
-                            return (new BaseResponse(
-                                429,
-                                null,
-                                sprintf(
-                                    'Please wait %d minute(s) before trying again.',
-                                    $data['SMS_TIMER_RESEND']['value']
-                                )
-                            ))->toResponse();
-                        }
+                    if ($latestEvent) {
+                        $latestEventMetadata = $latestEvent->getEventMetadata();
+                        $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+                        $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+                            ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+                            : null;
 
-                        $verificationAttempts++;
-                        $attemptsLeft = $maxAttempts - $verificationAttempts;
+                        if ($lastVerificationCodeTime instanceof DateTime) {
+                            $allowedTime = $lastVerificationCodeTime->add($minInterval);
 
-                        if ($attemptsLeft <= 0) {
-                            return (new BaseResponse(
-                                429,
-                                null,
-                                'Limit of tries exceeded for regeneration. Contact support.'
-                            ))->toResponse();
+                            if ($allowedTime > $currentTime) {
+                                return (new BaseResponse(
+                                    429,
+                                    null,
+                                    sprintf(
+                                        'Please wait %d minute(s) before trying again.',
+                                        $data['SMS_TIMER_RESEND']['value']
+                                    )
+                                ))->toResponse();
+                            }
+
+                            $verificationAttempts++;
+                            $attemptsLeft = $maxAttempts - $verificationAttempts;
+
+                            if ($attemptsLeft <= 0) {
+                                return (new BaseResponse(
+                                    429,
+                                    null,
+                                    'Limit of tries exceeded for regeneration. Contact support.'
+                                ))->toResponse();
+                            }
+                        } else {
+                            $verificationAttempts = 1;
+                            $attemptsLeft = $maxAttempts - $verificationAttempts;
                         }
                     } else {
                         $verificationAttempts = 1;
                         $attemptsLeft = $maxAttempts - $verificationAttempts;
                     }
-                } else {
-                    $verificationAttempts = 1;
-                    $attemptsLeft = $maxAttempts - $verificationAttempts;
+
+                    // Update or create the event record
+                    if (!$latestEvent) {
+                        $latestEvent = new Event();
+                        $latestEvent->setUser($user);
+                        $latestEvent->setEventDatetime($currentTime);
+                        $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
+                    }
+
+                    $eventMetadata = [
+                        'ip' => $request->getClientIp(),
+                        'uuid' => $user->getUuid(),
+                        'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
+                        'verificationAttempts' => $verificationAttempts,
+                    ];
+                    $latestEvent->setEventMetadata($eventMetadata);
+
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        $currentTime,
+                        $eventMetadata
+                    );
+
+                    // Set the hashed password for the user
+                    $user->setPassword($hashedPassword);
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+
+                    // Send SMS
+                    $message = sprintf(
+                        "Your account password is: %s\nVerification code is: %s",
+                        $randomPassword,
+                        $user->getVerificationCode()
+                    );
+
+                    $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+
+                    // Defines the Event to the table
+                    $eventMetadata = [
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'uuid' => $user->getUuid(),
+                    ];
+
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API,
+                        new DateTime(),
+                        $eventMetadata
+                    );
+
+                    if ($result) {
+                        return (new BaseResponse(200, [
+                            'success' => sprintf(
+                                'We have sent a new code to: %s. You have %d attempt(s) left.',
+                                $user->getPhoneNumber(),
+                                $attemptsLeft
+                            )
+                        ]))->toResponse();
+                    }
+                } catch (\RuntimeException $e) {
+                    return (new BaseResponse(500, null, $e->getMessage()))->toResponse(); // Internal Server Error
                 }
-
-                // Update or create the event record
-                if (!$latestEvent) {
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($user);
-                    $latestEvent->setEventDatetime($currentTime);
-                    $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
-                }
-
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'uuid' => $user->getUuid(),
-                    'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
-                    'verificationAttempts' => $verificationAttempts,
-                ];
-                $latestEvent->setEventMetadata($eventMetadata);
-
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::USER_SMS_ATTEMPT,
-                    $currentTime,
-                    $eventMetadata
-                );
-
-                // Set the hashed password for the user
-                $user->setPassword($hashedPassword);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-
-                // Send SMS
-                $message = sprintf(
-                    "Your account password is: %s\nVerification code is: %s",
-                    $randomPassword,
-                    $user->getVerificationCode()
-                );
-
-                $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
-
-                // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
-                    'uuid' => $user->getUuid(),
-                ];
-
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                if ($result) {
-                    return (new BaseResponse(200, [
-                        'success' => sprintf(
-                            'We have sent a new code to: %s. You have %d attempt(s) left.',
-                            $user->getPhoneNumber(),
-                            $attemptsLeft
-                        )
-                    ]))->toResponse();
-                }
-            } catch (\RuntimeException $e) {
-                return (new BaseResponse(500, null, $e->getMessage()))->toResponse(); // Internal Server Error
             }
         }
-
         return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
     }
 }

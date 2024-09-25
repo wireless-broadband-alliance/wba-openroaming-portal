@@ -1297,7 +1297,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message indicating the user was not found',
-                                            'example' => 'User not found',
+                                            'example' => 'Invalid portal account',
                                         ],
                                         'details' => [
                                             'type' => 'string',
@@ -1309,7 +1309,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => false,
                                     'error' => 'User not found',
-                                    'details' => 'No user found with email: user@example.com.',
+                                    'details' => 'Invalid portal account',
                                 ],
                             ],
                         ],
@@ -1484,7 +1484,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '404' => [
-                        'description' => 'User with the provided phone_number not found.',
+                        'description' => 'Invalid portal account.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1496,7 +1496,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'example' => 'User with provider phone_number not found!',
+                                            'example' => 'Invalid portal account!',
                                         ],
                                     ],
                                 ],
