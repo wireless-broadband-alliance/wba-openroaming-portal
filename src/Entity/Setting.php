@@ -21,6 +21,11 @@ use Doctrine\ORM\Mapping as ORM;
                 'summary' => 'Get configuration settings',
                 'description' => 'This endpoint returns public values from the Setting entity and 
                 environment variables categorized by platform and provider.',
+                'security' => [
+                    [
+                        'BearerAuth' => [],
+                    ],
+                ],
                 'responses' => [
                     '200' => [
                         'description' => 'Configuration settings retrieved successfully',
