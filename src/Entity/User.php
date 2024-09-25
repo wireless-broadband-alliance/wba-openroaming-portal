@@ -983,9 +983,9 @@ use Symfony\Component\Validator\Constraints as Assert;
             openapiContext: [
                 'summary' => 'Register a new user via SMS authentication',
                 'description' => 'This endpoint registers a new user using their phone number and password,
-                 with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
-                 and CAPTCHA verification. 
-                 Also sends an small sms message to the user with basic information for the portal.',
+            with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
+            and CAPTCHA verification. 
+            Also sends a small SMS message to the user with basic information for the portal.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -997,27 +997,27 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'phone_number' => [
                                         'type' => 'string',
                                         'example' => '+1234567890',
-                                        'description' => 'User phone number'
+                                        'description' => 'User phone number',
                                     ],
                                     'password' => [
                                         'type' => 'string',
                                         'example' => 'strongpassword',
-                                        'description' => 'User password'
+                                        'description' => 'User password',
                                     ],
                                     'first_name' => [
                                         'type' => 'string',
                                         'example' => 'John',
-                                        'description' => 'First name of the user'
+                                        'description' => 'First name of the user',
                                     ],
                                     'last_name' => [
                                         'type' => 'string',
                                         'example' => 'Doe',
-                                        'description' => 'Last name of the user'
+                                        'description' => 'Last name of the user',
                                     ],
                                     'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
+                                        'example' => 'valid_test_token',
                                     ],
                                 ],
                                 'required' => ['phone_number', 'password', 'turnstile_token'],
@@ -1073,11 +1073,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message explaining why the request failed',
                                             'example' => 'Missing required fields or invalid data',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Error information about missing fields or data validation',
-                                        ],
                                     ],
                                 ],
                                 'examples' => [
@@ -1086,17 +1081,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Missing data',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'details' => 'Missing required fields: phone_number, password or turnstile_token',
-                                            // phpcs:enable
                                         ],
                                     ],
                                     'mismatch_data' => [
-                                        'summary' => 'Phone number and data mismatch',
+                                        'summary' => 'Invalid data format for fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid data',
-                                            'details' => 'Invalid data',
+                                            'error' => 'Invalid data format for fields',
                                         ],
                                     ],
                                 ],
@@ -1119,23 +1110,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message for why the user could not be registered',
                                             'example' => 'This User already exists',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'User with the provided phone_number already exists',
-                                        ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
                                     'error' => 'This User already exists',
-                                    'details' => 'User with the provided phone number already exists',
                                 ],
                             ],
                         ],
                     ],
                     '500' => [
-                        'description' => 'Server error while processing the request.',
+                        'description' => 'Server error while processing the request',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1150,18 +1135,22 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'A short description of the error',
                                             'example' => 'Failed to send SMS',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Detailed error message',
-                                        ],
                                     ],
                                 ],
-                                'example' => [
-                                    'Failed to send SMS' => [
-                                        'success' => false,
-                                        'error' => 'Failed to send SMS',
-                                        'details' => 'Detailed message',
+                                'examples' => [
+                                    'failed_send_sms' => [
+                                        'summary' => 'Failed to send SMS',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Failed to send SMS: error details',
+                                        ],
+                                    ],
+                                    'fallback_sms' => [
+                                        'summary' => 'SMS sending failed after user registration',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User registered but SMS could not be sent.',
+                                        ],
                                     ],
                                 ],
                             ],
