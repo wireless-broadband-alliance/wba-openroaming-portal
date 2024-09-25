@@ -119,12 +119,12 @@ class AuthController extends AbstractController
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing User'))->toResponse();
+            return (new BaseResponse(400, null, 'Invalid credentials'))->toResponse();
             // Bad Request Response
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, null, 'Invalid data: Invalid Password'))->toResponse(
+            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(
             ); # Unauthorized Request Response
         }
 

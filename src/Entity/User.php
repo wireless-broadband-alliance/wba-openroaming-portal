@@ -120,13 +120,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'example' => [
-                                    'missing_token' => [
-                                        'summary' => 'Missing JWT Token',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'JWT Token not found!',
-                                        ],
-                                    ],
+                                    'success' => false,
+                                    'error' => 'JWT Token not found!',
                                 ],
                             ],
                         ],
@@ -164,7 +159,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification code' => '000000'
                                         ],
                                     ],
                                     'banned_account' => [
@@ -335,11 +329,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 ],
                                 'example' => [
                                     'invalid_credentials' => [
-                                        'summary' => 'Invalid credentials',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid credentials',
-                                        ],
+                                        'success' => false,
+                                        'error' => 'Invalid credentials',
                                     ],
                                 ],
                             ],
@@ -1088,7 +1079,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid data',
-                                            'details' => 'Phone number or other data is invalid',
+                                            'details' => 'Invalid data',
                                         ],
                                     ],
                                 ],
@@ -1289,21 +1280,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the request was forbidden',
-                                            'example' => 'Invalid credentials - Provider not allowed',
+                                            'example' => 'Invalid credentials',
                                         ],
                                         'details' => [
                                             'type' => 'string',
                                             'description' => 'Detailed error message',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'example' => 'Invalid credentials or provider is not allowed to reset the password.',
-                                            // phpcs:enable
+                                            'example' => 'Invalid credentials.',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Invalid credentials' => [
                                         'success' => false,
-                                        'error' => 'Invalid credentials - Provider not allowed',
+                                        'error' => 'Invalid credentials',
                                         'details' => 'The portal account does not allow password reset for this email.',
                                     ],
                                     'invalid_verification' => [
