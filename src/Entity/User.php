@@ -368,7 +368,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000',
                                         ],
                                     ],
                                     'banned_account' => [
@@ -584,7 +583,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000',
                                         ],
                                     ],
                                     'banned_account' => [
@@ -761,7 +759,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000',
                                         ],
                                     ],
                                     'banned_account' => [
@@ -1279,7 +1276,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000',
                                         ],
                                     ],
                                 ],
@@ -1472,9 +1468,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'properties' => [
                                         'success' => ['type' => 'boolean'],
                                         'error' => ['type' => 'string'],
-                                        'verification_code' => [
-                                            'type' => 'integer',
-                                        ],
                                     ],
                                 ],
                                 'example' => [
@@ -1483,7 +1476,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                            'verification_code' => '000000',
                                         ],
                                     ],
                                 ],
