@@ -289,22 +289,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'type' => 'object',
                                     'properties' => [
                                         'success' => ['type' => 'boolean', 'example' => false],
-                                        'data' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'error' => [
-                                                    'type' => 'string',
-                                                    'example' => 'CAPTCHA validation failed or invalid data',
-                                                    'description' => 'Details of the error'
-                                                ],
-                                            ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'CAPTCHA validation failed or invalid data',
                                         ],
                                     ],
                                     'example' => [
                                         'success' => false,
-                                        'data' => [
-                                            'error' => 'CAPTCHA validation failed or invalid data',
-                                        ],
+                                        'error' => 'CAPTCHA validation failed or invalid data',
                                     ],
                                 ],
                             ],
@@ -320,20 +312,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'error' => [
                                             'type' => 'string',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
-                                            // phpcs:enable
                                             'description' => 'Details of the authentication failure'
                                         ],
-                                    ],
-                                ],
-                                'examples' => [
-                                    'invalid_credentials' => [
-                                        'summary' => 'Invalid Credentials',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid credentials',
+                                        'details' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials provided.',
+                                            'description' => 'Additional details about the failure'
                                         ],
+                                    ],
+                                    'example' => [
+                                        'success' => false,
+                                        'error' => 'Invalid credentials',
                                     ],
                                 ],
                             ],
@@ -349,26 +339,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'error' => [
                                             'type' => 'string',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
-                                            // phpcs:enable
-                                            'description' => 'Details of the authentication failure'
+                                            'example' => 'User account is not verified or is banned.',
                                         ],
                                     ],
-                                ],
-                                'examples' => [
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
+                                    'examples' => [
+                                        'invalid_verification' => [
+                                            'summary' => 'User account is not verified',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'User account is not verified!',
+                                            ],
                                         ],
-                                    ],
-                                    'banned_account' => [
-                                        'summary' => 'User account is banned',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is banned from the system!',
+                                        'banned_account' => [
+                                            'summary' => 'User account is banned',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'User account is banned from the system!',
+                                            ],
                                         ],
                                     ],
                                 ],
