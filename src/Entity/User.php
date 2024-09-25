@@ -973,10 +973,11 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
             openapiContext: [
-                'summary' => 'This endpoint registers a new user using their phone number and password,
+                'summary' => 'Register a new user via SMS authentication',
+                'description' => 'This endpoint registers a new user using their phone number and password,
                  with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
                  and CAPTCHA verification. 
-                 Also sends an sms message to the user with basic instructions for the portal.',
+                 Also sends an small sms message to the user with basic information for the portal.',
                 'requestBody' => [
                     'description' => 'User registration data and CAPTCHA validation token',
                     'required' => true,
@@ -1121,6 +1122,39 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'success' => false,
                                     'error' => 'This User already exists',
                                     'details' => 'User with the provided phone number already exists',
+                                ],
+                            ],
+                        ],
+                    ],
+                    '500' => [
+                        'description' => 'Server error while processing the request.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'A short description of the error',
+                                            'example' => 'Failed to send SMS',
+                                        ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'Detailed error message',
+                                            'example' => 'Detailed error message',
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'Failed to send SMS' => [
+                                        'success' => false,
+                                        'error' => 'Failed to send SMS',
+                                        'details' => 'Detailed message',
+                                    ],
                                 ],
                             ],
                         ],
