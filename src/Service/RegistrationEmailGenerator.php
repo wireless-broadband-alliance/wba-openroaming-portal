@@ -43,7 +43,7 @@ class RegistrationEmailGenerator
             ->subject('Your OpenRoaming Registration Details')
             ->htmlTemplate('email/user_password.html.twig')
             ->context([
-                'uuid' => $user->getUuid(),
+                'uuid' => $user->getEmail(),
                 'verificationCode' => $user->getVerificationCode(),
                 'isNewUser' => true,
                 // This variable informs if the user it's new our if it's just a password reset request

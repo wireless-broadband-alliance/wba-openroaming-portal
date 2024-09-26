@@ -35,6 +35,8 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -55,6 +57,7 @@ class RegistrationController extends AbstractController
     private VerificationCodeGenerator $verificationCodeGenerator;
     private CaptchaValidator $captchaValidator;
     private RegistrationEmailGenerator $emailGenerator;
+    private ValidatorInterface $validator;
 
 
     public function __construct(
@@ -71,6 +74,7 @@ class RegistrationController extends AbstractController
         VerificationCodeGenerator $verificationCodeGenerator,
         CaptchaValidator $captchaValidator,
         RegistrationEmailGenerator $emailGenerator,
+        ValidatorInterface $validator
     ) {
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
@@ -85,19 +89,19 @@ class RegistrationController extends AbstractController
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->captchaValidator = $captchaValidator;
         $this->emailGenerator = $emailGenerator;
+        $this->validator = $validator;
     }
 
     /**
-     * @param UserPasswordHasherInterface $userPasswordHasher
      * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
      * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/api/v1/auth/local/register', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(
@@ -133,6 +137,16 @@ class RegistrationController extends AbstractController
                 'Invalid data: Missing required fields.'
             )
             )->toResponse();
+        }
+
+        $emailConstraint = new Assert\Email();
+        $emailConstraint->message = 'Invalid email format.';
+
+        $emailViolations = $this->validator->validate($data['email'], $emailConstraint);
+
+        if (count($emailViolations) > 0) {
+            $errorMessage = $emailViolations[0]->getMessage();
+            return (new BaseResponse(400, null, $errorMessage))->toResponse();
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
@@ -197,7 +211,7 @@ class RegistrationController extends AbstractController
     public function localReset(
         UserPasswordHasherInterface $userPasswordHasher,
         MailerInterface $mailer,
-        Request $request
+        Request $request,
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -223,6 +237,16 @@ class RegistrationController extends AbstractController
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+        }
+
+        $emailConstraint = new Assert\Email();
+        $emailConstraint->message = 'Invalid email format.';
+
+        $emailViolations = $this->validator->validate($data['email'], $emailConstraint);
+
+        if (count($emailViolations) > 0) {
+            $errorMessage = $emailViolations[0]->getMessage();
+            return (new BaseResponse(400, null, $errorMessage))->toResponse();
         }
 
         $user = $this->userRepository->findOneBy(['email' => $data['email']]);
