@@ -303,12 +303,12 @@ class RegistrationController extends AbstractController
                     $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
                     $latestEvent->setEventMetadata($latestEventMetadata);
 
-                    $user->setForgotPasswordRequest(true);
                     $this->eventRepository->save($latestEvent, true);
 
                     $randomPassword = bin2hex(random_bytes(4));
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
                     $user->setPassword($hashedPassword);
+                    $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
@@ -608,6 +608,7 @@ class RegistrationController extends AbstractController
 
                     // Set the hashed password for the user
                     $user->setPassword($hashedPassword);
+                    $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 

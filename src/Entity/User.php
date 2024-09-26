@@ -384,6 +384,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'User account is banned from the system!',
                                         ],
                                     ],
+                                    'password_reset_request_active' => [
+                                        'summary' => 'Forgot password request active',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Your request cannot be processed at this time, pending password request',
+                                            // phpcs:enable
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
