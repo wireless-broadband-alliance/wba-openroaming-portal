@@ -355,7 +355,7 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
+        return (new BaseResponse(400, null, 'An error occurred while processing your request.'))->toResponse(); // Bad Request Response
     }
 
     /**
@@ -648,6 +648,6 @@ class RegistrationController extends AbstractController
                 }
             }
         }
-        return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
+        return (new BaseResponse(400, null, 'An error occurred while processing your request'))->toResponse(); // Bad Request Response
     }
 }

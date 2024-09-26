@@ -179,8 +179,8 @@ class AuthController extends AbstractController
             if ($samlAuth->getErrors()) {
                 return (new BaseResponse(
                     401,
-                    ['details' => $samlAuth->getLastErrorReason()],
-                    'Invalid SAML Assertion',
+                    null,
+                    'Unable to validate saml assertion',
                 ))->toResponse(); // Unauthorized
             }
 
@@ -188,7 +188,7 @@ class AuthController extends AbstractController
             if (!$samlAuth->isAuthenticated()) {
                 return (new BaseResponse(
                     401,
-                    ['details' => $samlAuth->getLastErrorReason()],
+                    null,
                     'Authentication Failed'
                 ))->toResponse(); // Unauthorized
             }
