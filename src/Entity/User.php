@@ -304,12 +304,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'missing_fields' => [
-                                        'summary' => 'Missing Fields',
+                                        'summary' => 'Missing fields',
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Missing required fields: phone number, password or turnstile_token',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'invalid_credentials' => [
+                                        'summary' => 'Invalid credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials',
                                         ],
                                     ],
                                 ],
@@ -326,15 +340,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'error' => [
                                             'type' => 'string',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
-                                            // phpcs:enable
-                                            'description' => 'Details of the authentication failure'
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'example' => 'Invalid credentials provided.',
-                                            'description' => 'Additional details about the failure'
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
                                         ],
                                     ],
                                     'example' => [
@@ -563,6 +570,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'details' => 'Detailed error information from SAML assertion',
                                         ],
                                     ],
+                                    'authentication_failed' => [
+                                        'summary' => 'Authentication Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Authentication Failed',
+                                            'details' => 'Detailed error information from SAML assertion',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -734,7 +749,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad request due to missing or invalid parameters',
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -747,30 +762,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'message' => 'Missing authorization code!',
-                                ],
-                            ],
-                        ],
-                    ],
-                    '401' => [
-                        'description' => 'Authentication failed due to invalid Google credentials.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
-                                        'message' => [
-                                            'type' => 'string',
-                                            'example' => 'Authentication Failed: Invalid Google credentials.',
+                                'examples' => [
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'message' => 'Authentication Failed: Invalid Google credentials.',
+                                    'missing_authorization_code' => [
+                                        'summary' => 'Missing authorization code',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                    'email_not_allowed' => [
+                                        'summary' => 'Email not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User creation failed or email is not allowed!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -975,18 +988,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Missing required fields: email, password or turnstile_token',
                                         ],
                                     ],
-                                    'invalid_porta_account' => [
-                                        'summary' => 'Invalid portal account',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid portal account',
-                                        ],
-                                    ],
-                                    'invalid_email_formart' => [
+                                    'invalid_email_format' => [
                                         'summary' => 'Invalid email format',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid email format',
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
@@ -1145,11 +1158,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
-                                    'invalid_porta_account' => [
-                                        'summary' => 'Invalid portal account',
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid portal account',
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
@@ -1332,11 +1345,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Missing required fields: email, password or turnstile_token',
                                         ],
                                     ],
-                                    'invalid_email_formart' => [
+                                    'invalid_email_format' => [
                                         'summary' => 'Invalid email format',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid email format',
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
@@ -1519,6 +1539,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Missing required fields: phone number, password or turnstile_token',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],

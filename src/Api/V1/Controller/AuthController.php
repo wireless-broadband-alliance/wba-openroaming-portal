@@ -186,7 +186,11 @@ class AuthController extends AbstractController
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                return (new BaseResponse(401, null, 'Authentication Failed'))->toResponse(); // Unauthorized
+                return (new BaseResponse(
+                    401,
+                    ['details' => $samlAuth->getLastErrorReason()],
+                    'Authentication Failed'
+                ))->toResponse(); // Unauthorized
             }
 
             $sAMAccountName = $samlAuth->getNameId();
@@ -253,9 +257,11 @@ class AuthController extends AbstractController
 
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
-            return (new BaseResponse(500, ['details' => $e->getMessage()], 'Unexpected error', [
-                'details' => $e->getMessage()
-            ]))->toResponse(); // Internal Server Error
+            return (new BaseResponse(
+                500,
+                ['details' => $e->getMessage()],
+                'SAML processing error',
+            ))->toResponse(); // Internal Server Error
         }
     }
 

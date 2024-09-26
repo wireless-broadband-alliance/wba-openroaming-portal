@@ -102,6 +102,7 @@ class RegistrationController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws Exception
      */
     #[Route('/api/v1/auth/local/register', name: 'api_auth_local_register', methods: ['POST'])]
     public function localRegister(
