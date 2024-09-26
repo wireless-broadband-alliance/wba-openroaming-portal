@@ -389,7 +389,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Your request cannot be processed at this time, pending password request',
+                                            'error' => 'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction send it to your email',
                                             // phpcs:enable
                                         ],
                                     ],

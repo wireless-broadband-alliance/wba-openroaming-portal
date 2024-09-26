@@ -41,7 +41,9 @@ class UserStatusChecker
                 new BaseResponse(
                     403,
                     null,
-                    'Your request cannot be processed at this time, pending password request'
+                    // phpcs:disable Generic.Files.LineLength.TooLong
+                    'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction send it to your email.'
+                // phpcs:enable
                 );
         }
 

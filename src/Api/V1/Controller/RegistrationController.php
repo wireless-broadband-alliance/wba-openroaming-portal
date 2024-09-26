@@ -285,8 +285,8 @@ class RegistrationController extends AbstractController
                 // Check if enough time has passed since the last password reset request
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -355,7 +355,8 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return (new BaseResponse(400, null, 'An error occurred while processing your request.'))->toResponse(); // Bad Request Response
+        return (new BaseResponse(400, null, 'An error occurred while processing your request.'))->toResponse(
+        ); // Bad Request Response
     }
 
     /**
@@ -648,6 +649,7 @@ class RegistrationController extends AbstractController
                 }
             }
         }
-        return (new BaseResponse(400, null, 'An error occurred while processing your request'))->toResponse(); // Bad Request Response
+        return (new BaseResponse(400, null, 'An error occurred while processing your request'))->toResponse(
+        ); // Bad Request Response
     }
 }
