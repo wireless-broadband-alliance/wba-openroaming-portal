@@ -186,7 +186,9 @@ class AuthController extends AbstractController
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                return (new BaseResponse(401, null, 'Authentication Failed'))->toResponse(); // Unauthorized
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                return (new BaseResponse(401, ['details' => $samlAuth->getLastErrorReason()], 'Authentication Failed'))->toResponse(); // Unauthorized
+                // phpcs:enable
             }
 
             $sAMAccountName = $samlAuth->getNameId();

@@ -304,12 +304,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'missing_fields' => [
-                                        'summary' => 'Missing Fields',
+                                        'summary' => 'Missing fields',
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Missing required fields: phone number, password or turnstile_token',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'invalid_credentials' => [
+                                        'summary' => 'Invalid credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials',
                                         ],
                                     ],
                                 ],
@@ -326,15 +340,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'error' => [
                                             'type' => 'string',
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
-                                            // phpcs:enable
-                                            'description' => 'Details of the authentication failure'
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'example' => 'Invalid credentials provided.',
-                                            'description' => 'Additional details about the failure'
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
                                         ],
                                     ],
                                     'example' => [
@@ -560,6 +567,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid SAML Assertion',
+                                            'details' => 'Detailed error information from SAML assertion',
+                                        ],
+                                    ],
+                                    'authentication_failed' => [
+                                        'summary' => 'Authentication Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Authentication Failed',
                                             'details' => 'Detailed error information from SAML assertion',
                                         ],
                                     ],
