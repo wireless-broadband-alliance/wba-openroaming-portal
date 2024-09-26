@@ -283,11 +283,13 @@ class RegistrationController extends AbstractController
                     : null;
 
                 // Check if enough time has passed since the last password reset request
+                // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
                 ) {
+                    // phpcs:enable
                     if (!$latestEvent) {
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
