@@ -99,7 +99,7 @@ use Doctrine\ORM\Mapping as ORM;
                                     'success' => true,
                                     'data' => [
                                         'platform' => [
-                                            'PLATFORM_MODE' => true,
+                                            'PLATFORM_MODE' => "Live",
                                             'USER_VERIFICATION' => true,
                                             'TURNSTILE_CHECKER' => true,
                                             'CONTACT_EMAIL' => 'support@example.com',

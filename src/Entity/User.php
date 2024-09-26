@@ -384,6 +384,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'User account is banned from the system!',
                                         ],
                                     ],
+                                    'password_reset_request_active' => [
+                                        'summary' => 'Forgot password request active',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction send it to your email',
+                                            // phpcs:enable
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -554,20 +563,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message for why authentication failed',
                                             'example' => 'Invalid SAML Assertion',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Detailed error information from SAML assertion',
-                                        ],
                                     ],
                                 ],
                                 'examples' => [
                                     'invalid_saml_assertion' => [
-                                        'summary' => 'Invalid SAML Assertion',
+                                        'summary' => 'Unable to validate saml assertion',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid SAML Assertion',
-                                            'details' => 'Detailed error information from SAML assertion',
+                                            'error' => 'Unable to validate saml assertion',
                                         ],
                                     ],
                                     'authentication_failed' => [
@@ -575,7 +578,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Authentication Failed',
-                                            'details' => 'Detailed error information from SAML assertion',
                                         ],
                                     ],
                                 ],
@@ -1359,6 +1361,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Invalid json format',
                                         ],
                                     ],
+                                    'invalid_request' => [
+                                        'summary' => 'An error occurred while processing your request',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'An error occurred while processing your request',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -1546,6 +1555,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'invalid_request' => [
+                                        'summary' => 'An error occurred while processing your request',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'An error occurred while processing your request',
                                         ],
                                     ],
                                 ],

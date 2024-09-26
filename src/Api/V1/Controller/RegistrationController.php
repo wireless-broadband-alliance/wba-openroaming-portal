@@ -283,11 +283,13 @@ class RegistrationController extends AbstractController
                     : null;
 
                 // Check if enough time has passed since the last password reset request
+                // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
                         $minInterval
                     ) < $currentTime)
                 ) {
+                    // phpcs:enable
                     if (!$latestEvent) {
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
@@ -303,12 +305,12 @@ class RegistrationController extends AbstractController
                     $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
                     $latestEvent->setEventMetadata($latestEventMetadata);
 
-                    $user->setForgotPasswordRequest(true);
                     $this->eventRepository->save($latestEvent, true);
 
                     $randomPassword = bin2hex(random_bytes(4));
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
                     $user->setPassword($hashedPassword);
+                    $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
@@ -355,7 +357,8 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
+        return (new BaseResponse(400, null, 'An error occurred while processing your request.'))->toResponse(
+        ); // Bad Request Response
     }
 
     /**
@@ -608,6 +611,7 @@ class RegistrationController extends AbstractController
 
                     // Set the hashed password for the user
                     $user->setPassword($hashedPassword);
+                    $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
@@ -647,6 +651,7 @@ class RegistrationController extends AbstractController
                 }
             }
         }
-        return (new BaseResponse(400, null, 'Invalid portal account'))->toResponse(); // Bad Request Response
+        return (new BaseResponse(400, null, 'An error occurred while processing your request'))->toResponse(
+        ); // Bad Request Response
     }
 }
