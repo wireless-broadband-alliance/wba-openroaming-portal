@@ -119,12 +119,12 @@ class AuthController extends AbstractController
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user) {
-            return (new BaseResponse(400, null, 'Invalid data: Missing User'))->toResponse();
+            return (new BaseResponse(400, null, 'Invalid credentials'))->toResponse();
             // Bad Request Response
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, null, 'Invalid data: Invalid Password'))->toResponse(
+            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(
             ); # Unauthorized Request Response
         }
 
@@ -208,7 +208,8 @@ class AuthController extends AbstractController
                 $user->setLastName($lastName);
                 $user->setPassword('notused');
                 $user->setUuid($uuid);
-                $user->setRoles([]); // Set roles if needed or keep empty
+                $user->setIsVerified(true);
+                $user->setRoles([]);
 
                 // Persist the new user
                 $this->entityManager->persist($user);
@@ -251,7 +252,7 @@ class AuthController extends AbstractController
 
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
-            return (new BaseResponse(500, null, 'Unexpected error', [
+            return (new BaseResponse(500, ['details' => $e->getMessage()], 'Unexpected error', [
                 'details' => $e->getMessage()
             ]))->toResponse(); // Internal Server Error
         }

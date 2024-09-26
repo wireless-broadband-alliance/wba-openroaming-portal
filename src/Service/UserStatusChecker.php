@@ -12,7 +12,7 @@ class UserStatusChecker
         if (!$user->isVerified()) {
             return new BaseResponse(
                 401,
-                ['verification_code' => $user->getVerificationCode()],
+                null,
                 'User account is not verified.'
             );
         }
@@ -24,19 +24,6 @@ class UserStatusChecker
                     null,
                     'User account is banned from the system.'
                 );
-        }
-
-        return null;
-    }
-
-    public function checkUserVerification(User $user): ?BaseResponse
-    {
-        if (!$user->isVerified()) {
-            return new BaseResponse(
-                403,
-                ['verification_code' => $user->getVerificationCode()],
-                'User account is not verified.'
-            );
         }
 
         return null;

@@ -14,6 +14,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateTime;
@@ -47,11 +48,11 @@ class RegistrationController extends AbstractController
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
-    private ParameterBagInterface $parameterBag;
     private SendSMS $sendSMS;
     private TokenStorageInterface $tokenStorage;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private RegistrationEmailGenerator $emailGenerator;
 
     /**
      * Registration constructor.
@@ -59,30 +60,30 @@ class RegistrationController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
-     * @param ParameterBagInterface $parameterBag
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param RegistrationEmailGenerator $emailGenerator Used to generate and send emails for the user
      */
     public function __construct(
         UserRepository $userRepository,
         SettingRepository $settingRepository,
         GetSettings $getSettings,
-        ParameterBagInterface $parameterBag,
         SendSMS $sendSMS,
         TokenStorageInterface $tokenStorage,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
+        RegistrationEmailGenerator $emailGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
-        $this->parameterBag = $parameterBag;
         $this->sendSMS = $sendSMS;
         $this->tokenStorage = $tokenStorage;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->emailGenerator = $emailGenerator;
     }
 
     /*
@@ -92,7 +93,6 @@ class RegistrationController extends AbstractController
      * @param Request $request
      * @param UserPasswordHasherInterface $userPasswordHasher
      * @param EntityManagerInterface $entityManager
-     * @param MailerInterface $mailer
      * @return Response
      * @throws RandomException
      * @throws TransportExceptionInterface
@@ -103,7 +103,6 @@ class RegistrationController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        MailerInterface $mailer
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -165,25 +164,9 @@ class RegistrationController extends AbstractController
                     $eventMetaData
                 );
 
-                $emailSender = $this->parameterBag->get('app.email_address');
-                $nameSender = $this->parameterBag->get('app.sender_name');
-
-                // Send email to the user with the verification code
-                $email = (new TemplatedEmail())
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($user->getEmail())
-                    ->subject('Your OpenRoaming Registration Details')
-                    ->htmlTemplate('email/user_password.html.twig')
-                    ->context([
-                        'uuid' => $user->getUuid(),
-                        'verificationCode' => $user->getVerificationCode(),
-                        'isNewUser' => true,
-                        // This variable informs if the user it's new our if it's just a password reset request
-                        'password' => $randomPassword,
-                    ]);
+                $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
                 $this->addFlash('success', 'We have sent an email with your account password and verification code');
-                $mailer->send($email);
             }
         }
 
