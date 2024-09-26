@@ -749,7 +749,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad request due to missing - Invalid parameters - Email not allowed',
+                        'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1345,11 +1345,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Missing required fields: email, password or turnstile_token',
                                         ],
                                     ],
-                                    'invalid_email_formart' => [
+                                    'invalid_email_format' => [
                                         'summary' => 'Invalid email format',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid email format',
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
@@ -1532,6 +1539,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Missing required fields: phone number, password or turnstile_token',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
