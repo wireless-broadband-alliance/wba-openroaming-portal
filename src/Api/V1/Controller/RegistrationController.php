@@ -260,8 +260,8 @@ class RegistrationController extends AbstractController
                 // Check if enough time has passed since the last password reset request
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                            $minInterval
+                        ) < $currentTime)
                 ) {
                     if (!$latestEvent) {
                         $latestEvent = new Event();
@@ -433,8 +433,9 @@ class RegistrationController extends AbstractController
                 ]))->toResponse();
             }
         } catch (\RuntimeException $e) {
-            return (new BaseResponse(500, null, 'Failed to send SMS: ' . $e->getMessage()))->toResponse(
-            ); // Internal Server Error
+            return (new BaseResponse(500, null, 'Failed to send SMS: ', [
+                'details' => $e->getMessage()
+            ]))->toResponse(); // Internal Server Error
         }
 
         // Return fallback response

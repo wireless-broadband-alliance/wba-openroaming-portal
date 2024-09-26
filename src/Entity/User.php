@@ -1070,7 +1070,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'properties' => [
                                                 'message' => [
                                                     'type' => 'string',
-                                                    'example' => 'SMS User Account Registered Successfully',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'example' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone',
+                                                    // phpcs:enable
                                                 ],
                                             ],
                                         ],
@@ -1079,7 +1081,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => true,
                                     'data' => [
-                                        'message' => 'SMS User Account Registered Successfully',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone',
+                                        // phpcs:enable
                                     ],
                                 ],
                             ],
@@ -1172,6 +1176,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'A short description of the error',
                                             'example' => 'Failed to send SMS',
                                         ],
+                                        'details' => [
+                                            'type' => 'string',
+                                            'description' => 'A more details of the error',
+                                            'example' => 'Error details',
+                                        ],
                                     ],
                                 ],
                                 'examples' => [
@@ -1179,7 +1188,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Failed to send SMS',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Failed to send SMS: error details',
+                                            'error' => 'Failed to send SMS',
+                                            'details' => 'Error details'
                                         ],
                                     ],
                                     'fallback_sms' => [
