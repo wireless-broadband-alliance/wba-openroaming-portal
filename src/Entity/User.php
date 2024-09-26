@@ -1373,7 +1373,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '403' => [
-                        'description' => 'User email or provider not allowed - Account not verified',
+                        'description' => 'User email or provider not allowed - Account banned',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1395,11 +1395,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => false,
                                         'error' => 'Invalid credentials',
                                     ],
-                                    'Invalid verification' => [
-                                        'summary' => 'User account is not verified',
+                                    'Account banned' => [
+                                        'summary' => 'User account is banned',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'User account is not verified!',
+                                            'error' => 'An error occurred while processing your request!!',
                                         ],
                                     ],
                                 ],
@@ -1570,7 +1570,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                     '403' => [
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'User phone number or provider not allowed - Account not verified',
+                        'description' => 'User phone number or provider not allowed - Account banned',
                         // phpcs:enable
                         'content' => [
                             'application/json' => [
@@ -1601,11 +1601,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'details' => 'The portal account does not allow password reset for this phone number.',
                                         // phpcs:enable
                                     ],
-                                    'Invalid verification' => [
-                                        'summary' => 'User account is not verified',
+                                    'Account banned' => [
+                                        'summary' => 'User account is banned',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'User account is not verified!',
+                                            'error' => 'An error occurred while processing your request!!',
                                         ],
                                     ],
                                 ],
