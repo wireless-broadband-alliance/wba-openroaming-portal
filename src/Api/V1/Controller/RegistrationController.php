@@ -229,7 +229,7 @@ class RegistrationController extends AbstractController
 
         if ($user) {
             if (!$user->isVerified()) {
-                return (new BaseResponse(401, null, 'User account is not verified!'))->toResponse();
+                return (new BaseResponse(403, null, 'User account is not verified!'))->toResponse();
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -487,7 +487,7 @@ class RegistrationController extends AbstractController
 
         if ($user) {
             if (!$user->isVerified()) {
-                return (new BaseResponse(401, null, 'User account is not verified!'))->toResponse();
+                return (new BaseResponse(403, null, 'User account is not verified!'))->toResponse();
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
