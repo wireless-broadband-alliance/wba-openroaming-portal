@@ -749,7 +749,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '400' => [
-                        'description' => 'Bad request due to missing or invalid parameters',
+                        'description' => 'Bad request due to missing - Invalid parameters - Email not allowed',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -762,30 +762,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'message' => 'Missing authorization code!',
-                                ],
-                            ],
-                        ],
-                    ],
-                    '401' => [
-                        'description' => 'Authentication failed due to invalid Google credentials.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
-                                        'message' => [
-                                            'type' => 'string',
-                                            'example' => 'Authentication Failed: Invalid Google credentials.',
+                                'examples' => [
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'message' => 'Authentication Failed: Invalid Google credentials.',
+                                    'missing_authorization_code' => [
+                                        'summary' => 'Missing authorization code',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                    'email_not_allowed' => [
+                                        'summary' => 'Email not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User creation failed or email is not allowed!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
