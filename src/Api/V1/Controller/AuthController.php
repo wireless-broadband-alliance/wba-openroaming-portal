@@ -186,10 +186,11 @@ class AuthController extends AbstractController
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                return (new BaseResponse(401, ['details' => $samlAuth->getLastErrorReason()], 'Authentication Failed'
+                return (new BaseResponse(
+                    401,
+                    ['details' => $samlAuth->getLastErrorReason()],
+                    'Authentication Failed'
                 ))->toResponse(); // Unauthorized
-                // phpcs:enable
             }
 
             $sAMAccountName = $samlAuth->getNameId();
@@ -256,7 +257,10 @@ class AuthController extends AbstractController
 
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
         } catch (Exception $e) {
-            return (new BaseResponse(500, ['details' => $e->getMessage()], 'SAML processing error',
+            return (new BaseResponse(
+                500,
+                ['details' => $e->getMessage()],
+                'SAML processing error',
             ))->toResponse(); // Internal Server Error
         }
     }

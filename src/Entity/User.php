@@ -1158,11 +1158,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
-                                    'invalid_porta_account' => [
-                                        'summary' => 'Invalid portal account',
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid portal account',
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
