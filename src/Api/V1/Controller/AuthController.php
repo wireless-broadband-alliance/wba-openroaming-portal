@@ -124,8 +124,7 @@ class AuthController extends AbstractController
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(
-            ); # Unauthorized Request Response
+            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
@@ -178,9 +177,11 @@ class AuthController extends AbstractController
 
             // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
-                return (new BaseResponse(401, null, 'Invalid SAML Assertion', [
-                    'details' => $samlAuth->getLastErrorReason()
-                ]))->toResponse(); // Unauthorized
+                return (new BaseResponse(
+                    401,
+                    ['details' => $samlAuth->getLastErrorReason()],
+                    'Invalid SAML Assertion',
+                ))->toResponse(); // Unauthorized
             }
 
             // Ensure the authentication was successful

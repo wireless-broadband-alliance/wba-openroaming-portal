@@ -16,4 +16,4 @@ nbgrp_onelogin_saml:
             security:
                 allowRepeatAttributeName: true
             strict: false
-            debug: true
+            debug: false
