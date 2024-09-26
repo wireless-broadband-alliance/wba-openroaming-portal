@@ -988,18 +988,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Missing required fields: email, password or turnstile_token',
                                         ],
                                     ],
-                                    'invalid_porta_account' => [
-                                        'summary' => 'Invalid portal account',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid portal account',
-                                        ],
-                                    ],
-                                    'invalid_email_formart' => [
+                                    'invalid_email_format' => [
                                         'summary' => 'Invalid email format',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid email format',
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
                                         ],
                                     ],
                                 ],
