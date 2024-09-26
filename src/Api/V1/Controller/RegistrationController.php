@@ -286,8 +286,8 @@ class RegistrationController extends AbstractController
                 // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
                     !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
+                        $minInterval
+                    ) < $currentTime)
                 ) {
                     // phpcs:enable
                     if (!$latestEvent) {
