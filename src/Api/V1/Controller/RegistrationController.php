@@ -95,7 +95,6 @@ class RegistrationController extends AbstractController
     /**
      * @param Request $request
      * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param \Symfony\Component\Validator\Validator\ValidatorInterface $validator
      * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
