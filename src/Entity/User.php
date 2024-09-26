@@ -1310,10 +1310,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    '401' => [
+                        'description' => 'Invalid account verification',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request was forbidden',
+                                            'example' => 'Invalid credentials',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     '403' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'User email or provider not allowed - Invalid account verification',
-                        // phpcs:enable
+                        'description' => 'User email or provider not allowed',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1334,13 +1362,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'Invalid credentials' => [
                                         'success' => false,
                                         'error' => 'Invalid credentials',
-                                    ],
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
-                                        ],
                                     ],
                                 ],
                             ],
@@ -1489,9 +1510,39 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    '401' => [
+                        'description' => 'Invalid account verification',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request was forbidden',
+                                            'example' => 'Invalid credentials',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     '403' => [
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'User phone number or provider not allowed - Invalid account verification',
+                        'description' => 'User phone number or provider not allowed',
                         // phpcs:enable
                         'content' => [
                             'application/json' => [
@@ -1515,19 +1566,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'invalid_credentials' => [
+                                    'Invalid Credentials' => [
                                         'success' => false,
                                         'error' => 'Invalid credentials',
                                         // phpcs:disable Generic.Files.LineLength.TooLong
                                         'details' => 'The portal account does not allow password reset for this phone number.',
                                         // phpcs:enable
-                                    ],
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
-                                        ],
                                     ],
                                 ],
                             ],
