@@ -1346,37 +1346,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '404' => [
-                        'description' => 'User not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message indicating the user was not found',
-                                            'example' => 'Invalid portal account',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'No user found with the provided email.',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'User not found',
-                                    'details' => 'Invalid portal account',
-                                ],
-                            ],
-                        ],
-                    ],
                     '429' => [
                         'description' => 'Too Many Requests - Rate limit exceeded',
                         'content' => [
@@ -1558,26 +1527,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is not verified!',
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '404' => [
-                        'description' => 'Invalid portal account.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'example' => 'Invalid portal account!',
                                         ],
                                     ],
                                 ],
