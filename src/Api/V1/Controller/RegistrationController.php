@@ -253,8 +253,8 @@ class RegistrationController extends AbstractController
         $user = $this->userRepository->findOneBy(['email' => $data['email']]);
 
         if ($user) {
-            if (!$user->isVerified()) {
-                return (new BaseResponse(403, null, 'User account is not verified!'))->toResponse();
+            if ($user->getBannedAt()) {
+                return (new BaseResponse(400, null, 'An error occurred while processing your request!'))->toResponse();
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -514,8 +514,8 @@ class RegistrationController extends AbstractController
         $user = $this->userRepository->findOneBy(['phoneNumber' => $dataRequest['phone_number']]);
 
         if ($user) {
-            if (!$user->isVerified()) {
-                return (new BaseResponse(403, null, 'User account is not verified!'))->toResponse();
+            if ($user->getBannedAt()) {
+                return (new BaseResponse(400, null, 'An error occurred while processing your request!'))->toResponse();
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
