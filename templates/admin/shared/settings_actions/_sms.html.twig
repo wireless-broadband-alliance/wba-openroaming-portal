@@ -25,7 +25,7 @@
                     </div>
 
                     <div class="flex items-center space-x-2 mt-5">
-                        {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 11}}) }}
+                        {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 32}}) }}
                     </div>
 
                     {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
