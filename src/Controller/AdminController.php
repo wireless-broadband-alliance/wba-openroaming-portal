@@ -1356,8 +1356,23 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
             ];
 
+            $labelsFields = [
+                'AUTH_METHOD_SAML_LABEL',
+                'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'AUTH_METHOD_REGISTER_LABEL',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'AUTH_METHOD_SMS_REGISTER_LABEL',
+            ];
+
             foreach ($settingsToUpdate as $settingName) {
                 $value = $submittedData[$settingName] ?? null;
+
+                // Check if the setting is a label, to be impossible to set it null of empty
+                if (in_array($settingName, $labelsFields)) {
+                    if ($value === null || $value === "") {
+                        continue;
+                    }
+                }
 
                 // Check if any submitted data is empty
                 if ($value === null) {
