@@ -1299,7 +1299,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'properties' => [
                                                 'message' => [
                                                     'type' => 'string',
-                                                    'example' => 'We have sent you a new email to: user@example.com.',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'example' => 'If the email exist, we have sent you a new one to: user@example.com',
+                                                    // phpcs:enable
                                                 ],
                                             ],
                                         ],
@@ -1308,7 +1310,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'example' => [
                                     'success' => true,
                                     'data' => [
-                                        'message' => 'We have sent you a new email to: user@example.com.',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'message' => 'If the email exist, we have sent you a new one to: user@example.com',
+                                        // phpcs:enable
                                     ],
                                 ],
                             ],
@@ -1402,37 +1406,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'An error occurred while processing your request!!',
                                         ],
                                     ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '429' => [
-                        'description' => 'Too Many Requests - Rate limit exceeded',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message explaining why the rate limit was exceeded',
-                                            'example' => 'Too Many Requests',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Please wait 2 minutes before trying again.',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'Too Many Requests',
-                                    'details' => 'Please wait 2 minutes before trying again.',
                                 ],
                             ],
                         ],
@@ -1608,35 +1581,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'An error occurred while processing your request!!',
                                         ],
                                     ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '429' => [
-                        'description' => 'Too Many Requests - Rate limit exceeded or attempt limit reached.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'example' => 'Rate limit exceeded.',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'example' => 'Please wait 2 minute(s) before trying again.',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'Rate limit exceeded',
-                                    'details' => 'Please wait 2 minute(s) before trying again.',
                                 ],
                             ],
                         ],

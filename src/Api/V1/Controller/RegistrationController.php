@@ -283,13 +283,14 @@ class RegistrationController extends AbstractController
                     : null;
 
                 // Check if enough time has passed since the last password reset request
-                // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
-                    !$latestEvent || ($lastVerificationCodeTime instanceof DateTime && $lastVerificationCodeTime->add(
-                        $minInterval
-                    ) < $currentTime)
+                    !$latestEvent ||
+                    ($lastVerificationCodeTime
+                        instanceof DateTime &&
+                        $lastVerificationCodeTime->add(
+                            $minInterval
+                        ) < $currentTime)
                 ) {
-                    // phpcs:enable
                     if (!$latestEvent) {
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
@@ -348,12 +349,19 @@ class RegistrationController extends AbstractController
                     );
 
                     return (new BaseResponse(200, [
-                        'message' => sprintf('We have sent you a new email to: %s.', $user->getEmail())
+                        // Correct success response
+                        'message' => sprintf(
+                            'If the email exist, we have sent you a new one to: %s.',
+                            $user->getEmail()
+                        )
                     ]))->toResponse();
                 }
-
-                return (new BaseResponse(429, null, 'Please wait 2 minutes before trying again.'))->toResponse(
-                ); // Too Many Requests Response
+                // This message exists in case of a user spams the email/reset, to protect against RGPD
+                return (new BaseResponse(
+                    200,
+                    null,
+                    'If the email exist, we have sent you a new one to: %s'
+                ))->toResponse(); // Too Many Requests Response
             }
         }
 
@@ -557,14 +565,16 @@ class RegistrationController extends AbstractController
                             $allowedTime = $lastVerificationCodeTime->add($minInterval);
 
                             if ($allowedTime > $currentTime) {
-                                return (new BaseResponse(
-                                    429,
-                                    null,
-                                    sprintf(
-                                        'Please wait %d minute(s) before trying again.',
-                                        $data['SMS_TIMER_RESEND']['value']
+                                // This message is to protect against spam and RGPD policies
+                                return (new BaseResponse(200, [
+                                    'success' => sprintf(
+                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
+                                        // phpcs:enable
+                                        $user->getPhoneNumber(),
+                                        $attemptsLeft
                                     )
-                                ))->toResponse();
+                                ]))->toResponse();
                             }
 
                             $verificationAttempts++;
@@ -640,7 +650,9 @@ class RegistrationController extends AbstractController
                     if ($result) {
                         return (new BaseResponse(200, [
                             'success' => sprintf(
-                                'We have sent a new code to: %s. You have %d attempt(s) left.',
+                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
+                                //phpcs:enable
                                 $user->getPhoneNumber(),
                                 $attemptsLeft
                             )
