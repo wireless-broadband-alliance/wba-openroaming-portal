@@ -1399,13 +1399,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => false,
                                         'error' => 'Invalid credentials',
                                     ],
-                                    'Account banned' => [
-                                        'summary' => 'User account is banned',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'An error occurred while processing your request!!',
-                                        ],
-                                    ],
                                 ],
                             ],
                         ],
@@ -1573,13 +1566,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         // phpcs:disable Generic.Files.LineLength.TooLong
                                         'details' => 'The portal account does not allow password reset for this phone number.',
                                         // phpcs:enable
-                                    ],
-                                    'Account banned' => [
-                                        'summary' => 'User account is banned',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'An error occurred while processing your request!!',
-                                        ],
                                     ],
                                 ],
                             ],

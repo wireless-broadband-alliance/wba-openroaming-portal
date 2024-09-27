@@ -254,7 +254,13 @@ class RegistrationController extends AbstractController
 
         if ($user) {
             if ($user->getBannedAt()) {
-                return (new BaseResponse(400, null, 'An error occurred while processing your request!'))->toResponse();
+                // This message exists in case of a user is banned the email/reset, to protect against RGPD
+                return (new BaseResponse(
+                    200,
+                    null,
+                    'If the email exist, we have sent you a new one to: %s',
+                    $user->getEmail()
+                ))->toResponse(); // Too Many Requests Response
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -360,13 +366,19 @@ class RegistrationController extends AbstractController
                 return (new BaseResponse(
                     200,
                     null,
-                    'If the email exist, we have sent you a new one to: %s'
+                    'If the email exist, we have sent you a new one to: %s',
+                    $user->getEmail()
                 ))->toResponse(); // Too Many Requests Response
             }
         }
 
-        return (new BaseResponse(400, null, 'An error occurred while processing your request.'))->toResponse(
-        ); // Bad Request Response
+        // This message exists in case of a user spams the email/reset, to protect against RGPD
+        return (new BaseResponse(
+            200,
+            null,
+            'If the email exist, we have sent you a new one to: %s',
+            $user->getEmail()
+        ))->toResponse(); // Too Many Requests Response
     }
 
     /**
@@ -523,7 +535,13 @@ class RegistrationController extends AbstractController
 
         if ($user) {
             if ($user->getBannedAt()) {
-                return (new BaseResponse(400, null, 'An error occurred while processing your request!'))->toResponse();
+                // This message exists in case of a user is banned the sms/reset, to protect against RGPD
+                return (new BaseResponse(
+                    200,
+                    null,
+                    'If the phone number exist, we have sent you a new one to: %s',
+                    $user->getEmail()
+                ))->toResponse(); // Too Many Requests Response
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
