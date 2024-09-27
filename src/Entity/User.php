@@ -1470,7 +1470,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'message' => [
                                                     'type' => 'string',
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
+                                                    'example' => 'If the phone number exists, we have sent a new code to: +1234567890. You have %d attempt(s) left.',
                                                     // phpcs:enable
                                                 ],
                                             ],
@@ -1481,7 +1481,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'success' => true,
                                     'data' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'message' => 'We have sent a new code to: +1234567890. You have 3 attempt(s) left.',
+                                        'message' => 'If the phone number exists, we have sent a new code to: +1234567890. You have %d attempt(s) left.',
                                         // phpcs:enable
                                     ],
                                 ],
