@@ -15,7 +15,7 @@ export default class extends Controller {
 
 	block() {
 		for (let t of this.inputTargets) {
-			t.disabled = true;
+			t.readOnly = true;
 			t.classList.add('cursor-not-allowed');
 		}
 
@@ -27,7 +27,7 @@ export default class extends Controller {
 
 	unblock() {
 		for (let t of this.inputTargets) {
-			t.disabled = false;
+			t.readOnly = false;
 			t.classList.remove('cursor-not-allowed');
 		}
 
