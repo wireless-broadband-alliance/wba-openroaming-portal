@@ -76,12 +76,6 @@ use Doctrine\ORM\Mapping as ORM;
                                                         'GOOGLE_CLIENT_ID' => ['type' => 'string'],
                                                     ],
                                                 ],
-                                                'sentry' => [
-                                                    'type' => 'object',
-                                                    'properties' => [
-                                                        'SENTRY_DSN' => ['type' => 'string'],
-                                                    ],
-                                                ],
                                                 'saml' => [
                                                     'type' => 'object',
                                                     'properties' => [
@@ -118,9 +112,6 @@ use Doctrine\ORM\Mapping as ORM;
                                         ],
                                         'google' => [
                                             'GOOGLE_CLIENT_ID' => 'example_google_client_id',
-                                        ],
-                                        'sentry' => [
-                                            'SENTRY_DSN' => 'example_sentry_dsn',
                                         ],
                                         'saml' => [
                                             'SAML_IDP_ENTITY_ID' => 'https://example.com/saml/metadata',

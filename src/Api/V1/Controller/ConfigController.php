@@ -70,10 +70,6 @@ class ConfigController extends AbstractController
             'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
         ];
 
-        $data['sentry'] = [
-            'SENTRY_DSN' => $this->parameterBag->get('app.sentry_dsn')
-        ];
-
         $data['saml'] = [
             'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
             'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
