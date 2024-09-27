@@ -255,12 +255,13 @@ class RegistrationController extends AbstractController
         if ($user) {
             if ($user->getBannedAt()) {
                 // This message exists in case of a user is banned the email/reset, to protect against RGPD
-                return (new BaseResponse(
-                    200,
-                    null,
-                    'If the email exist, we have sent you a new one to: %s',
-                    $user->getEmail()
-                ))->toResponse(); // Too Many Requests Response
+                return (new BaseResponse(200, [
+                    // Correct success response
+                    'message' => sprintf(
+                        'If the email exist, we have sent you a new one to: %s.', // Forbidden request
+                        $user->getEmail()
+                    )
+                ]))->toResponse();
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -357,28 +358,28 @@ class RegistrationController extends AbstractController
                     return (new BaseResponse(200, [
                         // Correct success response
                         'message' => sprintf(
-                            'If the email exist, we have sent you a new one to: %s.',
+                            'If the email exist, we have sent you a new one to: %s.', // Actually success
                             $user->getEmail()
                         )
                     ]))->toResponse();
                 }
                 // This message exists in case of a user spams the email/reset, to protect against RGPD
-                return (new BaseResponse(
-                    200,
-                    null,
-                    'If the email exist, we have sent you a new one to: %s',
-                    $user->getEmail()
-                ))->toResponse(); // Too Many Requests Response
+                return (new BaseResponse(200, [
+                    // Correct success response
+                    'message' => sprintf(
+                        'If the email exist, we have sent you a new one to: %s.',
+                        $user->getEmail()
+                    )
+                ]))->toResponse(); // To many requests
             }
         }
 
         // This message exists in case of a user spams the email/reset, to protect against RGPD
         return (new BaseResponse(
             200,
+            sprintf('If the email exist, we have sent you a new one to: %s', $data['email']),
             null,
-            'If the email exist, we have sent you a new one to: %s',
-            $user->getEmail()
-        ))->toResponse(); // Too Many Requests Response
+        ))->toResponse(); // Not Found User doesn't exist request
     }
 
     /**
@@ -538,9 +539,9 @@ class RegistrationController extends AbstractController
                 // This message exists in case of a user is banned the sms/reset, to protect against RGPD
                 return (new BaseResponse(
                     200,
-                    null,
                     'If the phone number exist, we have sent you a new one to: %s',
-                    $user->getEmail()
+                    $user->getEmail(),
+                    null,
                 ))->toResponse(); // Too Many Requests Response
             }
 
@@ -669,6 +670,7 @@ class RegistrationController extends AbstractController
                             'success' => sprintf(
                             // phpcs:disable Generic.Files.LineLength.TooLong
                                 'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
+                                // Actually Success message
                                 //phpcs:enable
                                 $user->getPhoneNumber(),
                                 $attemptsLeft
@@ -676,11 +678,21 @@ class RegistrationController extends AbstractController
                         ]))->toResponse();
                     }
                 } catch (\RuntimeException $e) {
-                    return (new BaseResponse(500, null, $e->getMessage()))->toResponse(); // Internal Server Error
+                    return (new BaseResponse(
+                        500,
+                        null,
+                        'An unexpected error occurred while processing the request',
+                        ['details' => $e->getMessage()]
+                    ))->toResponse(); // Internal Server Error
                 }
             }
         }
-        return (new BaseResponse(400, null, 'An error occurred while processing your request'))->toResponse(
-        ); // Bad Request Response
+
+        // This message exists in case of the user doesn't exist on the sms/reset, to protect against RGPD
+        return (new BaseResponse(
+            200,
+            sprintf('If the phone number exists, we have sent you a new code to: %s', $dataRequest['phone_number']),
+            null,
+        ))->toResponse();
     }
 }

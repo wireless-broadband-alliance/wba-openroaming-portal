@@ -1359,45 +1359,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'invalid_json' => [
-                                        'summary' => 'Invalid json format',
+                                        'summary' => 'Invalid JSON format',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid json format',
+                                            'error' => 'Invalid JSON format',
                                         ],
-                                    ],
-                                    'invalid_request' => [
-                                        'summary' => 'An error occurred while processing your request',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'An error occurred while processing your request',
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '403' => [
-                        'description' => 'User email or provider not allowed - Account banned',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message explaining why the request was forbidden',
-                                            'example' => 'Invalid credentials',
-                                        ],
-                                    ],
-                                ],
-                                'examples' => [
-                                    'Invalid credentials' => [
-                                        'success' => false,
-                                        'error' => 'Invalid credentials',
                                     ],
                                 ],
                             ],
@@ -1529,43 +1495,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'success' => false,
                                             'error' => 'An error occurred while processing your request',
                                         ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '403' => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'description' => 'User phone number or provider not allowed - Account banned',
-                        // phpcs:enable
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message explaining why the request was forbidden',
-                                            'example' => 'Invalid credentials',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Invalid credentials.',
-                                        ],
-                                    ],
-                                ],
-                                'examples' => [
-                                    'Invalid Credentials' => [
-                                        'success' => false,
-                                        'error' => 'Invalid credentials',
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'details' => 'The portal account does not allow password reset for this phone number.',
-                                        // phpcs:enable
                                     ],
                                 ],
                             ],
