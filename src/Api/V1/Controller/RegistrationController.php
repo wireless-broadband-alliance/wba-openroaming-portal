@@ -565,14 +565,13 @@ class RegistrationController extends AbstractController
                             $allowedTime = $lastVerificationCodeTime->add($minInterval);
 
                             if ($allowedTime > $currentTime) {
-                                // This message is to protect against spam and RGPD policies
+                                // This message is to protect against spam and RGPD policies - not and actually success
                                 return (new BaseResponse(200, [
                                     'success' => sprintf(
                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
+                                        'If the phone number exists, we have sent a new code to: %s.',
                                         // phpcs:enable
                                         $user->getPhoneNumber(),
-                                        $attemptsLeft
                                     )
                                 ]))->toResponse();
                             }
