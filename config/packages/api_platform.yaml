@@ -17,10 +17,10 @@ api_platform:
             rfc_7807_compliant_errors: true
     swagger:
         versions: [3]
-        ## api_keys:
-        ##    BearerAuth:
-        ##        name: Authorization
-        ##        type: header
+        api_keys:
+            User:
+                name: Authorization
+                type: header
         swagger_ui_extra_configuration:
             persistAuthorization: true
     keep_legacy_inflector: false
