@@ -33,11 +33,11 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: "is_granted('ROLE_USER')",
             securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
             openapiContext: [
-                ## 'security' => [
-                ##    [
-                ##        'BearerAuth' => [],
-                ##    ],
-                ## ],
+                'security' => [
+                    [
+                        'BearerAuth' => [],
+                    ],
+                ],
                 'summary' => 'Retrieve current authenticated user',
                 'description' => 'This endpoint returns the details of the currently authenticated user.',
                 'responses' => [
