@@ -18,11 +18,10 @@ api_platform:
     swagger:
         versions: [3]
         api_keys:
-            Bearer:
+            User:
                 name: Authorization
                 type: header
         swagger_ui_extra_configuration:
-            security:
-                - BearerAuth: []
+            persistAuthorization: true
     keep_legacy_inflector: false
     use_symfony_listeners: true
