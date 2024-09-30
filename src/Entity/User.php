@@ -1136,9 +1136,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'invalid_phone_number_format' => [
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'summary' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
-                                        // phpcs:enable
+                                        'summary' => 'Invalid phone number format',
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
@@ -1452,7 +1450,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                     'invalid_phone_number_format' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'summary' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                        'summary' => 'Invalid phone number format.',
                                         // phpcs:enable
                                         'value' => [
                                             'success' => false,

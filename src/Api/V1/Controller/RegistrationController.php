@@ -433,7 +433,6 @@ class RegistrationController extends AbstractController
         $validator = Validation::createValidator();
         $phoneNumberConstraint = new Assert\Regex([
             'pattern' => '/^\+\d{1,3}\d{4,14}$/',
-            'message' => 'Invalid phone number format. Example of a valid format: +351912345678',
         ]);
 
         $violations = $validator->validate($data['phone_number'], $phoneNumberConstraint);
@@ -562,7 +561,6 @@ class RegistrationController extends AbstractController
         $validator = Validation::createValidator();
         $phoneNumberConstraint = new Assert\Regex([
             'pattern' => '/^\+\d{1,3}\d{4,14}$/',
-            'message' => 'Invalid phone number format. Example of a valid format: +351912345678',
         ]);
 
         $violations = $validator->validate($dataRequest['phone_number'], $phoneNumberConstraint);
