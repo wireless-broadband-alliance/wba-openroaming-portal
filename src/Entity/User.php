@@ -1135,6 +1135,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
+                                    'invalid_phone_number_format' => [
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'summary' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                        // phpcs:enable
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                            // phpcs:enable
+                                        ],
+                                    ],
                                     'invalid_json' => [
                                         'summary' => 'Invalid json format',
                                         'value' => [
@@ -1437,6 +1448,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'invalid_phone_number_format' => [
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'summary' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                        // phpcs:enable
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_request' => [
