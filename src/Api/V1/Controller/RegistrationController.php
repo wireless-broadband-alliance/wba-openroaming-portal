@@ -36,6 +36,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -151,7 +152,10 @@ class RegistrationController extends AbstractController
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
-            return (new BaseResponse(409, null, 'This User already exists'))->toResponse();
+            return (new BaseResponse(
+                200,
+                ['message' => 'Registration successful. Please check your email for further instructions']
+            ))->toResponse(); // False success for RGPD policies
         }
 
         $user = new User();
@@ -425,8 +429,29 @@ class RegistrationController extends AbstractController
             ))->toResponse();
         }
 
+        // Validate phone number format using regex, like the front page of the portal does
+        $validator = Validation::createValidator();
+        $phoneNumberConstraint = new Assert\Regex([
+            'pattern' => '/^\+\d{1,3}\d{4,14}$/',
+        ]);
+
+        $violations = $validator->validate($data['phone_number'], $phoneNumberConstraint);
+
+        // If phone number format is invalid, return a custom error message
+        if (count($violations) > 0) {
+            return (new BaseResponse(
+                400,
+                null,
+                'Invalid phone number format. Use a valid format, example: +19700XXXXXX'
+            ))->toResponse();
+        }
+
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['phone_number']])) {
-            return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
+            return (new BaseResponse(200, [
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
+                // phpcs:enable
+            ]))->toResponse(); // False success for RGPD policies
         }
 
         $user = new User();
@@ -530,6 +555,23 @@ class RegistrationController extends AbstractController
 
         if (!$this->captchaValidator->validate($dataRequest['turnstile_token'], $request->getClientIp())) {
             return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+        }
+
+        // Validate phone number format using regex, like the front page of the portal does
+        $validator = Validation::createValidator();
+        $phoneNumberConstraint = new Assert\Regex([
+            'pattern' => '/^\+\d{1,3}\d{4,14}$/',
+        ]);
+
+        $violations = $validator->validate($dataRequest['phone_number'], $phoneNumberConstraint);
+
+        // If phone number format is invalid, return a custom error message
+        if (count($violations) > 0) {
+            return (new BaseResponse(
+                400,
+                null,
+                'Invalid phone number format. Use a valid format, example: +19700XXXXXX'
+            ))->toResponse();
         }
 
         $user = $this->userRepository->findOneBy(['phoneNumber' => $dataRequest['phone_number']]);

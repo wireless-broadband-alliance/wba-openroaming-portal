@@ -308,7 +308,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
+                                            'error' => 'Missing required fields: uuid, password or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1008,31 +1008,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '409' => [
-                        'description' => 'Conflict due to user already existing',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error when the user already exists',
-                                            'example' => 'This User already exists',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'This User already exists',
-                                ],
-                            ],
-                        ],
-                    ],
                 ],
             ],
         ),
@@ -1160,6 +1135,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
+                                    'invalid_phone_number_format' => [
+                                        'summary' => 'Invalid phone number format',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                            // phpcs:enable
+                                        ],
+                                    ],
                                     'invalid_json' => [
                                         'summary' => 'Invalid json format',
                                         'value' => [
@@ -1167,31 +1151,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Invalid json format',
                                         ],
                                     ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '409' => [
-                        'description' => 'Conflict due to user already existing',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message for why the user could not be registered',
-                                            'example' => 'This User already exists',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'This User already exists',
                                 ],
                             ],
                         ],
@@ -1487,6 +1446,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'invalid_phone_number_format' => [
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'summary' => 'Invalid phone number format.',
+                                        // phpcs:enable
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_request' => [
