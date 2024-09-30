@@ -151,7 +151,10 @@ class RegistrationController extends AbstractController
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
-            return (new BaseResponse(409, null, 'This User already exists'))->toResponse();
+            return (new BaseResponse(
+                200,
+                ['message' => 'Registration successful. Please check your email for further instructions']
+            ))->toResponse(); // False success for RGPD policies
         }
 
         $user = new User();
@@ -426,7 +429,11 @@ class RegistrationController extends AbstractController
         }
 
         if ($this->userRepository->findOneBy(['phoneNumber' => $data['phone_number']])) {
-            return (new BaseResponse(409, null, 'This User already exists'))->toResponse(); // Conflict Response
+            return (new BaseResponse(200, [
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
+                // phpcs:enable
+            ]))->toResponse(); // False success for RGPD policies
         }
 
         $user = new User();

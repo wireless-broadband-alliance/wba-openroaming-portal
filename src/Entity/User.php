@@ -308,7 +308,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
+                                            'error' => 'Missing required fields: uuid, password or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1008,31 +1008,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '409' => [
-                        'description' => 'Conflict due to user already existing',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error when the user already exists',
-                                            'example' => 'This User already exists',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'This User already exists',
-                                ],
-                            ],
-                        ],
-                    ],
                 ],
             ],
         ),
@@ -1167,31 +1142,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Invalid json format',
                                         ],
                                     ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    '409' => [
-                        'description' => 'Conflict due to user already existing',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
-                                            'type' => 'string',
-                                            'description' => 'Error message for why the user could not be registered',
-                                            'example' => 'This User already exists',
-                                        ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'This User already exists',
                                 ],
                             ],
                         ],
