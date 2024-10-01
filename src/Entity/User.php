@@ -5,8 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
-use App\Api\V1\Controller\GenerateJwtSamlController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
 use App\Repository\UserRepository;
@@ -27,15 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             uriTemplate: '/v1/user',
             controller: GetCurrentUserController::class,
-            shortName: 'User',
-            paginationEnabled: false,
-            name: 'api_get_current_user',
-            security: "is_granted('ROLE_USER')",
-            securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
-            openapiContext: [
-                'summary' => 'Retrieve current authenticated user',
-                'description' => 'This endpoint returns the details of the currently authenticated user.',
-                'responses' => [
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'User details retrieved successfully',
                         'content' => [
@@ -51,7 +45,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'email' => ['type' => 'string'],
                                                 'roles' => [
                                                     'type' => 'array',
-                                                    'items' => ['type' => 'string']
+                                                    'items' => ['type' => 'string'],
                                                 ],
                                                 'first_name' => ['type' => 'string'],
                                                 'last_name' => ['type' => 'string'],
@@ -61,9 +55,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                         'type' => 'object',
                                                         'properties' => [
                                                             'provider' => ['type' => 'string'],
-                                                            'provider_id' => ['type' => 'string']
-                                                        ]
-                                                    ]
+                                                            'provider_id' => ['type' => 'string'],
+                                                        ],
+                                                    ],
                                                 ],
                                                 'phone_number' => ['type' => 'string', 'nullable' => true],
                                                 'is_verified' => ['type' => 'boolean'],
@@ -87,7 +81,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'user_external_auths' => [
                                             [
                                                 'provider' => 'Portal Account',
-                                                'provider_id' => 'Email || Phone Number'
+                                                'provider_id' => 'Email || Phone Number',
                                             ],
                                         ],
                                         'phone_number' => null,
@@ -100,7 +94,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'Access token is missing.',
+                        'description' => 'Something with the access token.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -110,9 +104,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'JWT Token not found!',
+                                'examples' => [
+                                    'jwt_not_found' => [
+                                        'summary' => 'JWT Token not found',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token not found!',
+                                        ],
+                                    ],
+                                    'jwt_invalid' => [
+                                        'summary' => 'JWT Token invalid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token is invalid!',
+                                        ],
+                                    ],
+                                    'jwt_expired' => [
+                                        'summary' => 'JWT Token expired',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token is expired!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -164,51 +177,25 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
+                summary: 'Retrieve current authenticated user',
+                description: 'This endpoint returns the details of the currently authenticated user.',
+                security: [
+                    [
+                        'bearerAuth' => [],
+                    ]
+                ],
+            ),
+            shortName: 'User',
+            paginationEnabled: false,
+            security: "is_granted('ROLE_USER')",
+            securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
+            name: 'api_get_current_user',
         ),
         new Post(
             uriTemplate: '/v1/auth/local',
             controller: AuthController::class,
-            shortName: 'User Auth',
-            name: 'api_auth_local',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Authenticate a user locally',
-                'description' => 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.',
-                'requestBody' => [
-                    'description' => 'User credentials and CAPTCHA validation token',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'uuid' => [
-                                        'type' => 'string',
-                                        'description' => 'Unique identifier of the user',
-                                        'example' => 'user-uuid-example'
-                                    ],
-                                    'password' => [
-                                        'type' => 'string',
-                                        'description' => 'Password of the user',
-                                        'example' => 'user-password-example'
-                                    ],
-                                    'turnstile_token' => [
-                                        'type' => 'string',
-                                        'description' => 'CAPTCHA validation token',
-                                        'example' => 'valid_test_token'
-                                    ],
-                                ],
-                                'required' => ['uuid', 'password', 'turnstile_token'],
-                            ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'Authenticated user details and JWT token',
                         'content' => [
@@ -307,9 +294,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing fields',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Missing required fields: uuid, password or turnstile_token',
-                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_json' => [
@@ -389,7 +374,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction send it to your email',
+                                            'error' => 'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction sent to your email',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -398,45 +383,47 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
+                summary: 'Authenticate a user locally',
+                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.',
+                requestBody: new RequestBody(
+                    description: 'User credentials and CAPTCHA validation token',
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'description' => 'Unique identifier of the user',
+                                        'example' => 'user-uuid-example'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'description' => 'Password of the user',
+                                        'example' => 'user-password-example'
+                                    ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['uuid', 'password', 'turnstile_token'],
+                            ],
+                        ],
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_auth_local',
         ),
         new Post(
             uriTemplate: '/v1/auth/saml',
             controller: AuthController::class,
-            shortName: 'User Auth',
-            name: 'api_auth_saml',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Authenticate a user via SAML',
-                'description' => 'This endpoint authenticates a user using their SAML response. 
-            If the user is not found in the database, a new user will be created based on the SAML assertion. 
-            The response includes user details along with a JWT token if authentication is successful.',
-                'requestBody' => [
-                    'description' => 'SAML response required for user authentication. 
-            The request should be sent as `multipart/form-data` with the SAML response 
-            included as a form field (not a file).',
-                    'required' => true,
-                    'content' => [
-                        'multipart/form-data' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'SAMLResponse' => [
-                                        'type' => 'string',
-                                        'description' => 'Base64-encoded SAML response included in the form data',
-                                        'example' => 'base64-encoded-saml-assertion',
-                                    ],
-                                ],
-                                'required' => ['SAMLResponse'],
-                            ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'Authenticated user details and JWT token',
                         'content' => [
@@ -460,9 +447,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                                 'roles' => [
                                                     'type' => 'array',
-                                                    'items' => [
-                                                        'type' => 'string',
-                                                    ],
+                                                    'items' => ['type' => 'string'],
                                                     'description' => 'List of user roles',
                                                     'example' => ['ROLE_USER'],
                                                 ],
@@ -493,6 +478,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                             ],
                                                         ],
                                                     ],
+                                                    'description' => 'External authentication details',
                                                 ],
                                                 'token' => [
                                                     'type' => 'string',
@@ -501,23 +487,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 ],
                                             ],
                                         ],
-                                    ],
-                                ],
-                                'example' => [
-                                    'success' => true,
-                                    'data' => [
-                                        'uuid' => 'user-uuid-example',
-                                        'email' => 'user@example.com',
-                                        'roles' => ['ROLE_USER'],
-                                        'first_name' => 'John',
-                                        'last_name' => 'Doe',
-                                        'user_external_auths' => [
-                                            [
-                                                'provider' => 'SAML Account',
-                                                'provider_id' => 'userExampleAccountName',
-                                            ],
-                                        ],
-                                        'token' => 'jwt-token-example',
                                     ],
                                 ],
                             ],
@@ -530,20 +499,23 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message explaining why the request failed',
                                             'example' => 'SAML Response not found',
                                         ],
                                     ],
-                                ],
-                                'examples' => [
-                                    'saml_response_not_found' => [
-                                        'summary' => 'SAML Response not found',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'SAML Response not found',
+                                    'examples' => [
+                                        'saml_response_not_found' => [
+                                            'summary' => 'SAML Response not found',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'SAML Response not found',
+                                            ],
                                         ],
                                     ],
                                 ],
@@ -557,27 +529,30 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message for why authentication failed',
                                             'example' => 'Invalid SAML Assertion',
                                         ],
                                     ],
-                                ],
-                                'examples' => [
-                                    'invalid_saml_assertion' => [
-                                        'summary' => 'Unable to validate saml assertion',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Unable to validate saml assertion',
+                                    'examples' => [
+                                        'invalid_saml_assertion' => [
+                                            'summary' => 'Unable to validate SAML assertion',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'Unable to validate SAML assertion',
+                                            ],
                                         ],
-                                    ],
-                                    'authentication_failed' => [
-                                        'summary' => 'Authentication Failed',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Authentication Failed',
+                                        'authentication_failed' => [
+                                            'summary' => 'Authentication Failed',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'Authentication Failed',
+                                            ],
                                         ],
                                     ],
                                 ],
@@ -591,7 +566,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
@@ -600,20 +578,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Details of the authentication failure',
                                         ],
                                     ],
-                                ],
-                                'examples' => [
-                                    'invalid_verification' => [
-                                        'summary' => 'User account is not verified',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is not verified!',
+                                    'examples' => [
+                                        'invalid_verification' => [
+                                            'summary' => 'User account is not verified',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'User account is not verified!',
+                                            ],
                                         ],
-                                    ],
-                                    'banned_account' => [
-                                        'summary' => 'User account is banned',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'User account is banned from the system!',
+                                        'banned_account' => [
+                                            'summary' => 'User account is banned',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'User account is banned from the system!',
+                                            ],
                                         ],
                                     ],
                                 ],
@@ -627,7 +605,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'error' => [
                                             'type' => 'string',
                                             'description' => 'Error message for why the server error occurred',
@@ -639,14 +620,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'example' => 'Detailed error information',
                                         ],
                                     ],
-                                ],
-                                'examples' => [
-                                    'saml_processing_error' => [
-                                        'summary' => 'SAML processing error',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'SAML processing error',
-                                            'details' => 'Detailed error information',
+                                    'examples' => [
+                                        'saml_processing_error' => [
+                                            'summary' => 'SAML processing error',
+                                            'value' => [
+                                                'success' => false,
+                                                'error' => 'SAML processing error',
+                                                'details' => 'Detailed error information',
+                                            ],
                                         ],
                                     ],
                                 ],
@@ -654,41 +635,41 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
+                summary: 'Authenticate a user via SAML',
+                description: 'This endpoint authenticates a user using their SAML response. 
+                If the user is not found in the database, a new user will be created based on the SAML assertion. 
+                The response includes user details along with a JWT token if authentication is successful.',
+                requestBody: new RequestBody(
+                    description: 'SAML response required for user authentication. 
+                    The request should be sent as `multipart/form-data` with the SAML response included
+                     as a form field (not a file).',
+                    content: new \ArrayObject([
+                        'multipart/form-data' => new \ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'SAMLResponse' => [
+                                        'type' => 'string',
+                                        'description' => 'Base64-encoded SAML response included in the form data',
+                                        'example' => 'base64-encoded-saml-assertion',
+                                    ],
+                                ],
+                                'required' => ['SAMLResponse'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_auth_saml'
         ),
         new Post(
             uriTemplate: '/v1/auth/google',
             controller: AuthController::class,
-            shortName: 'User Auth',
-            name: 'api_auth_google',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Authenticate a user via Google',
-                'description' => 'This endpoint authenticates a user using their Google account. 
-                A valid Google OAuth authorization code is required.',
-                'requestBody' => [
-                    'description' => 'Google authorization code',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'code' => [
-                                        'type' => 'string',
-                                        'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
-                                    ],
-                                ],
-                                'required' => ['code'],
-                            ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'Authenticated user details and JWT token',
                         'content' => [
@@ -766,10 +747,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 ],
                                 'examples' => [
                                     'invalid_json' => [
-                                        'summary' => 'Invalid json format',
+                                        'summary' => 'Invalid JSON format',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid json format',
+                                            'error' => 'Invalid JSON format',
                                         ],
                                     ],
                                     'missing_authorization_code' => [
@@ -845,14 +826,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'Authentication failed' => [
+                                    'Authentication_failed' => [
                                         'success' => false,
                                         'message' => 'An error occurred: Could not connect to Google API.',
                                         // phpcs:disable Generic.Files.LineLength.TooLong
                                         'details' => 'The API request timed out while trying to connect to Google services.',
                                         // phpcs:enable
                                     ],
-                                    'Server related' => [
+                                    'Server_related' => [
                                         'success' => false,
                                         'message' => 'An error occurred: Generic server related error.',
                                         // phpcs:disable Generic.Files.LineLength.TooLong
@@ -864,64 +845,40 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
+                summary: 'Authenticate a user via Google',
+                description: 'This endpoint authenticates a user using their Google account. 
+                A valid Google OAuth authorization code is required. 
+                If the user is successfully authenticated, user details and a JWT token will be returned.',
+                requestBody: new RequestBody(
+                    description: 'Google authorization code required for user authentication.
+                     The request should be sent as JSON with the authorization code included in the body.',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'code' => [
+                                        'type' => 'string',
+                                        'description' => 'The Google OAuth authorization code',
+                                        'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
+                                    ],
+                                ],
+                                'required' => ['code'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_auth_google',
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register',
             controller: RegistrationController::class,
-            shortName: 'User Auth Register',
-            name: 'api_auth_local_register',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Register a new user via local authentication',
-                'description' => 'This endpoint registers a new user using their email and password,
-                 with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
-                 and CAPTCHA verification. If the user already exists, it returns a conflict error.',
-                'requestBody' => [
-                    'description' => 'User registration data and CAPTCHA validation token. 
-            The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'email' => [
-                                        'type' => 'string',
-                                        'example' => 'user@example.com',
-                                        'description' => 'User email address',
-                                    ],
-                                    'password' => [
-                                        'type' => 'string',
-                                        'example' => 'strongpassword',
-                                        'description' => 'User password',
-                                    ],
-                                    'first_name' => [
-                                        'type' => 'string',
-                                        'example' => 'John',
-                                        'description' => 'First name of the user',
-                                    ],
-                                    'last_name' => [
-                                        'type' => 'string',
-                                        'example' => 'Doe',
-                                        'description' => 'Last name of the user',
-                                    ],
-                                    'turnstile_token' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token from Turnstile',
-                                        'example' => 'valid_test_token',
-                                    ],
-                                ],
-                                'required' => ['email', 'password', 'turnstile_token'],
-                            ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'User registered successfully',
                         'content' => [
@@ -939,7 +896,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'message' => [
                                                     'type' => 'string',
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'Registration successful. Please check your email for further instructions',
+                                                    'example' => 'Registration successful. Please check your email for further instructions.',
                                                     // phpcs:enable
                                                 ],
                                             ],
@@ -950,7 +907,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'success' => true,
                                     'data' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'message' => 'Registration successful. Please check your email for further instructions',
+                                        'message' => 'Registration successful. Please check your email for further instructions.',
                                         // phpcs:enable
                                     ],
                                 ],
@@ -998,10 +955,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'invalid_json' => [
-                                        'summary' => 'Invalid json format',
+                                        'summary' => 'Invalid JSON format',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Invalid json format',
+                                            'error' => 'Invalid JSON format',
                                         ],
                                     ],
                                 ],
@@ -1009,34 +966,22 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
-        ),
-        new Post(
-            uriTemplate: '/v1/auth/sms/register',
-            controller: RegistrationController::class,
-            shortName: 'User Auth Register',
-            name: 'api_auth_sms_register',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Register a new user via SMS authentication',
-                'description' => 'This endpoint registers a new user using their phone number and validates 
-                the request with a CAPTCHA token.',
-                'requestBody' => [
-                    'description' => 'User registration data and CAPTCHA validation token',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
+                summary: 'Register a new user via local authentication',
+                description: 'This endpoint registers a new user using their email and password, with 
+                CAPTCHA validation via the Turnstile token. It handles user creation, password hashing,
+                 and CAPTCHA verification. If the user already exists, it returns a conflict error.',
+                requestBody: new RequestBody(
+                    description: 'User registration data and CAPTCHA validation token. 
+                    The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'phone_number' => [
+                                    'email' => [
                                         'type' => 'string',
-                                        'example' => '+1234567890',
-                                        'description' => 'User phone number',
+                                        'example' => 'user@example.com',
+                                        'description' => 'User email address',
                                     ],
                                     'password' => [
                                         'type' => 'string',
@@ -1055,16 +1000,26 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                     'turnstile_token' => [
                                         'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
+                                        'description' => 'The CAPTCHA validation token from Turnstile',
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phone_number', 'password', 'turnstile_token'],
+                                'required' => ['email', 'password', 'turnstile_token'],
                             ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth Register',
+            name: 'api_auth_local_register',
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/sms/register',
+            controller: RegistrationController::class,
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'User registered successfully',
                         'content' => [
@@ -1131,7 +1086,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
+                                            'error' => 'Missing required fields: phone number, password, or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1173,7 +1128,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'details' => [
                                             'type' => 'string',
-                                            'description' => 'A more details of the error',
+                                            'description' => 'A more detailed explanation of the error',
                                             'example' => 'Error details',
                                         ],
                                     ],
@@ -1184,7 +1139,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Failed to send SMS',
-                                            'details' => 'Error details'
+                                            'details' => 'Error details',
                                         ],
                                     ],
                                     'fallback_sms' => [
@@ -1199,49 +1154,58 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
-        ),
-        new Post(
-            uriTemplate: '/v1/auth/local/reset',
-            controller: AuthController::class,
-            shortName: 'User Auth Reset',
-            name: 'api_auth_local_reset',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Trigger a password reset for a local auth account',
-                'description' => 'This endpoint triggers a password reset for a local auth account. 
-        The user must provide their email and a CAPTCHA validation token. 
-        The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
-        then proceeds with the password reset if the conditions are met.',
-                'requestBody' => [
-                    'description' => 'Password reset request data, including CAPTCHA validation token and user email',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
+                summary: 'Register a new user via SMS authentication',
+                description: 'This endpoint registers a new user using their phone number and 
+                validates the request with a CAPTCHA token.',
+                requestBody: new RequestBody(
+                    description: 'User registration data and CAPTCHA validation token',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
+                                    'phone_number' => [
+                                        'type' => 'string',
+                                        'example' => '+1234567890',
+                                        'description' => 'User phone number',
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'example' => 'strongpassword',
+                                        'description' => 'User password',
+                                    ],
+                                    'first_name' => [
+                                        'type' => 'string',
+                                        'example' => 'John',
+                                        'description' => 'First name of the user',
+                                    ],
+                                    'last_name' => [
+                                        'type' => 'string',
+                                        'example' => 'Doe',
+                                        'description' => 'Last name of the user',
+                                    ],
                                     'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token',
                                     ],
-                                    'email' => [
-                                        'type' => 'string',
-                                        'description' => 'The email of the user requesting the password reset',
-                                        'example' => 'user@example.com',
-                                    ],
                                 ],
-                                'required' => ['turnstile_token', 'email'],
+                                'required' => ['phone_number', 'password', 'turnstile_token'],
                             ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth Register',
+            name: 'api_auth_sms_register',
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/local/reset',
+            controller: AuthController::class,
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'Password reset email sent successfully',
                         'content' => [
@@ -1259,7 +1223,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'message' => [
                                                     'type' => 'string',
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'If the email exist, we have sent you a new one to: user@example.com',
+                                                    'example' => 'If the email exists, we have sent you a new one to: user@example.com',
                                                     // phpcs:enable
                                                 ],
                                             ],
@@ -1270,7 +1234,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'success' => true,
                                     'data' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'message' => 'If the email exist, we have sent you a new one to: user@example.com',
+                                        'message' => 'If the email exists, we have sent you a new one to: user@example.com',
                                         // phpcs:enable
                                     ],
                                 ],
@@ -1307,7 +1271,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Missing required fields: email, password or turnstile_token',
+                                            'error' => 'Missing required fields: email or turnstile_token',
                                         ],
                                     ],
                                     'invalid_email_format' => [
@@ -1329,48 +1293,45 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
-        ),
-        new Post(
-            uriTemplate: '/v1/auth/sms/reset',
-            controller: AuthController::class,
-            shortName: 'User Auth Reset',
-            name: 'api_auth_sms_reset',
-            openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
-                'summary' => 'Trigger a password reset for an SMS auth account',
-                'description' => 'This endpoint sends an SMS with a new password and verification code 
-        if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also
-        enforces the time interval between requests and limits the number of attempts allowed.',
-                'requestBody' => [
-                    'description' => 'Password reset request data including CAPTCHA token and user phone number',
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
+                summary: 'Trigger a password reset for a local auth account',
+                description: 'This endpoint triggers a password reset for a local auth account. 
+                The user must provide their email and a CAPTCHA validation token. 
+                The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId,
+                 then proceeds with the password reset if the conditions are met.',
+                requestBody: new RequestBody(
+                    description: 'Password reset request data, including CAPTCHA validation token and user email',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'phone_number' => [
-                                        'type' => 'string',
-                                        'description' => 'The phone number of the user requesting password reset',
-                                        'example' => '+1234567890',
-                                    ],
                                     'turnstile_token' => [
                                         'type' => 'string',
                                         'description' => 'The CAPTCHA validation token',
                                         'example' => 'valid_test_token',
                                     ],
+                                    'email' => [
+                                        'type' => 'string',
+                                        'description' => 'The email of the user requesting the password reset',
+                                        'example' => 'user@example.com',
+                                    ],
                                 ],
-                                'required' => ['phone_number', 'turnstile_token'],
+                                'required' => ['turnstile_token', 'email'],
                             ],
-                        ],
-                    ],
-                ],
-                'responses' => [
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth Reset',
+            name: 'api_auth_local_reset',
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/sms/reset',
+            controller: AuthController::class,
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'Successfully sent the SMS with a new password and verification code',
                         'content' => [
@@ -1436,22 +1397,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Missing required fields: phone number, password or turnstile_token',
-                                            // phpcs:enable
-                                        ],
-                                    ],
-                                    'invalid_json' => [
-                                        'summary' => 'Invalid json format',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid json format',
+                                            'error' => 'Missing required fields: phone number, turnstile_token',
                                         ],
                                     ],
                                     'invalid_phone_number_format' => [
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
                                         'summary' => 'Invalid phone number format.',
-                                        // phpcs:enable
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
@@ -1459,11 +1409,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
-                                    'invalid_request' => [
-                                        'summary' => 'An error occurred while processing your request',
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid JSON format',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'An error occurred while processing your request',
+                                            'error' => 'Invalid JSON format',
                                         ],
                                     ],
                                 ],
@@ -1502,7 +1452,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-            ],
+                summary: 'Trigger a password reset for an SMS auth account',
+                description: 'This endpoint sends an SMS with a new password and verification code 
+                if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also 
+                enforces the time interval between requests and limits the number of attempts allowed.',
+                requestBody: new RequestBody(
+                    description: 'Password reset request data including CAPTCHA token and user phone number',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'phone_number' => [
+                                        'type' => 'string',
+                                        'description' => 'The phone number of the user requesting password reset',
+                                        'example' => '+1234567890',
+                                    ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token',
+                                    ],
+                                ],
+                                'required' => ['phone_number', 'turnstile_token'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth Reset',
+            name: 'api_auth_sms_reset',
         ),
     ],
 )]

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -29,6 +28,346 @@
                 }
             ],
             "paths": {
+                "/api/v1/config": {
+                    "get": {
+                        "operationId": "app_config_settings",
+                        "tags": [
+                            "Setting"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Configuration settings retrieved successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "platform": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "PLATFORM_MODE": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "USER_VERIFICATION": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "TURNSTILE_CHECKER": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "CONTACT_EMAIL": {
+                                                                    "type": "string"
+                                                                },
+                                                                "TOS_LINK": {
+                                                                    "type": "string"
+                                                                },
+                                                                "PRIVACY_POLICY_LINK": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "AUTH_METHOD_SAML_ENABLED": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "AUTH_METHOD_REGISTER_ENABLED": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "AUTH_METHOD_SMS_REGISTER_ENABLED": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            }
+                                                        },
+                                                        "turnstile": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "TURNSTILE_KEY": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "google": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "GOOGLE_CLIENT_ID": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "saml": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "SAML_IDP_ENTITY_ID": {
+                                                                    "type": "string"
+                                                                },
+                                                                "SAML_IDP_SSO_URL": {
+                                                                    "type": "string"
+                                                                },
+                                                                "SAML_IDP_X509_CERT": {
+                                                                    "type": "string"
+                                                                },
+                                                                "SAML_SP_ENTITY_ID": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": {
+                                                "platform": {
+                                                    "PLATFORM_MODE": "Live",
+                                                    "USER_VERIFICATION": true,
+                                                    "TURNSTILE_CHECKER": true,
+                                                    "CONTACT_EMAIL": "support@example.com",
+                                                    "TOS_LINK": "https://example.com/tos",
+                                                    "PRIVACY_POLICY_LINK": "https://example.com/privacy"
+                                                },
+                                                "auth": {
+                                                    "AUTH_METHOD_SAML_ENABLED": true,
+                                                    "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": true,
+                                                    "AUTH_METHOD_REGISTER_ENABLED": true,
+                                                    "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": true,
+                                                    "AUTH_METHOD_SMS_REGISTER_ENABLED": true
+                                                },
+                                                "turnstile": {
+                                                    "TURNSTILE_KEY": "example_turnstile_key"
+                                                },
+                                                "google": {
+                                                    "GOOGLE_CLIENT_ID": "example_google_client_id"
+                                                },
+                                                "saml": {
+                                                    "SAML_IDP_ENTITY_ID": "https://example.com/saml/metadata",
+                                                    "SAML_IDP_SSO_URL": "https://example.com/saml/sso",
+                                                    "SAML_IDP_X509_CERT": "MIIC...AB",
+                                                    "SAML_SP_ENTITY_ID": "https://example.com/saml/sp"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Get configuration settings",
+                        "description": "This endpoint returns public values from the Setting entity and \n                environment variables categorized by platform and provider.",
+                        "parameters": [],
+                        "deprecated": false,
+                        "security": []
+                    }
+                },
+                "/api/v1/user": {
+                    "get": {
+                        "operationId": "api_get_current_user",
+                        "tags": [
+                            "User"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "User details retrieved successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean"
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "uuid": {
+                                                            "type": "string"
+                                                        },
+                                                        "email": {
+                                                            "type": "string"
+                                                        },
+                                                        "roles": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string"
+                                                        },
+                                                        "user_external_auths": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "provider": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "provider_id": {
+                                                                        "type": "string"
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        "phone_number": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "is_verified": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "forgot_password_request": {
+                                                            "type": "boolean"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": {
+                                                "uuid": "user@example.com",
+                                                "email": "user@example.com",
+                                                "roles": [
+                                                    "ROLE_USER"
+                                                ],
+                                                "first_name": "John",
+                                                "last_name": "Doe",
+                                                "user_external_auths": [
+                                                    {
+                                                        "provider": "Portal Account",
+                                                        "provider_id": "Email || Phone Number"
+                                                    }
+                                                ],
+                                                "phone_number": null,
+                                                "is_verified": true,
+                                                "created_at": "0000-00-00T00:00:00+00:00",
+                                                "forgot_password_request": false
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "401": {
+                                "description": "Something with the access token.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean"
+                                                },
+                                                "error": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "jwt_not_found": {
+                                                "summary": "JWT Token not found",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "JWT Token not found!"
+                                                }
+                                            },
+                                            "jwt_invalid": {
+                                                "summary": "JWT Token invalid",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "JWT Token is invalid!"
+                                                }
+                                            },
+                                            "jwt_expired": {
+                                                "summary": "JWT Token expired",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "JWT Token is expired!"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "403": {
+                                "description": "Unauthorized Access - Invalid JWT Token - Account unverified/banned",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean"
+                                                },
+                                                "error": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "unauthorized_access": {
+                                                "summary": "Unauthorized Access",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Unauthorized - You do not have permission to access this resource."
+                                                }
+                                            },
+                                            "invalid_token": {
+                                                "summary": "Invalid JWT Token",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "JWT Token is invalid!"
+                                                }
+                                            },
+                                            "invalid_verification": {
+                                                "summary": "User account is not verified",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "User account is not verified!"
+                                                }
+                                            },
+                                            "banned_account": {
+                                                "summary": "User account is banned",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "User account is banned from the system!"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Retrieve current authenticated user",
+                        "description": "This endpoint returns the details of the currently authenticated user.",
+                        "parameters": [],
+                        "deprecated": false,
+                        "security": [
+                            {
+                                "bearerAuth": []
+                            }
+                        ]
+                    }
+                },
                 "/api/v1/auth/google": {
                     "post": {
                         "operationId": "api_auth_google",
@@ -121,10 +460,10 @@
                                         },
                                         "examples": {
                                             "invalid_json": {
-                                                "summary": "Invalid json format",
+                                                "summary": "Invalid JSON format",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Invalid json format"
+                                                    "error": "Invalid JSON format"
                                                 }
                                             },
                                             "missing_authorization_code": {
@@ -204,12 +543,12 @@
                                             }
                                         },
                                         "examples": {
-                                            "Authentication failed": {
+                                            "Authentication_failed": {
                                                 "success": false,
                                                 "message": "An error occurred: Could not connect to Google API.",
                                                 "details": "The API request timed out while trying to connect to Google services."
                                             },
-                                            "Server related": {
+                                            "Server_related": {
                                                 "success": false,
                                                 "message": "An error occurred: Generic server related error.",
                                                 "details": "The server encountered an unexpected condition which prevented it from fulfilling the request."
@@ -217,13 +556,32 @@
                                         }
                                     }
                                 }
+                            },
+                            "201": {
+                                "description": "User Auth resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user via Google",
-                        "description": "This endpoint authenticates a user using their Google account. \n                A valid Google OAuth authorization code is required.",
+                        "description": "This endpoint authenticates a user using their Google account. \n                A valid Google OAuth authorization code is required. \n                If the user is successfully authenticated, user details and a JWT token will be returned.",
                         "parameters": [],
                         "requestBody": {
-                            "description": "Google authorization code",
+                            "description": "Google authorization code required for user authentication.\n                     The request should be sent as JSON with the authorization code included in the body.",
                             "content": {
                                 "application/json": {
                                     "schema": {
@@ -231,6 +589,7 @@
                                         "properties": {
                                             "code": {
                                                 "type": "string",
+                                                "description": "The Google OAuth authorization code",
                                                 "example": "4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR"
                                             }
                                         },
@@ -243,11 +602,7 @@
                             "required": true
                         },
                         "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
-                            }
-                        ]
+                        "security": []
                     }
                 },
                 "/api/v1/auth/local": {
@@ -445,12 +800,31 @@
                                                 "summary": "Forgot password request active",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction send it to your email"
+                                                    "error": "Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction sent to your email"
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            },
+                            "201": {
+                                "description": "User Auth resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user locally",
@@ -490,283 +864,7 @@
                             "required": true
                         },
                         "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
-                            }
-                        ]
-                    }
-                },
-                "/api/v1/auth/local/register": {
-                    "post": {
-                        "operationId": "api_auth_local_register",
-                        "tags": [
-                            "User Auth Register"
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "User registered successfully",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "data": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "message": {
-                                                            "type": "string",
-                                                            "example": "Registration successful. Please check your email for further instructions"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "example": {
-                                            "success": true,
-                                            "data": {
-                                                "message": "Registration successful. Please check your email for further instructions"
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "400": {
-                                "description": "Invalid request data",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "error": {
-                                                    "type": "string",
-                                                    "description": "Error message for invalid data",
-                                                    "example": "Missing required fields: email, password or turnstile_token"
-                                                }
-                                            }
-                                        },
-                                        "examples": {
-                                            "captcha_failed": {
-                                                "summary": "CAPTCHA validation failed",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "CAPTCHA validation failed"
-                                                }
-                                            },
-                                            "missing_fields": {
-                                                "summary": "Missing Fields",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Missing required fields: email, password or turnstile_token"
-                                                }
-                                            },
-                                            "invalid_email_format": {
-                                                "summary": "Invalid email format",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid email format"
-                                                }
-                                            },
-                                            "invalid_json": {
-                                                "summary": "Invalid json format",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid json format"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "summary": "Register a new user via local authentication",
-                        "description": "This endpoint registers a new user using their email and password,\n                 with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, \n                 and CAPTCHA verification. If the user already exists, it returns a conflict error.",
-                        "parameters": [],
-                        "requestBody": {
-                            "description": "User registration data and CAPTCHA validation token. \n            The request should include the user's email, password, and Turnstile CAPTCHA token.",
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "email": {
-                                                "type": "string",
-                                                "example": "user@example.com",
-                                                "description": "User email address"
-                                            },
-                                            "password": {
-                                                "type": "string",
-                                                "example": "strongpassword",
-                                                "description": "User password"
-                                            },
-                                            "first_name": {
-                                                "type": "string",
-                                                "example": "John",
-                                                "description": "First name of the user"
-                                            },
-                                            "last_name": {
-                                                "type": "string",
-                                                "example": "Doe",
-                                                "description": "Last name of the user"
-                                            },
-                                            "turnstile_token": {
-                                                "type": "string",
-                                                "description": "The CAPTCHA validation token from Turnstile",
-                                                "example": "valid_test_token"
-                                            }
-                                        },
-                                        "required": [
-                                            "email",
-                                            "password",
-                                            "turnstile_token"
-                                        ]
-                                    }
-                                }
-                            },
-                            "required": true
-                        },
-                        "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
-                            }
-                        ]
-                    }
-                },
-                "/api/v1/auth/local/reset": {
-                    "post": {
-                        "operationId": "api_auth_local_reset",
-                        "tags": [
-                            "User Auth Reset"
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "Password reset email sent successfully",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "data": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "message": {
-                                                            "type": "string",
-                                                            "example": "If the email exist, we have sent you a new one to: user@example.com"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "example": {
-                                            "success": true,
-                                            "data": {
-                                                "message": "If the email exist, we have sent you a new one to: user@example.com"
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "400": {
-                                "description": "Invalid request data",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "error": {
-                                                    "type": "string",
-                                                    "description": "Error message explaining why the request failed",
-                                                    "example": "Missing required fields or invalid data"
-                                                }
-                                            }
-                                        },
-                                        "examples": {
-                                            "captcha_failed": {
-                                                "summary": "CAPTCHA validation failed",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "CAPTCHA validation failed"
-                                                }
-                                            },
-                                            "missing_fields": {
-                                                "summary": "Missing Fields",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Missing required fields: email, password or turnstile_token"
-                                                }
-                                            },
-                                            "invalid_email_format": {
-                                                "summary": "Invalid email format",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid email format"
-                                                }
-                                            },
-                                            "invalid_json": {
-                                                "summary": "Invalid JSON format",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid JSON format"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "summary": "Trigger a password reset for a local auth account",
-                        "description": "This endpoint triggers a password reset for a local auth account. \n        The user must provide their email and a CAPTCHA validation token. \n        The endpoint verifies if the user has an external auth with \"PortalAccount\" and \"EMAIL\" providerId,\n        then proceeds with the password reset if the conditions are met.",
-                        "parameters": [],
-                        "requestBody": {
-                            "description": "Password reset request data, including CAPTCHA validation token and user email",
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "turnstile_token": {
-                                                "type": "string",
-                                                "description": "The CAPTCHA validation token",
-                                                "example": "valid_test_token"
-                                            },
-                                            "email": {
-                                                "type": "string",
-                                                "description": "The email of the user requesting the password reset",
-                                                "example": "user@example.com"
-                                            }
-                                        },
-                                        "required": [
-                                            "turnstile_token",
-                                            "email"
-                                        ]
-                                    }
-                                }
-                            },
-                            "required": true
-                        },
-                        "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
-                            }
-                        ]
+                        "security": []
                     }
                 },
                 "/api/v1/auth/saml": {
@@ -836,7 +934,8 @@
                                                                         "description": "Provider identifier"
                                                                     }
                                                                 }
-                                                            }
+                                                            },
+                                                            "description": "External authentication details"
                                                         },
                                                         "token": {
                                                             "type": "string",
@@ -845,25 +944,6 @@
                                                         }
                                                     }
                                                 }
-                                            }
-                                        },
-                                        "example": {
-                                            "success": true,
-                                            "data": {
-                                                "uuid": "user-uuid-example",
-                                                "email": "user@example.com",
-                                                "roles": [
-                                                    "ROLE_USER"
-                                                ],
-                                                "first_name": "John",
-                                                "last_name": "Doe",
-                                                "user_external_auths": [
-                                                    {
-                                                        "provider": "SAML Account",
-                                                        "provider_id": "userExampleAccountName"
-                                                    }
-                                                ],
-                                                "token": "jwt-token-example"
                                             }
                                         }
                                     }
@@ -885,14 +965,14 @@
                                                     "description": "Error message explaining why the request failed",
                                                     "example": "SAML Response not found"
                                                 }
-                                            }
-                                        },
-                                        "examples": {
-                                            "saml_response_not_found": {
-                                                "summary": "SAML Response not found",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "SAML Response not found"
+                                            },
+                                            "examples": {
+                                                "saml_response_not_found": {
+                                                    "summary": "SAML Response not found",
+                                                    "value": {
+                                                        "success": false,
+                                                        "error": "SAML Response not found"
+                                                    }
                                                 }
                                             }
                                         }
@@ -915,21 +995,21 @@
                                                     "description": "Error message for why authentication failed",
                                                     "example": "Invalid SAML Assertion"
                                                 }
-                                            }
-                                        },
-                                        "examples": {
-                                            "invalid_saml_assertion": {
-                                                "summary": "Unable to validate saml assertion",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Unable to validate saml assertion"
-                                                }
                                             },
-                                            "authentication_failed": {
-                                                "summary": "Authentication Failed",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Authentication Failed"
+                                            "examples": {
+                                                "invalid_saml_assertion": {
+                                                    "summary": "Unable to validate SAML assertion",
+                                                    "value": {
+                                                        "success": false,
+                                                        "error": "Unable to validate SAML assertion"
+                                                    }
+                                                },
+                                                "authentication_failed": {
+                                                    "summary": "Authentication Failed",
+                                                    "value": {
+                                                        "success": false,
+                                                        "error": "Authentication Failed"
+                                                    }
                                                 }
                                             }
                                         }
@@ -952,21 +1032,21 @@
                                                     "example": "Unauthorized - You do not have permission to access this resource.",
                                                     "description": "Details of the authentication failure"
                                                 }
-                                            }
-                                        },
-                                        "examples": {
-                                            "invalid_verification": {
-                                                "summary": "User account is not verified",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "User account is not verified!"
-                                                }
                                             },
-                                            "banned_account": {
-                                                "summary": "User account is banned",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "User account is banned from the system!"
+                                            "examples": {
+                                                "invalid_verification": {
+                                                    "summary": "User account is not verified",
+                                                    "value": {
+                                                        "success": false,
+                                                        "error": "User account is not verified!"
+                                                    }
+                                                },
+                                                "banned_account": {
+                                                    "summary": "User account is banned",
+                                                    "value": {
+                                                        "success": false,
+                                                        "error": "User account is banned from the system!"
+                                                    }
                                                 }
                                             }
                                         }
@@ -994,27 +1074,46 @@
                                                     "description": "Detailed error message",
                                                     "example": "Detailed error information"
                                                 }
-                                            }
-                                        },
-                                        "examples": {
-                                            "saml_processing_error": {
-                                                "summary": "SAML processing error",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "SAML processing error",
-                                                    "details": "Detailed error information"
+                                            },
+                                            "examples": {
+                                                "saml_processing_error": {
+                                                    "summary": "SAML processing error",
+                                                    "value": {
+                                                        "success": false,
+                                                        "error": "SAML processing error",
+                                                        "details": "Detailed error information"
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            },
+                            "201": {
+                                "description": "User Auth resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user via SAML",
-                        "description": "This endpoint authenticates a user using their SAML response. \n            If the user is not found in the database, a new user will be created based on the SAML assertion. \n            The response includes user details along with a JWT token if authentication is successful.",
+                        "description": "This endpoint authenticates a user using their SAML response. \n                If the user is not found in the database, a new user will be created based on the SAML assertion. \n                The response includes user details along with a JWT token if authentication is successful.",
                         "parameters": [],
                         "requestBody": {
-                            "description": "SAML response required for user authentication. \n            The request should be sent as `multipart/form-data` with the SAML response \n            included as a form field (not a file).",
+                            "description": "SAML response required for user authentication. \n                    The request should be sent as `multipart/form-data` with the SAML response included\n                     as a form field (not a file).",
                             "content": {
                                 "multipart/form-data": {
                                     "schema": {
@@ -1035,11 +1134,166 @@
                             "required": true
                         },
                         "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
+                        "security": []
+                    }
+                },
+                "/api/v1/auth/local/register": {
+                    "post": {
+                        "operationId": "api_auth_local_register",
+                        "tags": [
+                            "User Auth Register"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "User registered successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Registration successful. Please check your email for further instructions."
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": {
+                                                "message": "Registration successful. Please check your email for further instructions."
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "400": {
+                                "description": "Invalid request data",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "description": "Error message for invalid data",
+                                                    "example": "Missing required fields: email, password or turnstile_token"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "captcha_failed": {
+                                                "summary": "CAPTCHA validation failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "CAPTCHA validation failed"
+                                                }
+                                            },
+                                            "missing_fields": {
+                                                "summary": "Missing Fields",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Missing required fields: email, password or turnstile_token"
+                                                }
+                                            },
+                                            "invalid_email_format": {
+                                                "summary": "Invalid email format",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid email format"
+                                                }
+                                            },
+                                            "invalid_json": {
+                                                "summary": "Invalid JSON format",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid JSON format"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "201": {
+                                "description": "User Auth Register resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Register.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Register"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
-                        ]
+                        },
+                        "summary": "Register a new user via local authentication",
+                        "description": "This endpoint registers a new user using their email and password, with \n                CAPTCHA validation via the Turnstile token. It handles user creation, password hashing,\n                 and CAPTCHA verification. If the user already exists, it returns a conflict error.",
+                        "parameters": [],
+                        "requestBody": {
+                            "description": "User registration data and CAPTCHA validation token. \n                    The request should include the user's email, password, and Turnstile CAPTCHA token.",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "example": "user@example.com",
+                                                "description": "User email address"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "example": "strongpassword",
+                                                "description": "User password"
+                                            },
+                                            "first_name": {
+                                                "type": "string",
+                                                "example": "John",
+                                                "description": "First name of the user"
+                                            },
+                                            "last_name": {
+                                                "type": "string",
+                                                "example": "Doe",
+                                                "description": "Last name of the user"
+                                            },
+                                            "turnstile_token": {
+                                                "type": "string",
+                                                "description": "The CAPTCHA validation token from Turnstile",
+                                                "example": "valid_test_token"
+                                            }
+                                        },
+                                        "required": [
+                                            "email",
+                                            "password",
+                                            "turnstile_token"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": true
+                        },
+                        "deprecated": false,
+                        "security": []
                     }
                 },
                 "/api/v1/auth/sms/register": {
@@ -1110,7 +1364,7 @@
                                                 "summary": "Missing Fields",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Missing required fields: phone number, password or turnstile_token"
+                                                    "error": "Missing required fields: phone number, password, or turnstile_token"
                                                 }
                                             },
                                             "invalid_phone_number_format": {
@@ -1149,7 +1403,7 @@
                                                 },
                                                 "details": {
                                                     "type": "string",
-                                                    "description": "A more details of the error",
+                                                    "description": "A more detailed explanation of the error",
                                                     "example": "Error details"
                                                 }
                                             }
@@ -1173,10 +1427,29 @@
                                         }
                                     }
                                 }
+                            },
+                            "201": {
+                                "description": "User Auth Register resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Register.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Register"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Register a new user via SMS authentication",
-                        "description": "This endpoint registers a new user using their phone number and validates \n                the request with a CAPTCHA token.",
+                        "description": "This endpoint registers a new user using their phone number and \n                validates the request with a CAPTCHA token.",
                         "parameters": [],
                         "requestBody": {
                             "description": "User registration data and CAPTCHA validation token",
@@ -1222,11 +1495,150 @@
                             "required": true
                         },
                         "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
+                        "security": []
+                    }
+                },
+                "/api/v1/auth/local/reset": {
+                    "post": {
+                        "operationId": "api_auth_local_reset",
+                        "tags": [
+                            "User Auth Reset"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Password reset email sent successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "If the email exists, we have sent you a new one to: user@example.com"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": {
+                                                "message": "If the email exists, we have sent you a new one to: user@example.com"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "400": {
+                                "description": "Invalid request data",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "description": "Error message explaining why the request failed",
+                                                    "example": "Missing required fields or invalid data"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "captcha_failed": {
+                                                "summary": "CAPTCHA validation failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "CAPTCHA validation failed"
+                                                }
+                                            },
+                                            "missing_fields": {
+                                                "summary": "Missing Fields",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Missing required fields: email or turnstile_token"
+                                                }
+                                            },
+                                            "invalid_email_format": {
+                                                "summary": "Invalid email format",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid email format"
+                                                }
+                                            },
+                                            "invalid_json": {
+                                                "summary": "Invalid JSON format",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid JSON format"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "201": {
+                                "description": "User Auth Reset resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Reset.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Reset"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
-                        ]
+                        },
+                        "summary": "Trigger a password reset for a local auth account",
+                        "description": "This endpoint triggers a password reset for a local auth account. \n                The user must provide their email and a CAPTCHA validation token. \n                The endpoint verifies if the user has an external auth with \"PortalAccount\" and \"EMAIL\" providerId,\n                 then proceeds with the password reset if the conditions are met.",
+                        "parameters": [],
+                        "requestBody": {
+                            "description": "Password reset request data, including CAPTCHA validation token and user email",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "turnstile_token": {
+                                                "type": "string",
+                                                "description": "The CAPTCHA validation token",
+                                                "example": "valid_test_token"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "description": "The email of the user requesting the password reset",
+                                                "example": "user@example.com"
+                                            }
+                                        },
+                                        "required": [
+                                            "turnstile_token",
+                                            "email"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": true
+                        },
+                        "deprecated": false,
+                        "security": []
                     }
                 },
                 "/api/v1/auth/sms/reset": {
@@ -1297,14 +1709,7 @@
                                                 "summary": "Missing Fields",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Missing required fields: phone number, password or turnstile_token"
-                                                }
-                                            },
-                                            "invalid_json": {
-                                                "summary": "Invalid json format",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid json format"
+                                                    "error": "Missing required fields: phone number, turnstile_token"
                                                 }
                                             },
                                             "invalid_phone_number_format": {
@@ -1314,11 +1719,11 @@
                                                     "error": "Invalid phone number format. Use a valid format, example: +19700XXXXXX"
                                                 }
                                             },
-                                            "invalid_request": {
-                                                "summary": "An error occurred while processing your request",
+                                            "invalid_json": {
+                                                "summary": "Invalid JSON format",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "An error occurred while processing your request"
+                                                    "error": "Invalid JSON format"
                                                 }
                                             }
                                         }
@@ -1355,10 +1760,29 @@
                                         }
                                     }
                                 }
+                            },
+                            "201": {
+                                "description": "User Auth Reset resource created",
+                                "content": {
+                                    "application/ld+json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Reset.jsonld"
+                                        }
+                                    },
+                                    "application/json": {
+                                        "schema": {
+                                            "$ref": "#/components/schemas/User.Auth.Reset"
+                                        }
+                                    }
+                                },
+                                "links": {}
+                            },
+                            "422": {
+                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Trigger a password reset for an SMS auth account",
-                        "description": "This endpoint sends an SMS with a new password and verification code \n        if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also\n        enforces the time interval between requests and limits the number of attempts allowed.",
+                        "description": "This endpoint sends an SMS with a new password and verification code \n                if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also \n                enforces the time interval between requests and limits the number of attempts allowed.",
                         "parameters": [],
                         "requestBody": {
                             "description": "Password reset request data including CAPTCHA token and user phone number",
@@ -1388,331 +1812,7 @@
                             "required": true
                         },
                         "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
-                            }
-                        ]
-                    }
-                },
-                "/api/v1/config": {
-                    "get": {
-                        "operationId": "app_config_settings",
-                        "tags": [
-                            "Setting"
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "Configuration settings retrieved successfully",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "data": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "platform": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "PLATFORM_MODE": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "USER_VERIFICATION": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "TURNSTILE_CHECKER": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "CONTACT_EMAIL": {
-                                                                    "type": "string"
-                                                                },
-                                                                "TOS_LINK": {
-                                                                    "type": "string"
-                                                                },
-                                                                "PRIVACY_POLICY_LINK": {
-                                                                    "type": "string"
-                                                                }
-                                                            }
-                                                        },
-                                                        "auth": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "AUTH_METHOD_SAML_ENABLED": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "AUTH_METHOD_REGISTER_ENABLED": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": {
-                                                                    "type": "boolean"
-                                                                },
-                                                                "AUTH_METHOD_SMS_REGISTER_ENABLED": {
-                                                                    "type": "boolean"
-                                                                }
-                                                            }
-                                                        },
-                                                        "turnstile": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "TURNSTILE_KEY": {
-                                                                    "type": "string"
-                                                                }
-                                                            }
-                                                        },
-                                                        "google": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "GOOGLE_CLIENT_ID": {
-                                                                    "type": "string"
-                                                                }
-                                                            }
-                                                        },
-                                                        "saml": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "SAML_IDP_ENTITY_ID": {
-                                                                    "type": "string"
-                                                                },
-                                                                "SAML_IDP_SSO_URL": {
-                                                                    "type": "string"
-                                                                },
-                                                                "SAML_IDP_X509_CERT": {
-                                                                    "type": "string"
-                                                                },
-                                                                "SAML_SP_ENTITY_ID": {
-                                                                    "type": "string"
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "example": {
-                                            "success": true,
-                                            "data": {
-                                                "platform": {
-                                                    "PLATFORM_MODE": "Live",
-                                                    "USER_VERIFICATION": true,
-                                                    "TURNSTILE_CHECKER": true,
-                                                    "CONTACT_EMAIL": "support@example.com",
-                                                    "TOS_LINK": "https://example.com/tos",
-                                                    "PRIVACY_POLICY_LINK": "https://example.com/privacy"
-                                                },
-                                                "auth": {
-                                                    "AUTH_METHOD_SAML_ENABLED": true,
-                                                    "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": true,
-                                                    "AUTH_METHOD_REGISTER_ENABLED": true,
-                                                    "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": true,
-                                                    "AUTH_METHOD_SMS_REGISTER_ENABLED": true
-                                                },
-                                                "turnstile": {
-                                                    "TURNSTILE_KEY": "example_turnstile_key"
-                                                },
-                                                "google": {
-                                                    "GOOGLE_CLIENT_ID": "example_google_client_id"
-                                                },
-                                                "saml": {
-                                                    "SAML_IDP_ENTITY_ID": "https://example.com/saml/metadata",
-                                                    "SAML_IDP_SSO_URL": "https://example.com/saml/sso",
-                                                    "SAML_IDP_X509_CERT": "MIIC...AB",
-                                                    "SAML_SP_ENTITY_ID": "https://example.com/saml/sp"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "summary": "Get configuration settings",
-                        "description": "This endpoint returns public values from the Setting entity and \n                environment variables categorized by platform and provider.",
-                        "parameters": [],
-                        "deprecated": false,
-                        "security": [
-                            {
-                                "BearerAuth": []
-                            }
-                        ]
-                    }
-                },
-                "/api/v1/user": {
-                    "get": {
-                        "operationId": "api_get_current_user",
-                        "tags": [
-                            "User"
-                        ],
-                        "responses": {
-                            "200": {
-                                "description": "User details retrieved successfully",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean"
-                                                },
-                                                "data": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "uuid": {
-                                                            "type": "string"
-                                                        },
-                                                        "email": {
-                                                            "type": "string"
-                                                        },
-                                                        "roles": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "first_name": {
-                                                            "type": "string"
-                                                        },
-                                                        "last_name": {
-                                                            "type": "string"
-                                                        },
-                                                        "user_external_auths": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "provider": {
-                                                                        "type": "string"
-                                                                    },
-                                                                    "provider_id": {
-                                                                        "type": "string"
-                                                                    }
-                                                                }
-                                                            }
-                                                        },
-                                                        "phone_number": {
-                                                            "type": "string",
-                                                            "nullable": true
-                                                        },
-                                                        "is_verified": {
-                                                            "type": "boolean"
-                                                        },
-                                                        "created_at": {
-                                                            "type": "string",
-                                                            "format": "date-time"
-                                                        },
-                                                        "forgot_password_request": {
-                                                            "type": "boolean"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "example": {
-                                            "success": true,
-                                            "data": {
-                                                "uuid": "user@example.com",
-                                                "email": "user@example.com",
-                                                "roles": [
-                                                    "ROLE_USER"
-                                                ],
-                                                "first_name": "John",
-                                                "last_name": "Doe",
-                                                "user_external_auths": [
-                                                    {
-                                                        "provider": "Portal Account",
-                                                        "provider_id": "Email || Phone Number"
-                                                    }
-                                                ],
-                                                "phone_number": null,
-                                                "is_verified": true,
-                                                "created_at": "0000-00-00T00:00:00+00:00",
-                                                "forgot_password_request": false
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "401": {
-                                "description": "Access token is missing.",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean"
-                                                },
-                                                "error": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "example": {
-                                            "success": false,
-                                            "error": "JWT Token not found!"
-                                        }
-                                    }
-                                }
-                            },
-                            "403": {
-                                "description": "Unauthorized Access - Invalid JWT Token - Account unverified/banned",
-                                "content": {
-                                    "application/json": {
-                                        "schema": {
-                                            "type": "object",
-                                            "properties": {
-                                                "success": {
-                                                    "type": "boolean"
-                                                },
-                                                "error": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "examples": {
-                                            "unauthorized_access": {
-                                                "summary": "Unauthorized Access",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Unauthorized - You do not have permission to access this resource."
-                                                }
-                                            },
-                                            "invalid_token": {
-                                                "summary": "Invalid JWT Token",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "JWT Token is invalid!"
-                                                }
-                                            },
-                                            "invalid_verification": {
-                                                "summary": "User account is not verified",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "User account is not verified!"
-                                                }
-                                            },
-                                            "banned_account": {
-                                                "summary": "User account is banned",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "User account is banned from the system!"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "summary": "Retrieve current authenticated user",
-                        "description": "This endpoint returns the details of the currently authenticated user.",
-                        "parameters": [],
-                        "deprecated": false
+                        "security": []
                     }
                 }
             },
@@ -3646,7 +3746,7 @@
                 "requestBodies": {},
                 "headers": {},
                 "securitySchemes": {
-                    "User": {
+                    "bearerAuth": {
                         "type": "apiKey",
                         "description": "Value for the Authorization header parameter.",
                         "name": "Authorization",
@@ -3656,7 +3756,7 @@
             },
             "security": [
                 {
-                    "User": []
+                    "bearerAuth": []
                 }
             ],
             "tags": [],
@@ -3922,204 +4022,10 @@
                 <div class="wrapper">
                     <section class="block col-12 block-desktop col-12-desktop">
                         <div><span><div class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                                id="operations-tag-User_Auth"
-                                                                                data-tag="User Auth"
+                                                                                id="operations-tag-Setting"
+                                                                                data-tag="Setting"
                                                                                 data-is-open="true"><a class="nostyle"
-                                                                                                       href="http:///api#/User%20Auth"><span>User Auth</span></a><small></small><button
-                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
-                                class="no-margin"> <div class="operation-tag-content"><span><div
-                                class="opblock opblock-post" id="operations-User_Auth-api_auth_google"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/google"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_google"><span>/api<wbr>/v1<wbr>/auth<wbr>/google</span></a></span><div
-                                class="opblock-summary-description">Authenticate a user via Google</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/google" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
-                                class="opblock opblock-post" id="operations-User_Auth-api_auth_local"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/local"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_local"><span>/api<wbr>/v1<wbr>/auth<wbr>/local</span></a></span><div
-                                class="opblock-summary-description">Authenticate a user locally</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/local" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
-                                class="opblock opblock-post" id="operations-User_Auth-api_auth_saml"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/saml"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_saml"><span>/api<wbr>/v1<wbr>/auth<wbr>/saml</span></a></span><div
-                                class="opblock-summary-description">Authenticate a user via SAML</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/saml" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                        id="operations-tag-User_Auth_Register"
-                                                                        data-tag="User Auth Register"
-                                                                        data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/User%20Auth%20Register"><span>User Auth Register</span></a><small></small><button
-                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
-                                class="no-margin"> <div class="operation-tag-content"><span><div
-                                class="opblock opblock-post" id="operations-User_Auth_Register-api_auth_local_register"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/local/register"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Register/api_auth_local_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/register</span></a></span><div
-                                class="opblock-summary-description">Register a new user via local authentication</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/local​/register" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
-                                class="opblock opblock-post" id="operations-User_Auth_Register-api_auth_sms_register"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/sms/register"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Register/api_auth_sms_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/register</span></a></span><div
-                                class="opblock-summary-description">Register a new user via SMS authentication</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/sms​/register" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                        id="operations-tag-User_Auth_Reset"
-                                                                        data-tag="User Auth Reset"
-                                                                        data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/User%20Auth%20Reset"><span>User Auth Reset</span></a><small></small><button
-                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
-                                class="no-margin"> <div class="operation-tag-content"><span><div
-                                class="opblock opblock-post" id="operations-User_Auth_Reset-api_auth_local_reset"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/local/reset"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Reset/api_auth_local_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/reset</span></a></span><div
-                                class="opblock-summary-description">Trigger a password reset for a local auth account</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/local​/reset" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
-                                class="opblock opblock-post" id="operations-User_Auth_Reset-api_auth_sms_reset"><div
-                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
-                                                                                     class="opblock-summary-control"><span
-                                class="opblock-summary-method">POST</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/auth/sms/reset"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Reset/api_auth_sms_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/reset</span></a></span><div
-                                class="opblock-summary-description">Trigger a password reset for an SMS auth account</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
-                                aria-label="post ​/api​/v1​/auth​/sms​/reset" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                        id="operations-tag-Setting" data-tag="Setting"
-                                                                        data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/Setting"><span>Setting</span></a><small></small><button
+                                                                                                       href="http:///api#/Setting"><span>Setting</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -4138,10 +4044,6 @@
                                 aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
                                 fill="#ffffff" fill-rule="evenodd"
                                 d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
                                 aria-label="get ​/api​/v1​/config" class="opblock-control-arrow" aria-expanded="false"
                                 tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
                                                    width="20" height="20" aria-hidden="true" focusable="false"><path
@@ -4175,6 +4077,173 @@
                                 aria-label="get ​/api​/v1​/user" class="opblock-control-arrow" aria-expanded="false"
                                 tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
                                                    width="20" height="20" aria-hidden="true" focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                                                        id="operations-tag-User_Auth"
+                                                                        data-tag="User Auth" data-is-open="true"><a
+                                class="nostyle"
+                                href="http:///api#/User%20Auth"><span>User Auth</span></a><small></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-post" id="operations-User_Auth-api_auth_google"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/google"><a
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_google"><span>/api<wbr>/v1<wbr>/auth<wbr>/google</span></a></span><div
+                                class="opblock-summary-description">Authenticate a user via Google</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/google" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
+                                class="opblock opblock-post" id="operations-User_Auth-api_auth_local"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/local"><a
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_local"><span>/api<wbr>/v1<wbr>/auth<wbr>/local</span></a></span><div
+                                class="opblock-summary-description">Authenticate a user locally</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/local" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
+                                class="opblock opblock-post" id="operations-User_Auth-api_auth_saml"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/saml"><a
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_saml"><span>/api<wbr>/v1<wbr>/auth<wbr>/saml</span></a></span><div
+                                class="opblock-summary-description">Authenticate a user via SAML</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/saml" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                                                        id="operations-tag-User_Auth_Register"
+                                                                        data-tag="User Auth Register"
+                                                                        data-is-open="true"><a class="nostyle"
+                                                                                               href="http:///api#/User%20Auth%20Register"><span>User Auth Register</span></a><small></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-post" id="operations-User_Auth_Register-api_auth_local_register"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/local/register"><a
+                                class="nostyle"
+                                href="http:///api#/User%20Auth%20Register/api_auth_local_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/register</span></a></span><div
+                                class="opblock-summary-description">Register a new user via local authentication</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/local​/register" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
+                                class="opblock opblock-post" id="operations-User_Auth_Register-api_auth_sms_register"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/sms/register"><a
+                                class="nostyle"
+                                href="http:///api#/User%20Auth%20Register/api_auth_sms_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/register</span></a></span><div
+                                class="opblock-summary-description">Register a new user via SMS authentication</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/sms​/register" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                                                        id="operations-tag-User_Auth_Reset"
+                                                                        data-tag="User Auth Reset"
+                                                                        data-is-open="true"><a class="nostyle"
+                                                                                               href="http:///api#/User%20Auth%20Reset"><span>User Auth Reset</span></a><small></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-post" id="operations-User_Auth_Reset-api_auth_local_reset"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/local/reset"><a
+                                class="nostyle"
+                                href="http:///api#/User%20Auth%20Reset/api_auth_local_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/reset</span></a></span><div
+                                class="opblock-summary-description">Trigger a password reset for a local auth account</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/local​/reset" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
+                                class="opblock opblock-post" id="operations-User_Auth_Reset-api_auth_sms_reset"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/auth/sms/reset"><a
+                                class="nostyle"
+                                href="http:///api#/User%20Auth%20Reset/api_auth_sms_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/reset</span></a></span><div
+                                class="opblock-summary-description">Trigger a password reset for an SMS auth account</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/auth​/sms​/reset" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
                                 d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span>
                         </div>
                     </section>
@@ -5776,7 +5845,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('8f3321');/*]]>*/</script>
+Sfjs.loadToolbar('7e9777');/*]]>*/</script>
 
 
 <jam-ui id="__jam-ui" suppresshydrationwarning="true" dir="ltr" class="jam---its rr-block rr-ignore"
