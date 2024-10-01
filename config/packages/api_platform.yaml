@@ -18,7 +18,7 @@ api_platform:
     swagger:
         versions: [3]
         api_keys:
-            User:
+            bearerAuth:
                 name: Authorization
                 type: header
         swagger_ui_extra_configuration:

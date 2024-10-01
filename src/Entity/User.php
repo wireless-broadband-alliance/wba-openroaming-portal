@@ -33,6 +33,11 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: "is_granted('ROLE_USER')",
             securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
             openapiContext: [
+                'security' => [
+                    [
+                        'bearerAuth' => [],
+                    ]
+                ],
                 'summary' => 'Retrieve current authenticated user',
                 'description' => 'This endpoint returns the details of the currently authenticated user.',
                 'responses' => [
@@ -191,11 +196,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth',
             name: 'api_auth_local',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Authenticate a user locally',
                 'description' => 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.',
                 'requestBody' => [
@@ -425,11 +426,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth',
             name: 'api_auth_saml',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Authenticate a user via SAML',
                 'description' => 'This endpoint authenticates a user using their SAML response. 
             If the user is not found in the database, a new user will be created based on the SAML assertion. 
@@ -681,11 +678,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth',
             name: 'api_auth_google',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Authenticate a user via Google',
                 'description' => 'This endpoint authenticates a user using their Google account. 
                 A valid Google OAuth authorization code is required.',
@@ -891,11 +884,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Register',
             name: 'api_auth_local_register',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Register a new user via local authentication',
                 'description' => 'This endpoint registers a new user using their email and password,
                  with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
@@ -1036,11 +1025,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Register a new user via SMS authentication',
                 'description' => 'This endpoint registers a new user using their phone number and validates 
                 the request with a CAPTCHA token.',
@@ -1226,11 +1211,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Trigger a password reset for a local auth account',
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
         The user must provide their email and a CAPTCHA validation token. 
@@ -1356,11 +1337,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Trigger a password reset for an SMS auth account',
                 'description' => 'This endpoint sends an SMS with a new password and verification code 
         if the user has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also

@@ -18,11 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
             openapiContext: [
-                'security' => [
-                    [
-                        'BearerAuth' => [],
-                    ]
-                ],
+                'security' => [],
                 'summary' => 'Get configuration settings',
                 'description' => 'This endpoint returns public values from the Setting entity and 
                 environment variables categorized by platform and provider.',
