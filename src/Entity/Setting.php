@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\OpenApi\Model\Operation;
 use App\Api\V1\Controller\ConfigController;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,12 +18,8 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
-            openapiContext: [
-                'security' => [],
-                'summary' => 'Get configuration settings',
-                'description' => 'This endpoint returns public values from the Setting entity and 
-                environment variables categorized by platform and provider.',
-                'responses' => [
+            openapi: new Operation(
+                responses: [
                     '200' => [
                         'description' => 'Configuration settings retrieved successfully',
                         'content' => [
@@ -121,7 +118,11 @@ use Doctrine\ORM\Mapping as ORM;
                         ],
                     ],
                 ],
-            ],
+                summary: 'Get configuration settings',
+                description: 'This endpoint returns public values from the Setting entity and 
+                environment variables categorized by platform and provider.',
+                security: [],
+            ),
             shortName: 'Setting',
             paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
