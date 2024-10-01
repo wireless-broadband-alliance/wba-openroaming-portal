@@ -100,7 +100,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     '401' => [
-                        'description' => 'Access token is missing.',
+                        'description' => 'Something with the access token.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -110,9 +110,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'error' => ['type' => 'string'],
                                     ],
                                 ],
-                                'example' => [
-                                    'success' => false,
-                                    'error' => 'JWT Token not found!',
+                                'examples' => [
+                                    'jwt_not_found' => [
+                                        'summary' => 'JWT Token not found',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token not found!',
+                                        ],
+                                    ],
+                                    'jwt_invalid' => [
+                                        'summary' => 'JWT Token invalid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token is invalid!',
+                                        ],
+                                    ],
+                                    'jwt_expired' => [
+                                        'summary' => 'JWT Token expired',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT Token is expired!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
