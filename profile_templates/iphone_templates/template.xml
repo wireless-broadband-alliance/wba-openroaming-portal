@@ -44,7 +44,7 @@
 					<key>UserPassword</key>
 					<string>@PASSWORD@</string>
 					<key>OuterIdentity</key>
-					<string>@USERNAME@</string>
+                    <string>anonymous@@DOMAIN_NAME@</string>
 				</dict>
 				<key>EncryptionType</key>
 				<string>@PROFILES_ENCRYPTION_TYPE_IOS_ONLY@</string>
