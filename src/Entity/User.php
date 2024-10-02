@@ -1303,18 +1303,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'turnstile_token' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token',
-                                    ],
                                     'email' => [
                                         'type' => 'string',
                                         'description' => 'The email of the user requesting the password reset',
                                         'example' => 'user@example.com',
                                     ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token',
+                                    ],
                                 ],
-                                'required' => ['turnstile_token', 'email'],
+                                'required' => ['email', 'turnstile_token'],
                             ],
                         ]),
                     ]),
