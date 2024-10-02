@@ -33,6 +33,8 @@
         {% set label = 'Email' %}
     {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
         {% set label = 'Phone Number' %}
+    {% else %}
+        {% set label = 'Email' %}
     {% endif %}
 
     {# UUID #}
