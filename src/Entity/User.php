@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
@@ -172,6 +173,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
                 summary: 'Retrieve current authenticated user',
                 description: 'This endpoint returns the details of the currently authenticated user.',
+                parameters: [
+                    new Parameter(
+                        name: 'Authorization',
+                        in: 'header',
+                        description: 'Bearer token required for authentication. Use the format: `Bearer <JWT token>`.',
+                        required: true,
+                        schema: [
+                            'type' => 'string',
+                        ],
+                    ),
+                ],
                 security: [
                     [
                         'bearerAuth' => [],
