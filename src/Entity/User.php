@@ -297,13 +297,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Invalid json format',
                                         ],
                                     ],
-                                    'invalid_credentials' => [
-                                        'summary' => 'Invalid credentials',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid credentials',
-                                        ],
-                                    ],
                                 ],
                             ],
                         ],
