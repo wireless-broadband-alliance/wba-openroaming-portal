@@ -4,9 +4,13 @@ api_platform:
     formats:
         jsonld: ['application/ld+json']
         json: ['application/json']
+        jsonopenapi: ['application/vnd.openapi+json']
+        yaml: ['application/yaml', 'text/yaml']
     docs_formats:
         jsonld: ['application/ld+json']
         jsonopenapi: ['application/vnd.openapi+json']
+        json: ['application/json']
+        yaml: ['application/yaml', 'text/yaml']
         html: ['text/html']
     defaults:
         stateless: true
