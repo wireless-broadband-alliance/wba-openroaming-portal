@@ -349,6 +349,7 @@ class AdminController extends AbstractController
 
         // Prepare user data for encryption
         $deletedUserData = [
+            'id' => $user->getId(),
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail() ?? 'This value is empty',
             'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
