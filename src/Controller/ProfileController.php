@@ -65,7 +65,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() || !$user->isVerified()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
@@ -139,7 +139,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() || !$user->isVerified()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
@@ -258,7 +258,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() || !$user->isVerified()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             return $this->redirectToRoute('app_landing');
         }
