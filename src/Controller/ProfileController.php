@@ -151,6 +151,9 @@ class ProfileController extends AbstractController
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
@@ -282,6 +285,9 @@ class ProfileController extends AbstractController
         UrlGeneratorInterface $urlGenerator,
         UserRadiusProfileRepository $radiusProfileRepository,
     ): Response {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
