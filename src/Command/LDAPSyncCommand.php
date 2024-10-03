@@ -22,16 +22,18 @@ class LDAPSyncCommand extends Command
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private ProfileManager $profileManager;
+    private UserExternalAuthRepository $userExternalAuthRepository;
 
     public function __construct(
         UserRepository $userRepository,
         SettingRepository $settingRepository,
-        ProfileManager $profileManager
+        ProfileManager $profileManager,
+        UserExternalAuthRepository $userExternalAuthRepository
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->profileManager = $profileManager;
-
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
         parent::__construct();
     }
 
@@ -49,7 +51,7 @@ class LDAPSyncCommand extends Command
         $ldapEnabledUsers = $this->userRepository->findLDAPEnabledUsers();
         $io->writeln('Found ' . count($ldapEnabledUsers) . ' LDAP enabled users');
         foreach ($ldapEnabledUsers as $user) {
-            $userExternalAuths = $user->getUserExternalAuths();
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
             foreach ($userExternalAuths as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::SAML) {
