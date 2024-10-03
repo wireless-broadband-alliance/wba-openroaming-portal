@@ -11,10 +11,72 @@
     <link rel="stylesheet" href="./index_files/swagger-ui.css">
     <link rel="stylesheet" href="./index_files/style.css">
 
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="lock-fixer.js"></script>
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                // Remove the scheme container
+                $('.scheme-container').remove();
 
+                // Replace the authorization button to locked state
+                $('button.authorization__btn[aria-label="authorization button unlocked"]').replaceWith(`
+              <button class="authorization__btn" aria-label="authorization button locked">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20" height="20" aria-hidden="true" focusable="false">
+                  <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path>
+                </svg>
+              </button>
+            `);
+
+                // Function to find and remove entire 201 response sections including examples, schemas, and media types
+                function remove201Responses() {
+                    // Look for all response blocks containing "201" status code
+                    $('table.responses-table').each(function() {
+                        $(this).find('td.response-col_status').each(function() {
+                            if ($(this).text().trim() === '201') {
+                                // Remove the entire response block (tr or div around 201 example)
+                                $(this).closest('tr').remove();
+                            }
+                        });
+                    });
+
+                    // Find all response examples with 201 status and their associated media types
+                    $('[data-line]').each(function() {
+                        var responseCode = $(this).find('.response-col_status').text().trim();
+                        if (responseCode === '201') {
+                            // Remove all related schema, media types, and example values under 201 responses
+                            $(this).closest('[data-line]').remove();
+                        }
+                    });
+
+                    // Remove 201 response blocks from different media types like JSON, YAML, etc.
+                    $('.response').each(function() {
+                        if ($(this).find('.response-col_status').text().trim() === '201') {
+                            $(this).closest('.response').remove();
+                        }
+                    });
+                }
+
+                // Suppress and ignore resolver errors
+                function suppressErrors() {
+                    // Hide error messages related to resolver failures
+                    $('.errors-wrapper').each(function() {
+                        const errorText = $(this).text();
+                        if (errorText.includes('Resolver error')) {
+                            // Hide the error wrapper for resolver errors
+                            $(this).remove();
+                        }
+                    });
+                }
+
+                // Call the function to remove 201 responses
+                remove201Responses();
+
+                // Call the function to suppress resolver errors
+                suppressErrors();
+
+            }, 1500);
+        });
+    </script>
 
     <script id="swagger-data" type="application/json">{
         "url": "/api/docs?format=json",
@@ -272,7 +334,7 @@
                                 }
                             },
                             "401": {
-                                "description": "Something with the access token.",
+                                "description": "Access token",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -313,7 +375,7 @@
                                 }
                             },
                             "403": {
-                                "description": "Unauthorized Access - Invalid JWT Token - Account unverified/banned",
+                                "description": "Unauthorized Access - Account unverified/banned",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -333,13 +395,6 @@
                                                 "value": {
                                                     "success": false,
                                                     "error": "Unauthorized - You do not have permission to access this resource."
-                                                }
-                                            },
-                                            "invalid_token": {
-                                                "summary": "Invalid JWT Token",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "JWT Token is invalid!"
                                                 }
                                             },
                                             "invalid_verification": {
@@ -363,7 +418,22 @@
                         },
                         "summary": "Retrieve current authenticated user",
                         "description": "This endpoint returns the details of the currently authenticated user.",
-                        "parameters": [],
+                        "parameters": [
+                            {
+                                "name": "Authorization",
+                                "in": "header",
+                                "description": "Bearer token required for authentication. Use the format: `Bearer \u003CJWT token\u003E`.",
+                                "required": true,
+                                "deprecated": false,
+                                "allowEmptyValue": false,
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "style": "simple",
+                                "explode": false,
+                                "allowReserved": false
+                            }
+                        ],
                         "deprecated": false,
                         "security": [
                             {
@@ -560,25 +630,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user via Google",
@@ -730,13 +781,6 @@
                                                     "success": false,
                                                     "error": "Invalid json format"
                                                 }
-                                            },
-                                            "invalid_credentials": {
-                                                "summary": "Invalid credentials",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid credentials"
-                                                }
                                             }
                                         }
                                     }
@@ -810,25 +854,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user locally",
@@ -1092,25 +1117,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user via SAML",
@@ -1229,25 +1235,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Register resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Register a new user via local authentication",
@@ -1431,25 +1418,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Register resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Register a new user via SMS authentication",
@@ -1590,25 +1558,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Reset resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Trigger a password reset for a local auth account",
@@ -1621,20 +1570,20 @@
                                     "schema": {
                                         "type": "object",
                                         "properties": {
-                                            "turnstile_token": {
-                                                "type": "string",
-                                                "description": "The CAPTCHA validation token",
-                                                "example": "valid_test_token"
-                                            },
                                             "email": {
                                                 "type": "string",
                                                 "description": "The email of the user requesting the password reset",
                                                 "example": "user@example.com"
+                                            },
+                                            "turnstile_token": {
+                                                "type": "string",
+                                                "description": "The CAPTCHA validation token",
+                                                "example": "valid_test_token"
                                             }
                                         },
                                         "required": [
-                                            "turnstile_token",
-                                            "email"
+                                            "email",
+                                            "turnstile_token"
                                         ]
                                     }
                                 }
@@ -1764,25 +1713,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Reset resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Trigger a password reset for an SMS auth account",
@@ -4608,7 +4538,8 @@
         <div class="info">
             Available formats:
             <a href="http:///api/index.jsonld">jsonld</a>
-            <a href="http:///api/index.jsonopenapi">jsonopenapi</a>
+            <a href="http:///api/index.json">json</a>
+            <a href="http:///api/index.yaml">yaml</a>
             <a href="http:///api/index.html">html</a>
             <br>
             Other API docs:
@@ -4621,6 +4552,623 @@
 <script src="./index_files/init-swagger-ui.js"></script>
 <script src="./index_files/init-common-ui.js" defer=""></script>
 
+
+<div id="sfwdt0c7e64" class="sf-toolbar" role="region" aria-label="Symfony Web Debug Toolbar"
+     data-sfurl="http:///_wdt/0c7e64" style="display: block;"><!-- START of Symfony Web Debug Toolbar -->
+    <div id="sfMiniToolbar-0c7e64" class="sf-minitoolbar" data-no-turbolink="" data-turbo="false"
+         style="display: block;">
+        <button type="button" title="Show Symfony toolbar" id="sfToolbarMiniToggler-0c7e64" accesskey="D"
+                aria-expanded="false" aria-controls="sfToolbarMainContent-0c7e64">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"
+                 focusable="false">
+                <path fill="currentColor"
+                      d="M12 .9C5.8.9.9 5.8.9 12a11 11 0 1 0 22.2 0A11 11 0 0 0 12 .9zm6.5 6c-.6 0-.9-.3-.9-.8 0-.2 0-.4.2-.6l.2-.4c0-.3-.5-.4-.6-.4-1.8.1-2.3 2.5-2.7 4.4l-.2 1c1 .2 1.8 0 2.2-.3.6-.4-.2-.7-.1-1.2.1-.3.5-.5.7-.6.5 0 .7.5.7.9 0 .7-1 1.8-3 1.8l-.6-.1-.6 2.4c-.4 1.6-.8 3.8-2.4 5.7-1.4 1.7-2.9 1.9-3.5 1.9-1.2 0-1.9-.6-2-1.5 0-.8.7-1.3 1.2-1.3.6 0 1.1.5 1.1 1s-.2.6-.4.6c-.1.1-.3.2-.3.4 0 .1.1.3.4.3.5 0 .8-.3 1.1-.5 1.2-.9 1.6-2.7 2.2-5.7l.1-.7.7-3.2c-.8-.6-1.3-1.4-2.4-1.7-.6-.1-1.1.1-1.5.5-.4.5-.2 1.1.2 1.5l.7.6c.7.8 1.2 1.6 1 2.5-.3 1.5-2 2.6-4 1.9-1.8-.6-2-1.8-1.8-2.5.2-.6.6-.7 1.1-.6.5.2.6.7.6 1.2l-.1.3c-.2.1-.3.3-.3.4-.1.4.4.6.7.7.7.3 1.6-.2 1.8-.8a1 1 0 0 0-.4-1.1l-.7-.8c-.4-.4-1.1-1.4-.7-2.6.1-.5.4-.9.7-1.3a4 4 0 0 1 2.8-.6c1.2.4 1.8 1.1 2.6 1.8.5-1.2 1-2.4 1.8-3.5.9-.9 1.9-1.6 3.1-1.7 1.3.2 2.2.7 2.2 1.6 0 .4-.2 1.1-.9 1.1z"></path>
+            </svg>
+
+        </button>
+    </div>
+    <div id="sfToolbarClearer-0c7e64" class="sf-toolbar-clearer" style="display: none;"></div>
+
+    <div id="sfToolbarMainContent-0c7e64" class="sf-toolbarreset notranslate clear-fix" data-no-turbolink=""
+         data-turbo="false" style="display: none;">
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-request sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=request">
+                <div class="sf-toolbar-icon"><span class="sf-toolbar-status sf-toolbar-status-green">200</span>
+                    <span class="sf-toolbar-label"> @</span>
+                    <span class="sf-toolbar-value sf-toolbar-info-piece-additional">api_entrypoint</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-group">
+                    <div class="sf-toolbar-info-piece">
+                        <b>HTTP status</b>
+                        <span>200 OK</span>
+                    </div>
+
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Controller</b>
+                        <span>            <a
+                                href="file:///var/www/openroaming/vendor/api-platform/core/src/Symfony/Action/EntrypointAction.php#L30"
+                                title="ApiPlatform\Symfony\Action\EntrypointAction">EntrypointAction</a>
+    </span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Route name</b>
+                        <span>api_entrypoint</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Has session</b>
+                        <span>yes</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Stateless Check</b>
+                        <span>no</span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-api_platform.data_collector.request sf-toolbar-status-default ">
+            <a href="http:///_profiler/0c7e64?panel=api_platform.data_collector.request">
+                <div class="sf-toolbar-icon">
+                    <svg width="24" height="24" viewBox="0 120 256 300" xmlns="http://www.w3.org/2000/svg">
+                        <g data-name="spider">
+                            <g fill="#aaa">
+                                <path d="M40.66 321.08L23.67 248.1l31.32.56 1.77 7.43-24.21-.5 15.36 63.08-7.25 2.41z"></path>
+                                <path d="M36.81 331s-6.21 11.73 5.36 16.56 17-5.51 17-5.51.89-4.49-4.79-14.32-7.38-11.9-10.56-12.43-7.01 15.7-7.01 15.7z"></path>
+                            </g>
+                            <g fill="#aaa">
+                                <path d="M21.27 383.93L0 246.05l57.07-25.51-.73 7.59-47.79 22.31L28.9 384l-7.63-.07z"></path>
+                                <path d="m14.57 396.19s-9.28 13 3.75 20.59 21.17-3.84 21.17-3.84 1.78-5.21-3.43-17.83-6.91-15.4-10.63-16.54-10.86 17.62-10.86 17.62z"></path>
+                            </g>
+                            <g fill="#aaa">
+                                <path d="M215.59 320.08l16.99-72.98-31.32.56-1.77 7.43 24.21-.5-15.36 63.08 7.25 2.41z"></path>
+                                <path d="M219.44 330s6.21 11.73-5.36 16.56-17-5.51-17-5.51-.89-4.49 4.79-14.32 7.4-11.93 10.59-12.46 6.98 15.73 6.98 15.73z"></path>
+                            </g>
+                            <g fill="#aaa">
+                                <path d="M234.98 382.93l21.27-137.88-57.07-25.51.73 7.59 47.8 22.31L227.36 383l7.62-.07z"></path>
+                                <path d="m241.68 395.19s9.28 13-3.75 20.59-21.17-3.84-21.17-3.84-1.78-5.21 3.43-17.83 6.91-15.4 10.63-16.54 10.86 17.62 10.86 17.62z"></path>
+                            </g>
+                            <path d="m207.23 219.63c0 41-35.77 62.69-79.9 62.69s-77.67-21.69-77.67-62.69 33.54-71.22 77.67-71.22 79.9 30.22 79.9 71.22z"
+                                  fill="#d2d2d2"></path>
+                            <path d="m126.33 285.72c-23.33 0-43.33-5.79-57.75-16.72-15.46-11.73-23.63-28.79-23.63-49.34 0-38.35 28.14-74.62 81.38-74.62 53.92 0 83.62 36.82 83.62 74.62 0 20.47-8.58 37.54-24.8 49.38-14.78 10.75-35.66 16.68-58.82 16.68zm0-133.91c-49.07 0-74 33.44-74 67.82 0 36.58 28.34 59.3 74 59.3 46.28 0 76.18-23.28 76.18-59.3 0-42.83-41.42-67.82-76.18-67.82z"
+                                  fill="#aaa"></path>
+                            <ellipse cx="92.29" cy="165.77" rx="37.55" ry="36.82" fill="#fff"></ellipse>
+                            <path d="M91.29 205c-22 0-39.92-17.59-39.92-39.2s17.91-39.2 39.92-39.2 39.93 17.59 39.93 39.2S113.3 205 91.29 205zm0-73.65c-19.39 0-35.17 15.45-35.17 34.45s15.78 34.45 35.17 34.45 35.17-15.45 35.17-34.45-15.78-34.47-35.17-34.47z"
+                                  fill="#aaa"></path>
+                            <ellipse cx="95.19" cy="167.95" rx="16.99" ry="16.3"></ellipse>
+                            <circle cx="92.02" cy="165.04" r="4.68" fill="#fff"></circle>
+                            <ellipse cx="166.29" cy="171.09" rx="45.51" ry="47.07" fill="#fff"></ellipse>
+                            <path d="m165.29 220.53c-26.41 0-47.89-22.18-47.89-49.44s21.48-49.44 47.89-49.44 47.89 22.18 47.89 49.44-21.48 49.44-47.89 49.44zm0-94.13c-23.78 0-43.14 20-43.14 44.69s19.35 44.69 43.14 44.69 43.13-20 43.13-44.69-19.34-44.69-43.13-44.69z"
+                                  fill="#aaa"></path>
+                            <circle cx="169.13" cy="173.57" r="20.96"></circle>
+                            <circle cx="180.48" cy="170.39" r="5.78" fill="#fff"></circle>
+                        </g>
+                    </svg>
+
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Resource Class</b>
+                    <span>Not an API Platform resource</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-time sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=time">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-chart-infographic" width="24"
+                         height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
+                         stroke-linecap="round" stroke-linejoin="round" role="img">
+                        <title>Time</title>
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <circle cx="7" cy="7" r="4"></circle>
+                        <path d="M7 3v4h4"></path>
+                        <line x1="9" y1="17" x2="9" y2="21"></line>
+                        <line x1="17" y1="14" x2="17" y2="21"></line>
+                        <line x1="13" y1="13" x2="13" y2="21"></line>
+                        <line x1="21" y1="12" x2="21" y2="21"></line>
+                    </svg>
+
+                    <span class="sf-toolbar-value">318</span>
+                    <span class="sf-toolbar-label">ms</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Total time</b>
+                    <span>318 ms</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Initialization time</b>
+                    <span>13 ms</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-time sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=time">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-cpu" width="24" height="24"
+                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round" role="img">
+                        <title>Memory</title>
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <rect x="5" y="5" width="14" height="14" rx="1"></rect>
+                        <path d="M9 9h6v6h-6z"></path>
+                        <path d="M3 10h2"></path>
+                        <path d="M3 14h2"></path>
+                        <path d="M10 3v2"></path>
+                        <path d="M14 3v2"></path>
+                        <path d="M21 10h-2"></path>
+                        <path d="M21 14h-2"></path>
+                        <path d="M14 21v-2"></path>
+                        <path d="M10 21v-2"></path>
+                    </svg>
+
+                    <span class="sf-toolbar-value">10.0</span>
+                    <span class="sf-toolbar-label">MiB</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Peak memory usage</b>
+                    <span>10.0 MiB</span>
+                </div>
+
+                <div class="sf-toolbar-info-piece">
+                    <b>PHP memory limit</b>
+                    <span>128 MiB</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-ajax sf-toolbar-status-normal" style="display: none;">
+            <div class="sf-toolbar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-arrows-down-up" width="24"
+                     height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <line x1="17" y1="3" x2="17" y2="21"></line>
+                    <path d="M10 18l-3 3l-3 -3"></path>
+                    <line x1="7" y1="21" x2="7" y2="3"></line>
+                    <path d="M20 6l-3 -3l-3 3"></path>
+                </svg>
+
+                <span class="sf-toolbar-value sf-toolbar-ajax-request-counter">0</span>
+            </div>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+            <span class="sf-toolbar-header">
+                <b class="sf-toolbar-ajax-info">0 AJAX requests</b>
+                <b class="sf-toolbar-action">(<a class="sf-toolbar-ajax-clear" href="javascript:void(0);">Clear</a>)</b>
+            </span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <table class="sf-toolbar-ajax-requests">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Profile</th>
+                            <th>Method</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>URL</th>
+                            <th>Time</th>
+                        </tr>
+                        </thead>
+                        <tbody class="sf-toolbar-ajax-request-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-logger sf-toolbar-status-none ">
+            <a href="http:///_profiler/0c7e64?panel=logger">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-file-alert" width="24"
+                         height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
+                         stroke-linecap="round" stroke-linejoin="round" role="img">
+                        <title>Logger</title>
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        <line x1="12" y1="11" x2="12" y2="14"></line>
+                    </svg>
+
+                    <span class="sf-toolbar-value">37</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Errors</b>
+                    <span class="sf-toolbar-status sf-toolbar-status-">0</span>
+                </div>
+
+                <div class="sf-toolbar-info-piece">
+                    <b>Warnings</b>
+                    <span class="sf-toolbar-status sf-toolbar-status-">0</span>
+                </div>
+
+                <div class="sf-toolbar-info-piece">
+                    <b>Deprecations</b>
+                    <span class="sf-toolbar-status sf-toolbar-status-none">37</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-cache sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=cache">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-stack-2" width="24" height="24"
+                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round" role="img">
+                        <title>Cache</title>
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <polyline points="12 4 4 8 12 12 20 8 12 4"></polyline>
+                        <polyline points="4 12 12 16 20 12"></polyline>
+                        <polyline points="4 16 12 20 20 16"></polyline>
+                    </svg>
+
+                    <span class="sf-toolbar-value">891</span>
+                    <span class="sf-toolbar-info-piece-additional-detail">
+                <span class="sf-toolbar-label">in</span>
+                <span class="sf-toolbar-value">121.77</span>
+                <span class="sf-toolbar-label">ms</span>
+            </span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Cache Calls</b>
+                    <span>891</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Total time</b>
+                    <span>121.77 ms</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Cache hits</b>
+                    <span>515 / 703 (73.26%)</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Cache writes</b>
+                    <span>188</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-security sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=security">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-user" width="24" height="24"
+                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round" role="img">
+                        <title>Security</title>
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                        <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+                    </svg>
+
+                    <span class="sf-toolbar-value">admin@example.com</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-group">
+                    <div class="sf-toolbar-info-piece">
+                        <b>Logged in as</b>
+                        <span>admin@example.com</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Authenticated</b>
+                        <span class="sf-toolbar-status sf-toolbar-status-green">Yes</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Roles</b>
+                        <span>
+                                                                ROLE_ADMIN
+                                                                    +
+                                    <abbr title="ROLE_USER">
+                                        1 more
+                                    </abbr>
+                                                            </span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Inherited Roles</b>
+                        <span>
+                                                                            none
+                                                                    </span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Token class</b>
+                        <span><abbr title="Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken">PostAuthenticationToken</abbr></span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Firewall name</b>
+                        <span>main</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Actions</b>
+                        <span>
+                                <a href="http:///saml/logout">Logout</a>
+                                                            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-twig sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=twig">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-seeding" width="24" height="24"
+                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round" role="img">
+                        <title>Twig</title>
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 10a6 6 0 0 0 -6 -6h-3v2a6 6 0 0 0 6 6h3"></path>
+                        <path d="M12 14a6 6 0 0 1 6 -6h3v1a6 6 0 0 1 -6 6h-3"></path>
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                    </svg>
+
+                    <span class="sf-toolbar-value">1</span>
+                    <span class="sf-toolbar-label">ms</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Entry View</b>
+                    <span>
+                                      <a href="file:///var/www/openroaming/vendor/api-platform/core/src/Symfony/Bundle/Resources/views/SwaggerUi/index.html.twig#L1"
+                                         title="/var/www/openroaming/vendor/api-platform/core/src/Symfony/Bundle/Resources/views/SwaggerUi/index.html.twig">
+                         @ApiPlatform/SwaggerUi/index.html.twig
+                     </a>
+                             </span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Render Time</b>
+                    <span>1 ms</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Template Calls</b>
+                    <span class="sf-toolbar-status">5</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Block Calls</b>
+                    <span class="sf-toolbar-status">7</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Macro Calls</b>
+                    <span class="sf-toolbar-status">0</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-db sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=db">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-database" width="24" height="24"
+                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <ellipse cx="12" cy="6" rx="8" ry="3"></ellipse>
+                        <path d="M4 6v6a8 3 0 0 0 16 0v-6"></path>
+                        <path d="M4 12v6a8 3 0 0 0 16 0v-6"></path>
+                    </svg>
+
+
+                    <span class="sf-toolbar-value">1</span>
+                    <span class="sf-toolbar-info-piece-additional-detail">
+                    <span class="sf-toolbar-label">in</span>
+                    <span class="sf-toolbar-value">0.50</span>
+                    <span class="sf-toolbar-label">ms</span>
+                </span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Database Queries</b>
+                    <span class="sf-toolbar-status ">1</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Different statements</b>
+                    <span class="sf-toolbar-status">1</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Query time</b>
+                    <span>0.50 ms</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Invalid entities</b>
+                    <span class="sf-toolbar-status ">0</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Second Level Cache</b>
+                    <span class="sf-toolbar-status">disabled</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-serializer sf-toolbar-status-normal ">
+            <a href="http:///_profiler/0c7e64?panel=serializer">
+                <div class="sf-toolbar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-arrows-right" width="24"
+                         height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <line x1="21" y1="17" x2="3" y2="17"></line>
+                        <path d="M18 4l3 3l-3 3"></path>
+                        <path d="M18 20l3 -3l-3 -3"></path>
+                        <line x1="21" y1="7" x2="3" y2="7"></line>
+                    </svg>
+
+                    <span class="sf-toolbar-value">
+                1
+            </span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-piece">
+                    <b>Total calls</b>
+                    <span class="sf-toolbar-status">1</span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>Total time</b>
+                    <span>
+                    3.38 <span class="unit">ms</span>
+                </span>
+                </div>
+
+                <div class="detailed-metrics">
+                    <div>
+                        <div class="sf-toolbar-info-piece">
+                            <b>Serialize</b>
+                            <span class="sf-toolbar-status">0</span>
+                        </div>
+                        <div class="sf-toolbar-info-piece">
+                            <b>Deserialize</b>
+                            <span class="sf-toolbar-status">0</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="sf-toolbar-info-piece">
+                            <b>Encode</b>
+                            <span class="sf-toolbar-status">0</span>
+                        </div>
+                        <div class="sf-toolbar-info-piece">
+                            <b>Decode</b>
+                            <span class="sf-toolbar-status">0</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="sf-toolbar-info-piece">
+                            <b>Normalize</b>
+                            <span class="sf-toolbar-status">1</span>
+                        </div>
+                        <div class="sf-toolbar-info-piece">
+                            <b>Denormalize</b>
+                            <span class="sf-toolbar-status">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="sf-toolbar-block sf-toolbar-block-config sf-toolbar-status-normal sf-toolbar-block-right" title="">
+            <a href="http:///_profiler/0c7e64?panel=config">
+                <div class="sf-toolbar-icon">        <span class="sf-toolbar-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor"
+                                                                                                     d="M12 .9C5.8.9.9 5.8.9 12a11 11 0 1 0 22.2 0A11 11 0 0 0 12 .9zm6.5 6c-.6 0-.9-.3-.9-.8 0-.2 0-.4.2-.6l.2-.4c0-.3-.5-.4-.6-.4-1.8.1-2.3 2.5-2.7 4.4l-.2 1c1 .2 1.8 0 2.2-.3.6-.4-.2-.7-.1-1.2.1-.3.5-.5.7-.6.5 0 .7.5.7.9 0 .7-1 1.8-3 1.8l-.6-.1-.6 2.4c-.4 1.6-.8 3.8-2.4 5.7-1.4 1.7-2.9 1.9-3.5 1.9-1.2 0-1.9-.6-2-1.5 0-.8.7-1.3 1.2-1.3.6 0 1.1.5 1.1 1s-.2.6-.4.6c-.1.1-.3.2-.3.4 0 .1.1.3.4.3.5 0 .8-.3 1.1-.5 1.2-.9 1.6-2.7 2.2-5.7l.1-.7.7-3.2c-.8-.6-1.3-1.4-2.4-1.7-.6-.1-1.1.1-1.5.5-.4.5-.2 1.1.2 1.5l.7.6c.7.8 1.2 1.6 1 2.5-.3 1.5-2 2.6-4 1.9-1.8-.6-2-1.8-1.8-2.5.2-.6.6-.7 1.1-.6.5.2.6.7.6 1.2l-.1.3c-.2.1-.3.3-.3.4-.1.4.4.6.7.7.7.3 1.6-.2 1.8-.8a1 1 0 0 0-.4-1.1l-.7-.8c-.4-.4-1.1-1.4-.7-2.6.1-.5.4-.9.7-1.3a4 4 0 0 1 2.8-.6c1.2.4 1.8 1.1 2.6 1.8.5-1.2 1-2.4 1.8-3.5.9-.9 1.9-1.6 3.1-1.7 1.3.2 2.2.7 2.2 1.6 0 .4-.2 1.1-.9 1.1z"></path></svg>
+
+        </span>
+                    <span class="sf-toolbar-value">6.4.12</span>
+                </div>
+            </a>
+            <div class="sf-toolbar-info">
+                <div class="sf-toolbar-info-group">
+                    <div class="sf-toolbar-info-piece">
+                        <b>Profiler token</b>
+                        <span>
+                                            <a href="http:///_profiler/0c7e64">0c7e64</a>
+                                    </span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Environment</b>
+                        <span>dev</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>Debug</b>
+                        <span class="sf-toolbar-status sf-toolbar-status-green">enabled</span>
+                    </div>
+                </div>
+
+                <div class="sf-toolbar-info-group">
+                    <div class="sf-toolbar-info-piece sf-toolbar-info-php">
+                        <b>PHP version</b>
+                        <span>
+                    8.3.12
+                    &nbsp; <a href="http:///_profiler/phpinfo">View phpinfo()</a>
+                </span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece sf-toolbar-info-php-ext">
+                        <b>PHP Extensions</b>
+                        <span class="sf-toolbar-status sf-toolbar-status-gray">Xdebug ✗</span>
+                        <span class="sf-toolbar-status sf-toolbar-status-gray">APCu ✗</span>
+                        <span class="sf-toolbar-status sf-toolbar-status-green">OPcache ✓</span>
+                    </div>
+
+                    <div class="sf-toolbar-info-piece">
+                        <b>PHP SAPI</b>
+                        <span>fpm-fcgi</span>
+                    </div>
+                </div>
+
+                <div class="sf-toolbar-info-group">
+                    <div class="sf-toolbar-info-piece">
+                        <b>Resources</b>
+                        <span>
+                        <a href="https://symfony.com/doc/6.4.12/index.html" rel="help">
+                            Read Symfony 6.4.12 Docs
+                        </a>
+                    </span>
+                    </div>
+                    <div class="sf-toolbar-info-piece">
+                        <b>Help</b>
+                        <span>
+                        <a href="https://symfony.com/support">
+                            Symfony Support Channels
+                        </a>
+                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <button class="hide-button" type="button" id="sfToolbarHideButton-0c7e64" title="Close Toolbar" accesskey="D"
+                aria-expanded="true" aria-controls="sfToolbarMainContent-0c7e64">
+            <svg xmlns="http://www.w3.org/2000/svg" data-icon-name="icon-tabler-x" width="24" height="24"
+                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+
+        </button>
+    </div>
+    <!-- END of Symfony Web Debug Toolbar -->
+</div>
 <style nonce="">    .sf-toolbarreset {
     --sf-toolbar-font-family-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --sf-toolbar-font-family-monospace: "Ubuntu Mono", "JetBrains Mono", ui-monospace, "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -5849,7 +6397,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('7e9777');/*]]>*/</script>
+Sfjs.loadToolbar('0c7e64');/*]]>*/</script>
 
 
 <jam-ui id="__jam-ui" suppresshydrationwarning="true" dir="ltr" class="jam---its rr-block rr-ignore"
