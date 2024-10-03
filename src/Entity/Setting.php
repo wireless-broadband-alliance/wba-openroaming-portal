@@ -20,7 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
             controller: ConfigController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'Configuration settings retrieved successfully',
                         'content' => [
                             'application/json' => [

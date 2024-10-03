@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
@@ -30,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: GetCurrentUserController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'User details retrieved successfully',
                         'content' => [
                             'application/json' => [
@@ -93,8 +94,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '401' => [
-                        'description' => 'Something with the access token.',
+                    401 => [
+                        'description' => 'Access token',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -130,8 +131,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '403' => [
-                        'description' => 'Unauthorized Access - Invalid JWT Token - Account unverified/banned',
+                    403 => [
+                        'description' => 'Unauthorized Access - Account unverified/banned',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -149,13 +150,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Unauthorized - You do not have permission to access this resource.',
                                             // phpcs:enable
-                                        ],
-                                    ],
-                                    'invalid_token' => [
-                                        'summary' => 'Invalid JWT Token',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'JWT Token is invalid!',
                                         ],
                                     ],
                                     'invalid_verification' => [
@@ -179,6 +173,17 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
                 summary: 'Retrieve current authenticated user',
                 description: 'This endpoint returns the details of the currently authenticated user.',
+                parameters: [
+                    new Parameter(
+                        name: 'Authorization',
+                        in: 'header',
+                        description: 'Bearer token required for authentication. Use the format: `Bearer <JWT token>`.',
+                        required: true,
+                        schema: [
+                            'type' => 'string',
+                        ],
+                    ),
+                ],
                 security: [
                     [
                         'bearerAuth' => [],
@@ -196,7 +201,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'Authenticated user details and JWT token',
                         'content' => [
                             'application/json' => [
@@ -264,7 +269,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
@@ -304,18 +309,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Invalid json format',
                                         ],
                                     ],
-                                    'invalid_credentials' => [
-                                        'summary' => 'Invalid credentials',
-                                        'value' => [
-                                            'success' => false,
-                                            'error' => 'Invalid credentials',
-                                        ],
-                                    ],
                                 ],
                             ],
                         ],
                     ],
-                    '401' => [
+                    401 => [
                         'description' => 'Invalid credentials.',
                         'content' => [
                             'application/json' => [
@@ -337,7 +335,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '403' => [
+                    403 => [
                         'description' => 'Account unverified/banned',
                         'content' => [
                             'application/json' => [
@@ -424,7 +422,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'Authenticated user details and JWT token',
                         'content' => [
                             'application/json' => [
@@ -492,7 +490,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Bad Request due to missing SAML response',
                         'content' => [
                             'application/json' => [
@@ -522,7 +520,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '401' => [
+                    401 => [
                         'description' => 'Unauthorized due to invalid SAML assertion.',
                         'content' => [
                             'application/json' => [
@@ -559,7 +557,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '403' => [
+                    403 => [
                         'description' => 'Account unverified/banned',
                         'content' => [
                             'application/json' => [
@@ -598,7 +596,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '500' => [
+                    500 => [
                         'description' => 'Server error while processing the SAML response',
                         'content' => [
                             'application/json' => [
@@ -670,7 +668,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'Authenticated user details and JWT token',
                         'content' => [
                             'application/json' => [
@@ -731,7 +729,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
@@ -771,7 +769,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '403' => [
+                    403 => [
                         'description' => 'Account unverified/banned',
                         'content' => [
                             'application/json' => [
@@ -807,7 +805,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '500' => [
+                    500 => [
                         'description' => 'Server error due to internal issues or Google API failure',
                         'content' => [
                             'application/json' => [
@@ -879,7 +877,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: RegistrationController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'User registered successfully',
                         'content' => [
                             'application/json' => [
@@ -914,7 +912,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
@@ -1020,7 +1018,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: RegistrationController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'User registered successfully',
                         'content' => [
                             'application/json' => [
@@ -1055,7 +1053,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
@@ -1110,7 +1108,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '500' => [
+                    500 => [
                         'description' => 'Server error while processing the request',
                         'content' => [
                             'application/json' => [
@@ -1206,7 +1204,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'Password reset email sent successfully',
                         'content' => [
                             'application/json' => [
@@ -1241,7 +1239,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
@@ -1305,18 +1303,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'turnstile_token' => [
-                                        'type' => 'string',
-                                        'description' => 'The CAPTCHA validation token',
-                                        'example' => 'valid_test_token',
-                                    ],
                                     'email' => [
                                         'type' => 'string',
                                         'description' => 'The email of the user requesting the password reset',
                                         'example' => 'user@example.com',
                                     ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'The CAPTCHA validation token',
+                                        'example' => 'valid_test_token',
+                                    ],
                                 ],
-                                'required' => ['turnstile_token', 'email'],
+                                'required' => ['email', 'turnstile_token'],
                             ],
                         ]),
                     ]),
@@ -1332,7 +1330,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
-                    '200' => [
+                    200 => [
                         'description' => 'Successfully sent the SMS with a new password and verification code',
                         'content' => [
                             'application/json' => [
@@ -1367,7 +1365,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '400' => [
+                    400 => [
                         'description' => 'Invalid request data',
                         'content' => [
                             'application/json' => [
@@ -1420,7 +1418,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
-                    '500' => [
+                    500 => [
                         'description' => 'Server error while processing the request.',
                         'content' => [
                             'application/json' => [
