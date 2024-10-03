@@ -2,7 +2,9 @@
 
 namespace App\Command;
 
+use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -47,27 +49,36 @@ class LDAPSyncCommand extends Command
         $ldapEnabledUsers = $this->userRepository->findLDAPEnabledUsers();
         $io->writeln('Found ' . count($ldapEnabledUsers) . ' LDAP enabled users');
         foreach ($ldapEnabledUsers as $user) {
-            $io->writeln('Syncing ' . $user->saml_identifier . ' with LDAP');
-            $ldapUser = $this->fetchUserFromLDAP($user->saml_identifier);
-            if (!$ldapUser) {
-                $io->writeln('User ' . $user->saml_identifier . ' not found in LDAP, disabling');
-                $this->disableProfiles($user);
-                continue;
-            }
-            $userAccountControl = $ldapUser['useraccountcontrol'][0];
-            $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
-            $userLocked = ($userAccountControl & 0x000002) == 0x000002;
+            $userExternalAuths = $user->getUserExternalAuths();
 
-            if ($userLocked) {
-                $io->writeln('User ' . $user->saml_identifier . ' is locked in LDAP, disabling');
-                $this->disableProfiles($user);
-            } else {
-                if ($passwordExpired) {
-                    $io->writeln('User ' . $user->saml_identifier . ' has an expired password in LDAP, disabling');
-                    $this->disableProfiles($user);
-                } else {
-                    $io->writeln('User ' . $user->saml_identifier . ' is enabled in LDAP, enabling');
-                    $this->enableProfiles($user);
+            foreach ($userExternalAuths as $externalAuth) {
+                if ($externalAuth->getProvider() === UserProvider::SAML) {
+                    $providerId = $externalAuth->getProviderId();
+                    $io->writeln('Syncing ' . $providerId . ' with LDAP');
+
+                    $ldapUser = $this->fetchUserFromLDAP($providerId);
+                    if (!$ldapUser) {
+                        $io->writeln('User ' . $providerId . ' not found in LDAP, disabling');
+                        $this->disableProfiles($user);
+                        continue;
+                    }
+
+                    $userAccountControl = $ldapUser['useraccountcontrol'][0];
+                    $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
+                    $userLocked = ($userAccountControl & 0x000002) == 0x000002;
+
+                    if ($userLocked) {
+                        $io->writeln('User ' . $providerId . ' is locked in LDAP, disabling');
+                        $this->disableProfiles($user);
+                    } else {
+                        if ($passwordExpired) {
+                            $io->writeln('User ' . $providerId . ' has an expired password in LDAP, disabling');
+                            $this->disableProfiles($user);
+                        } else {
+                            $io->writeln('User ' . $providerId . ' is enabled in LDAP, enabling');
+                            $this->enableProfiles($user);
+                        }
+                    }
                 }
             }
         }
@@ -92,7 +103,6 @@ class LDAPSyncCommand extends Command
         );
         $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
         $searchResult = ldap_search($ldapConnection, $searchBaseDN, $searchFilter);
-
         ldap_get_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
 

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -86,7 +87,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findLDAPEnabledUsers()
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.saml_identifier is not null')
+            ->join('u.userExternalAuths', 'uea')
+            ->andWhere('uea.provider = :provider')
+            ->andWhere('uea.provider_id is not null')
+            ->setParameter('provider', UserProvider::SAML)
             ->getQuery()
             ->getResult();
     }
