@@ -184,9 +184,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         if ($searchTerm !== null) {
             $qb->andWhere(
                 'u.uuid LIKE :searchTerm OR
-                 u.email LIKE  :searchTerm OR
-                  u.first_name LIKE:searchTerm OR
-                   u.last_name LIKE :searchTerm'
+                 u.email LIKE :searchTerm OR
+                 u.first_name LIKE :searchTerm OR
+                 u.last_name LIKE :searchTerm'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
@@ -220,9 +220,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         if ($searchTerm !== null) {
             $qb->andWhere(
                 'u.uuid LIKE :searchTerm OR
-                 u.email LIKE  :searchTerm OR
-                  u.first_name LIKE:searchTerm OR
-                   u.last_name LIKE :searchTerm'
+                 u.email LIKE :searchTerm OR
+                 u.first_name LIKE :searchTerm OR
+                 u.last_name LIKE :searchTerm'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
@@ -246,9 +246,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         if ($searchTerm !== null) {
             $qb->andWhere(
                 'u.uuid LIKE :searchTerm OR
-                 u.email LIKE  :searchTerm OR
-                  u.first_name LIKE:searchTerm OR
-                   u.last_name LIKE :searchTerm'
+                 u.email LIKE :searchTerm OR
+                 u.first_name LIKE :searchTerm OR
+                 u.last_name LIKE :searchTerm'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
