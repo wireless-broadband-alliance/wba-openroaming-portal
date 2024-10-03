@@ -194,9 +194,9 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
-        $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->totalBannedUsers();
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
+        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $userRepository->totalBannedUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
