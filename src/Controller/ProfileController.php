@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
@@ -13,6 +14,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\GetSettings;
 use App\Utils\CacheUtils;
 use DateTime;
 use RuntimeException;
@@ -28,17 +30,27 @@ class ProfileController extends AbstractController
 {
     private array $settings;
     private EventActions $eventActions;
+    private GetSettings $getSettings;
+    private UserRepository $userRepository;
+    private SettingRepository $settingRepository;
 
     /**
      * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
+     * @param GetSettings $getSettings
+     * @param UserRepository $userRepository
      */
     public function __construct(
         SettingRepository $settingRepository,
         EventActions $eventActions,
+        GetSettings $getSettings,
+        UserRepository $userRepository,
     ) {
         $this->settings = $this->getSettings($settingRepository);
         $this->eventActions = $eventActions;
+        $this->getSettings = $getSettings;
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
@@ -50,6 +62,8 @@ class ProfileController extends AbstractController
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
         }
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         /** @var User $user */
         $user = $this->getUser();
@@ -65,8 +79,20 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getBannedAt() || !$user->isVerified()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if (
+            !$user->isVerified(
+            ) && isset($data['USER_VERIFICATION']['value']) &&
+            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+        ) {
+            $this->addFlash(
+                'error',
+                'Your account is not verified. Please, for more information contact our support.'
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -139,8 +165,20 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getBannedAt() || !$user->isVerified()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if (
+            !$user->isVerified(
+            ) && isset($data['USER_VERIFICATION']['value']) &&
+            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+        ) {
+            $this->addFlash(
+                'error',
+                'Your account is not verified. Please, for more information contact our support.'
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -258,8 +296,20 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getBannedAt() || !$user->isVerified()) {
+        if ($user->getBannedAt()) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if (
+            !$user->isVerified(
+            ) && isset($data['USER_VERIFICATION']['value']) &&
+            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+        ) {
+            $this->addFlash(
+                'error',
+                'Your account is not verified. Please, for more information contact our support.'
+            );
             return $this->redirectToRoute('app_landing');
         }
 
