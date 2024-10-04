@@ -96,7 +96,7 @@ class LDAPSyncCommand extends Command
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 1);
+        ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
         ldap_bind($ldapConnection, $ldapUsername, $ldapPassword) or die("Could not bind to LDAP server.");
         $searchFilter = str_replace(
             "@ID",
@@ -104,7 +104,11 @@ class LDAPSyncCommand extends Command
             $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue()
         );
         $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
-        $searchResult = ldap_search($ldapConnection, $searchBaseDN, $searchFilter);
+        $searchResult = ldap_search(
+            $ldapConnection,
+            $searchBaseDN,
+            $searchFilter,
+        );
         ldap_get_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
 
