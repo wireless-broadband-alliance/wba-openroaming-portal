@@ -128,7 +128,6 @@ class SiteController extends AbstractController
             $verification = $currentUser->isVerified();
             // Check if the user is verified
             if (!$verification) {
-                $this->addFlash('error', 'Your account is not verified to download a profile!');
                 return $this->redirectToRoute('app_email_code');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
