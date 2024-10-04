@@ -91,7 +91,7 @@ class ProfileController extends AbstractController
         ) {
             $this->addFlash(
                 'error',
-                'Your account is not verified to download a profile!.'
+                'Your account is not verified to download a profile!'
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -180,7 +180,7 @@ class ProfileController extends AbstractController
         ) {
             $this->addFlash(
                 'error',
-                'Your account is not verified to download a profile!.'
+                'Your account is not verified to download a profile!'
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -314,7 +314,7 @@ class ProfileController extends AbstractController
         ) {
             $this->addFlash(
                 'error',
-                'Your account is not verified to download a profile!.'
+                'Your account is not verified to download a profile!'
             );
             return $this->redirectToRoute('app_landing');
         }
