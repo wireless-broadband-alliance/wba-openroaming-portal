@@ -263,36 +263,67 @@ class AdminController extends AbstractController
         $sheet->setCellValue('F1', 'Last Name');
         $sheet->setCellValue('G1', 'Verification');
         $sheet->setCellValue('H1', 'Provider');
-        $sheet->setCellValue('I1', 'Banned At');
-        $sheet->setCellValue('J1', 'Created At');
+        $sheet->setCellValue('I1', 'ProviderId');
+        $sheet->setCellValue('J1', 'Banned At');
+        $sheet->setCellValue('K1', 'Created At');
 
         // Apply the data
         $row = 2;
         foreach ($users as $user) {
             $sheet->setCellValue('A' . $row, $this->escapeSpreadsheetValue($user->getId()));
-            $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($user->getUuid()));
+
+            // Check if UUID might be a phone number and format accordingly
+            $uuid = $user->getUuid();
+            if (is_numeric($uuid)) {
+                // If UUID is numeric, treat it as a string to prevent scientific notation
+                $sheet->setCellValueExplicit(
+                    'B' . $row,
+                    $this->escapeSpreadsheetValue($uuid),
+                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                );
+            } else {
+                $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($uuid));
+            }
+
             $sheet->setCellValue('C' . $row, $this->escapeSpreadsheetValue($user->getEmail()));
-            $sheet->setCellValue('D' . $row, $this->escapeSpreadsheetValue($user->getPhoneNumber()));
+
+            // Handle Phone Number
+            $phoneNumber = $user->getPhoneNumber();
+            if ($phoneNumber) {
+                $sheet->setCellValueExplicit(
+                    'D' . $row,
+                    $this->escapeSpreadsheetValue($phoneNumber),
+                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                );
+            } else {
+                $sheet->setCellValue('D' . $row, '');
+            }
+
             $sheet->setCellValue('E' . $row, $this->escapeSpreadsheetValue($user->getFirstName()));
             $sheet->setCellValue('F' . $row, $this->escapeSpreadsheetValue($user->getLastName()));
             $sheet->setCellValue(
                 'G' . $row,
                 $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified')
             );
-            // Determine User Provider
 
+            // Determine User Provider && ProviderId
             $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
             $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
 
-            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userExternalAuth->getProvider()));
+            $provider = $userExternalAuth !== null ? $userExternalAuth->getProvider() : 'No Provider';
+            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($provider));
+
+            $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
+            $sheet->setCellValue('I' . $row, $this->escapeSpreadsheetValue($providerID));
+
             // Check if the user is Banned
             $sheet->setCellValue(
-                'I' . $row,
+                'J' . $row,
                 $this->escapeSpreadsheetValue(
                     $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'
                 )
             );
-            $sheet->setCellValue('J' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
+            $sheet->setCellValue('K' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
         }
