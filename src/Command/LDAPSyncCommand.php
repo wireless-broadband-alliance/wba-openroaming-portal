@@ -59,27 +59,25 @@ class LDAPSyncCommand extends Command
                     $io->writeln('Syncing ' . $providerId . ' with LDAP');
 
                     $ldapUser = $this->fetchUserFromLDAP($providerId);
-                    if (!$ldapUser) {
+                    if (is_null($ldapUser)) {
                         $io->writeln('User ' . $providerId . ' not found in LDAP, disabling');
                         $this->disableProfiles($user);
                         continue;
                     }
 
-                    $userAccountControl = $ldapUser['useraccountcontrol'][0];
+                    $userAccountControl = $ldapUser['userAccountControl'][0];
                     $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
                     $userLocked = ($userAccountControl & 0x000002) == 0x000002;
 
                     if ($userLocked) {
                         $io->writeln('User ' . $providerId . ' is locked in LDAP, disabling');
                         $this->disableProfiles($user);
+                    } elseif ($passwordExpired || $ldapUser["pwdLastSet"][0] === "0") {
+                        $io->writeln('User ' . $providerId . ' has an expired password in LDAP, disabling');
+                        $this->disableProfiles($user);
                     } else {
-                        if ($passwordExpired) {
-                            $io->writeln('User ' . $providerId . ' has an expired password in LDAP, disabling');
-                            $this->disableProfiles($user);
-                        } else {
-                            $io->writeln('User ' . $providerId . ' is enabled in LDAP, enabling');
-                            $this->enableProfiles($user);
-                        }
+                        $io->writeln('User ' . $providerId . ' is enabled in LDAP, enabling');
+                        $this->enableProfiles($user);
                     }
                 }
             }
@@ -109,17 +107,15 @@ class LDAPSyncCommand extends Command
             $searchBaseDN,
             $searchFilter,
         );
-        ldap_get_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
-        ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, $referrals);
 
-        $searchEntries = ldap_get_entries($ldapConnection, $searchResult);
-        ldap_unbind($ldapConnection);
-
-        if ($searchEntries['count'] === 1) {
-            return $searchEntries[0];
+        $entry = ldap_first_entry($ldapConnection, $searchResult);
+        if (!$entry) {
+            ldap_unbind($ldapConnection);
+            return null;
         }
-
-        return null;
+        $attrs = ldap_get_attributes($ldapConnection, $entry);
+        ldap_unbind($ldapConnection);
+        return $attrs;
     }
 
     private function disableProfiles($user): void

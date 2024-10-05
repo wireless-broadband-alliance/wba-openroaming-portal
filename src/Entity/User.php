@@ -1552,6 +1552,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?DeletedUserData $deletedUserData = null;
 
+    #[ORM\Column]
+    private ?bool $isDisabled = null;
+
 
     public function __construct()
     {
@@ -1686,6 +1689,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
         $this->password = 'notused'; //invalid hash so won't ever authenticate
         $this->isVerified = 1;
+        $this->isDisabled = false;
         // #$this->setLevel(LevelType::NONE);
     }
 
@@ -1933,5 +1937,17 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         ];
 
         return array_merge($responseData, $additionalData);
+    }
+
+    public function isDisabled(): ?bool
+    {
+        return $this->isDisabled;
+    }
+
+    public function setDisabled(bool $isDisabled): static
+    {
+        $this->isDisabled = $isDisabled;
+
+        return $this;
     }
 }
