@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
@@ -104,6 +105,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
+        /** @var User $user */
         $user->setDisabled(false);
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();
