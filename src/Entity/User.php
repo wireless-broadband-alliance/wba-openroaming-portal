@@ -1561,7 +1561,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private ?DeletedUserData $deletedUserData = null;
 
     #[ORM\Column]
-    private ?bool $isDisabled = null;
+    private ?bool $isDisabled = false;
 
 
     public function __construct()
