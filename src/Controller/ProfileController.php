@@ -15,6 +15,7 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\ProfileManager;
 use App\Utils\CacheUtils;
 use DateTime;
 use RuntimeException;
@@ -33,24 +34,28 @@ class ProfileController extends AbstractController
     private GetSettings $getSettings;
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
+    private ProfileManager $profileManager;
 
     /**
      * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
      * @param GetSettings $getSettings
      * @param UserRepository $userRepository
+     * @param ProfileManager $profileManager
      */
     public function __construct(
         SettingRepository $settingRepository,
         EventActions $eventActions,
         GetSettings $getSettings,
         UserRepository $userRepository,
+        ProfileManager $profileManager,
     ) {
         $this->settings = $this->getSettings($settingRepository);
         $this->eventActions = $eventActions;
         $this->getSettings = $getSettings;
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
+        $this->profileManager = $profileManager;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
@@ -84,9 +89,13 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($user->isDisabled()) {
+            $this->addFlash('error', 'Your account is disabled. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if (
-            !$user->isVerified(
-            ) && isset($data['USER_VERIFICATION']['value']) &&
+            !$user->isVerified() && isset($data['USER_VERIFICATION']['value']) &&
             $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
         ) {
             $this->addFlash(
@@ -173,9 +182,13 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($user->isDisabled()) {
+            $this->addFlash('error', 'Your account is disabled. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if (
-            !$user->isVerified(
-            ) && isset($data['USER_VERIFICATION']['value']) &&
+            !$user->isVerified() && isset($data['USER_VERIFICATION']['value']) &&
             $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
         ) {
             $this->addFlash(
@@ -307,9 +320,13 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($user->isDisabled()) {
+            $this->addFlash('error', 'Your account is disabled. Please, for more information contact our support.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         if (
-            !$user->isVerified(
-            ) && isset($data['USER_VERIFICATION']['value']) &&
+            !$user->isVerified() && isset($data['USER_VERIFICATION']['value']) &&
             $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
         ) {
             $this->addFlash(

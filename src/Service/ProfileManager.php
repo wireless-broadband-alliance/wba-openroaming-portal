@@ -57,6 +57,7 @@ class ProfileManager
         });
         $user->setDisabled(true);
         $this->userRepository->save($user, true);
+        $this->radiusUserRepository->flush();
     }
 
     public function enableProfiles(User $user): void
@@ -86,5 +87,6 @@ class ProfileManager
         });
         $user->setDisabled(false);
         $this->userRepository->save($user, true);
+        $this->radiusUserRepository->flush();
     }
 }
