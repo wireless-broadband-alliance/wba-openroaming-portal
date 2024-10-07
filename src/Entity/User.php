@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
@@ -416,6 +417,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth',
             name: 'api_auth_local',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/saml',
@@ -661,7 +663,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_auth_saml'
+            name: 'api_auth_saml',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/google',
@@ -871,6 +874,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth',
             name: 'api_auth_google',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register',
@@ -1012,6 +1016,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Register',
             name: 'api_auth_local_register',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/register',
@@ -1198,6 +1203,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/local/reset',
@@ -1324,6 +1330,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/reset',
@@ -1482,6 +1489,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
 )]

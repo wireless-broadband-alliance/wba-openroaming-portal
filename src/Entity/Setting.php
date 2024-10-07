@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
 use App\Api\V1\Controller\ConfigController;
 use App\Repository\SettingRepository;
@@ -127,6 +128,7 @@ use Doctrine\ORM\Mapping as ORM;
             paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
             name: 'app_config_settings',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
 )]
