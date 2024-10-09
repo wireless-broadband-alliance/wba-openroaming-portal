@@ -586,12 +586,17 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
             }
 
+            // Get the User Provider && ProviderId
+            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $em->flush();
-            if ($user->getEmail()) {
-                // Send email to the user with the new password
+
+            // Only if the acount is from the  portal, send the email
+            if ($user->getEmail() && $userExternalAuth->getProvider() == UserProvider::EMAIL) {
                 $email = (new Email())
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
@@ -604,6 +609,7 @@ class AdminController extends AbstractController
                     );
                 $mailer->send($email);
             }
+
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
 
             $eventMetadata = [
@@ -2984,9 +2990,8 @@ class AdminController extends AbstractController
                         $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
                         // Set the destination directory based on the setting name
-                        $destinationDirectory = $this->getParameter(
-                            'kernel.project_dir'
-                        ) . '/public/resources/uploaded/';
+                        $destinationDirectory = $this->getParameter('kernel.project_dir')
+                            . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
