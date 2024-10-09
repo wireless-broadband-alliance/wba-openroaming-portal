@@ -33,6 +33,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
+use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -76,6 +77,7 @@ class AdminController extends AbstractController
     private PgpEncryptionService $pgpEncryptionService;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private SendSMS $sendSMS;
 
     /**
      * @param MailerInterface $mailer
@@ -91,6 +93,7 @@ class AdminController extends AbstractController
      * @param PgpEncryptionService $pgpEncryptionService
      * @param EventActions $eventActions
      * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param SendSMS $sendSMS
      */
     public function __construct(
         MailerInterface $mailer,
@@ -105,7 +108,8 @@ class AdminController extends AbstractController
         RadiusAccountingRepository $radiusAccountingRepository,
         PgpEncryptionService $pgpEncryptionService,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator
+        VerificationCodeGenerator $verificationCodeGenerator,
+        SendSMS $sendSMS
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -120,6 +124,7 @@ class AdminController extends AbstractController
         $this->pgpEncryptionService = $pgpEncryptionService;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->sendSMS = $sendSMS;
     }
 
     /*
@@ -595,8 +600,8 @@ class AdminController extends AbstractController
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            // Only if the acount is from the  portal, send the email
-            if ($user->getEmail() && $userExternalAuth->getProvider() == UserProvider::EMAIL) {
+            if ($user->getEmail() && $userExternalAuth->getProviderId() == UserProvider::EMAIL) {
+                // Send email
                 $email = (new Email())
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
@@ -608,6 +613,14 @@ class AdminController extends AbstractController
                         )
                     );
                 $mailer->send($email);
+            }
+
+            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
+                // Send SMS
+                $message = "Your new account password is: "
+                    . $newPassword
+                    . "%0A";
+                $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
             }
 
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
