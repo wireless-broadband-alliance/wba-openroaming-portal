@@ -649,12 +649,16 @@ class AdminController extends AbstractController
                 $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
                     ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
                     : null;
-                $resetAttempts = isset($latestEventMetadata['resetAttempts']) ? $latestEventMetadata['resetAttempts'] : 0;
+                $resetAttempts = isset(
+                    $latestEventMetadata['resetAttempts']
+                ) ? $latestEventMetadata['resetAttempts'] : 0;
 
                 if (!$latestEvent || $resetAttempts < 3) {
                     // Check if enough time has passed since the last reset
-                    if (!$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime &&
-                            $lastResetAccountPasswordTime->add($minInterval) < $currentTime)) {
+                    if (
+                        !$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime &&
+                            $lastResetAccountPasswordTime->add($minInterval) < $currentTime)
+                    ) {
                         $attempts = $resetAttempts + 1;
 
                         $message = "Your new account password is: " . $newPassword . "%0A";
