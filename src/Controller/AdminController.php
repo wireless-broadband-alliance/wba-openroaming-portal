@@ -561,6 +561,13 @@ class AdminController extends AbstractController
                 $user->setBannedAt(null);
                 $this->enableProfiles($user);
             }
+
+            if ($form->get('isVerified')->getData()) {
+                $this->enableProfiles($user);
+            } else {
+                $this->disableProfiles($user);
+            }
+
             $userRepository->save($user, true);
 
             $eventMetadata = [
