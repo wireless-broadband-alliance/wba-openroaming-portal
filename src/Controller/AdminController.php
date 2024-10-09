@@ -26,6 +26,7 @@ use App\Form\UserExternalAuthType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -35,6 +36,7 @@ use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
+use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -78,6 +80,7 @@ class AdminController extends AbstractController
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
     private SendSMS $sendSMS;
+    private EventRepository $eventRepository;
 
     /**
      * @param MailerInterface $mailer
@@ -94,6 +97,7 @@ class AdminController extends AbstractController
      * @param EventActions $eventActions
      * @param VerificationCodeGenerator $verificationCodeGenerator
      * @param SendSMS $sendSMS
+     * @param EventRepository $eventRepository
      */
     public function __construct(
         MailerInterface $mailer,
@@ -109,7 +113,8 @@ class AdminController extends AbstractController
         PgpEncryptionService $pgpEncryptionService,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
-        SendSMS $sendSMS
+        SendSMS $sendSMS,
+        EventRepository $eventRepository
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -125,6 +130,7 @@ class AdminController extends AbstractController
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->sendSMS = $sendSMS;
+        $this->eventRepository = $eventRepository;
     }
 
     /*
@@ -563,7 +569,7 @@ class AdminController extends AbstractController
                 'by' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
-                $currentUser,
+                $user,
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
                 new DateTime(),
                 $eventMetadata
@@ -613,30 +619,64 @@ class AdminController extends AbstractController
                         )
                     );
                 $mailer->send($email);
+
+                $eventMetadata = [
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'edited ' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                    new DateTime(),
+                    $eventMetadata
+                );
             }
 
             if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
-                // Send SMS
-                $message = "Your new account password is: "
-                    . $newPassword
-                    . "%0A";
-                $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
+                );
+                // Retrieve the SMS resend interval from the settings
+                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
+                $currentTime = new DateTime();
+
+                // Retrieve the metadata from the latest event
+                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
+                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
+                    : null;
+                $resetAttempts = isset($latestEventMetadata['resetAttempts']) ? $latestEventMetadata['resetAttempts'] : 0;
+
+                if (!$latestEvent || $resetAttempts < 3) {
+                    // Check if enough time has passed since the last reset
+                    if (!$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime &&
+                            $lastResetAccountPasswordTime->add($minInterval) < $currentTime)) {
+                        $attempts = $resetAttempts + 1;
+
+                        $message = "Your new account password is: " . $newPassword . "%0A";
+                        $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
+
+                        $eventMetadata = [
+                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'edited' => $user->getUuid(),
+                            'by' => $currentUser->getUuid(),
+                            'resetAttempts' => $attempts,
+                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $user,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                            new DateTime(),
+                            $eventMetadata
+                        );
+                    }
+                }
             }
-
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
-
-            $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
-                'edited ' => $user->getUuid(),
-                'by' => $currentUser->getUuid(),
-            ];
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
-                new DateTime(),
-                $eventMetadata
-            );
-
             return $this->redirectToRoute('admin_page');
         }
 
