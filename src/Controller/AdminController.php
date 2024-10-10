@@ -1477,6 +1477,24 @@ class AdminController extends AbstractController
                     $value = "";
                 }
 
+                if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN') {
+                    continue; // Ignore this setting if the user does not implement any google domains
+                }
+
+                if (strlen($value) < 3) {
+                    $this->addFlash(
+                        'error_admin',
+                        "The value for $settingName must be at least 3 characters long."
+                    );
+                    return $this->redirectToRoute('admin_dashboard_settings_auth');
+                } elseif (strlen($value) > 100) {
+                    $this->addFlash(
+                        'error_admin',
+                        "The value for $settingName must not exceed 100 characters."
+                    );
+                    return $this->redirectToRoute('admin_dashboard_settings_auth');
+                }
+
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
