@@ -95,7 +95,7 @@ class ProfileController extends AbstractController
         }
 
         if (
-            !$user->isVerified() && isset($data['USER_VERIFICATION']['value']) &&
+            !$user->isVerified() &&
             $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
         ) {
             $this->addFlash(
@@ -188,7 +188,7 @@ class ProfileController extends AbstractController
         }
 
         if (
-            !$user->isVerified() && isset($data['USER_VERIFICATION']['value']) &&
+            !$user->isVerified() &&
             $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
         ) {
             $this->addFlash(
@@ -326,7 +326,7 @@ class ProfileController extends AbstractController
         }
 
         if (
-            !$user->isVerified() && isset($data['USER_VERIFICATION']['value']) &&
+            !$user->isVerified() &&
             $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
         ) {
             $this->addFlash(
