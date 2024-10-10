@@ -311,12 +311,12 @@ class AuthController extends AbstractController
             );
 
             return (new BaseResponse(200, $formattedUserData, null))->toResponse();
-        } catch (IdentityProviderException $e) {
+        } catch (IdentityProviderException) {
             // Handle OAuth identity provider-specific errors
-            return (new BaseResponse(500, null, 'Authentication failed: ' . $e->getMessage()))->toResponse();
-        } catch (Exception $e) {
+            return (new BaseResponse(500, null, 'Authentication failed'))->toResponse();
+        } catch (Exception) {
             // Handle any other general errors
-            return (new BaseResponse(500, null, 'An error occurred: ' . $e->getMessage()))->toResponse();
+            return (new BaseResponse(500, null, 'An error occurred'))->toResponse();
         }
     }
 }

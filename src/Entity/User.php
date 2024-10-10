@@ -812,28 +812,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'message' => [
                                             'type' => 'string',
-                                            'example' => 'An error occurred: Could not connect to Google API.',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'example' => 'Some details about the error',
+                                            'example' => 'An error occurred.',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Authentication_failed' => [
                                         'success' => false,
-                                        'message' => 'An error occurred: Could not connect to Google API.',
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'details' => 'The API request timed out while trying to connect to Google services.',
-                                        // phpcs:enable
+                                        'message' => 'Authentication Failed.',
                                     ],
                                     'Server_related' => [
                                         'success' => false,
                                         'message' => 'An error occurred: Generic server related error.',
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'details' => 'The server encountered an unexpected condition which prevented it from fulfilling the request.',
-                                        // phpcs:enable
                                     ],
                                 ],
                             ],
