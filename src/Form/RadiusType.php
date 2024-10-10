@@ -78,7 +78,6 @@ class RadiusType extends AbstractType
                     'autocomplete' => 'off',
                     'required' => true,
                 ],
-                'required' => false,
             ];
         }
     }
