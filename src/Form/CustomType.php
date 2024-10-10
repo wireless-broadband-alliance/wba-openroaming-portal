@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 
 class CustomType extends AbstractType
@@ -74,6 +75,18 @@ class CustomType extends AbstractType
                 // If the field is an image, set the appropriate options
                 $formFieldOptions['mapped'] = false;
                 $formFieldOptions['required'] = false;
+                $formFieldOptions['constraints'] = [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/svg',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Please upload a valid format (JPEG,PNG,SVG,WEBP) image',
+                    ]),
+                ];
                 $formFieldType = $config;
             } elseif (is_array($config)) {
                 // Handle the case where config is an array (like CONTACT_EMAIL)
