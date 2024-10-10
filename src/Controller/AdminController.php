@@ -1477,8 +1477,13 @@ class AdminController extends AbstractController
                     $value = "";
                 }
 
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN') {
-                    continue; // Ignore this setting if the user does not implement any google domains
+                    if ($setting) {
+                        $setting->setValue($value);
+                        $em->persist($setting);
+                    }
+                    continue;
                 }
 
                 if (strlen($value) < 3) {
@@ -1495,7 +1500,6 @@ class AdminController extends AbstractController
                     return $this->redirectToRoute('admin_dashboard_settings_auth');
                 }
 
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
                     $em->persist($setting);
