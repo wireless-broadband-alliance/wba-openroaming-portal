@@ -1198,10 +1198,6 @@ class AdminController extends AbstractController
                 foreach ($settingsToUpdate as $settingName) {
                     $value = $submittedData[$settingName] ?? null;
 
-                    if ($value === null) {
-                        $value = "";
-                    }
-
                     // Check for specific settings that need domain validation
                     if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
                         if (!$this->isValidDomain($value)) {
