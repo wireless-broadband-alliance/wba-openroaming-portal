@@ -717,12 +717,11 @@ class RegistrationController extends AbstractController
                             )
                         ]))->toResponse();
                     }
-                } catch (\RuntimeException $e) {
+                } catch (\RuntimeException) {
                     return (new BaseResponse(
                         500,
                         null,
                         'An unexpected error occurred while processing the request',
-                        ['details' => $e->getMessage()]
                     ))->toResponse(); // Internal Server Error
                 }
             }

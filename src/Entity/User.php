@@ -1429,17 +1429,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message explaining why the server error occurred',
                                             'example' => 'An unexpected error occurred while processing the request',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Detailed message',
-                                        ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
                                     'error' => 'An unexpected error occurred while processing the request',
-                                    'details' => 'Detailed message',
                                 ],
                             ],
                         ],
