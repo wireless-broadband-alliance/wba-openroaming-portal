@@ -33,7 +33,15 @@ class CustomType extends AbstractType
             'WALLPAPER_IMAGE' => FileType::class,
             'WELCOME_TEXT' => TextareaType::class,
             'WELCOME_DESCRIPTION' => TextareaType::class,
-            'PAGE_TITLE' => TextType::class,
+            'PAGE_TITLE' => [
+                'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 255,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
+            ],
             'ADDITIONAL_LABEL' => [
                 'type' => TextType::class,
                 'constraints' => [
@@ -48,6 +56,10 @@ class CustomType extends AbstractType
                 'constraints' => [
                     new EmailConstraint([
                         'message' => 'The value "{{ value }}" is not a valid email address.'
+                    ]),
+                    new Length([
+                        'max' => 320,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ])
                 ]
             ],
