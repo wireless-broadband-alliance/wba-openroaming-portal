@@ -373,7 +373,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction sent to your email',
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions.',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -614,11 +614,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message for why the server error occurred',
                                             'example' => 'SAML processing error',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Detailed error information',
-                                        ],
                                     ],
                                     'examples' => [
                                         'saml_processing_error' => [
@@ -626,7 +621,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'value' => [
                                                 'success' => false,
                                                 'error' => 'SAML processing error',
-                                                'details' => 'Detailed error information',
                                             ],
                                         ],
                                     ],
@@ -765,7 +759,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Email not allowed',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'User creation failed or email is not allowed!',
+                                            'error' => 'This code is not associated with a google account!',
                                         ],
                                     ],
                                 ],
@@ -1040,7 +1034,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'message' => [
                                                     'type' => 'string',
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone',
+                                                    'example' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
                                                     // phpcs:enable
                                                 ],
                                             ],
@@ -1051,7 +1045,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'success' => true,
                                     'data' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone',
+                                        'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
                                         // phpcs:enable
                                     ],
                                 ],
@@ -1129,11 +1123,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'A short description of the error',
                                             'example' => 'Failed to send SMS',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'A more detailed explanation of the error',
-                                            'example' => 'Error details',
-                                        ],
                                     ],
                                 ],
                                 'examples' => [
@@ -1142,7 +1131,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Failed to send SMS',
-                                            'details' => 'Error details',
                                         ],
                                     ],
                                     'fallback_sms' => [

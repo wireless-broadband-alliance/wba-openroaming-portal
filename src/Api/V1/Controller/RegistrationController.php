@@ -506,10 +506,8 @@ class RegistrationController extends AbstractController
                     // phpcs:enable
                 ]))->toResponse();
             }
-        } catch (\RuntimeException $e) {
-            return (new BaseResponse(500, null, 'Failed to send SMS: ', [
-                'details' => $e->getMessage()
-            ]))->toResponse(); // Internal Server Error
+        } catch (\RuntimeException) {
+            return (new BaseResponse(500, null, 'Failed to send SMS'))->toResponse(); // Internal Server Error
         }
 
         // Return fallback response

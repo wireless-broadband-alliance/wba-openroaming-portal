@@ -34,16 +34,15 @@ class UserStatusChecker
                 );
         }
 
-
-        // Checks if the user has a "forgot_password_request", if yes, send a error with the authentication
+        // Checks if the user has a "forgot_password_request", if yes, send an error with the authentication
         if ($this->userRepository->findOneBy(['id' => $user->getId(), 'forgot_password_request' => true])) {
             return
                 new BaseResponse(
                     403,
                     null,
                     // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction send it to your email.'
-                // phpcs:enable
+                    "Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions."
+                    // phpcs:enable
                 );
         }
 

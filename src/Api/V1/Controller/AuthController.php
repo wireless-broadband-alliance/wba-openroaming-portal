@@ -180,7 +180,7 @@ class AuthController extends AbstractController
                 return (new BaseResponse(
                     401,
                     null,
-                    'Unable to validate saml assertion',
+                    'Invalid SAML Assertion',
                 ))->toResponse(); // Unauthorized
             }
 
@@ -256,10 +256,10 @@ class AuthController extends AbstractController
             );
 
             return (new BaseResponse(200, $responseData))->toResponse(); // Success
-        } catch (Exception $e) {
+        } catch (Exception) {
             return (new BaseResponse(
                 500,
-                ['details' => $e->getMessage()],
+                null,
                 'SAML processing error',
             ))->toResponse(); // Internal Server Error
         }
@@ -281,7 +281,8 @@ class AuthController extends AbstractController
         try {
             $user = $this->googleController->fetchUserFromGoogle($data['code']);
             if ($user === null) {
-                return (new BaseResponse(400, null, 'User creation failed or email is not allowed.'))->toResponse();
+                return (new BaseResponse(400, null, 'This code is not associated with a google account.'))->toResponse(
+                );
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);

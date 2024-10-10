@@ -59,7 +59,7 @@ class GetCurrentUserController extends AbstractController
                 return (new BaseResponse(
                     401,
                     null,
-                    'Unauthorized - Invalid JWT token'
+                    'JWT Token is invalid!'
                 ))->toResponse();
             }
 
