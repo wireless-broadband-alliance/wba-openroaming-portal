@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 
 class AuthType extends AbstractType
 {
@@ -27,9 +28,27 @@ class AuthType extends AbstractType
             ],
             'AUTH_METHOD_SAML_LABEL' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'AUTH_METHOD_SAML_DESCRIPTION' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
 
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
@@ -37,9 +56,27 @@ class AuthType extends AbstractType
             ],
             'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'VALID_DOMAINS_GOOGLE_LOGIN' => [
                 'type' => TextType::class,
@@ -50,9 +87,27 @@ class AuthType extends AbstractType
             ],
             'AUTH_METHOD_REGISTER_LABEL' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'AUTH_METHOD_REGISTER_DESCRIPTION' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
 
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
@@ -60,9 +115,27 @@ class AuthType extends AbstractType
             ],
             'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
 
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
@@ -70,9 +143,27 @@ class AuthType extends AbstractType
             ],
             'AUTH_METHOD_SMS_REGISTER_LABEL' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
 
             'AUTH_METHOD_SMS_LOGIN_ENABLED' => [
@@ -80,9 +171,27 @@ class AuthType extends AbstractType
             ],
             'AUTH_METHOD_SMS_LOGIN_LABEL' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
             'AUTH_METHOD_SMS_LOGIN_DESCRIPTION' => [
                 'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
             ],
         ];
 
