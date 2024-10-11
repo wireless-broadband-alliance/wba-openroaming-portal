@@ -1486,13 +1486,7 @@ class AdminController extends AbstractController
                     continue;
                 }
 
-                if (strlen($value) < 3) {
-                    $this->addFlash(
-                        'error_admin',
-                        "The value for $settingName must be at least 3 characters long."
-                    );
-                    return $this->redirectToRoute('admin_dashboard_settings_auth');
-                } elseif (strlen($value) > 100) {
+                if (strlen($value) > 100) {
                     $this->addFlash(
                         'error_admin',
                         "The value for $settingName must not exceed 100 characters."
