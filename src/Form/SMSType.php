@@ -10,6 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class SMSType extends AbstractType
 {
@@ -29,7 +30,10 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 32,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to define: "USERNAME"',
+                    ]),
                 ],
             ],
             'SMS_USER_ID' => [
@@ -38,7 +42,10 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 32,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to define: "USER_ID"',
+                    ]),
                 ],
             ],
             'SMS_HANDLE' => [
@@ -47,7 +54,10 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 32,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to define: "HANDLE"',
+                    ]),
                 ],
             ],
             'SMS_FROM' => [
@@ -57,7 +67,10 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 11,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to define: "FROM"',
+                    ]),
                 ],
             ],
             'SMS_TIMER_RESEND' => [
@@ -70,6 +83,9 @@ class SMSType extends AbstractType
                     new GreaterThanOrEqual([
                         'value' => 0,
                         'message' => 'This timer should never be less than 0.',
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to set a timer',
                     ]),
                 ],
             ],
