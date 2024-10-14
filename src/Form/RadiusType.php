@@ -29,7 +29,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: DISPLAY_NAME',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -41,7 +41,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: RADIUS_REALM_NAME',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -53,7 +53,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: DOMAIN_NAME',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -65,7 +65,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: OPERATOR_NAME',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -77,7 +77,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: RADIUS_TLS_NAME',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -89,7 +89,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: NAI_REALM',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -101,7 +101,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
@@ -113,7 +113,7 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please make sure to define your: PAYLOAD_IDENTIFIER',
+                        'message' => 'This field cannot be empty',
                     ]),
                     new Length([
                         'max' => 253,
