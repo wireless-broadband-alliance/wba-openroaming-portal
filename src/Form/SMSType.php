@@ -32,7 +32,7 @@ class SMSType extends AbstractType
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to define: "USERNAME"',
+                        'message' => 'This field cannot be empty',
                     ]),
                 ],
             ],
@@ -44,7 +44,7 @@ class SMSType extends AbstractType
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to define: "USER_ID"',
+                        'message' => 'This field cannot be empty',
                     ]),
                 ],
             ],
@@ -56,7 +56,7 @@ class SMSType extends AbstractType
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to define: "HANDLE"',
+                        'message' => 'This field cannot be empty',
                     ]),
                 ],
             ],
@@ -69,7 +69,7 @@ class SMSType extends AbstractType
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to define: "FROM"',
+                        'message' => 'This field cannot be empty',
                     ]),
                 ],
             ],
