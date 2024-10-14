@@ -25,12 +25,30 @@ class SMSType extends AbstractType
         $settingsToUpdate = [
             'SMS_USERNAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 32,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'SMS_USER_ID' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 32,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'SMS_HANDLE' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 32,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'SMS_FROM' => [
                 'type' => TextType::class,
