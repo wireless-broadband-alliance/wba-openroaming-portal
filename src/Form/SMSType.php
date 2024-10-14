@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 
 class SMSType extends AbstractType
@@ -47,7 +48,11 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 3,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new GreaterThanOrEqual([
+                        'value' => 0,
+                        'message' => 'This timer should never be less than 0.',
+                    ]),
                 ],
             ],
         ];
