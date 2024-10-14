@@ -1428,6 +1428,7 @@ class AdminController extends AbstractController
 
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
@@ -1471,12 +1472,12 @@ class AdminController extends AbstractController
                         continue;
                     }
                 }
-
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
-                }
-
+                /*
+                                // Check if any submitted data is empty
+                                if ($value === null) {
+                                    $value = "";
+                                }
+                */
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN') {
                     if ($setting) {
@@ -1485,15 +1486,15 @@ class AdminController extends AbstractController
                     }
                     continue;
                 }
-
-                if (strlen($value) > 100) {
-                    $this->addFlash(
-                        'error_admin',
-                        "The value for $settingName must not exceed 100 characters."
-                    );
-                    return $this->redirectToRoute('admin_dashboard_settings_auth');
-                }
-
+                /*
+                                if (strlen($value) > 100) {
+                                    $this->addFlash(
+                                        'error_admin',
+                                        "The value for $settingName must not exceed 100 characters."
+                                    );
+                                    return $this->redirectToRoute('admin_dashboard_settings_auth');
+                                }
+                */
                 if ($setting) {
                     $setting->setValue($value);
                     $em->persist($setting);

@@ -42,6 +42,7 @@ class AuthType extends AbstractType
             'AUTH_METHOD_SAML_DESCRIPTION' => [
                 'type' => TextType::class,
                 'options' => [
+                    'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
@@ -196,33 +197,35 @@ class AuthType extends AbstractType
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
-            // Get the corresponding Setting entity and set its value
+            $formFieldOptions = $config['options'] ?? [];
+
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
+
                     if (
-                        $settingName === 'AUTH_METHOD_SAML_ENABLED' ||
-                        $settingName === 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' ||
-                        $settingName === 'AUTH_METHOD_REGISTER_ENABLED' ||
-                        $settingName === 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' ||
-                        $settingName === 'AUTH_METHOD_SMS_REGISTER_ENABLED' ||
-                        $settingName === 'AUTH_METHOD_SMS_LOGIN_ENABLED'
+                        in_array($settingName, [
+                        'AUTH_METHOD_SAML_ENABLED',
+                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+                        'AUTH_METHOD_REGISTER_ENABLED',
+                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+                        'AUTH_METHOD_SMS_REGISTER_ENABLED',
+                        'AUTH_METHOD_SMS_LOGIN_ENABLED'
+                        ])
                     ) {
                         $formFieldOptions['choices'] = [
                             EmailConfirmationStrategy::EMAIL => 'true',
                             EmailConfirmationStrategy::NO_EMAIL => 'false',
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
-                        $formFieldOptions['required'] = true;
                     }
+
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
-                    $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
             }
-            $formFieldOptions = [
-                'required' => false,
-            ];
+
+            $builder->add($settingName, $config['type'], $formFieldOptions);
         }
     }
 

@@ -15,6 +15,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class CustomType extends AbstractType
 {
@@ -32,11 +33,21 @@ class CustomType extends AbstractType
             'CUSTOMER_LOGO' => FileType::class,
             'OPENROAMING_LOGO' => FileType::class,
             'WALLPAPER_IMAGE' => FileType::class,
-            'WELCOME_TEXT' => TextareaType::class,
+            'WELCOME_TEXT' => [
+                'type' => TextareaType::class,
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'This field cannot be empty'
+                    ]),
+                ]
+            ],
             'WELCOME_DESCRIPTION' => TextareaType::class,
             'PAGE_TITLE' => [
                 'type' => TextType::class,
                 'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'This field cannot be empty'
+                    ]),
                     new Length([
                         'max' => 255,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
@@ -57,6 +68,9 @@ class CustomType extends AbstractType
                 'constraints' => [
                     new EmailConstraint([
                         'message' => 'The value "{{ value }}" is not a valid email address.'
+                    ]),
+                    new Assert\NotBlank([
+                        'message' => 'This field cannot be empty'
                     ]),
                     new Length([
                         'max' => 320,
