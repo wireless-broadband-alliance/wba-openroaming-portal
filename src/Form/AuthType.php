@@ -203,14 +203,16 @@ class AuthType extends AbstractType
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
 
-                    if (in_array($settingName, [
+                    if (
+                        in_array($settingName, [
                         'AUTH_METHOD_SAML_ENABLED',
                         'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                         'AUTH_METHOD_REGISTER_ENABLED',
                         'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                         'AUTH_METHOD_SMS_REGISTER_ENABLED',
                         'AUTH_METHOD_SMS_LOGIN_ENABLED'
-                    ])) {
+                        ])
+                    ) {
                         $formFieldOptions['choices'] = [
                             EmailConfirmationStrategy::EMAIL => 'true',
                             EmailConfirmationStrategy::NO_EMAIL => 'false',
