@@ -80,6 +80,10 @@ class CustomType extends AbstractType
             ],
         ];
 
+        $uploadMaxFilesize = ini_get('upload_max_filesize');
+        $postMaxSize = ini_get('post_max_size');
+        $maxSize = min($uploadMaxFilesize, $postMaxSize);
+
         foreach ($allowedSettings as $settingName => $config) {
             $formFieldOptions = [
                 'data' => null, // Set data to null for FileType fields
@@ -91,7 +95,7 @@ class CustomType extends AbstractType
                 $formFieldOptions['required'] = false;
                 $formFieldOptions['constraints'] = [
                     new File([
-                        'maxSize' => '2M',
+                        'maxSize' => $maxSize,
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
