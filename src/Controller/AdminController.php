@@ -245,8 +245,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportUsers(UserRepository $userRepository, EntityManagerInterface $entityManager): Response
-    {
+    public function exportUsers(
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        Request $request
+    ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -345,7 +348,7 @@ class AdminController extends AbstractController
         $writer->save($tempFile);
 
         $eventMetadata = [
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
@@ -373,7 +376,8 @@ class AdminController extends AbstractController
     public function deleteUsers(
         $id,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher
+        UserPasswordHasherInterface $userPasswordHasher,
+        Request $request
     ): Response {
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
@@ -452,7 +456,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         $event->setEventMetadata([
             'deletedBy' => $currentUser->getUuid(),
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ]);
 
         // Update user entity
@@ -479,7 +483,7 @@ class AdminController extends AbstractController
         $eventMetadata = [
             'uuid' => $getUUID,
             'deletedBy' => $currentUser->getUuid(),
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
             $currentUser,
@@ -571,7 +575,7 @@ class AdminController extends AbstractController
             $userRepository->save($user, true);
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'edited' => $user->getUuid(),
                 'by' => $currentUser->getUuid(),
             ];
@@ -628,7 +632,7 @@ class AdminController extends AbstractController
                 $mailer->send($email);
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'edited ' => $user->getUuid(),
                     'by' => $currentUser->getUuid(),
                 ];
@@ -672,7 +676,7 @@ class AdminController extends AbstractController
                         $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
 
                         $eventMetadata = [
-                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'ip' => $request->getClientIp(),
                             'edited' => $user->getUuid(),
                             'by' => $currentUser->getUuid(),
                             'resetAttempts' => $attempts,
@@ -738,6 +742,7 @@ class AdminController extends AbstractController
     public function checkSettings(
         RequestStack $requestStack,
         EntityManagerInterface $em,
+        Request $request,
         string $type
     ): Response {
         // Get the entered code from the form
@@ -758,7 +763,7 @@ class AdminController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The setting has been reset successfully!');
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -785,7 +790,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -812,7 +817,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -843,7 +848,7 @@ class AdminController extends AbstractController
                 $event->setEventDatetime(new DateTime());
                 $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
                 $event->setEventMetadata([
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid()
                 ]);
 
@@ -866,7 +871,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -893,7 +898,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The CAPPORT settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -920,7 +925,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The authentication settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -947,7 +952,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -1127,7 +1132,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1217,7 +1222,7 @@ class AdminController extends AbstractController
                 }
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -1299,7 +1304,7 @@ class AdminController extends AbstractController
             $em->flush();
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid()
             ];
             $this->eventActions->saveEvent(
@@ -1378,7 +1383,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1489,7 +1494,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1564,7 +1569,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1640,7 +1645,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -2116,7 +2121,7 @@ class AdminController extends AbstractController
         $writer->save($tempFile);
 
         $eventMetadata = [
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
@@ -3068,7 +3073,7 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(

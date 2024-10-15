@@ -184,7 +184,7 @@ class SiteController extends AbstractController
                         $eventMetadata = [
                             'platform' => PlatformMode::DEMO,
                             'uuid' => $user->getUuid(),
-                            'ip' => $_SERVER['REMOTE_ADDR'],
+                            'ip' => $request->getClientIp(),
                             'registrationType' => UserProvider::EMAIL,
                         ];
                         $this->eventActions->saveEvent(
@@ -327,7 +327,7 @@ class SiteController extends AbstractController
             $eventMetaData = [
                 'platform' => PlatformMode::LIVE,
                 'uuid' => $user->getUuid(),
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'Old data' => [
                     'First Name' => $oldFirstName,
                     'Last Name' => $oldLastName,
@@ -383,7 +383,7 @@ class SiteController extends AbstractController
             $eventMetaData = [
                 'platform' => PlatformMode::LIVE,
                 'uuid' => $user->getUuid(),
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -477,7 +477,7 @@ class SiteController extends AbstractController
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                             $latestEventMetadata = [
                                 'platform' => PlatformMode::LIVE,
-                                'ip' => $_SERVER['REMOTE_ADDR'],
+                                'ip' => $request->getClientIp(),
                                 'uuid' => $user->getUuid(),
                             ];
                         }
@@ -616,7 +616,7 @@ class SiteController extends AbstractController
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEventMetadata = [
                                 'platform' => PlatformMode::LIVE,
-                                'ip' => $_SERVER['REMOTE_ADDR'],
+                                'ip' => $request->getClientIp(),
                                 'uuid' => $user->getUuid(),
                             ];
                         }
@@ -772,7 +772,7 @@ class SiteController extends AbstractController
 
             $eventMetadata = [
                 'platform' => PlatformMode::LIVE,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -868,8 +868,11 @@ class SiteController extends AbstractController
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
-    public function regenerateCode(EventRepository $eventRepository, MailerInterface $mailer): RedirectResponse
-    {
+    public function regenerateCode(
+        EventRepository $eventRepository,
+        MailerInterface $mailer,
+        Request $request
+    ): RedirectResponse {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $isVerified = $currentUser->isVerified();
@@ -910,7 +913,7 @@ class SiteController extends AbstractController
                     $latestEventMetadata = [
                         'platform' => PlatformMode::LIVE,
                         'uuid' => $currentUser->getEmail(),
-                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'ip' => $request->getClientIp(),
                     ];
                 }
 
@@ -974,7 +977,8 @@ class SiteController extends AbstractController
     public function verifyCode(
         RequestStack $requestStack,
         UserRepository $userRepository,
-        EventRepository $eventRepository
+        EventRepository $eventRepository,
+        Request $request
     ): Response {
         // Get the current user
         /** @var User $currentUser */
@@ -1002,7 +1006,7 @@ class SiteController extends AbstractController
 
             $eventMetadata = [
                 'platform' => PlatformMode::LIVE,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(

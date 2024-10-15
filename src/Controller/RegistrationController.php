@@ -154,7 +154,7 @@ class RegistrationController extends AbstractController
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'registrationType' => UserProvider::EMAIL,
                 ];
                 $this->eventActions->saveEvent(
@@ -250,7 +250,7 @@ class RegistrationController extends AbstractController
                 $eventMetadata = [
                     'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'registrationType' => UserProvider::PHONE_NUMBER,
                 ];
                 $this->eventActions->saveEvent(
@@ -338,7 +338,7 @@ class RegistrationController extends AbstractController
                 $eventMetadata = [
                     'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,

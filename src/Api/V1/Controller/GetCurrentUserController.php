@@ -78,7 +78,7 @@ class GetCurrentUserController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
 

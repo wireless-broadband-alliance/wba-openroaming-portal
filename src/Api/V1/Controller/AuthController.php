@@ -142,7 +142,7 @@ class AuthController extends AbstractController
 
         // Defines the Event to the table
         $eventMetadata = [
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
             'uuid' => $user->getUuid(),
         ];
 
@@ -244,7 +244,7 @@ class AuthController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $user->getUuid(),
             ];
 
@@ -299,7 +299,7 @@ class AuthController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $user->getUuid(),
             ];
 

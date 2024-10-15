@@ -34,28 +34,24 @@ class ProfileController extends AbstractController
     private GetSettings $getSettings;
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
-    private ProfileManager $profileManager;
 
     /**
      * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
      * @param GetSettings $getSettings
      * @param UserRepository $userRepository
-     * @param ProfileManager $profileManager
      */
     public function __construct(
         SettingRepository $settingRepository,
         EventActions $eventActions,
         GetSettings $getSettings,
         UserRepository $userRepository,
-        ProfileManager $profileManager,
     ) {
         $this->settings = $this->getSettings($settingRepository);
         $this->eventActions = $eventActions;
         $this->getSettings = $getSettings;
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
-        $this->profileManager = $profileManager;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
@@ -63,6 +59,7 @@ class ProfileController extends AbstractController
         RadiusUserRepository $radiusUserRepository,
         UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
+        Request $request
     ): Response {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
@@ -144,7 +141,7 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::ANDROID,
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service
@@ -276,13 +273,13 @@ class ProfileController extends AbstractController
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
             ];
         } elseif (stripos($userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
             ];
         }
 
@@ -297,6 +294,7 @@ class ProfileController extends AbstractController
         UserRepository $userRepository,
         UrlGeneratorInterface $urlGenerator,
         UserRadiusProfileRepository $radiusProfileRepository,
+        Request $request
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -395,7 +393,7 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::WINDOWS,
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service

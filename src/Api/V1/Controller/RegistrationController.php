@@ -184,6 +184,7 @@ class RegistrationController extends AbstractController
             'uuid' => $user->getEmail(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
             'registrationType' => UserProvider::EMAIL,
+            'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
             $user,
@@ -348,7 +349,7 @@ class RegistrationController extends AbstractController
 
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'ip' => $request->getClientIp(),
                         'uuid' => $user->getUuid(),
                     ];
 
@@ -480,6 +481,7 @@ class RegistrationController extends AbstractController
             'uuid' => $user->getPhoneNumber(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
             'registrationType' => UserProvider::PHONE_NUMBER,
+            'ip' => $request->getClientIp(),
         ];
 
         $this->eventActions->saveEvent(
@@ -694,7 +696,7 @@ class RegistrationController extends AbstractController
 
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'ip' => $request->getClientIp(),
                         'uuid' => $user->getUuid(),
                     ];
 
