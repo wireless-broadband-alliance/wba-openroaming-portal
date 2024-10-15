@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class AuthType extends AbstractType
 {
@@ -35,6 +36,9 @@ class AuthType extends AbstractType
                             'max' => 50,
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
                         ]),
                     ],
                 ],
@@ -65,12 +69,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
+                        ]),
                     ],
                 ],
             ],
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => [
                 'type' => TextType::class,
                 'options' => [
+                    'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
@@ -81,6 +89,9 @@ class AuthType extends AbstractType
             ],
             'VALID_DOMAINS_GOOGLE_LOGIN' => [
                 'type' => TextType::class,
+                'options' => [
+                    'required' => false,
+                ]
             ],
 
             'AUTH_METHOD_REGISTER_ENABLED' => [
@@ -96,12 +107,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
+                        ]),
                     ],
                 ],
             ],
             'AUTH_METHOD_REGISTER_DESCRIPTION' => [
                 'type' => TextType::class,
                 'options' => [
+                    'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
@@ -124,12 +139,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
+                        ]),
                     ],
                 ],
             ],
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => [
                 'type' => TextType::class,
                 'options' => [
+                    'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
@@ -152,12 +171,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
+                        ]),
                     ],
                 ],
             ],
             'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => [
                 'type' => TextType::class,
                 'options' => [
+                    'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
@@ -180,12 +203,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
+                        ]),
                     ],
                 ],
             ],
             'AUTH_METHOD_SMS_LOGIN_DESCRIPTION' => [
                 'type' => TextType::class,
                 'options' => [
+                    'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
@@ -205,12 +232,12 @@ class AuthType extends AbstractType
 
                     if (
                         in_array($settingName, [
-                        'AUTH_METHOD_SAML_ENABLED',
-                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
-                        'AUTH_METHOD_REGISTER_ENABLED',
-                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
-                        'AUTH_METHOD_SMS_REGISTER_ENABLED',
-                        'AUTH_METHOD_SMS_LOGIN_ENABLED'
+                            'AUTH_METHOD_SAML_ENABLED',
+                            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+                            'AUTH_METHOD_REGISTER_ENABLED',
+                            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+                            'AUTH_METHOD_SMS_REGISTER_ENABLED',
+                            'AUTH_METHOD_SMS_LOGIN_ENABLED'
                         ])
                     ) {
                         $formFieldOptions['choices'] = [
