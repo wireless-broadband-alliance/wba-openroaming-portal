@@ -15,7 +15,6 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\ProfileManager;
 use App\Utils\CacheUtils;
 use DateTime;
 use RuntimeException;
@@ -87,7 +86,7 @@ class ProfileController extends AbstractController
         }
 
         if ($user->isDisabled()) {
-            $this->addFlash('error', 'Your account is disabled. Please, for more information contact our support.');
+            $this->addFlash('error', 'Your account currently is disabled.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -180,7 +179,7 @@ class ProfileController extends AbstractController
         }
 
         if ($user->isDisabled()) {
-            $this->addFlash('error', 'Your account is disabled. Please, for more information contact our support.');
+            $this->addFlash('error', 'Your account currently is disabled.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -319,7 +318,7 @@ class ProfileController extends AbstractController
         }
 
         if ($user->isDisabled()) {
-            $this->addFlash('error', 'Your account is disabled. Please, for more information contact our support.');
+            $this->addFlash('error', 'Your account currently is disabled.');
             return $this->redirectToRoute('app_landing');
         }
 
