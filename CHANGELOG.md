@@ -2,7 +2,7 @@
 
 ---
 
-# Release V1.5
+# Release V1.5.0
 
 - Update Php version to (php8.3)
 - Starting APIs (Open Api implementation - v4.0.2)
@@ -17,7 +17,7 @@
 
 ---
 
-# Release V1.4
+# Release V1.4.0
 
 - **Clear Event Command**: `clear:eventEntity` Removes any records in the `Event` entity that have empty or null fields.
 
@@ -43,7 +43,7 @@ php bin/console clear:eventEntity
 
 ---
 
-# Release V1.3
+# Release V1.3.0
 
 - **Allocate Providers Command**: `reset:allocate-providers` Allocates providers info from the **User
   Entity** to the **UserExternalAuth Entity**
@@ -103,7 +103,7 @@ php bin/console reset:allocate-providers
 
 ---
 
-# Release V1.1
+# Release V1.1.0
 
 - Tailwind CSS Implementation
 - Login with Google implementation
@@ -114,6 +114,6 @@ php bin/console reset:allocate-providers
 
 ---
 
-# Release V1.0
+# Release V1.0.0
 
 - Initial Release
