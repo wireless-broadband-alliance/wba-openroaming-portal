@@ -21,10 +21,19 @@
 
 - **Clear Event Command**: `clear:eventEntity` Removes any records in the `Event` entity that have empty or null fields.
 
+This command is required for older versions that cannot run the new migrations. The `clear:eventEntity` command removes
+any records in the `Event` entity that have empty or null fields.
+
 > **Important**: This command will permanently delete any log or record in the `Event` entity that has an empty field.
 
 For more details on how this command works, please refer to the file at:
 **src/Command/ClearEventCommand.php**
+
+To use this command, run the following root in the root folder of the project:
+
+```bash
+php bin/console clear:eventEntity
+```
 
 - Rework Pagination on User Management Table
 - User Provider Implementation (New UserExternalAuth Entity)
@@ -34,63 +43,77 @@ For more details on how this command works, please refer to the file at:
 
 ---
 
-# Release Version 1.3
+# Release V1.3
 
 - **Allocate Providers Command**: `reset:allocate-providers` Allocates providers info from the **User
   Entity** to the **UserExternalAuth Entity**
-- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](INSTALATION.md))
+
+> **Important**: This command will allocate any log or record in the `User` entity to the `UserExternalAuth` entity,
+
+> For security reasons only run this command in older versions of the project to not miss any potential data
+
+For more details on how this command works, please refer to the file at:
+**src/Command/AllocateProvidersCommand.php**
+
+To use this command, run the following code in the root folder of the project:
+
+```bash
+php bin/console reset:allocate-providers
+```
+
+- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](INSTALATION.md), it's
+  required to back up the user data for legal purposes)
 - Forgot password for user's - landing page implementation (widget for user on the landing page after login)
 - CloudFlare TurnStile Implementation - Landing page
-- Pgp Encryption for delete user's action (backup user data for legal requirements)
 - Update Landing Page UI - design update
 - Update Admin Dashboard - design update
 
 ---
 
-# Release Version 1.2.3
+# Release V1.2.3
 
+- Fix bugs with Freeradius Statistics (Fix data filtering)
+- Fix SAML authentication (accounts without email)
 - Export data (Freeradius - Excel format)
 - Export data (User Management - Excel format)
-- Fix bugs with Freeradius Statistics (Fix data filtering)
-- Fix saml authentication (account's without email)
 
 ---
 
-# Release Version 1.2.2
+# Release V1.2.2
 
-- Portal Statistics (Graphics and statistics about the portal events)
-- Freeradius Statistics (Graphics and statistics about the accounting of the users)
+- Add Portal Statistics (Graphics and statistics about the portal events)
+- Add Freeradius Statistics (Graphics and statistics about the accounting of the users)
 
 ---
 
-# Release Version 1.2.1
+# Release V1.2.1
 
-- Allow only white listed google domains to authenticate with Google
+- Allow only white-listed Google domains to authenticate with Google
 - Authenticate user after account creation with SMS provider
 - Add blocker for code resending with SMS (block spam of code generation)
 
 ---
 
-# Release Version 1.2.0
+# Release V1.2.0
 
-- Ban User's system (disable associated profiles)
-- Verification User's system (also disable profiles)
+- Implement Ban User system (disable associated profiles)
+- Implement Verification User system (also disables profiles)
 - Events Rework with metadata info (json format conversion)
-- Saml Provider Implementation
+- Login with SAML Implementation
 
 ---
 
-# Release Version 1.1
+# Release V1.1
 
-- Tailwind Implementation
+- Tailwind CSS Implementation
 - Login with Google implementation
-- SMS Provider implementation (send sms)
+- SMS Provider implementation (send SMS)
 - Admin UI Dashboard Management creation
-- Capport Support
+- Capport Support/Implementation
 - Events Implementations
 
 ---
 
-# Release Version 1.0
+# Release V1.0
 
 - Initial Release
