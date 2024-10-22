@@ -109,11 +109,6 @@ The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` du
 Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
 environment.
 
-9. **Composer install**: And finally, make sure to install all the dependencies of the project by running the following command:
-```bash 
-composer install
-```
-
 ### 🛑 Important Security Note after Installation 🛑
 
 **It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
