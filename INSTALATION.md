@@ -91,8 +91,7 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-8. **Configure JWT and CORS in the `.env` File**
-   Next, configure the JWT and CORS environment variables in your `.env` file:
+8. **Configure JWT and CORS**: Next, configure the JWT and CORS environment variables in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
@@ -109,6 +108,11 @@ Replace `openroaming` with the passphrase you used when generating the JWT keys 
 The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` during local development.
 Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
 environment.
+
+9. **Composer install**: And finally, make sure to install all the dependencies of the project by running the following command:
+```bash 
+composer install
+```
 
 ### 🛑 Important Security Note after Installation 🛑
 
