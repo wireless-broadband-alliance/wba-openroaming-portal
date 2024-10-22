@@ -290,21 +290,27 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const agreeTermsCheckbox = document.querySelector('#{{ formTOS.agreeTerms.vars.id }}');
-            const submitButton = document.querySelector('button[type="submit"]');
+            const submitButtons = document.querySelectorAll('button[type="submit"]');
             const confirmationModal = document.getElementById('confirmationModal');
             const closeConfirmationModalButton = document.getElementById('closeConfirmationModal');
-            function toggleSubmitButton() {
-                submitButton.disabled = !agreeTermsCheckbox.checked;
+
+            function toggleSubmitButtons() {
+                submitButtons.forEach(button => {
+                    button.disabled = !agreeTermsCheckbox.checked;
+                });
             }
-            toggleSubmitButton();
+
+            toggleSubmitButtons(); // Chame para garantir que o estado inicial esteja correto.
+
             agreeTermsCheckbox.addEventListener('change', function() {
-                toggleSubmitButton();
+                toggleSubmitButtons();
                 if (agreeTermsCheckbox.checked) {
                     confirmationModal.classList.remove('hidden');
                 } else {
                     confirmationModal.classList.add('hidden');
                 }
             });
+
             closeConfirmationModalButton.addEventListener('click', function() {
                 confirmationModal.classList.add('hidden');
             });
