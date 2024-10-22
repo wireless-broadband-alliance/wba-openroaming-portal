@@ -19,16 +19,6 @@
         {% endfor %}
     </div>
 
-    <div id="confirmationModal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
-            <h2 class="text-lg font-bold">You Accepted the Terms</h2>
-            <p class="text-sm">Thank you for accepting the terms and conditions. You are ready to create your account!</p>
-            <div class="mt-4 flex justify-center">
-                <button id="closeConfirmationModal" class="btn-secondary">Close</button>
-            </div>
-        </div>
-    </div>
-
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
@@ -104,50 +94,5 @@
     {% endif %}
 
     {{ form_end(registrationForm) }}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const agreeTermsCheckbox = document.querySelector('#{{ registrationForm.agreeTerms.vars.id }}');
-            const submitButton = document.querySelector('button[type="submit"]');
-
-            function toggleSubmitButton() {
-                submitButton.disabled = !agreeTermsCheckbox.checked;
-            }
-            toggleSubmitButton();
-            agreeTermsCheckbox.addEventListener('change', toggleSubmitButton);
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const agreeTermsCheckbox = document.querySelector('#{{ registrationForm.agreeTerms.vars.id }}');
-            const submitButton = document.querySelector('button[type="submit"]');
-            const confirmationModal = document.getElementById('confirmationModal');
-            const closeConfirmationModalButton = document.getElementById('closeConfirmationModal');
-
-            // Função para verificar o estado da checkbox
-            function toggleSubmitButton() {
-                submitButton.disabled = !agreeTermsCheckbox.checked;
-            }
-
-            // Verificar o estado da checkbox ao carregar a página
-            toggleSubmitButton();
-
-            // Adicionar um listener de evento para alterar o estado do botão
-            agreeTermsCheckbox.addEventListener('change', function() {
-                toggleSubmitButton();
-                // Abrir o modal se a checkbox for marcada
-                if (agreeTermsCheckbox.checked) {
-                    confirmationModal.classList.remove('hidden');
-                } else {
-                    confirmationModal.classList.add('hidden'); // Esconde o modal se desmarcar
-                }
-            });
-
-            // Fechar o modal ao clicar no botão "Fechar"
-            closeConfirmationModalButton.addEventListener('click', function() {
-                confirmationModal.classList.add('hidden'); // Esconde o modal
-            });
-        });
-    </script>
 
 {% endblock %}
