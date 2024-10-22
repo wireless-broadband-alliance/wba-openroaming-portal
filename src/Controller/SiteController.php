@@ -15,6 +15,7 @@ use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
+use App\Form\TOStype;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -288,10 +289,12 @@ class SiteController extends AbstractController
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formTOS = $this->createForm(TOStype::class);
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
+            'formTOS' => $formTOS,
             'registrationFormDemo' => $formResgistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
