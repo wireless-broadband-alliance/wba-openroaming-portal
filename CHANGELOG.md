@@ -41,6 +41,7 @@ For more details on how this command works, please refer to the file at:
 - Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](INSTALATION.md))
 - Forgot password for user's - landing page implementation (widget for user on the landing page after login)
 - CloudFlare TurnStile Implementation - Landing page
+- Pgp Encryption for delete user's action (backup user data for legal requirements)
 - Update Landing Page UI - design update
 - Update Admin Dashboard - design update
 
