@@ -10,11 +10,22 @@
     <link rel="stylesheet" href="./index_files/700.css">
     <link rel="stylesheet" href="./index_files/swagger-ui.css">
     <link rel="stylesheet" href="./index_files/style.css">
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="lock-fixer.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.scheme-container').remove();
+                $('button.authorization__btn[aria-label="authorization button unlocked"]').replaceWith(`
+      <button class="authorization__btn" aria-label="authorization button locked">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20" height="20" aria-hidden="true" focusable="false">
+          <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path>
+        </svg>
+      </button>
+    `);
+            }, 1500);
+        });
+    </script>
 
     <script id="swagger-data" type="application/json">{
         "url": "/api/docs?format=json",
@@ -272,7 +283,7 @@
                                 }
                             },
                             "401": {
-                                "description": "Something with the access token.",
+                                "description": "Access token",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -313,7 +324,7 @@
                                 }
                             },
                             "403": {
-                                "description": "Unauthorized Access - Invalid JWT Token - Account unverified/banned",
+                                "description": "Unauthorized Access - Account unverified/banned",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -333,13 +344,6 @@
                                                 "value": {
                                                     "success": false,
                                                     "error": "Unauthorized - You do not have permission to access this resource."
-                                                }
-                                            },
-                                            "invalid_token": {
-                                                "summary": "Invalid JWT Token",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "JWT Token is invalid!"
                                                 }
                                             },
                                             "invalid_verification": {
@@ -363,7 +367,22 @@
                         },
                         "summary": "Retrieve current authenticated user",
                         "description": "This endpoint returns the details of the currently authenticated user.",
-                        "parameters": [],
+                        "parameters": [
+                            {
+                                "name": "Authorization",
+                                "in": "header",
+                                "description": "Bearer token required for authentication. Use the format: `Bearer \u003CJWT token\u003E`.",
+                                "required": true,
+                                "deprecated": false,
+                                "allowEmptyValue": false,
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "style": "simple",
+                                "explode": false,
+                                "allowReserved": false
+                            }
+                        ],
                         "deprecated": false,
                         "security": [
                             {
@@ -481,7 +500,7 @@
                                                 "summary": "Email not allowed",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "User creation failed or email is not allowed!"
+                                                    "error": "This code is not associated with a google account!"
                                                 }
                                             }
                                         }
@@ -538,47 +557,22 @@
                                                 },
                                                 "message": {
                                                     "type": "string",
-                                                    "example": "An error occurred: Could not connect to Google API."
-                                                },
-                                                "details": {
-                                                    "type": "string",
-                                                    "example": "Some details about the error"
+                                                    "example": "An error occurred."
                                                 }
                                             }
                                         },
                                         "examples": {
                                             "Authentication_failed": {
                                                 "success": false,
-                                                "message": "An error occurred: Could not connect to Google API.",
-                                                "details": "The API request timed out while trying to connect to Google services."
+                                                "message": "Authentication Failed."
                                             },
                                             "Server_related": {
                                                 "success": false,
-                                                "message": "An error occurred: Generic server related error.",
-                                                "details": "The server encountered an unexpected condition which prevented it from fulfilling the request."
+                                                "message": "An error occurred: Generic server related error."
                                             }
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user via Google",
@@ -730,13 +724,6 @@
                                                     "success": false,
                                                     "error": "Invalid json format"
                                                 }
-                                            },
-                                            "invalid_credentials": {
-                                                "summary": "Invalid credentials",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid credentials"
-                                                }
                                             }
                                         }
                                     }
@@ -804,31 +791,12 @@
                                                 "summary": "Forgot password request active",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction sent to your email"
+                                                    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions."
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user locally",
@@ -1072,11 +1040,6 @@
                                                     "type": "string",
                                                     "description": "Error message for why the server error occurred",
                                                     "example": "SAML processing error"
-                                                },
-                                                "details": {
-                                                    "type": "string",
-                                                    "description": "Detailed error message",
-                                                    "example": "Detailed error information"
                                                 }
                                             },
                                             "examples": {
@@ -1084,33 +1047,13 @@
                                                     "summary": "SAML processing error",
                                                     "value": {
                                                         "success": false,
-                                                        "error": "SAML processing error",
-                                                        "details": "Detailed error information"
+                                                        "error": "SAML processing error"
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Authenticate a user via SAML",
@@ -1229,25 +1172,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Register resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Register a new user via local authentication",
@@ -1323,7 +1247,7 @@
                                                     "properties": {
                                                         "message": {
                                                             "type": "string",
-                                                            "example": "SMS User Account Registered Successfully. A verification code has been sent to your phone"
+                                                            "example": "SMS User Account Registered Successfully. A verification code has been sent to your phone."
                                                         }
                                                     }
                                                 }
@@ -1332,7 +1256,7 @@
                                         "example": {
                                             "success": true,
                                             "data": {
-                                                "message": "SMS User Account Registered Successfully. A verification code has been sent to your phone"
+                                                "message": "SMS User Account Registered Successfully. A verification code has been sent to your phone."
                                             }
                                         }
                                     }
@@ -1404,11 +1328,6 @@
                                                     "type": "string",
                                                     "description": "A short description of the error",
                                                     "example": "Failed to send SMS"
-                                                },
-                                                "details": {
-                                                    "type": "string",
-                                                    "description": "A more detailed explanation of the error",
-                                                    "example": "Error details"
                                                 }
                                             }
                                         },
@@ -1417,8 +1336,7 @@
                                                 "summary": "Failed to send SMS",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Failed to send SMS",
-                                                    "details": "Error details"
+                                                    "error": "Failed to send SMS"
                                                 }
                                             },
                                             "fallback_sms": {
@@ -1431,25 +1349,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Register resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Register"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Register a new user via SMS authentication",
@@ -1590,25 +1489,6 @@
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Reset resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Trigger a password reset for a local auth account",
@@ -1621,20 +1501,20 @@
                                     "schema": {
                                         "type": "object",
                                         "properties": {
-                                            "turnstile_token": {
-                                                "type": "string",
-                                                "description": "The CAPTCHA validation token",
-                                                "example": "valid_test_token"
-                                            },
                                             "email": {
                                                 "type": "string",
                                                 "description": "The email of the user requesting the password reset",
                                                 "example": "user@example.com"
+                                            },
+                                            "turnstile_token": {
+                                                "type": "string",
+                                                "description": "The CAPTCHA validation token",
+                                                "example": "valid_test_token"
                                             }
                                         },
                                         "required": [
-                                            "turnstile_token",
-                                            "email"
+                                            "email",
+                                            "turnstile_token"
                                         ]
                                     }
                                 }
@@ -1749,40 +1629,15 @@
                                                     "type": "string",
                                                     "description": "Error message explaining why the server error occurred",
                                                     "example": "An unexpected error occurred while processing the request"
-                                                },
-                                                "details": {
-                                                    "type": "string",
-                                                    "description": "Detailed error message",
-                                                    "example": "Detailed message"
                                                 }
                                             }
                                         },
                                         "example": {
                                             "success": false,
-                                            "error": "An unexpected error occurred while processing the request",
-                                            "details": "Detailed message"
+                                            "error": "An unexpected error occurred while processing the request"
                                         }
                                     }
                                 }
-                            },
-                            "201": {
-                                "description": "User Auth Reset resource created",
-                                "content": {
-                                    "application/ld+json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset.jsonld"
-                                        }
-                                    },
-                                    "application/json": {
-                                        "schema": {
-                                            "$ref": "#/components/schemas/User.Auth.Reset"
-                                        }
-                                    }
-                                },
-                                "links": {}
-                            },
-                            "422": {
-                                "description": "Unprocessable entity"
                             }
                         },
                         "summary": "Trigger a password reset for an SMS auth account",
@@ -2190,6 +2045,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -2232,6 +2091,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -2357,6 +2219,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -2399,6 +2265,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -2524,6 +2393,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -2566,6 +2439,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -2726,6 +2602,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -2768,6 +2648,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -2893,6 +2776,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -2935,6 +2822,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -3095,6 +2985,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3137,6 +3031,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -3297,6 +3194,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3339,6 +3240,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -3472,6 +3376,10 @@
                                     }
                                 ]
                             },
+                            "isDisabled": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3514,6 +3422,9 @@
                                     "boolean",
                                     "null"
                                 ]
+                            },
+                            "disabled": {
+                                "type": "boolean"
                             }
                         }
                     },
@@ -4013,10 +3924,10 @@
                             </div>
                         </div>
                         <div class="auth-wrapper">
-                            <button class="btn authorize locked"><span>Authorize</span>
+                            <button class="btn authorize unlocked"><span>Authorize</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20"
                                      aria-hidden="true" focusable="false">
-                                    <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path>
+                                    <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path>
                                 </svg>
                             </button>
                         </div>
@@ -4074,10 +3985,10 @@
                                 aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
                                 fill="#ffffff" fill-rule="evenodd"
                                 d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button locked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20"
+                                class="authorization__btn" aria-label="authorization button unlocked"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path></svg></button><button
+                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
                                 aria-label="get ​/api​/v1​/user" class="opblock-control-arrow" aria-expanded="false"
                                 tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
                                                    width="20" height="20" aria-hidden="true" focusable="false"><path
@@ -4608,7 +4519,8 @@
         <div class="info">
             Available formats:
             <a href="http:///api/index.jsonld">jsonld</a>
-            <a href="http:///api/index.jsonopenapi">jsonopenapi</a>
+            <a href="http:///api/index.json">json</a>
+            <a href="http:///api/index.yaml">yaml</a>
             <a href="http:///api/index.html">html</a>
             <br>
             Other API docs:
@@ -4620,6 +4532,7 @@
 <script src="./index_files/swagger-ui-standalone-preset.js"></script>
 <script src="./index_files/init-swagger-ui.js"></script>
 <script src="./index_files/init-common-ui.js" defer=""></script>
+
 
 <style nonce="">    .sf-toolbarreset {
     --sf-toolbar-font-family-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -5849,106 +5762,8 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('7e9777');/*]]>*/</script>
+Sfjs.loadToolbar('a3480d');/*]]>*/</script>
 
 
-<jam-ui id="__jam-ui" suppresshydrationwarning="true" dir="ltr" class="jam---its rr-block rr-ignore"
-        style="visibility: visible; display: block;">
-    <template shadowrootmode="open" shadowrootdelegatesfocus>
-        <head>
-            <style id="_goober"> @keyframes go2264125279 {
-                                     from {
-                                         transform: scale(0) rotate(45deg);
-                                         opacity: 0;
-                                     }
-                                     to {
-                                         transform: scale(1) rotate(45deg);
-                                         opacity: 1;
-                                     }
-                                 }
-
-            @keyframes go3020080000 {
-                from {
-                    transform: scale(0);
-                    opacity: 0;
-                }
-                to {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes go463499852 {
-                from {
-                    transform: scale(0) rotate(90deg);
-                    opacity: 0;
-                }
-                to {
-                    transform: scale(1) rotate(90deg);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes go1268368563 {
-                from {
-                    transform: rotate(0deg);
-                }
-                to {
-                    transform: rotate(360deg);
-                }
-            }
-
-            @keyframes go1310225428 {
-                from {
-                    transform: scale(0) rotate(45deg);
-                    opacity: 0;
-                }
-                to {
-                    transform: scale(1) rotate(45deg);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes go651618207 {
-                0% {
-                    height: 0;
-                    width: 0;
-                    opacity: 0;
-                }
-                40% {
-                    height: 0;
-                    width: 6px;
-                    opacity: 1;
-                }
-                100% {
-                    opacity: 1;
-                    height: 10px;
-                }
-            }
-
-            @keyframes go901347462 {
-                from {
-                    transform: scale(0.6);
-                    opacity: 0.4;
-                }
-                to {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-            }
-
-            .go4109123758 {
-                z-index: 9999;
-            }
-
-            .go4109123758 > * {
-                pointer-events: auto;
-            }</style>
-        </head>
-        <div id="__jam-ui-container"></div>
-    </template>
-</jam-ui>
-<iframe id="jam-iframe" src="./index_files/iframeUi.html"
-        style="top: 0px; left: 0px; border: none; position: fixed; pointer-events: auto; color-scheme: light; transition: opacity 0.3s ease-in-out; opacity: 0; height: 0px; width: 0px; display: none; z-index: -1;"></iframe>
 </body>
 </html>

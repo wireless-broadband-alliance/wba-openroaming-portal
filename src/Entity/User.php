@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
@@ -372,7 +373,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Your request cannot be processed at this time, pending password request. Please make sure to follow the instruction sent to your email',
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions.',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -416,6 +417,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth',
             name: 'api_auth_local',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/saml',
@@ -612,11 +614,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message for why the server error occurred',
                                             'example' => 'SAML processing error',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Detailed error information',
-                                        ],
                                     ],
                                     'examples' => [
                                         'saml_processing_error' => [
@@ -624,7 +621,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'value' => [
                                                 'success' => false,
                                                 'error' => 'SAML processing error',
-                                                'details' => 'Detailed error information',
                                             ],
                                         ],
                                     ],
@@ -661,7 +657,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_auth_saml'
+            name: 'api_auth_saml',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/google',
@@ -762,7 +759,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Email not allowed',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'User creation failed or email is not allowed!',
+                                            'error' => 'This code is not associated with a google account!',
                                         ],
                                     ],
                                 ],
@@ -815,28 +812,18 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'success' => ['type' => 'boolean', 'example' => false],
                                         'message' => [
                                             'type' => 'string',
-                                            'example' => 'An error occurred: Could not connect to Google API.',
-                                        ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'example' => 'Some details about the error',
+                                            'example' => 'An error occurred.',
                                         ],
                                     ],
                                 ],
                                 'examples' => [
                                     'Authentication_failed' => [
                                         'success' => false,
-                                        'message' => 'An error occurred: Could not connect to Google API.',
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'details' => 'The API request timed out while trying to connect to Google services.',
-                                        // phpcs:enable
+                                        'message' => 'Authentication Failed.',
                                     ],
                                     'Server_related' => [
                                         'success' => false,
                                         'message' => 'An error occurred: Generic server related error.',
-                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'details' => 'The server encountered an unexpected condition which prevented it from fulfilling the request.',
-                                        // phpcs:enable
                                     ],
                                 ],
                             ],
@@ -871,6 +858,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth',
             name: 'api_auth_google',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/local/register',
@@ -1012,6 +1000,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Register',
             name: 'api_auth_local_register',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/register',
@@ -1035,7 +1024,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'message' => [
                                                     'type' => 'string',
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
-                                                    'example' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone',
+                                                    'example' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
                                                     // phpcs:enable
                                                 ],
                                             ],
@@ -1046,7 +1035,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     'success' => true,
                                     'data' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone',
+                                        'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
                                         // phpcs:enable
                                     ],
                                 ],
@@ -1124,11 +1113,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'A short description of the error',
                                             'example' => 'Failed to send SMS',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'A more detailed explanation of the error',
-                                            'example' => 'Error details',
-                                        ],
                                     ],
                                 ],
                                 'examples' => [
@@ -1137,7 +1121,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Failed to send SMS',
-                                            'details' => 'Error details',
                                         ],
                                     ],
                                     'fallback_sms' => [
@@ -1198,6 +1181,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Register',
             name: 'api_auth_sms_register',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/local/reset',
@@ -1324,6 +1308,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Reset',
             name: 'api_auth_local_reset',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/sms/reset',
@@ -1434,17 +1419,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Error message explaining why the server error occurred',
                                             'example' => 'An unexpected error occurred while processing the request',
                                         ],
-                                        'details' => [
-                                            'type' => 'string',
-                                            'description' => 'Detailed error message',
-                                            'example' => 'Detailed message',
-                                        ],
                                     ],
                                 ],
                                 'example' => [
                                     'success' => false,
                                     'error' => 'An unexpected error occurred while processing the request',
-                                    'details' => 'Detailed message',
                                 ],
                             ],
                         ],
@@ -1482,6 +1461,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth Reset',
             name: 'api_auth_sms_reset',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
 )]
@@ -1551,6 +1531,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?DeletedUserData $deletedUserData = null;
+
+    #[ORM\Column]
+    private ?bool $isDisabled = false;
 
 
     public function __construct()
@@ -1686,6 +1669,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
         $this->password = 'notused'; //invalid hash so won't ever authenticate
         $this->isVerified = 1;
+        $this->isDisabled = false;
         // #$this->setLevel(LevelType::NONE);
     }
 
@@ -1933,5 +1917,17 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         ];
 
         return array_merge($responseData, $additionalData);
+    }
+
+    public function isDisabled(): ?bool
+    {
+        return $this->isDisabled;
+    }
+
+    public function setDisabled(bool $isDisabled): static
+    {
+        $this->isDisabled = $isDisabled;
+
+        return $this;
     }
 }

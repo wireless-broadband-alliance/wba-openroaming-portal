@@ -6,12 +6,15 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -26,6 +29,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     private EntityManagerInterface $entityManager;
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
+    private UserRadiusProfileRepository $userRadiusProfileRepository;
 
     /**
      * @param class-string<UserInterface> $userClass
@@ -34,6 +38,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
      * @param EntityManagerInterface $entityManager
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
+     * @param UserRadiusProfileRepository $userRadiusProfileRepository
      */
     public function __construct(
         private readonly string $userClass,
@@ -42,11 +47,13 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         EntityManagerInterface $entityManager,
         GetSettings $getSettings,
         SettingRepository $settingRepository,
+        UserRadiusProfileRepository $userRadiusProfileRepository,
     ) {
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
+        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
     }
 
     /**
@@ -69,6 +76,9 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $existingUser = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
         if ($existingUser) {
+            if ($existingUser->isDisabled()) {
+                throw new \RuntimeException('User Disabled');
+            }
             return $existingUser;
         }
 
@@ -95,6 +105,8 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
+        /** @var User $user */
+        $user->setDisabled(false);
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)

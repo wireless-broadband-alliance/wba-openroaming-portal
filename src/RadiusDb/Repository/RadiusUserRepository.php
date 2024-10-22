@@ -39,6 +39,11 @@ class RadiusUserRepository extends ServiceEntityRepository
         }
     }
 
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
+
 //    /**
 //     * @return RadiusUser[] Returns an array of RadiusUser objects
 //     */

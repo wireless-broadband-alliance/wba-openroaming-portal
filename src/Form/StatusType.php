@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class StatusType extends AbstractType
 {
@@ -37,6 +38,12 @@ class StatusType extends AbstractType
                         'description' => $description,
                     ],
                     'data' => $settingValue,
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'Please select an option',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please select an option',
                 ]);
             } elseif ($settingName === 'PLATFORM_MODE') {
                 $builder->add('PLATFORM_MODE', ChoiceType::class, [
@@ -48,6 +55,12 @@ class StatusType extends AbstractType
                     'attr' => [
                         'description' => $description,
                     ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'Please select an option',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please select an option',
                 ]);
             } elseif ($settingName === 'TURNSTILE_CHECKER') {
                 $builder->add('TURNSTILE_CHECKER', ChoiceType::class, [
@@ -59,6 +72,12 @@ class StatusType extends AbstractType
                         'description' => $description,
                     ],
                     'data' => $settingValue,
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'Please select an option',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please select an option',
                 ]);
             }
         }

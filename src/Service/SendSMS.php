@@ -8,7 +8,6 @@ use App\Enum\PlatformMode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -95,6 +94,32 @@ class SendSMS
             return true;
         }
         return false;
+    }
+
+    public function sendSmsReset(string $recipient, string $message): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $apiUrl = $this->parameterBag->get('app.budget_api_url');
+
+        // Fetch SMS credentials from the database
+        $username = $data['SMS_USERNAME']['value'];
+        $userId = $data['SMS_USER_ID']['value'];
+        $handle = $data['SMS_HANDLE']['value'];
+        $from = $data['SMS_FROM']['value'];
+
+        // Check if the user can regenerate the SMS code
+        $user = $this->userRepository->findOneBy(['phoneNumber' => $recipient]);
+        $client = HttpClient::create();
+
+        // Adjust the API endpoint and parameters based on the Budget SMS documentation
+        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+        $response = $client->request('GET', $apiUrl);
+
+        // Handle the API response as needed
+        $statusCode = $response->getStatusCode();
+        $content = $response->getContent();
+
+        return true;
     }
 
     /**

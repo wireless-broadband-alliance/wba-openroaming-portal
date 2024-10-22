@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
 
 class RadiusType extends AbstractType
@@ -25,30 +27,107 @@ class RadiusType extends AbstractType
         $settingsToUpdate = [
             'DISPLAY_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'RADIUS_REALM_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'DOMAIN_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'OPERATOR_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'RADIUS_TLS_NAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'NAI_REALM' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'PAYLOAD_IDENTIFIER' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                    new Length([
+                        'max' => 253,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
             ],
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => [
                 'type' => ChoiceType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                ],
             ],
         ];
 
@@ -78,7 +157,6 @@ class RadiusType extends AbstractType
                     'autocomplete' => 'off',
                     'required' => true,
                 ],
-                'required' => false,
             ];
         }
     }

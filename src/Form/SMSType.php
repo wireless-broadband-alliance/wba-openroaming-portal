@@ -8,7 +8,9 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class SMSType extends AbstractType
 {
@@ -24,12 +26,39 @@ class SMSType extends AbstractType
         $settingsToUpdate = [
             'SMS_USERNAME' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 32,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ]),
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                ],
             ],
             'SMS_USER_ID' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 32,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ]),
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                ],
             ],
             'SMS_HANDLE' => [
                 'type' => TextType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 32,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ]),
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                ],
             ],
             'SMS_FROM' => [
                 'type' => TextType::class,
@@ -38,7 +67,10 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 11,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
                 ],
             ],
             'SMS_TIMER_RESEND' => [
@@ -47,7 +79,14 @@ class SMSType extends AbstractType
                     new Length([
                         'max' => 3,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                    ])
+                    ]),
+                    new GreaterThanOrEqual([
+                        'value' => 0,
+                        'message' => 'This timer should never be less than 0.',
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to set a timer',
+                    ]),
                 ],
             ],
         ];

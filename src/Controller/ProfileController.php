@@ -5,14 +5,18 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
+use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
+use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\GetSettings;
 use App\Utils\CacheUtils;
 use DateTime;
 use RuntimeException;
@@ -28,17 +32,31 @@ class ProfileController extends AbstractController
 {
     private array $settings;
     private EventActions $eventActions;
+    private GetSettings $getSettings;
+    private UserRepository $userRepository;
+    private SettingRepository $settingRepository;
+    private UserExternalAuthRepository $userExternalAuthRepository;
 
     /**
      * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
+     * @param GetSettings $getSettings
+     * @param UserRepository $userRepository
+     * @param UserExternalAuthRepository $userExternalAuthRepository
      */
     public function __construct(
         SettingRepository $settingRepository,
         EventActions $eventActions,
+        GetSettings $getSettings,
+        UserRepository $userRepository,
+        UserExternalAuthRepository $userExternalAuthRepository,
     ) {
         $this->settings = $this->getSettings($settingRepository);
         $this->eventActions = $eventActions;
+        $this->getSettings = $getSettings;
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
@@ -46,6 +64,7 @@ class ProfileController extends AbstractController
         RadiusUserRepository $radiusUserRepository,
         UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
+        Request $request
     ): Response {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
             throw new RuntimeException("CA.pem is missing");
@@ -57,16 +76,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($user->getDeletedAt()) {
-            $this->addFlash(
-                'error',
-                'Your account has been deleted. Please, for more information contact our support.'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($user->getBannedAt()) {
-            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+        if ($this->checkUserStatus($user) === true) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -109,7 +119,7 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::ANDROID,
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service
@@ -131,16 +141,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($user->getDeletedAt()) {
-            $this->addFlash(
-                'error',
-                'Your account has been deleted. Please, for more information contact our support.'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($user->getBannedAt()) {
-            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+        if ($this->checkUserStatus($user) === true) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -222,13 +223,13 @@ class ProfileController extends AbstractController
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
             ];
         } elseif (stripos($userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
             ];
         }
 
@@ -243,6 +244,7 @@ class ProfileController extends AbstractController
         UserRepository $userRepository,
         UrlGeneratorInterface $urlGenerator,
         UserRadiusProfileRepository $radiusProfileRepository,
+        Request $request
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -250,16 +252,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($user->getDeletedAt()) {
-            $this->addFlash(
-                'error',
-                'Your account has been deleted. Please, for more information contact our support.'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($user->getBannedAt()) {
-            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+        if ($this->checkUserStatus($user) === true) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -322,7 +315,7 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::WINDOWS,
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service
@@ -425,5 +418,57 @@ class ProfileController extends AbstractController
             $carry[$item->getName()] = $item->getValue();
             return $carry;
         }, []);
+    }
+
+    private function checkUserStatus(User $user): bool
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        if ($user->getDeletedAt()) {
+            $this->addFlash(
+                'error',
+                'Your account has been deleted. Please, for more information contact our support.'
+            );
+            $this->redirectToRoute('app_landing');
+            return true;
+        }
+
+        if ($user->getBannedAt()) {
+            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            $this->redirectToRoute('app_landing');
+            return true;
+        }
+
+        if ($user->isDisabled()) {
+            $this->addFlash('error', 'Your account currently is disabled.');
+            $this->redirectToRoute('app_landing');
+            return true;
+        }
+
+        if (
+            !$user->isVerified() &&
+            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+        ) {
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+            if ($userExternalAuths === UserProvider::EMAIL) {
+                $this->addFlash(
+                    'error',
+                    'Your account is not verified to download a profile, 
+                    before being able to download a profile you need to confirm your account by 
+                    clicking on the link send to you via email!'
+                );
+            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER) {
+                $this->addFlash(
+                    'error',
+                    'Your account is not verified to download a profile, 
+                    before being able to download a profile you need to confirm your account by 
+                   inserting the code send to you via SMS!'
+                );
+            }
+            $this->redirectToRoute('app_landing');
+            return true;
+        }
+        return false;
     }
 }

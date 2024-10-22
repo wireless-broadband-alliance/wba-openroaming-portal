@@ -26,6 +26,7 @@ use App\Form\UserExternalAuthType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -33,7 +34,9 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
+use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
+use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -76,6 +79,8 @@ class AdminController extends AbstractController
     private PgpEncryptionService $pgpEncryptionService;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private SendSMS $sendSMS;
+    private EventRepository $eventRepository;
 
     /**
      * @param MailerInterface $mailer
@@ -91,6 +96,8 @@ class AdminController extends AbstractController
      * @param PgpEncryptionService $pgpEncryptionService
      * @param EventActions $eventActions
      * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param SendSMS $sendSMS
+     * @param EventRepository $eventRepository
      */
     public function __construct(
         MailerInterface $mailer,
@@ -105,7 +112,9 @@ class AdminController extends AbstractController
         RadiusAccountingRepository $radiusAccountingRepository,
         PgpEncryptionService $pgpEncryptionService,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator
+        VerificationCodeGenerator $verificationCodeGenerator,
+        SendSMS $sendSMS,
+        EventRepository $eventRepository
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -120,6 +129,8 @@ class AdminController extends AbstractController
         $this->pgpEncryptionService = $pgpEncryptionService;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->sendSMS = $sendSMS;
+        $this->eventRepository = $eventRepository;
     }
 
     /*
@@ -194,9 +205,9 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin();
-        $verifiedUsersCount = $userRepository->countVerifiedUsers();
-        $bannedUsersCount = $userRepository->totalBannedUsers();
+        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
+        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $userRepository->totalBannedUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
@@ -234,8 +245,11 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportUsers(UserRepository $userRepository, EntityManagerInterface $entityManager): Response
-    {
+    public function exportUsers(
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        Request $request
+    ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -263,36 +277,67 @@ class AdminController extends AbstractController
         $sheet->setCellValue('F1', 'Last Name');
         $sheet->setCellValue('G1', 'Verification');
         $sheet->setCellValue('H1', 'Provider');
-        $sheet->setCellValue('I1', 'Banned At');
-        $sheet->setCellValue('J1', 'Created At');
+        $sheet->setCellValue('I1', 'ProviderId');
+        $sheet->setCellValue('J1', 'Banned At');
+        $sheet->setCellValue('K1', 'Created At');
 
         // Apply the data
         $row = 2;
         foreach ($users as $user) {
             $sheet->setCellValue('A' . $row, $this->escapeSpreadsheetValue($user->getId()));
-            $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($user->getUuid()));
+
+            // Check if UUID might be a phone number and format accordingly
+            $uuid = $user->getUuid();
+            if (is_numeric($uuid)) {
+                // If UUID is numeric, treat it as a string to prevent scientific notation
+                $sheet->setCellValueExplicit(
+                    'B' . $row,
+                    $this->escapeSpreadsheetValue($uuid),
+                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                );
+            } else {
+                $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($uuid));
+            }
+
             $sheet->setCellValue('C' . $row, $this->escapeSpreadsheetValue($user->getEmail()));
-            $sheet->setCellValue('D' . $row, $this->escapeSpreadsheetValue($user->getPhoneNumber()));
+
+            // Handle Phone Number
+            $phoneNumber = $user->getPhoneNumber();
+            if ($phoneNumber) {
+                $sheet->setCellValueExplicit(
+                    'D' . $row,
+                    $this->escapeSpreadsheetValue($phoneNumber),
+                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                );
+            } else {
+                $sheet->setCellValue('D' . $row, '');
+            }
+
             $sheet->setCellValue('E' . $row, $this->escapeSpreadsheetValue($user->getFirstName()));
             $sheet->setCellValue('F' . $row, $this->escapeSpreadsheetValue($user->getLastName()));
             $sheet->setCellValue(
                 'G' . $row,
                 $this->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified')
             );
-            // Determine User Provider
 
+            // Determine User Provider && ProviderId
             $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
             $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
 
-            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($userExternalAuth->getProvider()));
+            $provider = $userExternalAuth !== null ? $userExternalAuth->getProvider() : 'No Provider';
+            $sheet->setCellValue('H' . $row, $this->escapeSpreadsheetValue($provider));
+
+            $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
+            $sheet->setCellValue('I' . $row, $this->escapeSpreadsheetValue($providerID));
+
             // Check if the user is Banned
             $sheet->setCellValue(
-                'I' . $row,
+                'J' . $row,
                 $this->escapeSpreadsheetValue(
                     $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'
                 )
             );
-            $sheet->setCellValue('J' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
+            $sheet->setCellValue('K' . $row, $this->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
         }
@@ -303,7 +348,7 @@ class AdminController extends AbstractController
         $writer->save($tempFile);
 
         $eventMetadata = [
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
@@ -331,7 +376,8 @@ class AdminController extends AbstractController
     public function deleteUsers(
         $id,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher
+        UserPasswordHasherInterface $userPasswordHasher,
+        Request $request
     ): Response {
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
@@ -349,6 +395,7 @@ class AdminController extends AbstractController
 
         // Prepare user data for encryption
         $deletedUserData = [
+            'id' => $user->getId(),
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail() ?? 'This value is empty',
             'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
@@ -409,7 +456,7 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         $event->setEventMetadata([
             'deletedBy' => $currentUser->getUuid(),
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ]);
 
         // Update user entity
@@ -436,7 +483,7 @@ class AdminController extends AbstractController
         $eventMetadata = [
             'uuid' => $getUUID,
             'deletedBy' => $currentUser->getUuid(),
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
             $currentUser,
@@ -518,15 +565,22 @@ class AdminController extends AbstractController
                 $user->setBannedAt(null);
                 $this->enableProfiles($user);
             }
+
+            if ($form->get('isVerified')->getData()) {
+                $this->enableProfiles($user);
+            } else {
+                $this->disableProfiles($user);
+            }
+
             $userRepository->save($user, true);
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'edited' => $user->getUuid(),
                 'by' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
-                $currentUser,
+                $user,
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
                 new DateTime(),
                 $eventMetadata
@@ -554,12 +608,17 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
             }
 
+            // Get the User Provider && ProviderId
+            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $em->flush();
-            if ($user->getEmail()) {
-                // Send email to the user with the new password
+
+            if ($user->getEmail() && $userExternalAuth->getProviderId() == UserProvider::EMAIL) {
+                // Send email
                 $email = (new Email())
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
@@ -571,21 +630,68 @@ class AdminController extends AbstractController
                         )
                     );
                 $mailer->send($email);
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'edited ' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                    new DateTime(),
+                    $eventMetadata
+                );
+            }
+
+            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
+                );
+                // Retrieve the SMS resend interval from the settings
+                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
+                $currentTime = new DateTime();
+
+                // Retrieve the metadata from the latest event
+                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
+                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
+                    : null;
+                $resetAttempts = isset(
+                    $latestEventMetadata['resetAttempts']
+                ) ? $latestEventMetadata['resetAttempts'] : 0;
+
+                if (!$latestEvent || $resetAttempts < 3) {
+                    // Check if enough time has passed since the last reset
+                    if (
+                        !$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime &&
+                            $lastResetAccountPasswordTime->add($minInterval) < $currentTime)
+                    ) {
+                        $attempts = $resetAttempts + 1;
+
+                        $message = "Your new account password is: " . $newPassword . "%0A";
+                        $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
+
+                        $eventMetadata = [
+                            'ip' => $request->getClientIp(),
+                            'edited' => $user->getUuid(),
+                            'by' => $currentUser->getUuid(),
+                            'resetAttempts' => $attempts,
+                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $user,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                            new DateTime(),
+                            $eventMetadata
+                        );
+                    }
+                }
             }
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
-
-            $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
-                'edited ' => $user->getUuid(),
-                'by' => $currentUser->getUuid(),
-            ];
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
-                new DateTime(),
-                $eventMetadata
-            );
-
             return $this->redirectToRoute('admin_page');
         }
 
@@ -636,6 +742,7 @@ class AdminController extends AbstractController
     public function checkSettings(
         RequestStack $requestStack,
         EntityManagerInterface $em,
+        Request $request,
         string $type
     ): Response {
         // Get the entered code from the form
@@ -656,7 +763,7 @@ class AdminController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The setting has been reset successfully!');
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -683,7 +790,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -710,7 +817,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -741,7 +848,7 @@ class AdminController extends AbstractController
                 $event->setEventDatetime(new DateTime());
                 $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
                 $event->setEventMetadata([
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid()
                 ]);
 
@@ -764,7 +871,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -791,7 +898,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The CAPPORT settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -818,7 +925,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The authentication settings has been reset successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -845,7 +952,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully!');
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -1025,7 +1132,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1096,10 +1203,6 @@ class AdminController extends AbstractController
                 foreach ($settingsToUpdate as $settingName) {
                     $value = $submittedData[$settingName] ?? null;
 
-                    if ($value === null) {
-                        $value = "";
-                    }
-
                     // Check for specific settings that need domain validation
                     if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
                         if (!$this->isValidDomain($value)) {
@@ -1119,7 +1222,7 @@ class AdminController extends AbstractController
                 }
 
                 $eventMetadata = [
-                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -1201,7 +1304,7 @@ class AdminController extends AbstractController
             $em->flush();
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid()
             ];
             $this->eventActions->saveEvent(
@@ -1280,7 +1383,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1330,6 +1433,7 @@ class AdminController extends AbstractController
 
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
@@ -1374,12 +1478,15 @@ class AdminController extends AbstractController
                     }
                 }
 
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN') {
+                    if ($setting) {
+                        $setting->setValue($value);
+                        $em->persist($setting);
+                    }
+                    continue;
                 }
 
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
                     $em->persist($setting);
@@ -1387,7 +1494,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1462,7 +1569,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1538,7 +1645,7 @@ class AdminController extends AbstractController
             }
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -2014,7 +2121,7 @@ class AdminController extends AbstractController
         $writer->save($tempFile);
 
         $eventMetadata = [
-            'ip' => $_SERVER['REMOTE_ADDR'],
+            'ip' => $request->getClientIp(),
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
@@ -2952,9 +3059,8 @@ class AdminController extends AbstractController
                         $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
                         // Set the destination directory based on the setting name
-                        $destinationDirectory = $this->getParameter(
-                            'kernel.project_dir'
-                        ) . '/public/resources/uploaded/';
+                        $destinationDirectory = $this->getParameter('kernel.project_dir')
+                            . '/public/resources/uploaded/';
 
                         $file->move($destinationDirectory, $newFilename);
                         $setting->setValue('/resources/uploaded/' . $newFilename);
@@ -2967,7 +3073,7 @@ class AdminController extends AbstractController
             $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
 
             $eventMetadata = [
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(

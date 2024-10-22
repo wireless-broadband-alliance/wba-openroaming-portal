@@ -13,7 +13,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class CustomType extends AbstractType
 {
@@ -31,9 +33,27 @@ class CustomType extends AbstractType
             'CUSTOMER_LOGO' => FileType::class,
             'OPENROAMING_LOGO' => FileType::class,
             'WALLPAPER_IMAGE' => FileType::class,
-            'WELCOME_TEXT' => TextareaType::class,
+            'WELCOME_TEXT' => [
+                'type' => TextareaType::class,
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'This field cannot be empty'
+                    ]),
+                ]
+            ],
             'WELCOME_DESCRIPTION' => TextareaType::class,
-            'PAGE_TITLE' => TextType::class,
+            'PAGE_TITLE' => [
+                'type' => TextType::class,
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'This field cannot be empty'
+                    ]),
+                    new Length([
+                        'max' => 255,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
+                ],
+            ],
             'ADDITIONAL_LABEL' => [
                 'type' => TextType::class,
                 'constraints' => [
@@ -48,10 +68,21 @@ class CustomType extends AbstractType
                 'constraints' => [
                     new EmailConstraint([
                         'message' => 'The value "{{ value }}" is not a valid email address.'
+                    ]),
+                    new Assert\NotBlank([
+                        'message' => 'This field cannot be empty'
+                    ]),
+                    new Length([
+                        'max' => 320,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ])
                 ]
             ],
         ];
+
+        $uploadMaxFilesize = ini_get('upload_max_filesize');
+        $postMaxSize = ini_get('post_max_size');
+        $maxSize = min($uploadMaxFilesize, $postMaxSize);
 
         foreach ($allowedSettings as $settingName => $config) {
             $formFieldOptions = [
@@ -62,6 +93,18 @@ class CustomType extends AbstractType
                 // If the field is an image, set the appropriate options
                 $formFieldOptions['mapped'] = false;
                 $formFieldOptions['required'] = false;
+                $formFieldOptions['constraints'] = [
+                    new File([
+                        'maxSize' => $maxSize,
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/svg',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Please upload a valid format (JPEG,PNG,SVG,WEBP) image',
+                    ]),
+                ];
                 $formFieldType = $config;
             } elseif (is_array($config)) {
                 // Handle the case where config is an array (like CONTACT_EMAIL)
