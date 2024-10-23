@@ -61,10 +61,6 @@ class RegistrationFormSMSType extends AbstractType
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'label' => 'I agree to the terms',
             ]);
 
         // Check if TURNSTILE_CHECKER value is ON

@@ -957,9 +957,11 @@ class SiteController extends AbstractController
         }
 
         if (!$currentUser->isVerified()) {
+            $formTOS = $this->createForm(TOStype::class);
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'data' => $data,
+                'formTOS' => $formTOS,
                 'user' => $currentUser
             ]);
         }
