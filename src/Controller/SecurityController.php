@@ -59,8 +59,7 @@ class SecurityController extends AbstractController
             if ($type == 'admin') {
                 if ($this->isGranted('ROLE_ADMIN')) {
                     return $this->redirectToRoute('admin_page');
-                }
-                else {
+                } else {
                     $this->addFlash('error', 'Wrong credentials');
                     return $this->redirectToRoute('saml_logout');
                 }
@@ -106,8 +105,7 @@ class SecurityController extends AbstractController
                 'data' => $data,
                 'form' => $form,
             ]);
-        }
-        else {
+        } else {
             return $this->render('site/login_landing.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
