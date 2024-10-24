@@ -15,6 +15,7 @@ use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
+use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -288,10 +289,12 @@ class SiteController extends AbstractController
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
+            'formRevokeProfiles' => $formRevokeProfiles->createView(),
             'registrationFormDemo' => $formResgistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
@@ -319,6 +322,13 @@ class SiteController extends AbstractController
         $user = $this->getUser();
         $oldFirstName = $user->getFirstName();
         $oldLastName = $user->getLastName();
+
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        $formRevokeProfiles->handleRequest($request);
+
+        if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
+            dd('Revoking Account Profiles');
+        }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);

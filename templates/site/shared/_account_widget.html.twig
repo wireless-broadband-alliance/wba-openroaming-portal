@@ -10,6 +10,32 @@
         </button>
     </div>
 
+    <div>
+        <form method="POST"
+              action="{{ path('app_site_account_user') }}"
+              data-controller="alert-revoke-profiles"
+              data-alert-revoke-profiles-target="form">
+            <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
+
+            {{ form_start(formRevokeProfiles) }}
+            {{ form_errors(formRevokeProfiles) }}
+
+            <button class="mt-6 w-[240px] btn-logout"
+                    data-action="alert-revoke-profiles#revoke_profiles"
+                    data-alert-revoke-profiles-target="button"
+                    data-user-uuid="{{ user.uuid }}"
+                    type="button">
+                Revoke Account Profiles
+            </button>
+
+            {{ form_rest(formRevokeProfiles) }}
+            {{ form_end(formRevokeProfiles) }}
+        </form>
+    </div>
+
+    {# divider #}
+    <div class="divider my-8"></div>
+
     <div {{ stimulus_controller('fields') }}>
         <form method="POST" action="{{ path('app_site_account_user') }}">
             <h1 class="text-lg mb-8 mt-10">Personal Data</h1>
@@ -31,7 +57,8 @@
                 </div>
             </div>
 
-            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed" type="submit" disabled>
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                              type="submit" disabled>
                 Apply Changes
             </button>
 
@@ -83,7 +110,8 @@
                 </div>
             {% endif %}
 
-            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed" type="submit" disabled>
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                              type="submit" disabled>
                 Change Password
             </button>
 
