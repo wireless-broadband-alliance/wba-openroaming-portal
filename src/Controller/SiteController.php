@@ -19,6 +19,7 @@ use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
@@ -60,6 +61,7 @@ class SiteController extends AbstractController
     private EventRepository $eventRepository;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private UserRadiusProfileRepository $userRadiusProfileRepository;
 
     /**
      * SiteController constructor.
@@ -72,7 +74,8 @@ class SiteController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
+     * @param UserRadiusProfileRepository $userRadiusProfileRepository The entity returs the data about radius profiles
      */
     public function __construct(
         MailerInterface $mailer,
@@ -83,7 +86,8 @@ class SiteController extends AbstractController
         GetSettings $getSettings,
         EventRepository $eventRepository,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator
+        VerificationCodeGenerator $verificationCodeGenerator,
+        UserRadiusProfileRepository $userRadiusProfileRepository
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -94,6 +98,7 @@ class SiteController extends AbstractController
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
     }
 
     /**
@@ -327,7 +332,31 @@ class SiteController extends AbstractController
         $formRevokeProfiles->handleRequest($request);
 
         if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
-            dd('Revoking Account Profiles');
+            $radiusProfile = $this->userRadiusProfileRepository->findBy(
+                ['user' => $user]
+            );
+
+            if ($radiusProfile) {
+                foreach ($radiusProfile as $radiusProfiles) {
+                    $em->remove($radiusProfiles);
+                }
+                $em->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_REVOKE_PROFILES,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $this->addFlash('success', 'Your profiles associated with this account has been revoked');
+            } else {
+                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
+            }
+            return $this->redirectToRoute('app_landing');
         }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
