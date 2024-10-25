@@ -1279,6 +1279,7 @@ class AdminController extends AbstractController
             // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
+            $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
@@ -1299,6 +1300,11 @@ class AdminController extends AbstractController
             if ($turnstileCheckerSetting) {
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
+            }
+            $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
+            if ($userDeleteTimeSetting) {
+                $userDeleteTimeSetting->setValue($userDeleteTime);
+                $em->persist($userDeleteTimeSetting);
             }
             // Flush the changes to the database
             $em->flush();

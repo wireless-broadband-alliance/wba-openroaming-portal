@@ -80,6 +80,7 @@ class SettingFixture extends Fixture
             ['name' => 'SMS_HANDLE', 'value' => ''],
             ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
+            ['name' => 'USER_DELETE_TIME', 'value' => '5']
         ];
 
         foreach ($settings as $settingData) {
