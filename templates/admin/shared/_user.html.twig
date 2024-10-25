@@ -114,9 +114,8 @@
                            data-alert-revoke-profiles-target="button"
                            data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}{{ auth.providerId }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}{{ user.uuid }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}{{ user.uuid }}{% endif %}{% endfor %}{% else %}{{ user.uuid }}{% endif %}"
                         >
-                            <twig:ux:icon name="wba:revoke" class="w-5 mr-3"
-                                          fill="none"/> {# look for a new icon this on is kinda ugly #}
-                            Revoke Profiles
+                            <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
+                            Revoke
                         </a>
 
                         {{ form_rest(formRevokeProfiles) }}
