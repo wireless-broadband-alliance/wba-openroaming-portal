@@ -16,15 +16,17 @@ RUN echo "UTC" >> /etc/timezone \
 
 RUN add-apt-repository ppa:ondrej/php \
     && apt-get update \
-    && apt-get -y install xmlsec1 libxmlsec1-openssl nginx php8.1-fpm php8.1-cli php8.1-curl php8.1-mbstring \
-        php8.1-mysql php8.1-gd php8.1-bcmath php8.1-readline \
-        php8.1-zip php8.1-imap php8.1-xml php8.1-intl php8.1-soap \
-        php8.1-memcache php8.1-memcached php8.1-yaml php8.1-dom php8.1-ldap php8.1-gnupg supervisor ca-certificates curl gnupg && mkdir -p /var/log/supervisor \
-        && rm -rf /var/lib/apt/lists/*
+    && apt-get -y install xmlsec1 libxmlsec1-openssl nginx php8.3-fpm php8.3-cli php8.3-curl php8.3-mbstring \
+        php8.3-mysql php8.3-gd php8.3-bcmath php8.3-readline \
+        php8.3-zip php8.3-imap php8.3-xml php8.3-intl php8.3-soap \
+        php8.3-memcache php8.3-memcached php8.3-yaml php8.3-dom php8.3-ldap \
+        php8.3-gnupg supervisor ca-certificates curl gnupg && mkdir -p /var/log/supervisor \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update -y && apt-get install nodejs yarn -y
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --install-dir=/usr/bin --filename=composer
 
@@ -35,6 +37,7 @@ WORKDIR /var/www/openroaming
 COPY . /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
 RUN composer install
+
 RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt
 RUN npm config set strict-ssl false
 RUN echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc

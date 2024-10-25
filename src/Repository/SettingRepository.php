@@ -63,4 +63,19 @@ class SettingRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * Find all settings except those specified by name
+     * @param array $includedNames
+     * @return array
+     */
+    public function findAllIn(array $includedNames): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->where('u.name IN (:includeNames)')
+            ->setParameter('includeNames', $includedNames);
+
+
+        return $qb->getQuery()->getResult();
+    }
 }

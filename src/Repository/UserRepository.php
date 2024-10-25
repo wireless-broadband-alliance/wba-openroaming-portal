@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -86,7 +87,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findLDAPEnabledUsers()
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.saml_identifier is not null')
+            ->join('u.userExternalAuths', 'uea')
+            ->andWhere('uea.provider = :provider')
+            ->andWhere('uea.provider_id is not null')
+            ->setParameter('provider', UserProvider::SAML)
             ->getQuery()
             ->getResult();
     }
@@ -118,7 +122,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter('role', '%ROLE_ADMIN%');
 
         if ($filter === UserVerificationStatus::VERIFIED) {
-            $qb->andWhere('u.isVerified = :verified')
+            $qb->andWhere('u.isVerified = :Verified')
                 ->setParameter(UserVerificationStatus::VERIFIED, true);
         } elseif ($filter === UserVerificationStatus::BANNED) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
@@ -164,11 +168,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     /**
      * @param string|null $searchTerm
+     * @param string|null $filter
      * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function countAllUsersExcludingAdmin(?string $searchTerm = null): int
+    public function countAllUsersExcludingAdmin(?string $searchTerm = null, ?string $filter = null): int
     {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
@@ -177,8 +182,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter('adminRole', '%ROLE_ADMIN%');
 
         if ($searchTerm !== null) {
-            $qb->andWhere('u.uuid LIKE :searchTerm OR u.email LIKE :searchTerm')
+            $qb->andWhere(
+                'u.uuid LIKE :searchTerm OR
+                 u.email LIKE :searchTerm OR
+                 u.first_name LIKE :searchTerm OR
+                 u.last_name LIKE :searchTerm'
+            )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        if ($filter === UserVerificationStatus::VERIFIED) {
+            $qb->andWhere('u.isVerified = :Verified')
+                ->setParameter('Verified', true);
+        } elseif ($filter === UserVerificationStatus::BANNED) {
+            $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
         return $qb->getQuery()->getSingleScalarResult();
@@ -194,14 +211,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
-            ->where('u.isVerified = :verified')
+            ->where('u.isVerified = :Verified')
             ->andWhere('u.roles NOT LIKE :adminRole')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->setParameter(UserVerificationStatus::VERIFIED, true)
+            ->setParameter('Verified', true)
             ->setParameter('adminRole', '%ROLE_ADMIN%');
 
         if ($searchTerm !== null) {
-            $qb->andWhere('u.uuid LIKE :searchTerm OR u.email LIKE :searchTerm')
+            $qb->andWhere(
+                'u.uuid LIKE :searchTerm OR
+                 u.email LIKE :searchTerm OR
+                 u.first_name LIKE :searchTerm OR
+                 u.last_name LIKE :searchTerm'
+            )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
@@ -222,7 +244,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->andWhere($qb->expr()->isNull('u.deletedAt'));
 
         if ($searchTerm !== null) {
-            $qb->andWhere('u.uuid LIKE :searchTerm OR u.email LIKE :searchTerm')
+            $qb->andWhere(
+                'u.uuid LIKE :searchTerm OR
+                 u.email LIKE :searchTerm OR
+                 u.first_name LIKE :searchTerm OR
+                 u.last_name LIKE :searchTerm'
+            )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 

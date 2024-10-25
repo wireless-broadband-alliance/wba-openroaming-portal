@@ -22,7 +22,7 @@
 
                     {# Left Search Filters #}
                     <div class="flex items-center space-x-6 cursor-default">
-                        <a href="{{ path('admin_page', {'filter': 'all'}) }}"
+                        <a href="{{ path('admin_page', {'filter': 'all', 'u': app.request.query.get('u') }) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
                                 All
@@ -31,8 +31,8 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {'filter': 'verified'}) }}"
-                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'verified' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
+                        <a href="{{ path('admin_page', {'filter': constant('App\\Enum\\UserVerificationStatus::VERIFIED'), 'u': app.request.query.get('u') }) }}"
+                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 Verified
                             </h1>
@@ -40,8 +40,8 @@
                                 {{ verifiedUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {'filter': 'banned'}) }}"
-                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'banned' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
+                        <a href="{{ path('admin_page', {'filter': constant('App\\Enum\\UserVerificationStatus::BANNED'), 'u': app.request.query.get('u') }) }}"
+                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 Banned
                             </h1>
@@ -143,9 +143,9 @@
                                         <div class="pill-error">
                                             {% if searchTerm %}
                                                 No users found with "{{ searchTerm }}"
-                                            {% elseif app.request.query.get('filter') == 'verified' %}
+                                            {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}
                                                 There are no verified users in the system
-                                            {% elseif app.request.query.get('filter') == 'banned' %}
+                                            {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}
                                                 There are no banned users in the system
                                             {% else %}
                                                 There are no users in the system
@@ -163,7 +163,7 @@
             {# Users Table Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('admin/shared/_pagination.html.twig', {label: 'Users per page', route: 'admin_page', occurrencies: allUsersCount}) }}
+                {{ include('admin/shared/_pagination_users.html.twig', {label: 'Users per page', route: 'admin_page', occurrencies: allUsersCount}) }}
             </div>
         </div>
     </div>

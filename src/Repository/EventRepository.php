@@ -82,4 +82,27 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Find events where any field is null or empty.
+     *
+     * @return Event[] Returns an array of Event objects
+     */
+    public function findEventsWithNullOrEmptyFields(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->where(
+                $this->createQueryBuilder('e')
+                    ->expr()->orX(
+                        'e.event_name IS NULL',
+                        'e.event_name = :emptyString',
+                        'e.event_metadata IS NULL',
+                        'e.event_metadata = :emptyString',
+                        'e.user IS NULL'
+                    )
+            )
+            ->setParameter('emptyString', '')
+            ->getQuery()
+            ->getResult();
+    }
 }

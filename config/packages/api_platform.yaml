@@ -1,0 +1,28 @@
+api_platform:
+    title: OpenRoaming Portal API
+    version: 1.0.0
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+        yaml: ['application/yaml', 'text/yaml']
+    docs_formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+        yaml: ['application/yaml', 'text/yaml']
+        html: ['text/html']
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+        extra_properties:
+            standard_put: true
+            rfc_7807_compliant_errors: true
+    swagger:
+        versions: [3]
+        api_keys:
+            bearerAuth:
+                name: Authorization
+                type: header
+        swagger_ui_extra_configuration:
+            persistAuthorization: true
+    use_symfony_listeners: true

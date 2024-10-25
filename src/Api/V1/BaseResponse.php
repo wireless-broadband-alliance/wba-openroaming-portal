@@ -28,10 +28,16 @@ class BaseResponse
     public function toResponse(): JsonResponse
     {
         if ($this->error) {
-            return new JsonResponse([
+            $response = [
                 'success' => false,
                 'error' => $this->error
-            ], $this->statusCode, $this->headers);
+            ];
+
+            if (!empty($this->data)) {
+                $response = array_merge($response, $this->data);
+            }
+
+            return new JsonResponse($response, $this->statusCode, $this->headers);
         }
 
         return new JsonResponse([

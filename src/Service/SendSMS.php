@@ -10,6 +10,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use RuntimeException;
@@ -28,6 +29,7 @@ class SendSMS
     private ParameterBagInterface $parameterBag;
     private EventRepository $eventRepository;
     private EventActions $eventActions;
+    private VerificationCodeGenerator $verificationCodeGenerator;
 
     /**
      * SendSMS constructor.
@@ -38,6 +40,7 @@ class SendSMS
      * @param ParameterBagInterface $parameterBag
      * @param EventRepository $eventRepository
      * @param EventActions $eventActions
+     * @param VerificationCodeGenerator $verificationCodeGenerator
      */
     public function __construct(
         UserRepository $userRepository,
@@ -46,6 +49,7 @@ class SendSMS
         ParameterBagInterface $parameterBag,
         EventRepository $eventRepository,
         EventActions $eventActions,
+        VerificationCodeGenerator $verificationCodeGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
@@ -53,23 +57,7 @@ class SendSMS
         $this->parameterBag = $parameterBag;
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
-    }
-
-    /**
-     * Generate a new verification code for the user.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    protected function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
+        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /**
@@ -108,6 +96,32 @@ class SendSMS
         return false;
     }
 
+    public function sendSmsReset(string $recipient, string $message): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $apiUrl = $this->parameterBag->get('app.budget_api_url');
+
+        // Fetch SMS credentials from the database
+        $username = $data['SMS_USERNAME']['value'];
+        $userId = $data['SMS_USER_ID']['value'];
+        $handle = $data['SMS_HANDLE']['value'];
+        $from = $data['SMS_FROM']['value'];
+
+        // Check if the user can regenerate the SMS code
+        $user = $this->userRepository->findOneBy(['phoneNumber' => $recipient]);
+        $client = HttpClient::create();
+
+        // Adjust the API endpoint and parameters based on the Budget SMS documentation
+        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+        $response = $client->request('GET', $apiUrl);
+
+        // Handle the API response as needed
+        $statusCode = $response->getStatusCode();
+        $content = $response->getContent();
+
+        return true;
+    }
+
     /**
      * Check if the user can resend the SMS code based on attempts and on the interval.
      * @throws NonUniqueResultException
@@ -116,8 +130,17 @@ class SendSMS
     {
         $latestEvent = $eventRepository->findLatestSmsAttemptEvent($user);
 
-        // Check the number of attempts
-        return !$latestEvent || $latestEvent->getVerificationAttempts() < 3;
+        if (!$latestEvent) {
+            return true;
+        }
+
+        // Retrieve verification attempts from metadata
+        $latestEventMetadata = $latestEvent->getEventMetadata();
+        $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
+            ? (int)$latestEventMetadata['verificationAttempts']
+            : 0;
+
+        return $verificationAttempts < 3;
     }
 
     /**
@@ -130,7 +153,7 @@ class SendSMS
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws \RuntimeException
+     * @throws RuntimeException
      * @throws Exception
      */
     public function regenerateSmsCode(User $user): bool
@@ -138,13 +161,20 @@ class SendSMS
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
-        if (!$latestEvent || $latestEvent->getVerificationAttempts() < 3) {
+        // Retrieve metadata from the latest event
+        $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+        $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
+            ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
+            : null;
+        $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+
+        if (!$latestEvent || $verificationAttempts < 3) {
             $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
             $currentTime = new DateTime();
 
             if (
-                !$latestEvent || ($latestEvent->getLastVerificationCodeTime() instanceof DateTime &&
-                    $latestEvent->getLastVerificationCodeTime()->add($minInterval) < $currentTime)
+                !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
+                    $lastVerificationCodeTime->add($minInterval) < $currentTime)
             ) {
                 if (!$latestEvent) {
                     // If no previous attempt, set attempts to 1
@@ -154,6 +184,8 @@ class SendSMS
                         'platform' => PlatformMode::LIVE,
                         'ip' => $_SERVER['REMOTE_ADDR'],
                         'uuid' => $user->getUuid(),
+                        'verificationAttempts' => 0,
+                        'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM)
                     ];
                     $this->eventActions->saveEvent(
                         $user,
@@ -163,15 +195,15 @@ class SendSMS
                     );
                 } else {
                     // Increment the attempts
-                    $attempts = $latestEvent->getVerificationAttempts() + 1;
+                    $attempts = $verificationAttempts + 1;
+                    $latestEventMetadata['verificationAttempts'] = $attempts;
+                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
+                    $latestEvent->setEventMetadata($latestEventMetadata);
+                    $this->eventRepository->save($latestEvent, true);
                 }
 
-                $latestEvent->setVerificationAttempts($attempts);
-                $latestEvent->setLastVerificationCodeTime($currentTime);
-                $this->eventRepository->save($latestEvent, true);
-
                 // Generate a new verification code and resend the SMS
-                $verificationCode = $this->generateVerificationCode($user);
+                $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($user);
                 $message = 'Your new verification code is: ' . $verificationCode;
                 $this->sendSms($user->getPhoneNumber(), $message);
                 return true;

@@ -4,10 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -38,6 +42,9 @@ class GoogleController extends AbstractController
     private RequestStack $requestStack;
     private EventDispatcherInterface $eventDispatcher;
     private EventActions $eventActions;
+    private GetSettings $getSettings;
+    private UserRepository $userRepository;
+    private SettingRepository $settingRepository;
 
     /**
      * @param ClientRegistry $clientRegistry
@@ -47,6 +54,9 @@ class GoogleController extends AbstractController
      * @param RequestStack $requestStack
      * @param EventDispatcherInterface $eventDispatcher
      * @param EventActions $eventActions
+     * @param GetSettings $getSettings
+     * @param UserRepository $userRepository
+     * @param SettingRepository $settingRepository
      */
     public function __construct(
         ClientRegistry $clientRegistry,
@@ -56,6 +66,9 @@ class GoogleController extends AbstractController
         RequestStack $requestStack,
         EventDispatcherInterface $eventDispatcher,
         EventActions $eventActions,
+        GetSettings $getSettings,
+        UserRepository $userRepository,
+        SettingRepository $settingRepository,
     ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
@@ -64,6 +77,9 @@ class GoogleController extends AbstractController
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
         $this->eventActions = $eventActions;
+        $this->getSettings = $getSettings;
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
     }
 
     /**
@@ -72,6 +88,18 @@ class GoogleController extends AbstractController
     #[Route('/connect/google', name: 'connect_google')]
     public function connectAction(): RedirectResponse
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            $this->addFlash(
+                'error',
+                'The portal is in Demo mode - it is not possible to use this verification method.'
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
 
@@ -134,7 +162,7 @@ class GoogleController extends AbstractController
         }
 
         // Authenticate the user
-        $this->authenticateUser($user);
+        $this->authenticateUserGoogle($user);
 
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
@@ -183,41 +211,54 @@ class GoogleController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Google user ID exists
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleUserId]);
-        if ($existingUser) {
-            // If a user with the given Google user ID exists, return the user
-            return $existingUser;
+        // Check if a user with the given Google user ID exists in UserExternalAuth
+        $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
+            'provider' => UserProvider::GOOGLE_ACCOUNT,
+            'provider_id' => $googleUserId
+        ]);
+
+        if ($userExternalAuth) {
+            // If a user with the given Google user ID exists, return the associated user
+            return $userExternalAuth->getUser();
         }
 
         // Check if a user with the given email exists
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail) {
-            if ($userWithEmail->getGoogleId() === null) {
+            $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
+                'user' => $userWithEmail
+            ]);
+
+            if (!$existingUserAuth) {
                 $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;
             }
 
-            // Return the correct user to authenticate
+            // If a user with the given email exists and they don't have an external auth entry, return the user
             return $userWithEmail;
         }
 
-        // If no user exists, create a new user with a new set of Events
+        // If no user exists, create a new user and a corresponding UserExternalAuth entry
         $user = new User();
-        $user->setGoogleId($googleUserId)
-            ->setIsVerified(true)
+        $user->setIsVerified(true)
             ->setEmail($email)
             ->setFirstName($firstname)
             ->setLastName($lastname)
             ->setCreatedAt(new DateTime())
             ->setUuid($email);
 
+        $userAuth = new UserExternalAuth();
+        $userAuth->setUser($user)
+            ->setProvider(UserProvider::GOOGLE_ACCOUNT)
+            ->setProviderId($googleUserId);
+
         $randomPassword = bin2hex(random_bytes(8));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
         $this->entityManager->persist($user);
+        $this->entityManager->persist($userAuth);
         $this->entityManager->flush();
 
         $event_metadata = [
@@ -238,7 +279,7 @@ class GoogleController extends AbstractController
      * @param User $user
      * @return void
      */
-    private function authenticateUser(User $user): void
+    public function authenticateUserGoogle(User $user): void
     {
         // Get the current request from the request stack
         $request = $this->requestStack->getCurrentRequest();
@@ -269,5 +310,31 @@ class GoogleController extends AbstractController
             $this->redirectToRoute('app_landing');
             return;
         }
+    }
+
+    /**
+     * @throws IdentityProviderException
+     * @throws Exception
+     */
+    public function fetchUserFromGoogle(string $code): ?User
+    {
+        $client = $this->clientRegistry->getClient('google');
+
+        // Exchange the authorization code for an access token
+        $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
+            'code' => $code,
+        ]);
+
+        // Fetch user info from Google
+        $resourceOwner = $client->fetchUserFromToken($accessToken);
+        $googleUserId = $resourceOwner->getId();
+        /** @phpstan-ignore-next-line */
+        $email = $resourceOwner->getEmail();
+        /** @phpstan-ignore-next-line */
+        $firstname = $resourceOwner->getFirstname();
+        /** @phpstan-ignore-next-line */
+        $lastname = $resourceOwner->getLastname();
+
+        return $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
     }
 }
