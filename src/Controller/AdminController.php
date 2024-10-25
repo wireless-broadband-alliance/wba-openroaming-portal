@@ -247,6 +247,7 @@ class AdminController extends AbstractController
         EntityManagerInterface $em,
         $id
     ): Response {
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
         $user = $userRepository->find($id);
         if (!$user) {
