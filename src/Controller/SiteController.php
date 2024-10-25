@@ -24,6 +24,7 @@ use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
@@ -62,6 +63,7 @@ class SiteController extends AbstractController
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
     private UserRadiusProfileRepository $userRadiusProfileRepository;
+    private ProfileManager $profileManager;
 
     /**
      * SiteController constructor.
@@ -76,6 +78,7 @@ class SiteController extends AbstractController
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
      * @param UserRadiusProfileRepository $userRadiusProfileRepository The entity returs the data about radius profiles
+     * @param ProfileManager $profileManager Calls the functions to enable/disable provisnioning profiles
      */
     public function __construct(
         MailerInterface $mailer,
@@ -87,7 +90,8 @@ class SiteController extends AbstractController
         EventRepository $eventRepository,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
-        UserRadiusProfileRepository $userRadiusProfileRepository
+        UserRadiusProfileRepository $userRadiusProfileRepository,
+        ProfileManager $profileManager
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -99,6 +103,7 @@ class SiteController extends AbstractController
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
+        $this->profileManager = $profileManager;
     }
 
     /**
@@ -332,30 +337,24 @@ class SiteController extends AbstractController
         $formRevokeProfiles->handleRequest($request);
 
         if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
-            $radiusProfile = $this->userRadiusProfileRepository->findBy(
-                ['user' => $user]
+            $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+            if (!$revokeProfiles) {
+                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
+                return $this->redirectToRoute('app_landing');
+            }
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::USER_REVOKE_PROFILES,
+                new DateTime(),
+                $eventMetaData
             );
 
-            if ($radiusProfile) {
-                foreach ($radiusProfile as $radiusProfiles) {
-                    $em->remove($radiusProfiles);
-                }
-                $em->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::USER_REVOKE_PROFILES,
-                    new DateTime(),
-                    $eventMetaData
-                );
-                $this->addFlash('success', 'Your profiles associated with this account has been revoked');
-            } else {
-                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
-            }
+            $this->addFlash('success', 'Your profiles associated with this account have been revoked.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1142,5 +1141,14 @@ class SiteController extends AbstractController
 
         $referer = $request->headers->get('referer', $this->generateUrl('app_landing'));
         return $this->redirect($referer);
+    }
+
+    /**
+     * @param $user
+     * @return void
+     */
+    private function disableProfiles($user): void
+    {
+        $this->profileManager->disableProfiles($user);
     }
 }

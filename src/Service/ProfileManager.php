@@ -36,9 +36,9 @@ class ProfileManager
         }
     }
 
-    public function disableProfiles(User $user): void
+    public function disableProfiles(User $user, ?bool $skipDisableAccount = null): void
     {
-        if ($user->isDisabled()) {
+        if (!$skipDisableAccount && $user->isDisabled()) {
             return;
         }
 
@@ -55,8 +55,11 @@ class ProfileManager
             $this->userRadiusProfile->save($profile);
             return true;
         });
-        $user->setDisabled(true);
-        $this->userRepository->save($user, true);
+
+        if ($skipDisableAccount !== true) {
+            $user->setDisabled(true);
+            $this->userRepository->save($user, true);
+        }
         $this->radiusUserRepository->flush();
     }
 
