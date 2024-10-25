@@ -19,6 +19,7 @@ use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
+use App\Form\RevokeProfilesType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
@@ -213,6 +214,8 @@ class AdminController extends AbstractController
         $exportUsers = $this->parameterBag->get('app.export_users');
         // Check if the delete action has a public PGP key defined
         $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
+        // Create form views
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -231,8 +234,53 @@ class AdminController extends AbstractController
             'count' => $count,
             'export_users' => $exportUsers,
             'delete_users' => $deleteUsers,
-            'ApUsage' => null
+            'ApUsage' => null,
+            'formRevokeProfiles' => $formRevokeProfiles
         ]);
+    }
+
+    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_revoke_profiles', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function revokeUsers(
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $em,
+        $id
+    ): Response {
+        $currentUser = $this->getUser();
+        $user = $userRepository->find($id);
+        if (!$user) {
+            $this->addFlash('error', 'User not found.');
+            return $this->redirectToRoute('app_landing');
+        }
+        $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+        if (!$revokeProfiles) {
+            $this->addFlash('error_admin', 'This account doesn\'t have profiles associated!');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE,
+            'userRevoked' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+            'by' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::ADMIN_REVOKE_PROFILES,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        $this->addFlash(
+            'success_admin',
+            sprintf(
+                'Profile associated "%s" have been revoked.',
+                $user->getUuid()
+            )
+        );
+
+        return $this->redirectToRoute('admin_page');
     }
 
     /*

@@ -45,4 +45,5 @@ enum AnalyticalEventType
     public const GET_USER_API = 'GET_USER_API';
     public const USER_ACCOUNT_PASSWORD_RESET_API = 'USER_ACCOUNT_PASSWORD_RESET_API';
     public const USER_REVOKE_PROFILES = 'USER_REVOKE_PROFILES';
+    public const ADMIN_REVOKE_PROFILES = 'ADMIN_REVOKE_PROFILES';
 }
