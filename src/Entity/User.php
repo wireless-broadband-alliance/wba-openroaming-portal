@@ -1524,7 +1524,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
-    #[ORM\Column(type: PhoneNumber::class, nullable: true)]
+    #[ORM\Column(type: 'phone_number', nullable: true)]
     private ?PhoneNumber $phoneNumber = null;
 
     #[ORM\Column(nullable: true)]
@@ -1856,7 +1856,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
-    public function getPhoneNumber(): ?string
+    public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->phoneNumber;
     }
