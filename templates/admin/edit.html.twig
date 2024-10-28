@@ -34,28 +34,23 @@
                 {{ form_errors(form.lastName) }}
             </div>
 
-            <div class="mt-2.5 w-full lg:w-1/2 flex flex-row justify-start md:justify-between space-x-4">
-                <div class="mb-4 mt-1 flex-grow">
-                    <div class="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 justify-center items-center">
-                        {{ form_label(form.isVerified) }}
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            {{ form_widget(form.isVerified, {'attr': {'class': 'toggle-checkbox-green absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer', 'id': 'toggle'}}) }}
-                            <label for="toggle"
-                                   class="toggle-label block overflow-hidden h-6 p-2 rounded-full bg-gray-300 cursor-pointer"></label>
-                        </div>
-                        {{ form_errors(form.isVerified) }}
+            <div class="w-full lg:w-1/2 ">
+                <div class="flex md:flex-row flex-col items-center sm:justify-start">
+                    <div class="flex flex-col mx-4 space-x-3 space-y-2">
+                        <p>Verification</p>
+                        <label class="inline-flex items-center cursor-pointer">
+                            {{ form_widget(form.isVerified, {'attr': {'class': 'sr-only peer'}}) }}
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                            {{ form_errors(form.isVerified) }}
+                        </label>
                     </div>
-                </div>
-
-                <div class="mb-4 mt-1 flex-grow">
-                    <div class="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 justify-center items-center">
-                        {{ form_label(form.bannedAt) }}
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            {{ form_widget(form.bannedAt, {'attr': {'class': 'toggle-checkbox-red absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer', 'id': 'toggle'}}) }}
-                            <label for="toggle"
-                                   class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                        </div>
-                        {{ form_errors(form.bannedAt) }}
+                    <div class="flex flex-col mt-2 md:mt-0 mx-4 space-y-2">
+                        <p>Banned</p>
+                        <label class="inline-flex items-center cursor-pointer">
+                            {{ form_widget(form.bannedAt, {'attr': {'class': 'sr-only peer'}}) }}
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f87171]"></div>
+                            {{ form_errors(form.bannedAt) }}
+                        </label>
                     </div>
                 </div>
             </div>
@@ -70,7 +65,7 @@
     </div>
 
     {# Content - Reset Password Users/Admin #}
-    <h1 class="text-2xl font-semibold mb-6">Reset Password</h1>
+    <h1 class="text-2xl font-semibold mt-6 mb-6">Reset Password</h1>
     <div>
         {{ form_start(formReset) }}
         {{ form_errors(formReset) }}
