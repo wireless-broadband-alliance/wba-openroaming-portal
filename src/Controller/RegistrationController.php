@@ -233,7 +233,13 @@ class RegistrationController extends AbstractController
 
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
-                $user->setUuid($user->getPhoneNumber());
+
+                if (!is_null($user->getPhoneNumber())) {
+                    $user->setUuid(
+                        $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
+                    );
+                }
+
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);

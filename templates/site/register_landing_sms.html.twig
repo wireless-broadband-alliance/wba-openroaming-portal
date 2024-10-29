@@ -30,30 +30,29 @@
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]'}} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Create your account</p>
         <p class="text-lg">This will enable you to access and download a profile onto your device.</p>
-        <p class="text-lg">Once you download your profile you can connect automatically to OpenRoaming Wi-Fi networks across the world.</p>
+        <p class="text-lg">Once you download your profile you can connect automatically to OpenRoaming Wi-Fi networks
+            across the world.</p>
     </div>
 
     {{ form_start(registrationSMSForm) }}
 
     <div class="flex flex-row items-end space-x-4 mt-8">
-        {# Country Code Selection #}
+        {# Phone Number Input #}
         <div class="flex flex-col w-1/3">
-            {{ form_label(registrationSMSForm.country, 'Country', { 'label_attr': {'class': 'text-gray-700 font-medium mb-2'} }) }}
-            {{ form_widget(registrationSMSForm.country, {
+            {{ form_label(registrationSMSForm.phoneNumber, 'Phone Number', { 'label_attr': {'class': 'text-gray-700 font-medium mb-2'} }) }}
+            {{ form_widget(registrationSMSForm.phoneNumber.children.country, {
                 'attr': {
                     'class': 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                    'placeholder': 'Select your country'
+                    'placeholder': 'Enter your phone number',
+                    'autocomplete': 'tel',
                 }
             }) }}
         </div>
-
-        {# Phone Number Input #}
         <div class="flex flex-col w-2/3">
-            {{ form_label(registrationSMSForm.phoneNumber, 'Phone Number', { 'label_attr': {'class': 'text-gray-700 font-medium mb-2'} }) }}
-            {{ form_widget(registrationSMSForm.phoneNumber, {
+            {{ form_widget(registrationSMSForm.phoneNumber.children.number, {
                 'attr': {
                     'class': 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
                     'placeholder': 'Enter your phone number',
