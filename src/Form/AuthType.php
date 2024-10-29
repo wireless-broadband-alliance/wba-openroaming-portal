@@ -189,38 +189,6 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-
-            'AUTH_METHOD_SMS_LOGIN_ENABLED' => [
-                'type' => ChoiceType::class,
-            ],
-            'AUTH_METHOD_SMS_LOGIN_LABEL' => [
-                'type' => TextType::class,
-                'options' => [
-                    'constraints' => [
-                        new Length([
-                            'min' => 3,
-                            'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
-                        ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
-                        ]),
-                    ],
-                ],
-            ],
-            'AUTH_METHOD_SMS_LOGIN_DESCRIPTION' => [
-                'type' => TextType::class,
-                'options' => [
-                    'required' => false,
-                    'constraints' => [
-                        new Length([
-                            'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
-                        ]),
-                    ],
-                ],
-            ],
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
@@ -237,7 +205,6 @@ class AuthType extends AbstractType
                             'AUTH_METHOD_REGISTER_ENABLED',
                             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                             'AUTH_METHOD_SMS_REGISTER_ENABLED',
-                            'AUTH_METHOD_SMS_LOGIN_ENABLED'
                         ])
                     ) {
                         $formFieldOptions['choices'] = [
