@@ -236,7 +236,7 @@ class RegistrationController extends AbstractController
 
                 if (!is_null($user->getPhoneNumber())) {
                     $user->setUuid(
-                        "+". $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
+                        "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
                     );
                 }
 
