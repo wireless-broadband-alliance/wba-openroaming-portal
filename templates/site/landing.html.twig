@@ -220,7 +220,7 @@
                 {% if data.GOOGLE_LOGIN_ENABLED.value %}
                     <div>
                         <a href="{{ path('connect_google') }}">
-                            <button type="submit" class="w-full btn-primary" disabled="disabled">
+                            <button type="submit" class="w-full btn-primary btn-disabled" disabled="disabled">
                             {{ data.GOOGLE_LOGIN_LABEL.value }}
                             </button>
                         </a>
@@ -231,7 +231,7 @@
                 {% if data.EMAIL_REGISTER_ENABLED.value %}
                     <div>
                         <a href="{{ path('app_register') }}">
-                            <button type="submit" class="w-full btn-primary" disabled="disabled">
+                            <button type="submit" class="w-full btn-primary btn-disabled" disabled="disabled">
                             {{ data.REGISTER_LABEL.value }}
                             </button>
                         </a>
@@ -242,7 +242,7 @@
                 {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
                     <div>
                         <a href="{{ path('app_register_sms') }}">
-                            <button type="submit" class="w-full btn-primary" disabled="disabled">
+                            <button type="submit" class="w-full btn-primary btn-disabled" disabled="disabled">
                             {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                             </button>
                         </a>
@@ -253,7 +253,7 @@
                 {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
                     <div class="w-full">
                         <a href="{{ path('app_login') }}">
-                            <button type="submit" class="w-full h-[50px] btn-secondary" disabled="disabled">
+                            <button type="submit" class="w-full h-[50px] btn-secondary btn-disabled" disabled="disabled">
                             {{ data.LOGIN_TRADITIONAL_LABEL.value }}
                             </button>
                         </a>
@@ -298,6 +298,11 @@
             function toggleSubmitButtons() {
                 submitButtons.forEach(button => {
                     button.disabled = !agreeTermsCheckbox.checked;
+                    if (agreeTermsCheckbox.checked) {
+                        button.classList.remove('btn-disabled');
+                    } else {
+                        button.classList.add('btn-disabled');
+                    }
                 });
             }
 

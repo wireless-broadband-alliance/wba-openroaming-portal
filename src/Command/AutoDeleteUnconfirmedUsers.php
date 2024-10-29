@@ -129,7 +129,7 @@ class AutoDeleteUnconfirmedUsers extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->deleteUnconfirmedUsers();
-        $output->writeln('Notificações enviadas com sucesso.');
+        $output->writeln('Users deleted');
 
         return Command::SUCCESS;
     }
