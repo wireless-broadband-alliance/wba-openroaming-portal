@@ -15,7 +15,7 @@ export default class extends Controller {
 
 	block() {
 		for (let t of this.inputTargets) {
-			t.readOnly = true;
+			t.readOnly = true; // This is readOnly because of the user verification card on the status page
 			t.classList.add('cursor-not-allowed');
 		}
 
@@ -27,7 +27,7 @@ export default class extends Controller {
 
 	unblock() {
 		for (let t of this.inputTargets) {
-			t.readOnly = false;
+			t.readOnly = false; // same explication as before
 			t.classList.remove('cursor-not-allowed');
 		}
 
