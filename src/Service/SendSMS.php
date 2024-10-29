@@ -13,6 +13,8 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -67,7 +69,7 @@ class SendSMS
      * @throws ClientExceptionInterface
      * @throws NonUniqueResultException
      */
-    public function sendSms(string $recipient, string $message): bool
+    public function sendSms($recipient, string $message): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
@@ -83,8 +85,11 @@ class SendSMS
         if ($user && $this->canRegenerateSmsCode($user, $this->eventRepository)) {
             $client = HttpClient::create();
 
+            // Convert PhoneNumber object to string in E.164 format
+            $phoneNumberUtil = PhoneNumberUtil::getInstance();
+            $recipientString = $phoneNumberUtil->format($recipient, PhoneNumberFormat::E164);
             // Adjust the API endpoint and parameters based on the Budget SMS documentation
-            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipientString&from=$from&msg=$message";
             $response = $client->request('GET', $apiUrl);
 
             // Handle the API response as needed
@@ -96,7 +101,7 @@ class SendSMS
         return false;
     }
 
-    public function sendSmsReset(string $recipient, string $message): bool
+    public function sendSmsReset($recipient, string $message): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
@@ -108,17 +113,20 @@ class SendSMS
         $from = $data['SMS_FROM']['value'];
 
         // Check if the user can regenerate the SMS code
-        $user = $this->userRepository->findOneBy(['phoneNumber' => $recipient]);
         $client = HttpClient::create();
 
+        // Convert PhoneNumber object to string in E.164 format
+        $phoneNumberUtil = PhoneNumberUtil::getInstance();
+        $recipientString = $phoneNumberUtil->format($recipient, PhoneNumberFormat::E164);
         // Adjust the API endpoint and parameters based on the Budget SMS documentation
-        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipientString&from=$from&msg=$message";
         $response = $client->request('GET', $apiUrl);
 
         // Handle the API response as needed
         $statusCode = $response->getStatusCode();
         $content = $response->getContent();
 
+        dd($statusCode, $content);
         return true;
     }
 

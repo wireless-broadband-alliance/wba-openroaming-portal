@@ -7,14 +7,16 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use libphonenumber\PhoneNumberFormat;
+use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CountryType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class RegistrationFormSMSType extends AbstractType
 {
@@ -44,23 +46,21 @@ class RegistrationFormSMSType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
-            ->add('phoneNumber', TextType::class, [
-                'constraints' => [
-                    new Length([
-                        'min' => 8,
-                        'max' => 15,
-                        'minMessage' => 'Phone number should be at least {{ limit }} characters long.',
-                        'maxMessage' => 'Phone number should be at most {{ limit }} characters long.',
-                    ]),
-                    new Regex([
-                        'pattern' => '/^\+\d{1,3}\d{4,14}$/m',
-                        'message' => 'Phone number should contain only digits and must be in international format 
-                        (e.g., +19700XXXXXX)',
-                    ]),
-                ],
-                'attr' => [
-                    'autocomplete' => 'off',
-                ],
+            ->add('country', CountryType::class, [
+                'label' => 'Country',
+                'preferred_choices' => ['PT', 'US', 'GB'],
+                'mapped' => false,
+            ])
+            ->add('phoneNumber', PhoneNumberType::class, [
+                'label' => 'Phone Number',
+                'default_region' => 'PT',  // This will be dynamically changed -> Dropdown Country
+                'format' => PhoneNumberFormat::INTERNATIONAL,
+                'required' => true,
+                'attr' => ['autocomplete' => 'tel'],
+            ])
+            ->add('agreeTerms', CheckboxType::class, [
+                'mapped' => false,
+                'label' => 'I agree to the terms',
             ]);
 
         // Check if TURNSTILE_CHECKER value is ON
@@ -73,6 +73,23 @@ class RegistrationFormSMSType extends AbstractType
                 'label' => false
             ]);
         }
+
+        // Event listener to dynamically set the `default_region` based on `country`
+        $builder->get('country')->addEventListener(
+            FormEvents::POST_SUBMIT,
+            function (FormEvent $event) use ($builder) {
+                $countryCode = $event->getForm()->getData();
+                $form = $event->getForm()->getParent();
+
+                $form->add('phoneNumber', PhoneNumberType::class, [
+                    'label' => 'Phone Number',
+                    'default_region' => $countryCode,  // Use the selected country code
+                    'format' => PhoneNumberFormat::INTERNATIONAL,
+                    'required' => true,
+                    'attr' => ['autocomplete' => 'tel'],
+                ]);
+            }
+        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
