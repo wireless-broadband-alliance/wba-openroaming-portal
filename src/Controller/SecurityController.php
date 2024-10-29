@@ -42,9 +42,10 @@ class SecurityController extends AbstractController
 
     /**
      * @throws NonUniqueResultException
+     * @Route("/login/{type}", name="app_login", defaults={"type"="user"})
      */
-    #[Route('/login', name: 'app_login')]
-    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
+    //#[Route('/login', name: 'app_login')]
+    public function login(Request $request, AuthenticationUtils $authenticationUtils, $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -55,13 +56,23 @@ class SecurityController extends AbstractController
 
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
-            if ($this->isGranted('ROLE_ADMIN')) {
-                return $this->redirectToRoute('admin_page');
+            if ($type == 'admin') {
+                if ($this->isGranted('ROLE_ADMIN')) {
+                    return $this->redirectToRoute('admin_page');
+                } else {
+                    $this->addFlash('error', 'Wrong credentials');
+                    return $this->redirectToRoute('saml_logout');
+                }
+            }
+            if ($type == 'user' and $this->isGranted('ROLE_ADMIN')) {
+                $this->addFlash('error', 'Wrong credentials');
+                return $this->redirectToRoute('saml_logout');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
             if ($platformMode === PlatformMode::DEMO) {
                 return $this->redirectToRoute('saml_logout');
             }
+
             return $this->redirectToRoute('app_landing');
         }
 
@@ -87,12 +98,21 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Wrong credentials');
         }
 
-        return $this->render('site/login_landing.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-            'data' => $data,
-            'form' => $form,
-        ]);
+        if ($type == "admin") {
+            return $this->render('admin/login_landing.html.twig', [
+                'last_username' => $lastUsername,
+                'error' => $error,
+                'data' => $data,
+                'form' => $form,
+            ]);
+        } else {
+            return $this->render('site/login_landing.html.twig', [
+                'last_username' => $lastUsername,
+                'error' => $error,
+                'data' => $data,
+                'form' => $form,
+            ]);
+        }
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

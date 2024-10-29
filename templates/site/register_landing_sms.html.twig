@@ -70,24 +70,6 @@
         </div>
     {% endif %}
 
-    {# Terms Checkbox #}
-    <div class="mt-[28px] flex items-center justify-start gap-2">
-
-        {{ form_widget(registrationSMSForm.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
-                          rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
-
-        <label for="{{ registrationSMSForm.agreeTerms.vars.id }}" class="text-xs">
-            I agree to the
-            <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">terms &
-                conditions of
-                use
-            </a>
-            and
-            <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank" class="underline text-primary font-semibold">privacy
-                policy
-            </a>.
-        </label>
-    </div>
 
     {# Button Submit #}
     {{ form_row(registrationSMSForm._token) }}

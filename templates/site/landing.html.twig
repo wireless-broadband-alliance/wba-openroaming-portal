@@ -19,6 +19,16 @@
         {% endfor %}
     </div>
 
+    <div id="confirmationModal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
+            <h2 class="text-lg font-bold">You Accepted the Terms</h2>
+            <p class="text-sm">Thank you for accepting the terms and conditions. You are ready to create your account!</p>
+            <div class="mt-4 flex justify-center">
+                <button id="closeConfirmationModal" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
@@ -55,10 +65,10 @@
             {# Terms Checkbox #}
             <div class="mt-[28px] flex items-center justify-start gap-2">
 
-                {{ form_widget(registrationFormDemo.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
+                {{ form_widget(formTOS.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
                           rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
 
-                <label for="{{ registrationFormDemo.agreeTerms.vars.id }}" class="text-xs">
+                <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
                     <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
                         terms & conditions of use
@@ -198,8 +208,10 @@
             <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
                 {% if data.SAML_ENABLED.value %}
                     <div>
-                        <a href="/saml/login" class="w-full btn-primary">
+                        <a href="/saml/login">
+                        <button type="submit" class="w-full btn-primary" disabled="disabled">
                             {{ data.SAML_LABEL.value }}
+                        </button>
                         </a>
                         <p class="text-xs mt-[8px]">{{ data.SAML_DESCRIPTION.value }}</p>
                     </div>
@@ -207,8 +219,10 @@
 
                 {% if data.GOOGLE_LOGIN_ENABLED.value %}
                     <div>
-                        <a href="{{ path('connect_google') }}" class="w-full btn-primary">
+                        <a href="{{ path('connect_google') }}">
+                            <button type="submit" class="w-full btn-primary" disabled="disabled">
                             {{ data.GOOGLE_LOGIN_LABEL.value }}
+                            </button>
                         </a>
                         <p class="text-xs mt-[8px]">{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
                     </div>
@@ -216,8 +230,10 @@
 
                 {% if data.EMAIL_REGISTER_ENABLED.value %}
                     <div>
-                        <a href="{{ path('app_register') }}" class="w-full btn-primary">
+                        <a href="{{ path('app_register') }}">
+                            <button type="submit" class="w-full btn-primary" disabled="disabled">
                             {{ data.REGISTER_LABEL.value }}
+                            </button>
                         </a>
                         <p class="text-xs mt-[8px]">{{ data.REGISTER_DESCRIPTION.value }}</p>
                     </div>
@@ -225,8 +241,10 @@
 
                 {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
                     <div>
-                        <a href="{{ path('app_register_sms') }}" class="w-full btn-primary">
+                        <a href="{{ path('app_register_sms') }}">
+                            <button type="submit" class="w-full btn-primary" disabled="disabled">
                             {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
+                            </button>
                         </a>
                         <p class="text-xs mt-[8px]">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
                     </div>
@@ -234,20 +252,70 @@
 
                 {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
                     <div class="w-full">
-                        <a href="{{ path('app_login') }}" class="w-full h-[50px] btn-secondary">
+                        <a href="{{ path('app_login') }}">
+                            <button type="submit" class="w-full h-[50px] btn-secondary" disabled="disabled">
                             {{ data.LOGIN_TRADITIONAL_LABEL.value }}
+                            </button>
                         </a>
                         <p class="text-xs mt-[8px]">{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
                     </div>
                 {% endif %}
             </div>
 
-            {# Divider #}
+
+            {{ form_start(formTOS) }}
+            <div class="mt-[28px] flex items-center justify-start gap-2">
+                {{ form_widget(formTOS.agreeTerms, {
+                    'attr': {
+                        'class': 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary',
+                        'id': 'agreeTermsCheckbox'
+                    }
+                }) }}
+                <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
+                    I agree to the
+                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">terms & conditions of use</a>
+                    and
+                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank" class="underline text-primary font-semibold">privacy policy</a>.
+                </label>
+            </div>
+
+            {{ form_end(formTOS) }}
+
             <div class="my-[25px] divider"></div>
 
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
 
         {% endif %}
     {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const agreeTermsCheckbox = document.querySelector('#{{ formTOS.agreeTerms.vars.id }}');
+            const submitButtons = document.querySelectorAll('button[type="submit"]');
+            const confirmationModal = document.getElementById('confirmationModal');
+            const closeConfirmationModalButton = document.getElementById('closeConfirmationModal');
+
+            function toggleSubmitButtons() {
+                submitButtons.forEach(button => {
+                    button.disabled = !agreeTermsCheckbox.checked;
+                });
+            }
+
+            toggleSubmitButtons();
+
+            agreeTermsCheckbox.addEventListener('change', function() {
+                toggleSubmitButtons();
+                if (agreeTermsCheckbox.checked) {
+                    confirmationModal.classList.remove('hidden');
+                } else {
+                    confirmationModal.classList.add('hidden');
+                }
+            });
+
+            closeConfirmationModalButton.addEventListener('click', function() {
+                confirmationModal.classList.add('hidden');
+            });
+        });
+    </script>
 
 {% endblock %}
