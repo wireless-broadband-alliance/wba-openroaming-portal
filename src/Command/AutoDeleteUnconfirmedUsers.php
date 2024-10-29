@@ -33,7 +33,6 @@ class AutoDeleteUnconfirmedUsers extends Command
 
     public function deleteUnconfirmedUsers(): void
     {
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
