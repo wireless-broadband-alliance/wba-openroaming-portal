@@ -65,10 +65,10 @@
             {# Terms Checkbox #}
             <div class="mt-[28px] flex items-center justify-start gap-2">
 
-                {{ form_widget(registrationFormDemo.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
+                {{ form_widget(formTOS.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
                           rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
 
-                <label for="{{ registrationFormDemo.agreeTerms.vars.id }}" class="text-xs">
+                <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
                     <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
                         terms & conditions of use
