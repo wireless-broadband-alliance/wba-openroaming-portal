@@ -1,7 +1,5 @@
 doctrine:
     dbal:
-        types:
-            phone_number: Misd\PhoneNumberBundle\Doctrine\DBAL\Types\PhoneNumberType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'

@@ -1864,7 +1864,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setPhoneNumber(?PhoneNumber $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
-
         return $this;
     }
 
