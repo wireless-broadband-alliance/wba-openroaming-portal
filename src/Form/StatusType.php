@@ -82,8 +82,7 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => 'Please select an option',
                 ]);
-            }
-            elseif ($settingName === 'USER_DELETE_TIME') {
+            } elseif ($settingName === 'USER_DELETE_TIME') {
                 $builder->add('USER_DELETE_TIME', IntegerType::class, [
                     'attr' => [
                         'description' => $description,

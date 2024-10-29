@@ -25,7 +25,8 @@ class AutoDeleteUnconfirmedUsers extends Command
         $this->entityManager = $entityManager;
     }
 
-    public function delete_unconfirmed_users() {
+    public function deleteUnconfirmedUsers(): void
+    {
         $userRepository = $this->entityManager->getRepository(User::class);
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $users = $userRepository->findAll();
@@ -36,7 +37,7 @@ class AutoDeleteUnconfirmedUsers extends Command
             $limitTime = $user->getCreatedAt();
             $limitTime->modify("+ {$time} hours");
             $realTime = new \DateTime();
-            if ( !$user->isVerified()) {
+            if (!$user->isVerified()) {
                 if ($limitTime < $realTime) {
                     $this->entityManager->remove($user);
                 }
@@ -47,7 +48,7 @@ class AutoDeleteUnconfirmedUsers extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->delete_unconfirmed_users();
+        $this->deleteUnconfirmedUsers();
         $output->writeln('Notificações enviadas com sucesso.');
 
         return Command::SUCCESS;
