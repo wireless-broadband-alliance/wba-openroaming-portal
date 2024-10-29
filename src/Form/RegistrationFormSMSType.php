@@ -46,15 +46,13 @@ class RegistrationFormSMSType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
-            ->add('country', CountryType::class, [
-                'label' => 'Country',
-                'preferred_choices' => ['PT', 'US', 'GB'],
-                'mapped' => false,
-            ])
             ->add('phoneNumber', PhoneNumberType::class, [
                 'label' => 'Phone Number',
                 'default_region' => 'PT',  // This will be dynamically changed -> Dropdown Country
                 'format' => PhoneNumberFormat::INTERNATIONAL,
+                'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
+                'preferred_country_choices' => ['PT', 'US', 'GB'],
+                'country_display_emoji_flag' => true,
                 'required' => true,
                 'attr' => ['autocomplete' => 'tel'],
             ])
@@ -73,23 +71,6 @@ class RegistrationFormSMSType extends AbstractType
                 'label' => false
             ]);
         }
-
-        // Event listener to dynamically set the `default_region` based on `country`
-        $builder->get('country')->addEventListener(
-            FormEvents::POST_SUBMIT,
-            function (FormEvent $event) use ($builder) {
-                $countryCode = $event->getForm()->getData();
-                $form = $event->getForm()->getParent();
-
-                $form->add('phoneNumber', PhoneNumberType::class, [
-                    'label' => 'Phone Number',
-                    'default_region' => $countryCode,  // Use the selected country code
-                    'format' => PhoneNumberFormat::INTERNATIONAL,
-                    'required' => true,
-                    'attr' => ['autocomplete' => 'tel'],
-                ]);
-            }
-        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
