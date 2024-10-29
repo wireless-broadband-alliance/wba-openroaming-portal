@@ -461,8 +461,8 @@ class AdminController extends AbstractController
 
         // Update user entity
         $user->setUuid($user->getId());
-        $user->setEmail('');
-        $user->setPhoneNumber('');
+        $user->setEmail(null);
+        $user->setPhoneNumber(null);
         $user->setPassword($user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);

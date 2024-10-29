@@ -85,11 +85,8 @@ class SendSMS
         if ($user && $this->canRegenerateSmsCode($user, $this->eventRepository)) {
             $client = HttpClient::create();
 
-            // Convert PhoneNumber object to string in E.164 format
-            $phoneNumberUtil = PhoneNumberUtil::getInstance();
-            $recipientString = $phoneNumberUtil->format($recipient, PhoneNumberFormat::E164);
             // Adjust the API endpoint and parameters based on the Budget SMS documentation
-            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipientString&from=$from&msg=$message";
+            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
             $response = $client->request('GET', $apiUrl);
 
             // Handle the API response as needed
@@ -115,18 +112,14 @@ class SendSMS
         // Check if the user can regenerate the SMS code
         $client = HttpClient::create();
 
-        // Convert PhoneNumber object to string in E.164 format
-        $phoneNumberUtil = PhoneNumberUtil::getInstance();
-        $recipientString = $phoneNumberUtil->format($recipient, PhoneNumberFormat::E164);
         // Adjust the API endpoint and parameters based on the Budget SMS documentation
-        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipientString&from=$from&msg=$message";
+        $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
         $response = $client->request('GET', $apiUrl);
 
         // Handle the API response as needed
         $statusCode = $response->getStatusCode();
         $content = $response->getContent();
 
-        dd($statusCode, $content);
         return true;
     }
 
