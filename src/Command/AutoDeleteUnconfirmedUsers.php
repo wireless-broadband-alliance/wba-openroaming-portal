@@ -29,7 +29,11 @@ class AutoDeleteUnconfirmedUsers extends Command
     public ProfileManager $profileManager;
     public PgpEncryptionService $pgpEncryptionService;
 
-    public function __construct(EntityManagerInterface $entityManager, PgpEncryptionService $pgpEncryptionService, ProfileManager $profileManager)
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        PgpEncryptionService $pgpEncryptionService,
+        ProfileManager $profileManager
+    )
     {
         parent::__construct();
         $this->entityManager = $entityManager;
