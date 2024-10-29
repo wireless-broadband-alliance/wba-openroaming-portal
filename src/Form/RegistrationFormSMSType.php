@@ -55,10 +55,6 @@ class RegistrationFormSMSType extends AbstractType
                 'country_display_emoji_flag' => true,
                 'required' => true,
                 'attr' => ['autocomplete' => 'tel'],
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'label' => 'I agree to the terms',
             ]);
 
         // Check if TURNSTILE_CHECKER value is ON
