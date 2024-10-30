@@ -58,15 +58,15 @@ or, only for local usage and testing,
 
 **IMPORTANT**:
 After you load the fixtures by running the second command,
-if you are not using Let’s Encrypt CA, you need to change the following environment
-variable:
+if you are not using Let’s Encrypt CA, you need to change the following
+configuration:
 
 `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to
 the SHA1 hash of the LetsEncrypt CA.
 For that, you need to access the **Back Office Page**, and in the radius configuration section change the setting.
 Or just access the mysql container and update it there.
 
-This number is needed to validate the RADIUS server's certificate. If you use a different CA for your RADIUS server, you
+This hash is needed to validate the RADIUS server's certificate. If you use a different CA for your RADIUS server, you
 must replace this value with the SHA1 hash of your CA's root certificate. **Connections errors** can happen if the right
 SHA1 hash is not provided.
 
