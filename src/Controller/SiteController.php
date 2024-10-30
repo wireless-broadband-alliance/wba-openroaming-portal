@@ -650,12 +650,11 @@ class SiteController extends AbstractController
                         $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
                         // phpcs:enable
                         // Check if the user can get the SMS password and link
-                        if ($user && $attempts < 4) {
+                        if ($user && $attempts < 3) {
                             $client = HttpClient::create();
                             $uuid = $user->getUuid();
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
-                            $domainName = "/login";
                             $message = "Your new random account password is: "
                                 . $randomPassword
                                 . "%0A" . "Please make sure to relogin to complete the request";
@@ -669,10 +668,10 @@ class SiteController extends AbstractController
                             $content = $response->getContent();
                         }
 
-                        $attemptsLeft = 4 - $verificationAttempts;
+                        $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $user->getPhoneNumber(),
+                            $recipient,
                             $attemptsLeft
                         );
                         $this->addFlash('success', $message);
