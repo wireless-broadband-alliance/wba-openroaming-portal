@@ -239,14 +239,12 @@ class AdminController extends AbstractController
     * Handle export of the Users Table on the Main Route
     */
     /**
-     * @param UserRepository $userRepository
      * @return Response
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(
-        UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         Request $request
     ): Response {
@@ -262,7 +260,7 @@ class AdminController extends AbstractController
         }
 
         // Fetch all users excluding admins
-        $users = $userRepository->findExcludingAdmin();
+        $users = $this->userRepository->findExcludingAdmin();
 
         // Create a PHPSpreadsheet object
         $spreadsheet = new Spreadsheet();
