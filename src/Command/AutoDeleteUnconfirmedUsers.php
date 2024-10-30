@@ -33,7 +33,7 @@ class AutoDeleteUnconfirmedUsers extends Command
         EntityManagerInterface $entityManager,
         PgpEncryptionService $pgpEncryptionService,
         ProfileManager $profileManager
-    ){
+    ) {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->pgpEncryptionService = $pgpEncryptionService;
