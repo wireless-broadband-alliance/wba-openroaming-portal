@@ -51,6 +51,7 @@ class AutoDeleteUnconfirmedUsers extends Command
             $timeString = $settingTime[0]->getValue();
             $time = (int)$timeString;
             $limitTime = $user->getCreatedAt();
+            /** @var \DateTime $limitTime */
             $limitTime->modify("+ {$time} hours");
             $realTime = new \DateTime();
             if (!($user->isVerified() and !$user->isDisabled())) {
