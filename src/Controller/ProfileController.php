@@ -406,6 +406,23 @@ class ProfileController extends AbstractController
             $radiusUser = $radiusUserRepository->findOneBy([
                 'username' => $radiusProfile->getRadiusUser(),
             ]);
+            if (!$radiusUser) {
+                /* In cases where we have don't have the profile with a $radiusUser.
+                This logic is also required to not break the portal when the account profiles
+                have been revoked previously */
+                $androidLimit = 32;
+                $realmSize = strlen($realmName) + 1;
+                $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
+                $token = $this->generateToken($androidLimit - $realmSize);
+
+                $radiusUser = new RadiusUser();
+                $radiusUser->setUsername($username);
+                $radiusUser->setAttribute('Cleartext-Password');
+                $radiusUser->setOp(':=');
+                $radiusUser->setValue($token);
+                $radiusUserRepository->save($radiusUser, true);
+                $radiusProfileRepository->save($radiusProfile, true);
+            }
         }
 
         return $radiusUser;
