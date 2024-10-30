@@ -646,32 +646,30 @@ class SiteController extends AbstractController
                         $userId = $data['SMS_USER_ID']['value'];
                         $handle = $data['SMS_HANDLE']['value'];
                         $from = $data['SMS_FROM']['value'];
-                        $recipient = $user->getPhoneNumber();
-
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
+                        // phpcs:enable
                         // Check if the user can get the SMS password and link
-                        if ($user && $attempts < 3) {
+                        if ($user && $attempts < 4) {
                             $client = HttpClient::create();
                             $uuid = $user->getUuid();
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
                             $domainName = "/login";
-                            $message = "Your account password is: "
+                            $message = "Your new random account password is: "
                                 . $randomPassword
-                                . "%0A" . "Login here: "
-                                . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                                . "%0A" . "Please make sure to relogin to complete the request";
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
-                            $apiUrl .= "?username=$username
-                            &userid=$userId
-                            &handle=$handle
-                            &to=$recipient
-                            &from=$from
-                            &msg=$message";
+                            // phpcs:disable Generic.Files.LineLength.TooLong
+                            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+                            // phpcs:enable
                             $response = $client->request('GET', $apiUrl);
                             // Handle the API response as needed
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
                         }
-                        $attemptsLeft = 3 - $verificationAttempts;
+
+                        $attemptsLeft = 4 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
                             $user->getPhoneNumber(),
