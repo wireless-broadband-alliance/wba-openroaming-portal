@@ -494,7 +494,6 @@ class AdminController extends AbstractController
 
         // Persist encrypted data
         $deletedUserData = new DeletedUserData();
-        dd($pgpEncryptedData);
         $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserData->setUser($user);
 

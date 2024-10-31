@@ -42,9 +42,8 @@ class SecurityController extends AbstractController
 
     /**
      * @throws NonUniqueResultException
-     * @Route("/login/{type}", name="app_login", defaults={"type"="user"})
      */
-    //#[Route('/login', name: 'app_login')]
+    #[Route('/login/{type}', name: 'app_login')]
     public function login(Request $request, AuthenticationUtils $authenticationUtils, $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
