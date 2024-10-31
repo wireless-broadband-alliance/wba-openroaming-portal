@@ -52,28 +52,6 @@
 	font-weight: bold;
 }
 
-.toggle-checkbox-green:checked {
-	@apply: right-0 border-green-400;
-	right: 0;
-	border-color: #68D391;
-}
-
-.toggle-checkbox-green:checked + .toggle-label {
-	@apply: bg-lightGreen;
-	background-color: #68D391;
-}
-
-.toggle-checkbox-red:checked {
-	@apply: right-0 border-red-400;
-	right: 0;
-	border-color: #f87171; /* Use the appropriate red color code */
-}
-
-.toggle-checkbox-red:checked + .toggle-label {
-	@apply: bg-red-400;
-	background-color: #f87171; /* Use the appropriate red color code */
-}
-
 /* Animation for the donut graphic in the freeradius statistics page */
 @keyframes fadeIn {
 	from {

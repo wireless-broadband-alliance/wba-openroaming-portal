@@ -36,17 +36,18 @@ class ProfileManager
         }
     }
 
-    public function disableProfiles(User $user): void
+    public function disableProfiles(User $user, ?bool $skipDisableAccount = null): bool
     {
-        if ($user->isDisabled()) {
-            return;
+        if (!$skipDisableAccount && $user->isDisabled()) {
+            return false;
         }
-
-        $this->updateProfiles($user, function ($profile) {
+        $hasActiveProfiles = false;
+        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles) {
             if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE) {
                 return false;
             }
 
+            $hasActiveProfiles = true; // Active profile was found
             $profile->setStatus(UserRadiusProfileStatus::REVOKED);
             $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
             if ($radiusUser) {
@@ -55,9 +56,14 @@ class ProfileManager
             $this->userRadiusProfile->save($profile);
             return true;
         });
-        $user->setDisabled(true);
-        $this->userRepository->save($user, true);
+
+        if ($hasActiveProfiles && $skipDisableAccount !== true) {
+            $user->setDisabled(true);
+            $this->userRepository->save($user, true);
+        }
+
         $this->radiusUserRepository->flush();
+        return $hasActiveProfiles;
     }
 
     public function enableProfiles(User $user): void
