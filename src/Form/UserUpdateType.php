@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Form\Transformer\BooleanToDateTimeTransformer;
+use libphonenumber\PhoneNumberFormat;
+use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -39,6 +41,16 @@ class UserUpdateType extends AbstractType
             ->add('isVerified', CheckboxType::class, [
                 'label' => 'Verification',
                 'required' => false,
+            ])
+            ->add('phoneNumber', PhoneNumberType::class, [
+                'label' => 'Phone Number',
+                'default_region' => 'PT',
+                'format' => PhoneNumberFormat::INTERNATIONAL,
+                'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
+                'preferred_country_choices' => ['PT', 'US', 'GB'],
+                'country_display_emoji_flag' => true,
+                'required' => true,
+                'attr' => ['autocomplete' => 'tel'],
             ]);
         // Transforms the bannedAt bool to datetime when checked
         $builder->get('bannedAt')->addModelTransformer(new BooleanToDateTimeTransformer());

@@ -16,6 +16,7 @@ use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
+use App\Form\TOStype;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -30,6 +31,7 @@ use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -897,9 +899,11 @@ class SiteController extends AbstractController
      *
      * @param EventRepository $eventRepository
      * @param MailerInterface $mailer
+     * @param Request $request
      * @return RedirectResponse A redirect response.
-     * @throws Exception
      * @throws TransportExceptionInterface
+     * @throws \DateMalformedStringException
+     * @throws NonUniqueResultException
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
@@ -1007,6 +1011,7 @@ class SiteController extends AbstractController
      * @param RequestStack $requestStack
      * @param UserRepository $userRepository
      * @param EventRepository $eventRepository
+     * @param Request $request
      * @return Response
      */
     #[Route('/email/check', name: 'app_check_email_code')]

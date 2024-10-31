@@ -288,6 +288,8 @@ class AdminController extends AbstractController
     * Handle export of the Users Table on the Main Route
     */
     /**
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
      * @return Response
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
