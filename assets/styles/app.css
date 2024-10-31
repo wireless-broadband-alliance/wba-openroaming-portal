@@ -59,14 +59,10 @@
 }
 
 .btn-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: #006400;
+	@apply opacity-60 cursor-not-allowed bg-[#006400];
 }
 
 .btn-secondary-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: #696969;
+	@apply opacity-60 cursor-not-allowed bg-[#696969];
 }
 
