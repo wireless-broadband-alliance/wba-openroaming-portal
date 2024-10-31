@@ -126,7 +126,6 @@ class SendSMS
         $statusCode = $response->getStatusCode();
         $content = $response->getContent();
 
-        dd($statusCode, $content);
         return true;
     }
 
