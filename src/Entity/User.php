@@ -374,7 +374,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions.',
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                                             // phpcs:enable
                                         ],
                                     ],
