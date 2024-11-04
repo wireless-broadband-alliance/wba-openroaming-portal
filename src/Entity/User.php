@@ -1074,7 +1074,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Missing required fields: phone number, password, or turnstile_token',
+                                            'error' => 'Missing required fields: country code, phone number, password, or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1137,7 +1137,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 description: 'This endpoint registers a new user using their phone number and 
                 validates the request with a CAPTCHA token.',
                 requestBody: new RequestBody(
-                    description: 'User registration data and CAPTCHA validation token',
+                    description: 'User registration data with SMS and CAPTCHA validation token',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [
@@ -1174,7 +1174,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phone_number', 'password', 'turnstile_token'],
+                                'required' => ['country_code', 'phone_number', 'password', 'turnstile_token'],
                             ],
                         ]),
                     ]),
@@ -1366,7 +1366,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'description' => 'Error message explaining why the request failed',
                                             'example' => 'Missing required fields or invalid data',
                                         ],
                                     ],
@@ -1383,16 +1382,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Missing required fields: phone number, turnstile_token',
+                                            'error' => 'Missing required fields: country code, phone number, turnstile_token',
                                         ],
                                     ],
-                                    'invalid_phone_number_format' => [
-                                        'summary' => 'Invalid phone number format.',
+                                    'invalid_phone_number_format_or_country_code' => [
+                                        'summary' => 'Invalid phone number format',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
-                                            // phpcs:enable
+                                            'error' => 'Invalid phone number format or country code.',
                                         ],
                                     ],
                                     'invalid_json' => [
@@ -1443,10 +1440,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
+                                    'country_code' => [
+                                        'type' => 'string',
+                                        'example' => 'PT',
+                                        'description' => 'User phone number',
+                                    ],
                                     'phone_number' => [
                                         'type' => 'string',
                                         'description' => 'The phone number of the user requesting password reset',
-                                        'example' => '+1234567890',
+                                        'example' => '1234567890',
                                     ],
                                     'turnstile_token' => [
                                         'type' => 'string',
@@ -1454,7 +1456,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phone_number', 'turnstile_token'],
+                                'required' => ['country_code', 'phone_number', 'turnstile_token'],
                             ],
                         ]),
                     ]),

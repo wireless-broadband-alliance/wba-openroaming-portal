@@ -490,7 +490,7 @@ class RegistrationController extends AbstractController
 
         // Save user creation event
         $eventMetaData = [
-            'uuid' => $user->getPhoneNumber(),
+            'uuid' => $user->getUuid(),
             'provider' => UserProvider::PORTAL_ACCOUNT,
             'registrationType' => UserProvider::PHONE_NUMBER,
             'ip' => $request->getClientIp(),
