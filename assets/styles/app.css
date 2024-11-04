@@ -63,6 +63,6 @@
 }
 
 .btn-secondary-disabled {
-	@apply opacity-60 cursor-not-allowed bg-[#696969];
+	@apply opacity-60 cursor-not-allowed bg-[#696969] border-transparent;
 }
 
