@@ -1382,7 +1382,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Missing required fields: country code, phone number, turnstile_token',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_phone_number_format_or_country_code' => [
