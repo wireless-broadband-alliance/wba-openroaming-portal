@@ -302,10 +302,12 @@ class SiteController extends AbstractController
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        $formTOS = $this->createForm(TOStype::class);
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
+            'formTOS' => $formTOS,
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
             'registrationFormDemo' => $formResgistrationDemo->createView(),
             'data' => $data,

@@ -159,7 +159,7 @@
 
                         {% if setting.vars.name in ['USER_DELETE_TIME'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">
-                                <div class="flex items-center space-x-2 mt-5">
+                                <div class="flex flex-row justify-between hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
                                     {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 32}}) }}
                                 </div>
                             </div>

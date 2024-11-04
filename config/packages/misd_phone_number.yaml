@@ -10,4 +10,3 @@ misd_phone_number:
     form: false
     serializer: false
     validator:
-        default_region: PT
