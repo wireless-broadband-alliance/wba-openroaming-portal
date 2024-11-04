@@ -411,7 +411,7 @@ class GetSettings
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Timer in minutes to make the user wait to resend a new SMS',
-            'USER_DELETE_TIME' => 'Timer in hours to delete the unverified user'
+            'USER_DELETE_TIME' => 'Time in hours to delete the unverified user'
         ];
 
         return $descriptions[$settingName] ?? '';
