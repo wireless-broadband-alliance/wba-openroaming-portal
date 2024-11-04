@@ -28,6 +28,7 @@ use Exception;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -528,24 +529,37 @@ class RegistrationController extends AbstractController
 
     /**
      * @param Request $request
+     * @param PhoneNumberUtil $phoneNumberUtil
      * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
+     * @throws RandomException
      * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \DateMalformedIntervalStringException
+     * @throws \DateMalformedStringException
      */
     #[Route('/api/v1/auth/sms/reset', name: 'api_auth_sms_reset', methods: ['POST'])]
-    public function smsReset(Request $request): JsonResponse
-    {
+    public function smsReset(
+        Request $request,
+        PhoneNumberUtil $phoneNumberUtil
+    ): JsonResponse {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
         }
+        if (!isset($dataRequest['turnstile_token'])) {
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+        }
 
+        if (!$this->captchaValidator->validate($dataRequest['turnstile_token'], $request->getClientIp())) {
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+        }
+
+        if (empty($dataRequest['country_code'])) {
+            $errors[] = 'country_code';
+        }
         if (empty($dataRequest['phone_number'])) {
             $errors[] = 'phone_number';
         }
@@ -558,33 +572,30 @@ class RegistrationController extends AbstractController
             ))->toResponse();
         }
 
-        if (!isset($dataRequest['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
-        }
-
-        if (!$this->captchaValidator->validate($dataRequest['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
-        }
-
-        // Validate phone number format using regex, like the front page of the portal does
-        $validator = Validation::createValidator();
-        $phoneNumberConstraint = new Assert\Regex([
-            'pattern' => '/^\+\d{1,3}\d{4,14}$/',
-        ]);
-
-        $violations = $validator->validate($dataRequest['phone_number'], $phoneNumberConstraint);
-
-        // If phone number format is invalid, return a custom error message
-        if (count($violations) > 0) {
+        // Validate phone number with country code
+        try {
+            $parsedPhoneNumber = $phoneNumberUtil->parse(
+                $dataRequest['phone_number'],
+                strtoupper($dataRequest['country_code'])
+            );
+            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+                return (new BaseResponse(
+                    400,
+                    null,
+                    'Invalid phone number format.'
+                ))->toResponse();
+            }
+        } catch (NumberParseException $e) {
             return (new BaseResponse(
                 400,
                 null,
-                'Invalid phone number format. Use a valid format, example: +19700XXXXXX'
+                'Invalid phone number format or country code.'
             ))->toResponse();
         }
 
-        $user = $this->userRepository->findOneBy(['phoneNumber' => $dataRequest['phone_number']]);
-
+        // Check for existing user with the same phone number
+        $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        $user = $this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber]);
         if ($user) {
             if ($user->getBannedAt()) {
                 // This message exists in case of a user is banned the sms/reset, to protect against RGPD
@@ -620,10 +631,10 @@ class RegistrationController extends AbstractController
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
                     $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                    $maxAttempts = 4;
+                    $maxAttempts = 3;
                     $currentTime = new DateTime();
-                    $attemptsLeft = $maxAttempts;
 
+                    $verificationAttempts = 1;
                     if ($latestEvent) {
                         $latestEventMetadata = $latestEvent->getEventMetadata();
                         $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
@@ -632,37 +643,28 @@ class RegistrationController extends AbstractController
                             : null;
 
                         if ($lastVerificationCodeTime instanceof DateTime) {
-                            $allowedTime = $lastVerificationCodeTime->add($minInterval);
+                            $allowedTime = (clone $lastVerificationCodeTime)->add($minInterval);
 
                             if ($allowedTime > $currentTime) {
-                                // This message is to protect against spam and RGPD policies - not and actually success
+                                // Protect against spam and RGPD policies - simulate success without actual resend
                                 return (new BaseResponse(200, [
                                     'success' => sprintf(
-                                    // phpcs:disable Generic.Files.LineLength.TooLong
                                         'If the phone number exists, we have sent a new code to: %s.',
-                                        // phpcs:enable
-                                        $user->getPhoneNumber(),
+                                        $user->getPhoneNumber()
                                     )
                                 ]))->toResponse();
                             }
 
                             $verificationAttempts++;
-                            $attemptsLeft = $maxAttempts - $verificationAttempts;
-
-                            if ($attemptsLeft <= 0) {
-                                return (new BaseResponse(
-                                    429,
-                                    null,
-                                    'Limit of tries exceeded for regeneration. Contact support.'
-                                ))->toResponse();
-                            }
-                        } else {
-                            $verificationAttempts = 1;
-                            $attemptsLeft = $maxAttempts - $verificationAttempts;
                         }
-                    } else {
-                        $verificationAttempts = 1;
-                        $attemptsLeft = $maxAttempts - $verificationAttempts;
+                    }
+                    $attemptsLeft = $maxAttempts - $verificationAttempts;
+                    if ($attemptsLeft < 0) {
+                        return (new BaseResponse(
+                            429,
+                            null,
+                            'Limit of tries exceeded for regeneration. Contact support.'
+                        ))->toResponse();
                     }
 
                     // Update or create the event record
@@ -696,7 +698,7 @@ class RegistrationController extends AbstractController
 
                     // Send SMS
                     $message = sprintf(
-                        "Your account password is: %s\nVerification code is: %s",
+                        "Your account password is: %s\n Verification code is: %s",
                         $randomPassword,
                         $user->getVerificationCode()
                     );
@@ -719,11 +721,10 @@ class RegistrationController extends AbstractController
                     if ($result) {
                         return (new BaseResponse(200, [
                             'success' => sprintf(
-                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                // phpcs:disable Generic.Files.LineLength.TooLong
                                 'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
-                                // Actually Success message
                                 //phpcs:enable
-                                $user->getPhoneNumber(),
+                                $user->getUuid(),
                                 $attemptsLeft
                             )
                         ]))->toResponse();
