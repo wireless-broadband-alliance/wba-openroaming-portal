@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function Symfony\Component\String\u;
 
 #[AsCommand(
-    name: 'app:deleteUnconfirmedUsers',
+    name: 'clear:deleteUnconfirmedUsers',
     description: 'Delete unconfirmed users when timeout exceeded',
 )]
 
