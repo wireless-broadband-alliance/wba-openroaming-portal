@@ -410,7 +410,7 @@ class GetSettings
             'SMS_USER_ID' => 'Budget SMS User ID',
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
-            'SMS_TIMER_RESEND' => 'Timer in minutes to make the user wait to resend a new SMS',
+            'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user'
         ];
 
