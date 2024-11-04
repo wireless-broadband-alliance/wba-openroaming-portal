@@ -1078,13 +1078,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:enable
                                         ],
                                     ],
-                                    'invalid_phone_number_format' => [
+                                    'invalid_phone_number_format_or_country_code' => [
                                         'summary' => 'Invalid phone number format',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
-                                            // phpcs:enable
+                                            'error' => 'Invalid phone number format or country code.',
                                         ],
                                     ],
                                     'invalid_json' => [
@@ -1111,7 +1109,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'description' => 'A short description of the error',
                                             'example' => 'Failed to send SMS',
                                         ],
                                     ],
@@ -1146,9 +1143,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
+                                    'country_code' => [
+                                        'type' => 'string',
+                                        'example' => 'PT',
+                                        'description' => 'User phone number',
+                                    ],
                                     'phone_number' => [
                                         'type' => 'string',
-                                        'example' => '+1234567890',
+                                        'example' => '1234567890',
                                         'description' => 'User phone number',
                                     ],
                                     'password' => [
