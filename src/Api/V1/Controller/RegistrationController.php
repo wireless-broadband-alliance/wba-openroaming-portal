@@ -25,6 +25,9 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -399,55 +402,63 @@ class RegistrationController extends AbstractController
     #[Route('/api/v1/auth/sms/register', name: 'api_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher
+        UserPasswordHasherInterface $userPasswordHasher,
+        PhoneNumberUtil $phoneNumberUtil
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
+
         if (!isset($data['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse();
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse();
         }
 
         // Check for missing fields and add them to the array errors
+        $errors = [];
         if (empty($data['phone_number'])) {
             $errors[] = 'phone_number';
         }
         if (empty($data['password'])) {
             $errors[] = 'password';
         }
+        if (empty($data['country_code'])) {
+            $errors[] = 'country_code';
+        }
         if (!empty($errors)) {
-            return (
-            new BaseResponse(
+            return (new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
             ))->toResponse();
         }
 
-        // Validate phone number format using regex, like the front page of the portal does
-        $validator = Validation::createValidator();
-        $phoneNumberConstraint = new Assert\Regex([
-            'pattern' => '/^\+\d{1,3}\d{4,14}$/',
-        ]);
-
-        $violations = $validator->validate($data['phone_number'], $phoneNumberConstraint);
-
-        // If phone number format is invalid, return a custom error message
-        if (count($violations) > 0) {
+        // Validate phone number with country code
+        try {
+            $parsedPhoneNumber = $phoneNumberUtil->parse($data['phone_number'], strtoupper($data['country_code']));
+            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+                return (new BaseResponse(
+                    400,
+                    null,
+                    'Invalid phone number format.'
+                ))->toResponse();
+            }
+        } catch (NumberParseException $e) {
             return (new BaseResponse(
                 400,
                 null,
-                'Invalid phone number format. Use a valid format, example: +19700XXXXXX'
+                'Invalid phone number format or country code.'
             ))->toResponse();
         }
 
-        if ($this->userRepository->findOneBy(['phoneNumber' => $data['phone_number']])) {
+        // Check for existing user with the same phone number
+        $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
             return (new BaseResponse(200, [
                 // phpcs:disable Generic.Files.LineLength.TooLong
                 'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
@@ -455,10 +466,10 @@ class RegistrationController extends AbstractController
             ]))->toResponse(); // False success for RGPD policies
         }
 
+        // Create and populate the new user entity
         $user = new User();
-        $user->setUuid($data['phone_number']);
-        $user->setPhoneNumber($data['phone_number']);
-        // Hash the password
+        $user->setUuid($formattedPhoneNumber);  // Store formatted phone number in UUID field
+        $user->setPhoneNumber($parsedPhoneNumber);  // Set the PhoneNumber object directly
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
@@ -493,20 +504,18 @@ class RegistrationController extends AbstractController
 
         // Send SMS
         try {
-            $message = "Your account password is: "
-                . $data['password']
-                . "%0A"
-                . "Verification code is: "
-                . $user->getVerificationCode();
-
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            $message = "Your account password is: " . $data['password'] . "%0A" . "Verification code is: " . $user->getVerificationCode();
+            // phpcs:enable
             $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
 
             if ($result) {
-                return (new BaseResponse(200, [
+                return (new BaseResponse(
+                    200,
                     // phpcs:disable Generic.Files.LineLength.TooLong
-                    'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
+                    ['message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.']
                     // phpcs:enable
-                ]))->toResponse();
+                ))->toResponse();
             }
         } catch (\RuntimeException) {
             return (new BaseResponse(500, null, 'Failed to send SMS'))->toResponse(); // Internal Server Error
