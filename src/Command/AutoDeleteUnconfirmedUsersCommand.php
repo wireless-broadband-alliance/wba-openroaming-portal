@@ -23,10 +23,10 @@ use function Symfony\Component\String\u;
 
 #[AsCommand(
     name: 'app:delete_unconfirmed_users',
-    description: 'Allocate providers info from User Entity to the UserExternalAuth Entity',
+    description: 'Delete unconfirmed users when timeout exceeded',
 )]
 
-class AutoDeleteUnconfirmedUsers extends Command
+class AutoDeleteUnconfirmedUsersCommand extends Command
 {
     private EntityManagerInterface $entityManager;
     public ProfileManager $profileManager;
