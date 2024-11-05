@@ -1758,11 +1758,30 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
+        $interval = $startDate->diff($endDate);
+        if ($interval->y > 1) {
+            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            return $this->redirectToRoute('admin_dashboard_statistics');
+        }
+
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
         $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
         $fetchChartSMSEmail = $this->fetchChartSMSEmail($startDate, $endDate);
+
+        $memory_before = memory_get_usage();
+        $memory_after = memory_get_usage();
+        $memory_diff = $memory_after - $memory_before;
+
+        // Check that the memory usage does not exceed the PHP memory limit of 128M
+        if ($memory_diff > 128 * 1024 * 1024) {
+            $this->addFlash(
+                'error_admin',
+                'The data you requested is too large to be processed. Please try a smaller date range.'
+            );
+            return $this->redirectToRoute('admin_dashboard_statistics');
+        }
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
@@ -1771,8 +1790,8 @@ class AdminController extends AbstractController
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
             'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
-            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
-            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+            'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
+            'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
         ]);
     }
 
@@ -1784,6 +1803,7 @@ class AdminController extends AbstractController
      * @param int $page
      * @return Response
      * @throws \JsonException
+     * @throws \DateMalformedStringException
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1795,15 +1815,9 @@ class AdminController extends AbstractController
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
-        // Get the submitted start and end dates from the query parameters
+        // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
         $endDateString = $request->request->get('endDate');
-
-        // Get the current date on the URL if the pagination of the AP Table was used
-        if ($startDateString == null || $endDateString == null) {
-            $startDateString = $request->query->get('startDate');
-            $endDateString = $request->query->get('endDate');
-        }
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
@@ -1820,6 +1834,12 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
+        $interval = $startDate->diff($endDate);
+        if ($interval->y > 1) {
+            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
+        }
+
         // Fetch all the required data, graphics etc...
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
@@ -1829,6 +1849,19 @@ class AdminController extends AbstractController
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
+
+        $memory_before = memory_get_usage();
+        $memory_after = memory_get_usage();
+        $memory_diff = $memory_after - $memory_before;
+
+        // Check that the memory usage does not exceed the PHP memory limit of 128M
+        if ($memory_diff > 128 * 1024 * 1024) {
+            $this->addFlash(
+                'error_admin',
+                'The data you requested is too large to be processed. Please try a smaller date range.'
+            );
+            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
+        }
 
         // Extract the connection attempts
         $authCounts = [
@@ -1914,8 +1947,8 @@ class AdminController extends AbstractController
             'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
             'wifiTagsJson' => json_encode($fetchChartWifiTags, JSON_THROW_ON_ERROR),
             'ApUsage' => $fetchChartApUsage,
-            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
-            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+            'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
+            'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
             'paginationApUsage' => true
         ]);
