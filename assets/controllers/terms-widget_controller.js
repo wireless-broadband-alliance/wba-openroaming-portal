@@ -9,19 +9,21 @@ export default class extends Controller {
         this.toggleSubmitButtons();
     }
 
-     toggleSubmitButtons() {
+    toggleSubmitButtons() {
         console.log(`Checkbox checked: ${this.agreeTermsTarget.checked}`);
 
         // For each submit button add `btn-disabled` based on checkbox status
         for (let button of this.buttonTargets) {
-            button.disabled = !this.agreeTermsTarget.checked;
-            let disabled_css = button.classList.contains('btn-primary') ? 'btn-disabled' : 'btn-secondary-disabled';
-            if (this.agreeTermsTarget.checked) {
-                button.classList.remove(disabled_css);
-                console.log('Button enabled, btn-disabled class removed');
-            } else {
-                button.classList.add(disabled_css);
-                console.log('Button disabled, btn-disabled class added');
+            if (button.name === 'btn-primary' || button.name === 'btn-secondary') {
+                button.disabled = !this.agreeTermsTarget.checked;
+                let disabled_css = button.name === 'btn-primary' ? 'btn-disabled' : 'btn-secondary-disabled';
+                if (this.agreeTermsTarget.checked) {
+                    button.classList.remove(disabled_css);
+                    console.log('Button enabled, btn-disabled class removed');
+                } else {
+                    button.classList.add(disabled_css);
+                    console.log('Button disabled, btn-disabled class added');
+                }
             }
         }
     }

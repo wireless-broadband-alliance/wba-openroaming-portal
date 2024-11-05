@@ -203,6 +203,7 @@
                             <a href="/saml/login">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary"
+                                                                                        name="btn-primary"
                                                                                         disabled="disabled">
                                     {{ data.SAML_LABEL.value }}
                                 </button>
@@ -216,6 +217,7 @@
                             <a href="{{ path('connect_google') }}">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary btn-disabled"
+                                                                                        name="btn-primary"
                                                                                         disabled="disabled">
                                     {{ data.GOOGLE_LOGIN_LABEL.value }}
                                 </button>
@@ -229,6 +231,7 @@
                             <a href="{{ path('app_register') }}">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary btn-disabled"
+                                                                                        name="btn-primary"
                                                                                         disabled="disabled">
                                     {{ data.REGISTER_LABEL.value }}
                                 </button>
@@ -242,6 +245,7 @@
                             <a href="{{ path('app_register_sms') }}">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary btn-disabled"
+                                                                                        name="btn-primary"
                                                                                         disabled="disabled">
                                     {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                                 </button>
@@ -255,6 +259,7 @@
                             <a href="{{ path('app_login') }}">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full h-[50px] btn-secondary btn-secondary-disabled"
+                                                                                        name="btn-secondary"
                                                                                         disabled="disabled">
                                     {{ data.LOGIN_TRADITIONAL_LABEL.value }}
                                 </button>
