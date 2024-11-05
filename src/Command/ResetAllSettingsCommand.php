@@ -116,6 +116,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SMS_HANDLE', 'value' => ''],
             ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
+            ['name' => 'USER_DELETE_TIME', 'value' => '5'],
+            ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
         ];
 
         // Begin a database transaction to ensure data consistency

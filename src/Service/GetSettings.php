@@ -197,7 +197,7 @@ class GetSettings
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue(
-            ) === 'true',
+                ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
@@ -228,7 +228,7 @@ class GetSettings
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue(
-            ) === 'true',
+                ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
@@ -245,7 +245,7 @@ class GetSettings
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue(
-            ) === 'true',
+                ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
@@ -319,6 +319,11 @@ class GetSettings
         $data['SMS_TIMER_RESEND'] = [
             'value' => $settingRepository->findOneBy(['name' => 'SMS_TIMER_RESEND'])->getValue(),
             'description' => $this->getSettingDescription('SMS_TIMER_RESEND'),
+        ];
+
+        $data['DEFAULT_REGION_PHONE_INPUTS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
+            'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
         ];
 
         return $data;
@@ -411,7 +416,8 @@ class GetSettings
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
-            'USER_DELETE_TIME' => 'Time in hours to delete the unverified user'
+            'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
+            'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs'
         ];
 
         return $descriptions[$settingName] ?? '';
