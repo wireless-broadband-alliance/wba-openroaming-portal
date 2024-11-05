@@ -288,14 +288,14 @@ class AdminController extends AbstractController
     * Handle export of the Users Table on the Main Route
     */
     /**
-     * @param UserRepository $userRepository
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
      * @return Response
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(
-        UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         Request $request
     ): Response {
@@ -311,7 +311,7 @@ class AdminController extends AbstractController
         }
 
         // Fetch all users excluding admins
-        $users = $userRepository->findExcludingAdmin();
+        $users = $this->userRepository->findExcludingAdmin();
 
         // Create a PHPSpreadsheet object
         $spreadsheet = new Spreadsheet();
@@ -510,8 +510,8 @@ class AdminController extends AbstractController
 
         // Update user entity
         $user->setUuid($user->getId());
-        $user->setEmail('');
-        $user->setPhoneNumber('');
+        $user->setEmail(null);
+        $user->setPhoneNumber(null);
         $user->setPassword($user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);
@@ -1328,6 +1328,7 @@ class AdminController extends AbstractController
             // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
+            $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
@@ -1348,6 +1349,11 @@ class AdminController extends AbstractController
             if ($turnstileCheckerSetting) {
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
+            }
+            $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
+            if ($userDeleteTimeSetting) {
+                $userDeleteTimeSetting->setValue($userDeleteTime);
+                $em->persist($userDeleteTimeSetting);
             }
             // Flush the changes to the database
             $em->flush();
@@ -1675,7 +1681,8 @@ class AdminController extends AbstractController
                 'SMS_USER_ID',
                 'SMS_HANDLE',
                 'SMS_FROM',
-                'SMS_TIMER_RESEND'
+                'SMS_TIMER_RESEND',
+                'DEFAULT_REGION_PHONE_INPUTS'
             ];
 
             foreach ($settingsToUpdate as $settingName) {

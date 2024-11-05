@@ -16,6 +16,7 @@ use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
+use App\Form\TOStype;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -30,6 +31,7 @@ use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -300,10 +302,12 @@ class SiteController extends AbstractController
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        $formTOS = $this->createForm(TOStype::class);
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
+            'formTOS' => $formTOS,
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
             'registrationFormDemo' => $formResgistrationDemo->createView(),
             'data' => $data,
@@ -681,35 +685,32 @@ class SiteController extends AbstractController
                         $userId = $data['SMS_USER_ID']['value'];
                         $handle = $data['SMS_HANDLE']['value'];
                         $from = $data['SMS_FROM']['value'];
-                        $recipient = $user->getPhoneNumber();
-
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
+                        // phpcs:enable
                         // Check if the user can get the SMS password and link
                         if ($user && $attempts < 3) {
                             $client = HttpClient::create();
                             $uuid = $user->getUuid();
                             $uuid = urlencode($uuid);
                             $verificationCode = $user->getVerificationCode();
-                            $domainName = "/login";
-                            $message = "Your account password is: "
+                            $message = "Your new random account password is: "
                                 . $randomPassword
-                                . "%0A" . "Login here: "
-                                . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
+                                . "%0A" . "Please make sure to relogin to complete the request";
                             // Adjust the API endpoint and parameters based on the Budget SMS documentation
-                            $apiUrl .= "?username=$username
-                            &userid=$userId
-                            &handle=$handle
-                            &to=$recipient
-                            &from=$from
-                            &msg=$message";
+                            // phpcs:disable Generic.Files.LineLength.TooLong
+                            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
+                            // phpcs:enable
                             $response = $client->request('GET', $apiUrl);
                             // Handle the API response as needed
                             $statusCode = $response->getStatusCode();
                             $content = $response->getContent();
                         }
+
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $user->getPhoneNumber(),
+                            $recipient,
                             $attemptsLeft
                         );
                         $this->addFlash('success', $message);
@@ -900,9 +901,11 @@ class SiteController extends AbstractController
      *
      * @param EventRepository $eventRepository
      * @param MailerInterface $mailer
+     * @param Request $request
      * @return RedirectResponse A redirect response.
-     * @throws Exception
      * @throws TransportExceptionInterface
+     * @throws \DateMalformedStringException
+     * @throws NonUniqueResultException
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
@@ -992,9 +995,11 @@ class SiteController extends AbstractController
         }
 
         if (!$currentUser->isVerified()) {
+            $formTOS = $this->createForm(TOStype::class);
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'data' => $data,
+                'formTOS' => $formTOS,
                 'user' => $currentUser
             ]);
         }
@@ -1008,6 +1013,7 @@ class SiteController extends AbstractController
      * @param RequestStack $requestStack
      * @param UserRepository $userRepository
      * @param EventRepository $eventRepository
+     * @param Request $request
      * @return Response
      */
     #[Route('/email/check', name: 'app_check_email_code')]

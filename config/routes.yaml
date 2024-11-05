@@ -5,6 +5,11 @@ controllers:
     type: attribute
 nbgrp_saml:
         resource: "@NbgrpOneloginSamlBundle/Resources/config/routes.php"
+app_login:
+    path: /login/{type}
+    controller: App\Controller\SecurityController::login
+    defaults:
+        type: user
 
 api_v1:
     prefix: /api/v1

@@ -7,8 +7,11 @@ use App\Enum\PlatformMode;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class StatusType extends AbstractType
@@ -78,6 +81,26 @@ class StatusType extends AbstractType
                         ]),
                     ],
                     'invalid_message' => 'Please select an option',
+                ]);
+            } elseif ($settingName === 'USER_DELETE_TIME') {
+                $builder->add('USER_DELETE_TIME', IntegerType::class, [
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'data' => $settingValue,
+                    'constraints' => [
+                        new Length([
+                            'max' => 3,
+                            'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        ]),
+                        new GreaterThanOrEqual([
+                            'value' => 0,
+                            'message' => 'This timer should never be less than 0.',
+                        ]),
+                        new NotBlank([
+                            'message' => 'Please make sure to set a timer',
+                        ]),
+                    ],
                 ]);
             }
         }

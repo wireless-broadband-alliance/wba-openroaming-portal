@@ -196,8 +196,9 @@ class GetSettings
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue(
-            ) === 'true',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true',
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
@@ -227,8 +228,9 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue(
-            ) === 'true',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue() === 'true',
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
@@ -238,14 +240,16 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(
-            ),
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(),
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue(
-            ) === 'true',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
@@ -258,7 +262,6 @@ class GetSettings
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
         ];
-
 
         $data['TOS_LINK'] = [
             'value' => $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue(),
@@ -319,6 +322,11 @@ class GetSettings
         $data['SMS_TIMER_RESEND'] = [
             'value' => $settingRepository->findOneBy(['name' => 'SMS_TIMER_RESEND'])->getValue(),
             'description' => $this->getSettingDescription('SMS_TIMER_RESEND'),
+        ];
+
+        $data['DEFAULT_REGION_PHONE_INPUTS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
+            'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
         ];
 
         return $data;
@@ -410,7 +418,9 @@ class GetSettings
             'SMS_USER_ID' => 'Budget SMS User ID',
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
-            'SMS_TIMER_RESEND' => 'Timer in minutes to make the user wait to resend a new SMS'
+            'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
+            'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
+            'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs'
         ];
 
         return $descriptions[$settingName] ?? '';

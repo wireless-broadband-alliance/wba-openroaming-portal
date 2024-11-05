@@ -23,16 +23,12 @@ use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -226,7 +222,7 @@ class RegistrationController extends AbstractController
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
                 $this->addFlash(
                     'warning',
-                    'User with the same phone number already exists, please try to Login using the link below.'
+                    'User with the same phone number already exists, please try to "Log in" using the link below.'
                 );
             } else {
                 // Generate a random password
@@ -237,7 +233,13 @@ class RegistrationController extends AbstractController
 
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
-                $user->setUuid($user->getPhoneNumber());
+
+                if (!is_null($user->getPhoneNumber())) {
+                    $user->setUuid(
+                        "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
+                    );
+                }
+
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);

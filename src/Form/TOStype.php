@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Entity\User;
 use App\Enum\EmailConfirmationStrategy;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -10,12 +9,10 @@ use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 
-class RegistrationFormType extends AbstractType
+class TOStype extends AbstractType
 {
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
@@ -39,28 +36,15 @@ class RegistrationFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
-
         $builder
-            ->add('email', EmailType::class);
-
-        // Check if TURNSTILE_CHECKER value is ON
-        if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
-            $builder->add('security', TurnstileType::class, [
-                'attr' => [
-                    'data-action' => 'contact',
-                    'data-theme' => 'light'
+            ->add('agreeTerms', CheckboxType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
                 ],
-                'label' => false
+                'label' => 'I agree to the terms',
             ]);
-        }
-    }
-
-    public function configureOptions(OptionsResolver $resolver): void
-    {
-        $resolver->setDefaults([
-            'data_class' => User::class,
-        ]);
     }
 }
