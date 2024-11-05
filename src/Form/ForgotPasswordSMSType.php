@@ -41,15 +41,17 @@ class ForgotPasswordSMSType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $regionInputs = explode(',', $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = array_map('trim', $regionInputs);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [
                 'label' => 'Phone Number',
-                'default_region' => 'PT',  // This will be dynamically changed -> Dropdown Country
+                'default_region' => $regionInputs[0],  // This will be dynamically changed -> Dropdown Country
                 'format' => PhoneNumberFormat::INTERNATIONAL,
                 'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
-                'preferred_country_choices' => ['PT', 'US', 'GB'],
+                'preferred_country_choices' => $regionInputs,
                 'country_display_emoji_flag' => true,
                 'required' => true,
                 'attr' => ['autocomplete' => 'tel'],
