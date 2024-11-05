@@ -14,7 +14,19 @@ the docker-compose.yml** file.
 Failure to match the credentials will result in the application being unable to connect to
 the database.
 
-2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
+2. **Install Dependencies**: Use npm and composer to install the necessary dependencies. Execute the following commands: 📦
+
+```bash
+- npm install
+- composer install
+```
+
+3. **Build frontend assets**: Execute the following command: 🛠️
+```bash
+- npm run build
+```
+
+4. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
 
 ```bash
 - docker compose up -d
@@ -26,19 +38,19 @@ or, only for local usage and testing,
 - docker compose -f docker-compose-local.yml up -d
 ```
 
-3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
+5. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
    appropriately formed. The following command may be used to verify the status of each container, example:
 
 ```bash
 - docker ps
 ```
 
-4. **Upload Certificates**:
+6. **Upload Certificates**:
    Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles
    based on your certificates.
    You can either upload the certs to this folder, inside/outside the container web, but off course before creating it.
 
-5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
+7. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
    script by doing this:
 
 ```bash
@@ -47,7 +59,7 @@ or, only for local usage and testing,
 - sh generatePfxSigningKey.sh
 ```
 
-6. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
+8. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
    the database schema, load is respective settings and add permissions to a specific folder to save images:
 
 ```bash
@@ -74,7 +86,7 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
-7. **Generate JWT Keys**
+9. **Generate JWT Keys**
 
 This step is required for the **API** configuration. To enable JWT authentication, you need to generate a key pair (
 private and public keys). Make sure to run the
@@ -91,7 +103,7 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-8. **Configure JWT and CORS**: Next, configure the JWT and CORS environment variables in your `.env` file:
+10. **Configure JWT and CORS**: Next, configure the JWT and CORS environment variables in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
