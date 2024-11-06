@@ -36,30 +36,35 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $this->profileManager = $profileManager;
     }
 
-    public function notifyUsersWhenProfileExpires (): void
+    public function notifyUsersWhenProfileExpires (OutputInterface $output): void
     {
         $userRadiusProfileRepository = $this->entityManager->getRepository(UserRadiusProfile::class);
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $userRadiusProfiles = $userRadiusProfileRepository->findAll();
         $settingTime = $settingsRepository->findBy(['name' => 'USER_NOTIFY_TIME']);
-        $realTime = new \DateTime();
         $timeString = $settingTime[0]->getValue();
         $time = (int)$timeString;
         foreach ($userRadiusProfiles as $userRadiusProfile) {
-            /** @var \DateTime $limitTime */
-            $limitTime->modify("+ {$time} days");
             $limitTime = $userRadiusProfile->getIssuedAt();
+            /** @var \DateTime $limitTime */
+            $realTime = new \DateTime();
+            $limitTime->modify("+ {$time} days");
             if ($limitTime < $realTime)
             {
                 $user = $userRadiusProfile->getUser();
-
+                if ($user->getEmail()) {
+                    $output->writeln('email enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId()) ;
+                }
+                elseif ($user->getPhoneNumber()) {
+                    $output->writeln('sms enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId());
+                }
             }
         }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->notifyUsersWhenProfileExpires();
+        $this->notifyUsersWhenProfileExpires($output);
         $output->writeln('Users notified');
 
         return Command::SUCCESS;
