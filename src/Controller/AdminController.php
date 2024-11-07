@@ -1247,6 +1247,7 @@ class AdminController extends AbstractController
                     'NAI_REALM',
                     'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
                     'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
+                    'USER_NOTIFY_TIME'
                 ];
 
                 foreach ($settingsToUpdate as $settingName) {

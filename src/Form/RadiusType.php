@@ -6,6 +6,7 @@ use App\Enum\ProfileType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -127,6 +128,19 @@ class RadiusType extends AbstractType
                     new NotBlank([
                         'message' => 'Please select an option',
                     ]),
+                ],
+            ],
+            'USER_NOTIFY_TIME' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                    new Length([
+                        'max' => 90,
+                        'min' => 1,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ])
                 ],
             ],
         ];
