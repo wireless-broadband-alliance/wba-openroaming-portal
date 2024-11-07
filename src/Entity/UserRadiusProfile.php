@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRadiusProfileRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRadiusProfileRepository::class)]
@@ -23,11 +24,11 @@ class UserRadiusProfile
     #[ORM\Column(length: 255)]
     private ?string $radius_user = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $issued_at = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $issued_at = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $valid_until = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $valid_until = null;
 
     #[ORM\Column]
     private ?int $status = null;
@@ -73,24 +74,24 @@ class UserRadiusProfile
         return $this;
     }
 
-    public function getIssuedAt(): ?\DateTimeImmutable
+    public function getIssuedAt(): ?\DateTimeInterface
     {
         return $this->issued_at;
     }
 
-    public function setIssuedAt(\DateTimeImmutable $issued_at): self
+    public function setIssuedAt(?\DateTimeInterface $issued_at): self
     {
         $this->issued_at = $issued_at;
 
         return $this;
     }
 
-    public function getValidUntil(): ?\DateTimeImmutable
+    public function getValidUntil(): ?\DateTimeInterface
     {
         return $this->valid_until;
     }
 
-    public function setValidUntil(?\DateTimeImmutable $valid_until): self
+    public function setValidUntil(?\DateTimeInterface $valid_until): self
     {
         $this->valid_until = $valid_until;
 
