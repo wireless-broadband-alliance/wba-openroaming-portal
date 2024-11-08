@@ -51,13 +51,19 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $userRadiusProfiles = $userRadiusProfileRepository->findAll();
         $settingTime = $settingsRepository->findBy(['name' => 'USER_NOTIFY_TIME']);
         $timeString = $settingTime[0]->getValue();
-        $time = (int)$timeString;
+        $timeToExpire = (int)$timeString;
+        // 3 dias, profile menager tem uma função para desativar os perfis
+        $notifyTime = 3;
+        $timeToNotify = $timeToExpire - $notifyTime;
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             $limitTime = $userRadiusProfile->getIssuedAt();
+            $alertTime = $userRadiusProfile->getIssuedAt();
             /** @var \DateTime $limitTime */
             $realTime = new \DateTime();
-            $limitTime->modify("+ {$time} days");
-            if ($limitTime < $realTime and $userRadiusProfile->getStatus() == 1)
+            $limitTime->modify("+ {$timeToExpire} days");
+            /** @var \DateTime $alertTime */
+            $alertTime->modify("+ {$timeToExpire} days");
+            if (($alertTime < $realTime) and ($limitTime > $realTime) and $userRadiusProfile->getStatus() == 1)
             {
                 $user = $userRadiusProfile->getUser();
                 if ($user->getEmail()) {
@@ -66,8 +72,13 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 }
                 elseif ($user->getPhoneNumber()) {
                     $output->writeln('sms enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId());
-                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'sms notify');
+                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within 3 days');
                 }
+            }
+            if ($limitTime < $realTime and $userRadiusProfile->getStatus() == 1)
+            {
+                $user = $userRadiusProfile->getUser();
+                $this->profileManager->disableProfiles($user);
             }
         }
     }

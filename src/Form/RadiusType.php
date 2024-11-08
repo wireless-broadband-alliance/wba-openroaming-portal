@@ -138,7 +138,7 @@ class RadiusType extends AbstractType
                     ]),
                     new Length([
                         'max' => 90,
-                        'min' => 1,
+                        'min' => 5,
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ])
                 ],
