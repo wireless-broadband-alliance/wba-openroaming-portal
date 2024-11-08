@@ -6,6 +6,8 @@ use App\Entity\Setting;
 use App\Entity\UserRadiusProfile;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
+use App\Service\RegistrationEmailGenerator;
+use App\Service\SendSMS;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -24,16 +26,22 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     private EntityManagerInterface $entityManager;
     public ProfileManager $profileManager;
     public PgpEncryptionService $pgpEncryptionService;
+    public SendSMS $sendSMS;
+    public RegistrationEmailGenerator $registrationEmailGenerator;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PgpEncryptionService $pgpEncryptionService,
-        ProfileManager $profileManager
+        SendSMS $sendSMS,
+        ProfileManager $profileManager,
+        RegistrationEmailGenerator $registrationEmailGenerator
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->pgpEncryptionService = $pgpEncryptionService;
+        $this->sendSMS = $sendSMS;
         $this->profileManager = $profileManager;
+        $this->registrationEmailGenerator = $registrationEmailGenerator;
     }
 
     public function notifyUsersWhenProfileExpires (OutputInterface $output): void
@@ -49,14 +57,16 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             /** @var \DateTime $limitTime */
             $realTime = new \DateTime();
             $limitTime->modify("+ {$time} days");
-            if ($limitTime < $realTime)
+            if ($limitTime < $realTime and $userRadiusProfile->getStatus() == 1)
             {
                 $user = $userRadiusProfile->getUser();
                 if ($user->getEmail()) {
                     $output->writeln('email enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId()) ;
+                    $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user);
                 }
                 elseif ($user->getPhoneNumber()) {
                     $output->writeln('sms enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId());
+                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'sms notify');
                 }
             }
         }
