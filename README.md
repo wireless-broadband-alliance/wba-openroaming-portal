@@ -323,6 +323,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 51. `TOS_LINK`: Terms and Conditions URL
 52. `PRIVACY_POLICY_LINK`: Privacy and Policy URL
+53. `USER_DELETE_TIME`: Time in hours to delete the unverified user
+54. `USER_NOTIFY_TIME`: Time in days to notify the user when profile is about to expire
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
