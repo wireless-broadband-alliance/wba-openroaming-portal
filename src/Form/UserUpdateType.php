@@ -75,7 +75,7 @@ class UserUpdateType extends AbstractType
                 'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
                 'preferred_country_choices' => $regionInputs,
                 'country_display_emoji_flag' => true,
-                'required' => true,
+                'required' => false,
                 'attr' => ['autocomplete' => 'tel'],
             ]);
         // Transforms the bannedAt bool to datetime when checked
