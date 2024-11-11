@@ -791,7 +791,7 @@
                                                 "summary": "Forgot password request active",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions."
+                                                    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action"
                                                 }
                                             }
                                         }
@@ -1292,14 +1292,14 @@
                                                 "summary": "Missing Fields",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Missing required fields: phone number, password, or turnstile_token"
+                                                    "error": "Missing required fields: country code, phone number, password, or turnstile_token"
                                                 }
                                             },
-                                            "invalid_phone_number_format": {
+                                            "invalid_phone_number_format_or_country_code": {
                                                 "summary": "Invalid phone number format",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Invalid phone number format. Use a valid format, example: +19700XXXXXX"
+                                                    "error": "Invalid phone number format or country code."
                                                 }
                                             },
                                             "invalid_json": {
@@ -1326,7 +1326,6 @@
                                                 },
                                                 "error": {
                                                     "type": "string",
-                                                    "description": "A short description of the error",
                                                     "example": "Failed to send SMS"
                                                 }
                                             }
@@ -1355,15 +1354,20 @@
                         "description": "This endpoint registers a new user using their phone number and \n                validates the request with a CAPTCHA token.",
                         "parameters": [],
                         "requestBody": {
-                            "description": "User registration data and CAPTCHA validation token",
+                            "description": "User registration data with SMS and CAPTCHA validation token",
                             "content": {
                                 "application/json": {
                                     "schema": {
                                         "type": "object",
                                         "properties": {
+                                            "country_code": {
+                                                "type": "string",
+                                                "example": "PT",
+                                                "description": "User phone number"
+                                            },
                                             "phone_number": {
                                                 "type": "string",
-                                                "example": "+1234567890",
+                                                "example": "1234567890",
                                                 "description": "User phone number"
                                             },
                                             "password": {
@@ -1388,6 +1392,7 @@
                                             }
                                         },
                                         "required": [
+                                            "country_code",
                                             "phone_number",
                                             "password",
                                             "turnstile_token"
@@ -1576,7 +1581,6 @@
                                                 },
                                                 "error": {
                                                     "type": "string",
-                                                    "description": "Error message explaining why the request failed",
                                                     "example": "Missing required fields or invalid data"
                                                 }
                                             }
@@ -1593,14 +1597,14 @@
                                                 "summary": "Missing Fields",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Missing required fields: phone number, turnstile_token"
+                                                    "error": "Missing required fields: country code, phone number, turnstile_token"
                                                 }
                                             },
-                                            "invalid_phone_number_format": {
-                                                "summary": "Invalid phone number format.",
+                                            "invalid_phone_number_format_or_country_code": {
+                                                "summary": "Invalid phone number format",
                                                 "value": {
                                                     "success": false,
-                                                    "error": "Invalid phone number format. Use a valid format, example: +19700XXXXXX"
+                                                    "error": "Invalid phone number format or country code."
                                                 }
                                             },
                                             "invalid_json": {
@@ -1650,10 +1654,15 @@
                                     "schema": {
                                         "type": "object",
                                         "properties": {
+                                            "country_code": {
+                                                "type": "string",
+                                                "example": "PT",
+                                                "description": "User phone number"
+                                            },
                                             "phone_number": {
                                                 "type": "string",
                                                 "description": "The phone number of the user requesting password reset",
-                                                "example": "+1234567890"
+                                                "example": "1234567890"
                                             },
                                             "turnstile_token": {
                                                 "type": "string",
@@ -1662,6 +1671,7 @@
                                             }
                                         },
                                         "required": [
+                                            "country_code",
                                             "phone_number",
                                             "turnstile_token"
                                         ]
@@ -1875,6 +1885,179 @@
                             }
                         }
                     },
+                    "PhoneNumber": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "countryCode": {
+                                "description": "The country calling code for this number, as defined by the International Telecommunication Union\n(ITU). For example, this would be 1 for NANPA countries, and 33 for France.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "nationalNumber": {
+                                "description": "National (significant) Number is defined in International Telecommunication Union (ITU)\nRecommendation E.164. It is a language/country-neutral representation of a phone number at a\ncountry level. For countries which have the concept of an \"area code\" or \"national destination\ncode\", this is included in the National (significant) Number. Although the ITU says the maximum\nlength should be 15, we have found longer numbers in some countries e.g. Germany.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "extension": {
+                                "description": "Extension is not standardized in ITU recommendations, except for being defined as a series of\nnumbers with a maximum length of 40 digits. It is defined as a string here to accommodate for the\npossible use of a leading zero in the extension (organizations have complete freedom to do so,\nas there is no standard defined). However, only ASCII digits should be stored here.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "italianLeadingZero": {
+                                "description": "In some countries, the national (significant) number starts with one or more \"0\"s without this\nbeing a national prefix or trunk code of some kind. For example, the leading zero in the national\n(significant) number of an Italian phone number indicates the number is a fixed-line number.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ]
+                            },
+                            "rawInput": {
+                                "description": "This field is used to store the raw input string containing phone numbers before it was\ncanonicalized by the library. For example, it could be used to store alphanumerical numbers\nsuch as \"1-800-GOOG-411\".",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "countryCodeSource": {
+                                "description": "The source from which the country_code is derived. This is not set in the general parsing method,\nbut in the method that parses and keeps raw_input. New fields could be added upon request.",
+                                "default": 4,
+                                "example": 4,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "preferredDomesticCarrierCode": {
+                                "description": "The carrier selection code that is preferred when calling this phone number domestically. This\nalso includes codes that need to be dialed in some countries when calling from landlines to\nmobiles or vice versa. For example, in Columbia, a \"3\" needs to be dialed before the phone number\nitself when calling from a mobile phone to a domestic landline phone and vice versa.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "hasNumberOfLeadingZeros": {
+                                "readOnly": true,
+                                "description": "Whether this phone number has a number of leading zeros set.",
+                                "type": "boolean"
+                            },
+                            "numberOfLeadingZeros": {
+                                "description": "The number of leading zeros of this phone number.",
+                                "default": 1,
+                                "example": 1,
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "PhoneNumber.jsonld": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "@context": {
+                                "readOnly": true,
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "@vocab": {
+                                                "type": "string"
+                                            },
+                                            "hydra": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "http://www.w3.org/ns/hydra/core#"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "@vocab",
+                                            "hydra"
+                                        ],
+                                        "additionalProperties": true
+                                    }
+                                ]
+                            },
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "countryCode": {
+                                "description": "The country calling code for this number, as defined by the International Telecommunication Union\n(ITU). For example, this would be 1 for NANPA countries, and 33 for France.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "nationalNumber": {
+                                "description": "National (significant) Number is defined in International Telecommunication Union (ITU)\nRecommendation E.164. It is a language/country-neutral representation of a phone number at a\ncountry level. For countries which have the concept of an \"area code\" or \"national destination\ncode\", this is included in the National (significant) Number. Although the ITU says the maximum\nlength should be 15, we have found longer numbers in some countries e.g. Germany.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "extension": {
+                                "description": "Extension is not standardized in ITU recommendations, except for being defined as a series of\nnumbers with a maximum length of 40 digits. It is defined as a string here to accommodate for the\npossible use of a leading zero in the extension (organizations have complete freedom to do so,\nas there is no standard defined). However, only ASCII digits should be stored here.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "italianLeadingZero": {
+                                "description": "In some countries, the national (significant) number starts with one or more \"0\"s without this\nbeing a national prefix or trunk code of some kind. For example, the leading zero in the national\n(significant) number of an Italian phone number indicates the number is a fixed-line number.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ]
+                            },
+                            "rawInput": {
+                                "description": "This field is used to store the raw input string containing phone numbers before it was\ncanonicalized by the library. For example, it could be used to store alphanumerical numbers\nsuch as \"1-800-GOOG-411\".",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "countryCodeSource": {
+                                "description": "The source from which the country_code is derived. This is not set in the general parsing method,\nbut in the method that parses and keeps raw_input. New fields could be added upon request.",
+                                "default": 4,
+                                "example": 4,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "preferredDomesticCarrierCode": {
+                                "description": "The carrier selection code that is preferred when calling this phone number domestically. This\nalso includes codes that need to be dialed in some countries when calling from landlines to\nmobiles or vice versa. For example, in Columbia, a \"3\" needs to be dialed before the phone number\nitself when calling from a mobile phone to a domestic landline phone and vice versa.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "hasNumberOfLeadingZeros": {
+                                "readOnly": true,
+                                "description": "Whether this phone number has a number of leading zeros set.",
+                                "type": "boolean"
+                            },
+                            "numberOfLeadingZeros": {
+                                "description": "The number of leading zeros of this phone number.",
+                                "default": 1,
+                                "example": 1,
+                                "type": "integer"
+                            }
+                        }
+                    },
                     "Setting": {
                         "type": "object",
                         "description": "Returns public values from the Setting entity",
@@ -2024,9 +2207,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -2198,9 +2385,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -2372,9 +2563,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -2581,9 +2776,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber.jsonld"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -2755,9 +2954,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -2964,9 +3167,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber.jsonld"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -3173,9 +3380,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber.jsonld"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -3355,9 +3566,13 @@
                                 "format": "date-time"
                             },
                             "phoneNumber": {
-                                "type": [
-                                    "string",
-                                    "null"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/PhoneNumber.jsonld"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
                                 ]
                             },
                             "forgot_password_request": {
@@ -3924,10 +4139,10 @@
                             </div>
                         </div>
                         <div class="auth-wrapper">
-                            <button class="btn authorize unlocked"><span>Authorize</span>
+                            <button class="btn authorize locked"><span>Authorize</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20"
                                      aria-hidden="true" focusable="false">
-                                    <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path>
+                                    <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path>
                                 </svg>
                             </button>
                         </div>
@@ -3985,10 +4200,10 @@
                                 aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
                                 fill="#ffffff" fill-rule="evenodd"
                                 d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                class="authorization__btn" aria-label="authorization button unlocked"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="unlocked" width="20"
+                                class="authorization__btn" aria-label="authorization button locked"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
-                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path></svg></button><button
+                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path></svg></button><button
                                 aria-label="get ​/api​/v1​/user" class="opblock-control-arrow" aria-expanded="false"
                                 tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
                                                    width="20" height="20" aria-hidden="true" focusable="false"><path
@@ -4237,6 +4452,42 @@
                                         <button type="button" class="json-schema-2020-12-accordion">
                                             <div class="json-schema-2020-12-accordion__children">
                                                 <div class="json-schema-2020-12__title">Event.jsonld</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">PhoneNumber</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">PhoneNumber.jsonld</div>
                                             </div>
                                             <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -5762,7 +6013,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('a3480d');/*]]>*/</script>
+Sfjs.loadToolbar('02e12d');/*]]>*/</script>
 
 
 </body>
