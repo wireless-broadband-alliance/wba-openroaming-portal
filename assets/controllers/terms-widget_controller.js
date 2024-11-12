@@ -5,6 +5,12 @@ export default class extends Controller {
 
     connect() {
         console.log('TermsWidgetController connected');
+
+        // Check if the "functional" cookie is set to true
+        if (this.getCookie("cookie_preferences")?.functional === true) {
+            this.agreeTermsTarget.checked = true; // Auto-check the checkbox
+        }
+
         this.toggleSubmitButtons();
     }
 
@@ -44,5 +50,19 @@ export default class extends Controller {
     closeConfirmationModal() {
         console.log('Close button clicked, hiding confirmation modal');
         this.confirmationModalTarget.classList.add('hidden');
+    }
+
+    // Helper to get cookie value by name and parse JSON if necessary
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+            try {
+                return JSON.parse(parts.pop().split(';').shift());
+            } catch (error) {
+                console.error('Error parsing cookie:', error);
+            }
+        }
+        return null;
     }
 }
