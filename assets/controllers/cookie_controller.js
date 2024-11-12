@@ -5,67 +5,58 @@ export default class extends Controller {
 
     connect() {
         console.log("CookieController connected");
+        this.checkCookies();
+    }
 
-        // Show the cookie banner only if no preferences or terms acceptance is saved
-        const cookiePreferences = document.cookie.includes("cookie_preferences");
-        const termsAccepted = document.cookie.includes("terms_accepted");
+    checkCookies() {
+        const cookiePreferences = this.getCookie("cookie_preferences");
 
-        if (!cookiePreferences || !termsAccepted) {
+        if (cookiePreferences) {
+            // If cookies are already accepted, hide the banner
+            this.bannerTarget.classList.add("hidden");
+        } else {
+            // If not, show the banner
             this.bannerTarget.classList.remove("hidden");
         }
+        console.log("Current cookies are: " + cookiePreferences);
     }
 
     showModal() {
-        console.log("Displaying cookie preferences modal");
         this.modalCookieTarget.classList.remove("hidden");
     }
 
-    closeModal() {
-        console.log("Hiding cookie preferences modal");
-        this.modalTarget.classList.add("hidden");
-    }
-
     acceptCookies() {
-        const preferences = {
-            analytics: true,
-            functional: true,
-            marketing: true,
-        };
-
-        this.setCookiePreferences(preferences);
-        this.setTermsAccepted();
-        // Hide the cookie banner after accepting
-        this.bannerTarget.classList.add("hidden");
-    }
-
-    savePreferences() {
         const preferences = {
             analytics: this.analyticsTarget.checked,
             functional: this.functionalTarget.checked,
             marketing: this.marketingTarget.checked,
         };
 
-        console.log("Saving preferences:", preferences);
-        // Save the preferences and update the cookie
         this.setCookiePreferences(preferences);
-
-        // If the terms checkbox is checked, save it in cookies
-        if (this.termsCheckboxTarget.checked) {
-            this.setTermsAccepted();
-        }
-
+        this.setTermsAccepted();
         this.closeModal();
         this.bannerTarget.classList.add("hidden");
     }
 
+    // Set cookie preferences
     setCookiePreferences(preferences) {
-        document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + (365 * 24 * 60 * 60);
-        console.log("Cookie set with preferences:", document.cookie);
+        document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     setTermsAccepted() {
-        // Save terms acceptance in cookies (valid for 365 days)
-        document.cookie = "terms_accepted=true; path=/; max-age=" + (365 * 24 * 60 * 60);
-        console.log("Terms accepted cookie set");
+        document.cookie = "terms_accepted=true; path=/; max-age=" + 365 * 24 * 60 * 60;
+    }
+
+    // Close the modal
+    closeModal() {
+        console.log("Cookie Modal Closed");
+        this.modalCookieTarget.classList.add("hidden");
+    }
+
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
     }
 }

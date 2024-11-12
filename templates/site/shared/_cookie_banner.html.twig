@@ -23,7 +23,7 @@
     {# Cookie Preferences Modal #}
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
             {{ stimulus_target('cookie', 'modalCookie') }}>
-        <div class="bg-white w-11/12 md:w-1/2 rounded-lg shadow-lg p-6 space-y-4">
+        <div class="bg-white w-11/12 md:w-1/2 rounded shadow p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h2 class="text-lg font-bold">Cookie Settings</h2>
                 <button class="text-gray-400 hover:text-gray-800"
@@ -34,25 +34,21 @@
             {# Preferences List #}
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                    <span>Strictly necessary cookies</span>
-                    <span class="text-primary">Enabled</span>
-                </div>
-                <div class="flex items-center justify-between">
                     <span>Cookies that remember your settings</span>
                     <label>
-                        <input type="checkbox" class="form-checkbox" {{ stimulus_target('cookie', 'functional') }}>
+                        <input type="checkbox" checked class="form-checkbox" {{ stimulus_target('cookie', 'functional') }}>
                     </label>
                 </div>
                 <div class="flex items-center justify-between">
                     <span>Cookies that measure website use</span>
                     <label>
-                        <input type="checkbox" class="form-checkbox" {{ stimulus_target('cookie', 'analytics') }}>
+                        <input type="checkbox" checked class="form-checkbox" {{ stimulus_target('cookie', 'analytics') }}>
                     </label>
                 </div>
                 <div class="flex items-center justify-between">
                     <span>Cookies for communications and marketing</span>
                     <label>
-                        <input type="checkbox" class="form-checkbox"{{ stimulus_target('cookie', 'marketing') }}>
+                        <input type="checkbox" checked class="form-checkbox"{{ stimulus_target('cookie', 'marketing') }}>
                     </label>
                 </div>
             </div>
