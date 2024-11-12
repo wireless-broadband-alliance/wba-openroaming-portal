@@ -36,6 +36,9 @@ export default class extends Controller {
         this.setTermsAccepted();
         this.closeModal();
         this.bannerTarget.classList.add("hidden");
+
+        const cookiePreferences = this.getCookie("cookie_preferences");
+        console.log("Current cookies are: " + cookiePreferences);
     }
 
     // Set cookie preferences

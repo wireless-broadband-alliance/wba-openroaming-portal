@@ -42,6 +42,7 @@ class CookieConsentListener
 
     /**
      * Set necessary cookies (e.g., session cookies, CSRF token).
+     * @throws \DateMalformedStringException
      */
     private function setNecessaryCookie($response): void
     {
