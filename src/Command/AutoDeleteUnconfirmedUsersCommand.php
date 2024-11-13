@@ -58,7 +58,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
             /** @var \DateTime $limitTime */
             $limitTime->modify("+ {$time} hours");
             $realTime = new \DateTime();
-            if (!($user->isVerified() and !$user->isDisabled())) {
+            if (!($user->isVerified() && !$user->isDisabled())) {
                 if ($limitTime < $realTime) {
                     $uuid = $user->getUuid();
                     if (!(u($uuid)->containsAny('-DEMO-'))) {

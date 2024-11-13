@@ -9,6 +9,7 @@ use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use Doctrine\ORM\EntityManagerInterface;
+use http\Client\Curl\User;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -52,33 +53,31 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $settingTime = $settingsRepository->findBy(['name' => 'USER_NOTIFY_TIME']);
         $timeString = $settingTime[0]->getValue();
         $timeToExpire = (int)$timeString;
-        // 3 dias, profile menager tem uma função para desativar os perfis
         $notifyTime = 3;
         $timeToNotify = $timeToExpire - $notifyTime;
         foreach ($userRadiusProfiles as $userRadiusProfile) {
-            $limitTime = $userRadiusProfile->getIssuedAt();
-            $alertTime = $userRadiusProfile->getIssuedAt();
+            $limitTime = clone $userRadiusProfile->getIssuedAt();
+            $alertTime = clone $userRadiusProfile->getIssuedAt();
             /** @var \DateTime $limitTime */
             $realTime = new \DateTime();
             $limitTime->modify("+ {$timeToExpire} days");
             /** @var \DateTime $alertTime */
-            $alertTime->modify("+ {$timeToExpire} days");
-            if (($alertTime < $realTime) and ($limitTime > $realTime) and $userRadiusProfile->getStatus() == 1)
+            $alertTime->modify("+ {$timeToNotify} days");
+            if (($alertTime < $realTime) && ($limitTime > $realTime) && $userRadiusProfile->getStatus() == 1)
             {
                 $user = $userRadiusProfile->getUser();
                 if ($user->getEmail()) {
-                    $output->writeln('email enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId()) ;
                     $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user);
                 }
                 elseif ($user->getPhoneNumber()) {
-                    $output->writeln('sms enviado pelo user ' . $user->getUuid() . ' pelo profile ' . $userRadiusProfile->getId());
-                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within 3 days');
+                    $this->sendSMS->sendSms($user->getPhoneNumber(),'your profile will expire within 3 days');
                 }
             }
-            if ($limitTime < $realTime and $userRadiusProfile->getStatus() == 1)
+            if ($limitTime < $realTime && $userRadiusProfile->getStatus() == 1)
             {
-                $user = $userRadiusProfile->getUser();
-                $this->profileManager->disableProfiles($user);
+                $userRadiusProfile->setStatus(2);
+                $this->entityManager->persist($userRadiusProfile);
+                $this->entityManager->flush();
             }
         }
     }
