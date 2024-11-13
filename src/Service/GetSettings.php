@@ -421,7 +421,7 @@ class GetSettings
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
-            'USER_NOTIFY_TIME' => 'Time in days to notify the user when profile is about to expire'
+            'PROFILE_LIMIT_DATE' => 'Time in days to disabel profiles'
         ];
 
         return $descriptions[$settingName] ?? '';

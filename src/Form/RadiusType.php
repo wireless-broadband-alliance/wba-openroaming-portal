@@ -12,6 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\Regex;
 
 class RadiusType extends AbstractType
@@ -130,16 +131,16 @@ class RadiusType extends AbstractType
                     ]),
                 ],
             ],
-            'USER_NOTIFY_TIME' => [
+            'PROFILE_LIMIT_DATE' => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Please select an option',
                     ]),
-                    new Length([
-                        'max' => 90,
+                    new Range([
                         'min' => 5,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
                     ])
                 ],
             ],
@@ -179,6 +180,7 @@ class RadiusType extends AbstractType
     {
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
+            'profileLimitDate' => null
         ]);
     }
 }

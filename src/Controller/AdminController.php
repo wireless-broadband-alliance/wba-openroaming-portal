@@ -31,6 +31,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\CerteficateService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
@@ -1214,8 +1215,18 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings, CerteficateService $certeficateService): Response
     {
+        $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
+        $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
+        $realTime = time();
+        $timeLeft = round(($certificateLimitDate - $realTime) /(60*60*24)) - 1;
+        if ($timeLeft > 90) {
+            $profileLimitDate = 90;
+        }
+        else {
+            $profileLimitDate = $timeLeft;
+        }
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1226,6 +1237,7 @@ class AdminController extends AbstractController
 
         $form = $this->createForm(RadiusType::class, null, [
             'settings' => $settings,
+            'profileLimitDate' => $profileLimitDate,
         ]);
 
         $form->handleRequest($request);
@@ -1247,7 +1259,7 @@ class AdminController extends AbstractController
                     'NAI_REALM',
                     'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
                     'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
-                    'USER_NOTIFY_TIME'
+                    'PROFILE_LIMIT_DATE'
                 ];
 
                 foreach ($settingsToUpdate as $settingName) {
