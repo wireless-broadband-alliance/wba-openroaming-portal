@@ -55,7 +55,6 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
  */
 class SiteController extends AbstractController
 {
-    private MailerInterface $mailer;
     private UserRepository $userRepository;
     private UserExternalAuthRepository $userExternalAuthRepository;
     private ParameterBagInterface $parameterBag;
@@ -64,14 +63,12 @@ class SiteController extends AbstractController
     private EventRepository $eventRepository;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
     private ProfileManager $profileManager;
     private SendSMS $sendSMS;
 
     /**
      * SiteController constructor.
      *
-     * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
@@ -80,12 +77,10 @@ class SiteController extends AbstractController
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
-     * @param UserRadiusProfileRepository $userRadiusProfileRepository The entity returns the data about radius profiles
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      * @param SendSMS $sendSMS
      */
     public function __construct(
-        MailerInterface $mailer,
         UserRepository $userRepository,
         UserExternalAuthRepository $userExternalAuthRepository,
         ParameterBagInterface $parameterBag,
@@ -94,7 +89,6 @@ class SiteController extends AbstractController
         EventRepository $eventRepository,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
         ProfileManager $profileManager,
         SendSMS $sendSMS
     ) {
