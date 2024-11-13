@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class TermsType extends AbstractType
 {
@@ -35,6 +36,9 @@ class TermsType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                    ]),
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
                     ]),
                 ],
             ];

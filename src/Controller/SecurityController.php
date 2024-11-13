@@ -55,15 +55,15 @@ class SecurityController extends AbstractController
 
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
-            if ($type == 'admin') {
+            if ($type === 'admin') {
                 if ($this->isGranted('ROLE_ADMIN')) {
                     return $this->redirectToRoute('admin_page');
-                } else {
-                    $this->addFlash('error', 'Wrong credentials');
-                    return $this->redirectToRoute('saml_logout');
                 }
+
+                $this->addFlash('error', 'Wrong credentials');
+                return $this->redirectToRoute('saml_logout');
             }
-            if ($type == 'user' and $this->isGranted('ROLE_ADMIN')) {
+            if ($type === 'user' and $this->isGranted('ROLE_ADMIN')) {
                 $this->addFlash('error', 'Wrong credentials');
                 return $this->redirectToRoute('saml_logout');
             }
@@ -88,30 +88,30 @@ class SecurityController extends AbstractController
             $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
             if ($user) {
                 // If the user is found, set their email as the last username to pre-fill the email field
-                $lastUsername = $user->getEmail();
+                $lastUsername = $user->getUuid();
             }
         }
 
         // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
-            $this->addFlash('error', 'Wrong credentials');
+            $this->addFlash('error', $error->getMessage());
         }
 
-        if ($type == "admin") {
+        if ($type === "admin") {
             return $this->render('admin/login_landing.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
                 'data' => $data,
                 'form' => $form,
             ]);
-        } else {
-            return $this->render('site/login_landing.html.twig', [
-                'last_username' => $lastUsername,
-                'error' => $error,
-                'data' => $data,
-                'form' => $form,
-            ]);
         }
+
+        return $this->render('site/login_landing.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+            'data' => $data,
+            'form' => $form,
+        ]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

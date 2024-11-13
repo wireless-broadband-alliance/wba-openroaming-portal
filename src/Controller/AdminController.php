@@ -38,11 +38,14 @@ use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
+use DateMalformedStringException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use JsonException;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -342,7 +345,7 @@ class AdminController extends AbstractController
                 $sheet->setCellValueExplicit(
                     'B' . $row,
                     $this->escapeSpreadsheetValue($uuid),
-                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                    DataType::TYPE_STRING
                 );
             } else {
                 $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($uuid));
@@ -356,7 +359,7 @@ class AdminController extends AbstractController
                 $sheet->setCellValueExplicit(
                     'D' . $row,
                     $this->escapeSpreadsheetValue($phoneNumber),
-                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                    DataType::TYPE_STRING
                 );
             } else {
                 $sheet->setCellValue('D' . $row, '');
@@ -469,21 +472,23 @@ class AdminController extends AbstractController
             'user' => $deletedUserData,
             'externalAuths' => $deletedUserExternalAuthData,
         ];
-        $jsonDataCombined = json_encode($combinedData);
+        $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
 
         // Encrypt combined JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
 
         // Handle encryption errors
-        if ($pgpEncryptedData[0] == UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
+        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
                 'The public key is not set. 
             Make sure to define a public key in pgp_public_key/public_key.asc'
             );
             return $this->redirectToRoute('admin_page');
-        } elseif ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
+        }
+
+        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
                 'The public key is empty. 
@@ -603,7 +608,6 @@ class AdminController extends AbstractController
 
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
-                // Check if the admin is trying to ban himself
                 if ($currentUser->getId() === $user->getId()) {
                     $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
@@ -612,13 +616,11 @@ class AdminController extends AbstractController
                 $this->disableProfiles($user);
             } else {
                 $user->setBannedAt(null);
-                $this->enableProfiles($user);
-            }
-
-            if ($form->get('isVerified')->getData()) {
-                $this->enableProfiles($user);
-            } else {
-                $this->disableProfiles($user);
+                if ($form->get('isVerified')->getData()) {
+                    $this->enableProfiles($user);
+                } else {
+                    $this->disableProfiles($user);
+                }
             }
 
             $userRepository->save($user, true);
