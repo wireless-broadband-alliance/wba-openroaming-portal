@@ -2,6 +2,22 @@
 
 ---
 
+# Release V1.6.0
+
+- Fix bug on the date filtering on both statistics pages
+- Add a country dropdown for phone selection
+- Auto dele unconfirmed users  after a specific timeframe configurable by the admin
+- Separate user and admin login flows
+- Allow user or admin to revoke a radius profile
+- Fix Filtering results because don't reflect actual count for active filter
+- Fix LDAP Sync
+- Bypass account confirmation
+- Cookie banner
+- TOS Checkbox to enable/disable buttons
+- Fix missing unit of measurement for statistics
+
+---
+
 # Release V1.5.0
 
 - Update Php version to (php8.3)
