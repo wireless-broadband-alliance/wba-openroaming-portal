@@ -1,24 +1,24 @@
 import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["banner", "modal", "modalCookie", "analytics", "functional", "marketing"];
+    static targets = ["banner", "modalCookie", "consentForm"];
 
     connect() {
         console.log("CookieController connected");
+        this.cookieScopes = this.getCookiePreferences() || {
+            functional: false,
+            analytics: false,
+            marketing: false,
+        };
+        this.updateCheckboxes();
         this.checkCookies();
     }
 
     checkCookies() {
-        const cookiePreferences = this.getCookie("cookie_preferences");
-
-        if (cookiePreferences) {
-            // If cookies are already accepted, hide the banner
-            this.bannerTarget.classList.add("hidden");
-        } else {
-            // If not, show the banner
-            this.bannerTarget.classList.remove("hidden");
+        if (Object.values(this.cookieScopes).some(scope => scope)) {
+            this.hideBanner();
         }
-        console.log("Current cookies are: " + cookiePreferences);
+        console.log("Current cookies: ", this.cookieScopes);
     }
 
     showModal() {
@@ -26,49 +26,49 @@ export default class extends Controller {
     }
 
     acceptCookies() {
-        // Ensure all preferences are set to `true`
-        this.analyticsTarget.checked = true;
-        this.functionalTarget.checked = true;
-        this.marketingTarget.checked = true;
-
-        // Save preferences based on the updated checkbox states
-        const preferences = {
-            analytics: this.analyticsTarget.checked,
-            functional: this.functionalTarget.checked,
-            marketing: this.marketingTarget.checked,
-        };
-
-        this.setCookiePreferences(preferences);
-        this.closeModal();
-        this.bannerTarget.classList.add("hidden");
-
-        const cookiePreferences = this.getCookie("cookie_preferences");
-        console.log("Current cookies are: " + cookiePreferences);
+        Object.keys(this.cookieScopes).forEach(scope => {
+            this.cookieScopes[scope] = true;
+            this.updateCheckbox(scope, true);
+        });
+        this.setCookiePreferences();
+        this.hideBanner();
     }
 
     savePreferences() {
-        const preferences = {
-            analytics: this.analyticsTarget.checked,
-            functional: this.functionalTarget.checked,
-            marketing: this.marketingTarget.checked,
-        };
-
-        this.setCookiePreferences(preferences);
+        // Get checkbox values dynamically based on `data-scope`
+        this.consentFormTarget.querySelectorAll('[data-scope]').forEach(checkbox => {
+            const scope = checkbox.getAttribute('data-scope');
+            this.cookieScopes[scope] = checkbox.checked;
+        });
+        this.setCookiePreferences();
         this.closeModal();
+        this.hideBanner();
+    }
+
+    updateCheckbox(scope, checked) {
+        const checkbox = this.consentFormTarget.querySelector(`[data-scope="${scope}"]`);
+        if (checkbox) checkbox.checked = checked;
+    }
+
+    updateCheckboxes() {
+        // Update checkboxes on page load based on stored preferences
+        Object.entries(this.cookieScopes).forEach(([scope, checked]) => this.updateCheckbox(scope, checked));
+    }
+
+    hideBanner() {
         this.bannerTarget.classList.add("hidden");
-
-        const cookiePreferences = this.getCookie("cookie_preferences");
-        console.log("Current cookies after save: " + cookiePreferences);
     }
 
-    // Set cookie preferences
-    setCookiePreferences(preferences) {
-        document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
+    setCookiePreferences() {
+        document.cookie = "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
-    // Close the modal
+    getCookiePreferences() {
+        const cookie = this.getCookie("cookie_preferences");
+        return cookie ? JSON.parse(cookie) : null;
+    }
+
     closeModal() {
-        console.log("Cookie Modal Closed");
         this.modalCookieTarget.classList.add("hidden");
     }
 
