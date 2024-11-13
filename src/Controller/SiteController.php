@@ -676,14 +676,13 @@ class SiteController extends AbstractController
                         $entityManager->persist($user);
                         $entityManager->flush();
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber(
-                            )->getNationalNumber();
+                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
+                        // phpcs:enable
                         // Send SMS
                         $message = "Your new random account password is: "
                             . $randomPassword
                             . "%0A" . "Please make sure to login to complete the request";
                         $this->sendSMS->sendSmsReset($recipient, $message);
-                        // phpcs:enable
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
