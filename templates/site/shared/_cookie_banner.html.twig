@@ -26,16 +26,36 @@
             </div>
             <div {{ stimulus_target('cookie', 'consentForm') }}>
                 <div class="flex flex-col mx-4 space-y-4">
-                    {% for scope in ['functional', 'analytics', 'marketing'] %}
-                        <div class="flex items-center justify-between">
-                            <span>{{ scope|capitalize }} Cookies</span>
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" class="sr-only peer" data-scope="{{ scope }}">
-                                <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                            </label>
-                        </div>
-                    {% endfor %}
+
+                    {# Functional Cookies #}
+                    <div class="flex items-center justify-between">
+                        <span>Cookies that remember your settings</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" data-scope="functional">
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                        </label>
+                    </div>
+
+                    {# Analytics Cookies #}
+                    <div class="flex items-center justify-between">
+                        <span>Cookies that measure website use</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" data-scope="analytics">
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                        </label>
+                    </div>
+
+                    {# Marketing Cookies #}
+                    <div class="flex items-center justify-between">
+                        <span>Cookies for communications and marketing</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" data-scope="marketing">
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                        </label>
+                    </div>
+
                 </div>
+
                 <div class="mt-4">
                     <button class="flex justify-center items-center p-2 py-2 px-6 btn-primary"
                             data-action="cookie#savePreferences">Save settings
