@@ -11,10 +11,10 @@
             </div>
             <div class="mt-3 md:mt-0 flex justify-center md:justify-end space-x-3">
                 <button class="py-1 px-2 btn-secondary text-sm"
-                        data-action="cookie#showModal">Cookie settings
+                        data-action="cookie#showModal">Cookie Settings
                 </button>
                 <button class="py-1 px-2 btn-primary text-sm"
-                        data-action="cookie#acceptCookies">Accept cookies
+                        data-action="cookie#acceptCookies">Accept Cookies
                 </button>
             </div>
         </div>
@@ -32,24 +32,31 @@
                 </button>
             </div>
             {# Preferences List #}
-            <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                    <span>Cookies that remember your settings</span>
-                    <label>
-                        <input type="checkbox" checked class="form-checkbox" {{ stimulus_target('cookie', 'functional') }}>
-                    </label>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span>Cookies that measure website use</span>
-                    <label>
-                        <input type="checkbox" checked class="form-checkbox" {{ stimulus_target('cookie', 'analytics') }}>
-                    </label>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span>Cookies for communications and marketing</span>
-                    <label>
-                        <input type="checkbox" checked class="form-checkbox"{{ stimulus_target('cookie', 'marketing') }}>
-                    </label>
+            <div>
+                <div class="flex flex-col mx-4 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span>Cookies that remember your settings</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" {{ stimulus_target('cookie', 'functional') }}>
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span>Cookies that measure website use</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" {{ stimulus_target('cookie', 'analytics') }}>
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span>Cookies for communications and marketing</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" {{ stimulus_target('cookie', 'marketing') }}>
+                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                        </label>
+                    </div>
                 </div>
             </div>
 

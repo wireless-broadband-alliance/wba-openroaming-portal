@@ -1,7 +1,7 @@
 import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["banner", "modal", "modalCookie", "termsCheckbox", "analytics", "functional", "marketing"];
+    static targets = ["banner", "modal", "modalCookie", "analytics", "functional", "marketing"];
 
     connect() {
         console.log("CookieController connected");
@@ -33,7 +33,6 @@ export default class extends Controller {
         };
 
         this.setCookiePreferences(preferences);
-        this.setTermsAccepted();
         this.closeModal();
         this.bannerTarget.classList.add("hidden");
 
@@ -44,10 +43,6 @@ export default class extends Controller {
     // Set cookie preferences
     setCookiePreferences(preferences) {
         document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
-    }
-
-    setTermsAccepted() {
-        document.cookie = "terms_accepted=true; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     // Close the modal
