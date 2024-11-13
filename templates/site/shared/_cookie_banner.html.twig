@@ -56,10 +56,17 @@
 
                 </div>
 
-                <div class="mt-4">
-                    <button class="flex justify-center items-center p-2 py-2 px-6 btn-primary"
-                            data-action="cookie#savePreferences">Save settings
-                    </button>
+                <div class="p-2 mt-4 flex flex-row justify-between">
+                    <div class="mt-8">
+                        Your data is safe with us. Learn more in our
+                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                           class="underline text-primary font-semibold">Privacy Policy</a>.
+                    </div>
+                    <div class="mt-4">
+                        <button class="flex justify-center items-center p-2 py-2 px-6 btn-primary"
+                                data-action="cookie#savePreferences">Save settings
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
