@@ -26,6 +26,12 @@ export default class extends Controller {
     }
 
     acceptCookies() {
+        // Ensure all preferences are set to `true`
+        this.analyticsTarget.checked = true;
+        this.functionalTarget.checked = true;
+        this.marketingTarget.checked = true;
+
+        // Save preferences based on the updated checkbox states
         const preferences = {
             analytics: this.analyticsTarget.checked,
             functional: this.functionalTarget.checked,
@@ -38,6 +44,21 @@ export default class extends Controller {
 
         const cookiePreferences = this.getCookie("cookie_preferences");
         console.log("Current cookies are: " + cookiePreferences);
+    }
+
+    savePreferences() {
+        const preferences = {
+            analytics: this.analyticsTarget.checked,
+            functional: this.functionalTarget.checked,
+            marketing: this.marketingTarget.checked,
+        };
+
+        this.setCookiePreferences(preferences);
+        this.closeModal();
+        this.bannerTarget.classList.add("hidden");
+
+        const cookiePreferences = this.getCookie("cookie_preferences");
+        console.log("Current cookies after save: " + cookiePreferences);
     }
 
     // Set cookie preferences

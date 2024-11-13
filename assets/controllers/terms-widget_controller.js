@@ -15,7 +15,7 @@ export default class extends Controller {
     }
 
     toggleSubmitButtons() {
-        console.log(`Checkbox checked: ${this.agreeTermsTarget.checked}`);
+        console.log(`Checkbox terms: ${this.agreeTermsTarget.checked}`);
 
         // For each submit button add `btn-disabled` based on checkbox status
         for (let button of this.buttonTargets) {
