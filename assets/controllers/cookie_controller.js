@@ -18,7 +18,7 @@ export default class extends Controller {
         if (Object.values(this.cookieScopes).some(scope => scope)) {
             this.hideBanner();
         }
-        console.log("Current cookies: ", this.cookieScopes);
+        // console.log("Current cookies: ", this.cookieScopes);
     }
 
     showModal() {
