@@ -1,18 +1,28 @@
 # 🌐︎ OpenRoaming Provisioning Portal
 
-Welcome to the OpenRoaming Provisioning Portal! This repository provides a **reference implementation designed to baseline the industry** on the necessary components for developing an enabler component of OpenRoaming.
+Welcome to the OpenRoaming Provisioning Portal! This repository provides a **reference implementation designed to
+baseline the industry** on the necessary components for developing an enabler component of OpenRoaming.
 
 ## Why it was created?
 
-The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users across various environments.
+The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
+Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users
+across various environments.
 
-The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
+The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open
+networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
 ## How it works?
 
-OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes digital certificates and secure authentication mechanisms to **ensure a seamless and secure connection experience**. This technology allows users to quickly switch between Wi-Fi networks—such as public hotspots, venues, residencies, corporate networks, and other places—without delays or multiple logins.
+OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With
+OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes
+digital certificates and secure authentication mechanisms to **ensure a seamless and secure connection experience**.
+This technology allows users to quickly switch between Wi-Fi networks—such as public hotspots, venues, residencies,
+corporate networks, and other places—without delays or multiple logins.
 
-Each user is provided with a unique and secure profile that caters to their specific needs and preferences. The OpenRoaming Provisioning Portal simplifies the setup and configuration process for network administrators, acting as a key enabler for OpenRoaming technology.
+Each user is provided with a unique and secure profile that caters to their specific needs and preferences. The
+OpenRoaming Provisioning Portal simplifies the setup and configuration process for network administrators, acting as a
+key enabler for OpenRoaming technology.
 
 For more information about OpenRoaming Technology please visit: https://openroaming.org
 
@@ -184,15 +194,14 @@ Below is an overview of the different variables and their functions:
 - `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
 
 These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
-  `SENTRY_DSN`& `TRUSTED_PROXIES`.
+`SENTRY_DSN`& `TRUSTED_PROXIES`.
 
-- `ENABLE_DELETE_USERS_UI=OFF`: Shows a button on the UI, to be able to remove users from the
+- `ENABLE_DELETE_USERS_UI`: Shows a button on the UI, to be able to remove users from the
   portal.
   This action doesn't remove users, only encrypts the data with PGP (Pretty Good Privacy).
-  
-Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc) 
-  **do not create keys on the production server**.
 
+Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
+**do not create keys on the production server**.
 
 ### Google Authenticator Credentials
 
@@ -224,7 +233,7 @@ This property it's required to authenticate users if one of them doesn't have an
 
 ### 👾 Turnstile Integration
 
-These last two are used to configure the Turnstile integration with the portal, to check and validate actual users.
+These two are used to configure the Turnstile integration with the portal, to check and validate actual users.
 
 - `TURNSTILE_KEY`: Stores the public key for Cloudflare Turnstile integration.
 - `TURNSTILE_SECRET`: Holds the secret key for Cloudflare Turnstile integration.
@@ -234,6 +243,28 @@ link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile
 
 And for any **production deployment**, please follow the
 link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
+
+### 🕷️ API Platform
+
+The following configurations are required for the API of the project.
+
+- `CORS_ALLOW_ORIGIN`: Required to let the project know which domain is able to use the API
+
+#### 🪙 Jwt Tokens
+
+If you are planning using the API, please make sure to run the following command on the root folder of the container
+project:
+
+```bash
+php bin/console lexik:jwt:generate-keypair
+```
+
+A **public** && **private** keys will be automatically generated. If you want to know where they will be placed, please
+check the `.env.sample`.
+
+- `JWT_SECRET_KEY`: The secret defined for the key.
+- `JWT_PUBLIC_KEY`: The public key location.
+- `JWT_PASSPHRASE`: The private key location.
 
 ### 🛠️ Settings Table
 
