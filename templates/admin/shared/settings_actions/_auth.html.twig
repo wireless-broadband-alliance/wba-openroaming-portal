@@ -11,7 +11,7 @@
                 {# Display only the authentication settings #}
                 {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -100,7 +100,7 @@
                     {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                              name="GoogleCards"
-                             id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                             id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                             {# Title and Icon #}
                             <div class="flex flex-row justify-between">
                                 <div class="text-base font-medium text-center break-normal md:break-all">
@@ -234,7 +234,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="RegisterCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -321,7 +321,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="SMSRegisterCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -408,7 +408,7 @@
                 {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="LoginCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
