@@ -7,7 +7,7 @@ export default class extends Controller {
         console.log('TermsWidgetController connected');
 
         // Check if the "functional" cookie is set to true
-        if (this.getCookie("cookie_preferences")?.functional === true) {
+        if (this.getCookie("cookie_preferences")?.terms === true) {
             this.agreeTermsTarget.checked = true; // Auto-check the checkbox
         }
 
