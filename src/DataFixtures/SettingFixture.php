@@ -82,7 +82,11 @@ class SettingFixture extends Fixture
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
             ['name' => 'USER_DELETE_TIME', 'value' => '5'],
             ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
-            ['name' => 'PROFILE_LIMIT_DATE', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SMAL', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_LOGIN', 'value' => '5'],
         ];
 
         foreach ($settings as $settingData) {

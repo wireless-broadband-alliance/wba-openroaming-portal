@@ -131,19 +131,6 @@ class RadiusType extends AbstractType
                     ]),
                 ],
             ],
-            'PROFILE_LIMIT_DATE' => [
-                'type' => IntegerType::class,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please select an option',
-                    ]),
-                    new Range([
-                        'min' => 5,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
-                ],
-            ],
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
@@ -180,7 +167,6 @@ class RadiusType extends AbstractType
     {
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
-            'profileLimitDate' => null
         ]);
     }
 }

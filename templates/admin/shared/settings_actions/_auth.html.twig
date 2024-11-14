@@ -9,7 +9,7 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                             {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
@@ -19,6 +19,7 @@
                                     'AUTH_METHOD_SAML_ENABLED': 'Mode',
                                     'AUTH_METHOD_SAML_LABEL': 'Label',
                                     'AUTH_METHOD_SAML_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_SMAL': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
 
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
@@ -30,7 +31,7 @@
                             </label>
                         </div>
 
-                        {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
+                        {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
@@ -96,7 +97,7 @@
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
                 {% for setting in form %}
                     {# Display only the authentication settings #}
-                    {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
+                    {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                              name="GoogleCards"
                              id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
@@ -107,6 +108,7 @@
                                         'AUTH_METHOD_GOOGLE_LOGIN_ENABLED': 'Mode',
                                         'AUTH_METHOD_GOOGLE_LOGIN_LABEL': 'Label',
                                         'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION': 'Description',
+                                        'PROFILE_LIMIT_DATE_GOOGLE': 'Time to disable profiles(days)',
                                     }[setting.vars.name] ?? setting.vars.name %}
                                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                                 </div>
@@ -117,7 +119,7 @@
                                          alt="info_icon"/>
                                 </label>
                             </div>
-                            {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
+                            {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %}
                                 <div class="flex items-center space-x-2 mt-5">
                                     {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input' }}) }}
                                 </div>
@@ -229,7 +231,7 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="RegisterCards"
                          id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
@@ -240,6 +242,7 @@
                                     'AUTH_METHOD_REGISTER_ENABLED': 'Mode',
                                     'AUTH_METHOD_REGISTER_LABEL': 'Label',
                                     'AUTH_METHOD_REGISTER_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_EMAIL': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -250,7 +253,7 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
+                        {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
@@ -315,7 +318,7 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="SMSRegisterCards"
                          id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
@@ -326,6 +329,7 @@
                                     'AUTH_METHOD_SMS_REGISTER_ENABLED': 'Mode',
                                     'AUTH_METHOD_SMS_REGISTER_LABEL': 'Label',
                                     'AUTH_METHOD_SMS_REGISTER_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_SMS': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -336,7 +340,7 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
+                        {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
@@ -401,7 +405,7 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="LoginCards"
                          id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
@@ -412,6 +416,7 @@
                                     'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED': 'Mode',
                                     'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL': 'Label',
                                     'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_LOGIN': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -422,7 +427,7 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
+                        {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>

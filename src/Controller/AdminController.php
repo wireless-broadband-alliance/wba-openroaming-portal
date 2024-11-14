@@ -1215,18 +1215,8 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings, CerteficateService $certeficateService): Response
+    public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
-        $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
-        $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
-        $realTime = time();
-        $timeLeft = round(($certificateLimitDate - $realTime) /(60*60*24)) - 1;
-        if ($timeLeft > 90) {
-            $profileLimitDate = 90;
-        }
-        else {
-            $profileLimitDate = $timeLeft;
-        }
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1237,7 +1227,6 @@ class AdminController extends AbstractController
 
         $form = $this->createForm(RadiusType::class, null, [
             'settings' => $settings,
-            'profileLimitDate' => $profileLimitDate,
         ]);
 
         $form->handleRequest($request);
@@ -1259,7 +1248,6 @@ class AdminController extends AbstractController
                     'NAI_REALM',
                     'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
                     'PROFILES_ENCRYPTION_TYPE_IOS_ONLY',
-                    'PROFILE_LIMIT_DATE'
                 ];
 
                 foreach ($settingsToUpdate as $settingName) {
@@ -1485,7 +1473,8 @@ class AdminController extends AbstractController
     public function settingsAuths(
         Request $request,
         EntityManagerInterface $em,
-        GetSettings $getSettings
+        GetSettings $getSettings,
+        CerteficateService $certeficateService
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1495,8 +1484,20 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
+        $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
+        $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
+        $realTime = time();
+        $timeLeft = round(($certificateLimitDate - $realTime) /(60*60*24)) - 1;
+        if ($timeLeft > 90) {
+            $profileLimitDate = 90;
+        }
+        else {
+            $profileLimitDate = $timeLeft;
+        }
+
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
+            'profileLimitDate' => $profileLimitDate
         ]);
 
         $form->handleRequest($request);
@@ -1509,23 +1510,28 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_SAML_ENABLED',
                 'AUTH_METHOD_SAML_LABEL',
                 'AUTH_METHOD_SAML_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_SMAL',
 
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
                 'VALID_DOMAINS_GOOGLE_LOGIN',
+                'PROFILE_LIMIT_DATE_GOOGLE',
 
                 'AUTH_METHOD_REGISTER_ENABLED',
                 'AUTH_METHOD_REGISTER_LABEL',
                 'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_EMAIL',
 
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_LOGIN',
 
                 'AUTH_METHOD_SMS_REGISTER_ENABLED',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
                 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_SMS',
             ];
 
             $labelsFields = [
@@ -1565,13 +1571,13 @@ class AdminController extends AbstractController
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
+
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST,
                 new DateTime(),
                 $eventMetadata
             );
-
             $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
