@@ -1487,11 +1487,10 @@ class AdminController extends AbstractController
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
-        $timeLeft = round(($certificateLimitDate - $realTime) /(60*60*24)) - 1;
+        $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         if ($timeLeft > 90) {
             $profileLimitDate = 90;
-        }
-        else {
+        } else {
             $profileLimitDate = $timeLeft;
         }
 

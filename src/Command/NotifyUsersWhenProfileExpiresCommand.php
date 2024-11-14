@@ -23,7 +23,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class NotifyUsersWhenProfileExpiresCommand extends Command
 {
-
     private EntityManagerInterface $entityManager;
     public ProfileManager $profileManager;
     public PgpEncryptionService $pgpEncryptionService;
@@ -45,7 +44,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $this->registrationEmailGenerator = $registrationEmailGenerator;
     }
 
-    public function notifyUsersWhenProfileExpires (OutputInterface $output): void
+    public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
         $userRadiusProfileRepository = $this->entityManager->getRepository(UserRadiusProfile::class);
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
@@ -63,18 +62,15 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $limitTime->modify("+ {$timeToExpire} days");
             /** @var \DateTime $alertTime */
             $alertTime->modify("+ {$timeToNotify} days");
-            if (($alertTime < $realTime) && ($limitTime > $realTime) && $userRadiusProfile->getStatus() == 1)
-            {
+            if (($alertTime < $realTime) && ($limitTime > $realTime) && $userRadiusProfile->getStatus() == 1) {
                 $user = $userRadiusProfile->getUser();
                 if ($user->getEmail()) {
                     $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user);
-                }
-                elseif ($user->getPhoneNumber()) {
-                    $this->sendSMS->sendSms($user->getPhoneNumber(),'your profile will expire within 3 days');
+                } elseif ($user->getPhoneNumber()) {
+                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within 3 days');
                 }
             }
-            if ($limitTime < $realTime && $userRadiusProfile->getStatus() == 1)
-            {
+            if ($limitTime < $realTime && $userRadiusProfile->getStatus() == 1) {
                 $userRadiusProfile->setStatus(2);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
@@ -89,5 +85,4 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
         return Command::SUCCESS;
     }
-
 }
