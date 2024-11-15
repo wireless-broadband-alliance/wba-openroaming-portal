@@ -56,32 +56,27 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
-            }
-            elseif ($authenticationMethod->getProvider() == 'SAMLL Account') {
+            } elseif ($authenticationMethod->getProvider() == 'SAMLL Account') {
                 $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SAML']);
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
-            }
-            elseif ($authenticationMethod->getProvider() == 'Portal Account') {
+            } elseif ($authenticationMethod->getProvider() == 'Portal Account') {
                 if ($userRadiusProfile->getUser()->getEmail()) {
                     $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL']);
                     $timeString = $settingTime[0]->getValue();
                     $timeToExpire = (int)$timeString;
                     $timeToNotify = round($timeToExpire * 0.9);
-                }
-                elseif ($userRadiusProfile->getUser()->getEmail()) {
+                } elseif ($userRadiusProfile->getUser()->getEmail()) {
                     $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SMS']);
                     $timeString = $settingTime[0]->getValue();
                     $timeToExpire = (int)$timeString;
                     $timeToNotify = round($timeToExpire * 0.9);
-                }
-                else {
+                } else {
                     $timeToExpire = 90;
                     $timeToNotify = round($timeToExpire * 0.9);
                 }
-            }
-            else {
+            } else {
                 $timeToExpire = 90;
                 $timeToNotify = round($timeToExpire * 0.9);
             }
@@ -94,13 +89,14 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             /** @var \DateTime $alertTime */
             $alertTime->modify("+ {$timeToNotify} days");
             $timeLeft = $limitTime->diff($realTime);
-            $timeLeftDays = $timeLeft->days +1;
+            $timeLeftDays = $timeLeft->days + 1;
             if (($alertTime < $realTime) && ($limitTime > $realTime) && $userRadiusProfile->getStatus() == 1) {
                 $user = $userRadiusProfile->getUser();
                 if ($user->getEmail()) {
                     $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays);
                 } elseif ($user->getPhoneNumber()) {
-                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within ' . $timeLeftDays . ' days');
+                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within ' .
+                        $timeLeftDays . ' days');
                 }
             }
             if ($limitTime < $realTime && $userRadiusProfile->getStatus() == 1) {
