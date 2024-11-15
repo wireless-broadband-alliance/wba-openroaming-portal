@@ -425,7 +425,6 @@ class GetSettings
             'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disabel profiles for users with GOOGLE login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disabel profiles for users with EMAIL login',
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disabel profiles for users with SMS login',
-            'PROFILE_LIMIT_DATE_LOGIN' => 'Time in days to disabel profiles for users with login method',
         ];
 
         return $descriptions[$settingName] ?? '';
