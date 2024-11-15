@@ -9,9 +9,9 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -19,7 +19,7 @@
                                     'AUTH_METHOD_SAML_ENABLED': 'Mode',
                                     'AUTH_METHOD_SAML_LABEL': 'Label',
                                     'AUTH_METHOD_SAML_DESCRIPTION': 'Description',
-                                    'PROFILE_LIMIT_DATE_SMAL': 'Time to disable profiles(days)',
+                                    'PROFILE_LIMIT_DATE_SAML': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
 
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
@@ -31,7 +31,7 @@
                             </label>
                         </div>
 
-                        {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMAL'] %}
+                        {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>
@@ -405,10 +405,10 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="LoginCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -416,7 +416,6 @@
                                     'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED': 'Mode',
                                     'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL': 'Label',
                                     'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION': 'Description',
-                                    'PROFILE_LIMIT_DATE_LOGIN': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -427,7 +426,7 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'PROFILE_LIMIT_DATE_LOGIN'] %}
+                        {% if setting.vars.name in ['AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
                             </div>

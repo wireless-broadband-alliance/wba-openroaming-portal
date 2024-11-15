@@ -58,7 +58,7 @@ class AuthType extends AbstractType
                 ],
             ],
 
-            'PROFILE_LIMIT_DATE_SMAL' => [
+            'PROFILE_LIMIT_DATE_SAML' => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
@@ -199,20 +199,6 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
                         ]),
                     ],
-                ],
-            ],
-
-            'PROFILE_LIMIT_DATE_LOGIN' => [
-                'type' => IntegerType::class,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please select an option',
-                    ]),
-                    new Range([
-                        'min' => 5,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
                 ],
             ],
 

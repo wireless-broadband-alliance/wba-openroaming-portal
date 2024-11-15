@@ -53,7 +53,7 @@ class RegistrationEmailGenerator
         $this->mailer->send($email);
     }
 
-    public function sendNotifyExpiresProfileEmail(User $user): void
+    public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
         // Send email to the user with the verification code
         $email = (new TemplatedEmail())
@@ -68,6 +68,7 @@ class RegistrationEmailGenerator
             ->htmlTemplate('email/expiresProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
+                'timeLeft' => $timeLeft
             ]);
 
         $this->mailer->send($email);
