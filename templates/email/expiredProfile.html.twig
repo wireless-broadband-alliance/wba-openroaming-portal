@@ -11,16 +11,10 @@
     <div class="bg-white rounded-[18px] p-6 shadow-md">
         <h1 class="text-3xl font-bold">Your OpenRoaming Profile is about to expire</h1>
         <p class="mt-6 text-lg">
-            your profile will expire within {{ timeLeft }} days
+            Your profile will expire within {{ timeLeft }} days
+            <br>
+            To renew your profile, access the portal and download new profiles
         </p>
-        <li>Click
-            <a class="font-bold text-[#7BBA29] underline"
-               href="{{ absolute_url(path('app_landing')) }}">here</a>
-            to confirm your account
-        </li>
-        <ol class="mt-2 text-lg list-decimal list-inside">
-            <li>To renew your profile, access the portal and download new profiles</li>
-        </ol>
         <p class="mt-6 text-lg">
             Thank you,<br>
             OpenRoaming Portal Support Team

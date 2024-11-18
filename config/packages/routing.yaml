@@ -1,6 +1,7 @@
 framework:
     router:
         utf8: true
+        default_uri: 'http://127.0.0.1:80'
 
         # Configure how to generate URLs in non-HTTP contexts, such as CLI commands.
         # See https://symfony.com/doc/current/routing.html#generating-urls-in-commands

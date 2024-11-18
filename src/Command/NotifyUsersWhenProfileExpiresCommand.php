@@ -9,11 +9,15 @@ use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use Doctrine\ORM\EntityManagerInterface;
-use http\Client\Curl\User;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsCommand(
     name: 'notify:usersWhenProfileExpires',
@@ -44,6 +48,14 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $this->registrationEmailGenerator = $registrationEmailGenerator;
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws NonUniqueResultException
+     * @throws ClientExceptionInterface
+     */
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
         $userRadiusProfileRepository = $this->entityManager->getRepository(UserRadiusProfile::class);
@@ -101,6 +113,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             }
             if ($limitTime < $realTime && $userRadiusProfile->getStatus() == 1) {
                 $userRadiusProfile->setStatus(2);
+                //$this->registrationEmailGenerator->sendNotifyExpiredProfile($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
             }
