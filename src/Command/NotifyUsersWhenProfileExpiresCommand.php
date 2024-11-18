@@ -86,7 +86,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     $timeString = $settingTime[0]->getValue();
                     $timeToExpire = (int)$timeString;
                     $timeToNotify = round($timeToExpire * 0.9);
-                } elseif ($userRadiusProfile->getUser()->getEmail()) {
+                } elseif ($userRadiusProfile->getUser()->getPhoneNumber()) {
                     $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SMS']);
                     $timeString = $settingTime[0]->getValue();
                     $timeToExpire = (int)$timeString;
