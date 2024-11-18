@@ -7,8 +7,8 @@ export default class extends Controller {
         console.log("CookieController connected");
         this.cookieScopes = this.getCookiePreferences() || {
             terms: false,
-            analytics: false,
-            marketing: false,
+            // analytics: false,
+            // marketing: false,
         };
         this.updateCheckboxes();
         this.checkCookies();

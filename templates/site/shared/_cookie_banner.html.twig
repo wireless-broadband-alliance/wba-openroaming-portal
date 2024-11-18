@@ -1,7 +1,8 @@
 <div {{ stimulus_controller('cookie') }} class="flex items-center justify-center relative">
 
     {# Cookie Banner #}
-    <section class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10" {{ stimulus_target('cookie', 'banner') }}>
+    <section
+            class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10" {{ stimulus_target('cookie', 'banner') }}>
         <div class="md:flex items-center">
             <div class="md:flex-1 text-center md:text-left text-xs">
                 By accepting cookies, you consent to downloading and installing an OpenRoaming profile for your device
@@ -16,53 +17,140 @@
 
     {# Cookie Preferences Modal #}
     <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" {{ stimulus_target('cookie', 'modalCookie') }}>
-        <div class="bg-white w-11/12 md:w-1/2 rounded shadow p-6 space-y-4">
+        <div class="bg-white w-full lg:w-1/2 p-6 mx-4 rounded shadow space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h2 class="text-lg font-bold">Cookie Settings</h2>
                 <button class="text-gray-400 hover:text-gray-800" data-action="cookie#closeModal">
                     <twig:ux:icon name="wba:cross" fill="none"/>
                 </button>
             </div>
+
+            <div class="flex justify-center">
+                {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                    <img class="w-[170px] h-[58px] object-scale-down object-right mb-4"
+                         src="{{ data.customerLogoName.value }}" alt="Logo"/>
+                {% endif %}
+            </div>
+
+            <div class="text-center text-sm text-gray-700">
+                <p>
+                    This platform uses cookies to provide a seamless experience when connecting to the OpenRoaming
+                    network.
+                    These cookies are essential for provisioning your device securely, enabling automatic
+                    authentication,
+                    and ensuring compliance with our policies. By using our platform, you consent to the use of these
+                    cookies.
+                </p>
+            </div>
+
             <div {{ stimulus_target('cookie', 'consentForm') }}>
                 <div class="flex flex-col mx-4 space-y-4">
 
-                    {# Terms && Policies Cookies #}
-                    <div class="flex items-center justify-between">
-                        <span>Cookies - Agree with terms and policies</span>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" data-scope="terms">
-                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                        </label>
+                    {# Necessary Cookies Section #}
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="font-semibold">Necessary Cookies</h3>
+                        <p class="text-sm">
+                            These cookies are essential for the platform to function properly and cannot be disabled.
+                        </p>
+                        <ul class="list-disc list-inside text-sm">
+                            <li>
+                                <strong>Session Cookie</strong> - Maintains user session state.
+                                <span>Controlled by: <a
+                                            class="underline text-primary font-semibold"
+                                            href="{{ path('app_landing') }}">{{ app.request.getHost() }}</a></span>.
+                            </li>
+                            <li>
+                                <strong>CSRF Token</strong> - Protects against cross-site request forgery.
+                                <span>Controlled by: <a
+                                            class="underline text-primary font-semibold"
+                                            href="{{ path('app_landing') }}">{{ app.request.getHost() }}</a></span>.
+                            </li>
+                        </ul>
                     </div>
 
-                    {# Analytics Cookies #}
-                    <div class="flex items-center justify-between">
-                        <span>Cookies that measure website use</span>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" data-scope="analytics">
-                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                        </label>
+                    {# Terms & Policies Cookies #}
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="font-semibold">Preferences Cookies</h3>
+                        <p class="text-sm">
+                            These cookies help save your preferences and provide a personalized experience on our
+                            platform.
+                        </p>
+                        <ul class="list-disc list-inside text-sm">
+                            <li class="flex justify-between items-center">
+                                <div>
+                                    <strong>Terms & Policies</strong> - We use these cookies to track user consent and
+                                    interactions with our platform.
+                                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                       class="underline text-primary font-semibold" target="_blank">Privacy Policy</a>
+                                    and
+                                    <a href="{{ data.TOS_LINK.value }}"
+                                       class="underline text-primary font-semibold" target="_blank">Terms &
+                                        Conditions</a>.
+                                </div>
+                                <label class="mb-4 inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" data-scope="terms">
+                                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                </label>
+                            </li>
+                        </ul>
                     </div>
 
-                    {# Marketing Cookies #}
-                    <div class="flex items-center justify-between">
-                        <span>Cookies for communications and marketing</span>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" data-scope="marketing">
-                            <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                        </label>
+                    {# Analytics Cookies Section
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="font-semibold">Analytics Cookies</h3>
+                        <p class="text-sm">
+                            These cookies help us understand how our platform is used.
+                        </p>
+                        <ul class="list-disc list-inside text-sm">
+                            <li class="flex justify-between items-center">
+                                <div>
+                                    <strong>Google Analytics</strong> - Tracks user interactions on the platform.
+                                    Controlled by:
+                                    <a href="https://policies.google.com/privacy"
+                                       class="underline text-primary font-semibold" target="_blank">Google Privacy
+                                        Policy</a>.
+                                </div>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" data-scope="analytics">
+                                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                </label>
+                            </li>
+                        </ul>
                     </div>
-
+                    #}
+                    {# Marketing Cookies Section - Commented for later if needed
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="font-semibold">Marketing Cookies</h3>
+                        <p class="text-sm">
+                            These cookies are used for advertising and marketing purposes.
+                        </p>
+                        <ul class="list-disc list-inside text-sm">
+                            <li class="flex justify-between items-center">
+                                <div>
+                                    <strong>Facebook Pixel</strong> - Tracks user behavior for targeted advertising.
+                                    Controlled by:
+                                    <a href="https://www.facebook.com/policy.php"
+                                       class="underline text-primary font-semibold" target="_blank">Facebook Privacy
+                                        Policy</a>.
+                                </div>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" data-scope="marketing">
+                                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    #}
                 </div>
 
-                <div class="p-2 mt-4 flex flex-row justify-between">
-                    <div class="mt-8">
+                <div class="mt-8 p-2 flex flex-col md:flex-row md:justify-between justify-center">
+                    <div>
                         Your data is safe with us. Learn more in our
                         <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
                            class="underline text-primary font-semibold">Privacy Policy</a>.
                     </div>
-                    <div class="mt-4">
-                        <button class="flex justify-center items-center p-2 py-2 px-6 btn-primary"
+                    <div>
+                        <button class="mt-4 md:mt-0 btn-primary"
                                 data-action="cookie#savePreferences">Apply Cookies
                         </button>
                     </div>
