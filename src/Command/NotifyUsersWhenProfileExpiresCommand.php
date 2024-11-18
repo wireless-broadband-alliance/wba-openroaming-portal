@@ -25,8 +25,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
     name: 'notify:usersWhenProfileExpires',
     description: 'Notify users when profile is about to expire based on the provider it has used',
 )]
-
-
 class NotifyUsersWhenProfileExpiresCommand extends Command
 {
     private EntityManagerInterface $entityManager;
@@ -66,8 +64,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             if ($userRadiusProfile->getUser()) {
                 $authenticationMethod = $userRadiusProfile->getUser()->getUserExternalAuths()[0];
-            }
-            else {
+            } else {
                 $authenticationMethod = null;
             }
             if ($authenticationMethod->getProvider() === UserProvider::GOOGLE_ACCOUNT) {
@@ -75,12 +72,14 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
-            } elseif ($authenticationMethod->getProvider() === UserProvider::SAML) {
+            }
+            if ($authenticationMethod->getProvider() === UserProvider::SAML) {
                 $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SAML']);
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
-            } elseif ($authenticationMethod->getProvider() === UserProvider::PORTAL_ACCOUNT) {
+            }
+            if ($authenticationMethod->getProvider() === UserProvider::PORTAL_ACCOUNT) {
                 if ($userRadiusProfile->getUser()->getEmail()) {
                     $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL']);
                     $timeString = $settingTime[0]->getValue();
@@ -115,8 +114,11 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     if ($user->getEmail()) {
                         $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays);
                     } elseif ($user->getPhoneNumber()) {
-                        $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within ' .
-                            $timeLeftDays . ' days');
+                        $this->sendSMS->sendSms(
+                            $user->getPhoneNumber(),
+                            'your profile will expire within ' .
+                            $timeLeftDays . ' days'
+                        );
                     }
                 }
             }
