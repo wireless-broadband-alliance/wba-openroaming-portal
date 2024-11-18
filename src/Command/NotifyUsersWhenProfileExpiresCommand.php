@@ -4,10 +4,12 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\UserRadiusProfile;
+use App\Enum\UserProvider;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -62,18 +64,23 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $userRadiusProfiles = $userRadiusProfileRepository->findAll();
         foreach ($userRadiusProfiles as $userRadiusProfile) {
-            $authenticationMethod = $userRadiusProfile->getUser()->getUserExternalAuths()[0];
-            if ($authenticationMethod->getProvider() == 'Google Account') {
+            if ($userRadiusProfile->getUser()) {
+                $authenticationMethod = $userRadiusProfile->getUser()->getUserExternalAuths()[0];
+            }
+            else {
+                $authenticationMethod = null;
+            }
+            if ($authenticationMethod->getProvider() === UserProvider::GOOGLE_ACCOUNT) {
                 $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE']);
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
-            } elseif ($authenticationMethod->getProvider() == 'SAMLL Account') {
+            } elseif ($authenticationMethod->getProvider() === UserProvider::SAML) {
                 $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SAML']);
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
-            } elseif ($authenticationMethod->getProvider() == 'Portal Account') {
+            } elseif ($authenticationMethod->getProvider() === UserProvider::PORTAL_ACCOUNT) {
                 if ($userRadiusProfile->getUser()->getEmail()) {
                     $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL']);
                     $timeString = $settingTime[0]->getValue();
@@ -95,29 +102,35 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $limitTime = clone $userRadiusProfile->getIssuedAt();
             $alertTime = clone $userRadiusProfile->getIssuedAt();
 
-            /** @var \DateTime $limitTime */
-            $realTime = new \DateTime();
+            /** @var DateTime $limitTime */
+            $realTime = new DateTime();
             $limitTime->modify("+ {$timeToExpire} days");
-            /** @var \DateTime $alertTime */
+            /** @var DateTime $alertTime */
             $alertTime->modify("+ {$timeToNotify} days");
             $timeLeft = $limitTime->diff($realTime);
             $timeLeftDays = $timeLeft->days + 1;
-            if (($alertTime < $realTime) && ($limitTime > $realTime) && $userRadiusProfile->getStatus() == 1) {
-                $user = $userRadiusProfile->getUser();
-                if ($user->getEmail()) {
-                    $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays);
-                } elseif ($user->getPhoneNumber()) {
-                    $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within ' .
-                        $timeLeftDays . ' days');
+            $user = $userRadiusProfile->getUser();
+            if ($user) {
+                if (($alertTime < $realTime) && ($limitTime > $realTime) && $userRadiusProfile->getStatus() == 1) {
+                    if ($user->getEmail()) {
+                        $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays);
+                    } elseif ($user->getPhoneNumber()) {
+                        $this->sendSMS->sendSms($user->getPhoneNumber(), 'your profile will expire within ' .
+                            $timeLeftDays . ' days');
+                    }
                 }
             }
             if ($limitTime < $realTime && $userRadiusProfile->getStatus() == 1) {
-                $userRadiusProfile->setStatus(2);
-                //$this->registrationEmailGenerator->sendNotifyExpiredProfile($user);
+                $this->disableProfiles($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
             }
         }
+    }
+
+    private function disableProfiles($user): void
+    {
+        $this->profileManager->disableProfiles($user);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

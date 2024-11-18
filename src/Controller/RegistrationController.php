@@ -161,7 +161,6 @@ class RegistrationController extends AbstractController
                 );
 
                 $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
-                $this->emailGenerator->sendNotifyExpiresProfileEmail($user, 1);
 
                 $this->addFlash('success', 'We have sent an email with your account password and verification code');
             }
