@@ -73,7 +73,7 @@ class RegistrationEmailGenerator
                 'uuid' => $user->getEmail(),
                 'timeLeft' => $timeLeft,
             ]);
-
+        dd($email);
         $this->mailer->send($email);
     }
 

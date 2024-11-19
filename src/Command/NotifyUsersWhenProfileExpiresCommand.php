@@ -117,13 +117,30 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $realTime = new DateTime();
 
             $timeLeft = $limitTime->diff($realTime);
-            $timeLeftDays = $timeLeft->days + 1;
+            $timeLeftDays = $timeLeft->invert === 0 ? $timeLeft->days + 1 : 0; // Handle past time correctly
+
+            // Debug key time values
+            dd([
+                'issuedAt' => $userRadiusProfile->getIssuedAt()->format('Y-m-d H:i:s'),
+                'timeToExpire' => $timeToExpire,
+                'timeToNotify' => $timeToNotify,
+                'limitTime' => $limitTime->format('Y-m-d H:i:s'),
+                'alertTime' => $alertTime->format('Y-m-d H:i:s'),
+                'realTime' => $realTime->format('Y-m-d H:i:s'),
+                'profileStatus' => $userRadiusProfile->getStatus(),
+            ]);
 
             // Notify user if within alert window
-            if ($alertTime < $realTime && $limitTime > $realTime && $userRadiusProfile->getStatus() === 1) {
+            if (
+                $realTime >= $alertTime &&
+                $realTime <= $limitTime &&
+                $userRadiusProfile->getStatus() === 1
+            ) {
                 if ($user->getEmail()) {
                     $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays);
-                } elseif ($user->getPhoneNumber()) {
+                    dd("Email send");
+                }
+                if ($user->getPhoneNumber()) {
                     $this->sendSMS->sendSms(
                         $user->getPhoneNumber(),
                         'Your profile will expire in ' . $timeLeftDays . ' days.'
@@ -132,7 +149,10 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             }
 
             // Disable profile if expired
-            if ($limitTime < $realTime && $userRadiusProfile->getStatus() === 1) {
+            if (
+                $realTime > $limitTime &&
+                $userRadiusProfile->getStatus() === 1
+            ) {
                 $this->disableProfiles($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
