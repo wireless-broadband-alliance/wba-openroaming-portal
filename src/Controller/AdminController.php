@@ -23,7 +23,6 @@ use App\Form\RevokeProfilesType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
-use App\Form\UserExternalAuthType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
@@ -38,13 +37,11 @@ use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
-use DateMalformedStringException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
-use JsonException;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -420,15 +417,15 @@ class AdminController extends AbstractController
     /**
      * @param $id
      * @param EntityManagerInterface $em
-     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param Request $request
      * @return Response
+     * @throws \JsonException
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
         $id,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher,
         Request $request
     ): Response {
         $user = $this->userRepository->find($id);
@@ -1255,14 +1252,16 @@ class AdminController extends AbstractController
                     $value = $submittedData[$settingName] ?? null;
 
                     // Check for specific settings that need domain validation
-                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
-                        if (!$this->isValidDomain($value)) {
-                            $this->addFlash(
-                                'error_admin',
-                                "The value for $settingName is not a valid domain or does not resolve to an IP address."
-                            );
-                            return $this->redirectToRoute('admin_dashboard_settings_radius');
-                        }
+                    // phpcs:disable Generic.Files.LineLength.TooLong
+                    if (
+                        in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']) && !$this->isValidDomain($value)
+                    ) {
+                        // phpcs:enable
+                        $this->addFlash(
+                            'error_admin',
+                            "The value for $settingName is not a valid domain or does not resolve to an IP address."
+                        );
+                        return $this->redirectToRoute('admin_dashboard_settings_radius');
                     }
 
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
@@ -1806,6 +1805,7 @@ class AdminController extends AbstractController
      * @return Response
      * @throws \JsonException
      * @throws \DateMalformedStringException
+     * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1845,7 +1845,7 @@ class AdminController extends AbstractController
         // Fetch all the required data, graphics etc...
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
-        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
+        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius();
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
@@ -2069,7 +2069,7 @@ class AdminController extends AbstractController
             ];
         }
 
-        // Prepare the Wifi Standards Usage data for Excel
+        // Prepare the Wi-Fi Standards Usage data for Excel
         $wifiStandardsData = [];
         foreach ($fetchChartWifiTags['labels'] as $index => $wifi_Standards) {
             $wifiUsage = $fetchChartWifiTags['datasets'][0]['data'][$index] ?? 0;
@@ -2437,7 +2437,7 @@ class AdminController extends AbstractController
     /**
      * @throws Exception
      */
-    private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    private function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
     {
         // Fetch all data with date filtering
         $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
@@ -2469,21 +2469,12 @@ class AdminController extends AbstractController
             $eventDateTime = new DateTime($event->getAuthdate());
 
             // Determine the time period based on granularity
-            switch ($granularity) {
-                case 'year':
-                    $period = $eventDateTime->format('Y');
-                    break;
-                case 'month':
-                    $period = $eventDateTime->format('Y-m');
-                    break;
-                case 'week':
-                    $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
-                    break;
-                case 'day':
-                default:
-                    $period = $eventDateTime->format('Y-m-d');
-                    break;
-            }
+            $period = match ($granularity) {
+                'year' => $eventDateTime->format('Y'),
+                'month' => $eventDateTime->format('Y-m'),
+                'week' => $eventDateTime->format('o-W'),
+                default => $eventDateTime->format('Y-m-d'),
+            };
 
             // Initialize the period if not already set
             if (!isset($authsCounts['Accepted'][$period])) {
@@ -2525,12 +2516,11 @@ class AdminController extends AbstractController
      *
      * @throws Exception
      */
-    private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartRealmsFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
@@ -2541,11 +2531,12 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $realm = $event['realm'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!$realm) {
                 continue;
@@ -2582,7 +2573,7 @@ class AdminController extends AbstractController
     /**
      * @throws Exception
      */
-    private function fetchChartCurrentAuthFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartCurrentAuthFreeradius(): array
     {
         // Get the active sessions using the findActiveSessions query
         $activeSessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
@@ -2603,12 +2594,11 @@ class AdminController extends AbstractController
      * Fetch data related to traffic passed on the freeradius database
      * @throws Exception
      */
-    private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartTrafficFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
@@ -2620,11 +2610,12 @@ class AdminController extends AbstractController
             $totalInput = $content['total_input'];
             $totalOutput = $content['total_output'];
             $date = $content['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!isset($realmTraffic[$realm])) {
                 $realmTraffic[$realm] = [];
@@ -2657,12 +2648,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to session time (average) on the freeradius database
      */
-    private function fetchChartSessionAverageFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartSessionAverageFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
@@ -2673,11 +2663,12 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!isset($sessionAverageTimes[$groupKey])) {
                 $sessionAverageTimes[$groupKey] = ['totalTime' => 0, 'count' => 0];
@@ -2703,12 +2694,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to session time (total) on the freeradius database
      */
-    private function fetchChartSessionTotalFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartSessionTotalFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
@@ -2719,11 +2709,12 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!isset($sessionTotalTimes[$groupKey])) {
                 $sessionTotalTimes[$groupKey] = 0;
@@ -2747,18 +2738,17 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to wifi tag usage on the freeradius database
      */
-    private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
 
-        // Group the events based on the wifi Standard
+        // Group the events based on the Wi-Fi Standard
         foreach ($events as $event) {
             $connectInfo = $event['connectInfo_start'];
             $wifiStandard = $this->mapConnectInfoToWifiStandard($connectInfo);
@@ -2791,12 +2781,11 @@ class AdminController extends AbstractController
      *
      * @throws Exception
      */
-    private function fetchChartApUsage(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartApUsage(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
@@ -2844,7 +2833,6 @@ class AdminController extends AbstractController
         $dataValues = array_values($counts);
 
         $data = [];
-        $colors = [];
 
         // Calculate the colors with varying opacities
         $colors = $this->generateColorsWithOpacity($dataValues);
@@ -3078,14 +3066,12 @@ class AdminController extends AbstractController
         $blue = hexdec(substr($hash, 4, 2));
 
         // Format the RGB values into a CSS color string and convert to uppercase
-        $color = strtoupper(sprintf('#%02x%02x%02x', $red, $green, $blue));
-
-        return $color;
+        return strtoupper(sprintf('#%02x%02x%02x', $red, $green, $blue));
     }
 
 
     /**
-     * Handles the Page Style on the dasboard
+     * Handles the Page Style on the dashboard
      */
     /**
      * @param Request $request
@@ -3192,35 +3178,26 @@ class AdminController extends AbstractController
      */
     protected function mapConnectInfoToWifiStandard(string $connectInfo): string
     {
-        switch (true) {
-            case strpos($connectInfo, '802.11be') !== false:
-                return 'Wi-Fi 7';
-            case strpos($connectInfo, '802.11ax') !== false:
-                return 'Wi-Fi 6';
-            case strpos($connectInfo, '802.11ac') !== false:
-                return 'Wi-Fi 5';
-            case strpos($connectInfo, '802.11n') !== false:
-                return 'Wi-Fi 4';
-            case strpos($connectInfo, '802.11g') !== false:
-                return 'Wi-Fi 3';
-            case strpos($connectInfo, '802.11a') !== false:
-                return 'Wi-Fi 2';
-            case strpos($connectInfo, '802.11b') !== false:
-                return 'Wi-Fi 1';
-            default:
-                return 'Unknown';
-        }
+        return match (true) {
+            str_contains($connectInfo, '802.11be') => 'Wi-Fi 7',
+            str_contains($connectInfo, '802.11ax') => 'Wi-Fi 6',
+            str_contains($connectInfo, '802.11ac') => 'Wi-Fi 5',
+            str_contains($connectInfo, '802.11n') => 'Wi-Fi 4',
+            str_contains($connectInfo, '802.11g') => 'Wi-Fi 3',
+            str_contains($connectInfo, '802.11a') => 'Wi-Fi 2',
+            str_contains($connectInfo, '802.11b') => 'Wi-Fi 1',
+            default => 'Unknown',
+        };
     }
 
     /**
      * Determine date range and granularity
      *
-     * @param ?DateTime $startDate
-     * @param ?DateTime $endDate
-     * @param object $repository
+     * @param DateTime $startDate
+     * @param DateTime $endDate
      * @return array
      */
-    protected function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
+    protected function determineDateRangeAndGranularity(DateTime $startDate, DateTime $endDate): array
     {
         // Calculate the time difference between start and end dates
         $interval = $startDate->diff($endDate);
@@ -3243,11 +3220,9 @@ class AdminController extends AbstractController
      * Generate colors with varying opacities based on data values
      *
      * @param array $values
-     * @param float $minOpacity
-     * @param float $maxOpacity
      * @return array
      */
-    private function generateColorsWithOpacity(array $values, float $minOpacity = 0.4, float $maxOpacity = 1): array
+    private function generateColorsWithOpacity(array $values): array
     {
         if (!empty(array_filter($values, static fn($value) => $value !== 0))) {
             $maxValue = max($values);
@@ -3255,15 +3230,15 @@ class AdminController extends AbstractController
 
             foreach ($values as $value) {
                 // Calculate the opacity relative to the max value, scaled to the opacity range
-                $opacity = $minOpacity + ($value / $maxValue) * ($maxOpacity - $minOpacity);
+                $opacity = 0.4 + ($value / $maxValue) * (1 - 0.4);
                 $opacity = round($opacity, 2); // Round to 2 decimal places for better control
                 $colors[] = "rgba(125, 185, 40, {$opacity})";
             }
 
             return $colors;
-        } else {
-            return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
         }
+
+        return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
     }
 
 
@@ -3275,10 +3250,7 @@ class AdminController extends AbstractController
             return false;
         }
         $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
-        if ($dnsRecords === false || empty($dnsRecords)) {
-            return false;
-        }
-        return true;
+        return !($dnsRecords === false || empty($dnsRecords));
     }
 
     /**
@@ -3286,9 +3258,9 @@ class AdminController extends AbstractController
      * @param mixed $value
      * @return string
      */
-    private function escapeSpreadsheetValue($value): string
+    private function escapeSpreadsheetValue(mixed $value): string
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof DateTime) {
             return $value->format('Y-m-d H:i:s');
         }
 
@@ -3296,9 +3268,7 @@ class AdminController extends AbstractController
 
         // Remove specific characters
         $charactersToRemove = ['=', '(', ')'];
-        $escapedValue = str_replace($charactersToRemove, '', $escapedValue);
-
-        return $escapedValue;
+        return str_replace($charactersToRemove, '', $escapedValue);
     }
 
     /**

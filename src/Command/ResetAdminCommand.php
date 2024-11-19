@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
-use App\Repository\EventRepository;
+use App\Repository\UserRepository;
 use App\Service\EventActions;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,15 +27,19 @@ class ResetAdminCommand extends Command
 {
     private EntityManagerInterface $entityManager;
     private EventActions $eventActions;
+    private UserPasswordHasherInterface $userPasswordHashed;
+    private UserRepository $userRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        private UserPasswordHasherInterface $userPasswordHashed,
+        UserPasswordHasherInterface $userPasswordHashed,
         EventActions $eventActions,
-        private readonly EventRepository $eventRepository
+        UserRepository $userRepository,
     ) {
         $this->entityManager = $entityManager;
+        $this->userPasswordHashed = $userPasswordHashed;
         $this->eventActions = $eventActions;
+        $this->userRepository = $userRepository;
         parent::__construct();
     }
 
@@ -73,8 +77,7 @@ class ResetAdminCommand extends Command
 
     protected function resetAdminUser(): void
     {
-        $userRepository = $this->entityManager->getRepository(User::class);
-        $admin = $userRepository->findOneBy(['uuid' => 'admin@example.com']);
+        $admin = $this->userRepository->findAdmin();
 
         if (!$admin) {
             $admin = new User();
