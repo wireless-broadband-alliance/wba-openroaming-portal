@@ -55,26 +55,51 @@
                         </p>
                         <ul class="list-disc list-inside text-sm space-y-2">
                             <li>
-                                <strong>Session Cookie (PHPSESSID)</strong> - Maintains user session state for the
-                                duration of the session.
-                                <span>Controlled by: <a
-                                            class="underline text-primary font-semibold"
-                                            href="{{ path('app_landing') }}">{{ app.request.getHost() }}</a></span>.
+                                <strong>Session Cookie (PHPSESSID)</strong> - This cookie is essential for maintaining
+                                user session state during the session's duration. It enables the platform to function
+                                properly and ensures a seamless user experience.
+                                <span>
                                 <br>
-                                <small>Policy: <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                                  class="underline text-primary" target="_blank">Privacy
-                                        Policy</a></small>
+                                Controlled by:
+                                <a
+                                        class="underline text-primary font-semibold"
+                                        href="{{ absolute_url(path('app_landing')) }}">
+                                    {{ app.request.getHost() }}
+                                </a>
+                                </span>.
+                                <br>
+                                <small>
+                                    Policy:
+                                    <a
+                                            href="https://symfony.com/doc/current/session.html#how-sessions-work"
+                                            class="underline text-primary"
+                                            target="_blank">
+                                        Symfony Cookie Policy
+                                    </a>
+                                </small>
                             </li>
                             <li>
                                 <strong>CSRF Token</strong> - Protects against cross-site request forgery (CSRF) attacks
-                                by verifying requests.
-                                <span>Controlled by: <a
-                                            class="underline text-primary font-semibold"
-                                            href="{{ path('app_landing') }}">{{ app.request.getHost() }}</a></span>.
+                                by ensuring that forms and requests are submitted from trusted sources.
+                                <span>
                                 <br>
-                                <small>Policy: <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                                  class="underline text-primary" target="_blank">Privacy
-                                        Policy</a></small>
+                                Controlled by:
+                                <a
+                                        class="underline text-primary font-semibold"
+                                        href="{{ absolute_url(path('app_landing')) }}">
+                                    {{ app.request.getHost() }}
+                                </a>
+                                </span>.
+                                <br>
+                                <small>
+                                    Policy:
+                                    <a
+                                            href="https://symfony.com/doc/current/security/csrf.html"
+                                            class="underline text-primary"
+                                            target="_blank">
+                                        Symfony CSRF Protection Policy
+                                    </a>
+                                </small>
                             </li>
                         </ul>
                     </div>
@@ -94,9 +119,15 @@
                                 <br> Controlled by: <a href="{{ path('app_landing') }}"
                                                        class="underline text-primary">{{ app.request.getHost() }}</a>
                                 <br>
-                                <small>Policy: <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                                  class="underline text-primary" target="_blank">Privacy
-                                        Policy</a></small>
+                                <small>
+                                    Policy:
+                                    <a
+                                            href="https://symfony.com/doc/current/session.html#how-sessions-work"
+                                            class="underline text-primary"
+                                            target="_blank">
+                                        Symfony Cookie Policy
+                                    </a>
+                                </small>
                             </li>
                             <li>
                                 <strong>CSRF Token</strong> - A security cookie used to protect against cross-site
@@ -105,15 +136,17 @@
                                 <br> Controlled by: <a href="{{ path('app_landing') }}"
                                                        class="underline text-primary">{{ app.request.getHost() }}</a>
                                 <br>
-                                <small>Policy: <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                                  class="underline text-primary" target="_blank">Privacy
-                                        Policy</a></small>
+                                <small>
+                                    Policy:
+                                    <a
+                                            href="https://symfony.com/doc/current/security/csrf.html"
+                                            class="underline text-primary"
+                                            target="_blank">
+                                        Symfony CSRF Protection Policy
+                                    </a>
+                                </small>
                             </li>
                         </ul>
-                        <p class="text-sm">
-                            These cookies are automatically set by the platform and are necessary for the operation of
-                            the platform. You cannot disable these cookies.
-                        </p>
                     </div>
 
                     {# Preferences Cookies Section #}
