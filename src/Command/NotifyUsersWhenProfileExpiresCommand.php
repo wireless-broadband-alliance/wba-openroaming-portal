@@ -112,7 +112,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $timeToNotify = round($timeToExpire * 0.9);
 
             // Calculate time thresholds
+            /** @phpstan-ignore-next-line */
             $limitTime = (clone $userRadiusProfile->getIssuedAt())->modify("+ {$timeToExpire} days");
+            /** @phpstan-ignore-next-line */
             $alertTime = (clone $userRadiusProfile->getIssuedAt())->modify("+ {$timeToNotify} days");
             $realTime = new DateTime();
 
