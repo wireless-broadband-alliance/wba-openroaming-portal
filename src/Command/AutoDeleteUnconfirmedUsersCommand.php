@@ -2,18 +2,13 @@
 
 namespace App\Command;
 
-use App\Entity\DeletedUserData;
-use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
-use App\Enum\AnalyticalEventType;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,7 +21,6 @@ use function Symfony\Component\String\u;
     name: 'clear:deleteUnconfirmedUsers',
     description: 'Delete unconfirmed users when timeout exceeded',
 )]
-
 class AutoDeleteUnconfirmedUsersCommand extends Command
 {
     private EntityManagerInterface $entityManager;
@@ -73,7 +67,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
                             $this->entityManager->remove($userRadiusProfile);
                         }
                         $this->entityManager->remove($user);
-                        $usersDeleted ++;
+                        $usersDeleted++;
                     }
                 }
             }
@@ -91,7 +85,6 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
     {
         try {
             $deletedCount = $this->deleteUnconfirmedUsers();
-            dd($deletedCount);
 
             $output->writeln(
                 "<info>Success:</info> $deletedCount event(s) with null or empty values have been deleted."
