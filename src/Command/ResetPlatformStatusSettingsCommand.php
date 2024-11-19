@@ -55,6 +55,7 @@ class ResetPlatformStatusSettingsCommand extends Command
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
+            ['name' => 'USER_DELETE_TIME', 'value' => '5']
         ];
 
         $this->entityManager->beginTransaction();
