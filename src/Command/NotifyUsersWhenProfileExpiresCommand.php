@@ -42,20 +42,20 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         PgpEncryptionService $pgpEncryptionService,
         SendSMS $sendSMS,
         ProfileManager $profileManager,
-        RegistrationEmailGenerator $registrationEmailGenerator,
         UserExternalAuthRepository $userExternalAuthRepository,
         SettingRepository $settingRepository,
-        UserRadiusProfileRepository $userRadiusProfileRepository
+        UserRadiusProfileRepository $userRadiusProfileRepository,
+        RegistrationEmailGenerator $registrationEmailGenerator
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->pgpEncryptionService = $pgpEncryptionService;
         $this->sendSMS = $sendSMS;
         $this->profileManager = $profileManager;
-        $this->registrationEmailGenerator = $registrationEmailGenerator;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->settingRepository = $settingRepository;
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
+        $this->registrationEmailGenerator = $registrationEmailGenerator;
     }
 
     /**
@@ -133,7 +133,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 if ($user->getPhoneNumber()) {
                     $this->sendSMS->sendSms(
                         $user->getPhoneNumber(),
-                        'Your OpenRoaming profile will expire in ' . $timeLeftDays + 1 . ' days.'
+                        'Your OpenRoaming profile will expire in ' . ($timeLeftDays + 1) . ' days.'
                     );
                 }
             }
@@ -144,6 +144,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $userRadiusProfile->getStatus() === 1
             ) {
                 $this->disableProfiles($user);
+                $this->registrationEmailGenerator->sendNotifyExpiredProfile($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
             }
