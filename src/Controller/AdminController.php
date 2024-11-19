@@ -1489,11 +1489,8 @@ class AdminController extends AbstractController
         $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
-        if ($timeLeft > 90) {
-            $profileLimitDate = 90;
-        } else {
-            $profileLimitDate = $timeLeft;
-        }
+        $profileLimitDate = ((int)$timeLeft);
+
 
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
@@ -1587,6 +1584,7 @@ class AdminController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
+            'profileLimitDate' => $profileLimitDate
         ]);
     }
 

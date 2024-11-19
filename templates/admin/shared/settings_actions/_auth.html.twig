@@ -32,9 +32,28 @@
                         </div>
 
                         {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %}
-                            <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
-                            </div>
+                        {% if setting.vars.name == 'PROFILE_LIMIT_DATE_SAML' %}
+                        <div class="flex items-center space-x-2 mt-5"
+                             data-controller="certificate-limit"
+                             data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                            {{ form_widget(setting, {
+                                'attr': {
+                                    'class': 'form-widget',
+                                    'data-certificate-limit-target': 'input',
+                                }
+                            }) }}
+                                <button type="button" class="btn-primary"
+                                        data-certificate-limit-target="button"
+                                        data-action="certificate-limit#updateDate">
+                                    Certificate Limit Date
+                                </button>
+                        </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
+
                         {% endif %}
 
                         {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED'] %}
