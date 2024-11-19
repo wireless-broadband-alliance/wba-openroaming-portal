@@ -128,12 +128,12 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $userRadiusProfile->getStatus() === 1
             ) {
                 if ($user->getEmail()) {
-                    $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays);
+                    $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays + 1);
                 }
                 if ($user->getPhoneNumber()) {
                     $this->sendSMS->sendSms(
                         $user->getPhoneNumber(),
-                        'Your profile will expire in ' . $timeLeftDays . ' days.'
+                        'Your OpenRoaming profile will expire in ' . $timeLeftDays + 1 . ' days.'
                     );
                 }
             }

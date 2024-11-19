@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your OpenRoaming Profile is about to expire</title>
+    <title>Your OpenRoaming Profile has expired</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#080D4A]">
 <div class="container mx-auto px-8 pb-8 pt-[50px]">
     <div class="bg-white rounded-[18px] p-6 shadow-md">
-        <h1 class="text-3xl font-bold">Your OpenRoaming Profile is about to expire</h1>
+        <h1 class="text-3xl font-bold">Your OpenRoaming Profile has expired</h1>
         <p class="mt-6 text-lg">
-            Your profile will expire within {{ timeLeft }} days
-            <br>
-            To renew your profile, access the portal and download new profiles
+            Your OpenRoaming profile has expired <br>
+            To get a new profile, please follow these simple
+            steps:
         </p>
+        <ol class="mt-2 text-lg list-decimal list-inside">
+            <li>Click
+                <a class="font-bold text-[#7BBA29] underline"
+                   href="{{ absolute_url(path('app_landing')) }}">here</a>
+                to access OpenRoaming portal
+            </li>
+            <li>Login with your credentials</li>
+            <li>Inside the portal download new profile</li>
+        </ol>
         <p class="mt-6 text-lg">
             Thank you,<br>
             OpenRoaming Portal Support Team
