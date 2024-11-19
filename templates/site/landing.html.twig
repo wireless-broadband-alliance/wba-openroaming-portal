@@ -6,7 +6,6 @@
 
 {% block second_col %}
     {# Form Column #}
-
     {# Toasts  #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
@@ -292,7 +291,7 @@
                 {{ form_end(formTOS) }}
 
                 {# Confirmation Terms Modal  #}
-                <div class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                <div class="z-20 modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
                      data-terms-widget-target="confirmationModal" id="confirmationTermsModal">
                     <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
                         <h2 class="text-lg font-bold">You Accepted the Terms</h2>
@@ -314,4 +313,10 @@
         {% endif %}
     {% endif %}
 
+    {# Cookie Banner #}
+    {% block cookie %}
+        <div class="grid grid-cols-1 gap-[5px] ">
+            {{ include('site/shared/_cookie_banner.html.twig') }}
+        </div>
+    {% endblock %}
 {% endblock %}
