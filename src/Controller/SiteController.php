@@ -30,6 +30,7 @@ use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -37,7 +38,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -55,7 +55,6 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
  */
 class SiteController extends AbstractController
 {
-    private MailerInterface $mailer;
     private UserRepository $userRepository;
     private UserExternalAuthRepository $userExternalAuthRepository;
     private ParameterBagInterface $parameterBag;
@@ -64,13 +63,12 @@ class SiteController extends AbstractController
     private EventRepository $eventRepository;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
     private ProfileManager $profileManager;
+    private SendSMS $sendSMS;
 
     /**
      * SiteController constructor.
      *
-     * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
@@ -79,11 +77,10 @@ class SiteController extends AbstractController
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
-     * @param UserRadiusProfileRepository $userRadiusProfileRepository The entity returs the data about radius profiles
-     * @param ProfileManager $profileManager Calls the functions to enable/disable provisnioning profiles
+     * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
+     * @param SendSMS $sendSMS
      */
     public function __construct(
-        MailerInterface $mailer,
         UserRepository $userRepository,
         UserExternalAuthRepository $userExternalAuthRepository,
         ParameterBagInterface $parameterBag,
@@ -92,10 +89,9 @@ class SiteController extends AbstractController
         EventRepository $eventRepository,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
-        ProfileManager $profileManager
+        ProfileManager $profileManager,
+        SendSMS $sendSMS
     ) {
-        $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->parameterBag = $parameterBag;
@@ -104,8 +100,8 @@ class SiteController extends AbstractController
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
-        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
         $this->profileManager = $profileManager;
+        $this->sendSMS = $sendSMS;
     }
 
     /**
@@ -584,15 +580,14 @@ class SiteController extends AbstractController
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -617,7 +612,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(ForgotPasswordSMSType::class, $user);
         $form->handleRequest($request);
 
@@ -637,11 +631,8 @@ class SiteController extends AbstractController
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;
-                $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
-                    ? $latestEventMetadata['verificationAttempts']
-                    : 0;
-
-                if (!$latestEvent || $verificationAttempts < 3) {
+                $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+                if (!$latestEvent || $verificationAttempts < 4) {
                     // Check if enough time has passed since the last attempt
                     if (
                         !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
@@ -663,7 +654,9 @@ class SiteController extends AbstractController
                             ];
                         }
 
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
+                            DateTimeInterface::ATOM
+                        );
                         $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
@@ -676,41 +669,19 @@ class SiteController extends AbstractController
                         $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
-
-                        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-                        $apiUrl = $this->parameterBag->get('app.budget_api_url');
-
-                        // Fetch SMS credentials from the database
-                        $username = $data['SMS_USERNAME']['value'];
-                        $userId = $data['SMS_USER_ID']['value'];
-                        $handle = $data['SMS_HANDLE']['value'];
-                        $from = $data['SMS_FROM']['value'];
                         // phpcs:disable Generic.Files.LineLength.TooLong
                         $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
                         // phpcs:enable
-                        // Check if the user can get the SMS password and link
-                        if ($user && $attempts < 3) {
-                            $client = HttpClient::create();
-                            $uuid = $user->getUuid();
-                            $uuid = urlencode($uuid);
-                            $verificationCode = $user->getVerificationCode();
-                            $message = "Your new random account password is: "
-                                . $randomPassword
-                                . "%0A" . "Please make sure to relogin to complete the request";
-                            // Adjust the API endpoint and parameters based on the Budget SMS documentation
-                            // phpcs:disable Generic.Files.LineLength.TooLong
-                            $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
-                            // phpcs:enable
-                            $response = $client->request('GET', $apiUrl);
-                            // Handle the API response as needed
-                            $statusCode = $response->getStatusCode();
-                            $content = $response->getContent();
-                        }
+                        // Send SMS
+                        $message = "Your new random account password is: "
+                            . $randomPassword
+                            . "%0A" . "Please make sure to login to complete the request";
+                        $this->sendSMS->sendSmsReset($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $recipient,
+                            $user->getUuid(),
                             $attemptsLeft
                         );
                         $this->addFlash('success', $message);
@@ -724,7 +695,7 @@ class SiteController extends AbstractController
                 } else {
                     $this->addFlash(
                         'warning',
-                        'You have exceeded the limits for verification password. 
+                        'You have exceeded the limits of request for a new password. 
                             Please contact our support for help.'
                     );
                 }
