@@ -91,7 +91,6 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
     {
         try {
             $deletedCount = $this->deleteUnconfirmedUsers();
-            dd($deletedCount);
 
             $output->writeln(
                 "<info>Success:</info> $deletedCount event(s) with null or empty values have been deleted."
