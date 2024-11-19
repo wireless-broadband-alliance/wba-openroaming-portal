@@ -393,7 +393,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
-            $radiusProfile->setIssuedAt(new \DateTimeImmutable());
+            $radiusProfile->setIssuedAt(new \DateTime());
 
             $radiusUser = new RadiusUser();
             $radiusUser->setUsername($username);

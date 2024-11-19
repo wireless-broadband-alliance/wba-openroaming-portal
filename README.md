@@ -354,6 +354,11 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 51. `TOS_LINK`: Terms and Conditions URL
 52. `PRIVACY_POLICY_LINK`: Privacy and Policy URL
+53. `USER_DELETE_TIME`: Time in hours to delete the unverified user
+54. `PROFILE_LIMIT_DATE_SAML`: Time in days to disabel profiles for SMAL users with login
+55. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disabel profiles for users with GOOGLE login
+56. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disabel profiles for users with EMAIL login
+57. `PROFILE_LIMIT_DATE_SMS`: Time in days to disabel profiles for users with SMS login
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

@@ -2,6 +2,35 @@
 
 ---
 
+# Release V1.6.0
+
+- Fix bug on the date filtering on both statistics pages
+- Add a country dropdown for phone selection
+- Auto delete unconfirmed users  after a specific timeframe configurable by the admin
+- Separate user and admin login flows
+- Allow user or admin to revoke a radius profile
+- Filtered results don't reflect actual count for active filter
+- Fix Filtering results because don't reflect actual count for active filter
+- Bypass account confirmation
+- Cookie banner
+- TOS Checkbox to enable/disable buttons
+- Fix missing unit of measurement for statistics
+- User per page on User Management is not reflecting the pagination
+- Update READ.ME add new env's && settings
+
+## New Migrations
+
+- Phone Number bundle implementation
+- Auto-delete && Notify User's command (issued_at)
+
+## New Settings
+
+- Phone number default regions for inputs - `DEFAULT_REGION_PHONE_INPUTS`
+- Auto delete timer for unverified accounts - `USER_DELETE_TIME`
+- Date time limit for profiles (each provider) - `PROFILE_LIMIT_DATE_(provider_name)`
+
+---
+
 # Release V1.5.0
 
 - Update Php version to (php8.3)

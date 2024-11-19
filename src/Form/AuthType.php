@@ -6,11 +6,13 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 
 class AuthType extends AbstractType
 {
@@ -56,6 +58,20 @@ class AuthType extends AbstractType
                 ],
             ],
 
+            'PROFILE_LIMIT_DATE_SAML' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                    new Range([
+                        'min' => 5,
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
+                    ])
+                ],
+            ],
+
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -94,6 +110,20 @@ class AuthType extends AbstractType
                 ]
             ],
 
+            'PROFILE_LIMIT_DATE_GOOGLE' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                    new Range([
+                        'min' => 5,
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
+                    ])
+                ],
+            ],
+
             'AUTH_METHOD_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -123,6 +153,20 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
                         ]),
                     ],
+                ],
+            ],
+
+            'PROFILE_LIMIT_DATE_EMAIL' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                    new Range([
+                        'min' => 5,
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
+                    ])
                 ],
             ],
 
@@ -189,6 +233,21 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
+
+            'PROFILE_LIMIT_DATE_SMS' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                    new Range([
+                        'min' => 5,
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
+                    ])
+                ],
+            ],
+
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
@@ -213,6 +272,9 @@ class AuthType extends AbstractType
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                     }
+                    if (isset($config['constraints'])) {
+                        $formFieldOptions['constraints'] = $config['constraints'];
+                    }
 
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
                     break;
@@ -227,6 +289,7 @@ class AuthType extends AbstractType
     {
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
+            'profileLimitDate' => null
         ]);
     }
 }
