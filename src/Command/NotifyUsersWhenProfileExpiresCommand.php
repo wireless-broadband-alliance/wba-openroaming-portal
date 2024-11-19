@@ -3,8 +3,12 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
@@ -32,13 +36,19 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     public PgpEncryptionService $pgpEncryptionService;
     public SendSMS $sendSMS;
     public RegistrationEmailGenerator $registrationEmailGenerator;
+    public UserExternalAuthRepository $userExternalAuthRepository;
+    public UserRadiusProfileRepository $userRadiusProfileRepository;
+    public SettingRepository $settingRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PgpEncryptionService $pgpEncryptionService,
         SendSMS $sendSMS,
         ProfileManager $profileManager,
-        RegistrationEmailGenerator $registrationEmailGenerator
+        RegistrationEmailGenerator $registrationEmailGenerator,
+        UserExternalAuthRepository $userExternalAuthRepository,
+        UserRadiusProfileRepository $userRadiusProfileRepository,
+        SettingRepository $settingRepository,
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -46,6 +56,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $this->sendSMS = $sendSMS;
         $this->profileManager = $profileManager;
         $this->registrationEmailGenerator = $registrationEmailGenerator;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
+        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
+        $this->settingRepository = $settingRepository;
     }
 
     /**
@@ -58,9 +71,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
      */
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
-        $userRadiusProfileRepository = $this->entityManager->getRepository(UserRadiusProfile::class);
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $userRadiusProfiles = $userRadiusProfileRepository->findAll();
+        $userRadiusProfiles = $this->userRadiusProfileRepository->findAll();
+        $userExternalAuths = $this->userExternalAuthRepository->findAll();
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             if ($userRadiusProfile->getUser()) {
                 $authenticationMethod = $userRadiusProfile->getUser()->getUserExternalAuths()[0];
@@ -68,25 +80,25 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $authenticationMethod = null;
             }
             if ($authenticationMethod->getProvider() === UserProvider::GOOGLE_ACCOUNT) {
-                $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE']);
+                $settingTime = $this->settingRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE']);
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
             }
             if ($authenticationMethod->getProvider() === UserProvider::SAML) {
-                $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SAML']);
+                $settingTime = $this->settingRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SAML']);
                 $timeString = $settingTime[0]->getValue();
                 $timeToExpire = (int)$timeString;
                 $timeToNotify = round($timeToExpire * 0.9);
             }
             if ($authenticationMethod->getProvider() === UserProvider::PORTAL_ACCOUNT) {
                 if ($userRadiusProfile->getUser()->getEmail()) {
-                    $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL']);
+                    $settingTime = $this->settingRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL']);
                     $timeString = $settingTime[0]->getValue();
                     $timeToExpire = (int)$timeString;
                     $timeToNotify = round($timeToExpire * 0.9);
                 } elseif ($userRadiusProfile->getUser()->getPhoneNumber()) {
-                    $settingTime = $settingsRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SMS']);
+                    $settingTime = $this->settingRepository->findBy(['name' => 'PROFILE_LIMIT_DATE_SMS']);
                     $timeString = $settingTime[0]->getValue();
                     $timeToExpire = (int)$timeString;
                     $timeToNotify = round($timeToExpire * 0.9);
@@ -94,10 +106,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     $timeToExpire = 90;
                     $timeToNotify = round($timeToExpire * 0.9);
                 }
-            } else {
-                $timeToExpire = 90;
-                $timeToNotify = round($timeToExpire * 0.9);
+
             }
+
             $limitTime = clone $userRadiusProfile->getIssuedAt();
             $alertTime = clone $userRadiusProfile->getIssuedAt();
 
