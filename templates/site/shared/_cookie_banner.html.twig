@@ -185,9 +185,12 @@
                             <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
                                class="underline text-primary font-semibold">Privacy Policy</a>.
                         </div>
-                        <div class="mt-3 md:mt-0 flex justify-center md:justify-end space-x-3">
+                        <div class="mt-3 flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
                             <button class="mt-4 md:mt-0 btn-primary"
                                     data-action="cookie#savePreferences">Apply Cookies
+                            </button>
+                            <button class="mt-4 md:mt-0 btn-logout" data-action="cookie#rejectCookies">Reject
+                                Cookies
                             </button>
                         </div>
                     </div>

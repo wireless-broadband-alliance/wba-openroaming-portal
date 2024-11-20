@@ -15,14 +15,15 @@ export default class extends Controller {
     }
 
     checkCookies() {
-        // Check if the user has saved their preferences or accepted cookies
         const hasSavedPreferences = this.getCookie("cookies_accepted");
-        if (hasSavedPreferences) {
+        const hasRejectedCookies = this.getCookie("cookies_rejected");
+
+        if (hasSavedPreferences || hasRejectedCookies) {
             this.hideBanner();
         } else {
             this.showBanner();
         }
-        console.log("Current cookies: ", this.cookieScopes);
+        // console.log("Current cookies: ", this.cookieScopes);
     }
 
     showBanner() {
@@ -44,6 +45,13 @@ export default class extends Controller {
         });
         this.setCookiePreferences();
         this.setCookiesAccepted();
+        this.hideBanner();
+    }
+
+    rejectCookies() {
+        this.cookieScopes = {}; // Clear all cookie preferences
+        this.setCookiesRejected();
+        this.closeModal();
         this.hideBanner();
     }
 
@@ -70,12 +78,16 @@ export default class extends Controller {
     }
 
     setCookiePreferences() {
+        // Set a flag indicating the user has interacted with the cookie settings
         document.cookie = "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     setCookiesAccepted() {
-        // Set a flag indicating the user has interacted with the cookie settings
         document.cookie = "cookies_accepted=true; path=/; max-age=" + 365 * 24 * 60 * 60;
+    }
+
+    setCookiesRejected() {
+        document.cookie = "cookies_rejected=true; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     getCookiePreferences() {
