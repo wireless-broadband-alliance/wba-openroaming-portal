@@ -14,6 +14,8 @@
 		<string>@IOS_PAYLOAD_IDENTIFIER@-3</string>
 		<key>PayloadVersion</key>
 		<integer>1</integer>
+		<key>ExpirationDate</key>
+		<date>@EXPIRATION_DATE@</date>
 		<key>PayloadContent</key>
 		<array>
 			<dict>
