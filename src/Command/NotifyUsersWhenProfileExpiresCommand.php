@@ -2,15 +2,13 @@
 
 namespace App\Command;
 
-use App\Enum\UserProvider;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
+use App\Service\ExpirationProfileService;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -34,8 +32,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     public SendSMS $sendSMS;
     public RegistrationEmailGenerator $registrationEmailGenerator;
     private UserExternalAuthRepository $userExternalAuthRepository;
-    private SettingRepository $settingRepository;
     private UserRadiusProfileRepository $userRadiusProfileRepository;
+    private ExpirationProfileService $expirationProfileService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -43,9 +41,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         SendSMS $sendSMS,
         ProfileManager $profileManager,
         UserExternalAuthRepository $userExternalAuthRepository,
-        SettingRepository $settingRepository,
         UserRadiusProfileRepository $userRadiusProfileRepository,
-        RegistrationEmailGenerator $registrationEmailGenerator
+        RegistrationEmailGenerator $registrationEmailGenerator,
+        ExpirationProfileService $expirationProfileService
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -53,9 +51,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $this->sendSMS = $sendSMS;
         $this->profileManager = $profileManager;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->settingRepository = $settingRepository;
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
         $this->registrationEmailGenerator = $registrationEmailGenerator;
+        $this->expirationProfileService = $expirationProfileService;
     }
 
     /**
@@ -82,41 +80,16 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 continue;
             }
 
-            $provider = $userExternalAuth->getProvider();
-            $providerId = $userExternalAuth->getProviderId();
-            $timeToExpire = 90;
+            // Use the service to calculate expiration and alert times
+            $expirationData = $this->expirationProfileService->calculateExpiration(
+                $userExternalAuth->getProvider(),
+                $userExternalAuth->getProviderId(),
+                $userRadiusProfile
+            );
 
-            // Determine expiration based on provider and provider ID
-            switch ($provider) {
-                case UserProvider::GOOGLE_ACCOUNT:
-                    $settingTime = $this->settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE']);
-                    $timeToExpire = $settingTime ? (int)$settingTime->getValue() : $timeToExpire;
-                    break;
-
-                case UserProvider::SAML:
-                    $settingTime = $this->settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SAML']);
-                    $timeToExpire = $settingTime ? (int)$settingTime->getValue() : $timeToExpire;
-                    break;
-
-                case UserProvider::PORTAL_ACCOUNT:
-                    if ($providerId === UserProvider::EMAIL) {
-                        $settingTime = $this->settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL']);
-                        $timeToExpire = $settingTime ? (int)$settingTime->getValue() : $timeToExpire;
-                    } elseif ($providerId === UserProvider::PHONE_NUMBER) {
-                        $settingTime = $this->settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SMS']);
-                        $timeToExpire = $settingTime ? (int)$settingTime->getValue() : $timeToExpire;
-                    }
-                    break;
-            }
-
-            $timeToNotify = round($timeToExpire * 0.9);
-
-            // Calculate time thresholds
-            /** @phpstan-ignore-next-line */
-            $limitTime = (clone $userRadiusProfile->getIssuedAt())->modify("+ {$timeToExpire} days");
-            /** @phpstan-ignore-next-line */
-            $alertTime = (clone $userRadiusProfile->getIssuedAt())->modify("+ {$timeToNotify} days");
-            $realTime = new DateTime();
+            $limitTime = $expirationData['limitTime'];
+            $alertTime = $expirationData['notifyTime'];
+            $realTime = new \DateTime();
 
             $timeLeft = $limitTime->diff($realTime);
             $timeLeftDays = $timeLeft->invert === 0 ? $timeLeft->days + 1 : 0;
