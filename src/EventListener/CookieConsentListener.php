@@ -64,7 +64,7 @@ class CookieConsentListener
             }
         } catch (\JsonException $e) {
             // Log the error for debugging purposes
-            error_log(sprintf('Invalid JSON in cookie_preferences: %s', $e->getMessage()));
+            // error_log(sprintf('Invalid JSON in cookie_preferences: %s', $e->getMessage()));
 
             return [];
         }
