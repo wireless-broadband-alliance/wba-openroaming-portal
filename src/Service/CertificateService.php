@@ -4,7 +4,7 @@ namespace App\Service;
 
 use Exception;
 
-class CerteficateService
+class CertificateService
 {
     /**
      * @throws Exception

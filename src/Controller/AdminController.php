@@ -30,7 +30,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
-use App\Service\CerteficateService;
+use App\Service\CertificateService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
@@ -1475,7 +1475,7 @@ class AdminController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings,
-        CerteficateService $certeficateService
+        CertificateService $certeficateService
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
