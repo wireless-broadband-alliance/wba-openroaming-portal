@@ -5,14 +5,17 @@ namespace App\Service;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 class ExpirationProfileService
 {
     private SettingRepository $settingRepository;
+    private CertificateService $certificateService;
 
-    public function __construct(SettingRepository $settingRepository)
+    public function __construct(SettingRepository $settingRepository, CertificateService $certificateService)
     {
         $this->settingRepository = $settingRepository;
+        $this->certificateService = $certificateService;
     }
 
     /**
@@ -26,9 +29,13 @@ class ExpirationProfileService
     public function calculateExpiration(
         string $provider,
         ?string $providerId,
-        UserRadiusProfile $userRadiusProfile
+        UserRadiusProfile $userRadiusProfile,
     ): array {
-        $defaultExpireDays = 90;
+        $certificatePath = 'signing-keys/cert.pem';
+        $certificateLimitDate = strtotime($this->certificateService->getCertificateExpirationDate($certificatePath));
+        $realTime = time();
+        $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
+        $defaultExpireDays = ((int)$timeLeft);
         $expireDays = $defaultExpireDays;
 
         // Determine expiration time based on provider and provider ID
