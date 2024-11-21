@@ -42,10 +42,10 @@
                                     'data-certificate-limit-target': 'input',
                                 }
                             }) }}
-                                <button type="button" class="btn-primary"
+                                <button type="button" class="btn-cert-date"
                                         data-certificate-limit-target="button"
                                         data-action="certificate-limit#updateDate">
-                                    Certificate Limit Date
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/><path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/></g></svg>
                                 </button>
                         </div>
                             {% else %}
@@ -139,9 +139,27 @@
                                 </label>
                             </div>
                             {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %}
-                                <div class="flex items-center space-x-2 mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input' }}) }}
-                                </div>
+                                {% if setting.vars.name == 'PROFILE_LIMIT_DATE_GOOGLE' %}
+                                    <div class="flex items-center space-x-2 mt-5"
+                                         data-controller="certificate-limit"
+                                         data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                        {{ form_widget(setting, {
+                                            'attr': {
+                                                'class': 'form-widget',
+                                                'data-certificate-limit-target': 'input',
+                                            }
+                                        }) }}
+                                        <button type="button" class="btn-cert-date"
+                                                data-certificate-limit-target="button"
+                                                data-action="certificate-limit#updateDate">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/><path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/></g></svg>
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <div class="flex items-center space-x-2 mt-5">
+                                        {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                    </div>
+                                {% endif %}
                             {% endif %}
                             {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED'] %}
                                 <div class="flex flex-col items-center space-y-2 mt-5">
@@ -273,9 +291,27 @@
                             </label>
                         </div>
                         {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %}
-                            <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
-                            </div>
+                            {% if setting.vars.name == 'PROFILE_LIMIT_DATE_EMAIL' %}
+                                <div class="flex items-center space-x-2 mt-5"
+                                     data-controller="certificate-limit"
+                                     data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                    {{ form_widget(setting, {
+                                        'attr': {
+                                            'class': 'form-widget',
+                                            'data-certificate-limit-target': 'input',
+                                        }
+                                    }) }}
+                                    <button type="button" class="btn-cert-date"
+                                            data-certificate-limit-target="button"
+                                            data-action="certificate-limit#updateDate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/><path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/></g></svg>
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">
@@ -360,9 +396,27 @@
                             </label>
                         </div>
                         {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %}
-                            <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
-                            </div>
+                            {% if setting.vars.name == 'PROFILE_LIMIT_DATE_SMS' %}
+                                <div class="flex items-center space-x-2 mt-5"
+                                     data-controller="certificate-limit"
+                                     data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                    {{ form_widget(setting, {
+                                        'attr': {
+                                            'class': 'form-widget',
+                                            'data-certificate-limit-target': 'input',
+                                        }
+                                    }) }}
+                                    <button type="button" class="btn-cert-date"
+                                            data-certificate-limit-target="button"
+                                            data-action="certificate-limit#updateDate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/><path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/></g></svg>
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">
