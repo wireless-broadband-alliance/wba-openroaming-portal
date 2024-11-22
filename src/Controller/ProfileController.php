@@ -20,6 +20,7 @@ use App\Service\ExpirationProfileService;
 use App\Service\GetSettings;
 use App\Utils\CacheUtils;
 use DateTime;
+use Exception;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,7 +101,8 @@ class ProfileController extends AbstractController
             $userExternalAuth->getProviderId(),
             (new UserRadiusProfile())->setIssuedAt(
                 new DateTime()
-            ) // Pass a new DateTime if the user does not have a profile with the account
+            ), // Pass a new DateTime if the user does not have a profile with the account
+            '../signing-keys/cert.pem'
         );
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
@@ -177,7 +179,8 @@ class ProfileController extends AbstractController
             $userExternalAuth->getProviderId(),
             (new UserRadiusProfile())->setIssuedAt(
                 new DateTime()
-            ) // Pass a new DateTime if the user does not have a profile with the account
+            ), // Pass a new DateTime if the user does not have a profile with the account
+            '../signing-keys/cert.pem'
         );
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
@@ -401,6 +404,9 @@ class ProfileController extends AbstractController
         );
     }
 
+    /**
+     * @throws Exception
+     */
     private function createOrUpdateRadiusUser(
         User $user,
         RadiusUserRepository $radiusUserRepository,
@@ -430,7 +436,8 @@ class ProfileController extends AbstractController
             $expirationData = $this->expirationProfileService->calculateExpiration(
                 $userExternalAuth->getProvider(),
                 $userExternalAuth->getProviderId(),
-                $radiusProfile
+                $radiusProfile,
+                '../signing-keys/cert.pem'
             );
 
             // Set the valid_until property

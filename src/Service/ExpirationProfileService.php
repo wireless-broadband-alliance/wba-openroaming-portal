@@ -24,6 +24,7 @@ class ExpirationProfileService
      * @param string $provider
      * @param string|null $providerId
      * @param UserRadiusProfile $userRadiusProfile
+     * @param string $certificatePath
      * @return array Contains 'limitTime' and 'notifyTime' as DateTime instances.
      * @throws Exception
      */
@@ -31,8 +32,8 @@ class ExpirationProfileService
         string $provider,
         ?string $providerId,
         UserRadiusProfile $userRadiusProfile,
+        string $certificatePath,
     ): array {
-        $certificatePath = '../signing-keys/cert.pem';
         $certificateLimitDate = strtotime($this->certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;

@@ -11,6 +11,7 @@ use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -63,6 +64,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
      * @throws RedirectionExceptionInterface
      * @throws NonUniqueResultException
      * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
@@ -84,7 +86,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $expirationData = $this->expirationProfileService->calculateExpiration(
                 $userExternalAuth->getProvider(),
                 $userExternalAuth->getProviderId(),
-                $userRadiusProfile
+                $userRadiusProfile,
+                'signing-keys/cert.pem'
             );
 
             $limitTime = $expirationData['limitTime'];
