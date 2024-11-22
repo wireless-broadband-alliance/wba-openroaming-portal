@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Exception;
+use RuntimeException;
 
 class CertificateService
 {
@@ -12,17 +13,17 @@ class CertificateService
     public function getCertificateExpirationDate(string $certificatePath): ?string
     {
         if (!file_exists($certificatePath)) {
-            throw new Exception("Certificate not found in path: " . $certificatePath);
+            throw new RuntimeException("Certificate not found in path: " . $certificatePath);
         }
         $certContent = file_get_contents($certificatePath);
 
         if ($certContent === false) {
-            throw new Exception("Error reading certificate.");
+            throw new RuntimeException("Error reading certificate.");
         }
         $certInfo = openssl_x509_parse($certContent);
 
         if ($certInfo === false || !isset($certInfo['validTo_time_t'])) {
-            throw new Exception("Unable to extract the expiration date of the certificate.");
+            throw new RuntimeException("Unable to extract the expiration date of the certificate.");
         }
         return date('Y-m-d H:i:s', $certInfo['validTo_time_t']);
     }

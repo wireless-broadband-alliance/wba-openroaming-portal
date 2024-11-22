@@ -6,6 +6,7 @@ use App\Entity\UserRadiusProfile;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 class ExpirationProfileService
 {
@@ -20,18 +21,18 @@ class ExpirationProfileService
 
     /**
      * Calculate the expiration and notification times for a user profile.
-     *
      * @param string $provider
      * @param string|null $providerId
      * @param UserRadiusProfile $userRadiusProfile
      * @return array Contains 'limitTime' and 'notifyTime' as DateTime instances.
+     * @throws Exception
      */
     public function calculateExpiration(
         string $provider,
         ?string $providerId,
         UserRadiusProfile $userRadiusProfile,
     ): array {
-        $certificatePath = 'signing-keys/cert.pem';
+        $certificatePath = '../signing-keys/cert.pem';
         $certificateLimitDate = strtotime($this->certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
