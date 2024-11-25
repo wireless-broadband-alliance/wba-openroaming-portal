@@ -33,6 +33,7 @@
 		"robrichards/xmlseclibs": "^3.1",
 		"sensio/framework-extra-bundle": "^6.2",
 		"sentry/sentry-symfony": "^4.8",
+		"stevenmaguire/oauth2-microsoft": "^2.2",
 		"symfony/asset": "6.4.*",
 		"symfony/console": "6.4.*",
 		"symfony/doctrine-messenger": "6.4.*",
