@@ -53,7 +53,6 @@ class GoogleAuthenticator extends OAuth2Authenticator
                  */
                 $googleUser = $client->fetchUserFromToken($accessToken);
 
-                $email = $googleUser->getEmail();
                 $googleId = $googleUser->getId();
 
                 // Fetch the existing user by provider and provider ID
@@ -62,25 +61,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
                     'provider_id' => $googleId,
                 ]);
 
-                if ($userExternalAuth) {
-                    // Existing user found
-                    $existingUser = $userExternalAuth->getUser();
-                } else {
-                    // User doesn't exist, create a new User and UserExternalAuth
-                    $existingUser = new User();
-                    $existingUser->setEmail($email);
-
-                    $userExternalAuth = new UserExternalAuth();
-                    $userExternalAuth->setProvider('google');
-                    $userExternalAuth->setProviderId($googleId);
-                    $userExternalAuth->setUser($existingUser);
-
-                    $this->entityManager->persist($existingUser);
-                    $this->entityManager->persist($userExternalAuth);
-                    $this->entityManager->flush();
-                }
-
-                return $existingUser;
+                return $userExternalAuth->getUser();
             })
         );
     }
