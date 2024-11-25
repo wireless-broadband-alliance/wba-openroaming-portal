@@ -3,7 +3,7 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
-use App\Controller\GoogleController;
+use App\Controller\MicrosoftController;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -36,7 +36,7 @@ class AuthController extends AbstractController
     private jwtTokenGenerator $tokenGenerator;
     private CaptchaValidator $captchaValidator;
     private EntityManagerInterface $entityManager;
-    private GoogleController $googleController;
+    private MicrosoftController $googleController;
     private UserStatusChecker $userStatusChecker;
     private EventActions $eventActions;
 
@@ -46,7 +46,7 @@ class AuthController extends AbstractController
      * @param JWTTokenGenerator $tokenGenerator
      * @param CaptchaValidator $captchaValidator
      * @param EntityManagerInterface $entityManager
-     * @param GoogleController $googleController
+     * @param MicrosoftController $googleController
      * @param UserStatusChecker $userStatusChecker
      * @param EventActions $eventActions
      */
@@ -56,7 +56,7 @@ class AuthController extends AbstractController
         jwtTokenGenerator $tokenGenerator,
         CaptchaValidator $captchaValidator,
         EntityManagerInterface $entityManager,
-        GoogleController $googleController,
+        MicrosoftController $googleController,
         UserStatusChecker $userStatusChecker,
         EventActions $eventActions,
     ) {
@@ -279,7 +279,7 @@ class AuthController extends AbstractController
         }
 
         try {
-            $user = $this->googleController->fetchUserFromGoogle($data['code']);
+            $user = $this->googleController->fetchUserFromMicrosoft($data['code']);
             if ($user === null) {
                 return (new BaseResponse(400, null, 'This code is not associated with a google account.'))->toResponse(
                 );
@@ -291,7 +291,7 @@ class AuthController extends AbstractController
             }
 
             // Authenticate the user using custom Google authentication function already on the project
-            $this->googleController->authenticateUserGoogle($user);
+            $this->googleController->authenticateUserMicrosoft($user);
 
             $token = $this->tokenGenerator->generateToken($user);
 
