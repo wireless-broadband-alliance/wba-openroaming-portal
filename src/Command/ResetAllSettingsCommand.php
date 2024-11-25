@@ -85,6 +85,12 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
+            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'value' => 'Login with Microsoft'],
+            [
+                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'value' => 'Authenticate with your Microsoft account'
+            ],
             ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account'],
             ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
@@ -105,6 +111,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
+            ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
 
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
