@@ -426,7 +426,9 @@ class GetSettings
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => 'The description for Google authentication on the login page',
             'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => 'Enable or disable Microsoft authentication method',
             'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => 'The label for Microsoft authentication button on the login page',
+            // phpcs:disable Generic.Files.LineLength.TooLong
             'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => 'The description for Microsoft authentication on the login page',
+            // phpcs:enable
             'AUTH_METHOD_REGISTER_ENABLED' => 'Enable or disable Register authentication method',
             'AUTH_METHOD_REGISTER_LABEL' => 'The label for Register authentication button on the login page',
             'AUTH_METHOD_REGISTER_DESCRIPTION' => 'The description for Register authentication on the login page',
