@@ -402,8 +402,12 @@ class GetSettings
             'SYNC_LDAP_SEARCH_FILTER' => 'The filter used when searching the LDAP directory.
              The placeholder `@ID` is replaced with the user\'s ID',
 
+            'TOS' => 'Terms and Conditions format',
+            'PRIVACY_POLICY' => 'Privacy policy format',
             'TOS_LINK' => 'Terms and Conditions URL',
             'PRIVACY_POLICY_LINK' => 'Privacy policy URL',
+            'TOS_EDITOR' => 'Terms and Conditions text editor',
+            'PRIVACY_POLICY_EDITOR' => 'Privacy policy text editor',
 
             'VALID_DOMAINS_GOOGLE_LOGIN' => 'When this is empty, it allows all the domains to authenticate. 
             Please only type the domains you want to be able to authenticate',

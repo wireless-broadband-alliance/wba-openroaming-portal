@@ -4,15 +4,19 @@
     <div class="grid gap-4 lg:grid-cols-2 p-2">
         {% for setting in form %}
             {# Display only the terms and conditions settings #}
-            {% if setting.vars.name in ['TOS_LINK', 'PRIVACY_POLICY_LINK'] %}
+            {% if setting.vars.name in ['TOS', 'PRIVACY_POLICY','TOS_LINK', 'PRIVACY_POLICY_LINK', 'TOS_EDITOR', 'PRIVACY_POLICY_EDITOR'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                         {{ stimulus_controller('card') }}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
+                                'TOS': 'Terms and Conditions',
+                                'PRIVACY_POLICY': 'Privacy and Policy',
                                 'TOS_LINK': 'Terms and Conditions Link',
                                 'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
+                                'TOS_EDITOR': 'Terms and Conditions Text Editor',
+                                'PRIVACY_POLICY_EDITOR': 'Privacy and Policy Text Editor',
                             }[setting.vars.name] ?? setting.vars.name %}
 
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
