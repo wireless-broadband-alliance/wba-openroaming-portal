@@ -2308,6 +2308,7 @@ class AdminController extends AbstractController
         $userCounts = [
             UserProvider::SAML => 0,
             UserProvider::GOOGLE_ACCOUNT => 0,
+            UserProvider::MICROSOFT_ACCOUNT => 0,
             UserProvider::PORTAL_ACCOUNT => 0,
         ];
 
