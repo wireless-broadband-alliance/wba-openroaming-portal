@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Exception;
 
 class ExpirationProfileService
@@ -44,6 +43,10 @@ class ExpirationProfileService
         switch ($provider) {
             case UserProvider::GOOGLE_ACCOUNT:
                 $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_GOOGLE', $defaultExpireDays);
+                break;
+
+            case UserProvider::MICROSOFT_ACCOUNT:
+                $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_MICROSOFT', $defaultExpireDays);
                 break;
 
             case UserProvider::SAML:
