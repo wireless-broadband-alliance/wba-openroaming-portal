@@ -26,6 +26,7 @@ class AuthType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
+            // SAML
             'AUTH_METHOD_SAML_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -57,7 +58,6 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-
             'PROFILE_LIMIT_DATE_SAML' => [
                 'type' => IntegerType::class,
                 'constraints' => [
@@ -71,7 +71,7 @@ class AuthType extends AbstractType
                     ])
                 ],
             ],
-
+            // Google
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -109,7 +109,6 @@ class AuthType extends AbstractType
                     'required' => false,
                 ]
             ],
-
             'PROFILE_LIMIT_DATE_GOOGLE' => [
                 'type' => IntegerType::class,
                 'constraints' => [
@@ -123,7 +122,58 @@ class AuthType extends AbstractType
                     ])
                 ],
             ],
-
+            // Microsoft
+            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => [
+                'type' => ChoiceType::class,
+            ],
+            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => [
+                'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                        new NotBlank([
+                            'message' => 'This field cannot be empty'
+                        ]),
+                    ],
+                ],
+            ],
+            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => [
+                'type' => TextType::class,
+                'options' => [
+                    'required' => false,
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
+            ],
+            'VALID_DOMAINS_MICROSOFT_LOGIN' => [
+                'type' => TextType::class,
+                'options' => [
+                    'required' => false,
+                ]
+            ],
+            'PROFILE_LIMIT_DATE_MICROSOFT' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option',
+                    ]),
+                    new Range([
+                        'min' => 5,
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
+                    ])
+                ],
+            ],
+            // Email Registration
             'AUTH_METHOD_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -155,7 +205,6 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-
             'PROFILE_LIMIT_DATE_EMAIL' => [
                 'type' => IntegerType::class,
                 'constraints' => [
@@ -169,7 +218,7 @@ class AuthType extends AbstractType
                     ])
                 ],
             ],
-
+            // Login
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -201,7 +250,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-
+            // SMS
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -233,7 +282,6 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-
             'PROFILE_LIMIT_DATE_SMS' => [
                 'type' => IntegerType::class,
                 'constraints' => [
@@ -261,6 +309,7 @@ class AuthType extends AbstractType
                         in_array($settingName, [
                             'AUTH_METHOD_SAML_ENABLED',
                             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+                            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED',
                             'AUTH_METHOD_REGISTER_ENABLED',
                             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                             'AUTH_METHOD_SMS_REGISTER_ENABLED',

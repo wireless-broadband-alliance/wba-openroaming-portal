@@ -1254,10 +1254,8 @@ class AdminController extends AbstractController
 
                     // Check for specific settings that need domain validation
                     // phpcs:disable Generic.Files.LineLength.TooLong
-                    if (
-                        in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']) && !$this->isValidDomain($value)
-                    ) {
-                        // phpcs:enable
+                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']) && !$this->isValidDomain($value)) {
+                    // phpcs:enable
                         $this->addFlash(
                             'error_admin',
                             "The value for $settingName is not a valid domain or does not resolve to an IP address."
@@ -1467,7 +1465,9 @@ class AdminController extends AbstractController
      * @param Request $request
      * @param EntityManagerInterface $em
      * @param GetSettings $getSettings
+     * @param CertificateService $certificateService
      * @return Response
+     * @throws Exception
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1475,7 +1475,7 @@ class AdminController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings,
-        CertificateService $certeficateService
+        CertificateService $certificateService
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1486,11 +1486,10 @@ class AdminController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
-        $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
+        $certificateLimitDate = strtotime($certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         $profileLimitDate = ((int)$timeLeft);
-
 
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
@@ -1498,7 +1497,6 @@ class AdminController extends AbstractController
         ]);
 
         $form->handleRequest($request);
-
 
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
@@ -1514,6 +1512,12 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
                 'VALID_DOMAINS_GOOGLE_LOGIN',
                 'PROFILE_LIMIT_DATE_GOOGLE',
+
+                'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED',
+                'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+                'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'VALID_DOMAINS_MICROSOFT_LOGIN',
+                'PROFILE_LIMIT_DATE_MICROSOFT',
 
                 'AUTH_METHOD_REGISTER_ENABLED',
                 'AUTH_METHOD_REGISTER_LABEL',
@@ -1533,6 +1537,7 @@ class AdminController extends AbstractController
             $labelsFields = [
                 'AUTH_METHOD_SAML_LABEL',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
                 'AUTH_METHOD_REGISTER_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
@@ -1548,15 +1553,11 @@ class AdminController extends AbstractController
                     }
                 }
 
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN') {
-                    if ($setting) {
-                        $setting->setValue($value);
-                        $em->persist($setting);
-                    }
+                if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN' || $settingName === 'VALID_DOMAINS_MICROSOFT_LOGIN') {
                     continue;
                 }
 
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
                     $em->persist($setting);
