@@ -96,8 +96,8 @@ class ProfileController extends AbstractController
         }
 
         $data['config_android'] = [
-            'radius_username' => $radiusProfile->getRadiusUser(),
-            'radius_password' => $encryptedPassword,
+            'radiusUsername' => $radiusProfile->getRadiusUser(),
+            'radiusPassword' => $encryptedPassword,
             'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
             'fqdn' => $this->getSettingValueRaw('DOMAIN_NAME'),
             'roamingConsortiumOis' => ['5a03ba0000', '004096'],
