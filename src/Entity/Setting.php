@@ -6,6 +6,8 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\Parameter;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\ConfigController;
 use App\Api\V1\Controller\ProfileController;
 use App\Repository\SettingRepository;
@@ -134,9 +136,183 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(
             uriTemplate: '/v1/config/profile/android',
             controller: ProfileController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Profile configuration for Android successfully retrieved',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'config_android' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'radiusUsername' => ['type' => 'string'],
+                                                        'radiusPassword' => ['type' => 'string'],
+                                                        'friendlyName' => ['type' => 'string'],
+                                                        'fqdn' => ['type' => 'string'],
+                                                        'roamingConsortiumOis' => [
+                                                            'type' => 'array',
+                                                            'items' => ['type' => 'string'],
+                                                        ],
+                                                        'eapType' => ['type' => 'string'],
+                                                        'nonEapInnerMethod' => ['type' => 'string'],
+                                                        'realm' => ['type' => 'string'],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    'data' => [
+                                        'config_android' => [
+                                            'radiusUsername' => 'user123',
+                                            'radiusPassword' => 'encrypted_password_here',
+                                            'friendlyName' => 'My Android Profile',
+                                            'fqdn' => 'example.com',
+                                            'roamingConsortiumOis' => ['5a03ba0000', '004096'],
+                                            'eapType' => '21',
+                                            'nonEapInnerMethod' => 'MS-CHAP-V2',
+                                            'realm' => 'example.com',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid or missing public key',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => ['type' => 'string', 'example' => 'Invalid or missing public key'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    401 => [
+                        'description' => 'JWT Token is invalid',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => ['type' => 'string', 'example' => 'JWT Token is invalid!'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Unauthorized access',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => ['type' => 'string', 'example' => 'Unauthorized access!'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    404 => [
+                        'description' => 'User does not have a profile',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'This user does not have a profile created'
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    500 => [
+                        'description' => 'Failed to encrypt the password',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Failed to encrypt the password'
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Get Android profile configuration',
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                description: 'This endpoint retrieves the profile configuration for Android, including a user\'s radius profile data, encrypted password, and other relevant settings for the Android application.',
+                // phpcs:enable
+                parameters: [
+                    new Parameter(
+                        name: 'Authorization',
+                        in: 'header',
+                        description: 'Bearer token required for authentication. Use the format: `Bearer <JWT token>`.',
+                        required: true,
+                        schema: [
+                            'type' => 'string',
+                        ],
+                    ),
+                ],
+                requestBody: new RequestBody(
+                    description: 'Android public key required for radius password encryption.
+                     The request should be sent as JSON with the PGP public_key included in the body.',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'public_key' => [
+                                        'type' => 'string',
+                                        'description' => 'The PGP public key',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'example' => '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Vw9yC8xj5kFbzT5E9y9L\n--rest-of-the-key--\n-----END PUBLIC KEY-----',
+                                        // phpcs:enable
+                                    ],
+                                ],
+                                'required' => ['public_key'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [
+                    [
+                        'bearerAuth' => [],
+                    ]
+                ],
+            ),
             shortName: 'Profile Configuration',
             paginationEnabled: false,
-            description: 'Returns public values for a profile creation entity',
+            description: 'Returns the configuration data for an Android profile',
             name: 'api_config_profile_android',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
