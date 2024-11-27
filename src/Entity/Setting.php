@@ -293,8 +293,8 @@ use Doctrine\ORM\Mapping as ORM;
                                     'public_key' => [
                                         'type' => 'string',
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'description' => 'The PGP public key used for encryption. It must include the full BEGIN/END markers and the key content.',
-                                        'example' => '-----BEGIN PGP PUBLIC KEY BLOCK-----\n<PGP_PUBLIC_ENCRYPTION_KEY>\n-----END PGP PUBLIC KEY BLOCK-----',
+                                        'description' => 'The RSA public key used for encryption. It must include the full BEGIN/END markers and the key content.',
+                                        'example' => '-----BEGIN PUBLIC KEY-----\n<RSA_PUBLIC_KEY>\n-----END PUBLIC KEY-----',
                                         // phpcs:enable
                                     ],
                                 ],

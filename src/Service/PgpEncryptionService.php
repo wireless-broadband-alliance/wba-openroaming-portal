@@ -51,25 +51,26 @@ class PgpEncryptionService
         }
     }
 
-    public function encryptApi(string $publicKeyContent, string $data): bool|array|string
+    public function encryptApi(string $publicKeyContent, string $data): string
     {
         try {
-            $gpg = new gnupg();
+            $publicKey = openssl_pkey_get_public($publicKeyContent);
+            if ($publicKey === false) {
+                throw new RuntimeException('Invalid RSA public key provided.');
+            }
 
-            // Try importing the public key
-            $importResult = $gpg->import($publicKeyContent);
+            $encryptedData = '';
+            $success = openssl_public_encrypt($data, $encryptedData, $publicKey);
 
-            // Get errors
-            $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
+            openssl_free_key($publicKey);
 
-            // Extract fingerprint to encrypt
-            $fingerprint = $importResult['fingerprint'];
+            if (!$success) {
+                throw new RuntimeException('Failed to encrypt data using RSA public key.');
+            }
 
-            $gpg->addencryptKey($fingerprint);
-            return $gpg->encrypt($data);
+            return base64_encode($encryptedData);
         } catch (Exception $e) {
-            // Catch any exceptions and display the message for debugging
-            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());
+            throw new RuntimeException('RSA encryption operation failed: ' . $e->getMessage());
         }
     }
 }

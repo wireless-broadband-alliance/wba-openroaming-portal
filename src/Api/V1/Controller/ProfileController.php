@@ -4,16 +4,22 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserRadiusProfileStatus;
+use App\RadiusDb\Entity\RadiusUser;
+use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\EventActions;
+use App\Service\ExpirationProfileService;
 use App\Service\JWTTokenGenerator;
 use App\Service\PgpEncryptionService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Exception;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +35,9 @@ class ProfileController extends AbstractController
     private UserStatusChecker $userStatusChecker;
     private UserRadiusProfileRepository $userRadiusProfileRepository;
     private PgpEncryptionService $pgpEncryptionService;
+    private RadiusUserRepository $radiusUserRepository;
+    private UserExternalAuthRepository $userExternalAuthRepository;
+    private ExpirationProfileService $expirationProfileService;
 
     public function __construct(
         SettingRepository $settingRepository,
@@ -37,7 +46,10 @@ class ProfileController extends AbstractController
         JWTTokenGenerator $JWTTokenGenerator,
         UserStatusChecker $userStatusChecker,
         UserRadiusProfileRepository $userRadiusProfileRepository,
-        PgpEncryptionService $pgpEncryptionService
+        PgpEncryptionService $pgpEncryptionService,
+        RadiusUserRepository $radiusUserRepository,
+        UserExternalAuthRepository $userExternalAuthRepository,
+        ExpirationProfileService $expirationProfileService
     ) {
         $this->settingRepository = $settingRepository;
         $this->eventActions = $eventActions;
@@ -46,6 +58,9 @@ class ProfileController extends AbstractController
         $this->userStatusChecker = $userStatusChecker;
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
         $this->pgpEncryptionService = $pgpEncryptionService;
+        $this->radiusUserRepository = $radiusUserRepository;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
+        $this->expirationProfileService = $expirationProfileService;
     }
 
     /**
@@ -56,6 +71,9 @@ class ProfileController extends AbstractController
         return $this->getProfileAndroid($request);
     }
 
+    /**
+     * @throws RandomException
+     */
     private function getProfileAndroid(Request $request): JsonResponse
     {
         try {
@@ -87,9 +105,6 @@ class ProfileController extends AbstractController
         if (empty($dataRequest['public_key'])) {
             $errors[] = 'public_key';
         }
-        if (empty($dataRequest['public_key'])) {
-            $errors[] = 'public_key';
-        }
         if (!empty($errors)) {
             return (
             new BaseResponse(
@@ -104,8 +119,41 @@ class ProfileController extends AbstractController
             ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
         );
 
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
+
         if (!$radiusProfile) {
-            return (new BaseResponse(404, null, 'This user does not have a profile created'))->toResponse();
+            $radiusProfile = new UserRadiusProfile();
+
+            $androidLimit = 32;
+            $realmSize = strlen($this->getSettingValueRaw('RADIUS_REALM_NAME')) + 1;
+            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
+                'RADIUS_REALM_NAME'
+            );
+            $token = $this->generateToken($androidLimit - $realmSize);
+            $radiusProfile->setUser($currentUser);
+            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusUser($username);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setIssuedAt(new DateTime());
+
+            // Get the expiration date from the service
+            $expirationData = $this->expirationProfileService->calculateExpiration(
+                $userExternalAuth->getProvider(),
+                $userExternalAuth->getProviderId(),
+                $radiusProfile,
+                '../signing-keys/cert.pem'
+            );
+
+            // Set the valid_until property
+            $radiusProfile->setValidUntil($expirationData['limitTime']);
+
+            $radiusUser = new RadiusUser();
+            $radiusUser->setUsername($username);
+            $radiusUser->setAttribute('Cleartext-Password');
+            $radiusUser->setOp(':=');
+            $radiusUser->setValue($token);
+            $this->radiusUserRepository->save($radiusUser, true);
+            $this->userRadiusProfileRepository->save($radiusProfile, true);
         }
 
         // Encrypt the password with the provided PGP public key
@@ -116,7 +164,7 @@ class ProfileController extends AbstractController
             return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
         }
 
-        $data['config_android'] = [
+        $data = [
             'radiusUsername' => $radiusProfile->getRadiusUser(),
             'radiusPassword' => $encryptedPassword,
             'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
@@ -146,5 +194,19 @@ class ProfileController extends AbstractController
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
         return $setting ? $setting->getValue() : '';
+    }
+
+    /**
+     * @throws RandomException
+     */
+    private function generateToken($length = 16): string
+    {
+        $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $pieces = [];
+        $max = mb_strlen($stringSpace, '8bit') - 1;
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces[] = $stringSpace[random_int(0, $max)];
+        }
+        return implode('', $pieces);
     }
 }
