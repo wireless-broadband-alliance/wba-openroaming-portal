@@ -50,4 +50,26 @@ class PgpEncryptionService
             throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());
         }
     }
+
+    public function encryptApi(string $publicKeyContent, string $data): bool|array|string
+    {
+        try {
+            $gpg = new gnupg();
+
+            // Try importing the public key
+            $importResult = $gpg->import($publicKeyContent);
+
+            // Get errors
+            $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
+
+            // Extract fingerprint to encrypt
+            $fingerprint = $importResult['fingerprint'];
+
+            $gpg->addencryptKey($fingerprint);
+            return $gpg->encrypt($data);
+        } catch (Exception $e) {
+            // Catch any exceptions and display the message for debugging
+            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());
+        }
+    }
 }

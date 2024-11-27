@@ -10,10 +10,10 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
+use App\Service\PgpEncryptionService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Exception;
-use gnupg;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +28,7 @@ class ProfileController extends AbstractController
     private JWTTokenGenerator $JWTTokenGenerator;
     private UserStatusChecker $userStatusChecker;
     private UserRadiusProfileRepository $userRadiusProfileRepository;
+    private PgpEncryptionService $pgpEncryptionService;
 
     public function __construct(
         SettingRepository $settingRepository,
@@ -35,7 +36,8 @@ class ProfileController extends AbstractController
         TokenStorageInterface $tokenStorage,
         JWTTokenGenerator $JWTTokenGenerator,
         UserStatusChecker $userStatusChecker,
-        UserRadiusProfileRepository $userRadiusProfileRepository
+        UserRadiusProfileRepository $userRadiusProfileRepository,
+        PgpEncryptionService $pgpEncryptionService
     ) {
         $this->settingRepository = $settingRepository;
         $this->eventActions = $eventActions;
@@ -43,6 +45,7 @@ class ProfileController extends AbstractController
         $this->JWTTokenGenerator = $JWTTokenGenerator;
         $this->userStatusChecker = $userStatusChecker;
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
+        $this->pgpEncryptionService = $pgpEncryptionService;
     }
 
     /**
@@ -55,6 +58,12 @@ class ProfileController extends AbstractController
 
     private function getProfileAndroid(Request $request): JsonResponse
     {
+        try {
+            $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        }
+
         $token = $this->tokenStorage->getToken();
         if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
             return (new BaseResponse(403, null, 'Unauthorized access!'))->toResponse();
@@ -74,9 +83,21 @@ class ProfileController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        $publicKey = $request->get('public_key');
-        if (!$publicKey || !$this->isValidPGPKey($publicKey)) {
-            return (new BaseResponse(400, null, 'Invalid or missing public key'))->toResponse();
+        // Check for missing fields and add them to the array errors
+        if (empty($dataRequest['public_key'])) {
+            $errors[] = 'public_key';
+        }
+        if (empty($dataRequest['public_key'])) {
+            $errors[] = 'public_key';
+        }
+        if (!empty($errors)) {
+            return (
+            new BaseResponse(
+                400,
+                ['missing_fields' => $errors],
+                'Invalid data: Missing required fields.'
+            )
+            )->toResponse();
         }
 
         $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
@@ -89,7 +110,7 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->encryptWithPGP($radiusPassword, $publicKey);
+        $encryptedPassword = $this->pgpEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
         if (!$encryptedPassword) {
             return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
@@ -125,22 +146,5 @@ class ProfileController extends AbstractController
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
         return $setting ? $setting->getValue() : '';
-    }
-
-    private function isValidPGPKey(string $publicKey): bool
-    {
-        $gpg = new gnupg();
-        return $gpg->import($publicKey) !== false;
-    }
-
-    private function encryptWithPGP(string $data, string $publicKey): ?string
-    {
-        $gpg = new gnupg();
-        if (!$gpg->import($publicKey)) {
-            return null;
-        }
-        $gpg->addencryptkey($publicKey);
-
-        return $gpg->encrypt($data) ?: null;
     }
 }
