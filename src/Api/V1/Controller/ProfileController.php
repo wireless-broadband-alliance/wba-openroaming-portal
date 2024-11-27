@@ -73,20 +73,34 @@ class ProfileController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
+        // Retrieve and validate the public key
+        $publicKey = $request->get('public_key');
+        if (!$publicKey || !$this->isValidPublicKey($publicKey)) {
+            return (new BaseResponse(400, null, 'Invalid or missing public key'))->toResponse();
+        }
+
         $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
             ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
         );
 
-        if (!$radiusProfile){
-            $radiusProfile = 'This User doesn\'t have a profile created';
+        if (!$radiusProfile) {
+            return (new BaseResponse(404, null, 'This user does not have a profile created'))->toResponse();
+        }
+
+        // Encrypt the password with the provided public key
+        $radiusPassword = $radiusProfile->getRadiusToken();
+        $encryptedPassword = $this->encryptWithPublicKey($radiusPassword, $publicKey);
+
+        if (!$encryptedPassword) {
+            return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
         }
 
         $data['config_android'] = [
             'radius_username' => $radiusProfile->getRadiusUser(),
-            'radius_password' => 'potato_password',
+            'radius_password' => $encryptedPassword,
             'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
             'fqdn' => $this->getSettingValueRaw('DOMAIN_NAME'),
-            'roamingConsortiumOis' => '5a03ba0000,004096',
+            'roamingConsortiumOis' => ['5a03ba0000', '004096'],
             'eapType' => '21',
             'nonEapInnerMethod' => 'MS-CHAP-V2',
             'realm' => $this->getSettingValueRaw('RADIUS_REALM_NAME'),
@@ -104,7 +118,6 @@ class ProfileController extends AbstractController
             $eventMetadata
         );
 
-        // Return success response
         return (new BaseResponse(200, $data))->toResponse();
     }
 
@@ -112,5 +125,29 @@ class ProfileController extends AbstractController
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
         return $setting ? $setting->getValue() : '';
+    }
+
+    private function isValidPublicKey(string $publicKey): bool
+    {
+        // Validate the RSA public key
+        $keyResource = openssl_pkey_get_public($publicKey);
+        if ($keyResource === false) {
+            return false;
+        }
+        openssl_free_key($keyResource);
+        return true;
+    }
+
+    private function encryptWithPublicKey(string $data, string $publicKey): ?string
+    {
+        $encrypted = null;
+        $keyResource = openssl_pkey_get_public($publicKey);
+
+        if ($keyResource && openssl_public_encrypt($data, $encrypted, $keyResource)) {
+            openssl_free_key($keyResource);
+            return base64_encode($encrypted);
+        }
+
+        return null;
     }
 }
