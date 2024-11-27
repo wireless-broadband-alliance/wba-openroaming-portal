@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
 use App\Api\V1\Controller\ConfigController;
+use App\Api\V1\Controller\ProfileController;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -128,6 +129,15 @@ use Doctrine\ORM\Mapping as ORM;
             paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
             name: 'app_config_settings',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new GetCollection(
+            uriTemplate: '/v1/config/profile/android',
+            controller: ProfileController::class,
+            shortName: 'Profile Configuration',
+            paginationEnabled: false,
+            description: 'Returns public values for a profile creation entity',
+            name: 'api_config_profile_android',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
