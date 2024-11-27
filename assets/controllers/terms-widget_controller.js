@@ -1,4 +1,3 @@
-// controllers/terms_widget_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
@@ -6,11 +5,17 @@ export default class extends Controller {
 
     connect() {
         console.log('TermsWidgetController connected');
+
+        // Check if the "functional" cookie is set to true
+        if (this.getCookie("cookie_preferences")?.terms === true) {
+            this.agreeTermsTarget.checked = true; // Auto-check the checkbox
+        }
+
         this.toggleSubmitButtons();
     }
 
     toggleSubmitButtons() {
-        console.log(`Checkbox checked: ${this.agreeTermsTarget.checked}`);
+        console.log(`Checkbox terms: ${this.agreeTermsTarget.checked}`);
 
         // For each submit button add `btn-disabled` based on checkbox status
         for (let button of this.buttonTargets) {
@@ -45,5 +50,19 @@ export default class extends Controller {
     closeConfirmationModal() {
         console.log('Close button clicked, hiding confirmation modal');
         this.confirmationModalTarget.classList.add('hidden');
+    }
+
+    // Helper to get cookie value by name and parse JSON if necessary
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+            try {
+                return JSON.parse(parts.pop().split(';').shift());
+            } catch (error) {
+                console.error('Error parsing cookie:', error);
+            }
+        }
+        return null;
     }
 }

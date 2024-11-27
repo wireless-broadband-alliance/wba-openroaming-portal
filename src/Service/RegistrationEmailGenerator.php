@@ -52,4 +52,47 @@ class RegistrationEmailGenerator
 
         $this->mailer->send($email);
     }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
+    {
+        // Send email to the user with the verification code
+        $email = (new TemplatedEmail())
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject('Your OpenRoaming Profile is about to expire')
+            ->htmlTemplate('email/expiresProfile.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'timeLeft' => $timeLeft,
+            ]);
+        $this->mailer->send($email);
+    }
+
+    public function sendNotifyExpiredProfile(User $user): void
+    {
+        // Send email to the user with the verification code
+        $email = (new TemplatedEmail())
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject('Your OpenRoaming Profile is about to expire')
+            ->htmlTemplate('email/expiredProfile.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+            ]);
+
+        $this->mailer->send($email);
+    }
 }

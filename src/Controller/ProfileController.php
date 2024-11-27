@@ -16,9 +16,11 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
+use App\Service\ExpirationProfileService;
 use App\Service\GetSettings;
 use App\Utils\CacheUtils;
 use DateTime;
+use Exception;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,6 +38,7 @@ class ProfileController extends AbstractController
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private UserExternalAuthRepository $userExternalAuthRepository;
+    private ExpirationProfileService $expirationProfileService;
 
     /**
      * @param SettingRepository $settingRepository
@@ -43,6 +46,7 @@ class ProfileController extends AbstractController
      * @param GetSettings $getSettings
      * @param UserRepository $userRepository
      * @param UserExternalAuthRepository $userExternalAuthRepository
+     * @param ExpirationProfileService $expirationProfileService
      */
     public function __construct(
         SettingRepository $settingRepository,
@@ -50,6 +54,7 @@ class ProfileController extends AbstractController
         GetSettings $getSettings,
         UserRepository $userRepository,
         UserExternalAuthRepository $userExternalAuthRepository,
+        ExpirationProfileService $expirationProfileService,
     ) {
         $this->settings = $this->getSettings($settingRepository);
         $this->eventActions = $eventActions;
@@ -57,6 +62,7 @@ class ProfileController extends AbstractController
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
+        $this->expirationProfileService = $expirationProfileService;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
@@ -80,12 +86,23 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser(
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+
+        $radiusUser = $this->createOrUpdateRadiusUser(
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
             $userRepository,
             $this->settings['RADIUS_REALM_NAME']
+        );
+
+        $expirationDate = $this->expirationProfileService->calculateExpiration(
+            $userExternalAuth->getProvider(),
+            $userExternalAuth->getProviderId(),
+            (new UserRadiusProfile())->setIssuedAt(
+                new DateTime()
+            ), // Pass a new DateTime if the user does not have a profile with the account
+            '../signing-keys/cert.pem'
         );
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
@@ -95,12 +112,14 @@ class ProfileController extends AbstractController
             '@DOMAIN_NAME@',
             '@RADIUS_TLS_NAME@',
             '@DISPLAY_NAME@',
+            '@EXPIRATION_DATE@'
         ], [
-            $radiususer->getUsername(),
-            base64_encode($radiususer->getValue()),
+            $radiusUser->getUsername(),
+            base64_encode($radiusUser->getValue()),
             $this->settings['DOMAIN_NAME'],
             $this->settings['RADIUS_TLS_NAME'],
             $this->settings['DISPLAY_NAME'],
+            $expirationDate['limitTime']->format('Y-m-d')
         ], $profile);
         $profileTemplate = file_get_contents('../profile_templates/android/template.txt');
         $ca = file_get_contents('../signing-keys/ca.pem');
@@ -145,12 +164,23 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser(
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+
+        $radiusUser = $this->createOrUpdateRadiusUser(
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
             $userRepository,
             $this->settings['RADIUS_REALM_NAME']
+        );
+
+        $expirationDate = $this->expirationProfileService->calculateExpiration(
+            $userExternalAuth->getProvider(),
+            $userExternalAuth->getProviderId(),
+            (new UserRadiusProfile())->setIssuedAt(
+                new DateTime()
+            ), // Pass a new DateTime if the user does not have a profile with the account
+            '../signing-keys/cert.pem'
         );
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
@@ -164,9 +194,10 @@ class ProfileController extends AbstractController
             '@IOS_OPERATOR_NAME@',
             '@NAI_REALM@',
             '@PROFILES_ENCRYPTION_TYPE_IOS_ONLY@',
+            '@EXPIRATION_DATE@',
         ], [
-            $radiususer->getUsername(),
-            $radiususer->getValue(),
+            $radiusUser->getUsername(),
+            $radiusUser->getValue(),
             $this->settings['DOMAIN_NAME'],
             $this->settings['RADIUS_TLS_NAME'],
             $this->settings['DISPLAY_NAME'],
@@ -174,6 +205,7 @@ class ProfileController extends AbstractController
             $this->settings['OPERATOR_NAME'],
             $this->settings['NAI_REALM'],
             $this->settings['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'],
+            $expirationDate['limitTime']->format('Y-m-d\TH:i:s\Z'),
         ], $profile);
 
         //iOS Specific
@@ -372,6 +404,9 @@ class ProfileController extends AbstractController
         );
     }
 
+    /**
+     * @throws Exception
+     */
     private function createOrUpdateRadiusUser(
         User $user,
         RadiusUserRepository $radiusUserRepository,
@@ -382,6 +417,8 @@ class ProfileController extends AbstractController
         $radiusProfile = $radiusProfileRepository->findOneBy(
             ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]
         );
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+
         if (!$radiusProfile) {
             $radiusProfile = new UserRadiusProfile();
 
@@ -393,7 +430,18 @@ class ProfileController extends AbstractController
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
-            $radiusProfile->setIssuedAt(new \DateTimeImmutable());
+            $radiusProfile->setIssuedAt(new \DateTime());
+
+            // Get the expiration date from the service
+            $expirationData = $this->expirationProfileService->calculateExpiration(
+                $userExternalAuth->getProvider(),
+                $userExternalAuth->getProviderId(),
+                $radiusProfile,
+                '../signing-keys/cert.pem'
+            );
+
+            // Set the valid_until property
+            $radiusProfile->setValidUntil($expirationData['limitTime']);
 
             $radiusUser = new RadiusUser();
             $radiusUser->setUsername($username);

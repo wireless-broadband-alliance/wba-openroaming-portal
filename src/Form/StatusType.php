@@ -94,7 +94,7 @@ class StatusType extends AbstractType
                             'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                         ]),
                         new GreaterThanOrEqual([
-                            'value' => 0,
+                            'value' => 1,
                             'message' => 'This timer should never be less than 0.',
                         ]),
                         new NotBlank([

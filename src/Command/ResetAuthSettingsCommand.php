@@ -66,6 +66,10 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];
 
         // Begin a database transaction to ensure data consistency

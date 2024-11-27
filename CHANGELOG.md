@@ -2,6 +2,45 @@
 
 ---
 
+# Release V1.6.0
+
+- Fix bug on the date filtering on both statistics pages
+- Add a country dropdown for phone selection
+- Separate user and admin login flows
+- Allow user or admin to revoke a radius profile
+- Fix filtering results, they aren't reflect the actual active count on the filter's (Search User's)
+- Cookie banner
+- TOS Checkbox to enable/disable buttons
+- Fix missing unit of measurement for statistics
+- User per page on User Management is not reflecting the pagination
+- Update READ.ME add new env's && settings
+- Auto delete unconfirmed users after a specific timeframe configurable by the admin
+- **Clear Unverified Accounts Command**: `clear:deleteUnconfirmedUsers` Removes any records in the `User` and all the
+  associated entity's that have a unverified accounts associated.
+
+> **Important**: This command will permanently delete any log or record in the `User` entity.
+
+For more details on how this command works, please refer to the file at:
+**src/Command/AutoDeleteUnconfirmedUsersCommand.php**
+
+To use this command, run the following root in the root folder of the project:
+
+```bash
+php bin/console clear:deleteUnconfirmedUsers
+```
+
+- **Notify User When Profile is about to Expire Command**: `notify:usersWhenProfileExpires` Sends a notification
+  (email/sms) for all the user's that have a profile installed when the expiration date is about to end.
+
+For more details on how this command works, please refer to the file at:
+**src/Command/NotifyUsersWhenProfileExpiresCommand.php**
+
+To use this command, run the following root in the root folder of the project:
+
+```bash
+php bin/console notify:usersWhenProfileExpires
+```
+
 # Release V1.5.0
 
 - Update Php version to (php8.3)

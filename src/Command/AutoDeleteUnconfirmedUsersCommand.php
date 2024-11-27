@@ -2,18 +2,14 @@
 
 namespace App\Command;
 
-use App\Entity\DeletedUserData;
-use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
-use App\Enum\AnalyticalEventType;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,7 +21,6 @@ use function Symfony\Component\String\u;
     name: 'clear:deleteUnconfirmedUsers',
     description: 'Delete unconfirmed users when timeout exceeded',
 )]
-
 class AutoDeleteUnconfirmedUsersCommand extends Command
 {
     private EntityManagerInterface $entityManager;
@@ -43,7 +38,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
         $this->profileManager = $profileManager;
     }
 
-    public function deleteUnconfirmedUsers(): void
+    public function deleteUnconfirmedUsers(): int
     {
         $userRepository = $this->entityManager->getRepository(User::class);
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
@@ -51,6 +46,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
         $userRadiusProfileRepository = $this->entityManager->getRepository(UserRadiusProfile::class);
         $users = $userRepository->findAll();
         $settingTime = $settingsRepository->findBy(['name' => 'USER_DELETE_TIME']);
+        $usersDeleted = 0;
         foreach ($users as $user) {
             $timeString = $settingTime[0]->getValue();
             $time = (int)$timeString;
@@ -58,7 +54,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
             /** @var \DateTime $limitTime */
             $limitTime->modify("+ {$time} hours");
             $realTime = new \DateTime();
-            if (!($user->isVerified() and !$user->isDisabled())) {
+            if (!($user->isVerified() && !$user->isDisabled())) {
                 if ($limitTime < $realTime) {
                     $uuid = $user->getUuid();
                     if (!(u($uuid)->containsAny('-DEMO-'))) {
@@ -71,11 +67,13 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
                             $this->entityManager->remove($userRadiusProfile);
                         }
                         $this->entityManager->remove($user);
+                        $usersDeleted++;
                     }
                 }
             }
             $this->entityManager->flush();
         }
+        return $usersDeleted;
     }
 
     private function disableProfiles($user): void
@@ -85,8 +83,18 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->deleteUnconfirmedUsers();
-        $output->writeln('Users deleted');
+        try {
+            $deletedCount = $this->deleteUnconfirmedUsers();
+
+            $output->writeln(
+                "<info>Success:</info> $deletedCount event(s) with null or empty values have been deleted."
+            );
+        } catch (Exception $e) {
+            // Handle any exceptions and roll back in case of an error
+            $this->entityManager->rollback();
+            $output->writeln('<error>An error occurred:</error> ' . $e->getMessage());
+            return Command::FAILURE;
+        }
 
         return Command::SUCCESS;
     }

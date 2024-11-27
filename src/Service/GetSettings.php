@@ -328,6 +328,22 @@ class GetSettings
             'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
             'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
         ];
+        $data['PROFILE_LIMIT_DATE_SAML'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SAML'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SAML'),
+        ];
+        $data['PROFILE_LIMIT_DATE_GOOGLE'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_GOOGLE'),
+        ];
+        $data['PROFILE_LIMIT_DATE_EMAIL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_EMAIL'),
+        ];
+        $data['PROFILE_LIMIT_DATE_SMS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SMS'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SMS'),
+        ];
 
         return $data;
     }
@@ -420,7 +436,11 @@ class GetSettings
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
-            'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs'
+            'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
+            'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
+            'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with GOOGLE login',
+            'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
+            'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
         ];
 
         return $descriptions[$settingName] ?? '';
