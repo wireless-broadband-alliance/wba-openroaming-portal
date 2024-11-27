@@ -5,7 +5,9 @@ namespace App\Api\V1\Controller;
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\UserRadiusProfileStatus;
 use App\Repository\SettingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\UserStatusChecker;
@@ -24,19 +26,22 @@ class ProfileController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private JWTTokenGenerator $JWTTokenGenerator;
     private UserStatusChecker $userStatusChecker;
+    private UserRadiusProfileRepository $userRadiusProfileRepository;
 
     public function __construct(
         SettingRepository $settingRepository,
         EventActions $eventActions,
         TokenStorageInterface $tokenStorage,
         JWTTokenGenerator $JWTTokenGenerator,
-        UserStatusChecker $userStatusChecker
+        UserStatusChecker $userStatusChecker,
+        UserRadiusProfileRepository $userRadiusProfileRepository
     ) {
         $this->settingRepository = $settingRepository;
         $this->eventActions = $eventActions;
         $this->tokenStorage = $tokenStorage;
         $this->JWTTokenGenerator = $JWTTokenGenerator;
         $this->userStatusChecker = $userStatusChecker;
+        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
     }
 
     /**
@@ -68,8 +73,16 @@ class ProfileController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
+        $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
+            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
+        );
+
+        if (!$radiusProfile){
+            $radiusProfile = 'This User doesn\'t have a profile created';
+        }
+
         $data['config_android'] = [
-            'radius_username' => 'potato',
+            'radius_username' => $radiusProfile->getRadiusUser(),
             'radius_password' => 'potato_password',
             'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
             'fqdn' => $this->getSettingValueRaw('DOMAIN_NAME'),
