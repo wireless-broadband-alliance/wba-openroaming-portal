@@ -283,8 +283,8 @@ use Doctrine\ORM\Mapping as ORM;
                     ),
                 ],
                 requestBody: new RequestBody(
-                    description: 'Android public key required for radius password encryption.
-                     The request should be sent as JSON with the PGP public_key included in the body.',
+                    description: 'Android public key required for radius password encryption. 
+                    The request should be sent as JSON with the PGP public_key included in the body.',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [
@@ -292,9 +292,9 @@ use Doctrine\ORM\Mapping as ORM;
                                 'properties' => [
                                     'public_key' => [
                                         'type' => 'string',
-                                        'description' => 'The PGP public key',
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'example' => '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Vw9yC8xj5kFbzT5E9y9L\n--rest-of-the-key--\n-----END PUBLIC KEY-----',
+                                        'description' => 'The PGP public key used for encryption. It must include the full BEGIN/END markers and the key content.',
+                                        'example' => '-----BEGIN PGP PUBLIC KEY BLOCK-----\n<PGP_PUBLIC_ENCRYPTION_KEY>\n-----END PGP PUBLIC KEY BLOCK-----',
                                         // phpcs:enable
                                     ],
                                 ],
