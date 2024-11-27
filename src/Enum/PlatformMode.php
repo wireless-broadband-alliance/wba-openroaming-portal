@@ -4,6 +4,6 @@ namespace App\Enum;
 
 enum PlatformMode
 {
-public const LIVE = 'Live';
-public const DEMO = 'Demo';
+    public const LIVE = 'Live';
+    public const DEMO = 'Demo';
 }

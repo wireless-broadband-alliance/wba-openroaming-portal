@@ -33,28 +33,6 @@ class TermsType extends AbstractType
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
-            if ($formFieldType === ChoiceType::class) {
-                $formFieldOptions['choices'] = [
-                    'LINK' => 'Link',
-                    'TEXT_EDITOR' => 'Text Editor',
-                ];
-                $formFieldOptions['placeholder'] = 'Select an option';
-            }
-            if ($formFieldType === CKEditorType::class) {
-                $formFieldOptions['config'] = [
-                    'toolbar' => [
-                        ['Bold', 'Italic', 'Underline', '-', 'Subscript', 'Superscript'],
-                        ['Font', 'FontSize', 'TextColor', 'BGColor'],
-                        ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'],
-                        ['Link', 'Unlink'],
-                        ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-                        ['Image', 'Table', 'HorizontalRule', 'SpecialChar'],
-                        ['Undo', 'Redo'],
-                    ],
-                    'extraPlugins' => 'colorbutton,font',
-                ];
-            }
-
             $formFieldOptions = [
                 'attr' => [
                     'autocomplete' => 'off',
@@ -70,7 +48,13 @@ class TermsType extends AbstractType
                     ]),
                 ],
             ];
-
+            if ($formFieldType === ChoiceType::class) {
+                $formFieldOptions['choices'] = [
+                    'LINK' => 'Link',
+                    'TEXT_EDITOR' => 'Text Editor',
+                ];
+                $formFieldOptions['placeholder'] = 'Select an option';
+            }
             // Get the corresponding Setting entity and set its value
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
