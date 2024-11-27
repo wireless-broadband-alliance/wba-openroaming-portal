@@ -28,9 +28,90 @@
                         </label>
                     </div>
 
+                {% if setting.vars.name in ['TOS'] %}
+                        <div class="flex flex-col items-center space-y-2 mt-5">
+                            {# Render "ON" Radio Input #}
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="onLabelLogin">
+                                Link
+                                <input type="radio"
+                                       name="{{ form.TOS.vars.full_name }}"
+                                       value="true"
+                                       class="radio-input hidden"{{ form.TOS.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('tos-radio', 'toggle')|stimulus_action('radio-card', 'unblock') }} {{ stimulus_target('radio-card', 'on') }}>
+                                <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('tos-radio', 'Link') }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                         viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
+                            </label>
+                            {# Render "OFF" Radio Input #}
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="offLabelLogin">
+                                Text Editor
+                                <input type="radio"
+                                       name="{{ form.TOS.vars.full_name }}"
+                                       value="false"
+                                       class="radio-input hidden" {{ form.TOS.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('tos-radio', 'toggle')|stimulus_action('radio-card', 'block') }}>
+                                <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('tos-radio', 'TEXT_EDITOR') }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                         viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"/>
+                                    </svg>
+                                </div>
+                            </label>
+                        </div>
+                {% elseif  setting.vars.name in ['PRIVACY_POLICY'] %}
+                    <div class="flex flex-col items-center space-y-2 mt-5">
+                        {# Render "ON" Radio Input #}
+                        <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                               name="onLabelLogin">
+                            Link
+                            <input type="radio"
+                                   name="{{ form.PRIVACY_POLICY.vars.full_name }}"
+                                   value="true"
+                                   class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }} {{ stimulus_target('radio-card', 'on') }}>
+                            <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'Link') }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                     viewBox="0 0 14 10"
+                                     fill="none">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                          d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                          fill="#210124"/>
+                                </svg>
+                            </div>
+                        </label>
+                        {# Render "OFF" Radio Input #}
+                        <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                               name="offLabelLogin">
+                            Text Editor
+                            <input type="radio"
+                                   name="{{ form.PRIVACY_POLICY.vars.full_name }}"
+                                   value="false"
+                                   class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}>
+                            <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'TEXT_EDITOR') }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                     viewBox="0 0 14 10"
+                                     fill="none">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                          d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                          fill="#210124"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                    {% else %}
                     <div class="mt-5">
                         {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
                     </div>
+                {% endif %}
+
 
                     {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
 
