@@ -13,6 +13,7 @@ use App\Service\JWTTokenGenerator;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Exception;
+use gnupg;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -73,9 +74,8 @@ class ProfileController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        // Retrieve and validate the public key
         $publicKey = $request->get('public_key');
-        if (!$publicKey || !$this->isValidPublicKey($publicKey)) {
+        if (!$publicKey || !$this->isValidPGPKey($publicKey)) {
             return (new BaseResponse(400, null, 'Invalid or missing public key'))->toResponse();
         }
 
@@ -87,9 +87,9 @@ class ProfileController extends AbstractController
             return (new BaseResponse(404, null, 'This user does not have a profile created'))->toResponse();
         }
 
-        // Encrypt the password with the provided public key
+        // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->encryptWithPublicKey($radiusPassword, $publicKey);
+        $encryptedPassword = $this->encryptWithPGP($radiusPassword, $publicKey);
 
         if (!$encryptedPassword) {
             return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
@@ -127,27 +127,20 @@ class ProfileController extends AbstractController
         return $setting ? $setting->getValue() : '';
     }
 
-    private function isValidPublicKey(string $publicKey): bool
+    private function isValidPGPKey(string $publicKey): bool
     {
-        // Validate the RSA public key
-        $keyResource = openssl_pkey_get_public($publicKey);
-        if ($keyResource === false) {
-            return false;
-        }
-        openssl_free_key($keyResource);
-        return true;
+        $gpg = new gnupg();
+        return $gpg->import($publicKey) !== false;
     }
 
-    private function encryptWithPublicKey(string $data, string $publicKey): ?string
+    private function encryptWithPGP(string $data, string $publicKey): ?string
     {
-        $encrypted = null;
-        $keyResource = openssl_pkey_get_public($publicKey);
-
-        if ($keyResource && openssl_public_encrypt($data, $encrypted, $keyResource)) {
-            openssl_free_key($keyResource);
-            return base64_encode($encrypted);
+        $gpg = new gnupg();
+        if (!$gpg->import($publicKey)) {
+            return null;
         }
+        $gpg->addencryptkey($publicKey);
 
-        return null;
+        return $gpg->encrypt($data) ?: null;
     }
 }
