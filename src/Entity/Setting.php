@@ -300,7 +300,7 @@ use Doctrine\ORM\Mapping as ORM;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
-            uriTemplate: '/v1/config/profile/iOS',
+            uriTemplate: '/v1/config/profile/ios',
             controller: ProfileController::class,
             openapi: new Operation(
                 responses: [
@@ -470,7 +470,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Profile Configuration',
             paginationEnabled: false,
             description: 'Returns the configuration data for an iOS profile',
-            name: 'api_config_profile_iOS',
+            name: 'api_config_profile_ios',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
