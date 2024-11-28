@@ -34,24 +34,26 @@ class TermsType extends AbstractType
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
             $formFieldOptions = [
-                'attr' => [
-                    'autocomplete' => 'off',
-                ],
-                'required' => true,
-                'constraints' => [
-                    new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
-                        'protocols' => ['http', 'https'],
-                    ]),
-                    new NotBlank([
-                        'message' => 'This field cannot be empty',
-                    ]),
-                ],
+                'constraints' => [],
+                'attr' => [],
             ];
+            if ($formFieldType === TextType::class) {
+                $formFieldOptions = [
+                    'attr' => [
+                        'autocomplete' => 'off',
+                    ],
+                    'constraints' => [
+                        new Assert\Url([
+                            'message' => 'The value {{ value }} is not a valid URL.',
+                            'protocols' => ['http', 'https'],
+                        ]),
+                    ],
+                ];
+            }
             if ($formFieldType === ChoiceType::class) {
                 $formFieldOptions['choices'] = [
-                    'LINK' => 'Link',
-                    'TEXT_EDITOR' => 'Text Editor',
+                    'LINK' => 'LINK',
+                    'TEXT_EDITOR' => 'TEXT_EDITOR',
                 ];
                 $formFieldOptions['placeholder'] = 'Select an option';
             }

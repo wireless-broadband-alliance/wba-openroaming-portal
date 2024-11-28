@@ -1158,30 +1158,51 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            // Update settings
+            $tos = $submittedData['TOS'];
+            $privacyPolicy = $submittedData['PRIVACY_POLICY'];
             $tosLink = $submittedData['TOS_LINK'] ?? null;
             $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
+            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? null;
+            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? null;
 
-            // Check if the setting is an empty input
-            if ($tosLink === null) {
-                $tosLink = "";
-            }
-            if ($privacyPolicyLink === null) {
-                $privacyPolicyLink = "";
-            }
 
-            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
             if ($tosSetting) {
-                $tosSetting->setValue($tosLink);
+                $tosSetting->setValue($tos);
                 $em->persist($tosSetting);
             }
 
-            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
             if ($privacyPolicySetting) {
-                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $privacyPolicySetting->setValue($privacyPolicy);
                 $em->persist($privacyPolicySetting);
             }
 
+            $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            if ($tosLinkSetting) {
+                $tosLinkSetting->setValue($tosLink);
+                $em->persist($tosLinkSetting);
+            }
+
+            $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            if ($privacyPolicyLinkSetting) {
+                $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicyLinkSetting);
+            }
+
+            $tosEditorSetting = $settingsRepository->findOneBy(['name' => 'TOS_EDITOR']);
+            if ($tosEditorSetting) {
+                $tosEditorSetting->setValue($tosTextEditor);
+                $em->persist($tosEditorSetting);
+            }
+
+            $privacyPolicyEditorSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR']);
+            if ($privacyPolicyEditorSetting) {
+                $privacyPolicyEditorSetting->setValue($privacyPolicyTextEditor);
+                $em->persist($privacyPolicyEditorSetting);
+            }
+            /*
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
@@ -1193,7 +1214,9 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
+            */
 
+            $em->flush();
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
