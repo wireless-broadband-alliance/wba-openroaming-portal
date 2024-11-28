@@ -56,7 +56,7 @@ api_config_profile_android:
     controller: App\Api\V1\Controller\ProfileController::getProfileAndroid
     methods: ['GET']
 
-api_config_profile_iOS:
-    path: /api/v1/config/profile/iOS
+api_config_profile_ios:
+    path: /api/v1/config/profile/ios
     controller: App\Api\V1\Controller\ProfileController::getProfileIos
     methods: ['GET']

@@ -15,7 +15,7 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\JWTTokenGenerator;
-use App\Service\PgpEncryptionService;
+use App\Service\RsaEncryptionService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Random\RandomException;
@@ -34,10 +34,10 @@ class ProfileController extends AbstractController
     private JWTTokenGenerator $JWTTokenGenerator;
     private UserStatusChecker $userStatusChecker;
     private UserRadiusProfileRepository $userRadiusProfileRepository;
-    private PgpEncryptionService $pgpEncryptionService;
     private RadiusUserRepository $radiusUserRepository;
     private UserExternalAuthRepository $userExternalAuthRepository;
     private ExpirationProfileService $expirationProfileService;
+    private RsaEncryptionService $rsaEncryptionService;
 
     public function __construct(
         SettingRepository $settingRepository,
@@ -46,10 +46,10 @@ class ProfileController extends AbstractController
         JWTTokenGenerator $JWTTokenGenerator,
         UserStatusChecker $userStatusChecker,
         UserRadiusProfileRepository $userRadiusProfileRepository,
-        PgpEncryptionService $pgpEncryptionService,
         RadiusUserRepository $radiusUserRepository,
         UserExternalAuthRepository $userExternalAuthRepository,
-        ExpirationProfileService $expirationProfileService
+        ExpirationProfileService $expirationProfileService,
+        RsaEncryptionService $rsaEncryptionService
     ) {
         $this->settingRepository = $settingRepository;
         $this->eventActions = $eventActions;
@@ -57,10 +57,10 @@ class ProfileController extends AbstractController
         $this->JWTTokenGenerator = $JWTTokenGenerator;
         $this->userStatusChecker = $userStatusChecker;
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
-        $this->pgpEncryptionService = $pgpEncryptionService;
         $this->radiusUserRepository = $radiusUserRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->expirationProfileService = $expirationProfileService;
+        $this->rsaEncryptionService = $rsaEncryptionService;
     }
 
     /**
@@ -151,7 +151,7 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->pgpEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+        $encryptedPassword = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
         if (!$encryptedPassword) {
             return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
@@ -186,7 +186,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/api/v1/config/profile/iOS', name: 'api_config_profile_iOS', methods: ['GET'])]
+    #[Route('/api/v1/config/profile/ios', name: 'api_config_profile_ios', methods: ['GET'])]
     public function getProfileIos(Request $request): JsonResponse
     {
         try {
@@ -271,7 +271,7 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->pgpEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+        $encryptedPassword = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
         if (!$encryptedPassword) {
             return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
@@ -286,7 +286,7 @@ class ProfileController extends AbstractController
                 'acceptEAPTypes' => '21',
                 'radiusUsername' => $radiusProfile->getRadiusUser(),
                 'radiusPassword' => $encryptedPassword,
-                'outerIdentity' => 'anonymous@' .  $this->getSettingValueRaw('RADIUS_TLS_NAME'),
+                'outerIdentity' => 'anonymous@' . $this->getSettingValueRaw('RADIUS_TLS_NAME'),
                 'TTLSInnerAuthentication' => 'MSCHAPv2',
             ],
             'encryptionType' => 'WPA2',
