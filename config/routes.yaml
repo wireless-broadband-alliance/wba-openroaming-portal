@@ -50,3 +50,13 @@ api_auth_sms_reset:
     path: /api/v1/auth/sms/reset
     controller: App\Api\V1\Controller\RegistrationController::smsReset
     methods: ['POST']
+
+api_config_profile_android:
+    path: /api/v1/config/profile/android
+    controller: App\Api\V1\Controller\ProfileController::getProfileAndroid
+    methods: ['GET']
+
+api_config_profile_iOS:
+    path: /api/v1/config/profile/iOS
+    controller: App\Api\V1\Controller\ProfileController::getProfileIos
+    methods: ['GET']

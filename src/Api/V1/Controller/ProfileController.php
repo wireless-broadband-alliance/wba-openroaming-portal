@@ -18,11 +18,11 @@ use App\Service\JWTTokenGenerator;
 use App\Service\PgpEncryptionService;
 use App\Service\UserStatusChecker;
 use DateTime;
-use Exception;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -64,17 +64,10 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @throws Exception
-     */
-    public function __invoke(Request $request): JsonResponse
-    {
-        return $this->getProfileAndroid($request);
-    }
-
-    /**
      * @throws RandomException
      */
-    private function getProfileAndroid(Request $request): JsonResponse
+    #[Route('/api/v1/config/profile/android', name: 'api_config_profile_android', methods: ['GET'])]
+    public function getProfileAndroid(Request $request): JsonResponse
     {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -183,6 +176,132 @@ class ProfileController extends AbstractController
         $this->eventActions->saveEvent(
             $currentUser,
             AnalyticalEventType::CONFIG_PROFILE_ANDROID,
+            new DateTime(),
+            $eventMetadata
+        );
+
+        return (new BaseResponse(200, $data))->toResponse();
+    }
+
+    /**
+     * @throws RandomException
+     */
+    #[Route('/api/v1/config/profile/iOS', name: 'api_config_profile_iOS', methods: ['GET'])]
+    public function getProfileIos(Request $request): JsonResponse
+    {
+        try {
+            $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        }
+
+        $token = $this->tokenStorage->getToken();
+        if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
+            return (new BaseResponse(403, null, 'Unauthorized access!'))->toResponse();
+        }
+
+        /** @var User $currentUser */
+        $currentUser = $token->getUser();
+        /** @phpstan-ignore-next-line */
+        $jwtTokenString = $token->getCredentials();
+
+        if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
+            return (new BaseResponse(401, null, 'JWT Token is invalid!'))->toResponse();
+        }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+        if ($statusCheckerResponse !== null) {
+            return $statusCheckerResponse->toResponse();
+        }
+
+        // Check for missing fields and add them to the array errors
+        if (empty($dataRequest['public_key'])) {
+            $errors[] = 'public_key';
+        }
+        if (!empty($errors)) {
+            return (
+            new BaseResponse(
+                400,
+                ['missing_fields' => $errors],
+                'Invalid data: Missing required fields.'
+            )
+            )->toResponse();
+        }
+
+        $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
+            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
+        );
+
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
+
+        if (!$radiusProfile) {
+            $radiusProfile = new UserRadiusProfile();
+
+            $androidLimit = 32;
+            $realmSize = strlen($this->getSettingValueRaw('RADIUS_REALM_NAME')) + 1;
+            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
+                'RADIUS_REALM_NAME'
+            );
+            $token = $this->generateToken($androidLimit - $realmSize);
+            $radiusProfile->setUser($currentUser);
+            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusUser($username);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setIssuedAt(new DateTime());
+
+            // Get the expiration date from the service
+            $expirationData = $this->expirationProfileService->calculateExpiration(
+                $userExternalAuth->getProvider(),
+                $userExternalAuth->getProviderId(),
+                $radiusProfile,
+                '../signing-keys/cert.pem'
+            );
+
+            // Set the valid_until property
+            $radiusProfile->setValidUntil($expirationData['limitTime']);
+
+            $radiusUser = new RadiusUser();
+            $radiusUser->setUsername($username);
+            $radiusUser->setAttribute('Cleartext-Password');
+            $radiusUser->setOp(':=');
+            $radiusUser->setValue($token);
+            $this->radiusUserRepository->save($radiusUser, true);
+            $this->userRadiusProfileRepository->save($radiusProfile, true);
+        }
+
+        // Encrypt the password with the provided PGP public key
+        $radiusPassword = $radiusProfile->getRadiusToken();
+        $encryptedPassword = $this->pgpEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+
+        if (!$encryptedPassword) {
+            return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
+        }
+
+        $data = [
+            'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-2',
+            'payloadType' => 'com.apple.wifi.managed',
+            'payloadUUID' => $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-1',
+            'domainName' => $this->getSettingValueRaw('DOMAIN_NAME'),
+            'EAPClientConfiguration' => [
+                'acceptEAPTypes' => '21',
+                'radiusUsername' => $radiusProfile->getRadiusUser(),
+                'radiusPassword' => $encryptedPassword,
+                'outerIdentity' => 'anonymous@' .  $this->getSettingValueRaw('RADIUS_TLS_NAME'),
+                'TTLSInnerAuthentication' => 'MSCHAPv2',
+            ],
+            'encryptionType' => 'WPA2',
+            'roamingConsortiumOis' => ['5A03BA0000', '004096'],
+            'NAIRealmNames' => $this->getSettingValueRaw('NAI_REALM')
+        ];
+
+        $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'uuid' => $currentUser->getUuid(),
+        ];
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::CONFIG_PROFILE_IOS,
             new DateTime(),
             $eventMetadata
         );
