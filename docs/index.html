@@ -34,7 +34,7 @@
             "info": {
                 "title": "OpenRoaming Portal API",
                 "description": "",
-                "version": "1.0.0"
+                "version": "1.6.1"
             },
             "servers": [
                 {
@@ -43,6 +43,434 @@
                 }
             ],
             "paths": {
+                "/api/v1/config/profile/android": {
+                    "get": {
+                        "operationId": "api_config_profile_android",
+                        "tags": [
+                            "Profile Configuration"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Profile configuration for Android successfully retrieved",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "config_android": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "radiusUsername": {
+                                                                    "type": "string"
+                                                                },
+                                                                "radiusPassword": {
+                                                                    "type": "string"
+                                                                },
+                                                                "friendlyName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "fqdn": {
+                                                                    "type": "string"
+                                                                },
+                                                                "roamingConsortiumOis": {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "eapType": {
+                                                                    "type": "string"
+                                                                },
+                                                                "nonEapInnerMethod": {
+                                                                    "type": "string"
+                                                                },
+                                                                "realm": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": {
+                                                "config_android": {
+                                                    "radiusUsername": "user123",
+                                                    "radiusPassword": "encrypted_password_here",
+                                                    "friendlyName": "My Android Profile",
+                                                    "fqdn": "example.com",
+                                                    "roamingConsortiumOis": [
+                                                        "5a03ba0000",
+                                                        "004096"
+                                                    ],
+                                                    "eapType": "21",
+                                                    "nonEapInnerMethod": "MS-CHAP-V2",
+                                                    "realm": "example.com"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "400": {
+                                "description": "Invalid or missing public key",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Invalid or missing public key"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "401": {
+                                "description": "JWT Token is invalid",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "JWT Token is invalid!"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "403": {
+                                "description": "Unauthorized access",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Unauthorized access!"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "500": {
+                                "description": "Failed to encrypt the password",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Failed to encrypt the password"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Get Android profile configuration",
+                        "description": "This endpoint retrieves the profile configuration for Android, including a user's radius profile data, encrypted password, and other relevant settings for the Android application.",
+                        "parameters": [
+                            {
+                                "name": "Authorization",
+                                "in": "header",
+                                "description": "Bearer token required for authentication. Use the format: `Bearer \u003CJWT token\u003E`.",
+                                "required": true,
+                                "deprecated": false,
+                                "allowEmptyValue": false,
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "style": "simple",
+                                "explode": false,
+                                "allowReserved": false
+                            }
+                        ],
+                        "requestBody": {
+                            "description": "Android public key required for radius password encryption. \n                    The request should be sent as JSON with the PGP public_key included in the body.",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "public_key": {
+                                                "type": "string",
+                                                "description": "The RSA public key used for encryption. It must include the full BEGIN/END markers and the key content.",
+                                                "example": "-----BEGIN PUBLIC KEY-----\\n\u003CRSA_PUBLIC_KEY\u003E\\n-----END PUBLIC KEY-----"
+                                            }
+                                        },
+                                        "required": [
+                                            "public_key"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": true
+                        },
+                        "deprecated": false,
+                        "security": [
+                            {
+                                "bearerAuth": []
+                            }
+                        ]
+                    }
+                },
+                "/api/v1/config/profile/iOS": {
+                    "get": {
+                        "operationId": "api_config_profile_iOS",
+                        "tags": [
+                            "Profile Configuration"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Profile configuration for iOS successfully retrieved",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "payloadIdentifier": {
+                                                            "type": "string"
+                                                        },
+                                                        "payloadType": {
+                                                            "type": "string"
+                                                        },
+                                                        "payloadUUID": {
+                                                            "type": "string"
+                                                        },
+                                                        "domainName": {
+                                                            "type": "string"
+                                                        },
+                                                        "EAPClientConfiguration": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "acceptEAPTypes": {
+                                                                    "type": "string"
+                                                                },
+                                                                "radiusUsername": {
+                                                                    "type": "string"
+                                                                },
+                                                                "radiusPassword": {
+                                                                    "type": "string"
+                                                                },
+                                                                "outerIdentity": {
+                                                                    "type": "string"
+                                                                },
+                                                                "TTLSInnerAuthentication": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "encryptionType": {
+                                                            "type": "string"
+                                                        },
+                                                        "roamingConsortiumOis": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "NAIRealmNames": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": {
+                                                "payloadIdentifier": "com.apple.wifi.managed.\u003Crandom_payload_identifier\u003E-2",
+                                                "payloadType": "com.apple.wifi.managed",
+                                                "payloadUUID": "\u003Crandom_payload_identifier\u003E-1",
+                                                "domainName": "example.com",
+                                                "EAPClientConfiguration": {
+                                                    "acceptEAPTypes": "21",
+                                                    "radiusUsername": "user123",
+                                                    "radiusPassword": "encrypted_password_here",
+                                                    "outerIdentity": "anonymous@example.com",
+                                                    "TTLSInnerAuthentication": "MSCHAPv2"
+                                                },
+                                                "encryptionType": "WPA2",
+                                                "roamingConsortiumOis": [
+                                                    "5A03BA0000",
+                                                    "004096"
+                                                ],
+                                                "NAIRealmNames": "example.com"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "400": {
+                                "description": "Invalid or missing public key",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Invalid or missing public key"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "401": {
+                                "description": "JWT Token is invalid",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "JWT Token is invalid!"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "403": {
+                                "description": "Unauthorized access",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Unauthorized access!"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "500": {
+                                "description": "Failed to encrypt the password",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Failed to encrypt the password"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Get iOS profile configuration",
+                        "description": "This endpoint retrieves the profile configuration for iOS, \n                including a user's radius profile data, encrypted password, \n                and other relevant settings for the iOS application.",
+                        "parameters": [
+                            {
+                                "name": "Authorization",
+                                "in": "header",
+                                "description": "Bearer token required for authentication. Use the format: `Bearer \u003CJWT token\u003E`.",
+                                "required": true,
+                                "deprecated": false,
+                                "allowEmptyValue": false,
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "style": "simple",
+                                "explode": false,
+                                "allowReserved": false
+                            }
+                        ],
+                        "requestBody": {
+                            "description": "iOS public key required for radius password encryption. \n            The request should be sent as JSON with the PGP public_key included in the body.",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "public_key": {
+                                                "type": "string",
+                                                "description": "The RSA public key used for encryption. It must include the full BEGIN/END markers and the key content.",
+                                                "example": "-----BEGIN PUBLIC KEY-----\\n\u003CRSA_PUBLIC_KEY\u003E\\n-----END PUBLIC KEY-----"
+                                            }
+                                        },
+                                        "required": [
+                                            "public_key"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": true
+                        },
+                        "deprecated": false,
+                        "security": [
+                            {
+                                "bearerAuth": []
+                            }
+                        ]
+                    }
+                },
                 "/api/v1/config": {
                     "get": {
                         "operationId": "app_config_settings",
@@ -2058,6 +2486,54 @@
                             }
                         }
                     },
+                    "Profile.Configuration": {
+                        "type": "object",
+                        "description": "Returns the configuration data for an Android profile",
+                        "deprecated": false,
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "Profile.Configuration.jsonld": {
+                        "type": "object",
+                        "description": "Returns the configuration data for an Android profile",
+                        "deprecated": false,
+                        "properties": {
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
                     "Setting": {
                         "type": "object",
                         "description": "Returns public values from the Setting entity",
@@ -3769,7 +4245,10 @@
                                 "type": "string"
                             },
                             "issuedAt": {
-                                "type": "string",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
                                 "format": "date-time"
                             },
                             "validUntil": {
@@ -3857,7 +4336,10 @@
                                 "type": "string"
                             },
                             "issuedAt": {
-                                "type": "string",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
                                 "format": "date-time"
                             },
                             "validUntil": {
@@ -4122,7 +4604,7 @@
                     <section class="block col-12">
                         <div class="info">
                             <hgroup class="main">
-                                <h2 class="title">OpenRoaming Portal API<span><small><pre class="version"> 1.0.0 </pre></small><small
+                                <h2 class="title">OpenRoaming Portal API<span><small><pre class="version"> 1.6.1 </pre></small><small
                                         class="version-stamp"><pre class="version">OAS 3.1</pre></small></span></h2>
                             </hgroup>
                             <div class="info__description description"></div>
@@ -4152,10 +4634,69 @@
                 <div class="wrapper">
                     <section class="block col-12 block-desktop col-12-desktop">
                         <div><span><div class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                                id="operations-tag-Setting"
-                                                                                data-tag="Setting"
+                                                                                id="operations-tag-Profile_Configuration"
+                                                                                data-tag="Profile Configuration"
                                                                                 data-is-open="true"><a class="nostyle"
-                                                                                                       href="http:///api#/Setting"><span>Setting</span></a><small></small><button
+                                                                                                       href="http:///api#/Profile%20Configuration"><span>Profile Configuration</span></a><small></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-get"
+                                id="operations-Profile_Configuration-api_config_profile_android"><div
+                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
+                                                                                    class="opblock-summary-control"><span
+                                class="opblock-summary-method">GET</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/config/profile/android"><a
+                                class="nostyle"
+                                href="http:///api#/Profile%20Configuration/api_config_profile_android"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/android</span></a></span><div
+                                class="opblock-summary-description">Get Android profile configuration</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                class="authorization__btn" aria-label="authorization button locked"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path></svg></button><button
+                                aria-label="get ​/api​/v1​/config​/profile​/android" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
+                                class="opblock opblock-get"
+                                id="operations-Profile_Configuration-api_config_profile_iOS"><div
+                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
+                                                                                    class="opblock-summary-control"><span
+                                class="opblock-summary-method">GET</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/config/profile/iOS"><a
+                                class="nostyle"
+                                href="http:///api#/Profile%20Configuration/api_config_profile_iOS"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/iOS</span></a></span><div
+                                class="opblock-summary-description">Get iOS profile configuration</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                class="authorization__btn" aria-label="authorization button locked"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path></svg></button><button
+                                aria-label="get ​/api​/v1​/config​/profile​/iOS" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                                                        id="operations-tag-Setting" data-tag="Setting"
+                                                                        data-is-open="true"><a class="nostyle"
+                                                                                               href="http:///api#/Setting"><span>Setting</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -4488,6 +5029,43 @@
                                         <button type="button" class="json-schema-2020-12-accordion">
                                             <div class="json-schema-2020-12-accordion__children">
                                                 <div class="json-schema-2020-12__title">PhoneNumber.jsonld</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">Profile.Configuration</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">Profile.Configuration.jsonld
+                                                </div>
                                             </div>
                                             <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -6013,7 +6591,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('02e12d');/*]]>*/</script>
+Sfjs.loadToolbar('0a7d5d');/*]]>*/</script>
 
 
 </body>
