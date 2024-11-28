@@ -54,8 +54,15 @@ export default class extends Controller {
 
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
+
         for (let button of this.buttonTargets) {
+            // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
+
+            // btn-secondary-disabled (for the specific login button)
+            if (button.classList.contains('btn-secondary')) {
+                button.classList.toggle("btn-secondary-disabled", !isChecked);
+            }
         }
     }
 
