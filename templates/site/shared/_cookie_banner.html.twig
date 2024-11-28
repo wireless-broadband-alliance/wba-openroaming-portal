@@ -1,65 +1,71 @@
-<div {{ stimulus_controller('cookie') }} class="flex items-center justify-center relative">
+<div {{ stimulus_controller('cookie') }}>
+    <div class="flex items-center justify-center relative">
 
-    {# Cookie Banner #}
-    <section
-            class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10 flex flex-col justify-between" {{ stimulus_target('cookie', 'banner') }}>
-        <div class="md:flex items-center justify-between text-center md:text-left text-xs mb-4">
-            <div class="md:flex-1">
-                By accepting cookies, you consent to downloading and installing an OpenRoaming profile for your device
-                as part of the WBA OpenRoaming program.
+        {# Cookie Banner #}
+        <section
+                class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10 flex flex-col justify-between" {{ stimulus_target('cookie', 'banner') }}>
+            <div class="md:flex items-center justify-between text-center md:text-left text-xs mb-4">
+                <div class="md:flex-1">
+                    By accepting cookies, you consent to downloading and installing an OpenRoaming profile for your
+                    device
+                    as part of the WBA OpenRoaming program.
+                </div>
             </div>
-        </div>
-        <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
-            <button class="py-1 px-2 btn-primary text-sm" data-action="cookie#acceptCookies">Accept Cookies</button>
-            <button class="py-1 px-2 btn-logout text-sm" data-action="cookie#rejectCookies">Reject Cookies</button>
-            <button class="py-1 px-2 btn-secondary text-sm" data-action="cookie#showModal">Cookie Settings</button>
-        </div>
-    </section>
-
-    {# Cookie Preferences Modal #}
-    <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" {{ stimulus_target('cookie', 'modalCookie') }}>
-        <div class="px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] bg-white lg:w-1/2 p-6 mx-4 rounded shadow space-y-4 overflow-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h2 class="text-primary text-xl font-semibold">Cookie Settings</h2>
-                <button type="button"
-                        class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('cookie', 'closeModal') }}>
-                    <span>Close</span>
-                    <twig:ux:icon name="wba:cross" fill="fill-current"/>
-                </button>
+            <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
+                <button class="py-1 px-2 btn-primary text-sm" data-action="cookie#acceptCookies">Accept Cookies</button>
+                <button class="py-1 px-2 btn-logout text-sm" data-action="cookie#rejectCookies">Reject Cookies</button>
+                <button class="py-1 px-2 btn-secondary text-sm" data-action="cookie#showModal">Cookie Settings</button>
             </div>
+        </section>
 
-            <div class="flex justify-center">
-                {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
-                    <img class="w-[170px] h-[58px] object-scale-down object-right my-4"
-                         src="{{ data.customerLogoName.value }}" alt="Logo"/>
-                {% endif %}
-            </div>
+        {# Cookie Preferences Modal #}
+        <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" {{ stimulus_target('cookie', 'modalCookie') }}>
+            <div class="px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] bg-white lg:w-1/2 p-6 mx-4 rounded shadow space-y-4 overflow-auto">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h2 class="text-primary text-xl font-semibold">Cookie Settings</h2>
+                    <button type="button"
+                            class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('cookie', 'closeModal') }}>
+                        <span>Close</span>
+                        <twig:ux:icon name="wba:cross" fill="fill-current"/>
+                    </button>
+                </div>
 
-            <div class="text-center text-sm text-gray-700">
-                <p>
-                    This platform uses cookies to provide a seamless experience when connecting to the OpenRoaming
-                    network. These cookies are essential for provisioning your device securely, enabling automatic
-                    authentication, and ensuring compliance with our policies. By using our platform, you consent to the
-                    use
-                    of these cookies.
-                </p>
-            </div>
+                <div class="flex justify-center">
+                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                        <img class="w-[170px] h-[58px] object-scale-down object-right my-4"
+                             src="{{ data.customerLogoName.value }}" alt="Logo"/>
+                    {% endif %}
+                </div>
 
-            <div {{ stimulus_target('cookie', 'consentForm') }}>
-                <div class="flex flex-col mx-4 space-y-4">
+                <div class="text-center text-sm text-gray-700">
+                    <p>
+                        This platform uses cookies to provide a seamless experience when connecting to the OpenRoaming
+                        network. These cookies are essential for provisioning your device securely, enabling automatic
+                        authentication, and ensuring compliance with our policies. By using our platform, you consent to
+                        the
+                        use
+                        of these cookies.
+                    </p>
+                </div>
 
-                    {# Necessary Cookies Section #}
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="font-semibold">Necessary Cookies</h3>
-                        <p class="text-sm">
-                            These cookies are essential for the platform to function properly and cannot be disabled.
-                        </p>
-                        <ul class="list-disc list-inside text-sm space-y-2">
-                            <li>
-                                <strong>Session Cookie (PHPSESSID)</strong> - This cookie is essential for maintaining
-                                user session state during the session's duration. It enables the platform to function
-                                properly and ensures a seamless user experience.
-                                <span>
+                <div {{ stimulus_target('cookie', 'consentForm') }}>
+                    <div class="flex flex-col mx-4 space-y-4">
+
+                        {# Necessary Cookies Section #}
+                        <div class="flex flex-col space-y-3">
+                            <h3 class="font-semibold">Necessary Cookies</h3>
+                            <p class="text-sm">
+                                These cookies are essential for the platform to function properly and cannot be
+                                disabled.
+                            </p>
+                            <ul class="list-disc list-inside text-sm space-y-2">
+                                <li>
+                                    <strong>Session Cookie (PHPSESSID)</strong> - This cookie is essential for
+                                    maintaining
+                                    user session state during the session's duration. It enables the platform to
+                                    function
+                                    properly and ensures a seamless user experience.
+                                    <span>
                                 <br>
                                 Controlled by:
                                 <a
@@ -68,20 +74,21 @@
                                     {{ app.request.getHost() }}
                                 </a>
                                 </span>.
-                                <br>
-                                <p>
-                                    <a
-                                            href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                            class="underline text-primary"
-                                            target="_blank">
-                                        Privacy & Policy
-                                    </a>
-                                </p>
-                            </li>
-                            <li>
-                                <strong>CSRF Token</strong> - Protects against cross-site request forgery (CSRF) attacks
-                                by ensuring that forms and requests are submitted from trusted sources.
-                                <span>
+                                    <br>
+                                    <p>
+                                        <a
+                                                href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                                class="underline text-primary"
+                                                target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
+                                <li>
+                                    <strong>CSRF Token</strong> - Protects against cross-site request forgery (CSRF)
+                                    attacks
+                                    by ensuring that forms and requests are submitted from trusted sources.
+                                    <span>
                                 <br>
                                 Controlled by:
                                 <a
@@ -90,47 +97,49 @@
                                     {{ app.request.getHost() }}
                                 </a>
                                 </span>.
-                                <br>
-                                <p>
-                                    <a
-                                            href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                            class="underline text-primary"
-                                            target="_blank">
-                                        Privacy & Policy
-                                    </a>
-                                </p>
-                            </li>
-                        </ul>
-                    </div>
+                                    <br>
+                                    <p>
+                                        <a
+                                                href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                                class="underline text-primary"
+                                                target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
+                            </ul>
+                        </div>
 
-                    {# Preferences Cookies Section #}
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="font-semibold">Preferences Cookies</h3>
-                        <p class="text-sm">
-                            These cookies help save your preferences and provide a personalized experience on our
-                            platform.
-                        </p>
-                        <ul class="list-disc list-inside text-sm">
-                            <li class="flex justify-between items-center">
-                                <div>
-                                    <strong>Terms & Policies</strong> - We use these cookies to track user consent and
-                                    interactions with our platform.
-                                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                       class="underline text-primary font-semibold" target="_blank">Privacy Policy</a>
-                                    and
-                                    <a href="{{ data.TOS_LINK.value }}"
-                                       class="underline text-primary font-semibold" target="_blank">Terms &
-                                        Conditions</a>.
-                                </div>
-                                <label class="mb-4 inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" data-scope="terms">
-                                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
+                        {# Preferences Cookies Section #}
+                        <div class="flex flex-col space-y-3">
+                            <h3 class="font-semibold">Preferences Cookies</h3>
+                            <p class="text-sm">
+                                These cookies help save your preferences and provide a personalized experience on our
+                                platform.
+                            </p>
+                            <ul class="list-disc list-inside text-sm">
+                                <li class="flex justify-between items-center">
+                                    <div>
+                                        <strong>Terms & Policies</strong> - We use these cookies to track user consent
+                                        and
+                                        interactions with our platform.
+                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                           class="underline text-primary font-semibold" target="_blank">Privacy
+                                            Policy</a>
+                                        and
+                                        <a href="{{ data.TOS_LINK.value }}"
+                                           class="underline text-primary font-semibold" target="_blank">Terms &
+                                            Conditions</a>.
+                                    </div>
+                                    <label class="mb-4 inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" data-scope="terms">
+                                        <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
 
-                    {# Analytics Cookies Section
+                        {# Analytics Cookies Section
                     <div class="flex flex-col space-y-3">
                         <h3 class="font-semibold">Analytics Cookies</h3>
                         <p class="text-sm">
@@ -152,8 +161,8 @@
                             </li>
                         </ul>
                     </div>
-                    #}
-                    {# Marketing Cookies Section - Commented for later if needed
+                        #}
+                        {# Marketing Cookies Section - Commented for later if needed
                     <div class="flex flex-col space-y-3">
                         <h3 class="font-semibold">Marketing Cookies</h3>
                         <p class="text-sm">
@@ -175,27 +184,36 @@
                             </li>
                         </ul>
                     </div>
-                    #}
-                </div>
-                {# Apply Cookies #}
-                <div class="mt-10">
-                    <div class="md:flex md:justify-between justify-cente items-centerr">
-                        <div class="md:flex-1 text-center md:text-left text-xs">
-                            Your data is safe with us. Learn more in our
-                            <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
-                               class="underline text-primary font-semibold">Privacy Policy</a>.
-                        </div>
-                        <div class="mt-3 flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
-                            <button class="mt-4 md:mt-0 btn-primary"
-                                    data-action="cookie#savePreferences">Apply Cookies
-                            </button>
-                            <button class="mt-4 md:mt-0 btn-logout" data-action="cookie#rejectCookies">Reject
-                                Cookies
-                            </button>
+                        #}
+                    </div>
+                    {# Apply Cookies #}
+                    <div class="mt-10">
+                        <div class="md:flex md:justify-between justify-cente items-centerr">
+                            <div class="md:flex-1 text-center md:text-left text-xs">
+                                Your data is safe with us. Learn more in our
+                                <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                                   class="underline text-primary font-semibold">Privacy Policy</a>.
+                            </div>
+                            <div class="mt-3 flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
+                                <button class="mt-4 md:mt-0 btn-primary"
+                                        data-action="cookie#savePreferences">Apply Cookies
+                                </button>
+                                <button class="mt-4 md:mt-0 btn-logout" data-action="cookie#rejectCookies">Reject
+                                    Cookies
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    {# Cookie Open Modal Cookie Setting #}
+    <div class="flex justify-end items-center my-4 text-[#707070] space-x-2">
+        <span class="text-sm">Manage Cookies</span>
+        <button id="modalManageCookies" type="button" data-action="cookie#showModal"
+                class="flex items-center duration-300 cursor-pointer rounded-full focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
+            <twig:ux:icon name="material-symbols:cookie" />
+        </button>
     </div>
 </div>
