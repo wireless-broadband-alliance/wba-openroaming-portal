@@ -196,14 +196,13 @@
             </div>
             <div {{ stimulus_controller('terms-widget') }}>
 
-                <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
+                <div class="provider-list my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
                     {% if data.SAML_ENABLED.value %}
-                        <div>
-                            <a href="/saml/login">
+                        <div class="provider-btn">
+                            <a href="/saml/login" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary"
-                                                                                        name="btn-primary"
-                                                                                        disabled="disabled">
+                                                                                        name="btn-primary">
                                     {{ data.SAML_LABEL.value }}
                                 </button>
                             </a>
@@ -212,12 +211,10 @@
                     {% endif %}
 
                     {% if data.GOOGLE_LOGIN_ENABLED.value %}
-                        <div>
-                            <a href="{{ path('connect_google') }}">
+                        <div class="provider-btn">
+                            <a href="{{ path('connect_google') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary"
-                                                                                        disabled="disabled">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.GOOGLE_LOGIN_LABEL.value }}
                                 </button>
                             </a>
@@ -226,12 +223,11 @@
                     {% endif %}
 
                     {% if data.EMAIL_REGISTER_ENABLED.value %}
-                        <div>
-                            <a href="{{ path('app_register') }}">
+                        <div class="provider-btn">
+                            <a href="{{ path('app_register') }}" data-action="terms-widget#showModal" >
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary"
-                                                                                        disabled="disabled">
+                                                                                        name="btn-primary">
                                     {{ data.REGISTER_LABEL.value }}
                                 </button>
                             </a>
@@ -240,12 +236,11 @@
                     {% endif %}
 
                     {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                        <div>
-                            <a href="{{ path('app_register_sms') }}">
+                        <div class="provider-btn">
+                            <a href="{{ path('app_register_sms') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary"
-                                                                                        disabled="disabled">
+                                                                                        name="btn-primary">
                                     {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                                 </button>
                             </a>
@@ -254,12 +249,11 @@
                     {% endif %}
 
                     {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
-                        <div class="w-full">
-                            <a href="{{ path('app_login') }}">
+                        <div class="provider-btn w-full">
+                            <a href="{{ path('app_login') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
                                                                                         class="w-full h-[50px] btn-secondary btn-secondary-disabled"
-                                                                                        name="btn-secondary"
-                                                                                        disabled="disabled">
+                                                                                        name="btn-secondary">
                                     {{ data.LOGIN_TRADITIONAL_LABEL.value }}
                                 </button>
                             </a>
@@ -294,14 +288,9 @@
                 <div class="z-20 modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
                      data-terms-widget-target="confirmationModal" id="confirmationTermsModal">
                     <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
-                        <h2 class="text-lg font-bold">You Accepted the Terms</h2>
-                        <p class="text-sm">Thank you for accepting the terms and conditions. You are ready to create
-                            your account!</p>
+                        <p class="text-sm">You need to confirm the terms before proceeding.</p>
                         <div class="mt-4 flex justify-center">
-                            <button data-action="terms-widget#closeConfirmationModal"
-                                    class="btn-secondary">
-                                Close
-                            </button>
+                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close</button>
                         </div>
                     </div>
                 </div>
