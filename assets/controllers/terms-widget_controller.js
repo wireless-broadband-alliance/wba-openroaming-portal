@@ -1,68 +1,90 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["agreeTerms", "confirmationModal", "button"];
+    static targets = ["agreeTerms", "confirmationModal", "modalMessage", "button"];
 
     connect() {
         console.log('TermsWidgetController connected');
 
-        // Check if the "functional" cookie is set to true
-        if (this.getCookie("cookie_preferences")?.terms === true) {
-            this.agreeTermsTarget.checked = true; // Auto-check the checkbox
-        }
-
-        this.toggleSubmitButtons();
+        // Load cookie preferences from CookieController
+        const cookiePreferences = this.getCookiePreferences() || {};
+        this.updateTermsState(cookiePreferences.terms || false);
     }
 
-    toggleSubmitButtons() {
-        console.log(`Checkbox terms: ${this.agreeTermsTarget.checked}`);
+    showModal(event) {
+        event.preventDefault();
+        console.log("showModal triggered, checking terms state.");
 
-        // For each submit button add `btn-disabled` based on checkbox status
-        for (let button of this.buttonTargets) {
-            if (button.name === 'btn-primary' || button.name === 'btn-secondary') {
-                button.disabled = !this.agreeTermsTarget.checked;
-                let disabled_css = button.name === 'btn-primary' ? 'btn-disabled' : 'btn-secondary-disabled';
-                if (this.agreeTermsTarget.checked) {
-                    button.classList.remove(disabled_css);
-                    console.log('Button enabled, btn-disabled class removed');
-                } else {
-                    button.classList.add(disabled_css);
-                    console.log('Button disabled, btn-disabled class added');
-                }
-            }
+        const cookiePreferences = this.getCookiePreferences() || {};
+
+        if (!cookiePreferences.terms) {
+            console.log("Terms not accepted, showing modal.");
+            this.confirmationModalTarget.classList.remove("hidden");
+        } else {
+            console.log("Terms already accepted, proceeding with the action.");
+            const href = event.currentTarget.getAttribute("href"); // Get href of clicked link
+            window.location.href = href;
         }
     }
 
     handleCheckboxChange() {
-        console.log('Terms checkbox state changed');
-        this.toggleSubmitButtons();
+        const isChecked = this.agreeTermsTarget.checked;
+        this.updateTermsState(isChecked);
 
-        // Toggle the modal display based on checkbox status
-        if (this.agreeTermsTarget.checked) {
-            console.log('Terms checkbox is checked, showing confirmation modal');
-            this.confirmationModalTarget.classList.remove('hidden');
-        } else {
-            console.log('Terms checkbox is unchecked, hiding confirmation modal');
-            this.confirmationModalTarget.classList.add('hidden');
+        if (isChecked) {
+            console.log("Terms accepted, hiding modal.");
+            this.confirmationModalTarget.classList.add("hidden");
         }
     }
 
-    closeConfirmationModal() {
-        console.log('Close button clicked, hiding confirmation modal');
-        this.confirmationModalTarget.classList.add('hidden');
+    updateTermsState(accepted) {
+        console.log(`Updating terms state to: ${accepted}`);
+
+        // Update cookie preferences through CookieController
+        const cookiePreferences = this.getCookiePreferences() || {};
+        cookiePreferences.terms = accepted;
+        this.setCookiePreferences(cookiePreferences);
+
+        // Update checkbox and button states
+        if (this.agreeTermsTarget) {
+            this.agreeTermsTarget.checked = accepted;
+        }
+        this.toggleSubmitButtons();
     }
 
-    // Helper to get cookie value by name and parse JSON if necessary
-    getCookie(name) {
+    toggleSubmitButtons() {
+        const isChecked = this.agreeTermsTarget?.checked || false;
+
+        for (let button of this.buttonTargets) {
+            // btn-disabled (for general buttons)
+            button.classList.toggle("btn-disabled", !isChecked);
+
+            // btn-secondary-disabled (for the specific login button)
+            if (button.classList.contains('btn-secondary')) {
+                button.classList.toggle("btn-secondary-disabled", !isChecked);
+            }
+        }
+    }
+
+    setCookiePreferences(preferences) {
+        document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
+    }
+
+    getCookiePreferences() {
         const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
+        const parts = value.split(`; cookie_preferences=`);
         if (parts.length === 2) {
             try {
-                return JSON.parse(parts.pop().split(';').shift());
+                return JSON.parse(parts.pop().split(";").shift());
             } catch (error) {
-                console.error('Error parsing cookie:', error);
+                console.error("Error parsing cookie:", error);
             }
         }
         return null;
+    }
+
+    closeConfirmationModal() {
+        console.log("Close button clicked, hiding modal.");
+        this.confirmationModalTarget.classList.add("hidden");
     }
 }
