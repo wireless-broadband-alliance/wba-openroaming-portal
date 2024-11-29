@@ -4,7 +4,7 @@
     <div class="grid gap-4 lg:grid-cols-2 p-2">
         {% for setting in form %}
             {# Display only the terms and conditions settings #}
-            {% if setting.vars.name in ['TOS', 'PRIVACY_POLICY','TOS_LINK', 'PRIVACY_POLICY_LINK', 'TOS_EDITOR', 'PRIVACY_POLICY_EDITOR'] %}
+            {% if setting.vars.name in ['TOS', 'PRIVACY_POLICY'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                         {{ stimulus_controller('card') }}>
                     {# Title and Icon #}
@@ -13,10 +13,6 @@
                             {% set displayName = {
                                 'TOS': 'Terms and Conditions',
                                 'PRIVACY_POLICY': 'Privacy and Policy',
-                                'TOS_LINK': 'Terms and Conditions Link',
-                                'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
-                                'TOS_EDITOR': 'Terms and Conditions Text Editor',
-                                'PRIVACY_POLICY_EDITOR': 'Privacy and Policy Text Editor',
                             }[setting.vars.name] ?? setting.vars.name %}
 
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
@@ -111,6 +107,72 @@
                         {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
                     </div>
                 {% endif %}
+
+
+                    {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+
+                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                        {{ form_errors(setting) }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if setting.vars.name in ['TOS_LINK', 'PRIVACY_POLICY_LINK'] %}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+                        {{ stimulus_controller('card') }}>
+                    {# Title and Icon #}
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            {% set displayName = {
+                                'TOS_LINK': 'Terms and Conditions Link',
+                                'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
+                                'TOS_EDITOR': 'Terms and Conditions Text Editor',
+                                'PRIVACY_POLICY_EDITOR': 'Privacy and Policy Text Editor',
+                            }[setting.vars.name] ?? setting.vars.name %}
+
+                            <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
+                        </div>
+
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                        </label>
+                    </div>
+                        <div class="mt-5">
+                            {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                        </div>
+
+
+                    {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+
+                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                        {{ form_errors(setting) }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if setting.vars.name in ['TOS_EDITOR', 'PRIVACY_POLICY_EDITOR'] %}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+                        {{ stimulus_controller('card') }}>
+                    {# Title and Icon #}
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            {% set displayName = {
+                                'TOS_LINK': 'Terms and Conditions Link',
+                                'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
+                                'TOS_EDITOR': 'Terms and Conditions Text Editor',
+                                'PRIVACY_POLICY_EDITOR': 'Privacy and Policy Text Editor',
+                            }[setting.vars.name] ?? setting.vars.name %}
+
+                            <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
+                        </div>
+
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                        </label>
+                    </div>
+                    <div class="mt-5">
+                        {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                    </div>
 
 
                     {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
