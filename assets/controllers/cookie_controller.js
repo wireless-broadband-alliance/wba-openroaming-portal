@@ -1,4 +1,4 @@
-import { Controller } from "@hotwired/stimulus";
+import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["banner", "modalCookie", "consentForm"];
@@ -8,24 +8,28 @@ export default class extends Controller {
 
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
-            terms: false, // Default value; no cookies set unless user interacts
+            terms: false,
         };
 
-        // Check if the user rejected cookies earlier, use session storage to track it
-        this.cookiesRejected = sessionStorage.getItem("cookies_rejected") === "true";
+        this.updateCheckboxes();
 
-        this.updateCheckboxes(); // Update modal checkboxes if preferences exist
-        this.checkCookies(); // Check cookie acceptance/rejection state
+        // Use localStorage to check if cookies were rejected
+        this.cookiesRejected = localStorage.getItem("cookies_rejected") === "true";
+
+        this.checkCookies();
     }
 
     checkCookies() {
-        // If no decision has been made yet, show the banner
-        const hasSavedPreferences = this.getCookie("cookies_accepted");
+        const hasAcceptedCookies = this.getCookie("cookies_accepted");
+        const hasSavedPreferences = this.getCookie("cookie_preferences");
 
-        if (!hasSavedPreferences && !this.cookiesRejected) {
-            this.showBanner(); // Show banner if no decision has been made
-        } else {
-            this.hideBanner(); // Hide banner if decision is made
+        // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
+        if ((hasAcceptedCookies || hasSavedPreferences) && !this.cookiesRejected) {
+            this.hideBanner();
+        }
+
+        if (this.cookiesRejected) {
+            this.hideBanner();
         }
 
         console.log("Current cookie preferences: ", this.cookieScopes);
@@ -48,25 +52,26 @@ export default class extends Controller {
             this.cookieScopes[scope] = true;
             this.updateCheckbox(scope, true);
         });
+
+        // If cookies were rejected previously, reset the rejection flag
+        if (this.cookiesRejected) {
+            localStorage.removeItem("cookies_rejected");
+        }
         this.setCookiePreferences();
         this.setCookiesAccepted();
         this.hideBanner();
     }
 
     rejectCookies() {
-        console.log("Rejecting cookies, preventing future cookie creation.");
+        console.log("Rejecting cookies, removing existing cookies.");
 
-        // Clear all cookies immediately
         this.clearAllCookies();
 
-        // Set the session flag to prevent any future cookies from being created
-        sessionStorage.setItem("cookies_rejected", "true");
+        // Mark in localStorage that cookies have been rejected
+        localStorage.setItem("cookies_rejected", "true");
 
-        // Hide banner and modal
         this.closeModal();
         this.hideBanner();
-
-        // Do not set any "cookies_accepted" or similar state in actual cookies
     }
 
     savePreferences() {
@@ -78,13 +83,10 @@ export default class extends Controller {
 
         // If cookies were rejected previously, we need to reset the rejection flag
         if (this.cookiesRejected) {
-            // Reset the rejection flag and re-enable cookie setting
-            sessionStorage.removeItem("cookies_rejected");
+            localStorage.removeItem("cookies_rejected");
         }
 
-        // Save the preferences only if cookies are accepted
         this.setCookiePreferences();
-        this.setCookiesAccepted();
 
         this.closeModal();
         this.hideBanner();
@@ -96,26 +98,14 @@ export default class extends Controller {
     }
 
     updateCheckboxes() {
-        // Update modal checkboxes based on stored preferences
         Object.entries(this.cookieScopes).forEach(([scope, checked]) => this.updateCheckbox(scope, checked));
     }
 
     setCookiePreferences() {
-        // Save preferences only if cookies are explicitly accepted
-        if (this.cookiesRejected) {
-            console.log("Cookies have been rejected; preferences will not be saved.");
-            return;
-        }
-
         document.cookie = "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     setCookiesAccepted() {
-        if (this.cookiesRejected) {
-            console.log("Cookies have been rejected; acceptance state will not be saved.");
-            return;
-        }
-
         document.cookie = "cookies_accepted=true; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
@@ -132,11 +122,11 @@ export default class extends Controller {
     }
 
     clearAllCookies() {
-        // Clear all cookies by setting expiration to the past
         const cookies = document.cookie.split(";");
         cookies.forEach(cookie => {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            // Clear each cookie by setting max-age=0
             document.cookie = name + "=; path=/; max-age=0";
         });
     }
