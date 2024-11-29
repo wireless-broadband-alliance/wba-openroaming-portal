@@ -201,8 +201,7 @@
                         <div class="provider-btn">
                             <a href="/saml/login" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary"
-                                                                                        name="btn-primary">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.SAML_LABEL.value }}
                                 </button>
                             </a>
@@ -226,8 +225,7 @@
                         <div class="provider-btn">
                             <a href="{{ path('app_register') }}" data-action="terms-widget#showModal" >
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.REGISTER_LABEL.value }}
                                 </button>
                             </a>
@@ -239,8 +237,7 @@
                         <div class="provider-btn">
                             <a href="{{ path('app_register_sms') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                                 </button>
                             </a>
@@ -252,8 +249,7 @@
                         <div class="provider-btn w-full">
                             <a href="{{ path('app_login') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled"
-                                                                                        name="btn-secondary">
+                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled">
                                     {{ data.LOGIN_TRADITIONAL_LABEL.value }}
                                 </button>
                             </a>

@@ -1,29 +1,32 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["banner", "modalCookie", "consentForm"];
 
     connect() {
         console.log("CookieController connected");
+
+        // Initialize preferences without setting any cookies
         this.cookieScopes = this.getCookiePreferences() || {
-            terms: false,
-            // analytics: false,
-            // marketing: false,
+            terms: false, // Default value; no cookies set unless user interacts
         };
-        this.updateCheckboxes();
-        this.checkCookies();
+
+        this.updateCheckboxes(); // Update modal checkboxes if preferences exist
+        this.checkCookies(); // Check cookie acceptance/rejection state
     }
 
     checkCookies() {
         const hasSavedPreferences = this.getCookie("cookies_accepted");
         const hasRejectedCookies = this.getCookie("cookies_rejected");
 
+        // Show banner only if no decision has been made
         if (hasSavedPreferences || hasRejectedCookies) {
             this.hideBanner();
         } else {
             this.showBanner();
         }
-        // console.log("Current cookies: ", this.cookieScopes);
+
+        console.log("Current cookie preferences: ", this.cookieScopes);
     }
 
     showBanner() {
@@ -49,18 +52,20 @@ export default class extends Controller {
     }
 
     rejectCookies() {
-        this.cookieScopes = {}; // Clear all cookie preferences
+        this.cookieScopes = {};
+        this.clearAllCookies();
         this.setCookiesRejected();
         this.closeModal();
         this.hideBanner();
     }
 
     savePreferences() {
-        // Get checkbox values dynamically based on `data-scope`
+        // Save preferences based on user input in the modal
         this.consentFormTarget.querySelectorAll("[data-scope]").forEach(checkbox => {
             const scope = checkbox.getAttribute("data-scope");
             this.cookieScopes[scope] = checkbox.checked;
         });
+
         this.setCookiePreferences();
         this.setCookiesAccepted();
         this.closeModal();
@@ -73,12 +78,17 @@ export default class extends Controller {
     }
 
     updateCheckboxes() {
-        // Update checkboxes on page load based on stored preferences
+        // Update modal checkboxes based on stored preferences
         Object.entries(this.cookieScopes).forEach(([scope, checked]) => this.updateCheckbox(scope, checked));
     }
 
     setCookiePreferences() {
-        // Set a flag indicating the user has interacted with the cookie settings
+        // Save preferences only if cookies are explicitly accepted
+        if (!this.getCookie("cookies_accepted")) {
+            console.log("Cookies not accepted, preferences will not be saved.");
+            return;
+        }
+
         document.cookie = "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
@@ -100,6 +110,16 @@ export default class extends Controller {
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(";").shift();
         return null;
+    }
+
+    clearAllCookies() {
+        // Clear all cookies by setting expiration to the past
+        const cookies = document.cookie.split(";");
+        cookies.forEach(cookie => {
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            document.cookie = name + "=; path=/; max-age=0";
+        });
     }
 
     closeModal() {

@@ -6,9 +6,11 @@ export default class extends Controller {
     connect() {
         console.log('TermsWidgetController connected');
 
-        // Load cookie preferences from CookieController
         const cookiePreferences = this.getCookiePreferences() || {};
-        this.updateTermsState(cookiePreferences.terms || false);
+
+        if (cookiePreferences.terms !== undefined) {
+            this.updateTermsState(cookiePreferences.terms);
+        }
     }
 
     showModal(event) {
@@ -40,10 +42,12 @@ export default class extends Controller {
     updateTermsState(accepted) {
         console.log(`Updating terms state to: ${accepted}`);
 
-        // Update cookie preferences through CookieController
-        const cookiePreferences = this.getCookiePreferences() || {};
-        cookiePreferences.terms = accepted;
-        this.setCookiePreferences(cookiePreferences);
+        // Update cookie preferences only if explicitly accepted
+        if (accepted) {
+            const cookiePreferences = this.getCookiePreferences() || {};
+            cookiePreferences.terms = accepted;
+            this.setCookiePreferences(cookiePreferences);
+        }
 
         // Update checkbox and button states
         if (this.agreeTermsTarget) {
