@@ -53,7 +53,7 @@
 
                         {# Necessary Cookies Section #}
                         <div class="flex flex-col space-y-3">
-                            <h3 class="font-semibold">Necessary Cookies</h3>
+                            <h3 class="text-lg font-semibold">Necessary Cookies</h3>
                             <p class="text-sm">
                                 These cookies are essential for the platform to function properly and cannot be
                                 disabled.
@@ -61,7 +61,8 @@
                             <ul class="list-disc list-inside text-sm space-y-2">
                                 {# PHPSESSID #}
                                 <li>
-                                    <strong>Session Cookie (PHPSESSID)</strong> - This cookie is essential for
+                                    <strong>Session Cookie (PHPSESSID) and (_dd_s)</strong> - This cookie is essential
+                                    for
                                     maintaining
                                     user session state during the session's duration. It enables the platform to
                                     function
@@ -227,7 +228,7 @@
                             </ul>
                         </div>
 
-                        {# Preferences Cookies Section
+                        {# Analytics Cookies Section
                         <div class="flex flex-col space-y-3">
                             <h3 class="font-semibold">Preferences Cookies</h3>
                             <p class="text-sm">
@@ -255,8 +256,7 @@
                                 </li>
                             </ul>
                         </div>
-                        #}
-                        {# Analytics Cookies Section
+
                     <div class="flex flex-col space-y-3">
                         <h3 class="font-semibold">Analytics Cookies</h3>
                         <p class="text-sm">
@@ -279,6 +279,7 @@
                         </ul>
                     </div>
                         #}
+
                         {# Marketing Cookies Section - Commented for later if needed
                     <div class="flex flex-col space-y-3">
                         <h3 class="font-semibold">Marketing Cookies</h3>
@@ -309,7 +310,7 @@
                             <div class="md:flex-1 text-center md:text-left text-xs">
                                 Your data is safe with us. Learn more in our
                                 <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
-                                   class="underline text-primary font-semibold">Privacy Policy</a>.
+                                   class="underline text-primary font-semibold">Privacy Policy</a>
                             </div>
                             <div class="mt-3 flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
                                 <button class="mt-4 md:mt-0 btn-primary"

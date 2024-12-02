@@ -8,7 +8,7 @@ export default class extends Controller {
 
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
-            preferences: true,
+            // preferences: true,
             // analytics: false,
             // marketing: false,
         };
