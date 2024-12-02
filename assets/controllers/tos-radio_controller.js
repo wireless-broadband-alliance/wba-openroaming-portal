@@ -5,7 +5,7 @@ export default class extends Controller {
     static targets = ["LINK", "TEXT_EDITOR"];
 
     connect() {
-        console.log('tos radio controller connected');
+        super.connect();
     }
 
     toggle(event) {
