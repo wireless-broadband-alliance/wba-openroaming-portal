@@ -70,8 +70,8 @@ class SettingFixture extends Fixture
             ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
-            ['name' => 'TOS_EDITOR', 'value' => null],
-            ['name' => 'PRIVACY_POLICY_EDITOR', 'value' => null],
+            ['name' => 'TOS_EDITOR', 'value' => 'TEXT_EDITOR'],
+            ['name' => 'PRIVACY_POLICY_EDITOR', 'value' => 'TEXT_EDITOR'],
 
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
