@@ -48,8 +48,12 @@ class ConfigController extends AbstractController
             'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
             'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
+            'TOS' => $this->getSettingValueRaw('TOS'),
+            'PRIVACY_POLICY' => $this->getSettingValueRaw('PRIVACY_POLICY'),
             'TOS_LINK' => $this->getSettingValueRaw('TOS_LINK'),
-            'PRIVACY_POLICY_LINK' => $this->getSettingValueRaw('PRIVACY_POLICY_LINK')
+            'PRIVACY_POLICY_LINK' => $this->getSettingValueRaw('PRIVACY_POLICY_LINK'),
+            'TOS_EDITOR' => $this->getSettingValueRaw('TOS_EDITOR'),
+            'PRIVACY_POLICY_EDITOR' => $this->getSettingValueRaw('PRIVACY_POLICY_EDITOR')
         ];
 
         $data['auth'] = [
