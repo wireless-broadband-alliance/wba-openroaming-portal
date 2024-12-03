@@ -318,7 +318,8 @@ class SiteController extends AbstractController
     }
 
     #[Route('/terms-Conditions', name: 'app_terms_Conditions')]
-    public function termsCondicions(EntityManagerInterface $em) {
+    public function termsCondicions(EntityManagerInterface $em)
+    {
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
         if ($tosFormat) {
@@ -340,13 +341,19 @@ class SiteController extends AbstractController
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
-        if ($privacyPolicyFormat && $privacyPolicyFormat->getValue() === 'TEXT_EDITOR')
-                {
-                return $this->render('site/tos/privacy_policy.html.twig');
-            }
-        if ($privacyPolicyFormat && $privacyPolicyFormat->getValue() === 'LINK' && $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])) {
-                return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
-                }
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === 'TEXT_EDITOR'
+        ) {
+            return $this->render('site/tos/privacy_policy.html.twig');
+        }
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === 'LINK' &&
+            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
+        ) {
+            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
+        }
         return $this->redirectToRoute('app_landing');
     }
 

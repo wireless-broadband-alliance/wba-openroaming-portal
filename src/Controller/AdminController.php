@@ -38,14 +38,12 @@ use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
-use DateMalformedStringException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
 use HTMLPurifier_Config;
-use JsonException;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -1147,8 +1145,9 @@ class AdminController extends AbstractController
 
         $filesystem = new Filesystem();
         $filePathTOS = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
+        // phpcs:disable Generic.Files.LineLength.TooLong
         $filePathPrivacyPolicy = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
-
+        // phpcs:enable
         if ($filesystem->exists($filePathTOS)) {
             $htmlContentTos = file_get_contents($filePathTOS);
         } else {
