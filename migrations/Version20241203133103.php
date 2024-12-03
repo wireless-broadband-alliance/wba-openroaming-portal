@@ -23,8 +23,6 @@ final class Version20241203133103 extends AbstractMigration
             "INSERT INTO Setting (name, value) VALUES
             ('TOS', 'LINK'),
             ('PRIVACY_POLICY', 'LINK'),
-            ('TOS_LINK', 'https://wballiance.com/openroaming/toc/'),
-            ('PRIVACY_POLICY_LINK', 'https://wballiance.com/openroaming/privacy-policy'),
             ('TOS_EDITOR', 'TEXT_EDITOR'),
             ('PRIVACY_POLICY_EDITOR', 'TEXT_EDITOR')"
         );
