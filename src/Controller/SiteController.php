@@ -318,8 +318,8 @@ class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/terms-Conditions', name: 'app_terms_Conditions')]
-    public function termsCondicions(EntityManagerInterface $em)
+    #[Route('/terms-conditions', name: 'app_terms_conditions')]
+    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
