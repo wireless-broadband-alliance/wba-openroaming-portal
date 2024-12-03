@@ -31,6 +31,12 @@
         <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[74px]" {{ stimulus_controller('visibility') }}>
             {% block second_col %}
             {% endblock %}
+            {# Cookie Banner #}
+            {% block cookie %}
+                <div class="grid grid-cols-1 gap-[5px] ">
+                    {{ include('site/shared/_cookie_banner.html.twig') }}
+                </div>
+            {% endblock %}
         </div>
     </div>
 {% endblock %}

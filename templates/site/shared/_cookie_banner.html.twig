@@ -53,14 +53,16 @@
 
                         {# Necessary Cookies Section #}
                         <div class="flex flex-col space-y-3">
-                            <h3 class="font-semibold">Necessary Cookies</h3>
+                            <h3 class="text-lg font-semibold">Necessary Cookies</h3>
                             <p class="text-sm">
                                 These cookies are essential for the platform to function properly and cannot be
                                 disabled.
                             </p>
                             <ul class="list-disc list-inside text-sm space-y-2">
+                                {# PHPSESSID #}
                                 <li>
-                                    <strong>Session Cookie (PHPSESSID)</strong> - This cookie is essential for
+                                    <strong>Session Cookie (PHPSESSID) and (_dd_s)</strong> - This cookie is essential
+                                    for
                                     maintaining
                                     user session state during the session's duration. It enables the platform to
                                     function
@@ -73,7 +75,7 @@
                                         href="{{ absolute_url(path('app_landing')) }}">
                                     {{ app.request.getHost() }}
                                 </a>
-                                </span>.
+                                </span>
                                     <br>
                                     <p>
                                         <a
@@ -84,6 +86,7 @@
                                         </a>
                                     </p>
                                 </li>
+                                {# CSRF #}
                                 <li>
                                     <strong>CSRF Token</strong> - Protects against cross-site request forgery (CSRF)
                                     attacks
@@ -96,7 +99,7 @@
                                         href="{{ absolute_url(path('app_landing')) }}">
                                     {{ app.request.getHost() }}
                                 </a>
-                                </span>.
+                                </span>
                                     <br>
                                     <p>
                                         <a
@@ -107,10 +110,125 @@
                                         </a>
                                     </p>
                                 </li>
+                                {# ST Redirect Cookie #}
+                                <li>
+                                    <strong>ST Redirect Cookie</strong> - Temporarily stores redirect URLs to ensure
+                                    users are redirected
+                                    to the intended page after completing specific actions, such as logging in or
+                                    submitting a form.
+                                    <span>
+                                        <br>
+                                        Controlled by:
+                                        <a
+                                                class="underline text-primary font-semibold"
+                                                href="{{ absolute_url(path('app_landing')) }}">
+                                            {{ app.request.getHost() }}
+                                        </a>
+                                    </span>
+                                    <br>
+                                    <p>
+                                        <a
+                                                href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                                class="underline text-primary"
+                                                target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
+                                {# Remember Me Cookie #}
+                                <li>
+                                    <strong>Remember Me Cookie</strong> - Allows users to remain logged in on the
+                                    platform across browser sessions
+                                    by securely storing authentication information.
+                                    <span>
+                                    <br>
+                                    Controlled by:
+                                    <a class="underline text-primary font-semibold"
+                                       href="{{ absolute_url(path('app_landing')) }}">
+                                        {{ app.request.getHost() }}
+                                    </a>
+                                    </span>
+                                    <br>
+                                    <p>
+                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                           class="underline text-primary"
+                                           target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
+                                {# SAML Session Cookie #}
+                                <li>
+                                    <strong>SAML Session Cookie</strong> - Used to manage authentication and session
+                                    state during Single Sign-On (SSO)
+                                    interactions with a SAML identity provider. Ensures secure and seamless login across
+                                    connected services.
+                                    <span>
+                                    <br>
+                                    Controlled by:
+                                    <a class="underline text-primary font-semibold"
+                                       href="{{ absolute_url(path('app_landing')) }}">
+                                        {{ app.request.getHost() }}
+                                    </a>
+                                    </span>
+                                    <br>
+                                    <p>
+                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                           class="underline text-primary"
+                                           target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
+                                {# JWT Authentication - API Cookie #}
+                                <li>
+                                    <strong>JWT Authentication Cookie</strong> - Stores a JSON Web Token (JWT) for user
+                                    authentication, enabling
+                                    secure access to protected resources during a user's session. Ensures that the
+                                    user's identity is verified
+                                    throughout the session.
+                                    <span>
+                                    <br>
+                                    Controlled by:
+                                    <a class="underline text-primary font-semibold"
+                                       href="{{ absolute_url(path('app_landing')) }}">
+                                        {{ app.request.getHost() }}
+                                    </a>
+                                    </span>
+                                    <br>
+                                    <p>
+                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                           class="underline text-primary"
+                                           target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
+                                {# Turnstile Cookie #}
+                                <li>
+                                    <strong>Turnstile Security Cookie</strong> - Ensures platform security by preventing
+                                    spam and bot interactions.
+                                    <span>
+                                    <br>
+                                    Controlled by:
+                                    <a class="underline text-primary font-semibold"
+                                       href="{{ absolute_url(path('app_landing')) }}">
+                                        {{ app.request.getHost() }}
+                                    </a>
+                                    </span>
+                                    <br>
+                                    <p>
+                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                           class="underline text-primary"
+                                           target="_blank">
+                                            Privacy & Policy
+                                        </a>
+                                    </p>
+                                </li>
                             </ul>
                         </div>
 
-                        {# Preferences Cookies Section #}
+                        {# Analytics Cookies Section
                         <div class="flex flex-col space-y-3">
                             <h3 class="font-semibold">Preferences Cookies</h3>
                             <p class="text-sm">
@@ -139,7 +257,6 @@
                             </ul>
                         </div>
 
-                        {# Analytics Cookies Section
                     <div class="flex flex-col space-y-3">
                         <h3 class="font-semibold">Analytics Cookies</h3>
                         <p class="text-sm">
@@ -162,6 +279,7 @@
                         </ul>
                     </div>
                         #}
+
                         {# Marketing Cookies Section - Commented for later if needed
                     <div class="flex flex-col space-y-3">
                         <h3 class="font-semibold">Marketing Cookies</h3>
@@ -192,7 +310,7 @@
                             <div class="md:flex-1 text-center md:text-left text-xs">
                                 Your data is safe with us. Learn more in our
                                 <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
-                                   class="underline text-primary font-semibold">Privacy Policy</a>.
+                                   class="underline text-primary font-semibold">Privacy Policy</a>
                             </div>
                             <div class="mt-3 flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
                                 <button class="mt-4 md:mt-0 btn-primary"
@@ -213,7 +331,7 @@
         <span class="text-sm">Manage Cookies</span>
         <button id="modalManageCookies" type="button" data-action="cookie#showModal"
                 class="flex items-center duration-300 cursor-pointer rounded-full focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-            <twig:ux:icon name="material-symbols:cookie" />
+            <twig:ux:icon name="material-symbols:cookie"/>
         </button>
     </div>
 </div>

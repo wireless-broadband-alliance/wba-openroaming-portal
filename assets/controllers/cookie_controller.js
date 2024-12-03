@@ -5,25 +5,36 @@ export default class extends Controller {
 
     connect() {
         console.log("CookieController connected");
+
+        // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
-            terms: false,
+            // preferences: true,
             // analytics: false,
             // marketing: false,
         };
+
         this.updateCheckboxes();
+
+        // Use localStorage to check if cookies were rejected
+        this.cookiesRejected = localStorage.getItem("cookies_rejected") === "true";
+
         this.checkCookies();
     }
 
     checkCookies() {
-        const hasSavedPreferences = this.getCookie("cookies_accepted");
-        const hasRejectedCookies = this.getCookie("cookies_rejected");
+        const hasAcceptedCookies = this.getCookie("cookies_accepted");
+        const hasSavedPreferences = this.getCookie("cookie_preferences");
 
-        if (hasSavedPreferences || hasRejectedCookies) {
+        // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
+        if ((hasAcceptedCookies || hasSavedPreferences) && !this.cookiesRejected) {
             this.hideBanner();
-        } else {
-            this.showBanner();
         }
-        // console.log("Current cookies: ", this.cookieScopes);
+
+        if (this.cookiesRejected) {
+            this.hideBanner();
+        }
+
+        console.log("Current cookie preferences: ", this.cookieScopes);
     }
 
     showBanner() {
@@ -43,26 +54,42 @@ export default class extends Controller {
             this.cookieScopes[scope] = true;
             this.updateCheckbox(scope, true);
         });
+
+        // If cookies were rejected previously, reset the rejection flag
+        if (this.cookiesRejected) {
+            localStorage.removeItem("cookies_rejected");
+        }
         this.setCookiePreferences();
         this.setCookiesAccepted();
         this.hideBanner();
     }
 
     rejectCookies() {
-        this.cookieScopes = {}; // Clear all cookie preferences
-        this.setCookiesRejected();
+        console.log("Rejecting cookies, removing existing cookies.");
+
+        this.clearAllCookies();
+
+        // Mark in localStorage that cookies have been rejected
+        localStorage.setItem("cookies_rejected", "true");
+
         this.closeModal();
         this.hideBanner();
     }
 
     savePreferences() {
-        // Get checkbox values dynamically based on `data-scope`
+        // Save preferences based on user input in the modal
         this.consentFormTarget.querySelectorAll("[data-scope]").forEach(checkbox => {
             const scope = checkbox.getAttribute("data-scope");
             this.cookieScopes[scope] = checkbox.checked;
         });
+
+        // If cookies were rejected previously, we need to reset the rejection flag
+        if (this.cookiesRejected) {
+            localStorage.removeItem("cookies_rejected");
+        }
+
         this.setCookiePreferences();
-        this.setCookiesAccepted();
+
         this.closeModal();
         this.hideBanner();
     }
@@ -73,21 +100,15 @@ export default class extends Controller {
     }
 
     updateCheckboxes() {
-        // Update checkboxes on page load based on stored preferences
         Object.entries(this.cookieScopes).forEach(([scope, checked]) => this.updateCheckbox(scope, checked));
     }
 
     setCookiePreferences() {
-        // Set a flag indicating the user has interacted with the cookie settings
         document.cookie = "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     setCookiesAccepted() {
         document.cookie = "cookies_accepted=true; path=/; max-age=" + 365 * 24 * 60 * 60;
-    }
-
-    setCookiesRejected() {
-        document.cookie = "cookies_rejected=true; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     getCookiePreferences() {
@@ -100,6 +121,16 @@ export default class extends Controller {
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(";").shift();
         return null;
+    }
+
+    clearAllCookies() {
+        const cookies = document.cookie.split(";");
+        cookies.forEach(cookie => {
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            // Clear each cookie by setting max-age=0
+            document.cookie = name + "=; path=/; max-age=0";
+        });
     }
 
     closeModal() {

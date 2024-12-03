@@ -4,20 +4,29 @@ export default class extends Controller {
     static targets = ["agreeTerms", "confirmationModal", "modalMessage", "button"];
 
     connect() {
-        console.log('TermsWidgetController connected');
+        console.log("TermsWidgetController connected");
 
-        // Load cookie preferences from CookieController
-        const cookiePreferences = this.getCookiePreferences() || {};
-        this.updateTermsState(cookiePreferences.terms || false);
+        // Load the saved state of the terms checkbox from localStorage
+        const savedTermsState = localStorage.getItem("termsAccepted");
+
+        // If a saved state exists, update the checkbox accordingly
+        if (savedTermsState !== null) {
+            this.updateTermsState(JSON.parse(savedTermsState));
+        }
+
+        // Enable/Disable submit buttons based on the checkbox state
+        this.toggleSubmitButtons();
     }
 
     showModal(event) {
         event.preventDefault();
         console.log("showModal triggered, checking terms state.");
 
-        const cookiePreferences = this.getCookiePreferences() || {};
+        // Get the saved preferences from localStorage
+        const savedTermsState = localStorage.getItem("termsAccepted");
 
-        if (!cookiePreferences.terms) {
+        // Show the modal only if terms haven't been accepted yet
+        if (savedTermsState === null || savedTermsState === "false") {
             console.log("Terms not accepted, showing modal.");
             this.confirmationModalTarget.classList.remove("hidden");
         } else {
@@ -35,20 +44,23 @@ export default class extends Controller {
             console.log("Terms accepted, hiding modal.");
             this.confirmationModalTarget.classList.add("hidden");
         }
+
+        // Enable/Disable submit buttons based on the checkbox state
+        this.toggleSubmitButtons();
     }
 
     updateTermsState(accepted) {
         console.log(`Updating terms state to: ${accepted}`);
 
-        // Update cookie preferences through CookieController
-        const cookiePreferences = this.getCookiePreferences() || {};
-        cookiePreferences.terms = accepted;
-        this.setCookiePreferences(cookiePreferences);
+        // Save the state of the terms checkbox in localStorage
+        localStorage.setItem("termsAccepted", accepted);
 
-        // Update checkbox and button states
+        // Update the checkbox state visually
         if (this.agreeTermsTarget) {
             this.agreeTermsTarget.checked = accepted;
         }
+
+        // Enable/Disable submit buttons based on the checkbox state
         this.toggleSubmitButtons();
     }
 
@@ -60,27 +72,10 @@ export default class extends Controller {
             button.classList.toggle("btn-disabled", !isChecked);
 
             // btn-secondary-disabled (for the specific login button)
-            if (button.classList.contains('btn-secondary')) {
+            if (button.classList.contains("btn-secondary")) {
                 button.classList.toggle("btn-secondary-disabled", !isChecked);
             }
         }
-    }
-
-    setCookiePreferences(preferences) {
-        document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
-    }
-
-    getCookiePreferences() {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; cookie_preferences=`);
-        if (parts.length === 2) {
-            try {
-                return JSON.parse(parts.pop().split(";").shift());
-            } catch (error) {
-                console.error("Error parsing cookie:", error);
-            }
-        }
-        return null;
     }
 
     closeConfirmationModal() {
