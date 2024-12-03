@@ -317,8 +317,8 @@ class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/termsAndConditions', name: 'tos_link')]
-    public function tosLink(EntityManagerInterface $em) {
+    #[Route('/terms-Conditions', name: 'app_terms_Conditions')]
+    public function termsCondicions(EntityManagerInterface $em) {
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
         if ($tosFormat) {
@@ -335,8 +335,8 @@ class SiteController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/privacyPolicy', name: 'privacy_policy_link')]
-    public function privacyPolicyLink(EntityManagerInterface $em): RedirectResponse|Response
+    #[Route('/privacy-policy', name: 'app_privacy_policy')]
+    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
