@@ -21,10 +21,12 @@ final class Version20241203133103 extends AbstractMigration
     {
         $this->addSql(
             "INSERT INTO Setting (name, value) VALUES
-            ('TOS\_LINK', 'https://wballiance.com/openroaming/toc/'),
-            ('PRIVACY\_POLICY\_LINK', 'https://wballiance.com/openroaming/privacy-policy'),
-            ('TOS\_EDITOR', 'TEXT_EDITOR'),
-            ('PRIVACY\_POLICY\_EDITOR', 'TEXT_EDITOR')"
+            ('TOS', 'LINK'),
+            ('PRIVACY_POLICY', 'LINK'),
+            ('TOS_LINK', 'https://wballiance.com/openroaming/toc/'),
+            ('PRIVACY_POLICY_LINK', 'https://wballiance.com/openroaming/privacy-policy'),
+            ('TOS_EDITOR', 'TEXT_EDITOR'),
+            ('PRIVACY_POLICY_EDITOR', 'TEXT_EDITOR')"
         );
 
     }

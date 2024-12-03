@@ -52,8 +52,12 @@ class ResetTermsSettingsCommand extends Command
         }
 
         $settings = [
+            ['name' => 'TOS', 'value' => 'LINK'],
+            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
+            ['name' => 'TOS_EDITOR', 'value' => 'TEXT_EDITOR'],
+            ['name' => 'PRIVACY_POLICY_EDITOR', 'value' => 'TEXT_EDITOR'],
         ];
 
         $this->entityManager->beginTransaction();
