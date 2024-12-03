@@ -20,6 +20,7 @@
 		"doctrine/doctrine-migrations-bundle": "^3.2",
 		"doctrine/orm": "^2.14",
 		"easycorp/easyadmin-bundle": "^4.15",
+		"ezyang/htmlpurifier": "^4.18",
 		"friendsofsymfony/ckeditor-bundle": "^2.5",
 		"knpuniversity/oauth2-client-bundle": "^2.15",
 		"league/oauth2-google": "^4.0",

@@ -44,6 +44,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use HTMLPurifier_Config;
 use JsonException;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -52,6 +53,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -1143,9 +1145,31 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        $filesystem = new Filesystem();
+        $filePathTOS = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
+        $filePathPrivacyPolicy = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
+
+        if ($filesystem->exists($filePathTOS)) {
+            $htmlContentTos = file_get_contents($filePathTOS);
+        } else {
+            $htmlContentTos = '';
+        }
+
+        if ($filesystem->exists($filePathPrivacyPolicy)) {
+            $htmlContentPrivacyPolicy = file_get_contents($filePathPrivacyPolicy);
+        } else {
+            $htmlContentPrivacyPolicy = '';
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
+        if ($settingsRepository->findOneBy(['name' => 'TOS_EDITOR'])) {
+            $settingsRepository->findOneBy(['name' => 'TOS_EDITOR'])->setValue($htmlContentTos);
+        }
+        if ($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR'])) {
+            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR'])->setValue($htmlContentPrivacyPolicy);
+        }
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(TermsType::class, null, [
@@ -1193,13 +1217,29 @@ class AdminController extends AbstractController
 
             $tosEditorSetting = $settingsRepository->findOneBy(['name' => 'TOS_EDITOR']);
             if ($tosEditorSetting) {
-                $tosEditorSetting->setValue($tosTextEditor);
+                $htmlContent = $this->sanitizeHtml($tosTextEditor);
+                $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
+                $filesystem = new Filesystem();
+                $directoryPath = dirname($filePath);
+                if (!$filesystem->exists($directoryPath)) {
+                    $filesystem->mkdir($directoryPath, 0755);
+                }
+                $filesystem->dumpFile($filePath, $htmlContent);
+                $tosEditorSetting->setValue('TEXT_EDITOR');
                 $em->persist($tosEditorSetting);
             }
 
             $privacyPolicyEditorSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR']);
             if ($privacyPolicyEditorSetting) {
-                $privacyPolicyEditorSetting->setValue($privacyPolicyTextEditor);
+                $htmlContent = $this->sanitizeHtml($privacyPolicyTextEditor);
+                $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
+                $filesystem = new Filesystem();
+                $directoryPath = dirname($filePath);
+                if (!$filesystem->exists($directoryPath)) {
+                    $filesystem->mkdir($directoryPath, 0755);
+                }
+                $filesystem->dumpFile($filePath, $htmlContent);
+                $privacyPolicyEditorSetting->setValue('TEXT_EDITOR');
                 $em->persist($privacyPolicyEditorSetting);
             }
             /*
@@ -1229,6 +1269,13 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function sanitizeHtml(string $html): string
+    {
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', sys_get_temp_dir());
+        return (new \HTMLPurifier($config))->purify($html);
     }
 
     /**

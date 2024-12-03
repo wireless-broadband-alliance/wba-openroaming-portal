@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -316,6 +317,38 @@ class SiteController extends AbstractController
         ]);
     }
 
+    #[Route('/termsAndConditions', name: 'tos_link')]
+    public function tosLink(EntityManagerInterface $em) {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
+        if ($tosFormat) {
+            if ($tosFormat->getValue() === 'TEXT_EDITOR') {
+                return $this->render('site/tos/tos.html.twig');
+            }
+            if ($tosFormat->getValue() === 'LINK') {
+                $link = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+                if ($link) {
+                    return $this->redirect($link->getValue());
+                }
+            }
+        }
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/privacyPolicy', name: 'privacy_policy_link')]
+    public function privacyPolicyLink(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+        if ($privacyPolicyFormat && $privacyPolicyFormat->getValue() === 'TEXT_EDITOR')
+                {
+                return $this->render('site/tos/privacy_policy.html.twig');
+            }
+        if ($privacyPolicyFormat && $privacyPolicyFormat->getValue() === 'LINK' && $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])) {
+                return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
+                }
+        return $this->redirectToRoute('app_landing');
+    }
 
     /**
      * Widget with data about the account of the user / upload new password
