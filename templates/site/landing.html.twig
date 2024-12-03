@@ -60,11 +60,11 @@
 
                 <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
-                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
+                    <a href="{{ path('app_terms_conditions') }}" target="_blank" class="underline text-primary font-semibold">
                         terms & conditions of use
                     </a>
                     and
-                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                    <a href="{{ path('app_privacy_policy') }}" target="_blank"
                        class="underline text-primary font-semibold">
                         privacy policy
                     </a>.
@@ -271,10 +271,10 @@
                     }) }}
                     <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                         I agree to the
-                        <a href="{{ data.TOS_LINK.value }}" target="_blank"
+                        <a href="{{ path('app_terms_conditions') }}" target="_blank"
                            class="underline text-primary font-semibold">terms & conditions of use</a>
                         and
-                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                        <a href="{{ path('app_privacy_policy') }}" target="_blank"
                            class="underline text-primary font-semibold">privacy policy</a>.
                     </label>
                 </div>

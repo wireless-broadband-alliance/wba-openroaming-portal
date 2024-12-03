@@ -19,6 +19,9 @@
 		"doctrine/doctrine-bundle": "^2.8",
 		"doctrine/doctrine-migrations-bundle": "^3.2",
 		"doctrine/orm": "^2.14",
+		"easycorp/easyadmin-bundle": "^4.15",
+		"ezyang/htmlpurifier": "^4.18",
+		"friendsofsymfony/ckeditor-bundle": "^2.5",
 		"knpuniversity/oauth2-client-bundle": "^2.15",
 		"league/oauth2-google": "^4.0",
 		"lexik/jwt-authentication-bundle": "^2.21",
@@ -98,9 +101,10 @@
     },
     "scripts": {
         "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
-        },
+			"cache:clear": "symfony-cmd",
+			"assets:install %PUBLIC_DIR%": "symfony-cmd",
+			"ckeditor:install": "symfony-cmd"
+		},
         "post-install-cmd": [
             "@auto-scripts"
         ],

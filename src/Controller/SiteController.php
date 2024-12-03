@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TosTypes;
 use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
@@ -312,6 +314,47 @@ class SiteController extends AbstractController
         ]);
     }
 
+    #[Route('/terms-conditions', name: 'app_terms_conditions')]
+    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TosTypes::TEXT_EDITOR
+        ) {
+            return $this->render('site/tos/tos.html.twig');
+        }
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TosTypes::LINK &&
+            $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
+        ) {
+                return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
+        }
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/privacy-policy', name: 'app_privacy_policy')]
+    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        $settingsRepository = $em->getRepository(Setting::class);
+        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TosTypes::TEXT_EDITOR
+        ) {
+            return $this->render('site/tos/privacy_policy.html.twig');
+        }
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TosTypes::LINK &&
+            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
+        ) {
+            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
+        }
+        return $this->redirectToRoute('app_landing');
+    }
 
     /**
      * Widget with data about the account of the user / upload new password

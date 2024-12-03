@@ -43,6 +43,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use HTMLPurifier_Config;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -50,6 +51,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -1141,9 +1143,32 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        $filesystem = new Filesystem();
+        $filePathTOS = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
+        // phpcs:disable Generic.Files.LineLength.TooLong
+        $filePathPrivacyPolicy = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
+        // phpcs:enable
+        if ($filesystem->exists($filePathTOS)) {
+            $htmlContentTos = file_get_contents($filePathTOS);
+        } else {
+            $htmlContentTos = '';
+        }
+
+        if ($filesystem->exists($filePathPrivacyPolicy)) {
+            $htmlContentPrivacyPolicy = file_get_contents($filePathPrivacyPolicy);
+        } else {
+            $htmlContentPrivacyPolicy = '';
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
+        if ($settingsRepository->findOneBy(['name' => 'TOS_EDITOR'])) {
+            $settingsRepository->findOneBy(['name' => 'TOS_EDITOR'])->setValue($htmlContentTos);
+        }
+        if ($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR'])) {
+            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR'])->setValue($htmlContentPrivacyPolicy);
+        }
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(TermsType::class, null, [
@@ -1156,30 +1181,67 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            // Update settings
+            $tos = $submittedData['TOS'];
+            $privacyPolicy = $submittedData['PRIVACY_POLICY'];
             $tosLink = $submittedData['TOS_LINK'] ?? null;
             $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
+            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? null;
+            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? null;
 
-            // Check if the setting is an empty input
-            if ($tosLink === null) {
-                $tosLink = "";
-            }
-            if ($privacyPolicyLink === null) {
-                $privacyPolicyLink = "";
-            }
 
-            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
             if ($tosSetting) {
-                $tosSetting->setValue($tosLink);
+                $tosSetting->setValue($tos);
                 $em->persist($tosSetting);
             }
 
-            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
             if ($privacyPolicySetting) {
-                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $privacyPolicySetting->setValue($privacyPolicy);
                 $em->persist($privacyPolicySetting);
             }
 
+            $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            if ($tosLinkSetting) {
+                $tosLinkSetting->setValue($tosLink);
+                $em->persist($tosLinkSetting);
+            }
+
+            $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            if ($privacyPolicyLinkSetting) {
+                $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicyLinkSetting);
+            }
+
+            $tosEditorSetting = $settingsRepository->findOneBy(['name' => 'TOS_EDITOR']);
+            if ($tosEditorSetting) {
+                $htmlContent = $this->sanitizeHtml($tosTextEditor);
+                $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
+                $filesystem = new Filesystem();
+                $directoryPath = dirname($filePath);
+                if (!$filesystem->exists($directoryPath)) {
+                    $filesystem->mkdir($directoryPath, 0755);
+                }
+                $filesystem->dumpFile($filePath, $htmlContent);
+                $tosEditorSetting->setValue('TEXT_EDITOR');
+                $em->persist($tosEditorSetting);
+            }
+
+            $privacyPolicyEditorSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR']);
+            if ($privacyPolicyEditorSetting) {
+                $htmlContent = $this->sanitizeHtml($privacyPolicyTextEditor);
+                $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
+                $filesystem = new Filesystem();
+                $directoryPath = dirname($filePath);
+                if (!$filesystem->exists($directoryPath)) {
+                    $filesystem->mkdir($directoryPath, 0755);
+                }
+                $filesystem->dumpFile($filePath, $htmlContent);
+                $privacyPolicyEditorSetting->setValue('TEXT_EDITOR');
+                $em->persist($privacyPolicyEditorSetting);
+            }
+            /*
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
@@ -1191,7 +1253,9 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
+            */
 
+            $em->flush();
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
@@ -1204,6 +1268,13 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function sanitizeHtml(string $html): string
+    {
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', sys_get_temp_dir());
+        return (new \HTMLPurifier($config))->purify($html);
     }
 
     /**
