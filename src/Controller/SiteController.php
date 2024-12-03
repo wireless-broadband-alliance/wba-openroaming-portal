@@ -322,9 +322,10 @@ class SiteController extends AbstractController
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
-        if ($tosFormat) {
-            if ($tosFormat->getValue() === 'TEXT_EDITOR') {
-                return $this->render('site/tos/tos.html.twig');
+        if ($tosFormat &&
+            $tosFormat->getValue() === 'TEXT_EDITOR'
+        ) {
+            return $this->render('site/tos/tos.html.twig');
             }
             if ($tosFormat->getValue() === 'LINK') {
                 $link = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
@@ -332,7 +333,6 @@ class SiteController extends AbstractController
                     return $this->redirect($link->getValue());
                 }
             }
-        }
         return $this->redirectToRoute('app_landing');
     }
 
