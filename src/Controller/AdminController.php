@@ -1186,8 +1186,8 @@ class AdminController extends AbstractController
             $privacyPolicy = $submittedData['PRIVACY_POLICY'];
             $tosLink = $submittedData['TOS_LINK'] ?? null;
             $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
-            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? null;
-            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? null;
+            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? '';
+            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? '';
 
 
             $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
