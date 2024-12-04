@@ -1,7 +1,7 @@
 import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
-	static targets = ["on", "card", "input"];
+	static targets = ["link", "on", "card", "input"];
 
 	connect() {
 		super.connect();
@@ -11,6 +11,14 @@ export default class extends Controller {
 		} else {
 			this.block();
 		}
+
+        if (this.linkTarget.checked) {
+            this.addCard(//add text input);
+            this.removeCard(//remove google docs input);
+        } else {
+            this.addCard(//add google docs input);
+            this.removeCard(//remove text input);
+        }
 	}
 
 	block() {
@@ -36,4 +44,24 @@ export default class extends Controller {
 			t.classList.remove("bg-disableCardsColor");
 		}
 	}
+
+    addCard(){
+        for (let t of this.cardTargets) {
+            // style logic to add a card property
+        }
+    }
+
+    removeCard(){
+        for (let t of this.cardTargets) {
+            // style logic to remove a card hidden property
+        }
+    }
+
+    showContainer(container) {
+        container.classList.remove("hidden");
+    }
+
+    hideContainer(container) {
+        container.classList.add("hidden");
+    }
 }
