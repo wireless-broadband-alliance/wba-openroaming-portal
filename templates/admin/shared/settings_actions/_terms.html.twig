@@ -25,7 +25,7 @@
                     </div>
 
                 {% if setting.vars.name in ['TOS'] %}
-                        <div class="flex flex-col items-center space-y-2 mt-5" data-controller="tos-radio">
+                        <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
                             {# Render "ON" Radio Input #}
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="onLabelLogin" >
@@ -33,8 +33,8 @@
                                 <input type="radio"
                                        name="{{ form.TOS.vars.full_name }}"
                                        value="LINK"
-                                       class="radio-input hidden"{{ form.TOS.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('tos-radio', 'toggle') }}>
-                                <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('tos-radio', 'LINK') }}>
+                                       class="radio-input hidden"{{ form.TOS.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                          viewBox="0 0 14 10"
                                          fill="none">
@@ -51,8 +51,8 @@
                                 <input type="radio"
                                        name="{{ form.TOS.vars.full_name }}"
                                        value="TEXT_EDITOR"
-                                       class="radio-input hidden" {{ form.TOS.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('tos-radio', 'toggle')}}>
-                                <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('tos-radio', 'TEXT_EDITOR') }}>
+                                       class="radio-input hidden" {{ form.TOS.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')}}>
+                                <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                          viewBox="0 0 14 10"
                                          fill="none">
@@ -64,7 +64,7 @@
                             </label>
                         </div>
                 {% elseif  setting.vars.name in ['PRIVACY_POLICY'] %}
-                    <div class="flex flex-col items-center space-y-2 mt-5" data-controller="tos-radio">
+                    <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
                         {# Render "ON" Radio Input #}
                         <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                name="onLabelLogin" >
@@ -72,8 +72,8 @@
                             <input type="radio"
                                    name="{{ form.PRIVACY_POLICY.vars.full_name }}"
                                    value="LINK"
-                                   class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('tos-radio', 'toggle') }}>
-                            <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('tos-radio', 'LINK') }}>
+                                   class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                            <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                      viewBox="0 0 14 10"
                                      fill="none">
@@ -90,8 +90,8 @@
                             <input type="radio"
                                    name="{{ form.PRIVACY_POLICY.vars.full_name }}"
                                    value="TEXT_EDITOR"
-                                   class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('tos-radio', 'toggle')}}>
-                            <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('tos-radio', 'TEXT_EDITOR') }}>
+                                   class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')}}>
+                            <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                      viewBox="0 0 14 10"
                                      fill="none">

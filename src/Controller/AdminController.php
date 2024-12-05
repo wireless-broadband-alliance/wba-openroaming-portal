@@ -1186,8 +1186,8 @@ class AdminController extends AbstractController
             $privacyPolicy = $submittedData['PRIVACY_POLICY'];
             $tosLink = $submittedData['TOS_LINK'] ?? null;
             $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
-            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? null;
-            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? null;
+            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? '';
+            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? '';
 
 
             $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
@@ -1241,7 +1241,6 @@ class AdminController extends AbstractController
                 $privacyPolicyEditorSetting->setValue('TEXT_EDITOR');
                 $em->persist($privacyPolicyEditorSetting);
             }
-            /*
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
@@ -1253,7 +1252,6 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
-            */
 
             $em->flush();
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');

@@ -9,7 +9,7 @@ export default class extends Controller {
 	}
 
 	toggle(event) {
-		if (event.target.value == "ON" || event.target.value == "On" || event.target.value == "true" || event.target.value == "Demo") {
+		if (event.target.value == "ON" || event.target.value == "On" || event.target.value == "true" || event.target.value == "Demo" || event.target.value == "LINK") {
 			this.onTarget.classList.remove('hidden');
 			this.offTarget.classList.add('hidden');
 		} else {
