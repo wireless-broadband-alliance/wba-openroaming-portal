@@ -1,7 +1,7 @@
 import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
-	static targets = ["on", "card", "input"];
+	static targets = ["on", "card", "input", "link", "textInput", "fancyInput"];
 
 	connect() {
 		super.connect();
@@ -10,6 +10,12 @@ export default class extends Controller {
 			this.unblock();
 		} else {
 			this.block();
+		}
+
+		if(this.linkTarget.checked) {
+			this.showLink();
+		} else {
+			this.showTextEditor();
 		}
 	}
 
@@ -35,5 +41,18 @@ export default class extends Controller {
 			t.classList.add("bg-white");
 			t.classList.remove("bg-disableCardsColor");
 		}
+	}
+
+	showLink() {
+		console.log('show link input');
+		this.textInputTarget.classList.remove("hidden");
+		this.fancyInputTarget.classList.add("hidden");
+
+	}
+
+	showTextEditor() {
+		console.log('show fancy input');
+		this.textInputTarget.classList.add("hidden");
+		this.fancyInputTarget.classList.remove("hidden");
 	}
 }
