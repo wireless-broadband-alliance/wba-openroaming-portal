@@ -91,6 +91,95 @@
         {% endfor %}
             </div>
         </div>
+    <div {{ stimulus_controller('card radio-card') }}>
+        <div class="grid gap-4 lg:grid-cols-2 p-2">
+            {% for setting in form %}
+                {# Display only the terms and conditions settings #}
+                {% if setting.vars.name in ['PRIVACY_POLICY', 'PRIVACY_POLICY_LINK', 'PRIVACY_POLICY_EDITOR'] %}
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full
+                        {% if  setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}{% endif %}
+                        {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}{% endif %}"
+
+                            {% if  setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ stimulus_target('radio-card', 'linkInput') }}{% endif %}
+                            {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ stimulus_target('radio-card', 'textEditorInput') }}{% endif %}
+                            {% if setting.vars.name in ['PRIVACY_POLICY_LINK', 'PRIVACY_POLICY_EDITOR'] %} {{ stimulus_controller('card') }} {{ stimulus_target('radio-card', 'card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                        {# Title and Icon #}
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                {% set displayName = {
+                                    'PRIVACY_POLICY': 'Privacy and Policy',
+                                    'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
+                                    'PRIVACY_POLICY_EDITOR': 'Privacy and Policy Text Editor',
+                                }[setting.vars.name] ?? setting.vars.name %}
+
+                                <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
+                            </div>
+
+                            <label class="flex items-center bg-opacity-40">
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                            </label>
+                        </div>
+
+                        {% if setting.vars.name in ['PRIVACY_POLICY'] %}
+                            <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
+                                {# Render "ON" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="onLabelLogin" >
+                                    Link
+                                    <input type="radio"
+                                           name="{{ form.PRIVACY_POLICY.vars.full_name }}"
+                                           value="LINK"
+                                           class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"/>
+                                        </svg>
+                                    </div>
+                                </label>
+                                {# Render "OFF" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="offLabelLogin">
+                                    Text Editor
+                                    <input type="radio"
+                                           name="{{ form.PRIVACY_POLICY.vars.full_name }}"
+                                           value="TEXT_EDITOR"
+                                           class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor')}}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"/>
+                                        </svg>
+                                    </div>
+                                </label>
+                            </div>
+                        {% endif %}
+                        {% if  setting.vars.name in ['PRIVACY_POLICY_LINK'] %}
+                            <div class="mt-5">
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                            </div>
+                        {% endif %}
+                        {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %}
+                            <div class="mt-5">
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                            </div>
+                        {% endif %}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                            {{ form_errors(setting) }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 
     {# Footer #}
     <div class="mt-8 divider-solid"></div>
