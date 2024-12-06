@@ -1,7 +1,7 @@
 import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
-	static targets = ["on", "card", "input", "link", "textInput", "fancyInput"];
+	static targets = ["on", "card", "input", "link", "linkInput", "textEditorInput"];
 
 	connect() {
 		super.connect();
@@ -45,14 +45,14 @@ export default class extends Controller {
 
 	showLink() {
 		console.log('show link input');
-		this.textInputTarget.classList.remove("hidden");
-		this.fancyInputTarget.classList.add("hidden");
+		this.linkInputTarget.classList.remove("hidden");
+		this.textEditorInputTarget.classList.add("hidden");
 
 	}
 
 	showTextEditor() {
 		console.log('show fancy input');
-		this.textInputTarget.classList.add("hidden");
-		this.fancyInputTarget.classList.remove("hidden");
+		this.linkInputTarget.classList.add("hidden");
+		this.textEditorInputTarget.classList.remove("hidden");
 	}
 }

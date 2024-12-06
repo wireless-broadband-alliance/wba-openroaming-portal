@@ -1,8 +1,9 @@
 <form action="{{ path('admin_dashboard_settings_terms') }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
 
-    <div class="grid gap-4 lg:grid-cols-2 p-2">
+
         <div {{ stimulus_controller('card radio-card') }}>
+            <div class="grid gap-4 lg:grid-cols-2 p-2">
         {% for setting in form %}
             {# Display only the terms and conditions settings #}
             {% if setting.vars.name in ['TOS', 'TOS_LINK', 'TOS_EDITOR'] %}
@@ -10,8 +11,8 @@
                         {% if  setting.vars.name in ['TOS_LINK'] %} {{ form.TOS.vars.data == "LINK" ? '' : 'hidden' }}{% endif %}
                         {% if  setting.vars.name in ['TOS_EDITOR'] %} {{ form.TOS.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}{% endif %}"
 
-                        {% if  setting.vars.name in ['TOS_LINK'] %} {{ stimulus_target('radio-card', 'textInput') }}{% endif %}
-                        {% if  setting.vars.name in ['TOS_EDITOR'] %} {{ stimulus_target('radio-card', 'fancyInput') }}{% endif %}
+                        {% if  setting.vars.name in ['TOS_LINK'] %} {{ stimulus_target('radio-card', 'linkInput') }}{% endif %}
+                        {% if  setting.vars.name in ['TOS_EDITOR'] %} {{ stimulus_target('radio-card', 'textEditorInput') }}{% endif %}
                         {% if setting.vars.name in ['TOS_LINK', 'TOS_EDITOR'] %} {{ stimulus_controller('card') }} {{ stimulus_target('radio-card', 'card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
@@ -88,8 +89,8 @@
                 </div>
                 {% endif %}
         {% endfor %}
+            </div>
         </div>
-    </div>
 
     {# Footer #}
     <div class="mt-8 divider-solid"></div>
