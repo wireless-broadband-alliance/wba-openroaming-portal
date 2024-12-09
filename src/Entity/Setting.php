@@ -49,8 +49,6 @@ use Doctrine\ORM\Mapping as ORM;
                                                         'PRIVACY_POLICY' => ['type' => 'string'],
                                                         'TOS_LINK' => ['type' => 'string'],
                                                         'PRIVACY_POLICY_LINK' => ['type' => 'string'],
-                                                        'TOS_EDITOR' => ['type' => 'string'],
-                                                        'PRIVACY_POLICY_EDITOR' => ['type' => 'string'],
                                                     ],
                                                 ],
                                                 'auth' => [
@@ -102,8 +100,6 @@ use Doctrine\ORM\Mapping as ORM;
                                             'PRIVACY_POLICY' => 'LINK',
                                             'TOS_LINK' => 'https://example.com/tos',
                                             'PRIVACY_POLICY_LINK' => 'https://example.com/privacy',
-                                            'TOS_EDITOR' => 'TEXT_EDITOR',
-                                            'PRIVACY_POLICY_EDITOR' => 'TEXT_EDITOR',
                                         ],
                                         'auth' => [
                                             'AUTH_METHOD_SAML_ENABLED' => true,

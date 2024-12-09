@@ -52,8 +52,6 @@ class ConfigController extends AbstractController
             'PRIVACY_POLICY' => $this->getSettingValueRaw('PRIVACY_POLICY'),
             'TOS_LINK' => $this->getSettingValueRaw('TOS_LINK'),
             'PRIVACY_POLICY_LINK' => $this->getSettingValueRaw('PRIVACY_POLICY_LINK'),
-            'TOS_EDITOR' => $this->getSettingValueRaw('TOS_EDITOR'),
-            'PRIVACY_POLICY_EDITOR' => $this->getSettingValueRaw('PRIVACY_POLICY_EDITOR')
         ];
 
         $data['auth'] = [

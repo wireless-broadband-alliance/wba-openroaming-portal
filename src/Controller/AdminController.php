@@ -1163,13 +1163,16 @@ class AdminController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
-        if ($settingsRepository->findOneBy(['name' => 'TOS_EDITOR'])) {
-            $settingsRepository->findOneBy(['name' => 'TOS_EDITOR'])->setValue($htmlContentTos);
-        }
-        if ($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR'])) {
-            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR'])->setValue($htmlContentPrivacyPolicy);
-        }
         $settings = $settingsRepository->findAll();
+
+        $tosTextEditorsetting = new Setting();
+        $tosTextEditorsetting->setName('TOS_EDITOR');
+        $tosTextEditorsetting->setValue($htmlContentTos);
+        $privacyPolicyTextEditorSetting = new Setting();
+        $privacyPolicyTextEditorSetting->setName('PRIVACY_POLICY_EDITOR');
+        $privacyPolicyTextEditorSetting->setValue($htmlContentPrivacyPolicy);
+
+        $settings = array_merge($settings,[ $tosTextEditorsetting, $privacyPolicyTextEditorSetting]);
 
         $form = $this->createForm(TermsType::class, null, [
             'settings' => $settings,
@@ -1214,8 +1217,7 @@ class AdminController extends AbstractController
                 $em->persist($privacyPolicyLinkSetting);
             }
 
-            $tosEditorSetting = $settingsRepository->findOneBy(['name' => 'TOS_EDITOR']);
-            if ($tosEditorSetting) {
+            if ($tosTextEditor) {
                 $htmlContent = $this->sanitizeHtml($tosTextEditor);
                 $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
                 $filesystem = new Filesystem();
@@ -1224,12 +1226,9 @@ class AdminController extends AbstractController
                     $filesystem->mkdir($directoryPath, 0755);
                 }
                 $filesystem->dumpFile($filePath, $htmlContent);
-                $tosEditorSetting->setValue('TEXT_EDITOR');
-                $em->persist($tosEditorSetting);
             }
 
-            $privacyPolicyEditorSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_EDITOR']);
-            if ($privacyPolicyEditorSetting) {
+            if ($privacyPolicyTextEditor) {
                 $htmlContent = $this->sanitizeHtml($privacyPolicyTextEditor);
                 $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
                 $filesystem = new Filesystem();
@@ -1238,8 +1237,6 @@ class AdminController extends AbstractController
                     $filesystem->mkdir($directoryPath, 0755);
                 }
                 $filesystem->dumpFile($filePath, $htmlContent);
-                $privacyPolicyEditorSetting->setValue('TEXT_EDITOR');
-                $em->persist($privacyPolicyEditorSetting);
             }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
