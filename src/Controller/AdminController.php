@@ -1172,7 +1172,7 @@ class AdminController extends AbstractController
         $privacyPolicyTextEditorSetting->setName('PRIVACY_POLICY_EDITOR');
         $privacyPolicyTextEditorSetting->setValue($htmlContentPrivacyPolicy);
 
-        $settings = array_merge($settings,[ $tosTextEditorsetting, $privacyPolicyTextEditorSetting]);
+        $settings = array_merge($settings, [$tosTextEditorsetting, $privacyPolicyTextEditorSetting]);
 
         $form = $this->createForm(TermsType::class, null, [
             'settings' => $settings,
