@@ -17,6 +17,7 @@
 - Auto delete unconfirmed users after a specific timeframe configurable by the admin
 - **Clear Unverified Accounts Command**: `clear:deleteUnconfirmedUsers` Removes any records in the `User` and all the
   associated entity's that have a unverified accounts associated.
+- Allow TOS and Privacy Policy to be configured directly on the platform.
 
 > **Important**: This command will permanently delete any log or record in the `User` entity.
 
