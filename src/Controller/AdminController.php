@@ -1165,14 +1165,14 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
-        $tosTextEditorsetting = new Setting();
-        $tosTextEditorsetting->setName('TOS_EDITOR');
-        $tosTextEditorsetting->setValue($htmlContentTos);
+        $tosTextEditorSetting = new Setting();
+        $tosTextEditorSetting->setName('TOS_EDITOR');
+        $tosTextEditorSetting->setValue($htmlContentTos);
         $privacyPolicyTextEditorSetting = new Setting();
         $privacyPolicyTextEditorSetting->setName('PRIVACY_POLICY_EDITOR');
         $privacyPolicyTextEditorSetting->setValue($htmlContentPrivacyPolicy);
 
-        $settings = array_merge($settings, [$tosTextEditorsetting, $privacyPolicyTextEditorSetting]);
+        $settings = array_merge($settings, [$tosTextEditorSetting, $privacyPolicyTextEditorSetting]);
 
         $form = $this->createForm(TermsType::class, null, [
             'settings' => $settings,
