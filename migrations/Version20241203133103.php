@@ -22,9 +22,7 @@ final class Version20241203133103 extends AbstractMigration
         $this->addSql(
             "INSERT INTO Setting (name, value) VALUES
             ('TOS', 'LINK'),
-            ('PRIVACY_POLICY', 'LINK'),
-            ('TOS_EDITOR', 'TEXT_EDITOR'),
-            ('PRIVACY_POLICY_EDITOR', 'TEXT_EDITOR')"
+            ('PRIVACY_POLICY', 'LINK')"
         );
 
     }
