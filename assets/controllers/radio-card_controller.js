@@ -1,7 +1,7 @@
 import {Controller} from '@hotwired/stimulus';
 
 export default class extends Controller {
-	static targets = ["link", "on", "card", "input"];
+	static targets = ["on", "card", "input", "link", "linkInput", "textEditorInput"];
 
 	connect() {
 		super.connect();
@@ -12,13 +12,11 @@ export default class extends Controller {
 			this.block();
 		}
 
-        if (this.linkTarget.checked) {
-            this.addCard(//add text input);
-            this.removeCard(//remove google docs input);
-        } else {
-            this.addCard(//add google docs input);
-            this.removeCard(//remove text input);
-        }
+		if(this.linkTarget.checked) {
+			this.showLink();
+		} else {
+			this.showTextEditor();
+		}
 	}
 
 	block() {
@@ -45,23 +43,16 @@ export default class extends Controller {
 		}
 	}
 
-    addCard(){
-        for (let t of this.cardTargets) {
-            // style logic to add a card property
-        }
-    }
+	showLink() {
+		console.log('show link input');
+		this.linkInputTarget.classList.remove("hidden");
+		this.textEditorInputTarget.classList.add("hidden");
 
-    removeCard(){
-        for (let t of this.cardTargets) {
-            // style logic to remove a card hidden property
-        }
-    }
+	}
 
-    showContainer(container) {
-        container.classList.remove("hidden");
-    }
-
-    hideContainer(container) {
-        container.classList.add("hidden");
-    }
+	showTextEditor() {
+		console.log('show fancy input');
+		this.linkInputTarget.classList.add("hidden");
+		this.textEditorInputTarget.classList.remove("hidden");
+	}
 }
