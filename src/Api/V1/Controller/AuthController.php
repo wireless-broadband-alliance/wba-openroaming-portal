@@ -17,7 +17,6 @@ use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use JsonException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use OneLogin\Saml2\Auth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -91,7 +90,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
+        } catch (\JsonException) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); # Bad Request Response
         }
 
@@ -276,7 +275,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
+        } catch (\JsonException) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
 
@@ -331,7 +330,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
+        } catch (\JsonException) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
 
