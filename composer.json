@@ -33,7 +33,6 @@
 		"robrichards/xmlseclibs": "^3.1",
 		"sensio/framework-extra-bundle": "^6.2",
 		"sentry/sentry-symfony": "^4.8",
-		"stevenmaguire/oauth2-microsoft": "^2.2",
 		"symfony/asset": "6.4.*",
 		"symfony/console": "6.4.*",
 		"symfony/doctrine-messenger": "6.4.*",
@@ -66,6 +65,7 @@
 		"symfony/webpack-encore-bundle": "^1.16",
 		"symfony/yaml": "6.4.*",
 		"symfonycasts/verify-email-bundle": "^1.13",
+		"thenetworg/oauth2-azure": "^2.2",
 		"twig/extra-bundle": "^2.12|^3.0",
 		"twig/twig": "^2.12|^3.0"
 	},

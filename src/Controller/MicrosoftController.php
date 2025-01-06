@@ -97,7 +97,7 @@ class MicrosoftController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Retrieve the "google" client
+        // Retrieve the "microsoft" client
         $client = $this->clientRegistry->getClient('microsoft');
 
         // Get the authorization URL
@@ -114,7 +114,7 @@ class MicrosoftController extends AbstractController
     #[Route('/connect/microsoft/check', name: 'connect_microsoft_check', methods: ['GET'])]
     public function connectCheckAction(Request $request): RedirectResponse
     {
-        // Retrieve the "google" client
+        // Retrieve the "microsoft" client
         $client = $this->clientRegistry->getClient('microsoft');
 
         $code = $request->query->get('code');
