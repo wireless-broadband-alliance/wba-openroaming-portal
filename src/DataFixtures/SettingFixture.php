@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class SettingFixture extends Fixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $settings = [
             ['name' => 'RADIUS_REALM_NAME', 'value' => 'EditMe'],
