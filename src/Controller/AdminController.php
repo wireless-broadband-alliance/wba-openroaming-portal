@@ -1548,7 +1548,7 @@ class AdminController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         GetSettings $getSettings,
-        CertificateService $certeficateService
+        CertificateService $certificateService
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1559,15 +1559,15 @@ class AdminController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
-        $certificateLimitDate = strtotime($certeficateService->getCertificateExpirationDate($certificatePath));
+        $certificateLimitDate = strtotime($certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         $profileLimitDate = ((int)$timeLeft);
 
-
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
-            'profileLimitDate' => $profileLimitDate
+            'profileLimitDate' => $profileLimitDate,
+            'profileMinDate' => min($profileLimitDate, 5)
         ]);
 
         $form->handleRequest($request);
