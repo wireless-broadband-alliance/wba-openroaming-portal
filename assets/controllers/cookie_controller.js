@@ -15,9 +15,6 @@ export default class extends Controller {
 
         this.updateCheckboxes();
 
-        // Use localStorage to check if cookies were rejected
-        this.cookiesRejected = localStorage.getItem("cookies_rejected") === "true";
-
         this.checkCookies();
     }
 
@@ -55,10 +52,6 @@ export default class extends Controller {
             this.updateCheckbox(scope, true);
         });
 
-        // If cookies were rejected previously, reset the rejection flag
-        if (this.cookiesRejected) {
-            localStorage.removeItem("cookies_rejected");
-        }
         this.setCookiePreferences();
         this.setCookiesAccepted();
         this.hideBanner();
@@ -68,9 +61,6 @@ export default class extends Controller {
         console.log("Rejecting cookies, removing existing cookies.");
 
         this.clearAllCookies();
-
-        // Mark in localStorage that cookies have been rejected
-        localStorage.setItem("cookies_rejected", "true");
 
         this.closeModal();
         this.hideBanner();
@@ -82,11 +72,6 @@ export default class extends Controller {
             const scope = checkbox.getAttribute("data-scope");
             this.cookieScopes[scope] = checkbox.checked;
         });
-
-        // If cookies were rejected previously, we need to reset the rejection flag
-        if (this.cookiesRejected) {
-            localStorage.removeItem("cookies_rejected");
-        }
 
         this.setCookiePreferences();
 
