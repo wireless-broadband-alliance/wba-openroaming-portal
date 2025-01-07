@@ -1165,6 +1165,13 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
+        foreach ($settings as $setting) {
+            if ($setting->getName() === 'TOS_EDITOR' or $setting->getName() === 'PRIVACY_POLICY_EDITOR') {
+                $em->remove($setting);
+                $em->flush();
+            }
+        }
+
         $tosTextEditorSetting = new Setting();
         $tosTextEditorSetting->setName('TOS_EDITOR');
         $tosTextEditorSetting->setValue($htmlContentTos);
