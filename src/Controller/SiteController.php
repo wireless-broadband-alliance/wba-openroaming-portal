@@ -331,7 +331,7 @@ class SiteController extends AbstractController
             } else {
                 $content = '';
             }
-            return $this->render('site/tosTemplate.html.twig', [
+            return $this->render('site/tos_template.html.twig', [
                 'content' => $content
             ]);
         }
@@ -360,7 +360,7 @@ class SiteController extends AbstractController
             } else {
                 $content = '';
             }
-            return $this->render('site/tosTemplate.html.twig', [
+            return $this->render('site/tos_template.html.twig', [
                 'content' => $content
             ]);
         }
