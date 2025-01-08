@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\Setting;
+use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TextEditorName;
 use App\Enum\TosTypes;
 use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
@@ -319,11 +321,20 @@ class SiteController extends AbstractController
     {
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
+        $textEditorRepository = $em->getRepository(TextEditor::class);
         if (
             $tosFormat &&
             $tosFormat->getValue() === TosTypes::TEXT_EDITOR
         ) {
-            return $this->render('site/tos/tos.html.twig');
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
+            }
+            else {
+                $content = '';
+            }
+            return $this->render('site/tosTemplate.html.twig', [
+                'content' => $content
+            ]);
         }
         if (
             $tosFormat &&
@@ -339,12 +350,21 @@ class SiteController extends AbstractController
     public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
     {
         $settingsRepository = $em->getRepository(Setting::class);
+        $textEditorRepository = $em->getRepository(TextEditor::class);
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
         if (
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TosTypes::TEXT_EDITOR
         ) {
-            return $this->render('site/tos/privacy_policy.html.twig');
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
+            }
+            else {
+                $content = '';
+            }
+            return $this->render('site/tosTemplate.html.twig', [
+                'content' => $content
+            ]);
         }
         if (
             $privacyPolicyFormat &&
