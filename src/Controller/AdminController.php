@@ -1147,14 +1147,14 @@ class AdminController extends AbstractController
 
         $textEditorRepository = $em->getRepository(TextEditor::class);
         $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
-        if ($tosTextEditor === null) {
+        if (!$tosTextEditor) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS);
             $tosTextEditor->setContent('');
             $em->persist($tosTextEditor);
         }
         $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY]);
-        if ($privacyPolicyTextEditor === null) {
+        if (!$privacyPolicyTextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY);
             $privacyPolicyTextEditor->setContent('');
