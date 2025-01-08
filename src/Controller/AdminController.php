@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
+use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TextEditorName;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
 use App\Form\AuthType;
@@ -1143,22 +1145,22 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $filesystem = new Filesystem();
-        $filePathTOS = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
-        // phpcs:disable Generic.Files.LineLength.TooLong
-        $filePathPrivacyPolicy = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
-        // phpcs:enable
-        if ($filesystem->exists($filePathTOS)) {
-            $htmlContentTos = file_get_contents($filePathTOS);
-        } else {
-            $htmlContentTos = '';
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+        if (!$tosTextEditor) {
+            $tosTextEditor = new TextEditor();
+            $tosTextEditor->setName(TextEditorName::TOS);
+            $tosTextEditor->setContent('');
+            $em->persist($tosTextEditor);
         }
-
-        if ($filesystem->exists($filePathPrivacyPolicy)) {
-            $htmlContentPrivacyPolicy = file_get_contents($filePathPrivacyPolicy);
-        } else {
-            $htmlContentPrivacyPolicy = '';
+        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY]);
+        if (!$privacyPolicyTextEditor) {
+            $privacyPolicyTextEditor = new TextEditor();
+            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY);
+            $privacyPolicyTextEditor->setContent('');
+            $em->persist($privacyPolicyTextEditor);
         }
+        $em->flush();
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -1174,10 +1176,10 @@ class AdminController extends AbstractController
 
         $tosTextEditorSetting = new Setting();
         $tosTextEditorSetting->setName('TOS_EDITOR');
-        $tosTextEditorSetting->setValue($htmlContentTos);
+        $tosTextEditorSetting->setValue($tosTextEditor->getContent());
         $privacyPolicyTextEditorSetting = new Setting();
         $privacyPolicyTextEditorSetting->setName('PRIVACY_POLICY_EDITOR');
-        $privacyPolicyTextEditorSetting->setValue($htmlContentPrivacyPolicy);
+        $privacyPolicyTextEditorSetting->setValue($privacyPolicyTextEditor->getContent());
 
         $settings = array_merge($settings, [$tosTextEditorSetting, $privacyPolicyTextEditorSetting]);
 
@@ -1225,25 +1227,21 @@ class AdminController extends AbstractController
             }
 
             if ($tosTextEditor) {
-                $htmlContent = $this->sanitizeHtml($tosTextEditor);
-                $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/tos.html.twig';
-                $filesystem = new Filesystem();
-                $directoryPath = dirname($filePath);
-                if (!$filesystem->exists($directoryPath)) {
-                    $filesystem->mkdir($directoryPath, 0755);
+                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+                if ($tosEditorSetting) {
+                    $tosEditorSetting->setContent($tosTextEditor);
                 }
-                $filesystem->dumpFile($filePath, $htmlContent);
+                $em->persist($tosEditorSetting);
             }
 
             if ($privacyPolicyTextEditor) {
-                $htmlContent = $this->sanitizeHtml($privacyPolicyTextEditor);
-                $filePath = $this->getParameter('kernel.project_dir') . '/templates/site/tos/privacy_policy.html.twig';
-                $filesystem = new Filesystem();
-                $directoryPath = dirname($filePath);
-                if (!$filesystem->exists($directoryPath)) {
-                    $filesystem->mkdir($directoryPath, 0755);
+                $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
+                    'name' => TextEditorName::PRIVACY_POLICY
+                ]);
+                if ($privacyPolicyEditorSetting) {
+                    $privacyPolicyEditorSetting->setContent($privacyPolicyTextEditor);
                 }
-                $filesystem->dumpFile($filePath, $htmlContent);
+                $em->persist($privacyPolicyEditorSetting);
             }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
