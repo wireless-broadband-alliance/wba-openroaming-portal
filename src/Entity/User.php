@@ -1495,7 +1495,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private ?string $email = null;
 
     #[ORM\Column(type: 'boolean')]
-    private $isVerified = false;
+    private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
