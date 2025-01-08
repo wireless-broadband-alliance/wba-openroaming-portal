@@ -1235,7 +1235,9 @@ class AdminController extends AbstractController
             }
 
             if ($privacyPolicyTextEditor) {
-                $privacyPolicyEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY]);
+                $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
+                    'name' => TextEditorName::PRIVACY_POLICY
+                ]);
                 if ($privacyPolicyEditorSetting) {
                     $privacyPolicyEditorSetting->setContent($privacyPolicyTextEditor);
                 }

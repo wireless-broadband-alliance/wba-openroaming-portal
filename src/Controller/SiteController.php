@@ -328,8 +328,7 @@ class SiteController extends AbstractController
         ) {
             if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
-            }
-            else {
+            } else {
                 $content = '';
             }
             return $this->render('site/tosTemplate.html.twig', [
@@ -358,8 +357,7 @@ class SiteController extends AbstractController
         ) {
             if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
-            }
-            else {
+            } else {
                 $content = '';
             }
             return $this->render('site/tosTemplate.html.twig', [
