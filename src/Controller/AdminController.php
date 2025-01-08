@@ -146,7 +146,7 @@ class AdminController extends AbstractController
      * @param int $page
      * @param string $sort
      * @param string $order
-     * @param int $count
+     * @param int|null $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -2047,6 +2047,7 @@ class AdminController extends AbstractController
 
     /**
      * Exports the freeradius data
+     * @throws Exception
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -2536,14 +2537,12 @@ class AdminController extends AbstractController
         // Determine the appropriate time granularity
         if ($interval->days > 365.2) {
             $granularity = 'year';
+        } elseif ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
         } else {
-            if ($interval->days > 90) {
-                $granularity = 'month';
-            } elseif ($interval->days > 30) {
-                $granularity = 'week';
-            } else {
-                $granularity = 'day';
-            }
+            $granularity = 'day';
         }
 
         $authsCounts = [

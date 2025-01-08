@@ -22,7 +22,6 @@ use App\Form\TOStype;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
@@ -1024,7 +1023,6 @@ class SiteController extends AbstractController
     /**
      * @param RequestStack $requestStack
      * @param UserRepository $userRepository
-     * @param EventRepository $eventRepository
      * @param Request $request
      * @return Response
      */
@@ -1033,7 +1031,6 @@ class SiteController extends AbstractController
     public function verifyCode(
         RequestStack $requestStack,
         UserRepository $userRepository,
-        EventRepository $eventRepository,
         Request $request
     ): Response {
         // Get the current user
