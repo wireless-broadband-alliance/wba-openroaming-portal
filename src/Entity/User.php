@@ -1675,7 +1675,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->first_name = $attributes['givenName'][0];
         $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
         $this->password = 'notused'; //invalid hash so won't ever authenticate
-        $this->isVerified = 1;
+        $this->isVerified = true;
         $this->isDisabled = false;
         // #$this->setLevel(LevelType::NONE);
     }
