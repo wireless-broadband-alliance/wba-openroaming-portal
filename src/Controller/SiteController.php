@@ -807,7 +807,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(NewPasswordAccountType::class, $user);
         $form->handleRequest($request);
 

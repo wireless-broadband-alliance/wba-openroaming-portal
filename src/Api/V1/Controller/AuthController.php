@@ -280,7 +280,7 @@ class AuthController extends AbstractController
 
         try {
             $user = $this->googleController->fetchUserFromGoogle($data['code']);
-            if ($user === null) {
+            if (!$user) {
                 return (new BaseResponse(400, null, 'This code is not associated with a google account.'))->toResponse(
                 );
             }
