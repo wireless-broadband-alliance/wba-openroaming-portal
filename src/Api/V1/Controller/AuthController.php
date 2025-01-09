@@ -270,7 +270,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
 

@@ -157,7 +157,7 @@ class ProfileController extends AbstractController
             return match ($encryptionResult['error']['code']) {
                 1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
                 1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
-                default => (new BaseResponse(500, null, 'An unknown error occurred during encryption.'))->toResponse(),
+                default => (new BaseResponse(500, null, 'Failed to encrypt the password.'))->toResponse(),
             };
         }
         $encryptedPassword = $encryptionResult['data'];
@@ -282,7 +282,7 @@ class ProfileController extends AbstractController
             return match ($encryptionResult['error']['code']) {
                 1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
                 1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
-                default => (new BaseResponse(500, null, 'An unknown error occurred during encryption.'))->toResponse(),
+                default => (new BaseResponse(500, null, 'Failed to encrypt the password.'))->toResponse(),
             };
         }
         $encryptedPassword = $encryptionResult['data'];
