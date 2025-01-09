@@ -44,14 +44,12 @@ export default class extends Controller {
 	}
 
 	showLink() {
-		console.log('show link input');
 		this.linkInputTarget.classList.remove("hidden");
 		this.textEditorInputTarget.classList.add("hidden");
 
 	}
 
 	showTextEditor() {
-		console.log('show fancy input');
 		this.linkInputTarget.classList.add("hidden");
 		this.textEditorInputTarget.classList.remove("hidden");
 	}

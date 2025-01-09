@@ -157,9 +157,8 @@ class ResetAllSettingsCommand extends Command
             $message = <<<EOL
 
 <info>Success:</info> All the settings have been set to the default values.
-<comment>Note:</comment> If you want to reset the custom settings too,
-       make sure to run the following command:
-       <fg=blue>php bin/console reset:customS</>
+<comment>Note:</comment> If you want to reset any another setting please check using this command:
+      <fg=blue>php bin/console reset</>
 EOL;
 
             // Output the styled message

@@ -65,7 +65,7 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
                         'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
                     ])
@@ -117,7 +117,7 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
                         'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
                     ])
@@ -163,7 +163,7 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
                         'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
                     ])
@@ -241,7 +241,7 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
                         'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
                     ])
@@ -289,7 +289,8 @@ class AuthType extends AbstractType
     {
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
-            'profileLimitDate' => null
+            'profileLimitDate' => null,
+            'profileMinDate' => null
         ]);
     }
 }

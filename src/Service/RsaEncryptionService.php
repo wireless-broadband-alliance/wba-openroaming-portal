@@ -3,16 +3,21 @@
 namespace App\Service;
 
 use Exception;
-use RuntimeException;
 
 class RsaEncryptionService
 {
-    public function encryptApi(string $publicKeyContent, string $data): string
+    public function encryptApi(string $publicKeyContent, string $data): array
     {
         try {
             $publicKey = openssl_pkey_get_public($publicKeyContent);
             if ($publicKey === false) {
-                throw new RuntimeException('Invalid RSA public key provided.');
+                return [
+                    'success' => false,
+                    'error' => [
+                        'code' => 1001,
+                        'message' => 'Invalid RSA public key provided.',
+                    ],
+                ];
             }
 
             $encryptedData = '';
@@ -21,12 +26,27 @@ class RsaEncryptionService
             openssl_free_key($publicKey);
 
             if (!$success) {
-                throw new RuntimeException('Failed to encrypt data using RSA public key.');
+                return [
+                    'success' => false,
+                    'error' => [
+                        'code' => 1002,
+                        'message' => 'Failed to encrypt data using RSA public key.',
+                    ],
+                ];
             }
 
-            return base64_encode($encryptedData);
+            return [
+                'success' => true,
+                'data' => base64_encode($encryptedData),
+            ];
         } catch (Exception $e) {
-            throw new RuntimeException('RSA encryption operation failed: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => [
+                    'code' => 1003,
+                    'message' => 'RSA encryption operation failed: ' . $e->getMessage(),
+                ],
+            ];
         }
     }
 }
