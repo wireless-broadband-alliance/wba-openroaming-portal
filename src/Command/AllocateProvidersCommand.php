@@ -100,10 +100,11 @@ class AllocateProvidersCommand extends Command
         }
 
         // Check for Email Portal Account
-        if (
-            $user->getEmail() && !$user->getPhoneNumber() && !$user->getGoogleId() && !$user->getSamlIdentifier(
-            ) && !$this->userExternalAuthExists($user, UserProvider::PORTAL_ACCOUNT, UserProvider::EMAIL)
-        ) {
+        if (!$user->getGoogleId() && !$user->getSamlIdentifier() && !$this->userExternalAuthExists(
+                $user,
+                UserProvider::PORTAL_ACCOUNT,
+                UserProvider::EMAIL
+            ) && ($user->getEmail() === $user->getUuid())) {
             $this->createUserExternalAuth($user, UserProvider::PORTAL_ACCOUNT, UserProvider::EMAIL);
         }
     }

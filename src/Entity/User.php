@@ -1781,13 +1781,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this->googleId;
     }
 
-    public function setGoogleId(?string $googleId): self
-    {
-        $this->googleId = $googleId;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
