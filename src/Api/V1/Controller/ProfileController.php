@@ -151,11 +151,16 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+        $encryptionResult = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
-        if (!$encryptedPassword) {
-            return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
+        if (!$encryptionResult['success']) {
+            return match ($encryptionResult['error']['code']) {
+                1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
+                1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
+                default => (new BaseResponse(500, null, 'An unknown error occurred during encryption.'))->toResponse(),
+            };
         }
+        $encryptedPassword = $encryptionResult['data'];
 
         $data = [
             'radiusUsername' => $radiusProfile->getRadiusUser(),
@@ -271,11 +276,16 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+        $encryptionResult = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
-        if (!$encryptedPassword) {
-            return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
+        if (!$encryptionResult['success']) {
+            return match ($encryptionResult['error']['code']) {
+                1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
+                1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
+                default => (new BaseResponse(500, null, 'An unknown error occurred during encryption.'))->toResponse(),
+            };
         }
+        $encryptedPassword = $encryptionResult['data'];
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-2',
