@@ -299,7 +299,7 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
-        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOStype::class);
 
@@ -308,7 +308,7 @@ class SiteController extends AbstractController
             'formPassword' => $formPassword->createView(),
             'formTOS' => $formTOS,
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
-            'registrationFormDemo' => $formResgistrationDemo->createView(),
+            'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser

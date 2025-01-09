@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
 use App\Service\PgpEncryptionService;
-use App\Service\ProfileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -24,18 +23,15 @@ use function Symfony\Component\String\u;
 class AutoDeleteUnconfirmedUsersCommand extends Command
 {
     private EntityManagerInterface $entityManager;
-    public ProfileManager $profileManager;
     public PgpEncryptionService $pgpEncryptionService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PgpEncryptionService $pgpEncryptionService,
-        ProfileManager $profileManager
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->pgpEncryptionService = $pgpEncryptionService;
-        $this->profileManager = $profileManager;
     }
 
     public function deleteUnconfirmedUsers(): int
@@ -76,18 +72,13 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
         return $usersDeleted;
     }
 
-    private function disableProfiles($user): void
-    {
-        $this->profileManager->disableProfiles($user);
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $deletedCount = $this->deleteUnconfirmedUsers();
 
             $output->writeln(
-                "<info>Success:</info> $deletedCount event(s) with null or empty values have been deleted."
+                "<info>Success:</info> $deletedCount user(s) with unverified accounts have been deleted."
             );
         } catch (Exception $e) {
             // Handle any exceptions and roll back in case of an error
