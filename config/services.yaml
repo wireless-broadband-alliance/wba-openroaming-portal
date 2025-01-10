@@ -18,9 +18,6 @@ parameters:
   app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
   app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
 services:
-  App\EventListener\SessionRoleListener:
-        tags:
-            - { name: kernel.event_listener, event: kernel.request, priority: 10 }
   App\EventListener\CookieConsentListener:
         tags:
             - { name: kernel.event_listener }
