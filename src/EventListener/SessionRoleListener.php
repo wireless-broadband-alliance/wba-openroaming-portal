@@ -30,7 +30,7 @@ class SessionRoleListener
 
         // Block access to admin page if session_admin is not set
         if ($routeName === 'admin_page' && !$sessionAdmin) {
-            $this->logger->warning('Access denied for route: '.$routeName);
+            $this->logger->warning('Access denied for route: ' . $routeName);
             throw new AccessDeniedHttpException('Access denied.');
         }
     }
