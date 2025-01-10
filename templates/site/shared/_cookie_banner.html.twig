@@ -135,28 +135,6 @@
                                         </a>
                                     </p>
                                 </li>
-                                {# Remember Me Cookie #}
-                                <li>
-                                    <strong>Remember Me Cookie</strong> - Allows users to remain logged in on the
-                                    platform across browser sessions
-                                    by securely storing authentication information.
-                                    <span>
-                                    <br>
-                                    Controlled by:
-                                    <a class="underline text-primary font-semibold"
-                                       href="{{ absolute_url(path('app_landing')) }}">
-                                        {{ app.request.getHost() }}
-                                    </a>
-                                    </span>
-                                    <br>
-                                    <p>
-                                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
-                                           class="underline text-primary"
-                                           target="_blank">
-                                            Privacy & Policy
-                                        </a>
-                                    </p>
-                                </li>
                                 {# SAML Session Cookie #}
                                 <li>
                                     <strong>SAML Session Cookie</strong> - Used to manage authentication and session
