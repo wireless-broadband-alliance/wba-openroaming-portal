@@ -207,6 +207,45 @@
                             </ul>
                         </div>
 
+                        {# Remember Me Session #}
+                        <div class="flex flex-col space-y-3">
+                            <h3 class="font-semibold">Manageable Cookies</h3>
+                            <p class="text-sm">
+                                These cookies help us understand how you like to use our platform.
+                            </p>
+                            <ul class="text-sm space-y-2">
+                                <li>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <strong>Remember Me</strong> - Tracks user interactions on the platform.
+                                            <span>
+                                            <br>
+                                            Controlled by:
+                                            <a class="underline text-primary font-semibold"
+                                               href="{{ absolute_url(path('app_landing')) }}">
+                                                {{ app.request.getHost() }}
+                                            </a>
+                                        </span>
+                                            <br>
+                                            <p>
+                                                <a href="{{ data.PRIVACY_POLICY_LINK.value }}"
+                                                   class="underline text-primary"
+                                                   target="_blank">
+                                                    Privacy & Policy
+                                                </a>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="sr-only peer" data-scope="rememberMe">
+                                                <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
                         {# Analytics Cookies Section
                         <div class="flex flex-col space-y-3">
                             <h3 class="font-semibold">Preferences Cookies</h3>

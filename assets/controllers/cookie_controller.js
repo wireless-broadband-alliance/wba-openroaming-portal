@@ -8,9 +8,7 @@ export default class extends Controller {
 
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
-            // preferences: true,
-            // analytics: false,
-            // marketing: false,
+            rememberMe: false,
         };
 
         this.updateCheckboxes();
