@@ -64,8 +64,6 @@ class SecurityController extends AbstractController
                 $this->addFlash('error', 'Wrong credentials');
                 return $this->redirectToRoute('saml_logout');
             }
-            $session = $request->getSession();
-            $session->set('session_user', true);
             $platformMode = $data['PLATFORM_MODE']['value'];
             if ($platformMode === PlatformMode::DEMO) {
                 return $this->redirectToRoute('saml_logout');
