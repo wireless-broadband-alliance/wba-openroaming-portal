@@ -38,7 +38,16 @@ export default class extends Controller {
 
     handleCheckboxChange() {
         const isChecked = this.agreeTermsTarget.checked;
-        this.updateTermsState(isChecked);
+
+        // Check if cookies_accepted or cookie_preferences exists
+        const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
+
+        if (isChecked && hasCookies) {
+            console.log("Terms accepted and valid cookies exist, saving state.");
+            this.updateTermsState(isChecked);
+        } else if (!hasCookies) {
+            console.log("Cannot accept terms without valid cookies.");
+        }
 
         if (isChecked) {
             console.log("Terms accepted, hiding modal.");
@@ -81,5 +90,12 @@ export default class extends Controller {
     closeConfirmationModal() {
         console.log("Close button clicked, hiding modal.");
         this.confirmationModalTarget.classList.add("hidden");
+    }
+
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return null;
     }
 }

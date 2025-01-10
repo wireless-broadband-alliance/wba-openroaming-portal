@@ -116,6 +116,8 @@ export default class extends Controller {
             // Clear each cookie by setting max-age=0
             document.cookie = name + "=; path=/; max-age=0";
         });
+
+        localStorage.clear();
     }
 
     closeModal() {
