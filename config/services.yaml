@@ -19,8 +19,6 @@ parameters:
   app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
 services:
   App\EventListener\SessionRoleListener:
-        arguments:
-            - '@logger'
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 10 }
   App\EventListener\CookieConsentListener:
