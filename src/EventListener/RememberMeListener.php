@@ -4,15 +4,9 @@ namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\Security\Http\RememberMe\RememberMeHandlerInterface;
 
-final readonly class RememberMeListener
+final class RememberMeListener
 {
-    public function __construct(
-        private RememberMeHandlerInterface $rememberMeHandler
-    ) {
-    }
-
     /**
      * @param InteractiveLoginEvent $event
      */
