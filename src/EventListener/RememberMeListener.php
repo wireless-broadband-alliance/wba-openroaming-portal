@@ -29,7 +29,7 @@ final class RememberMeListener
 
             if (isset($preferences['rememberMe']) && $preferences['rememberMe'] === true) {
                 // Allow session persistence (default Symfony behavior will handle this)
-                $session->set('_security_remember_me', true);
+                // Symfony will automatically generate the remember-me cookie based on the security.yaml
             } else {
                 // Disable session existence
                 $session->migrate(true);
