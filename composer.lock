@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f1e6fb35e7938cf9486e8b3dee4d6dbd",
+    "content-hash": "68ea66476c0b116f363ffde605ee77be",
     "packages": [
         {
             "name": "api-platform/core",
@@ -1802,6 +1802,53 @@
                 }
             ],
             "time": "2025-01-05T11:24:43+00:00"
+        },
+        {
+            "name": "eckinox/tinymce-bundle",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/eckinox/tinymce-bundle.git",
+                "reference": "832e5f30bd9409f1c52aca6c601bff4b4ce81708"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/eckinox/tinymce-bundle/zipball/832e5f30bd9409f1c52aca6c601bff4b4ce81708",
+                "reference": "832e5f30bd9409f1c52aca6c601bff4b4ce81708",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0",
+                "symfony/asset": "^4.0|^5.0|^6.0|^7.0",
+                "symfony/dependency-injection": "^4.0|^5.0|^6.0|^7.0",
+                "symfony/form": "^4.0|^5.0|^6.0|^7.0",
+                "symfony/http-foundation": "^4.0|^5.0|^6.0|^7.0",
+                "symfony/http-kernel": "^4.0|^5.0|^6.0|^7.0",
+                "symfony/routing": "^4.0|^5.0|^6.0|^7.0",
+                "twig/twig": "^3.3"
+            },
+            "require-dev": {
+                "eckinox/eckinox-cs": "^2.0"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Eckinox\\TinymceBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Émile Perron",
+                    "email": "contact@emileperron.com"
+                }
+            ],
+            "description": "A Symfony bundle to add TinyMCE in your apps and forms.",
+            "support": {
+                "issues": "https://github.com/eckinox/tinymce-bundle/issues",
+                "source": "https://github.com/eckinox/tinymce-bundle/tree/v2.0.0"
+            },
+            "time": "2024-04-25T20:37:57+00:00"
         },
         {
             "name": "egulias/email-validator",

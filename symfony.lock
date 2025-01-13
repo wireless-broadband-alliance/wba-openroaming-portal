@@ -70,6 +70,9 @@
             "ref": "b131e6cbfe1b898a508987851963fff485986285"
         }
     },
+    "eckinox/tinymce-bundle": {
+        "version": "v2.0.0"
+    },
     "friendsofsymfony/ckeditor-bundle": {
         "version": "2.5",
         "recipe": {

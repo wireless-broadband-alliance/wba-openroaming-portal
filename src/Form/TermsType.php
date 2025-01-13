@@ -3,9 +3,9 @@
 namespace App\Form;
 
 use App\Service\GetSettings;
+use Eckinox\TinymceBundle\Form\Type\TinymceType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,8 +27,8 @@ class TermsType extends AbstractType
             'PRIVACY_POLICY' => ChoiceType::class,
             'TOS_LINK' => TextType::class,
             'PRIVACY_POLICY_LINK' => TextType::class,
-            'TOS_EDITOR' => TextareaType::class,
-            'PRIVACY_POLICY_EDITOR' => TextareaType::class,
+            'TOS_EDITOR' => TinymceType::class,
+            'PRIVACY_POLICY_EDITOR' => TinymceType::class,
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
