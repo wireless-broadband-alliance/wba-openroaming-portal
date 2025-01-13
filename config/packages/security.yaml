@@ -32,7 +32,7 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-
+            remember_me: null
             custom_authenticator: App\Security\PasswordAuthenticator
                 # where to redirect after logout
                 # target: app_any_route
