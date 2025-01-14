@@ -1572,11 +1572,15 @@ class AdminController extends AbstractController
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         $profileLimitDate = ((int)$timeLeft);
+        if ($profileLimitDate < 5) {
+            $profileLimitDate = 5;
+        }
+
 
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
             'profileLimitDate' => $profileLimitDate,
-            'profileMinDate' => min($profileLimitDate, 5)
+            'profileMinDate' => 5
         ]);
 
         $form->handleRequest($request);
