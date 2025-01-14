@@ -8,9 +8,7 @@ export default class extends Controller {
 
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
-            // preferences: true,
-            // analytics: false,
-            // marketing: false,
+            rememberMe: false,
         };
 
         this.updateCheckboxes();
@@ -23,11 +21,7 @@ export default class extends Controller {
         const hasSavedPreferences = this.getCookie("cookie_preferences");
 
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
-        if ((hasAcceptedCookies || hasSavedPreferences) && !this.cookiesRejected) {
-            this.hideBanner();
-        }
-
-        if (this.cookiesRejected) {
+        if ((hasAcceptedCookies || hasSavedPreferences)) {
             this.hideBanner();
         }
 
@@ -116,6 +110,8 @@ export default class extends Controller {
             // Clear each cookie by setting max-age=0
             document.cookie = name + "=; path=/; max-age=0";
         });
+
+        localStorage.clear();
     }
 
     closeModal() {

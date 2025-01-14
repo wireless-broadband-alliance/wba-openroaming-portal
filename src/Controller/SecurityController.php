@@ -57,13 +57,10 @@ class SecurityController extends AbstractController
         if ($this->getUser()) {
             if ($type === 'admin') {
                 if ($this->isGranted('ROLE_ADMIN')) {
+                    $session = $request->getSession();
+                    $session->set('session_admin', true);
                     return $this->redirectToRoute('admin_page');
                 }
-
-                $this->addFlash('error', 'Wrong credentials');
-                return $this->redirectToRoute('saml_logout');
-            }
-            if ($type === 'user' and $this->isGranted('ROLE_ADMIN')) {
                 $this->addFlash('error', 'Wrong credentials');
                 return $this->redirectToRoute('saml_logout');
             }
