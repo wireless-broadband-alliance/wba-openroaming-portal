@@ -45,6 +45,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use HTMLPurifier;
 use HTMLPurifier_Config;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -1229,7 +1230,12 @@ class AdminController extends AbstractController
             if ($tosTextEditor) {
                 $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
                 if ($tosEditorSetting) {
-                    $tosEditorSetting->setContent($tosTextEditor);
+                    $config = HTMLPurifier_Config::createDefault();
+                    $config->set('Cache.DefinitionImpl', null);
+                    $purifier = new HTMLPurifier($config);
+
+                    $cleanHTML = $purifier->purify($tosTextEditor);
+                    $tosEditorSetting->setContent($cleanHTML);
                 }
                 $em->persist($tosEditorSetting);
             }
@@ -1239,7 +1245,12 @@ class AdminController extends AbstractController
                     'name' => TextEditorName::PRIVACY_POLICY
                 ]);
                 if ($privacyPolicyEditorSetting) {
-                    $privacyPolicyEditorSetting->setContent($privacyPolicyTextEditor);
+                    $config = HTMLPurifier_Config::createDefault();
+                    $config->set('Cache.DefinitionImpl', null);
+                    $purifier = new HTMLPurifier($config);
+
+                    $cleanHTML = $purifier->purify($privacyPolicyTextEditor);
+                    $privacyPolicyEditorSetting->setContent($cleanHTML);
                 }
                 $em->persist($privacyPolicyEditorSetting);
             }
