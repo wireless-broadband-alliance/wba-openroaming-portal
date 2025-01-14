@@ -21,15 +21,40 @@ export default class extends Controller {
         const hasSavedPreferences = this.getCookie("cookie_preferences");
 
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
-        if ((hasAcceptedCookies || hasSavedPreferences) && !this.cookiesRejected) {
+        if ((hasAcceptedCookies || hasSavedPreferences)) {
             this.hideBanner();
-        }
 
-        if (this.cookiesRejected) {
-            this.hideBanner();
+            // Parse the cookie preferences if available
+            if (hasSavedPreferences) {
+                const preferences = JSON.parse(hasSavedPreferences);  // Parse cookie preferences
+                if (preferences.rememberMe === true) {
+                    // Check if session has already been restored
+                    if (!localStorage.getItem('blockUserSessionRestoration')) {
+                        console.log("Calling restoring session function");
+                        this.restoreSession();
+                    } else {
+                        console.log("Session restored");
+                    }
+                }
+            }
         }
 
         console.log("Current cookie preferences: ", this.cookieScopes);
+    }
+
+    restoreSession() {
+        const sessionBackup = this.getCookie("session_backup");
+
+        if (sessionBackup) {
+            console.log("Restoring session with backup session ID:", sessionBackup);
+
+            // Overwrite the PHPSESSID cookie with the session backup
+            document.cookie = "PHPSESSID=" + sessionBackup + "; path=/;";
+
+            // Set the flag to prevent further reloads
+            localStorage.setItem('blockUserSessionRestoration', 'true');
+        }
+        console.log("Session Backup is empty, Restoration Canceled");
     }
 
     showBanner() {
