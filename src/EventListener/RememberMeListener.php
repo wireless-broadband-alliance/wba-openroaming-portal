@@ -3,7 +3,6 @@
 namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 final class RememberMeListener
@@ -32,6 +31,7 @@ final class RememberMeListener
             if (isset($preferences['rememberMe']) && $preferences['rememberMe'] === true) {
                 // Condition 2: rememberMe is true, back up the PHPSESSID and create a new one
                 setcookie("session_backup", $session->getId(), time() + (365 * 24 * 60 * 60), '/', '');
+                $session->save();
             } else {
                 // Condition 3: rememberMe is false or not set, generate a new session with a new PHPSESSID
                 // Regenerate session ID to create a new PHPSESSID
