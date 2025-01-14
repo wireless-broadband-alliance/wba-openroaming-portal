@@ -2,9 +2,8 @@
 
 namespace App\EventListener;
 
-use http\Exception\RuntimeException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 final class RememberMeListener
@@ -20,8 +19,9 @@ final class RememberMeListener
         $cookiePreferences = $request->cookies->get("cookie_preferences");
 
         if (!$cookiePreferences) {
-            $session->migrate(true); // Regenerated session ID to ensure it expires with the browser
-            $session->set('security_last_interaction', time());
+            // Condition 1: No cookie preferences set, generate a new session with a new PHPSESSID
+            // Clear the old session and create a new one
+            $session->migrate(true);
             return;
         }
 
@@ -30,32 +30,15 @@ final class RememberMeListener
             $preferences = json_decode($cookiePreferences, true, 512, JSON_THROW_ON_ERROR);
 
             if (isset($preferences['rememberMe']) && $preferences['rememberMe'] === true) {
-                // Extend the session cookie's lifetime to 1 week (7 days)
-                $params = session_get_cookie_params();
-                setcookie(
-                    session_name(),
-                    session_id(),
-                    time() + 7 * 24 * 60 * 60, // Expire in 7 days
-                    $params['path'],
-                    $params['domain'],
-                    $params['secure'],
-                    $params['httponly']
-                );
+                // Condition 2: rememberMe is true, back up the PHPSESSID and create a new one
+                setcookie("session_backup", $session->getId(), time() + (365 * 24 * 60 * 60), '/', '', false, true);
             } else {
-                $session->migrate(true); // Regenerate session ID
-                $params = session_get_cookie_params();
-                setcookie(
-                    session_name(),
-                    session_id(),
-                    0, // Expire when the browser is closed
-                    $params['path'],
-                    $params['domain'],
-                    $params['secure'],
-                    $params['httponly']
-                );
+                // Condition 3: rememberMe is false or not set, generate a new session with a new PHPSESSID
+                // Regenerate session ID to create a new PHPSESSID
+                $session->migrate(true);
             }
         } catch (\JsonException $e) {
-            // Handle invalid JSON
+            // In case of invalid JSON, fall back to generating a new session
             $session->migrate(true);
         }
     }
