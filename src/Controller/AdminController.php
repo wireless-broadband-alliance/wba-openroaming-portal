@@ -1334,12 +1334,17 @@ class AdminController extends AbstractController
                     $value = $submittedData[$settingName] ?? null;
 
                     // Check for specific settings that need domain validation
-                    // phpcs:disable Generic.Files.LineLength.TooLong
                     if (
-                        in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']
+                        in_array(
+                            $settingName,
+                            [
+                                'RADIUS_REALM_NAME',
+                                'DOMAIN_NAME',
+                                'RADIUS_TLS_NAME',
+                                'NAI_REALM'
+                            ]
                         ) && !$this->isValidDomain($value)
                     ) {
-                        // phpcs:enable
                         $this->addFlash(
                             'error_admin',
                             "The value for $settingName is not a valid domain or does not resolve to an IP address."
