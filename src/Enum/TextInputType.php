@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum TosTypes
+enum TextInputType
 {
     public const LINK = 'LINK';
     public const TEXT_EDITOR = 'TEXT_EDITOR';
