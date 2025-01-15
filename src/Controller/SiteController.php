@@ -318,6 +318,9 @@ class SiteController extends AbstractController
     #[Route('/terms-conditions', name: 'app_terms_conditions')]
     public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
         $textEditorRepository = $em->getRepository(TextEditor::class);
@@ -330,8 +333,9 @@ class SiteController extends AbstractController
             } else {
                 $content = '';
             }
-            return $this->render('site/tos_template.html.twig', [
-                'content' => $content
+            return $this->render('site/shared/tos/_tos.html.twig', [
+                'content' => $content,
+                'data' => $data
             ]);
         }
         if (
@@ -347,6 +351,9 @@ class SiteController extends AbstractController
     #[Route('/privacy-policy', name: 'app_privacy_policy')]
     public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         $settingsRepository = $em->getRepository(Setting::class);
         $textEditorRepository = $em->getRepository(TextEditor::class);
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
@@ -359,8 +366,9 @@ class SiteController extends AbstractController
             } else {
                 $content = '';
             }
-            return $this->render('site/tos_template.html.twig', [
-                'content' => $content
+            return $this->render('site/shared/tos/_privacy_policy.html.twig', [
+                'content' => $content,
+                'data' => $data
             ]);
         }
         if (

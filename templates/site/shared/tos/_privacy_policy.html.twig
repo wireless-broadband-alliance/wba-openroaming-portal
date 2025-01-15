@@ -1,0 +1,11 @@
+{% extends '/site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }} - Privacy Policy
+{% endblock %}
+
+{% block second_col %}
+    <div>
+        {{ content|raw }}
+    </div>
+{% endblock %}
