@@ -12,7 +12,7 @@ use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
-use App\Enum\TosTypes;
+use App\Enum\TextInputType;
 use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
@@ -323,7 +323,7 @@ class SiteController extends AbstractController
         $textEditorRepository = $em->getRepository(TextEditor::class);
         if (
             $tosFormat &&
-            $tosFormat->getValue() === TosTypes::TEXT_EDITOR
+            $tosFormat->getValue() === TextInputType::TEXT_EDITOR
         ) {
             if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
@@ -336,7 +336,7 @@ class SiteController extends AbstractController
         }
         if (
             $tosFormat &&
-            $tosFormat->getValue() === TosTypes::LINK &&
+            $tosFormat->getValue() === TextInputType::LINK &&
             $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
         ) {
                 return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
@@ -352,7 +352,7 @@ class SiteController extends AbstractController
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
         if (
             $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TosTypes::TEXT_EDITOR
+            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR
         ) {
             if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
@@ -365,7 +365,7 @@ class SiteController extends AbstractController
         }
         if (
             $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TosTypes::LINK &&
+            $privacyPolicyFormat->getValue() === TextInputType::LINK &&
             $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
         ) {
             return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
