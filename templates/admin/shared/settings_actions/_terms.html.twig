@@ -79,7 +79,7 @@
                         {% endif %}
                         {% if  setting.vars.name in ['TOS_EDITOR'] %}
                             <div class="mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                                {{ form_widget(setting) }}
                             </div>
                         {% endif %}
                         {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
@@ -168,7 +168,7 @@
                             {% endif %}
                             {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %}
                                 <div class="mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                                    {{ form_widget(setting) }}
                                 </div>
                             {% endif %}
                             {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
