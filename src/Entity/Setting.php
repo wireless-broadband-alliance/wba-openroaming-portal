@@ -47,8 +47,6 @@ use Doctrine\ORM\Mapping as ORM;
                                                         'CONTACT_EMAIL' => ['type' => 'string'],
                                                         'TOS' => ['type' => 'string'],
                                                         'PRIVACY_POLICY' => ['type' => 'string'],
-                                                        'TOS_LINK' => ['type' => 'string'],
-                                                        'PRIVACY_POLICY_LINK' => ['type' => 'string'],
                                                     ],
                                                 ],
                                                 'auth' => [
@@ -98,8 +96,6 @@ use Doctrine\ORM\Mapping as ORM;
                                             'CONTACT_EMAIL' => 'support@example.com',
                                             'TOS' => 'LINK',
                                             'PRIVACY_POLICY' => 'LINK',
-                                            'TOS_LINK' => 'https://example.com/tos',
-                                            'PRIVACY_POLICY_LINK' => 'https://example.com/privacy',
                                         ],
                                         'auth' => [
                                             'AUTH_METHOD_SAML_ENABLED' => true,

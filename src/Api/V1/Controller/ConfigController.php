@@ -3,12 +3,14 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -41,17 +43,13 @@ class ConfigController extends AbstractController
 
     private function getSettings(): array
     {
-        $data = [];
-
         $data['platform'] = [
             'PLATFORM_MODE' => $this->getSettingValueRaw('PLATFORM_MODE'),
             'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
             'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
-            'TOS' => $this->getSettingValueRaw('TOS'),
-            'PRIVACY_POLICY' => $this->getSettingValueRaw('PRIVACY_POLICY'),
-            'TOS_LINK' => $this->getSettingValueRaw('TOS_LINK'),
-            'PRIVACY_POLICY_LINK' => $this->getSettingValueRaw('PRIVACY_POLICY_LINK'),
+            'TOS' => $this->resolveTosValue(),
+            'PRIVACY_POLICY' => $this->resolveTosValue(),
         ];
 
         $data['auth'] = [
@@ -105,5 +103,29 @@ class ConfigController extends AbstractController
             return false;
         }
         return (bool)$value;
+    }
+
+    protected function resolveTosValue(): string
+    {
+        $tosType = $this->getSettingValueRaw('TOS');
+        $tosLink = $this->getSettingValueRaw('TOS_LINK');
+        $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
+        $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
+
+        if ($tosType === TextInputType::LINK) {
+            return $tosLink;
+        }
+        if ($tosType === TextInputType::TEXT_EDITOR) {
+            return $this->generateUrl('app_terms_conditions', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+
+        if ($privacyPolicyType === TextInputType::LINK) {
+            return $privacyPolicyLink;
+        }
+        if ($privacyPolicyType === TextInputType::TEXT_EDITOR) {
+            return $this->generateUrl('app_privacy_policy', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+
+        return '';
     }
 }
