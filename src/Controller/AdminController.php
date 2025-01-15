@@ -54,7 +54,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -1337,7 +1336,8 @@ class AdminController extends AbstractController
                     // Check for specific settings that need domain validation
                     // phpcs:disable Generic.Files.LineLength.TooLong
                     if (
-                        in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']) && !$this->isValidDomain($value)
+                        in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']
+                        ) && !$this->isValidDomain($value)
                     ) {
                         // phpcs:enable
                         $this->addFlash(
@@ -1571,20 +1571,22 @@ class AdminController extends AbstractController
         $certificateLimitDate = strtotime($certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
-        $profileLimitDate = ((int)$timeLeft);
-        if ($profileLimitDate < 5) {
-            $profileLimitDate = 5;
+        $profileMinDate = 5; // Default minimum days
+        if ($timeLeft < 10) { // Adjust based on remaining certificate validity
+            $profileMinDate = max(1, floor($timeLeft / 2)); // Ensure it's at least 1 day
         }
-
+        $profileLimitDate = ((int)$timeLeft);
+        if ($profileLimitDate < $profileMinDate) {
+            $profileLimitDate = $profileMinDate;
+        }
 
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
             'profileLimitDate' => $profileLimitDate,
-            'profileMinDate' => 5
+            'profileMinDate' => $profileMinDate,
         ]);
 
         $form->handleRequest($request);
-
 
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();

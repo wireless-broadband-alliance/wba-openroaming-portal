@@ -10,9 +10,11 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AuthType extends AbstractType
 {
@@ -62,13 +64,19 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
                         'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileMinDate'] === $options['profileLimitDate'] || $options['profileMinDate'] > $options['profileLimitDate']) {
+                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ],
 
@@ -114,13 +122,19 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
                         'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileMinDate'] === $options['profileLimitDate'] || $options['profileMinDate'] > $options['profileLimitDate']) {
+                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ],
 
@@ -160,13 +174,19 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
                         'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileMinDate'] === $options['profileLimitDate'] || $options['profileMinDate'] > $options['profileLimitDate']) {
+                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ],
 
@@ -238,13 +258,19 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
                         'min' => $options['profileMinDate'],
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileMinDate'] === $options['profileLimitDate'] || $options['profileMinDate'] > $options['profileLimitDate']) {
+                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ],
 
