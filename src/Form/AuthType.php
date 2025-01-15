@@ -67,22 +67,25 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => $options['profileMinDate'],
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
                         // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
-                        if (
-                            $options['profileMinDate'] === $options['profileLimitDate']
-                            || $options['profileMinDate'] > $options['profileLimitDate']
-                        ) {
-                            // phpcs:disable Generic.Files.LineLength.TooLong
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
                             $context->buildViolation(
-                                'The certificate has expired. Profiles cannot be signed.'
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
                             )->addViolation();
-                            // phpcs:enable
                         }
                     }),
                 ],
@@ -133,20 +136,25 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => $options['profileMinDate'],
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
                         // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
-                        if (
-                            $options['profileMinDate'] === $options['profileLimitDate']
-                            || $options['profileMinDate'] > $options['profileLimitDate']
-                        ) {
-                            // phpcs:disable Generic.Files.LineLength.TooLong
-                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')->addViolation();
-                            // phpcs:enable
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -191,20 +199,25 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => $options['profileMinDate'],
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
                         // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
-                        if (
-                            $options['profileMinDate'] === $options['profileLimitDate']
-                            || $options['profileMinDate'] > $options['profileLimitDate']
-                        ) {
-                            // phpcs:disable Generic.Files.LineLength.TooLong
-                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')->addViolation();
-                            // phpcs:enable
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -281,20 +294,25 @@ class AuthType extends AbstractType
                         'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => $options['profileMinDate'],
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'notInRangeMessage' => 'Please select a value between {{ min }} (minimum) and {{ max }} (maximum).'
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
                         // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
-                        if (
-                            $options['profileMinDate'] === $options['profileLimitDate']
-                            || $options['profileMinDate'] > $options['profileLimitDate']
-                        ) {
-                            // phpcs:disable Generic.Files.LineLength.TooLong
-                            $context->buildViolation('The certificate has expired. Profiles cannot be signed.')->addViolation();
-                            // phpcs:enable
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -341,7 +359,8 @@ class AuthType extends AbstractType
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
             'profileLimitDate' => null,
-            'profileMinDate' => null
+            'profileMinDate' => null,
+            'humanReadableExpirationDate' => null
         ]);
     }
 }

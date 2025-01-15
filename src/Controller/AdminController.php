@@ -1168,7 +1168,7 @@ class AdminController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         foreach ($settings as $setting) {
-            if ($setting->getName() === 'TOS_EDITOR' or $setting->getName() === 'PRIVACY_POLICY_EDITOR') {
+            if ($setting->getName() === 'TOS_EDITOR' || $setting->getName() === 'PRIVACY_POLICY_EDITOR') {
                 $em->remove($setting);
                 $em->flush();
             }
@@ -1576,19 +1576,22 @@ class AdminController extends AbstractController
         $certificateLimitDate = strtotime($certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
-        $profileMinDate = 5; // Default minimum days
-        if ($timeLeft < 10) { // Adjust based on remaining certificate validity
-            $profileMinDate = max(1, floor($timeLeft / 2)); // Ensure it's at least 1 day
-        }
         $profileLimitDate = ((int)$timeLeft);
-        if ($profileLimitDate < $profileMinDate) {
-            $profileLimitDate = $profileMinDate;
+        if ($profileLimitDate < 0) {
+            $profileLimitDate = 0;
         }
 
+        $defaultTimeZone = date_default_timezone_get();
+        $dateTime = (new DateTime())
+            ->setTimestamp($certificateLimitDate)
+            ->setTimezone(new \DateTimeZone($defaultTimeZone));
+
+        // Convert to human-readable format
+        $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
             'profileLimitDate' => $profileLimitDate,
-            'profileMinDate' => $profileMinDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
 
         $form->handleRequest($request);
@@ -1677,7 +1680,8 @@ class AdminController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
-            'profileLimitDate' => $profileLimitDate
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
     }
 
