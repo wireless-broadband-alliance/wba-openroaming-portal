@@ -536,7 +536,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(ForgotPasswordEmailType::class, $user);
         $form->handleRequest($request);
 
@@ -590,6 +589,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
+                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         $randomPassword = bin2hex(random_bytes(4));
@@ -727,6 +727,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
+                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         // save new password hashed on the db for the user
