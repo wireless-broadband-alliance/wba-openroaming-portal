@@ -3,11 +3,19 @@
 This document provides an overview of the key API endpoints introduced in this project. Each endpoint is designed to
 improve user authentication and management processes, with integrated CAPTCHA validation to ensure security.
 
+## Turnstile Configuration
+
+- **Retrieves an empty HTML file for Turnstile configuration for Android App integration**
+    - The HTML serves as a base configuration page required for the Turnstile integration.
+    - This content is specifically designed for use in the public Android Turnstile functionality.
+    - Includes placeholder elements for Android-specific app setup.
+
 ## Profile Configuration
+
 - **Retrieves profile configuration for Android/iOS including the following data**
-  - User Radius Profile Data.
-  - Encrypted Radius Password with RSA
-  - Another important setting for a profile generation
+    - User Radius Profile Data.
+    - Encrypted Radius Password with RSA
+    - Another important setting for a profile generation
 
 ## Setting
 

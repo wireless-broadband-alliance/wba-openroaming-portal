@@ -10,6 +10,7 @@ use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\ConfigController;
 use App\Api\V1\Controller\ProfileController;
+use App\Api\V1\Controller\TurnstileController;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,6 +20,64 @@ use Doctrine\ORM\Mapping as ORM;
     Each setting consists of a name and an optional value, 
     which can be used to store and return configuration parameters required for the API.",
     operations: [
+        new GetCollection(
+            uriTemplate: '/api/v1/turnstile/android',
+            controller: TurnstileController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Turnstile HTML configuration retrieved successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                        ],
+                                        'data' => [
+                                            'type' => 'string',
+                                            'description' => 'The HTML content required for turnstile configuration on the Android app.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>',
+                                            //phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                    'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>',
+                                    //phpcs:enable
+                                ],
+                            ],
+                        ],
+                    ],
+                    404 => [
+                        'description' => 'HTML file not found.',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'HTML file not found.',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Return the HTML required for Turnstile configuration on an Android App',
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                description: 'This endpoint serves the public HTML configuration required for the Android App to integrate with the Turnstile feature.',
+                // phpcs:enable
+                security: [],
+            ),
+            shortName: 'Turnstile',
+            paginationEnabled: false,
+            description: 'Serves the public HTML configuration required for Turnstile integration for Android apps.',
+            name: 'api_turnstile_html_android',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
         new GetCollection(
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
