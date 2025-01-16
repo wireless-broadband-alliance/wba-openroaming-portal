@@ -267,7 +267,7 @@ use Doctrine\ORM\Mapping as ORM;
                 ],
                 requestBody: new RequestBody(
                     description: 'Android public key required for radius password encryption. 
-                    The request should be sent as JSON with the PGP public_key included in the body.',
+                    The request should be sent as JSON with the RSA public_key included in the body.',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [
@@ -441,7 +441,7 @@ use Doctrine\ORM\Mapping as ORM;
                 ],
                 requestBody: new RequestBody(
                     description: 'iOS public key required for radius password encryption. 
-            The request should be sent as JSON with the PGP public_key included in the body.',
+            The request should be sent as JSON with the RSA public_key included in the body.',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [
