@@ -38,8 +38,8 @@ use Doctrine\ORM\Mapping as ORM;
                                         ],
                                         'data' => [
                                             'type' => 'string',
-                                            'description' => 'The HTML content required for turnstile configuration on the Android app.',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'description' => 'The HTML content required for turnstile configuration on the Android app.',
                                             'example' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>',
                                             //phpcs:enable
                                         ],
