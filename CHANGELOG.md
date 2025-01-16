@@ -17,6 +17,7 @@
 - User per page on User Management is not reflecting the pagination
 - Update READ.ME add new env's && settings
 - Auto delete unconfirmed users after a specific timeframe configurable by the admin
+- Added a new endpoint for Turnstile configuration required for the Android App's
 - **Clear Unverified Accounts Command**: `clear:deleteUnconfirmedUsers` Removes any records in the `User` and all the
   associated entity's that have an unverified accounts associated.
 
