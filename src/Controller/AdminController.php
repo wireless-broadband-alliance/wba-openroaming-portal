@@ -1872,7 +1872,7 @@ class AdminController extends AbstractController
         }
 
         $interval = $startDate->diff($endDate);
-        if ($interval->y > 1) {
+        if ($interval->y >= 1) {
             $this->addFlash('error_admin', 'Maximum date range is 1 year');
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
