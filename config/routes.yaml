@@ -16,6 +16,11 @@ api_v1:
     resource: '../src/Api/V1/Controller/'
     type: annotation
 
+api_get_current_user:
+    path: /api/v1/user
+    controller: App\Api\V1\Controller\GetCurrentUserController::getCurrentUser
+    methods: [ 'GET' ]
+
 api_auth_local:
     path: /api/v1/auth/local
     controller: App\Api\V1\Controller\AuthController::authLocal
