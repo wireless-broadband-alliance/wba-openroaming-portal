@@ -166,9 +166,9 @@ class ProfileController extends AbstractController
             'radiusUsername' => $radiusProfile->getRadiusUser(),
             'radiusPassword' => $encryptedPassword,
             'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
-            'fqdn' => $this->getSettingValueRaw('DOMAIN_NAME'),
+            'fqdn' => $this->getSettingValueRaw('RADIUS_TLS_NAME'),
             'roamingConsortiumOis' => ['5a03ba0000', '004096'],
-            'eapType' => '21',
+            'eapType' => 21,
             'nonEapInnerMethod' => 'MS-CHAP-V2',
             'realm' => $this->getSettingValueRaw('RADIUS_REALM_NAME'),
         ];
@@ -293,7 +293,7 @@ class ProfileController extends AbstractController
             'payloadUUID' => $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-1',
             'domainName' => $this->getSettingValueRaw('DOMAIN_NAME'),
             'EAPClientConfiguration' => [
-                'acceptEAPTypes' => '21',
+                'acceptEAPTypes' => 21,
                 'radiusUsername' => $radiusProfile->getRadiusUser(),
                 'radiusPassword' => $encryptedPassword,
                 'outerIdentity' => 'anonymous@' . $this->getSettingValueRaw('RADIUS_TLS_NAME'),
