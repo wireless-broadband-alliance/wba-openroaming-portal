@@ -10,7 +10,6 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
-use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\UserProvider;
@@ -26,8 +25,6 @@ use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\UserUpdateType;
-use App\RadiusDb\Repository\RadiusAccountingRepository;
-use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -40,6 +37,7 @@ use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\SanitizeHTML;
 use App\Service\SendSMS;
+use App\Service\Statistics;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
@@ -47,8 +45,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -56,7 +52,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -82,8 +77,6 @@ class AdminController extends AbstractController
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
     private EntityManagerInterface $entityManager;
-    private RadiusAuthsRepository $radiusAuthsRepository;
-    private RadiusAccountingRepository $radiusAccountingRepository;
     private PgpEncryptionService $pgpEncryptionService;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
@@ -99,8 +92,6 @@ class AdminController extends AbstractController
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
      * @param EntityManagerInterface $entityManager
-     * @param RadiusAuthsRepository $radiusAuthsRepository
-     * @param RadiusAccountingRepository $radiusAccountingRepository
      * @param PgpEncryptionService $pgpEncryptionService
      * @param EventActions $eventActions
      * @param VerificationCodeGenerator $verificationCodeGenerator
@@ -116,8 +107,6 @@ class AdminController extends AbstractController
         GetSettings $getSettings,
         SettingRepository $settingRepository,
         EntityManagerInterface $entityManager,
-        RadiusAuthsRepository $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository,
         PgpEncryptionService $pgpEncryptionService,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
@@ -132,8 +121,6 @@ class AdminController extends AbstractController
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
         $this->entityManager = $entityManager;
-        $this->radiusAuthsRepository = $radiusAuthsRepository;
-        $this->radiusAccountingRepository = $radiusAccountingRepository;
         $this->pgpEncryptionService = $pgpEncryptionService;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
@@ -1865,11 +1852,12 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
-        $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
-        $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
-        $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
-        $fetchChartSMSEmail = $this->fetchChartSMSEmail($startDate, $endDate);
+        $statisticsService = new Statistics($this->entityManager);
+        $fetchChartDevices = $statisticsService->fetchChartDevices($startDate, $endDate);
+        $fetchChartAuthentication = $statisticsService->fetchChartAuthentication($startDate, $endDate);
+        $fetchChartPlatformStatus = $statisticsService->fetchChartPlatformStatus($startDate, $endDate);
+        $fetchChartUserVerified = $statisticsService->fetchChartUserVerified($startDate, $endDate);
+        $fetchChartSMSEmail = $statisticsService->fetchChartSMSEmail($startDate, $endDate);
 
         $memory_before = memory_get_usage();
         $memory_after = memory_get_usage();
@@ -1943,14 +1931,15 @@ class AdminController extends AbstractController
         }
 
         // Fetch all the required data, graphics etc...
-        $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
-        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
-        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius();
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
-        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
-        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
+        $statisticsService = new Statistics($this->entityManager);
+        $fetchChartAuthenticationsFreeradius = $statisticsService->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartCurrentAuthFreeradius = $statisticsService->fetchChartCurrentAuthFreeradius();
+        $fetchChartTrafficFreeradius = $statisticsService->fetchChartTrafficFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $statisticsService->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $statisticsService->fetchChartSessionTotalFreeradius($startDate, $endDate);
+        $fetchChartWifiTags = $statisticsService->fetchChartWifiVersion($startDate, $endDate);
+        $fetchChartApUsage = $statisticsService->fetchChartApUsage($startDate, $endDate);
 
         $memory_before = memory_get_usage();
         $memory_after = memory_get_usage();
@@ -2078,13 +2067,14 @@ class AdminController extends AbstractController
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
         // Fetch the authentication data
-        $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
-        $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
-        $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
-        $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
-        $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
-        $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
+        $statisticsService = new Statistics($this->entityManager);
+        $fetchChartAuthenticationsFreeradius = $statisticsService->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $statisticsService->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionTotalFreeradius = $statisticsService->fetchChartSessionTotalFreeradius($startDate, $endDate);
+        $fetchChartTrafficFreeradius = $statisticsService->fetchChartTrafficFreeradius($startDate, $endDate);
+        $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
+        $fetchChartApUsage = $statisticsService->fetchChartApUsage($startDate, $endDate);
+        $fetchChartWifiTags = $statisticsService->fetchChartWifiVersion($startDate, $endDate);
 
         // Prepare the authentication data for Excel
         $authData = [];
@@ -2329,847 +2319,6 @@ class AdminController extends AbstractController
 
 
     /**
-     * Fetch data related to downloaded profiles devices
-     */
-    /**
-     * @throws Exception
-     */
-    private function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
-    {
-        $repository = $this->entityManager->getRepository(Event::class);
-
-        // Fetch all data without date filtering
-        $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
-
-        $profileCounts = [
-            OSTypes::ANDROID => 0,
-            OSTypes::WINDOWS => 0,
-            OSTypes::MACOS => 0,
-            OSTypes::IOS => 0,
-        ];
-
-        // Filter and count profile types based on the date criteria
-        foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
-
-            if (!$eventDateTime) {
-                continue; // Skip events with missing dates
-            }
-
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $eventMetadata = $event->getEventMetadata();
-
-                if (isset($eventMetadata['type'])) {
-                    $profileType = $eventMetadata['type'];
-
-                    // Check the profile type and update the corresponding count
-                    if (isset($profileCounts[$profileType])) {
-                        $profileCounts[$profileType]++;
-                    }
-                }
-            }
-        }
-
-        return $this->generateDatasets($profileCounts);
-    }
-
-    /**
-     * Fetch data related to types of authentication.
-     *
-     * @throws Exception
-     */
-    private function fetchChartAuthentication(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
-    {
-        $repository = $this->entityManager->getRepository(User::class);
-        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
-
-        // Fetch all users excluding admin
-        /* @phpstan-ignore-next-line */
-        $users = $repository->findExcludingAdmin();
-
-        $userCounts = [
-            UserProvider::SAML => 0,
-            UserProvider::GOOGLE_ACCOUNT => 0,
-            UserProvider::PORTAL_ACCOUNT => 0,
-        ];
-
-        // Loop through the users and categorize them based on the provider
-        foreach ($users as $user) {
-            $createdAt = $user->getCreatedAt();
-
-            if (
-                (!$startDate || $createdAt >= $startDate) &&
-                (!$endDate || $createdAt <= $endDate)
-            ) {
-                // Fetch UserExternalAuth entities associated with the user
-                $userExternalAuths = $userExternalAuthRepository->findBy(['user' => $user]);
-
-                foreach ($userExternalAuths as $userExternalAuth) {
-                    $provider = $userExternalAuth->getProvider();
-
-                    if (isset($userCounts[$provider])) {
-                        $userCounts[$provider]++;
-                    } else {
-                        // Optionally handle unknown providers
-                        $userCounts[$provider] = 1;
-                    }
-                }
-            }
-        }
-
-        return $this->generateDatasets($userCounts);
-    }
-
-    /**
-     * Fetch data related to users created in platform mode - Live/Demo
-     */
-    /**
-     * @throws Exception
-     */
-    private function fetchChartPlatformStatus(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
-    {
-        $repository = $this->entityManager->getRepository(Event::class);
-
-        // Query the database to get events with "event_name" == "USER_CREATION"
-        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
-
-        $statusCounts = [
-            PlatformMode::LIVE => 0,
-            PlatformMode::DEMO => 0,
-        ];
-
-        // Loop through the events and count the status of the user when created
-        foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
-
-            if (!$eventDateTime) {
-                continue;
-            }
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $eventMetadata = $event->getEventMetadata();
-
-                if (isset($eventMetadata['platform'])) {
-                    $statusType = $eventMetadata['platform'];
-
-                    // Check the status type and update the corresponding count
-                    if (isset($statusCounts[$statusType])) {
-                        $statusCounts[$statusType]++;
-                    }
-                }
-            }
-        }
-
-        return $this->generateDatasets($statusCounts);
-    }
-
-    /**
-     * Fetch data related to verified users
-     */
-    /**
-     * @throws Exception
-     */
-    private function fetchChartUserVerified(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
-    {
-        $repository = $this->entityManager->getRepository(User::class);
-
-        /* @phpstan-ignore-next-line */
-        $users = $repository->findExcludingAdmin();
-
-        $userCounts = [
-            UserVerificationStatus::VERIFIED => 0,
-            UserVerificationStatus::NEED_VERIFICATON => 0,
-            UserVerificationStatus::BANNED => 0,
-        ];
-
-        // Loop through the users and categorize them based on isVerified and bannedAt
-        foreach ($users as $user) {
-            $createdAt = $user->getCreatedAt();
-
-            if (
-                (!$startDate || $createdAt >= $startDate) &&
-                (!$endDate || $createdAt <= $endDate)
-            ) {
-                $verification = $user->isVerified();
-                $ban = $user->getBannedAt();
-
-                if ($verification) {
-                    $userCounts[UserVerificationStatus::VERIFIED]++;
-                } else {
-                    $userCounts[UserVerificationStatus::NEED_VERIFICATON]++;
-                }
-
-                if ($ban) {
-                    $userCounts[UserVerificationStatus::BANNED]++;
-                }
-            }
-        }
-
-        return $this->generateDatasets($userCounts);
-    }
-
-    /**
-     * Fetch data related to users with portal accounts, categorized by email or phone number.
-     *
-     * @throws Exception
-     */
-    private function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
-    {
-        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
-        // Call the repository method to get portal user counts
-        /** @var UserExternalAuthRepository $userExternalAuthRepository */
-        $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
-            UserProvider::PORTAL_ACCOUNT,
-            $startDate,
-            $endDate
-        );
-
-        return $this->generateDatasets($portalUsersCounts);
-    }
-
-    /**
-     * Fetch data related to authentication attempts on the freeradius database
-     */
-    /**
-     * @throws Exception
-     */
-    private function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
-    {
-        // Fetch all data with date filtering
-        $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
-
-        // Calculate the time difference between start and end dates
-        $interval = $startDate->diff($endDate);
-
-        // Determine the appropriate time granularity
-        if ($interval->days > 365.2) {
-            $granularity = 'year';
-        } elseif ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
-        } else {
-            $granularity = 'day';
-        }
-
-        $authsCounts = [
-            'Accepted' => [],
-            'Rejected' => [],
-        ];
-
-        // Group the events based on the determined granularity
-        foreach ($events as $event) {
-            // Convert event date string to DateTime object
-            $eventDateTime = new DateTime($event->getAuthdate());
-
-            // Determine the time period based on granularity
-            $period = match ($granularity) {
-                'year' => $eventDateTime->format('Y'),
-                'month' => $eventDateTime->format('Y-m'),
-                'week' => $eventDateTime->format('o-W'),
-                default => $eventDateTime->format('Y-m-d'),
-            };
-
-            // Initialize the period if not already set
-            if (!isset($authsCounts['Accepted'][$period])) {
-                $authsCounts['Accepted'][$period] = [];
-                $authsCounts['Rejected'][$period] = [];
-            }
-
-            // Use the timestamp down to the second for deduplication
-            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
-
-            // Track unique timestamps within the period
-            if (
-                !isset($authsCounts['Accepted'][$period][$timestamp]) &&
-                !isset($authsCounts['Rejected'][$period][$timestamp])
-            ) {
-                $reply = $event->getReply();
-                if ($reply === 'Access-Accept') {
-                    $authsCounts['Accepted'][$period][$timestamp] = true;
-                } elseif ($reply === 'Access-Reject') {
-                    $authsCounts['Rejected'][$period][$timestamp] = true;
-                }
-            }
-        }
-
-        // Convert the tracked timestamps into counts
-        foreach ($authsCounts['Accepted'] as $period => $timestamps) {
-            $authsCounts['Accepted'][$period] = count($timestamps);
-        }
-        foreach ($authsCounts['Rejected'] as $period => $timestamps) {
-            $authsCounts['Rejected'][$period] = count($timestamps);
-        }
-
-        // Return an array containing both the generated datasets and the counts
-        return $this->generateDatasetsAuths($authsCounts);
-    }
-
-    /**
-     * Fetch data related to realms usage on the freeradius database
-     *
-     * @throws Exception
-     */
-    private function fetchChartRealmsFreeradius(DateTime $startDate, DateTime $endDate): array
-    {
-        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
-
-        $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
-
-        $realmCounts = [];
-
-        // Group the realm usage data based on the determined granularity
-        foreach ($events as $event) {
-            $realm = $event['realm'];
-            $date = $event['acctStartTime'];
-            $groupKey = match ($granularity) {
-                'year' => $date->format('Y'),
-                'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
-                default => $date->format('Y-m-d'),
-            };
-
-            if (!$realm) {
-                continue;
-            }
-
-            if (!isset($realmCounts[$groupKey])) {
-                $realmCounts[$groupKey] = [];
-            }
-
-            if (!isset($realmCounts[$groupKey][$realm])) {
-                $realmCounts[$groupKey][$realm] = 0;
-            }
-
-            $realmCounts[$groupKey][$realm]++;
-        }
-
-        $result = [];
-        foreach ($realmCounts as $groupKey => $realms) {
-            foreach ($realms as $realm => $count) {
-                $result[] = [
-                    'group' => $groupKey,
-                    'realm' => $realm,
-                    'count' => $count
-                ];
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Fetch data related to current authentications on the freeradius database
-     */
-    /**
-     * @throws Exception
-     */
-    private function fetchChartCurrentAuthFreeradius(): array
-    {
-        // Get the active sessions using the findActiveSessions query
-        $activeSessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
-
-        // Convert the results into the expected format
-        $realmCounts = [];
-        foreach ($activeSessions as $session) {
-            $realm = $session['realm'];
-            $numUsers = $session['num_users'];
-            $realmCounts[$realm] = $numUsers;
-        }
-
-        // Return the counts per realm
-        return $this->generateDatasetsRealmsCounting($realmCounts);
-    }
-
-    /**
-     * Fetch data related to traffic passed on the freeradius database
-     * @throws Exception
-     */
-    private function fetchChartTrafficFreeradius(DateTime $startDate, DateTime $endDate): array
-    {
-        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
-
-        $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
-        $realmTraffic = [];
-
-        // Group the traffic data based on the determined granularity
-        foreach ($trafficData as $content) {
-            $realm = $content['realm'];
-            $totalInput = $content['total_input'];
-            $totalOutput = $content['total_output'];
-            $date = $content['acctStartTime'];
-            $groupKey = match ($granularity) {
-                'year' => $date->format('Y'),
-                'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
-                default => $date->format('Y-m-d'),
-            };
-
-            if (!isset($realmTraffic[$realm])) {
-                $realmTraffic[$realm] = [];
-            }
-
-            if (!isset($realmTraffic[$realm][$groupKey])) {
-                $realmTraffic[$realm][$groupKey] = ['total_input' => 0, 'total_output' => 0];
-            }
-
-            $realmTraffic[$realm][$groupKey]['total_input'] += $totalInput;
-            $realmTraffic[$realm][$groupKey]['total_output'] += $totalOutput;
-        }
-
-        $result = [];
-        foreach ($realmTraffic as $realm => $groups) {
-            foreach ($groups as $groupKey => $traffic) {
-                $result[] = [
-                    'realm' => $realm,
-                    'group' => $groupKey,
-                    'total_input' => $traffic['total_input'],
-                    'total_output' => $traffic['total_output']
-                ];
-            }
-        }
-
-        return $result;
-    }
-
-
-    /**
-     * Fetch data related to session time (average) on the freeradius database
-     */
-    private function fetchChartSessionAverageFreeradius(DateTime $startDate, DateTime $endDate): array
-    {
-        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
-
-        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
-
-        $sessionAverageTimes = [];
-
-        // Group the events based on the determined granularity
-        foreach ($events as $event) {
-            $sessionTime = $event['acctSessionTime'];
-            $date = $event['acctStartTime'];
-            $groupKey = match ($granularity) {
-                'year' => $date->format('Y'),
-                'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
-                default => $date->format('Y-m-d'),
-            };
-
-            if (!isset($sessionAverageTimes[$groupKey])) {
-                $sessionAverageTimes[$groupKey] = ['totalTime' => 0, 'count' => 0];
-            }
-
-            $sessionAverageTimes[$groupKey]['totalTime'] += $sessionTime;
-            $sessionAverageTimes[$groupKey]['count']++;
-        }
-
-        $result = [];
-        foreach ($sessionAverageTimes as $groupKey => $data) {
-            $averageSessionTime = $data['count'] > 0 ? $data['totalTime'] / $data['count'] : 0;
-            $result[] = [
-                'group' => $groupKey,
-                'averageSessionTime' => $averageSessionTime
-            ];
-        }
-
-        return $this->generateDatasetsSessionAverage($result);
-    }
-
-
-    /**
-     * Fetch data related to session time (total) on the freeradius database
-     */
-    private function fetchChartSessionTotalFreeradius(DateTime $startDate, DateTime $endDate): array
-    {
-        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
-
-        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
-
-        $sessionTotalTimes = [];
-
-        // Group the events based on the determined granularity
-        foreach ($events as $event) {
-            $sessionTime = $event['acctSessionTime'];
-            $date = $event['acctStartTime'];
-            $groupKey = match ($granularity) {
-                'year' => $date->format('Y'),
-                'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
-                default => $date->format('Y-m-d'),
-            };
-
-            if (!isset($sessionTotalTimes[$groupKey])) {
-                $sessionTotalTimes[$groupKey] = 0;
-            }
-
-            $sessionTotalTimes[$groupKey] += $sessionTime;
-        }
-
-        $result = [];
-        foreach ($sessionTotalTimes as $groupKey => $totalSessionTime) {
-            $result[] = [
-                'group' => $groupKey,
-                'totalSessionTime' => $totalSessionTime
-            ];
-        }
-
-        return $this->generateDatasetsSessionTotal($result);
-    }
-
-
-    /**
-     * Fetch data related to wifi tag usage on the freeradius database
-     */
-    private function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): array
-    {
-        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
-
-        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
-        $wifiUsage = [];
-
-        // Group the events based on the Wi-Fi Standard
-        foreach ($events as $event) {
-            $connectInfo = $event['connectInfo_start'];
-            $wifiStandard = $this->mapConnectInfoToWifiStandard($connectInfo);
-
-            if (!isset($wifiUsage[$wifiStandard])) {
-                $wifiUsage[$wifiStandard] = 0;
-            }
-
-            $wifiUsage[$wifiStandard]++;
-        }
-
-        $result = [];
-        foreach ($wifiUsage as $standard => $count) {
-            $result[] = [
-                'standard' => $standard,
-                'count' => $count
-            ];
-        }
-
-        // Sort $result array BY DESC
-        usort($result, function ($a, $b) {
-            return $b['count'] <=> $a['count'];
-        });
-
-        return $this->generateDatasetsWifiTags($result);
-    }
-
-    /**
-     * Fetch data related to AP usage on the freeradius database
-     *
-     * @throws Exception
-     */
-    private function fetchChartApUsage(DateTime $startDate, DateTime $endDate): array
-    {
-        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
-
-        $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
-
-        $apCounts = [];
-
-        // Count the usage of each AP
-        foreach ($events as $event) {
-            $ap = $event['calledStationId'];
-
-            if (!$ap) {
-                continue;
-            }
-
-            if (!isset($apCounts[$ap])) {
-                $apCounts[$ap] = 0;
-            }
-
-            $apCounts[$ap]++;
-        }
-
-        $result = [];
-        foreach ($apCounts as $ap => $count) {
-            $result[] = [
-                'ap' => $ap,
-                'count' => $count
-            ];
-        }
-
-        // Sort the result array by the count value with the highest usage
-        usort($result, static function ($highest, $lowest) {
-            return $lowest['count'] <=> $highest['count'];
-        });
-
-        return $result;
-    }
-
-    /**
-     * Generated Datasets for charts graphics
-     */
-    private function generateDatasets(array $counts): array
-    {
-        $datasets = [];
-        $labels = array_keys($counts);
-        $dataValues = array_values($counts);
-
-        $data = [];
-
-        // Calculate the colors with varying opacities
-        $colors = $this->generateColorsWithOpacity($dataValues);
-
-        foreach ($labels as $index => $type) {
-            $data[] = $dataValues[$index];
-        }
-
-        $datasets[] = [
-            'data' => $data,
-            'backgroundColor' => $colors,
-            'borderColor' => "rgb(125, 185, 40)",
-            'borderRadius' => "15",
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
-    }
-
-    /**
-     * Generate datasets for session average time
-     */
-    private function generateDatasetsSessionAverage(array $sessionTime): array
-    {
-        $labels = array_column($sessionTime, 'group');
-        $averageTimes = array_map(function ($item) {
-            return $item['averageSessionTime']; // Keep numerical values for plotting
-        }, $sessionTime);
-
-        $averageTimesReadable = array_map(function ($seconds) {
-            $hours = floor($seconds / 3600);
-            $minutes = floor(($seconds % 3600) / 60);
-            return sprintf('%dh %dm', $hours, $minutes);
-        }, $averageTimes);
-
-        // Calculate the colors with varying opacities
-        $colors = $this->generateColorsWithOpacity($averageTimes);
-
-        $datasets = [
-            [
-                'label' => 'Average Session Time',
-                'data' => $averageTimes,
-                'backgroundColor' => $colors,
-                'borderRadius' => "15",
-                'tooltips' => $averageTimesReadable, // Human-readable values for tooltips
-            ]
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
-    }
-
-    /**
-     * Generate datasets for session total time
-     */
-    private function generateDatasetsSessionTotal(array $sessionTime): array
-    {
-        $labels = array_column($sessionTime, 'group');
-        $totalTimes = array_map(function ($item) {
-            return $item['totalSessionTime'];
-        }, $sessionTime);
-
-        $totalTimesReadable = array_map(function ($seconds) {
-            $hours = floor($seconds / 3600);
-            $minutes = floor(($seconds % 3600) / 60);
-            return sprintf('%dh %dm', $hours, $minutes);
-        }, $totalTimes);
-
-        // Calculate the colors with varying opacities
-        $colors = $this->generateColorsWithOpacity($totalTimes);
-
-        $datasets = [
-            [
-                'label' => 'Total Session Time',
-                'data' => $totalTimes,
-                'backgroundColor' => $colors,
-                'borderRadius' => "15",
-                'tooltips' => $totalTimesReadable,
-            ]
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
-    }
-
-    /**
-     * Generate datasets for Wi-Fi tags
-     */
-    private function generateDatasetsWifiTags(array $wifiUsage): array
-    {
-        $labels = array_column($wifiUsage, 'standard');
-        $counts = array_column($wifiUsage, 'count');
-
-        // Calculate the colors with varying opacities
-        $colors = $this->generateColorsWithOpacity($counts);
-
-        $datasets = [
-            [
-                'label' => 'Wi-Fi Usage',
-                'data' => $counts,
-                'backgroundColor' => $colors,
-                'borderRadius' => "15"
-            ]
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-            'rawData' => $counts // Include raw numerical data
-        ];
-    }
-
-    /**
-     * Generate datasets for authentication attempts
-     */
-    private function generateDatasetsAuths(array $authsCounts): array
-    {
-        $labels = array_keys($authsCounts['Accepted']);
-        $acceptedCounts = array_values($authsCounts['Accepted']);
-        $rejectedCounts = array_values($authsCounts['Rejected']);
-
-        $datasets = [
-            [
-                'label' => 'Accepted',
-                'data' => $acceptedCounts,
-                'backgroundColor' => '#7DB928',
-                'borderRadius' => "15",
-            ],
-            [
-                'label' => 'Rejected',
-                'data' => $rejectedCounts,
-                'backgroundColor' => '#FE4068',
-                'borderRadius' => "15",
-            ]
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
-    }
-
-    private function generateDatasetsRealmsCounting(array $counts): array
-    {
-        $datasets = [];
-        $labels = array_keys($counts);
-        $dataValues = array_values($counts);
-
-        $colors = [];
-
-        // Assign a specific color to the first most used realm
-        $colors[] = '#7DB928';
-
-        // Generate colors based on the realm names
-        foreach ($labels as $realm) {
-            // Generate a color based on the realm name
-            $color = $this->generateColorFromRealmName($realm);
-
-            // Add the color to the list
-            $colors[] = $color;
-        }
-
-        $datasets[] = [
-            'data' => $dataValues,
-            'backgroundColor' => $colors,
-            'borderRadius' => "15",
-        ];
-
-        // Extract unique colors
-        $uniqueColors = array_unique($colors);
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
-    }
-
-    private function generateDatasetsRealmsTraffic(array $trafficData): array
-    {
-        $datasets = [];
-        $labels = [];
-        $dataValuesInput = [];
-        $dataValuesOutput = [];
-        $colors = [];
-
-        $colors[] = '#7DB928';
-
-        foreach ($trafficData as $realm => $traffic) {
-            $labels[] = $realm;
-            $dataValuesInput[] = $traffic['total_input'];
-            $dataValuesOutput[] = $traffic['total_output'];
-            $colors[] = $this->generateColorFromRealmName($realm);
-        }
-
-        $datasets[] = [
-            'data' => $dataValuesInput,
-            'label' => 'Uploaded',
-            'backgroundColor' => $colors,
-            'borderWidth' => 1,
-            'borderRadius' => "15",
-        ];
-
-        $datasets[] = [
-            'data' => $dataValuesOutput,
-            'label' => 'Downloaded',
-            'backgroundColor' => $colors,
-            'borderWidth' => 1,
-            'borderRadius' => "15",
-        ];
-
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
-    }
-
-    private function generateColorFromRealmName(string $realm): string
-    {
-        // Generate a hash based on the realm name
-        $hash = md5($realm);
-
-        // Extract RGB values from the hash
-        $red = hexdec(substr($hash, 0, 2));
-        $green = hexdec(substr($hash, 2, 2));
-        $blue = hexdec(substr($hash, 4, 2));
-
-        // Format the RGB values into a CSS color string and convert to uppercase
-        return strtoupper(sprintf('#%02x%02x%02x', $red, $green, $blue));
-    }
-
-
-    /**
      * Handles the Page Style on the dashboard
      */
     /**
@@ -3270,75 +2419,6 @@ class AdminController extends AbstractController
         ]);
     }
 
-    /**
-     * Map connectInfo_start to Wifi standards
-     * @param string $connectInfo
-     * @return string
-     */
-    protected function mapConnectInfoToWifiStandard(string $connectInfo): string
-    {
-        return match (true) {
-            str_contains($connectInfo, '802.11be') => 'Wi-Fi 7',
-            str_contains($connectInfo, '802.11ax') => 'Wi-Fi 6',
-            str_contains($connectInfo, '802.11ac') => 'Wi-Fi 5',
-            str_contains($connectInfo, '802.11n') => 'Wi-Fi 4',
-            str_contains($connectInfo, '802.11g') => 'Wi-Fi 3',
-            str_contains($connectInfo, '802.11a') => 'Wi-Fi 2',
-            str_contains($connectInfo, '802.11b') => 'Wi-Fi 1',
-            default => 'Unknown',
-        };
-    }
-
-    /**
-     * Determine date range and granularity
-     *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
-     * @return array
-     */
-    protected function determineDateRangeAndGranularity(DateTime $startDate, DateTime $endDate): array
-    {
-        // Calculate the time difference between start and end dates
-        $interval = $startDate->diff($endDate);
-
-        // Determine the appropriate time granularity
-        if ($interval->days > 365.2) {
-            $granularity = 'year';
-        } elseif ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
-        } else {
-            $granularity = 'day';
-        }
-
-        return [$startDate, $endDate, $granularity];
-    }
-
-    /**
-     * Generate colors with varying opacities based on data values
-     *
-     * @param array $values
-     * @return array
-     */
-    private function generateColorsWithOpacity(array $values): array
-    {
-        if (!empty(array_filter($values, static fn($value) => $value !== 0))) {
-            $maxValue = max($values);
-            $colors = [];
-
-            foreach ($values as $value) {
-                // Calculate the opacity relative to the max value, scaled to the opacity range
-                $opacity = 0.4 + ($value / $maxValue) * (1 - 0.4);
-                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
-                $colors[] = "rgba(125, 185, 40, {$opacity})";
-            }
-
-            return $colors;
-        }
-
-        return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
-    }
 
     /**
      * Escape a value to prevent spreadsheet injection for the export routes (EXPORT USERS || FREERADIUS)
