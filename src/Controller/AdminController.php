@@ -2076,8 +2076,10 @@ class AdminController extends AbstractController
 
         // Fetch the authentication data
         $statisticsService = new Statistics($this->entityManager);
-        $fetchChartAuthenticationsFreeradius = $statisticsService->fetchChartAuthenticationsFreeradius($startDate, $endDate);
-        $fetchChartSessionAverageFreeradius = $statisticsService->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartAuthenticationsFreeradius = $statisticsService
+            ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $statisticsService
+            ->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $statisticsService->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartTrafficFreeradius = $statisticsService->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
