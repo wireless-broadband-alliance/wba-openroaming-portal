@@ -1068,5 +1068,4 @@ class SettingsController extends AbstractController
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
         ]);
     }
-
 }
