@@ -15,7 +15,7 @@ improve user authentication and management processes, with integrated CAPTCHA va
 - **Retrieves profile configuration for Android/iOS including the following data**
     - User Radius Profile Data.
     - Encrypted Radius Password with RSA
-    - Another important setting for a profile generation
+    - Another important settings for a profile generation (Domain Name, Operator Name, Radius TLS Name, etc...)
 
 ## Setting
 
