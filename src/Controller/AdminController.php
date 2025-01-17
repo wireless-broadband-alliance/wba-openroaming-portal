@@ -38,6 +38,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
+use App\Service\SanitizeHTML;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
@@ -1226,15 +1227,11 @@ class AdminController extends AbstractController
                 $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
                 $em->persist($privacyPolicyLinkSetting);
             }
-
+            $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
                 $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
                 if ($tosEditorSetting) {
-                    $config = HTMLPurifier_Config::createDefault();
-                    $config->set('Cache.DefinitionImpl', null);
-                    $purifier = new HTMLPurifier($config);
-
-                    $cleanHTML = $purifier->purify($tosTextEditor);
+                    $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
                 }
                 $em->persist($tosEditorSetting);
@@ -1245,11 +1242,7 @@ class AdminController extends AbstractController
                     'name' => TextEditorName::PRIVACY_POLICY
                 ]);
                 if ($privacyPolicyEditorSetting) {
-                    $config = HTMLPurifier_Config::createDefault();
-                    $config->set('Cache.DefinitionImpl', null);
-                    $purifier = new HTMLPurifier($config);
-
-                    $cleanHTML = $purifier->purify($privacyPolicyTextEditor);
+                    $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
                 }
                 $em->persist($privacyPolicyEditorSetting);
@@ -1279,13 +1272,6 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
-    }
-
-    private function sanitizeHtml(string $html): string
-    {
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('Cache.SerializerPath', sys_get_temp_dir());
-        return (new \HTMLPurifier($config))->purify($html);
     }
 
     /**
