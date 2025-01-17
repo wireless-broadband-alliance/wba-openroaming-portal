@@ -1932,11 +1932,13 @@ class AdminController extends AbstractController
 
         // Fetch all the required data, graphics etc...
         $statisticsService = new Statistics($this->entityManager);
-        $fetchChartAuthenticationsFreeradius = $statisticsService->fetchChartAuthenticationsFreeradius($startDate, $endDate);
+        $fetchChartAuthenticationsFreeradius = $statisticsService
+            ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
         $fetchChartCurrentAuthFreeradius = $statisticsService->fetchChartCurrentAuthFreeradius();
         $fetchChartTrafficFreeradius = $statisticsService->fetchChartTrafficFreeradius($startDate, $endDate);
-        $fetchChartSessionAverageFreeradius = $statisticsService->fetchChartSessionAverageFreeradius($startDate, $endDate);
+        $fetchChartSessionAverageFreeradius = $statisticsService
+            ->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $statisticsService->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartWifiTags = $statisticsService->fetchChartWifiVersion($startDate, $endDate);
         $fetchChartApUsage = $statisticsService->fetchChartApUsage($startDate, $endDate);
@@ -2033,8 +2035,14 @@ class AdminController extends AbstractController
             'totalTrafficFreeradius' => $totalTraffic,
             'sessionTimeAverage' => $totalAverageTimeReadable,
             'totalTime' => $totalTimeReadable,
-            'authAttemptsJson' => json_encode($fetchChartAuthenticationsFreeradius, JSON_THROW_ON_ERROR),
-            'sessionTimeJson' => json_encode($fetchChartSessionAverageFreeradius, JSON_THROW_ON_ERROR),
+            'authAttemptsJson' => json_encode(
+                $fetchChartAuthenticationsFreeradius,
+                JSON_THROW_ON_ERROR
+            ),
+            'sessionTimeJson' => json_encode(
+                $fetchChartSessionAverageFreeradius,
+                JSON_THROW_ON_ERROR
+            ),
             'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
             'wifiTagsJson' => json_encode($fetchChartWifiTags, JSON_THROW_ON_ERROR),
             'ApUsage' => $fetchChartApUsage,

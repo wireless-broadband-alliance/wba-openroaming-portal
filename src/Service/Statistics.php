@@ -19,7 +19,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Statistics
 {
-
     private EntityManagerInterface $entityManager;
 
 
@@ -673,5 +672,4 @@ class Statistics
 
         return [$startDate, $endDate, $granularity];
     }
-
 }

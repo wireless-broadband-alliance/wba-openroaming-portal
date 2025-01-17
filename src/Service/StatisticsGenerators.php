@@ -274,6 +274,4 @@ class StatisticsGenerators
 
         return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
     }
-
-
 }
