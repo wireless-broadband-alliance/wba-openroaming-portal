@@ -33,6 +33,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CertificateService;
+use App\Service\Domain;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
@@ -1301,7 +1302,7 @@ class AdminController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-
+        $domainService = new Domain();
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
@@ -1343,7 +1344,7 @@ class AdminController extends AbstractController
                                 'RADIUS_TLS_NAME',
                                 'NAI_REALM'
                             ]
-                        ) && !$this->isValidDomain($value)
+                        ) && !$domainService->isValidDomain($value)
                     ) {
                         $this->addFlash(
                             'error_admin',
@@ -3351,18 +3352,6 @@ class AdminController extends AbstractController
         }
 
         return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
-    }
-
-
-    // Validate domain names and check if they resolve to an IP address
-    // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
-    protected function isValidDomain($domain)
-    {
-        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
-            return false;
-        }
-        $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
-        return !($dnsRecords === false || empty($dnsRecords));
     }
 
     /**
