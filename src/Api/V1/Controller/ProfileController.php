@@ -151,19 +151,24 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+        $encryptionResult = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
-        if (!$encryptedPassword) {
-            return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
+        if (!$encryptionResult['success']) {
+            return match ($encryptionResult['error']['code']) {
+                1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
+                1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
+                default => (new BaseResponse(500, null, 'Failed to encrypt the password.'))->toResponse(),
+            };
         }
+        $encryptedPassword = $encryptionResult['data'];
 
         $data = [
             'radiusUsername' => $radiusProfile->getRadiusUser(),
             'radiusPassword' => $encryptedPassword,
             'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
-            'fqdn' => $this->getSettingValueRaw('DOMAIN_NAME'),
+            'fqdn' => $this->getSettingValueRaw('RADIUS_TLS_NAME'),
             'roamingConsortiumOis' => ['5a03ba0000', '004096'],
-            'eapType' => '21',
+            'eapType' => 21,
             'nonEapInnerMethod' => 'MS-CHAP-V2',
             'realm' => $this->getSettingValueRaw('RADIUS_REALM_NAME'),
         ];
@@ -271,11 +276,16 @@ class ProfileController extends AbstractController
 
         // Encrypt the password with the provided PGP public key
         $radiusPassword = $radiusProfile->getRadiusToken();
-        $encryptedPassword = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
+        $encryptionResult = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
-        if (!$encryptedPassword) {
-            return (new BaseResponse(500, null, 'Failed to encrypt the password'))->toResponse();
+        if (!$encryptionResult['success']) {
+            return match ($encryptionResult['error']['code']) {
+                1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
+                1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
+                default => (new BaseResponse(500, null, 'Failed to encrypt the password.'))->toResponse(),
+            };
         }
+        $encryptedPassword = $encryptionResult['data'];
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-2',
@@ -283,7 +293,7 @@ class ProfileController extends AbstractController
             'payloadUUID' => $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-1',
             'domainName' => $this->getSettingValueRaw('DOMAIN_NAME'),
             'EAPClientConfiguration' => [
-                'acceptEAPTypes' => '21',
+                'acceptEAPTypes' => 21,
                 'radiusUsername' => $radiusProfile->getRadiusUser(),
                 'radiusPassword' => $encryptedPassword,
                 'outerIdentity' => 'anonymous@' . $this->getSettingValueRaw('RADIUS_TLS_NAME'),

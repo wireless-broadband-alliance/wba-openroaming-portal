@@ -3,12 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Setting;
+use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TextEditorName;
+use App\Enum\TextInputType;
 use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
@@ -20,7 +24,6 @@ use App\Form\TOStype;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
@@ -296,7 +299,7 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
-        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOStype::class);
 
@@ -305,13 +308,78 @@ class SiteController extends AbstractController
             'formPassword' => $formPassword->createView(),
             'formTOS' => $formTOS,
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
-            'registrationFormDemo' => $formResgistrationDemo->createView(),
+            'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser
         ]);
     }
 
+    #[Route('/terms-conditions', name: 'app_terms_conditions')]
+    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TextInputType::TEXT_EDITOR
+        ) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
+            } else {
+                $content = '';
+            }
+            return $this->render('site/shared/tos/_tos.html.twig', [
+                'content' => $content,
+                'data' => $data
+            ]);
+        }
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TextInputType::LINK &&
+            $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
+        ) {
+                return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
+        }
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/privacy-policy', name: 'app_privacy_policy')]
+    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR
+        ) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
+            } else {
+                $content = '';
+            }
+            return $this->render('site/shared/tos/_privacy_policy.html.twig', [
+                'content' => $content,
+                'data' => $data
+            ]);
+        }
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TextInputType::LINK &&
+            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
+        ) {
+            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
+        }
+        return $this->redirectToRoute('app_landing');
+    }
 
     /**
      * Widget with data about the account of the user / upload new password
@@ -468,7 +536,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(ForgotPasswordEmailType::class, $user);
         $form->handleRequest($request);
 
@@ -522,6 +589,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
+                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         $randomPassword = bin2hex(random_bytes(4));
@@ -659,6 +727,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
+                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         // save new password hashed on the db for the user
@@ -747,7 +816,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(NewPasswordAccountType::class, $user);
         $form->handleRequest($request);
 
@@ -981,7 +1049,6 @@ class SiteController extends AbstractController
     /**
      * @param RequestStack $requestStack
      * @param UserRepository $userRepository
-     * @param EventRepository $eventRepository
      * @param Request $request
      * @return Response
      */
@@ -990,7 +1057,6 @@ class SiteController extends AbstractController
     public function verifyCode(
         RequestStack $requestStack,
         UserRepository $userRepository,
-        EventRepository $eventRepository,
         Request $request
     ): Response {
         // Get the current user

@@ -60,11 +60,11 @@
 
                 <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
-                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
+                    <a href="{{ path('app_terms_conditions') }}" target="_blank" class="underline text-primary font-semibold">
                         terms & conditions of use
                     </a>
                     and
-                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                    <a href="{{ path('app_privacy_policy') }}" target="_blank"
                        class="underline text-primary font-semibold">
                         privacy policy
                     </a>.
@@ -162,8 +162,8 @@
                     </p>
 
                     {% if app.user.isVerified %}
-                        <div class="flex flex-row justify-end items-center gap-1">
-                            <p class="text-[#707070]">Account Settings</p>
+                        <div class="flex flex-row justify-end items-center gap-2">
+                            <p class="text-sm text-[#707070]">Account Settings</p>
                             <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
                                     class="ml-auto duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
 
@@ -178,7 +178,7 @@
 
                     {# Widget User Settings #}
                     <div {{ stimulus_target('widget', 'modal') }}
-                            class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-10 ">
+                            class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
                         <div class="flex flex-row justify-center items-center h-full w-full">
                             {{ include('site/shared/_account_widget.html.twig') }}
                         </div>
@@ -201,8 +201,7 @@
                         <div class="provider-btn">
                             <a href="/saml/login" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary"
-                                                                                        name="btn-primary">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.SAML_LABEL.value }}
                                 </button>
                             </a>
@@ -226,8 +225,7 @@
                         <div class="provider-btn">
                             <a href="{{ path('app_register') }}" data-action="terms-widget#showModal" >
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.REGISTER_LABEL.value }}
                                 </button>
                             </a>
@@ -239,8 +237,7 @@
                         <div class="provider-btn">
                             <a href="{{ path('app_register_sms') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled"
-                                                                                        name="btn-primary">
+                                                                                        class="w-full btn-primary btn-disabled">
                                     {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                                 </button>
                             </a>
@@ -252,8 +249,7 @@
                         <div class="provider-btn w-full">
                             <a href="{{ path('app_login') }}" data-action="terms-widget#showModal">
                                 <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled"
-                                                                                        name="btn-secondary">
+                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled">
                                     {{ data.LOGIN_TRADITIONAL_LABEL.value }}
                                 </button>
                             </a>
@@ -275,10 +271,10 @@
                     }) }}
                     <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                         I agree to the
-                        <a href="{{ data.TOS_LINK.value }}" target="_blank"
+                        <a href="{{ path('app_terms_conditions') }}" target="_blank"
                            class="underline text-primary font-semibold">terms & conditions of use</a>
                         and
-                        <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                        <a href="{{ path('app_privacy_policy') }}" target="_blank"
                            class="underline text-primary font-semibold">privacy policy</a>.
                     </label>
                 </div>
@@ -301,11 +297,4 @@
 
         {% endif %}
     {% endif %}
-
-    {# Cookie Banner #}
-    {% block cookie %}
-        <div class="grid grid-cols-1 gap-[5px] ">
-            {{ include('site/shared/_cookie_banner.html.twig') }}
-        </div>
-    {% endblock %}
 {% endblock %}

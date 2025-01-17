@@ -102,6 +102,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
 
+            ['name' => 'TOS', 'value' => 'LINK'],
+            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
@@ -155,9 +157,8 @@ class ResetAllSettingsCommand extends Command
             $message = <<<EOL
 
 <info>Success:</info> All the settings have been set to the default values.
-<comment>Note:</comment> If you want to reset the custom settings too,
-       make sure to run the following command:
-       <fg=blue>php bin/console reset:customS</>
+<comment>Note:</comment> If you want to reset any another setting please check using this command:
+      <fg=blue>php bin/console reset</>
 EOL;
 
             // Output the styled message

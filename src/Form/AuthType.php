@@ -10,9 +10,11 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AuthType extends AbstractType
 {
@@ -62,13 +64,30 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
+                        // phpcs:enable
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
+                        }
+                    }),
                 ],
             ],
 
@@ -114,13 +133,30 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
+                        // phpcs:enable
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
+                        }
+                    }),
                 ],
             ],
 
@@ -160,13 +196,30 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
+                        // phpcs:enable
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
+                        }
+                    }),
                 ],
             ],
 
@@ -238,16 +291,32 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select an option.',
                     ]),
                     new Range([
-                        'min' => 5,
+                        'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
+                        // phpcs:enable
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
+                        }
+                    }),
                 ],
             ],
-
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {
@@ -289,7 +358,9 @@ class AuthType extends AbstractType
     {
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
-            'profileLimitDate' => null
+            'profileLimitDate' => null,
+            'profileMinDate' => null,
+            'humanReadableExpirationDate' => null
         ]);
     }
 }

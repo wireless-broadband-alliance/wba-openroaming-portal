@@ -18,11 +18,9 @@ parameters:
   app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
   app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
 services:
-  App\EventListener\CookieConsentListener:
-    tags: [ kernel.event_listener ]
   App\EventListener\JWTExceptionListener:
-    tags:
-      - { name: 'kernel.event_subscriber' }
+        tags:
+            - { name: kernel.event_subscriber }
   App\Form\Transformer\BooleanToDateTimeTransformer: ~
   App\Service\UserStatusChecker: ~
   #Things to make the login with Google work

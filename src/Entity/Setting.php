@@ -10,6 +10,7 @@ use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\ConfigController;
 use App\Api\V1\Controller\ProfileController;
+use App\Api\V1\Controller\TurnstileController;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,6 +20,64 @@ use Doctrine\ORM\Mapping as ORM;
     Each setting consists of a name and an optional value, 
     which can be used to store and return configuration parameters required for the API.",
     operations: [
+        new GetCollection(
+            uriTemplate: '/api/v1/turnstile/android',
+            controller: TurnstileController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Turnstile HTML configuration retrieved successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                        ],
+                                        'data' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'description' => 'The HTML content required for turnstile configuration on the Android app.',
+                                            'example' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>',
+                                            //phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                    'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>',
+                                    //phpcs:enable
+                                ],
+                            ],
+                        ],
+                    ],
+                    404 => [
+                        'description' => 'HTML file not found.',
+                        'content' => [
+                            'application/json' => [
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'HTML file not found.',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Return the HTML required for Turnstile configuration on an Android App',
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                description: 'This endpoint serves the public HTML configuration required for the Android App to integrate with the Turnstile feature.',
+                // phpcs:enable
+                security: [],
+            ),
+            shortName: 'Turnstile',
+            paginationEnabled: false,
+            description: 'Serves the public HTML configuration required for Turnstile integration for Android apps.',
+            name: 'api_turnstile_html_android',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
         new GetCollection(
             uriTemplate: '/v1/config',
             controller: ConfigController::class,
@@ -45,8 +104,8 @@ use Doctrine\ORM\Mapping as ORM;
                                                         'USER_VERIFICATION' => ['type' => 'boolean'],
                                                         'TURNSTILE_CHECKER' => ['type' => 'boolean'],
                                                         'CONTACT_EMAIL' => ['type' => 'string'],
-                                                        'TOS_LINK' => ['type' => 'string'],
-                                                        'PRIVACY_POLICY_LINK' => ['type' => 'string'],
+                                                        'TOS' => ['type' => 'string'],
+                                                        'PRIVACY_POLICY' => ['type' => 'string'],
                                                     ],
                                                 ],
                                                 'auth' => [
@@ -94,8 +153,8 @@ use Doctrine\ORM\Mapping as ORM;
                                             'USER_VERIFICATION' => true,
                                             'TURNSTILE_CHECKER' => true,
                                             'CONTACT_EMAIL' => 'support@example.com',
-                                            'TOS_LINK' => 'https://example.com/tos',
-                                            'PRIVACY_POLICY_LINK' => 'https://example.com/privacy',
+                                            'TOS' => 'LINK',
+                                            'PRIVACY_POLICY' => 'LINK',
                                         ],
                                         'auth' => [
                                             'AUTH_METHOD_SAML_ENABLED' => true,
@@ -163,7 +222,7 @@ use Doctrine\ORM\Mapping as ORM;
                                                             'type' => 'array',
                                                             'items' => ['type' => 'string'],
                                                         ],
-                                                        'eapType' => ['type' => 'string'],
+                                                        'eapType' => ['type' => 'integer'],
                                                         'nonEapInnerMethod' => ['type' => 'string'],
                                                         'realm' => ['type' => 'string'],
                                                     ],
@@ -181,7 +240,7 @@ use Doctrine\ORM\Mapping as ORM;
                                             'friendlyName' => 'My Android Profile',
                                             'fqdn' => 'example.com',
                                             'roamingConsortiumOis' => ['5a03ba0000', '004096'],
-                                            'eapType' => '21',
+                                            'eapType' => 21,
                                             'nonEapInnerMethod' => 'MS-CHAP-V2',
                                             'realm' => 'example.com',
                                         ],
@@ -267,7 +326,7 @@ use Doctrine\ORM\Mapping as ORM;
                 ],
                 requestBody: new RequestBody(
                     description: 'Android public key required for radius password encryption. 
-                    The request should be sent as JSON with the PGP public_key included in the body.',
+                    The request should be sent as JSON with the RSA public_key included in the body.',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [
@@ -325,7 +384,7 @@ use Doctrine\ORM\Mapping as ORM;
                                                 'EAPClientConfiguration' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'acceptEAPTypes' => ['type' => 'string'],
+                                                        'acceptEAPTypes' => ['type' => 'integer'],
                                                         'radiusUsername' => ['type' => 'string'],
                                                         'radiusPassword' => ['type' => 'string'],
                                                         'outerIdentity' => ['type' => 'string'],
@@ -350,7 +409,7 @@ use Doctrine\ORM\Mapping as ORM;
                                         'payloadUUID' => '<random_payload_identifier>-1',
                                         'domainName' => 'example.com',
                                         'EAPClientConfiguration' => [
-                                            'acceptEAPTypes' => '21',
+                                            'acceptEAPTypes' => 21,
                                             'radiusUsername' => 'user123',
                                             'radiusPassword' => 'encrypted_password_here',
                                             'outerIdentity' => 'anonymous@example.com',
@@ -441,7 +500,7 @@ use Doctrine\ORM\Mapping as ORM;
                 ],
                 requestBody: new RequestBody(
                     description: 'iOS public key required for radius password encryption. 
-            The request should be sent as JSON with the PGP public_key included in the body.',
+            The request should be sent as JSON with the RSA public_key included in the body.',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [

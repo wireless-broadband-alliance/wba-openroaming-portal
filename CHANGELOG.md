@@ -9,14 +9,17 @@
 - Separate user and admin login flows
 - Allow user or admin to revoke a radius profile
 - Fix filtering results, they aren't reflect the actual active count on the filter's (Search User's)
-- Cookie banner
+- Cookie Banner
 - TOS Checkbox to enable/disable buttons
+- Allow TOS and Privacy Policy to be configured directly on the platform.
+- New entity for TOS & Privacy Policy for the new custom editors on the terms page.
 - Fix missing unit of measurement for statistics
 - User per page on User Management is not reflecting the pagination
 - Update READ.ME add new env's && settings
 - Auto delete unconfirmed users after a specific timeframe configurable by the admin
+- Added a new endpoint for Turnstile configuration required for the Android App's
 - **Clear Unverified Accounts Command**: `clear:deleteUnconfirmedUsers` Removes any records in the `User` and all the
-  associated entity's that have a unverified accounts associated.
+  associated entity's that have an unverified accounts associated.
 
 > **Important**: This command will permanently delete any log or record in the `User` entity.
 

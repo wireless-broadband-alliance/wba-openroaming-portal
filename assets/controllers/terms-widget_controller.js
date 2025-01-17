@@ -1,23 +1,28 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["agreeTerms", "confirmationModal", "modalMessage", "button"];
+    static targets = ["agreeTerms", "confirmationModal", "button"];
 
     connect() {
-        console.log('TermsWidgetController connected');
+        console.log("TermsWidgetController connected");
 
-        // Load cookie preferences from CookieController
-        const cookiePreferences = this.getCookiePreferences() || {};
-        this.updateTermsState(cookiePreferences.terms || false);
+        // Load the saved state of the terms checkbox from localStorage, if allowed by cookies
+        const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
+        if (hasCookies) {
+            const savedTermsState = localStorage.getItem("termsAccepted");
+            if (savedTermsState !== null) {
+                this.updateTermsCheckbox(JSON.parse(savedTermsState));
+            }
+        }
+
+        // Enable/Disable submit buttons based on the checkbox state
+        this.toggleSubmitButtons();
     }
 
     showModal(event) {
         event.preventDefault();
-        console.log("showModal triggered, checking terms state.");
-
-        const cookiePreferences = this.getCookiePreferences() || {};
-
-        if (!cookiePreferences.terms) {
+        // Show the modal if the terms checkbox is not checked
+        if (!this.agreeTermsTarget.checked) {
             console.log("Terms not accepted, showing modal.");
             this.confirmationModalTarget.classList.remove("hidden");
         } else {
@@ -29,62 +34,58 @@ export default class extends Controller {
 
     handleCheckboxChange() {
         const isChecked = this.agreeTermsTarget.checked;
-        this.updateTermsState(isChecked);
+        console.log(`Checkbox changed, new state: ${isChecked}`);
 
         if (isChecked) {
             console.log("Terms accepted, hiding modal.");
             this.confirmationModalTarget.classList.add("hidden");
+
+            // Save the terms state only if cookies are allowed
+            const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
+            if (hasCookies) {
+                console.log("Cookies are enabled, saving terms state.");
+                this.saveTermsState(isChecked);
+            } else {
+                console.log("Cookies not enabled, terms state will not be saved.");
+            }
         }
+
+        // Enable/Disable submit buttons based on the checkbox state
+        this.toggleSubmitButtons();
     }
 
-    updateTermsState(accepted) {
-        console.log(`Updating terms state to: ${accepted}`);
+    saveTermsState(accepted) {
+        console.log(`Saving terms state: ${accepted}`);
+        localStorage.setItem("termsAccepted", accepted);
+    }
 
-        // Update cookie preferences through CookieController
-        const cookiePreferences = this.getCookiePreferences() || {};
-        cookiePreferences.terms = accepted;
-        this.setCookiePreferences(cookiePreferences);
-
-        // Update checkbox and button states
+    updateTermsCheckbox(accepted) {
         if (this.agreeTermsTarget) {
             this.agreeTermsTarget.checked = accepted;
         }
-        this.toggleSubmitButtons();
     }
 
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
-
         for (let button of this.buttonTargets) {
             // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
 
             // btn-secondary-disabled (for the specific login button)
-            if (button.classList.contains('btn-secondary')) {
+            if (button.classList.contains("btn-secondary")) {
                 button.classList.toggle("btn-secondary-disabled", !isChecked);
             }
         }
     }
 
-    setCookiePreferences(preferences) {
-        document.cookie = "cookie_preferences=" + JSON.stringify(preferences) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
-    }
-
-    getCookiePreferences() {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; cookie_preferences=`);
-        if (parts.length === 2) {
-            try {
-                return JSON.parse(parts.pop().split(";").shift());
-            } catch (error) {
-                console.error("Error parsing cookie:", error);
-            }
-        }
-        return null;
-    }
-
     closeConfirmationModal() {
         console.log("Close button clicked, hiding modal.");
         this.confirmationModalTarget.classList.add("hidden");
+    }
+
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        return parts.length === 2 ? parts.pop().split(";").shift() : null;
     }
 }

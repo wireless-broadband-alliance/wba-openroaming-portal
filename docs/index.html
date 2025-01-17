@@ -86,7 +86,7 @@
                                                                     }
                                                                 },
                                                                 "eapType": {
-                                                                    "type": "string"
+                                                                    "type": "integer"
                                                                 },
                                                                 "nonEapInnerMethod": {
                                                                     "type": "string"
@@ -112,7 +112,7 @@
                                                         "5a03ba0000",
                                                         "004096"
                                                     ],
-                                                    "eapType": "21",
+                                                    "eapType": 21,
                                                     "nonEapInnerMethod": "MS-CHAP-V2",
                                                     "realm": "example.com"
                                                 }
@@ -221,7 +221,7 @@
                             }
                         ],
                         "requestBody": {
-                            "description": "Android public key required for radius password encryption. \n                    The request should be sent as JSON with the PGP public_key included in the body.",
+                            "description": "Android public key required for radius password encryption. \n                    The request should be sent as JSON with the RSA public_key included in the body.",
                             "content": {
                                 "application/json": {
                                     "schema": {
@@ -286,7 +286,7 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "acceptEAPTypes": {
-                                                                    "type": "string"
+                                                                    "type": "integer"
                                                                 },
                                                                 "radiusUsername": {
                                                                     "type": "string"
@@ -326,7 +326,7 @@
                                                 "payloadUUID": "\u003Crandom_payload_identifier\u003E-1",
                                                 "domainName": "example.com",
                                                 "EAPClientConfiguration": {
-                                                    "acceptEAPTypes": "21",
+                                                    "acceptEAPTypes": 21,
                                                     "radiusUsername": "user123",
                                                     "radiusPassword": "encrypted_password_here",
                                                     "outerIdentity": "anonymous@example.com",
@@ -443,7 +443,7 @@
                             }
                         ],
                         "requestBody": {
-                            "description": "iOS public key required for radius password encryption. \n            The request should be sent as JSON with the PGP public_key included in the body.",
+                            "description": "iOS public key required for radius password encryption. \n            The request should be sent as JSON with the RSA public_key included in the body.",
                             "content": {
                                 "application/json": {
                                     "schema": {
@@ -507,10 +507,10 @@
                                                                 "CONTACT_EMAIL": {
                                                                     "type": "string"
                                                                 },
-                                                                "TOS_LINK": {
+                                                                "TOS": {
                                                                     "type": "string"
                                                                 },
-                                                                "PRIVACY_POLICY_LINK": {
+                                                                "PRIVACY_POLICY": {
                                                                     "type": "string"
                                                                 }
                                                             }
@@ -580,8 +580,8 @@
                                                     "USER_VERIFICATION": true,
                                                     "TURNSTILE_CHECKER": true,
                                                     "CONTACT_EMAIL": "support@example.com",
-                                                    "TOS_LINK": "https://example.com/tos",
-                                                    "PRIVACY_POLICY_LINK": "https://example.com/privacy"
+                                                    "TOS": "LINK",
+                                                    "PRIVACY_POLICY": "LINK"
                                                 },
                                                 "auth": {
                                                     "AUTH_METHOD_SAML_ENABLED": true,
@@ -610,6 +610,57 @@
                         },
                         "summary": "Get configuration settings",
                         "description": "This endpoint returns public values from the Setting entity and \n                environment variables categorized by platform and provider.",
+                        "parameters": [],
+                        "deprecated": false,
+                        "security": []
+                    }
+                },
+                "/api/v1/turnstile/android": {
+                    "get": {
+                        "operationId": "api_turnstile_html_android",
+                        "tags": [
+                            "Turnstile"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Turnstile HTML configuration retrieved successfully",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "description": "The HTML content required for turnstile configuration on the Android app.",
+                                                    "example": "\u003Chtml\u003E\u003Cbody\u003E\u003Ch1\u003ETurnstile Configuration\u003C/h1\u003E\u003Cp\u003EThis is the required HTML configuration for the Android App.\u003C/p\u003E\u003C/body\u003E\u003C/html\u003E"
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": true,
+                                            "data": "\u003Chtml\u003E\u003Cbody\u003E\u003Ch1\u003ETurnstile Configuration\u003C/h1\u003E\u003Cp\u003EThis is the required HTML configuration for the Android App.\u003C/p\u003E\u003C/body\u003E\u003C/html\u003E"
+                                        }
+                                    }
+                                }
+                            },
+                            "404": {
+                                "description": "HTML file not found.",
+                                "content": {
+                                    "application/json": {
+                                        "example": {
+                                            "success": false,
+                                            "error": "HTML file not found."
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Return the HTML required for Turnstile configuration on an Android App",
+                        "description": "This endpoint serves the public HTML configuration required for the Android App to integrate with the Turnstile feature.",
                         "parameters": [],
                         "deprecated": false,
                         "security": []
@@ -2582,6 +2633,54 @@
                             }
                         }
                     },
+                    "Turnstile": {
+                        "type": "object",
+                        "description": "Serves the public HTML configuration required for Turnstile integration for Android apps.",
+                        "deprecated": false,
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "Turnstile.jsonld": {
+                        "type": "object",
+                        "description": "Serves the public HTML configuration required for Turnstile integration for Android apps.",
+                        "deprecated": false,
+                        "properties": {
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
                     "User": {
                         "type": "object",
                         "description": "The User entity returns values related to a user.",
@@ -2653,6 +2752,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -2831,6 +2931,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -3009,6 +3110,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -3222,6 +3324,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -3400,6 +3503,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -3613,6 +3717,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -3826,6 +3931,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -4012,6 +4118,7 @@
                                 ]
                             },
                             "googleId": {
+                                "readOnly": true,
                                 "type": [
                                     "string",
                                     "null"
@@ -4720,6 +4827,35 @@
                                                    width="20" height="20" aria-hidden="true" focusable="false"><path
                                 d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
                                 class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                                                        id="operations-tag-Turnstile"
+                                                                        data-tag="Turnstile" data-is-open="true"><a
+                                class="nostyle"
+                                href="http:///api#/Turnstile"><span>Turnstile</span></a><small></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-get" id="operations-Turnstile-api_turnstile_html_android"><div
+                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
+                                                                                    class="opblock-summary-control"><span
+                                class="opblock-summary-method">GET</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/turnstile/android"><a
+                                class="nostyle" href="http:///api#/Turnstile/api_turnstile_html_android"><span>/api<wbr>/v1<wbr>/turnstile<wbr>/android</span></a></span><div
+                                class="opblock-summary-description">Return the HTML required for Turnstile configuration on an Android App</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="get ​/api​/v1​/turnstile​/android" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
                                                                         id="operations-tag-User" data-tag="User"
                                                                         data-is-open="true"><a class="nostyle"
                                                                                                href="http:///api#/User"><span>User</span></a><small></small><button
@@ -5102,6 +5238,42 @@
                                         <button type="button" class="json-schema-2020-12-accordion">
                                             <div class="json-schema-2020-12-accordion__children">
                                                 <div class="json-schema-2020-12__title">Setting.jsonld</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">Turnstile</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">Turnstile.jsonld</div>
                                             </div>
                                             <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24"
