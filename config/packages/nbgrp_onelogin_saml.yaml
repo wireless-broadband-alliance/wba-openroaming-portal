@@ -3,15 +3,15 @@ nbgrp_onelogin_saml:
         default:
             # Mandatory SAML settings
             idp:
-                entityId: '%env(string:SAML_IDP_ENTITY_ID)%'
+                entityId: '@=service("App\\Service\\SamlProviderConfigService").getDefaultProviderConfig()["idpEntityId"]'
                 singleSignOnService:
-                    url: '%env(string:SAML_IDP_SSO_URL)%'
+                    url: '@=service("App\\Service\\SamlProviderConfigService").getDefaultProviderConfig()["idpSsoUrl"]'
                     binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
-                x509cert: '%env(string:SAML_IDP_X509_CERT)%'
+                x509cert: '@=service("App\\Service\\SamlProviderConfigService").getDefaultProviderConfig()["idpX509Cert"]'
             sp:
-                entityId: '%env(string:SAML_SP_ENTITY_ID)%'
+                entityId: '@=service("App\\Service\\SamlProviderConfigService").getDefaultProviderConfig()["spEntityId"]'
                 assertionConsumerService:
-                    url: '%env(string:SAML_SP_ACS_URL)%'
+                    url: '@=service("App\\Service\\SamlProviderConfigService").getDefaultProviderConfig()["spAcsUrl"]'
                     binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
             security:
                 allowRepeatAttributeName: true

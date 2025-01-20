@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\SamlProvider;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,6 +15,21 @@ class SamlProviderRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, SamlProvider::class);
+    }
+
+    /**
+     * Find the default SAML provider.
+     *
+     * @return SamlProvider|null Returns the default provider or null if none exists.
+     * @throws NonUniqueResultException
+     */
+    public function findDefault(): ?SamlProvider
+    {
+        return $this->createQueryBuilder('sp')
+            ->setMaxResults(1) // Get only the default SAML Provider
+            ->orderBy('sp.id', 'ASC')
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**
