@@ -53,8 +53,6 @@ class VerificationCodeEmailGenerator
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        // If the verification code is not provided, generate a new one
-        /** @var User $currentUser */
         $verificationCode = $this->generateVerificationCode($user);
 
         return (new TemplatedEmail())
