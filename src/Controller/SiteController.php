@@ -30,7 +30,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeGenerator;
+use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -65,7 +65,7 @@ class SiteController extends AbstractController
     private GetSettings $getSettings;
     private EventRepository $eventRepository;
     private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
+    private VerificationCodeEmailGenerator $verificationCodeGenerator;
     private ProfileManager $profileManager;
     private SendSMS $sendSMS;
 
@@ -79,7 +79,7 @@ class SiteController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      * @param SendSMS $sendSMS
      */
@@ -91,7 +91,7 @@ class SiteController extends AbstractController
         GetSettings $getSettings,
         EventRepository $eventRepository,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
+        VerificationCodeEmailGenerator $verificationCodeGenerator,
         ProfileManager $profileManager,
         SendSMS $sendSMS
     ) {

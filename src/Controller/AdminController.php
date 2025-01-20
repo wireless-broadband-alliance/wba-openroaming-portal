@@ -16,7 +16,7 @@ use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeGenerator;
+use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -45,7 +45,7 @@ class AdminController extends AbstractController
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
     private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
+    private VerificationCodeEmailGenerator $verificationCodeGenerator;
 
     /**
      * @param MailerInterface $mailer
@@ -55,7 +55,7 @@ class AdminController extends AbstractController
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
      * @param EventActions $eventActions
-     * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator
      */
     public function __construct(
         MailerInterface $mailer,
@@ -65,7 +65,7 @@ class AdminController extends AbstractController
         GetSettings $getSettings,
         SettingRepository $settingRepository,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
+        VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -199,56 +199,56 @@ class AdminController extends AbstractController
         // Regenerate the verification code for the admin to reset settings
 
         if ($type === 'settingCustom') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
         }
 
         if ($type === 'settingTerms') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTerms']);
         }
 
         if ($type === 'settingRadius') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingRadius']);
         }
 
         if ($type === 'settingStatus') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
         }
 
         if ($type === 'settingLDAP') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
         }
 
         if ($type === 'settingCAPPORT') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
         }
 
         if ($type === 'settingAUTH') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
         }
 
         if ($type === 'settingSMS') {
-            $email = $this->createEmailAdmin($currentUser->getEmail());
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingSMS']);
@@ -257,35 +257,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_page');
     }
 
-    /**
-     * Create an email message with the verification code.
-     *
-     * @param string $email The recipient's email address.
-     * @return Email The email with the code.
-     * @throws Exception
-     */
-    protected function createEmailAdmin(
-        string $email
-    ): Email {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        // If the verification code is not provided, generate a new one
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
-
-        return (new TemplatedEmail())
-            ->from(new Address($emailSender, $nameSender))
-            ->to($email)
-            ->subject('Your Settings Reset Details')
-            ->htmlTemplate('email/admin_reset.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-                'resetPassword' => false
-            ]);
-    }
 
     /**
      * Handles the Page Style on the dashboard
