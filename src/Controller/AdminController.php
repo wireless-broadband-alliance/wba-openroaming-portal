@@ -7,15 +7,11 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\PgpEncryptionService;
-use App\Service\ProfileManager;
-use App\Service\SendSMS;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +19,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -32,8 +27,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class AdminController extends AbstractController
@@ -192,7 +185,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function regenerateCode(string $type, EntityManagerInterface $entityManager): RedirectResponse
+    public function regenerateCode(string $type): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
