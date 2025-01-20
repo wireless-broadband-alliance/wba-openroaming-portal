@@ -195,67 +195,8 @@
                 <p>To get started, select one of the following authentication methods:</p>
             </div>
             <div {{ stimulus_controller('terms-widget') }}>
-
-                <div class="provider-list my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
-                    {% if data.SAML_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="/saml/login" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.SAML_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.SAML_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.GOOGLE_LOGIN_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="{{ path('connect_google') }}" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.GOOGLE_LOGIN_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.EMAIL_REGISTER_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="{{ path('app_register') }}" data-action="terms-widget#showModal" >
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.REGISTER_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.REGISTER_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="{{ path('app_register_sms') }}" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
-                        <div class="provider-btn w-full">
-                            <a href="{{ path('app_login') }}" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled">
-                                    {{ data.LOGIN_TRADITIONAL_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
+                <div class="my-8 grid gap-4">
+                    {% include 'site/shared/_providers_login.html.twig' %}
                 </div>
 
                 {#  Terms and Conditions Check Box #}

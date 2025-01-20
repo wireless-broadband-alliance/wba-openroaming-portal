@@ -222,7 +222,7 @@ use Doctrine\ORM\Mapping as ORM;
                                                             'type' => 'array',
                                                             'items' => ['type' => 'string'],
                                                         ],
-                                                        'eapType' => ['type' => 'string'],
+                                                        'eapType' => ['type' => 'integer'],
                                                         'nonEapInnerMethod' => ['type' => 'string'],
                                                         'realm' => ['type' => 'string'],
                                                     ],
@@ -240,7 +240,7 @@ use Doctrine\ORM\Mapping as ORM;
                                             'friendlyName' => 'My Android Profile',
                                             'fqdn' => 'example.com',
                                             'roamingConsortiumOis' => ['5a03ba0000', '004096'],
-                                            'eapType' => '21',
+                                            'eapType' => 21,
                                             'nonEapInnerMethod' => 'MS-CHAP-V2',
                                             'realm' => 'example.com',
                                         ],
@@ -384,7 +384,7 @@ use Doctrine\ORM\Mapping as ORM;
                                                 'EAPClientConfiguration' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'acceptEAPTypes' => ['type' => 'string'],
+                                                        'acceptEAPTypes' => ['type' => 'integer'],
                                                         'radiusUsername' => ['type' => 'string'],
                                                         'radiusPassword' => ['type' => 'string'],
                                                         'outerIdentity' => ['type' => 'string'],
@@ -409,7 +409,7 @@ use Doctrine\ORM\Mapping as ORM;
                                         'payloadUUID' => '<random_payload_identifier>-1',
                                         'domainName' => 'example.com',
                                         'EAPClientConfiguration' => [
-                                            'acceptEAPTypes' => '21',
+                                            'acceptEAPTypes' => 21,
                                             'radiusUsername' => 'user123',
                                             'radiusPassword' => 'encrypted_password_here',
                                             'outerIdentity' => 'anonymous@example.com',
