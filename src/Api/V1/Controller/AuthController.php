@@ -340,7 +340,7 @@ class AuthController extends AbstractController
 
         try {
             $user = $this->microsoftController->fetchUserFromMicrosoft($data['code']);
-            if ($user === null) {
+            if (!$user) {
                 return (new BaseResponse(
                     400,
                     null,
