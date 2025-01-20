@@ -67,5 +67,4 @@ class VerificationCodeEmailGenerator
                 'resetPassword' => false
             ]);
     }
-
 }

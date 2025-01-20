@@ -79,7 +79,8 @@ class SiteController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code of the user account
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
+     * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      * @param SendSMS $sendSMS
      */
