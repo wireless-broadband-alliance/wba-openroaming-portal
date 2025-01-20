@@ -4,7 +4,7 @@ controllers:
         namespace: App\Controller
     type: attribute
 nbgrp_saml:
-        resource: "@NbgrpOneloginSamlBundle/Resources/config/routes.php"
+    resource: "@NbgrpOneloginSamlBundle/Resources/config/routes.php"
 app_login:
     path: /login/{type}
     controller: App\Controller\SecurityController::login
@@ -16,20 +16,25 @@ api_v1:
     resource: '../src/Api/V1/Controller/'
     type: annotation
 
+api_get_current_user:
+    path: /api/v1/user
+    controller: App\Api\V1\Controller\GetCurrentUserController::getCurrentUser
+    methods: [ 'GET' ]
+
 api_auth_local:
     path: /api/v1/auth/local
     controller: App\Api\V1\Controller\AuthController::authLocal
-    methods: ['POST']
+    methods: [ 'POST' ]
 
 api_auth_saml:
     path: /api/v1/auth/saml
     controller: App\Api\V1\Controller\AuthController::authSaml
-    methods: ['POST']
+    methods: [ 'POST' ]
 
 api_auth_google:
     path: /api/v1/auth/google
     controller: App\Api\V1\Controller\AuthController::authGoogle
-    methods: ['POST']
+    methods: [ 'POST' ]
 
 api_auth_microsoft:
     path: /api/v1/auth/microsoft
@@ -39,19 +44,34 @@ api_auth_microsoft:
 api_auth_local_register:
     path: /api/v1/auth/local/register
     controller: App\Api\V1\Controller\RegistrationController::localRegister
-    methods: ['POST']
+    methods: [ 'POST' ]
 
 api_auth_local_reset:
     path: /api/v1/auth/local/reset
     controller: App\Api\V1\Controller\RegistrationController::localReset
-    methods: ['POST']
+    methods: [ 'POST' ]
 
 api_auth_sms_register:
     path: /api/v1/auth/sms/register
     controller: App\Api\V1\Controller\RegistrationController::smsRegister
-    methods: ['POST']
+    methods: [ 'POST' ]
 
 api_auth_sms_reset:
     path: /api/v1/auth/sms/reset
     controller: App\Api\V1\Controller\RegistrationController::smsReset
-    methods: ['POST']
+    methods: [ 'POST' ]
+
+api_turnstile_html_android:
+    path: /api/v1/turnstile/android
+    controller: App\Api\V1\Controller\TurnstileController::getHtmlFromFile
+    methods: [ 'GET' ]
+
+api_config_profile_android:
+    path: /api/v1/config/profile/android
+    controller: App\Api\V1\Controller\ProfileController::getProfileAndroid
+    methods: [ 'GET' ]
+
+api_config_profile_ios:
+    path: /api/v1/config/profile/ios
+    controller: App\Api\V1\Controller\ProfileController::getProfileIos
+    methods: [ 'GET' ]

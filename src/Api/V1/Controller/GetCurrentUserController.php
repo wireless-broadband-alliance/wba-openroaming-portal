@@ -13,6 +13,7 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -44,7 +45,8 @@ class GetCurrentUserController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    public function __invoke(Request $request): JsonResponse
+    #[Route('/api/v1/user', name: 'api_get_current_user', methods: ['GET'])]
+    public function getCurrentUser(Request $request): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
 

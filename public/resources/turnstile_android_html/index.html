@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnstile</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .cf-turnstile {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+    <script>
+		function addTurnstileWidget() {
+			const turnstileDiv = document.createElement("div")
+            turnstileDiv.className = "cf-turnstile"
+            turnstileDiv.setAttribute("data-sitekey", JSInterface.getSiteKey())
+            turnstileDiv.setAttribute("data-callback", "onSuccess")
+
+            document.body.appendChild(turnstileDiv)
+            if (typeof turnstile !== "undefined" && typeof turnstile.render === "function") turnstile.render(turnstileDiv)
+        }
+		
+		function onSuccess(token) {
+            JSInterface.onTokenReceived(token)
+        }
+		
+		window.onload = addTurnstileWidget
+    </script>
+</body>
+</html>

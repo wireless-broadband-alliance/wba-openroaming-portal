@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
+use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TextEditorName;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
 use App\Form\AuthType;
@@ -43,6 +45,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -144,7 +148,7 @@ class AdminController extends AbstractController
      * @param int $page
      * @param string $sort
      * @param string $order
-     * @param int $count
+     * @param int|null $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -1141,10 +1145,43 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+        if (!$tosTextEditor) {
+            $tosTextEditor = new TextEditor();
+            $tosTextEditor->setName(TextEditorName::TOS);
+            $tosTextEditor->setContent('');
+            $em->persist($tosTextEditor);
+        }
+        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY]);
+        if (!$privacyPolicyTextEditor) {
+            $privacyPolicyTextEditor = new TextEditor();
+            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY);
+            $privacyPolicyTextEditor->setContent('');
+            $em->persist($privacyPolicyTextEditor);
+        }
+        $em->flush();
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
+
+        foreach ($settings as $setting) {
+            if ($setting->getName() === 'TOS_EDITOR' || $setting->getName() === 'PRIVACY_POLICY_EDITOR') {
+                $em->remove($setting);
+                $em->flush();
+            }
+        }
+
+        $tosTextEditorSetting = new Setting();
+        $tosTextEditorSetting->setName('TOS_EDITOR');
+        $tosTextEditorSetting->setValue($tosTextEditor->getContent());
+        $privacyPolicyTextEditorSetting = new Setting();
+        $privacyPolicyTextEditorSetting->setName('PRIVACY_POLICY_EDITOR');
+        $privacyPolicyTextEditorSetting->setValue($privacyPolicyTextEditor->getContent());
+
+        $settings = array_merge($settings, [$tosTextEditorSetting, $privacyPolicyTextEditorSetting]);
 
         $form = $this->createForm(TermsType::class, null, [
             'settings' => $settings,
@@ -1156,30 +1193,66 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            // Update settings
+            $tos = $submittedData['TOS'];
+            $privacyPolicy = $submittedData['PRIVACY_POLICY'];
             $tosLink = $submittedData['TOS_LINK'] ?? null;
             $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
+            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? '';
+            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? '';
 
-            // Check if the setting is an empty input
-            if ($tosLink === null) {
-                $tosLink = "";
-            }
-            if ($privacyPolicyLink === null) {
-                $privacyPolicyLink = "";
-            }
 
-            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
             if ($tosSetting) {
-                $tosSetting->setValue($tosLink);
+                $tosSetting->setValue($tos);
                 $em->persist($tosSetting);
             }
 
-            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
             if ($privacyPolicySetting) {
-                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $privacyPolicySetting->setValue($privacyPolicy);
                 $em->persist($privacyPolicySetting);
             }
 
+            $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            if ($tosLinkSetting) {
+                $tosLinkSetting->setValue($tosLink);
+                $em->persist($tosLinkSetting);
+            }
+
+            $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            if ($privacyPolicyLinkSetting) {
+                $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicyLinkSetting);
+            }
+
+            if ($tosTextEditor) {
+                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+                if ($tosEditorSetting) {
+                    $config = HTMLPurifier_Config::createDefault();
+                    $config->set('Cache.DefinitionImpl', null);
+                    $purifier = new HTMLPurifier($config);
+
+                    $cleanHTML = $purifier->purify($tosTextEditor);
+                    $tosEditorSetting->setContent($cleanHTML);
+                }
+                $em->persist($tosEditorSetting);
+            }
+
+            if ($privacyPolicyTextEditor) {
+                $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
+                    'name' => TextEditorName::PRIVACY_POLICY
+                ]);
+                if ($privacyPolicyEditorSetting) {
+                    $config = HTMLPurifier_Config::createDefault();
+                    $config->set('Cache.DefinitionImpl', null);
+                    $purifier = new HTMLPurifier($config);
+
+                    $cleanHTML = $purifier->purify($privacyPolicyTextEditor);
+                    $privacyPolicyEditorSetting->setContent($cleanHTML);
+                }
+                $em->persist($privacyPolicyEditorSetting);
+            }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
@@ -1192,6 +1265,7 @@ class AdminController extends AbstractController
             );
 
 
+            $em->flush();
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
@@ -1204,6 +1278,13 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function sanitizeHtml(string $html): string
+    {
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', sys_get_temp_dir());
+        return (new \HTMLPurifier($config))->purify($html);
     }
 
     /**
@@ -1253,9 +1334,17 @@ class AdminController extends AbstractController
                     $value = $submittedData[$settingName] ?? null;
 
                     // Check for specific settings that need domain validation
-                    // phpcs:disable Generic.Files.LineLength.TooLong
-                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM']) && !$this->isValidDomain($value)) {
-                    // phpcs:enable
+                    if (
+                        in_array(
+                            $settingName,
+                            [
+                                'RADIUS_REALM_NAME',
+                                'DOMAIN_NAME',
+                                'RADIUS_TLS_NAME',
+                                'NAI_REALM'
+                            ]
+                        ) && !$this->isValidDomain($value)
+                    ) {
                         $this->addFlash(
                             'error_admin',
                             "The value for $settingName is not a valid domain or does not resolve to an IP address."
@@ -1490,10 +1579,21 @@ class AdminController extends AbstractController
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         $profileLimitDate = ((int)$timeLeft);
+        if ($profileLimitDate < 0) {
+            $profileLimitDate = 0;
+        }
 
+        $defaultTimeZone = date_default_timezone_get();
+        $dateTime = (new DateTime())
+            ->setTimestamp($certificateLimitDate)
+            ->setTimezone(new \DateTimeZone($defaultTimeZone));
+
+        // Convert to human-readable format
+        $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
-            'profileLimitDate' => $profileLimitDate
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
 
         $form->handleRequest($request);
@@ -1585,7 +1685,8 @@ class AdminController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
-            'profileLimitDate' => $profileLimitDate
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
     }
 
@@ -1776,7 +1877,8 @@ class AdminController extends AbstractController
         }
 
         $interval = $startDate->diff($endDate);
-        if ($interval->y > 1) {
+
+        if ($interval->days > 366) {
             $this->addFlash('error_admin', 'Maximum date range is 1 year');
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
@@ -1975,6 +2077,7 @@ class AdminController extends AbstractController
 
     /**
      * Exports the freeradius data
+     * @throws Exception
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -2465,14 +2568,12 @@ class AdminController extends AbstractController
         // Determine the appropriate time granularity
         if ($interval->days > 365.2) {
             $granularity = 'year';
+        } elseif ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
         } else {
-            if ($interval->days > 90) {
-                $granularity = 'month';
-            } elseif ($interval->days > 30) {
-                $granularity = 'week';
-            } else {
-                $granularity = 'day';
-            }
+            $granularity = 'day';
         }
 
         $authsCounts = [

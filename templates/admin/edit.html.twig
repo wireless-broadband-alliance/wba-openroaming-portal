@@ -13,25 +13,33 @@
             <div class="relative">
                 {{ form_label(form.uuid, 'UUID', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(form.uuid, {'attr': {'class': 'form-widget'}}) }}
-                {{ form_errors(form.uuid) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.uuid) }}
+                </div>
             </div>
 
             <div class="relative">
                 {{ form_label(form.firstName, 'First Name', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(form.firstName, {'attr': {'class': 'form-widget'}}) }}
-                {{ form_errors(form.firstName) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.firstName) }}
+                </div>
             </div>
 
             <div class="relative">
                 {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(form.email, {'attr': {'class': 'form-widget'}}) }}
-                {{ form_errors(form.email) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.email) }}
+                </div>
             </div>
 
             <div class="relative">
                 {{ form_label(form.lastName, 'Last Name', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(form.lastName, {'attr': {'class': 'form-widget'}}) }}
-                {{ form_errors(form.lastName) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.lastName) }}
+                </div>
             </div>
 
             <div class="relative">
@@ -56,6 +64,10 @@
                             }
                         }) }}
                     </div>
+                </div>
+
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.phoneNumber) }}
                 </div>
             </div>
 
