@@ -6,6 +6,7 @@ enum UserProvider
 {
     public const SAML = 'SAML Account';
     public const GOOGLE_ACCOUNT = 'Google Account';
+    public const MICROSOFT_ACCOUNT = 'Microsoft Account';
     public const PORTAL_ACCOUNT = 'Portal Account';
     public const EMAIL = 'Email';
     public const PHONE_NUMBER = 'Phone Number';

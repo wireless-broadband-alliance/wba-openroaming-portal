@@ -1554,7 +1554,9 @@ class AdminController extends AbstractController
      * @param Request $request
      * @param EntityManagerInterface $em
      * @param GetSettings $getSettings
+     * @param CertificateService $certificateService
      * @return Response
+     * @throws Exception
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1611,6 +1613,12 @@ class AdminController extends AbstractController
                 'VALID_DOMAINS_GOOGLE_LOGIN',
                 'PROFILE_LIMIT_DATE_GOOGLE',
 
+                'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED',
+                'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+                'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'VALID_DOMAINS_MICROSOFT_LOGIN',
+                'PROFILE_LIMIT_DATE_MICROSOFT',
+
                 'AUTH_METHOD_REGISTER_ENABLED',
                 'AUTH_METHOD_REGISTER_LABEL',
                 'AUTH_METHOD_REGISTER_DESCRIPTION',
@@ -1629,6 +1637,7 @@ class AdminController extends AbstractController
             $labelsFields = [
                 'AUTH_METHOD_SAML_LABEL',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
                 'AUTH_METHOD_REGISTER_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
@@ -1644,15 +1653,11 @@ class AdminController extends AbstractController
                     }
                 }
 
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN') {
-                    if ($setting) {
-                        $setting->setValue($value);
-                        $em->persist($setting);
-                    }
+                if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN' || $settingName === 'VALID_DOMAINS_MICROSOFT_LOGIN') {
                     continue;
                 }
 
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
                     $em->persist($setting);
@@ -2406,6 +2411,7 @@ class AdminController extends AbstractController
         $userCounts = [
             UserProvider::SAML => 0,
             UserProvider::GOOGLE_ACCOUNT => 0,
+            UserProvider::MICROSOFT_ACCOUNT => 0,
             UserProvider::PORTAL_ACCOUNT => 0,
         ];
 

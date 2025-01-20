@@ -862,6 +862,206 @@ use Symfony\Component\Validator\Constraints as Assert;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
+            uriTemplate: '/v1/auth/microsoft',
+            controller: AuthController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Authenticated user details and JWT token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'example' => 'user-uuid-example',
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'example' => 'john_doe@example.com',
+                                                ],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'string',
+                                                    ],
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'John',
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Doe',
+                                                ],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'Microsoft Account',
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'microsoft_id_example',
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],
+                                                'token' => [
+                                                    'type' => 'string',
+                                                    'example' => 'jwt-token-example',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid JSON format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid JSON format',
+                                        ],
+                                    ],
+                                    'missing_authorization_code' => [
+                                        'summary' => 'Missing authorization code',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                    'email_not_allowed' => [
+                                        'summary' => 'Email not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'This code is not associated with a microsoft account!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Account unverified/banned',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    500 => [
+                        'description' => 'Server error due to internal issues or Microsoft API failure',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'An error occurred.',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'Authentication_failed' => [
+                                        'success' => false,
+                                        'message' => 'Authentication Failed.',
+                                    ],
+                                    'Server_related' => [
+                                        'success' => false,
+                                        'message' => 'An error occurred: Generic server related error.',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Authenticate a user via Microsoft',
+                description: 'This endpoint authenticates a user using their Microsoft account. 
+                A valid Microsoft OAuth authorization code is required. 
+                If the user is successfully authenticated, user details and a JWT token will be returned.',
+                requestBody: new RequestBody(
+                    description: 'Microsoft authorization code required for user authentication.
+                     The request should be sent as JSON with the authorization code included in the body.',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'code' => [
+                                        'type' => 'string',
+                                        'description' => 'The Microsoft OAuth authorization code',
+                                        'example' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
+                                    ],
+                                ],
+                                'required' => ['code'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_auth_microsoft',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new Post(
             uriTemplate: '/v1/auth/local/register',
             controller: RegistrationController::class,
             openapi: new Operation(
