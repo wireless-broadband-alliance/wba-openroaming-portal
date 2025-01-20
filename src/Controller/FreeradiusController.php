@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\RadiusDb\Repository\RadiusAccountingRepository;
+use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
@@ -31,6 +33,8 @@ class FreeradiusController extends AbstractController
     private SettingRepository $settingRepository;
     private ParameterBagInterface $parameterBag;
     private EventActions $eventActions;
+    private RadiusAuthsRepository $radiusAuthsRepository;
+    private RadiusAccountingRepository $radiusAccountingRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -39,6 +43,8 @@ class FreeradiusController extends AbstractController
         SettingRepository $settingRepository,
         ParameterBagInterface $parameterBag,
         EventActions $eventActions,
+        RadiusAuthsRepository $radiusAuthsRepository,
+        RadiusAccountingRepository $radiusAccountingRepository
     ) {
         $this->entityManager = $entityManager;
         $this->getSettings = $getSettings;
@@ -46,6 +52,8 @@ class FreeradiusController extends AbstractController
         $this->settingRepository = $settingRepository;
         $this->parameterBag = $parameterBag;
         $this->eventActions = $eventActions;
+        $this->radiusAuthsRepository = $radiusAuthsRepository;
+        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
 
     /**
@@ -95,7 +103,11 @@ class FreeradiusController extends AbstractController
         }
 
         // Fetch all the required data, graphics etc...
-        $statisticsService = new Statistics($this->entityManager);
+        $statisticsService = new Statistics(
+            $this->entityManager,
+            $this->radiusAuthsRepository,
+            $this->radiusAccountingRepository
+        );
         $fetchChartAuthenticationsFreeradius = $statisticsService
             ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
@@ -238,7 +250,11 @@ class FreeradiusController extends AbstractController
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
         // Fetch the authentication data
-        $statisticsService = new Statistics($this->entityManager);
+        $statisticsService = new Statistics(
+            $this->entityManager,
+            $this->radiusAuthsRepository,
+            $this->radiusAccountingRepository
+        );
         $fetchChartAuthenticationsFreeradius = $statisticsService
             ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $statisticsService

@@ -17,6 +17,8 @@ use App\Form\RadiusType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
+use App\RadiusDb\Repository\RadiusAccountingRepository;
+use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CertificateService;
@@ -45,6 +47,8 @@ class SettingsController extends AbstractController
     private SettingRepository $settingRepository;
     private UserRepository $userRepository;
     private EntityManagerInterface $entityManager;
+    private RadiusAuthsRepository $radiusAuthsRepository;
+    private RadiusAccountingRepository $radiusAccountingRepository;
 
     public function __construct(
         EventActions $eventActions,
@@ -52,12 +56,16 @@ class SettingsController extends AbstractController
         SettingRepository $settingRepository,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
+        RadiusAuthsRepository $radiusAuthsRepository,
+        RadiusAccountingRepository $radiusAccountingRepository
     ) {
         $this->eventActions = $eventActions;
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
+        $this->radiusAuthsRepository = $radiusAuthsRepository;
+        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
     /*
      * Check if the code and then return the correct action
@@ -1037,7 +1045,11 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        $statisticsService = new Statistics($this->entityManager);
+        $statisticsService = new Statistics(
+            $this->entityManager,
+            $this->radiusAuthsRepository,
+            $this->radiusAccountingRepository
+        );
         $fetchChartDevices = $statisticsService->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $statisticsService->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $statisticsService->fetchChartPlatformStatus($startDate, $endDate);

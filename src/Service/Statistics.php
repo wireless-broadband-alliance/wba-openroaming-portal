@@ -9,8 +9,8 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
-use App\RadiusDb\Entity\RadiusAccounting;
-use App\RadiusDb\Entity\RadiusAuths;
+use App\RadiusDb\Repository\RadiusAccountingRepository;
+use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\UserExternalAuthRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,13 +20,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class Statistics
 {
     private EntityManagerInterface $entityManager;
+    private RadiusAuthsRepository $radiusAuthsRepository;
+    private RadiusAccountingRepository $radiusAccountingRepository;
 
 
 
     public function __construct(
         EntityManagerInterface $entityManager,
+        RadiusAuthsRepository $radiusAuthsRepository,
+        RadiusAccountingRepository $radiusAccountingRepository
     ) {
         $this->entityManager = $entityManager;
+        $this->radiusAuthsRepository = $radiusAuthsRepository;
+        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
 
     /**
@@ -240,9 +246,8 @@ class Statistics
      */
     public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
     {
-        $radiusAuthsRepository = $this->entityManager->getRepository(RadiusAuths::class);
         // Fetch all data with date filtering
-        $events = $radiusAuthsRepository->findAuthRequests($startDate, $endDate);
+        $events = $this ->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
 
         // Calculate the time difference between start and end dates
         $interval = $startDate->diff($endDate);
@@ -323,9 +328,7 @@ class Statistics
             $endDate,
         );
 
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
-
-        $events = $radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
 
         $realmCounts = [];
 
@@ -377,10 +380,8 @@ class Statistics
      */
     public function fetchChartCurrentAuthFreeradius(): array
     {
-
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
         // Get the active sessions using the findActiveSessions query
-        $activeSessions = $radiusAccountingRepository->findActiveSessions()->getResult();
+        $activeSessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
 
         // Convert the results into the expected format
         $realmCounts = [];
@@ -404,8 +405,7 @@ class Statistics
             $startDate,
             $endDate,
         );
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
-        $trafficData = $radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
+        $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
         $realmTraffic = [];
 
         // Group the traffic data based on the determined granularity
@@ -458,8 +458,7 @@ class Statistics
             $startDate,
             $endDate,
         );
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
-        $events = $radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
         $sessionAverageTimes = [];
 
@@ -505,8 +504,7 @@ class Statistics
             $endDate,
         );
 
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
-        $events = $radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
 
         $sessionTotalTimes = [];
 
@@ -549,8 +547,7 @@ class Statistics
             $startDate,
             $endDate,
         );
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
-        $events = $radiusAccountingRepository->findWifiVersion($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
 
         // Group the events based on the Wi-Fi Standard
@@ -592,8 +589,7 @@ class Statistics
             $startDate,
             $endDate,
         );
-        $radiusAccountingRepository = $this->entityManager->getRepository(RadiusAccounting::class);
-        $events = $radiusAccountingRepository->findApUsage($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
 
         $apCounts = [];
 
