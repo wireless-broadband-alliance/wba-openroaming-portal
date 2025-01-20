@@ -1,0 +1,625 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\DeletedUserData;
+use App\Entity\Event;
+use App\Entity\User;
+use App\Entity\UserExternalAuth;
+use App\Enum\AnalyticalEventType;
+use App\Enum\EmailConfirmationStrategy;
+use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
+use App\Enum\UserVerificationStatus;
+use App\Form\ResetPasswordType;
+use App\Form\UserUpdateType;
+use App\Repository\EventRepository;
+use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRepository;
+use App\Service\EscapeSpreadSheet;
+use App\Service\EventActions;
+use App\Service\GetSettings;
+use App\Service\PgpEncryptionService;
+use App\Service\ProfileManager;
+use App\Service\SendSMS;
+use DateInterval;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
+class UsersManagementController extends AbstractController
+{
+
+    private ProfileManager $profileManager;
+    private EventActions $eventActions;
+    private ParameterBagInterface $parameterBag;
+    private UserRepository $userRepository;
+    private EntityManagerInterface $entityManager;
+    private UserExternalAuthRepository $userExternalAuthRepository;
+    private PgpEncryptionService $pgpEncryptionService;
+    private GetSettings $getSettings;
+    private SettingRepository $settingRepository;
+    private EventRepository $eventRepository;
+    private SendSMS $sendSMS;
+
+    public function __construct(
+        ProfileManager $profileManager,
+        EventActions $eventActions,
+        ParameterBagInterface $parameterBag,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        UserExternalAuthRepository $userExternalAuthRepository,
+        PgpEncryptionService $pgpEncryptionService,
+        GetSettings $getSettings,
+        SettingRepository $settingRepository,
+        EventRepository $eventRepository,
+        SendSMS $sendSMS,
+
+    ) {
+        $this->profileManager = $profileManager;
+        $this->eventActions = $eventActions;
+        $this->parameterBag = $parameterBag;
+        $this->userRepository = $userRepository;
+        $this->entityManager = $entityManager;
+        $this->userExternalAuthRepository = $userExternalAuthRepository;
+        $this->pgpEncryptionService = $pgpEncryptionService;
+        $this->getSettings = $getSettings;
+        $this->settingRepository = $settingRepository;
+        $this->eventRepository = $eventRepository;
+        $this->sendSMS = $sendSMS;
+    }
+    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_revoke_profiles', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function revokeUsers(
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $em,
+        $id
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $user = $userRepository->find($id);
+        if (!$user) {
+            $this->addFlash('error', 'User not found.');
+            return $this->redirectToRoute('app_landing');
+        }
+        $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+        if (!$revokeProfiles) {
+            $this->addFlash('error_admin', 'This account doesn\'t have profiles associated!');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE,
+            'userRevoked' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+            'by' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::ADMIN_REVOKE_PROFILES,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        $this->addFlash(
+            'success_admin',
+            sprintf(
+                'Profile associated "%s" have been revoked.',
+                $user->getUuid()
+            )
+        );
+
+        return $this->redirectToRoute('admin_page');
+    }
+
+    /*
+    * Handle export of the Users Table on the Main Route
+    */
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return Response
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportUsers(
+        EntityManagerInterface $entityManager,
+        Request $request
+    ): Response {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Check if the export users operation is enabled
+        $exportUsers = $this->parameterBag->get('app.export_users');
+        if ($exportUsers === EmailConfirmationStrategy::NO_EMAIL) {
+            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        // Fetch all users excluding admins
+        $users = $this->userRepository->findExcludingAdmin();
+
+        // Create a PHPSpreadsheet object
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Define each respective header for the User table
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'UUID');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Phone Number');
+        $sheet->setCellValue('E1', 'First Name');
+        $sheet->setCellValue('F1', 'Last Name');
+        $sheet->setCellValue('G1', 'Verification');
+        $sheet->setCellValue('H1', 'Provider');
+        $sheet->setCellValue('I1', 'ProviderId');
+        $sheet->setCellValue('J1', 'Banned At');
+        $sheet->setCellValue('K1', 'Created At');
+
+        // Apply the data
+        $row = 2;
+
+        $escapeSpreadSheetService = new EscapeSpreadSheet();
+
+        foreach ($users as $user) {
+            $sheet->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getId()));
+
+            // Check if UUID might be a phone number and format accordingly
+            $uuid = $user->getUuid();
+            if (is_numeric($uuid)) {
+                // If UUID is numeric, treat it as a string to prevent scientific notation
+                $sheet->setCellValueExplicit(
+                    'B' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($uuid),
+                    DataType::TYPE_STRING
+                );
+            } else {
+                $sheet->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($uuid));
+            }
+
+            $sheet->setCellValue('C' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getEmail()));
+
+            // Handle Phone Number
+            $phoneNumber = $user->getPhoneNumber();
+            if ($phoneNumber) {
+                $sheet->setCellValueExplicit(
+                    'D' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($phoneNumber),
+                    DataType::TYPE_STRING
+                );
+            } else {
+                $sheet->setCellValue('D' . $row, '');
+            }
+
+            $sheet->setCellValue('E' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getFirstName()));
+            $sheet->setCellValue('F' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getLastName()));
+            $sheet->setCellValue(
+                'G' . $row,
+                $escapeSpreadSheetService->escapeSpreadsheetValue($user->isVerified() ? 'Verified' : 'Not Verified')
+            );
+
+            // Determine User Provider && ProviderId
+            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+
+            $provider = $userExternalAuth !== null ? $userExternalAuth->getProvider() : 'No Provider';
+            $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($provider));
+
+            $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
+            $sheet->setCellValue('I' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($providerID));
+
+            // Check if the user is Banned
+            $sheet->setCellValue(
+                'J' . $row,
+                $escapeSpreadSheetService->escapeSpreadsheetValue(
+                    $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'
+                )
+            );
+            $sheet->setCellValue('K' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getCreatedAt()));
+
+            $row++;
+        }
+
+        // Create a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'users');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST,
+            new DateTime(),
+            $eventMetadata
+        );
+
+        // Return the file as a response
+        return $this->file($tempFile, 'users.xlsx');
+    }
+
+    /*
+    * Deletes Users from the Portal, encrypts the data before delete and saves it
+    */
+    /**
+     * @param $id
+     * @param EntityManagerInterface $em
+     * @param Request $request
+     * @return Response
+     * @throws \JsonException
+     */
+    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteUsers(
+        $id,
+        EntityManagerInterface $em,
+        Request $request
+    ): Response {
+        $user = $this->userRepository->find($id);
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
+
+        if (!$user) {
+            throw new NotFoundHttpException('User not found');
+        }
+
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $getUUID = $user->getUuid();
+
+        // Prepare user data for encryption
+        $deletedUserData = [
+            'id' => $user->getId(),
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail() ?? 'This value is empty',
+            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
+            'firstName' => $user->getFirstName() ?? 'This value is empty',
+            'lastName' => $user->getLastName() ?? 'This value is empty',
+            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
+            'deletedAt' => new DateTime(),
+        ];
+
+        // Prepare external auth data for encryption
+        $deletedUserExternalAuthData = [];
+        foreach ($userExternalAuths as $externalAuth) {
+            $deletedUserExternalAuthData[] = [
+                'provider' => $externalAuth->getProvider(),
+                'providerId' => $externalAuth->getProviderId()
+            ];
+        }
+
+        // Combine user data and external auth data
+        $combinedData = [
+            'user' => $deletedUserData,
+            'externalAuths' => $deletedUserExternalAuthData,
+        ];
+        $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
+
+        // Encrypt combined JSON data using PGP encryption
+        $pgpEncryptedService = new PgpEncryptionService();
+        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
+
+        // Handle encryption errors
+        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
+            $this->addFlash(
+                'error_admin',
+                'The public key is not set. 
+            Make sure to define a public key in pgp_public_key/public_key.asc'
+            );
+            return $this->redirectToRoute('admin_page');
+        }
+
+        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
+            $this->addFlash(
+                'error_admin',
+                'The public key is empty. 
+            Make sure to define content for the public key in pgp_public_key/public_key.asc'
+            );
+            return $this->redirectToRoute('admin_page');
+        }
+
+        // Persist encrypted data
+        $deletedUserData = new DeletedUserData();
+        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
+        $deletedUserData->setUser($user);
+
+        $event = new Event();
+        $event->setUser($user);
+        $event->setEventDatetime(new DateTime());
+        $event->setEventName(AnalyticalEventType::DELETED_USER_BY);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $event->setEventMetadata([
+            'deletedBy' => $currentUser->getUuid(),
+            'ip' => $request->getClientIp(),
+        ]);
+
+        // Update user entity
+        $user->setUuid($user->getId());
+        $user->setEmail(null);
+        $user->setPhoneNumber(null);
+        $user->setPassword($user->getId());
+        $user->setFirstName(null);
+        $user->setLastName(null);
+        $user->setDeletedAt(new DateTime());
+
+        // Update external auth entity
+        foreach ($userExternalAuths as $externalAuth) {
+            $em->remove($externalAuth);
+        }
+
+        // Persist changes
+        $this->profileManager->disableProfiles($user);
+        $em->persist($deletedUserData);
+        $em->persist($user);
+        $em->flush();
+
+        // Save deletion event
+        $eventMetadata = [
+            'uuid' => $getUUID,
+            'deletedBy' => $currentUser->getUuid(),
+            'ip' => $request->getClientIp(),
+        ];
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::DELETED_USER_BY,
+            new DateTime(),
+            $eventMetadata
+        );
+
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
+        return $this->redirectToRoute('admin_page');
+    }
+
+    /*
+    * Handles the edit of the Users by the admin
+    */
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @param UserPasswordHasherInterface $passwordHasher
+     * @param EntityManagerInterface $em
+     * @param MailerInterface $mailer
+     * @param $id
+     * @return Response
+     * @throws TransportExceptionInterface
+     */
+    #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function editUsers(
+        Request $request,
+        UserRepository $userRepository,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $em,
+        MailerInterface $mailer,
+        $id
+    ): Response {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        if (!$user = $this->userRepository->find($id)) {
+            // Get the 'id' parameter from the route URL
+            $this->addFlash('error_admin', 'The user does not exist.');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        if ($user->getDeletedAt() !== null) {
+            $this->addFlash('error_admin', 'This user has already been deleted.');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        // Store the initial bannedAt value before form submission
+        $initialBannedAtValue = $user->getBannedAt();
+
+        $form = $this->createForm(UserUpdateType::class, $user);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+
+            // Verifies if the isVerified is removed to the logged account
+            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() == 0) {
+                $user->isVerified();
+                $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
+                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+            }
+
+            // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
+            if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
+                if ($currentUser->getId() === $user->getId()) {
+                    $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
+                    return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                }
+                $user->setBannedAt(new DateTime());
+                $this->profileManager->disableProfiles($user);
+            } else {
+                $user->setBannedAt(null);
+                if ($form->get('isVerified')->getData()) {
+                    $this->profileManager->enableProfiles($user);
+                } else {
+                    $this->profileManager->disableProfiles($user);
+                }
+            }
+
+            $userRepository->save($user, true);
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'edited' => $user->getUuid(),
+                'by' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            $uuid = $user->getUuid();
+            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
+
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        $formReset = $this->createForm(ResetPasswordType::class, $user);
+        $formReset->handleRequest($request);
+
+        if ($formReset->isSubmitted() && $formReset->isValid()) {
+            // get the both typed passwords by the admin
+            $newPassword = $formReset->get('password')->getData();
+            $confirmPassword = $formReset->get('confirmPassword')->getData();
+
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
+                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+            }
+
+            // Get the User Provider && ProviderId
+            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
+            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+
+            // Hash the new password
+            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashedPassword);
+            $em->flush();
+
+            if ($user->getEmail() && $userExternalAuth->getProviderId() == UserProvider::EMAIL) {
+                // Send email
+                $email = (new Email())
+                    ->from(new Address($emailSender, $nameSender))
+                    ->to($user->getEmail())
+                    ->subject('Your Password Reset Details')
+                    ->html(
+                        $this->renderView(
+                            'email/user_password.html.twig',
+                            ['password' => $newPassword, 'isNewUser' => false]
+                        )
+                    );
+                $mailer->send($email);
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'edited ' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                    new DateTime(),
+                    $eventMetadata
+                );
+            }
+
+            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
+                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
+                );
+                // Retrieve the SMS resend interval from the settings
+                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
+                $currentTime = new DateTime();
+
+                // Retrieve the metadata from the latest event
+                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
+                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
+                    : null;
+                $resetAttempts = isset(
+                    $latestEventMetadata['resetAttempts']
+                ) ? $latestEventMetadata['resetAttempts'] : 0;
+
+                if (!$latestEvent || $resetAttempts < 3) {
+                    // Check if enough time has passed since the last reset
+                    if (
+                        !$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime &&
+                            $lastResetAccountPasswordTime->add($minInterval) < $currentTime)
+                    ) {
+                        $attempts = $resetAttempts + 1;
+
+                        $message = "Your new account password is: " . $newPassword . "%0A";
+                        $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
+
+                        $eventMetadata = [
+                            'ip' => $request->getClientIp(),
+                            'edited' => $user->getUuid(),
+                            'by' => $currentUser->getUuid(),
+                            'resetAttempts' => $attempts,
+                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $user,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                            new DateTime(),
+                            $eventMetadata
+                        );
+                    }
+                }
+            }
+            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
+            return $this->redirectToRoute('admin_page');
+        }
+
+        return $this->render(
+            'admin/edit.html.twig',
+            [
+                'form' => $form->createView(),
+                'formReset' => $formReset->createView(),
+                'user' => $user,
+                'data' => $data,
+                'current_user' => $currentUser,
+            ]
+        );
+    }
+
+    /*
+     * Render a confirmation password form
+     */
+    /**
+     * @param string $type Type of action
+     * @return Response
+     */
+    #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function confirmReset(string $type): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        return $this->render('admin/confirm.html.twig', [
+            'data' => $data,
+            'type' => $type
+        ]);
+    }
+
+}
