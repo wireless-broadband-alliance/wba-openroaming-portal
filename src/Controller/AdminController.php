@@ -41,60 +41,40 @@ class AdminController extends AbstractController
     private MailerInterface $mailer;
     private UserRepository $userRepository;
     private UserExternalAuthRepository $userExternalAuthRepository;
-    private ProfileManager $profileManager;
     private ParameterBagInterface $parameterBag;
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
-    private EntityManagerInterface $entityManager;
-    private PgpEncryptionService $pgpEncryptionService;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
-    private SendSMS $sendSMS;
-    private EventRepository $eventRepository;
 
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
      * @param UserExternalAuthRepository $userExternalAuthRepository
-     * @param ProfileManager $profileManager
      * @param ParameterBagInterface $parameterBag
      * @param GetSettings $getSettings
      * @param SettingRepository $settingRepository
-     * @param EntityManagerInterface $entityManager
-     * @param PgpEncryptionService $pgpEncryptionService
      * @param EventActions $eventActions
      * @param VerificationCodeGenerator $verificationCodeGenerator
-     * @param SendSMS $sendSMS
-     * @param EventRepository $eventRepository
      */
     public function __construct(
         MailerInterface $mailer,
         UserRepository $userRepository,
         UserExternalAuthRepository $userExternalAuthRepository,
-        ProfileManager $profileManager,
         ParameterBagInterface $parameterBag,
         GetSettings $getSettings,
         SettingRepository $settingRepository,
-        EntityManagerInterface $entityManager,
-        PgpEncryptionService $pgpEncryptionService,
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
-        SendSMS $sendSMS,
-        EventRepository $eventRepository
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->profileManager = $profileManager;
         $this->parameterBag = $parameterBag;
         $this->getSettings = $getSettings;
         $this->settingRepository = $settingRepository;
-        $this->entityManager = $entityManager;
-        $this->pgpEncryptionService = $pgpEncryptionService;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
-        $this->sendSMS = $sendSMS;
-        $this->eventRepository = $eventRepository;
     }
 
     /*
