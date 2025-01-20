@@ -412,16 +412,20 @@ class FreeradiusController extends AbstractController
         $row = 2;
         foreach ($trafficData as $data) {
             $sheet4->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['realm']))
-                ->setCellValue('B' . $row,
+                ->setCellValue(
+                    'B' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input_flat'])
                 )
-                ->setCellValue('C' . $row,
+                ->setCellValue(
+                    'C' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input'])
                 )
-                ->setCellValue('D' . $row,
+                ->setCellValue(
+                    'D' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output_flat'])
                 )
-                ->setCellValue('E' . $row,
+                ->setCellValue(
+                    'E' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output'])
                 );
             $row++;
@@ -473,10 +477,14 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($wifiStandardsData as $data) {
-            $sheet7->setCellValue('A' . $row,
+            $sheet7->setCellValue(
+                'A' . $row,
                 $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Standards'])
             )
-                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Usage']));
+                ->setCellValue(
+                    'B' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Usage'])
+                );
             $row++;
         }
 
