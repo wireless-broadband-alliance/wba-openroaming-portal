@@ -407,5 +407,4 @@ class AdminController extends AbstractController
             'getSettings' => $getSettings
         ]);
     }
-
 }

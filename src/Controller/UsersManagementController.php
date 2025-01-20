@@ -44,7 +44,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class UsersManagementController extends AbstractController
 {
-
     private ProfileManager $profileManager;
     private EventActions $eventActions;
     private ParameterBagInterface $parameterBag;
@@ -69,7 +68,6 @@ class UsersManagementController extends AbstractController
         SettingRepository $settingRepository,
         EventRepository $eventRepository,
         SendSMS $sendSMS,
-
     ) {
         $this->profileManager = $profileManager;
         $this->eventActions = $eventActions;
@@ -621,5 +619,4 @@ class UsersManagementController extends AbstractController
             'type' => $type
         ]);
     }
-
 }

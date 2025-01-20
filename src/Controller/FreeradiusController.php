@@ -25,7 +25,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class FreeradiusController extends AbstractController
 {
-
     private EntityManagerInterface $entityManager;
     private GetSettings $getSettings;
     private UserRepository $userRepository;
@@ -413,10 +412,18 @@ class FreeradiusController extends AbstractController
         $row = 2;
         foreach ($trafficData as $data) {
             $sheet4->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['realm']))
-                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input_flat']))
-                ->setCellValue('C' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input']))
-                ->setCellValue('D' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output_flat']))
-                ->setCellValue('E' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output']));
+                ->setCellValue('B' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input_flat'])
+                )
+                ->setCellValue('C' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input'])
+                )
+                ->setCellValue('D' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output_flat'])
+                )
+                ->setCellValue('E' . $row,
+                    $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output'])
+                );
             $row++;
         }
 
@@ -466,7 +473,9 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($wifiStandardsData as $data) {
-            $sheet7->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Standards']))
+            $sheet7->setCellValue('A' . $row,
+                $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Standards'])
+            )
                 ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Usage']));
             $row++;
         }
@@ -493,5 +502,4 @@ class FreeradiusController extends AbstractController
 
         return $this->file($tempFile, 'freeradiusStatistics.xlsx');
     }
-
 }
