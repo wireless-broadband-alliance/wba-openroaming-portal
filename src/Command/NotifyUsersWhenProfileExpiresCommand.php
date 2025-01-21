@@ -121,15 +121,12 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $interval = $dateToResend->diff($realTime);
                 if ($interval->days > 0) {
                     $timeToResendFlag = true;
-                }
-                else {
+                } else {
                     $timeToResendFlag = false;
                 }
-            }
-            elseif ($timeToResendNot and !$lastNotification) {
+            } elseif ($timeToResendNot and !$lastNotification) {
                 $timeToResendFlag = true;
-            }
-            else {
+            } else {
                 $timeToResendFlag = false;
             }
             // Notify user if within alert window
