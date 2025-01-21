@@ -109,10 +109,6 @@ class StatusType extends AbstractType
                     ],
                     'data' => $settingValue,
                     'constraints' => [
-                        new Length([
-                            'max' => 3,
-                            'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
-                        ]),
                         new GreaterThanOrEqual([
                             'value' => 1,
                             'message' => 'This timer should never be less than 0.',
