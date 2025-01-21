@@ -2,12 +2,12 @@
 
 namespace App\Security;
 
+use App\Repository\UserExternalAuthRepository;
 use App\Service\SamlActiveProviderService;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use OneLogin\Saml2\Error;
+use OneLogin\Saml2\ValidationError;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
@@ -16,80 +16,57 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class SamlCustomAuthenticator extends AbstractAuthenticator
 {
-    private LoggerInterface $logger;
-    private SamlActiveProviderService $samlActiveProviderService;
-    private RouterInterface $router;
+    private SamlActiveProviderService $samlService;
+    private UserExternalAuthRepository $userAuthRepo;
 
-    public function __construct(
-        LoggerInterface $logger,
-        SamlActiveProviderService $samlActiveProviderService,
-        RouterInterface $router
-    ) {
-        $this->logger = $logger;
-        $this->samlActiveProviderService = $samlActiveProviderService;
-        $this->router = $router;
+    public function __construct(SamlActiveProviderService $samlService, UserExternalAuthRepository $userAuthRepo)
+    {
+        $this->samlService = $samlService;
+        $this->userAuthRepo = $userAuthRepo;
     }
 
     public function supports(Request $request): ?bool
     {
-        // Check if the request contains a SAML response
-        return $request->isMethod('POST') && $request->get('SAMLResponse') !== null;
+        return $request->getPathInfo() === '/saml/acs'; // SAML assertion endpoint
     }
 
+    /**
+     * @throws ValidationError
+     * @throws Error
+     */
     public function authenticate(Request $request): SelfValidatingPassport
     {
-        // Extract SAML response
-        $samlResponse = $request->get('SAMLResponse');
+        $auth = $this->samlService->getActiveSamlProvider();
+        $auth->processResponse();
 
-        if (!$samlResponse) {
-            throw new AuthenticationException('SAMLResponse not found in the request.');
+        if ($auth->getErrors()) {
+            throw new AuthenticationException(implode(', ', $auth->getErrors()));
         }
 
-        // Find the current active provider
-        $activeProvider = $this->samlActiveProviderService->getActiveSamlProvider();
+        $attributes = $auth->getAttributes();
+        $nameId = $auth->getNameId();
 
-        if (!$activeProvider) {
-            throw new AuthenticationException('No active SAML provider found.');
+        // Find UserExternalAuth
+        $externalAuth = $this->userAuthRepo->findOneBy(['provider_id' => $nameId]);
+
+        if (!$externalAuth || !$externalAuth->getUser()) {
+            throw new AuthenticationException('User not found for the SAML response.');
         }
 
-        // Perform SAML validation and extract user information
-        // (This is where you'd integrate your SAML library to validate the response)
-        $userEmail = $this->validateSamlAndGetEmail($samlResponse, $activeProvider);
-
-        if (!$userEmail) {
-            throw new AuthenticationException('Invalid SAML response');
-        }
-
-        // Create a user passport to proceed with the Symfony security process
         return new SelfValidatingPassport(
-            new UserBadge($userEmail, function (string $userIdentifier) use ($userProvider) {
-                // Load user from your system's database or create a new one dynamically
-                return $userProvider->loadUserByIdentifier($userIdentifier);
+            new UserBadge($nameId, function () use ($externalAuth) {
+                return $externalAuth->getUser();
             })
         );
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?JsonResponse
     {
-        $this->logger->info("Authentication success for SAML user");
-
-        return new RedirectResponse($this->router->generate('app_landing'));
+        return new JsonResponse(['message' => 'Successfully authenticated.']);
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?JsonResponse
     {
-        $this->logger->error("Authentication failure: " . $exception->getMessage());
-
-        // Optional: Redirect or return error response
-        return new Response('Authentication Failed: ' . $exception->getMessage(), Response::HTTP_UNAUTHORIZED);
-    }
-
-    private function validateSamlAndGetEmail(string $samlResponse, $activeProvider): ?string
-    {
-        // Implement your SAML response validation logic
-        // Use a library like OneLogin SAML to decode and validate the SAMLResponse
-        // Example: parse SAML data and retrieve user email with active provider details
-        $email = 'user@example.com'; // Replace with parsed email from SAML response based on $activeProvider
-        return $email;
+        return new JsonResponse(['error' => $exception->getMessage()], 401);
     }
 }

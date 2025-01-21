@@ -67,7 +67,7 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         // If there is no referer URL, redirect the user to the home page
-        return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
 

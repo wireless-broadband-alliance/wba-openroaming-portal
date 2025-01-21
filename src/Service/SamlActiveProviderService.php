@@ -3,39 +3,45 @@
 namespace App\Service;
 
 use App\Repository\SamlProviderRepository;
+use OneLogin\Saml2\Auth;
+use OneLogin\Saml2\Error;
 
 class SamlActiveProviderService
 {
-    private SamlProviderRepository $repository;
+    private ?Auth $samlAuth = null;
 
-    public function __construct(SamlProviderRepository $repository)
+    public function __construct(private readonly SamlProviderRepository $repository)
     {
-        $this->repository = $repository;
     }
 
-    public function getActiveSamlProvider(): ?array
+    /**
+     * @throws Error
+     */
+    public function getActiveSamlProvider(): Auth
     {
-        $activeProvider = $this->repository->findOneBy(['isActive' => true]);
+        if ($this->samlAuth === null) {
+            // Fetch active provider
+            $activeProvider = $this->repository->findOneBy(['isActive' => true]);
 
-        if (!$activeProvider) {
-            return null;
-        }
-
-        $config = [
-            'idpEntityId' => $activeProvider->getIdpEntityId(),
-            'idpSsoUrl' => $activeProvider->getIdpSsoUrl(),
-            'idpX509Cert' => $activeProvider->getIdpX509Cert(),
-            'spEntityId' => $activeProvider->getSpEntityId(),
-            'spAcsUrl' => $activeProvider->getSpAcsUrl(),
-        ];
-
-        // Validate required URLs
-        foreach (['idpSsoUrl', 'spAcsUrl'] as $key) {
-            if (empty($config[$key]) || !filter_var($config[$key], FILTER_VALIDATE_URL)) {
-                throw new \RuntimeException("Invalid SAML configuration for: $key");
+            if (!$activeProvider) {
+                throw new \RuntimeException('No active SAML provider found.');
             }
-        }
 
-        return $config;
+            // Generate settings dynamically
+            $settings = [
+                'sp' => [
+                    'entityId' => $activeProvider->getSpEntityId(),
+                    'assertionConsumerService' => ['url' => $activeProvider->getSpAcsUrl()],
+                ],
+                'idp' => [
+                    'entityId' => $activeProvider->getIdpEntityId(),
+                    'singleSignOnService' => ['url' => $activeProvider->getIdpSsoUrl()],
+                    'x509cert' => $activeProvider->getIdpX509Cert(),
+                ],
+            ];
+
+            $this->samlAuth = new Auth($settings);
+        }
+        return $this->samlAuth;
     }
 }
