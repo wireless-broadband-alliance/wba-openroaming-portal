@@ -102,8 +102,7 @@ class StatusType extends AbstractType
                         ]),
                     ],
                 ]);
-            }
-            elseif ($settingName === 'TIME_INTERVAL_NOTIFICATION') {
+            } elseif ($settingName === 'TIME_INTERVAL_NOTIFICATION') {
                 $builder->add('TIME_INTERVAL_NOTIFICATION', IntegerType::class, [
                     'attr' => [
                         'description' => $description,
