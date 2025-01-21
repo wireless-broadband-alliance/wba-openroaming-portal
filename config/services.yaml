@@ -14,10 +14,6 @@ parameters:
     app.google_client_id: '%env(GOOGLE_CLIENT_ID)%'
     app.sentry_dsn: '%env(SENTRY_DSN)%'
 services:
-    App\Service\SamlProviderConfigService:
-        public: true
-        arguments:
-            $repository: '@App\Repository\SamlProviderRepository'
     App\EventListener\JWTExceptionListener:
         tags:
             - { name: kernel.event_subscriber }

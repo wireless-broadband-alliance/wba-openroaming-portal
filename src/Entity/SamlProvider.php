@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SamlProviderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +33,9 @@ class SamlProvider
 
     #[ORM\Column(length: 255)]
     private ?string $spAcsUrl = null;
+
+    #[ORM\Column]
+    private ?bool $isActive = null;
 
     public function getId(): ?int
     {
@@ -105,6 +110,48 @@ class SamlProvider
     public function setSpAcsUrl(string $spAcsUrl): static
     {
         $this->spAcsUrl = $spAcsUrl;
+
+        return $this;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserExternalAuth>
+     */
+    public function getUserExternalAuths(): Collection
+    {
+        return $this->userExternalAuths;
+    }
+
+    public function addUserExternalAuth(UserExternalAuth $userExternalAuth): static
+    {
+        if (!$this->userExternalAuths->contains($userExternalAuth)) {
+            $this->userExternalAuths->add($userExternalAuth);
+            $userExternalAuth->setSamlProvider($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): static
+    {
+        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
+            // set the owning side to null (unless already changed)
+            if ($userExternalAuth->getSamlProvider() === $this) {
+                $userExternalAuth->setSamlProvider(null);
+            }
+        }
 
         return $this;
     }
