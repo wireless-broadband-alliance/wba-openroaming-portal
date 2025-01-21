@@ -60,8 +60,11 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
         );
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?JsonResponse
-    {
+    public function onAuthenticationSuccess(
+        Request $request,
+        TokenInterface $token,
+        string $firewallName
+    ): ?JsonResponse {
         return new JsonResponse(['message' => 'Successfully authenticated.']);
     }
 
