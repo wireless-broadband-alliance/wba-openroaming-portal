@@ -29,6 +29,7 @@ use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\EventRepository;
+use App\Repository\NotificationRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -87,6 +88,7 @@ class AdminController extends AbstractController
     private VerificationCodeGenerator $verificationCodeGenerator;
     private SendSMS $sendSMS;
     private EventRepository $eventRepository;
+    private NotificationRepository $notificationRepository;
 
     /**
      * @param MailerInterface $mailer
@@ -104,6 +106,7 @@ class AdminController extends AbstractController
      * @param VerificationCodeGenerator $verificationCodeGenerator
      * @param SendSMS $sendSMS
      * @param EventRepository $eventRepository
+     * @param NotificationRepository $notificationRepository
      */
     public function __construct(
         MailerInterface $mailer,
@@ -120,7 +123,8 @@ class AdminController extends AbstractController
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
         SendSMS $sendSMS,
-        EventRepository $eventRepository
+        EventRepository $eventRepository,
+        NotificationRepository $notificationRepository
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -137,6 +141,7 @@ class AdminController extends AbstractController
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->sendSMS = $sendSMS;
         $this->eventRepository = $eventRepository;
+        $this->notificationRepository = $notificationRepository;
     }
 
     /*
@@ -435,6 +440,7 @@ class AdminController extends AbstractController
     ): Response {
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
+        $userNotifications = $this->notificationRepository->findBy(['user_id' => $user]);
 
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -527,6 +533,12 @@ class AdminController extends AbstractController
         // Update external auth entity
         foreach ($userExternalAuths as $externalAuth) {
             $em->remove($externalAuth);
+        }
+
+        if ($userNotifications) {
+            foreach ($userNotifications as $notification) {
+                $em->remove($notification);
+            }
         }
 
         // Persist changes
