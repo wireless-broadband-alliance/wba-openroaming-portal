@@ -16,6 +16,20 @@ class NotificationRepository extends ServiceEntityRepository
         parent::__construct($registry, Notification::class);
     }
 
+    public function findLastNotificationByType(User $user, string $type): ?Notification
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.user = :user')
+            ->andWhere('n.type = :type')
+            ->setParameter('user', $user)
+            ->setParameter('type', $type)
+            ->orderBy('n.lastNotification', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+
     //    /**
     //     * @return Notification[] Returns an array of Notification objects
     //     */

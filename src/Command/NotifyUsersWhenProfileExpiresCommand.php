@@ -2,6 +2,10 @@
 
 namespace App\Command;
 
+use App\Entity\Notification;
+use App\Enum\NotificationType;
+use App\Repository\NotificationRepository;
+use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\ExpirationProfileService;
@@ -35,6 +39,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     private UserExternalAuthRepository $userExternalAuthRepository;
     private UserRadiusProfileRepository $userRadiusProfileRepository;
     private ExpirationProfileService $expirationProfileService;
+    private SettingRepository $settingRepository;
+    private NotificationRepository $notificationRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -44,7 +50,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         UserExternalAuthRepository $userExternalAuthRepository,
         UserRadiusProfileRepository $userRadiusProfileRepository,
         RegistrationEmailGenerator $registrationEmailGenerator,
-        ExpirationProfileService $expirationProfileService
+        ExpirationProfileService $expirationProfileService,
+        SettingRepository $settingRepository,
+        NotificationRepository $notificationRepository,
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -55,6 +63,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         $this->userRadiusProfileRepository = $userRadiusProfileRepository;
         $this->registrationEmailGenerator = $registrationEmailGenerator;
         $this->expirationProfileService = $expirationProfileService;
+        $this->settingRepository = $settingRepository;
+        $this->notificationRepository = $notificationRepository;
     }
 
     /**
@@ -97,12 +107,45 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $timeLeft = $limitTime->diff($realTime);
             $timeLeftDays = $timeLeft->invert === 0 ? $timeLeft->days + 1 : 0;
 
+
+            $timeToResendNot = $this->settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+            $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                $user,
+                NotificationType::PROFILE_EXPIRATION
+            );
+
+            if ($timeToResendNot and $lastNotification) {
+                $dateToResend = $lastNotification
+                    ->getLastNotification()
+                    ->modify('+' . $timeToResendNot->getValue() . ' days');
+                $interval = $dateToResend->diff($realTime);
+                if ($interval->days > 0) {
+                    $timeToResendFlag = true;
+                }
+                else {
+                    $timeToResendFlag = false;
+                }
+            }
+            elseif ($timeToResendNot and !$lastNotification) {
+                $timeToResendFlag = true;
+            }
+            else {
+                $timeToResendFlag = false;
+            }
             // Notify user if within alert window
             if (
                 $realTime >= $alertTime &&
                 $realTime <= $limitTime &&
-                $userRadiusProfile->getStatus() === 1
-            ) {
+                $userRadiusProfile->getStatus() === 1 &&
+                $timeToResendFlag
+            ) {;
+                $notification = new Notification();
+                $notification->setType(NotificationType::PROFILE_EXPIRATION);
+                $notification->setUser($user);
+                $notification->setLastNotification($realTime);
+                $this->entityManager->persist($notification);
+                $this->entityManager->flush();
+
                 if ($user->getEmail()) {
                     $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays + 1);
                 }
