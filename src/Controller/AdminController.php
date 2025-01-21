@@ -1418,6 +1418,7 @@ class AdminController extends AbstractController
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
+            $timeIntervalNotification = $submittedData['TIME_INTERVAL_NOTIFICATION'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
@@ -1444,6 +1445,12 @@ class AdminController extends AbstractController
                 $userDeleteTimeSetting->setValue($userDeleteTime);
                 $em->persist($userDeleteTimeSetting);
             }
+            $timeIntervalNotificationSetting = $settingsRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+            if ($timeIntervalNotificationSetting) {
+                $timeIntervalNotificationSetting->setValue($timeIntervalNotification);
+                $em->persist($timeIntervalNotificationSetting);
+            }
+
             // Flush the changes to the database
             $em->flush();
 

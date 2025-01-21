@@ -103,6 +103,27 @@ class StatusType extends AbstractType
                     ],
                 ]);
             }
+            elseif ($settingName === 'TIME_INTERVAL_NOTIFICATION') {
+                $builder->add('TIME_INTERVAL_NOTIFICATION', IntegerType::class, [
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'data' => $settingValue,
+                    'constraints' => [
+                        new Length([
+                            'max' => 3,
+                            'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        ]),
+                        new GreaterThanOrEqual([
+                            'value' => 1,
+                            'message' => 'This timer should never be less than 0.',
+                        ]),
+                        new NotBlank([
+                            'message' => 'Please make sure to set a timer',
+                        ]),
+                    ],
+                ]);
+            }
         }
     }
 
