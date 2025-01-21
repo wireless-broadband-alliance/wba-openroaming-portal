@@ -37,6 +37,17 @@ class SamlProvider
     #[ORM\Column]
     private ?bool $isActive = null;
 
+    /**
+     * @var Collection<int, UserExternalAuth>
+     */
+    #[ORM\OneToMany(mappedBy: 'samlProvider', targetEntity: UserExternalAuth::class)]
+    private Collection $userExternalAuths;
+
+    public function __construct()
+    {
+        $this->userExternalAuths = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -122,6 +133,36 @@ class SamlProvider
     public function setActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserExternalAuth>
+     */
+    public function getUserExternalAuths(): Collection
+    {
+        return $this->userExternalAuths;
+    }
+
+    public function addUserExternalAuth(UserExternalAuth $userExternalAuth): static
+    {
+        if (!$this->userExternalAuths->contains($userExternalAuth)) {
+            $this->userExternalAuths->add($userExternalAuth);
+            $userExternalAuth->setSamlProvider($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): static
+    {
+        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
+            // set the owning side to null (unless already changed)
+            if ($userExternalAuth->getSamlProvider() === $this) {
+                $userExternalAuth->setSamlProvider(null);
+            }
+        }
 
         return $this;
     }

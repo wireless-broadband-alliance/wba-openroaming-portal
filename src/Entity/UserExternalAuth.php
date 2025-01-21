@@ -24,7 +24,7 @@ class UserExternalAuth
     private ?string $provider_id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userExternalAuths')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?SamlProvider $samlProvider = null;
 
     public function getId(): ?int
