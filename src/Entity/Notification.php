@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\NotificationRepository;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,16 +16,16 @@ class Notification
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'notification')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?User $user = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private User $user;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $lastNotification = null;
+    private \DateTimeInterface $lastNotification;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    public ?string $type = null;
+    #[ORM\Column(length: 255)]
+    private string $type;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -34,31 +35,31 @@ class Notification
         return $this->user;
     }
 
-    public function setUser(?User $user): Notification
+    public function setUser(User $user): Notification
     {
         $this->user = $user;
 
         return $this;
     }
 
-    public function getLastNotification(): ?\DateTimeInterface
+    public function getLastNotification(): DateTimeInterface
     {
         return $this->lastNotification;
     }
 
-    public function setLastNotification(\DateTimeInterface $lastNotification): static
+    public function setLastNotification(DateTimeInterface $lastNotification): static
     {
         $this->lastNotification = $lastNotification;
 
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function setType(?string $type): void
+    public function setType(string $type): void
     {
         $this->type = $type;
     }

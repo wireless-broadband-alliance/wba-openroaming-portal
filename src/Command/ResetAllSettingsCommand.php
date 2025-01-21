@@ -119,7 +119,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
             ['name' => 'USER_DELETE_TIME', 'value' => '5'],
-            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '5'],
+            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
             ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
             ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
