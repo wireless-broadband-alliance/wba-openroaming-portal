@@ -1,4 +1,18 @@
 # Changelog
+---
+
+# Release V1.7.0
+
+- Multiple Saml Providers
+- **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
+  exist
+  associated accounts that have a saml provider.
+
+> **Important**: This command must be executed **before running any migrations**.
+
+```bash
+php bin/console app:set-saml-provider
+```
 
 ---
 
