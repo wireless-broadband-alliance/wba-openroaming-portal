@@ -114,28 +114,28 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 NotificationType::PROFILE_EXPIRATION
             );
 
-            if ($timeToResendNot and $lastNotification) {
-                $dateToResend = $lastNotification
-                    ->getLastNotification()
-                    ->modify('+' . $timeToResendNot->getValue() . ' days');
+            if ($timeToResendNot && $lastNotification) {
+                $dateToResend = (new \DateTime(
+                    $lastNotification->getLastNotification()->format('Y-m-d H:i:s')
+                ))->modify('+' . $timeToResendNot->getValue() . ' days');
                 $interval = $dateToResend->diff($realTime);
                 if ($interval->days > 0) {
                     $timeToResendFlag = true;
                 } else {
                     $timeToResendFlag = false;
                 }
-            } elseif ($timeToResendNot and !$lastNotification) {
+            } elseif ($timeToResendNot && !$lastNotification) {
                 $timeToResendFlag = true;
             } else {
                 $timeToResendFlag = false;
             }
             // Notify user if within alert window
             if (
+                $timeToResendFlag &&
                 $realTime >= $alertTime &&
                 $realTime <= $limitTime &&
-                $userRadiusProfile->getStatus() === 1 &&
-                $timeToResendFlag
-            ) {;
+                $userRadiusProfile->getStatus() === 1
+            ) {
                 $notification = new Notification();
                 $notification->setType(NotificationType::PROFILE_EXPIRATION);
                 $notification->setUser($user);
