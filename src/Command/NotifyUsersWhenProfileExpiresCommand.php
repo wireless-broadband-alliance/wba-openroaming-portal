@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Notification;
 use App\Enum\NotificationType;
+use App\Enum\UserProvider;
 use App\Repository\NotificationRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -13,6 +14,7 @@ use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -79,6 +81,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
         $userRadiusProfiles = $this->userRadiusProfileRepository->findAll();
+        $notificationResendInterval = $this->settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
 
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             $user = $userRadiusProfile->getUser();
@@ -102,36 +105,29 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
             $limitTime = $expirationData['limitTime'];
             $alertTime = $expirationData['notifyTime'];
-            $realTime = new \DateTime();
+            $realTime = new DateTime();
 
             $timeLeft = $limitTime->diff($realTime);
             $timeLeftDays = $timeLeft->invert === 0 ? $timeLeft->days + 1 : 0;
 
-
-            $timeToResendNot = $this->settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
             $lastNotification = $this->notificationRepository->findLastNotificationByType(
                 $user,
                 NotificationType::PROFILE_EXPIRATION
             );
 
-            if ($timeToResendNot && $lastNotification) {
-                $dateToResend = (new \DateTime(
+            $sendNotification = true;
+
+            if ($notificationResendInterval && $lastNotification) {
+                $dateToResend = (new DateTime(
                     $lastNotification->getLastNotification()->format('Y-m-d H:i:s')
-                ))->modify('+' . $timeToResendNot->getValue() . ' days');
-                $interval = $dateToResend->diff($realTime);
-                if ($interval->days > 0) {
-                    $timeToResendFlag = true;
-                } else {
-                    $timeToResendFlag = false;
+                ))->modify('+' . $notificationResendInterval->getValue() . ' days');
+
+                if ($realTime < $dateToResend) {
+                    $sendNotification = false;
                 }
-            } elseif ($timeToResendNot && !$lastNotification) {
-                $timeToResendFlag = true;
-            } else {
-                $timeToResendFlag = false;
             }
-            // Notify user if within alert window
             if (
-                $timeToResendFlag &&
+                $sendNotification &&
                 $realTime >= $alertTime &&
                 $realTime <= $limitTime &&
                 $userRadiusProfile->getStatus() === 1
@@ -140,21 +136,55 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $notification->setType(NotificationType::PROFILE_EXPIRATION);
                 $notification->setUser($user);
                 $notification->setLastNotification($realTime);
-                $this->entityManager->persist($notification);
-                $this->entityManager->flush();
 
-                if ($user->getEmail()) {
-                    $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail($user, $timeLeftDays + 1);
-                }
-                if ($user->getPhoneNumber()) {
-                    $this->sendSMS->sendSms(
-                        $user->getPhoneNumber(),
-                        'Your OpenRoaming profile will expire in ' . ($timeLeftDays + 1) . ' days.'
-                    );
+                try {
+                    // Priority: Send Email Notification
+                    if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with a email
+                        $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail(
+                            $user,
+                            $timeLeftDays + 1
+                        );
+                        $output->writeln("Email sent to user ID {$user->getId()}");
+                        try {
+                            $this->entityManager->persist($notification);
+                            $this->entityManager->flush();
+                        } catch (Exception $e) {
+                            $output->writeln(
+                                "Failed to store notification for user ID {$user->getId()}: " . $e->getMessage()
+                            );
+                        }
+                        break; // Stop processing once the match is found
+                    }
+
+                    $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+                    foreach ($userExternalAuths as $externalAuth) {
+                        // If email is not sent, try to use phoneNumber
+                        if (
+                            ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT) &&
+                            $user->getPhoneNumber() &&
+                            $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER
+                        ) {
+                            $this->sendSMS->sendSms(
+                                $user->getPhoneNumber(),
+                                'Your OpenRoaming profile will expire in ' . ($timeLeftDays + 1) . ' days.'
+                            );
+                            $output->writeln("SMS sent to user ID {$user->getId()}");
+                            try {
+                                $this->entityManager->persist($notification);
+                                $this->entityManager->flush();
+                            } catch (Exception $e) {
+                                $output->writeln(
+                                    "Failed to store notification for user ID {$user->getId()}: " . $e->getMessage()
+                                );
+                            }
+                            break; // Stop processing once the match is found
+                        }
+                    }
+                } catch (Exception $e) {
+                    $output->writeln("Failed to send notification for user ID {$user->getId()}: " . $e->getMessage());
                 }
             }
 
-            // Disable profile if expired
             if (
                 $realTime > $limitTime &&
                 $userRadiusProfile->getStatus() === 1
