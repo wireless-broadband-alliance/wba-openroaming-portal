@@ -1498,9 +1498,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    public ?string $saml_identifier = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -1514,9 +1511,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $googleId = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
@@ -1659,18 +1653,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
-    public function getSamlIdentifier(): ?string
-    {
-        return $this->saml_identifier;
-    }
-
-    public function setSamlIdentifier(?string $saml_identifier): self
-    {
-        $this->saml_identifier = $saml_identifier;
-
-        return $this;
-    }
-
     public function setSamlAttributes(array $attributes): void
     {
         $this->uuid = $attributes['samlUuid'][0];
@@ -1779,11 +1761,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
-    public function getGoogleId(): ?string
-    {
-        return $this->googleId;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -1856,18 +1833,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         if (!$this->event->contains($notification)) {
             $this->event->add($notification);
             $notification->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNotification(Notification $notification): static
-    {
-        if ($this->event->removeElement($notification)) {
-            // set the owning side to null (unless already changed)
-            if ($notification->getUser() === $this) {
-                $notification->setUser(null);
-            }
         }
 
         return $this;
