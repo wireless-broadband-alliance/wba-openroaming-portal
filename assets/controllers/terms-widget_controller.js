@@ -68,6 +68,9 @@ export default class extends Controller {
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
         for (let button of this.buttonTargets) {
+            // Set or remove the "disabled" property
+            button.disabled = !isChecked;
+
             // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
 

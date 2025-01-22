@@ -27,6 +27,9 @@ services:
   App\Controller\GoogleController:
     arguments:
       $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient'
+  App\Controller\MicrosoftController:
+    arguments:
+      $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\MicrosoftClient'
   # default configuration for services in *this* file
   _defaults:
     autowire: true      # Automatically injects dependencies in your services.

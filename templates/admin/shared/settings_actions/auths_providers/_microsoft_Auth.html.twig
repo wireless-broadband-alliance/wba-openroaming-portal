@@ -1,0 +1,158 @@
+<div {{ stimulus_controller('radio-card') }}>
+    <div>
+        <div class="p-2 mt-10">
+            <h1 class="text-xl md:text-2xl font-semibold">MICROSOFT</h1>
+        </div>
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+            {% for setting in form %}
+                {# Display only the authentication settings #}
+                {% if setting.vars.name in ['AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_MICROSOFT'] %}
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+                         name="MicrosoftCards"
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_MICROSOFT'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                        {# Title and Icon #}
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                {% set displayName = {
+                                    'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED': 'Mode',
+                                    'AUTH_METHOD_MICROSOFT_LOGIN_LABEL': 'Label',
+                                    'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_MICROSOFT': 'Time to disable profiles(days)',
+                                }[setting.vars.name] ?? setting.vars.name %}
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40"
+                            >
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                     src="{{ asset('resources/logos/info_icon.svg') }}"
+                                     alt="info_icon"/>
+                            </label>
+                        </div>
+                        {% if setting.vars.name in ['AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_MICROSOFT'] %}
+                            {% if setting.vars.name == 'PROFILE_LIMIT_DATE_MICROSOFT' %}
+                                <div class="flex items-center space-x-2 mt-5"
+                                     data-controller="certificate-limit"
+                                     data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                    {{ form_widget(setting, {
+                                        'attr': {
+                                            'class': 'form-widget',
+                                            'data-certificate-limit-target': 'input',
+                                        }
+                                    }) }}
+                                    <button type="button" class="btn-cert-date"
+                                            data-certificate-limit-target="button"
+                                            data-action="certificate-limit#updateDate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+                                             viewBox="0 0 24 24">
+                                            <g fill="none" stroke="currentColor" stroke-linecap="round"
+                                               stroke-linejoin="round" stroke-width="2">
+                                                <path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/>
+                                                <path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        {% if setting.vars.name in ['AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'] %}
+                            <div class="flex flex-col items-center space-y-2 mt-5">
+                                {# Render "ON" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="onLabelMicrosoft">
+                                    On
+                                    <input type="radio"
+                                           name="{{ form.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.vars.full_name }}"
+                                           value="true"
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }} {{ stimulus_target('radio-card', 'on') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"/>
+                                        </svg>
+                                    </div>
+                                </label>
+                                {# Render "OFF" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="offLabelMicrosoft">
+                                    Off
+                                    <input type="radio"
+                                           name="{{ form.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.vars.full_name }}"
+                                           value="false"
+                                           class="radio-input hidden"{{ form.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"/>
+                                        </svg>
+                                    </div>
+                                </label>
+                            </div>
+                        {% endif %}
+
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+
+                        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                            {{ form_errors(setting) }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    {# Microsoft Sub-settings #}
+    <div>
+        <div class="p-2 mt-10">
+            <h1 class="text-xl md:text-2xl font-semibold">Microsoft Sub-Settings</h1>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+            {% for setting in form %}
+                {# Display only the authentication settings #}
+                {% if setting.vars.name in ['VALID_DOMAINS_MICROSOFT_LOGIN'] %}
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+                         name="MicrosoftSubCards"
+                         id="{{ setting.vars.name }}" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+                        {# Title and Icon #}
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                {% set displayName = {
+                                    'VALID_DOMAINS_MICROSOFT_LOGIN': 'Domains to authenticate with Google',
+                                }[setting.vars.name] ?? setting.vars.name %}
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40"
+                            >
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                     src="{{ asset('resources/logos/info_icon.svg') }}"
+                                     alt="info_icon"/>
+                            </label>
+                        </div>
+
+                        {% if setting.vars.name in ['VALID_DOMAINS_MICROSOFT_LOGIN'] %}
+                            <div class="flex items-center space-x-2 mt-5">
+                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input', 'data-radio-card-target': 'input' }}) }}
+                            </div>
+                        {% endif %}
+
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+
+                        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                            {{ form_errors(setting) }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -114,6 +114,11 @@ class GetSettings
             'description' => $this->getSettingDescription('VALID_DOMAINS_GOOGLE_LOGIN'),
         ];
 
+        $data['VALID_DOMAINS_MICROSOFT_LOGIN'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN'])->getValue(),
+            'description' => $this->getSettingDescription('VALID_DOMAINS_MICROSOFT_LOGIN'),
+        ];
+
         $data['title'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
             'description' => $this->getSettingDescription('PAGE_TITLE'),
@@ -210,6 +215,24 @@ class GetSettings
         $data['GOOGLE_LOGIN_DESCRIPTION'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'),
+        ];
+
+        $data['MICROSOFT_LOGIN_ENABLED'] = [
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'])->getValue(
+            ) === 'true',
+            // phpcs:enable
+            'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'),
+        ];
+
+        $data['MICROSOFT_LOGIN_LABEL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_LABEL'),
+        ];
+
+        $data['MICROSOFT_LOGIN_DESCRIPTION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION'),
         ];
 
         $data['EMAIL_REGISTER_ENABLED'] = [
@@ -333,18 +356,27 @@ class GetSettings
             'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
             'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
         ];
+
         $data['PROFILE_LIMIT_DATE_SAML'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SAML'])->getValue(),
             'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SAML'),
         ];
+
         $data['PROFILE_LIMIT_DATE_GOOGLE'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE'])->getValue(),
             'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_GOOGLE'),
         ];
+
+        $data['PROFILE_LIMIT_DATE_MICROSOFT'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_MICROSOFT'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_MICROSOFT'),
+        ];
+
         $data['PROFILE_LIMIT_DATE_EMAIL'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL'])->getValue(),
             'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_EMAIL'),
         ];
+
         $data['PROFILE_LIMIT_DATE_SMS'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SMS'])->getValue(),
             'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SMS'),
@@ -397,6 +429,11 @@ class GetSettings
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => 'Enable or disable Google authentication method',
             'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => 'The label for Google authentication button on the login page',
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => 'The description for Google authentication on the login page',
+            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => 'Enable or disable Microsoft authentication method',
+            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => 'The label for Microsoft authentication button on the login page',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => 'The description for Microsoft authentication on the login page',
+            // phpcs:enable
             'AUTH_METHOD_REGISTER_ENABLED' => 'Enable or disable Register authentication method',
             'AUTH_METHOD_REGISTER_LABEL' => 'The label for Register authentication button on the login page',
             'AUTH_METHOD_REGISTER_DESCRIPTION' => 'The description for Register authentication on the login page',
@@ -433,6 +470,9 @@ class GetSettings
             'VALID_DOMAINS_GOOGLE_LOGIN' => 'When this is empty, it allows all the domains to authenticate. 
             Please only type the domains you want to be able to authenticate',
 
+            'VALID_DOMAINS_MICROSOFT_LOGIN' => 'When this is empty, it allows all the domains to authenticate. 
+            Please only type the domains you want to be able to authenticate',
+
             'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => 'Type of encryption defined for the creation of the profiles',
 
             'CAPPORT_ENABLED' => 'Enable or disable Capport DHCP configuration',
@@ -447,7 +487,8 @@ class GetSettings
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
             'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
-            'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with GOOGLE login',
+            'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',
+            'PROFILE_LIMIT_DATE_MICROSOFT' => 'Time in days to disable profiles for users with Microsoft login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
         ];
