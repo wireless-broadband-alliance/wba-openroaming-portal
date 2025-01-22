@@ -2,8 +2,8 @@
 
 namespace App\Security;
 
-use App\Repository\UserExternalAuthRepository;
 use App\Service\SamlActiveProviderService;
+use Exception;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\ValidationError;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,18 +16,16 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class SamlCustomAuthenticator extends AbstractAuthenticator
 {
-    private SamlActiveProviderService $samlService;
-    private UserExternalAuthRepository $userAuthRepo;
-
-    public function __construct(SamlActiveProviderService $samlService, UserExternalAuthRepository $userAuthRepo)
-    {
-        $this->samlService = $samlService;
-        $this->userAuthRepo = $userAuthRepo;
+    public function __construct(
+        private readonly SamlActiveProviderService $samlService,
+        private readonly CustomSamlUserFactory $userFactory
+    ) {
     }
 
-    public function supports(Request $request): ?bool
+    public function supports(Request $request): bool
     {
-        return $request->getPathInfo() === '/saml/acs'; // SAML assertion endpoint
+        // This authenticator only supports requests to '/saml/acs'
+        return $request->getPathInfo() === '/saml/acs';
     }
 
     /**
@@ -36,26 +34,37 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
      */
     public function authenticate(Request $request): SelfValidatingPassport
     {
+        // Get the SAML Response from the request
+        $samlResponse = $request->request->get('SAMLResponse');
+
+        if (!$samlResponse) {
+            throw new AuthenticationException('Missing SAMLResponse in the request.');
+        }
+
         $auth = $this->samlService->getActiveSamlProvider();
         $auth->processResponse();
-
         if ($auth->getErrors()) {
             throw new AuthenticationException(implode(', ', $auth->getErrors()));
         }
 
-        $attributes = $auth->getAttributes();
+        // Retrieve NameID and attributes from response
         $nameId = $auth->getNameId();
+        if (!$nameId) {
+            throw new AuthenticationException('Missing NameID in SAML response.');
+        }
+        $attributes = $auth->getAttributes();
 
-        // Find UserExternalAuth
-        $externalAuth = $this->userAuthRepo->findOneBy(['provider_id' => $nameId]);
-
-        if (!$externalAuth || !$externalAuth->getUser()) {
-            throw new AuthenticationException('User not found for the SAML response.');
+        try {
+            // Factory will create or retrieve the user based on SAML attributes
+            $user = $this->userFactory->createUser($nameId, $attributes);
+        } catch (Exception $e) {
+            throw new AuthenticationException('Failed to process user from SAML response: '.$e->getMessage(), 0, $e);
         }
 
+        // Return a SelfValidatingPassport including the user
         return new SelfValidatingPassport(
-            new UserBadge($nameId, function () use ($externalAuth) {
-                return $externalAuth->getUser();
+            new UserBadge($nameId, function () use ($user) {
+                return $user; // Returning the user created or found by the factory
             })
         );
     }
@@ -65,7 +74,7 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
         TokenInterface $token,
         string $firewallName
     ): ?JsonResponse {
-        return new JsonResponse(['message' => 'Successfully authenticated.']);
+        return new JsonResponse(['message' => 'Authentication successful!']);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?JsonResponse

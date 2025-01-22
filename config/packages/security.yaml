@@ -31,20 +31,20 @@ security:
             # Integrate multiple custom authenticators here.
             custom_authenticators:
                 - App\Security\PasswordAuthenticator # Password-based authenticator
-                - App\Security\SamlCustomAuthenticator # SAML authenticator
+                - App\Security\SamlCustomAuthenticator # SAML Custom authenticator
 
             # Form login for password-based authentication.
             form_login:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-            saml:
-                identifier_attribute: sAMAccountName
-                user_factory: saml_user_factory
-                persist_user: true
-                use_attribute_friendly_name: true
-                check_path: saml_acs
-                login_path: saml_login
+#            saml: This feature is disable because is being replaced by a custom authenticator
+#                identifier_attribute: sAMAccountName
+#                user_factory: saml_user_factory
+#                persist_user: true
+#                use_attribute_friendly_name: true
+#                check_path: saml_acs
+#                login_path: saml_login
             # Logout configuration for users with SAML or password authentication.
             logout:
                 path: saml_logout
