@@ -347,6 +347,11 @@ class GetSettings
             'description' => $this->getSettingDescription('SMS_TIMER_RESEND'),
         ];
 
+        $data['TIME_INTERVAL_NOTIFICATION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION'])->getValue(),
+            'description' => $this->getSettingDescription('TIME_INTERVAL_NOTIFICATION'),
+        ];
+
         $data['DEFAULT_REGION_PHONE_INPUTS'] = [
             'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
             'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
