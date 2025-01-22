@@ -16,7 +16,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeGenerator;
+use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -47,7 +47,7 @@ class RegistrationController extends AbstractController
     private SendSMS $sendSMS;
     private TokenStorageInterface $tokenStorage;
     private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
+    private VerificationCodeEmailGenerator $verificationCodeGenerator;
     private RegistrationEmailGenerator $emailGenerator;
 
     /**
@@ -59,7 +59,7 @@ class RegistrationController extends AbstractController
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator
      * @param RegistrationEmailGenerator $emailGenerator Used to generate and send emails for the user
      */
     public function __construct(
@@ -69,7 +69,7 @@ class RegistrationController extends AbstractController
         SendSMS $sendSMS,
         TokenStorageInterface $tokenStorage,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
+        VerificationCodeEmailGenerator $verificationCodeGenerator,
         RegistrationEmailGenerator $emailGenerator,
     ) {
         $this->userRepository = $userRepository;

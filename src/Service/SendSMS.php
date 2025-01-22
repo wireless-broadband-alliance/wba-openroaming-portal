@@ -31,7 +31,7 @@ class SendSMS
     private ParameterBagInterface $parameterBag;
     private EventRepository $eventRepository;
     private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
+    private VerificationCodeEmailGenerator $verificationCodeGenerator;
 
     /**
      * SendSMS constructor.
@@ -42,7 +42,7 @@ class SendSMS
      * @param ParameterBagInterface $parameterBag
      * @param EventRepository $eventRepository
      * @param EventActions $eventActions
-     * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator
      */
     public function __construct(
         UserRepository $userRepository,
@@ -51,7 +51,7 @@ class SendSMS
         ParameterBagInterface $parameterBag,
         EventRepository $eventRepository,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
+        VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;

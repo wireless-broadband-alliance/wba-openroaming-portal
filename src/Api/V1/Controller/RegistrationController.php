@@ -18,7 +18,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeGenerator;
+use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -59,7 +59,7 @@ class RegistrationController extends AbstractController
     private GetSettings $getSettings;
     private SettingRepository $settingRepository;
     private UserPasswordHasherInterface $userPasswordHasher;
-    private VerificationCodeGenerator $verificationCodeGenerator;
+    private VerificationCodeEmailGenerator $verificationCodeGenerator;
     private CaptchaValidator $captchaValidator;
     private RegistrationEmailGenerator $emailGenerator;
     private ValidatorInterface $validator;
@@ -76,7 +76,7 @@ class RegistrationController extends AbstractController
         GetSettings $getSettings,
         SettingRepository $settingRepository,
         UserPasswordHasherInterface $userPasswordHasher,
-        VerificationCodeGenerator $verificationCodeGenerator,
+        VerificationCodeEmailGenerator $verificationCodeGenerator,
         CaptchaValidator $captchaValidator,
         RegistrationEmailGenerator $emailGenerator,
         ValidatorInterface $validator
