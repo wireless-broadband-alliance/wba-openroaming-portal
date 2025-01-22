@@ -185,6 +185,11 @@ class GetSettings
             ];
         }
 
+        $data['TWO_FACTOR_AUTH_STATUS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS'])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_STATUS'),
+        ];
+
         $data['SAML_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
@@ -409,6 +414,8 @@ class GetSettings
 
             'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to between genuine users and bots.
              This can be used in Live or Demo modes.',
+
+            'TWO_FACTOR_AUTH_STATUS' => 'The status of two factor authentication when users log in to the platform',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',

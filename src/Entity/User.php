@@ -1712,6 +1712,12 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $twoFAcode = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool  $twoFA = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
@@ -2123,5 +2129,25 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->isDisabled = $isDisabled;
 
         return $this;
+    }
+
+    public function getTwoFAcode(): ?string
+    {
+        return $this->twoFAcode;
+    }
+
+    public function setTwoFAcode(?string $twoFAcode): void
+    {
+        $this->twoFAcode = $twoFAcode;
+    }
+
+    public function getTwoFA(): ?bool
+    {
+        return $this->twoFA;
+    }
+
+    public function setTwoFA(?bool $twoFA): void
+    {
+        $this->twoFA = $twoFA;
     }
 }
