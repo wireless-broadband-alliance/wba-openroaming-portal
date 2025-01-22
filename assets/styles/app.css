@@ -54,7 +54,19 @@
 	@apply h-[50px] px-2 border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
 }
 
+.btn-cert-date {
+    @apply h-[45px] w-[45px] px-2 border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
+}
+
 .btn-logout {
 	@apply h-[50px] px-2 border border-[#E33D40] rounded-[5px] bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
+}
+
+.btn-disabled {
+	@apply opacity-60 cursor-not-allowed bg-[#006400];
+}
+
+.btn-secondary-disabled {
+	@apply opacity-60 cursor-not-allowed bg-[#696969] border-transparent;
 }
 

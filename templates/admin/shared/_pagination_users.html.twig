@@ -7,7 +7,7 @@
             >
                 <label for="count">{{ label }}</label>
 
-                <select class="form-select" name="count" id="count" data-update-url-target="select">
+                <select class="form-select" name="count" id="count" data-update-url-target="select" onchange="this.form.submit()">
                     <option value="7" {% if count == 7 %} selected {% endif %}>7</option>
                     <option value="20" {% if count == 20 %} selected {% endif %}>20</option>
                     <option value="50" {% if count == 50 %} selected {% endif %}>50</option>
@@ -20,13 +20,13 @@
         <div class="sm:ml-auto flex flex-row text-base cursor-default">
             {# Display the range of user numbers on the current page #}
             <div class="flex space-x-2 mr-4">
-                {{ (currentPage - 1) * perPage + 1 }} - {{ min(currentPage * perPage, occurrencies) }}
+                {{ (currentPage - 1) * count + 1 }} - {{ min(currentPage * count, occurrencies) }}
                 of {{ occurrencies }}
             </div>
 
             <div class="flex space-x-2.5">
                 {# First Page navigation #}
-                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': 1, 'filter': activeFilter ?? '', 'count': count}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to First Page">
                     <twig:ux:icon name="wba:d-right" class="w-4 rotate-180" fill="none"/>
@@ -34,7 +34,7 @@
                 </a>
 
                 {# Previous Page navigation #}
-                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage - 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                <a {% if currentPage > 1 %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage - 1, 'filter': activeFilter ?? '', 'count': count}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to Previous Page">
                     <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
@@ -42,7 +42,7 @@
                 </a>
 
                 {# Next Page navigation #}
-                <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage + 1, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': currentPage + 1, 'filter': activeFilter ?? '', 'count': count}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to Next Page">
                     <twig:ux:icon name="wba:right" class="w-4" fill="none"/>
@@ -50,7 +50,7 @@
                 </a>
 
                 {# Last Page navigation #}
-                <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': totalPages, 'filter': activeFilter ?? ''}) }}" {% endif %}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {'u': searchTerm ?? '', 'page': totalPages, 'filter': activeFilter ?? '', 'count': count}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to Last Page">
                     <twig:ux:icon name="wba:d-right" class="w-4" fill="none"/>

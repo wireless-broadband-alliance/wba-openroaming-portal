@@ -73,6 +73,8 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
 
     protected function getLoginUrl(Request $request): string
     {
-        return $this->urlGenerator->generate(self::LOGIN_ROUTE);
+        $type = $request->get('type', 'user');
+
+        return $this->urlGenerator->generate(self::LOGIN_ROUTE, ['type' => $type]);
     }
 }

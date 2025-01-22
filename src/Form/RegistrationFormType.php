@@ -43,16 +43,7 @@ class RegistrationFormType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
-            ->add('email', EmailType::class)
-            ->add('agreeTerms', CheckboxType::class, [
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
-                'label' => 'I agree to the terms',
-            ]);
+            ->add('email', EmailType::class);
 
         // Check if TURNSTILE_CHECKER value is ON
         if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {

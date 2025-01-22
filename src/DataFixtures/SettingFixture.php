@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class SettingFixture extends Fixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $settings = [
             ['name' => 'RADIUS_REALM_NAME', 'value' => 'EditMe'],
@@ -66,8 +66,11 @@ class SettingFixture extends Fixture
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
 
+            ['name' => 'TOS', 'value' => 'LINK'],
+            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
+
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
 
@@ -80,6 +83,13 @@ class SettingFixture extends Fixture
             ['name' => 'SMS_HANDLE', 'value' => ''],
             ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
+            ['name' => 'USER_DELETE_TIME', 'value' => '5'],
+            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
+            ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
+            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];
 
         foreach ($settings as $settingData) {

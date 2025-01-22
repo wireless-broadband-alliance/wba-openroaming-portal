@@ -18,6 +18,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use libphonenumber\PhoneNumber;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -373,7 +374,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions.',
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                                             // phpcs:enable
                                         ],
                                     ],
@@ -1073,17 +1074,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Missing required fields: phone number, password, or turnstile_token',
+                                            'error' => 'Missing required fields: country code, phone number, password, or turnstile_token',
                                             // phpcs:enable
                                         ],
                                     ],
-                                    'invalid_phone_number_format' => [
+                                    'invalid_phone_number_format_or_country_code' => [
                                         'summary' => 'Invalid phone number format',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
-                                            // phpcs:enable
+                                            'error' => 'Invalid phone number format or country code.',
                                         ],
                                     ],
                                     'invalid_json' => [
@@ -1110,7 +1109,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'description' => 'A short description of the error',
                                             'example' => 'Failed to send SMS',
                                         ],
                                     ],
@@ -1139,15 +1137,20 @@ use Symfony\Component\Validator\Constraints as Assert;
                 description: 'This endpoint registers a new user using their phone number and 
                 validates the request with a CAPTCHA token.',
                 requestBody: new RequestBody(
-                    description: 'User registration data and CAPTCHA validation token',
+                    description: 'User registration data with SMS and CAPTCHA validation token',
                     content: new \ArrayObject([
                         'application/json' => new \ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
+                                    'country_code' => [
+                                        'type' => 'string',
+                                        'example' => 'PT',
+                                        'description' => 'User phone number',
+                                    ],
                                     'phone_number' => [
                                         'type' => 'string',
-                                        'example' => '+1234567890',
+                                        'example' => '1234567890',
                                         'description' => 'User phone number',
                                     ],
                                     'password' => [
@@ -1171,7 +1174,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phone_number', 'password', 'turnstile_token'],
+                                'required' => ['country_code', 'phone_number', 'password', 'turnstile_token'],
                             ],
                         ]),
                     ]),
@@ -1363,7 +1366,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
-                                            'description' => 'Error message explaining why the request failed',
                                             'example' => 'Missing required fields or invalid data',
                                         ],
                                     ],
@@ -1380,16 +1382,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing Fields',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Missing required fields: phone number, turnstile_token',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required fields: country code, phone number, turnstile_token',
+                                            // phpcs:enable
                                         ],
                                     ],
-                                    'invalid_phone_number_format' => [
-                                        'summary' => 'Invalid phone number format.',
+                                    'invalid_phone_number_format_or_country_code' => [
+                                        'summary' => 'Invalid phone number format',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Invalid phone number format. Use a valid format, example: +19700XXXXXX',
-                                            // phpcs:enable
+                                            'error' => 'Invalid phone number format or country code.',
                                         ],
                                     ],
                                     'invalid_json' => [
@@ -1440,10 +1442,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
+                                    'country_code' => [
+                                        'type' => 'string',
+                                        'example' => 'PT',
+                                        'description' => 'User phone number',
+                                    ],
                                     'phone_number' => [
                                         'type' => 'string',
                                         'description' => 'The phone number of the user requesting password reset',
-                                        'example' => '+1234567890',
+                                        'example' => '1234567890',
                                     ],
                                     'turnstile_token' => [
                                         'type' => 'string',
@@ -1451,7 +1458,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'example' => 'valid_test_token',
                                     ],
                                 ],
-                                'required' => ['phone_number', 'turnstile_token'],
+                                'required' => ['country_code', 'phone_number', 'turnstile_token'],
                             ],
                         ]),
                     ]),
@@ -1488,7 +1495,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private ?string $email = null;
 
     #[ORM\Column(type: 'boolean')]
-    private $isVerified = false;
+    private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $saml_identifier = null;
@@ -1520,11 +1527,14 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
     private Collection $event;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Notification::class, orphanRemoval: true)]
+    private Collection $notification;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $phoneNumber = null;
+    #[ORM\Column(type: 'phone_number', nullable: true)]
+    private ?PhoneNumber $phoneNumber = null;
 
     #[ORM\Column(nullable: true)]
     private ?bool $forgot_password_request = null;
@@ -1668,7 +1678,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->first_name = $attributes['givenName'][0];
         $this->last_name = $attributes['surname'][0] ?? ''; // set surname to empty string if null
         $this->password = 'notused'; //invalid hash so won't ever authenticate
-        $this->isVerified = 1;
+        $this->isVerified = true;
         $this->isDisabled = false;
         // #$this->setLevel(LevelType::NONE);
     }
@@ -1774,13 +1784,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this->googleId;
     }
 
-    public function setGoogleId(?string $googleId): self
-    {
-        $this->googleId = $googleId;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -1843,6 +1846,33 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+    public function getNotification(): Collection
+    {
+        return $this->notification;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->event->contains($notification)) {
+            $this->event->add($notification);
+            $notification->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->event->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
     public function getDeletedAt(): ?\DateTimeInterface
     {
         return $this->deletedAt;
@@ -1855,15 +1885,14 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
-    public function getPhoneNumber(): ?string
+    public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(?string $phoneNumber): static
+    public function setPhoneNumber(?PhoneNumber $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
-
         return $this;
     }
 

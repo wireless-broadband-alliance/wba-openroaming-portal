@@ -102,6 +102,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
             ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
 
+            ['name' => 'TOS', 'value' => 'LINK'],
+            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
@@ -116,6 +118,13 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'SMS_HANDLE', 'value' => ''],
             ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
             ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
+            ['name' => 'USER_DELETE_TIME', 'value' => '5'],
+            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
+            ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
+            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];
 
         // Begin a database transaction to ensure data consistency
@@ -149,9 +158,8 @@ class ResetAllSettingsCommand extends Command
             $message = <<<EOL
 
 <info>Success:</info> All the settings have been set to the default values.
-<comment>Note:</comment> If you want to reset the custom settings too,
-       make sure to run the following command:
-       <fg=blue>php bin/console reset:customS</>
+<comment>Note:</comment> If you want to reset any another setting please check using this command:
+      <fg=blue>php bin/console reset</>
 EOL;
 
             // Output the styled message

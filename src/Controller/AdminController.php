@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\DeletedUserData;
 use App\Entity\Event;
 use App\Entity\Setting;
+use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TextEditorName;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
 use App\Form\AuthType;
@@ -19,17 +21,19 @@ use App\Form\CustomType;
 use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\ResetPasswordType;
+use App\Form\RevokeProfilesType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
-use App\Form\UserExternalAuthType;
 use App\Form\UserUpdateType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\EventRepository;
+use App\Repository\NotificationRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\CertificateService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PgpEncryptionService;
@@ -42,6 +46,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use HTMLPurifier;
+use HTMLPurifier_Config;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -81,6 +88,7 @@ class AdminController extends AbstractController
     private VerificationCodeGenerator $verificationCodeGenerator;
     private SendSMS $sendSMS;
     private EventRepository $eventRepository;
+    private NotificationRepository $notificationRepository;
 
     /**
      * @param MailerInterface $mailer
@@ -98,6 +106,7 @@ class AdminController extends AbstractController
      * @param VerificationCodeGenerator $verificationCodeGenerator
      * @param SendSMS $sendSMS
      * @param EventRepository $eventRepository
+     * @param NotificationRepository $notificationRepository
      */
     public function __construct(
         MailerInterface $mailer,
@@ -114,7 +123,8 @@ class AdminController extends AbstractController
         EventActions $eventActions,
         VerificationCodeGenerator $verificationCodeGenerator,
         SendSMS $sendSMS,
-        EventRepository $eventRepository
+        EventRepository $eventRepository,
+        NotificationRepository $notificationRepository
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
@@ -131,6 +141,7 @@ class AdminController extends AbstractController
         $this->verificationCodeGenerator = $verificationCodeGenerator;
         $this->sendSMS = $sendSMS;
         $this->eventRepository = $eventRepository;
+        $this->notificationRepository = $notificationRepository;
     }
 
     /*
@@ -142,7 +153,7 @@ class AdminController extends AbstractController
      * @param int $page
      * @param string $sort
      * @param string $order
-     * @param int $count
+     * @param int|null $count
      * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -213,6 +224,8 @@ class AdminController extends AbstractController
         $exportUsers = $this->parameterBag->get('app.export_users');
         // Check if the delete action has a public PGP key defined
         $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
+        // Create form views
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
@@ -231,22 +244,68 @@ class AdminController extends AbstractController
             'count' => $count,
             'export_users' => $exportUsers,
             'delete_users' => $deleteUsers,
-            'ApUsage' => null
+            'ApUsage' => null,
+            'formRevokeProfiles' => $formRevokeProfiles
         ]);
+    }
+
+    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_revoke_profiles', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function revokeUsers(
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $em,
+        $id
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $user = $userRepository->find($id);
+        if (!$user) {
+            $this->addFlash('error', 'User not found.');
+            return $this->redirectToRoute('app_landing');
+        }
+        $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+        if (!$revokeProfiles) {
+            $this->addFlash('error_admin', 'This account doesn\'t have profiles associated!');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE,
+            'userRevoked' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+            'by' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::ADMIN_REVOKE_PROFILES,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        $this->addFlash(
+            'success_admin',
+            sprintf(
+                'Profile associated "%s" have been revoked.',
+                $user->getUuid()
+            )
+        );
+
+        return $this->redirectToRoute('admin_page');
     }
 
     /*
     * Handle export of the Users Table on the Main Route
     */
     /**
-     * @param UserRepository $userRepository
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
      * @return Response
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(
-        UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         Request $request
     ): Response {
@@ -262,7 +321,7 @@ class AdminController extends AbstractController
         }
 
         // Fetch all users excluding admins
-        $users = $userRepository->findExcludingAdmin();
+        $users = $this->userRepository->findExcludingAdmin();
 
         // Create a PHPSpreadsheet object
         $spreadsheet = new Spreadsheet();
@@ -293,7 +352,7 @@ class AdminController extends AbstractController
                 $sheet->setCellValueExplicit(
                     'B' . $row,
                     $this->escapeSpreadsheetValue($uuid),
-                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                    DataType::TYPE_STRING
                 );
             } else {
                 $sheet->setCellValue('B' . $row, $this->escapeSpreadsheetValue($uuid));
@@ -307,7 +366,7 @@ class AdminController extends AbstractController
                 $sheet->setCellValueExplicit(
                     'D' . $row,
                     $this->escapeSpreadsheetValue($phoneNumber),
-                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                    DataType::TYPE_STRING
                 );
             } else {
                 $sheet->setCellValue('D' . $row, '');
@@ -368,19 +427,20 @@ class AdminController extends AbstractController
     /**
      * @param $id
      * @param EntityManagerInterface $em
-     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param Request $request
      * @return Response
+     * @throws \JsonException
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
         $id,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher,
         Request $request
     ): Response {
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
+        $userNotifications = $this->notificationRepository->findBy(['user_id' => $user]);
 
         if (!$user) {
             throw new NotFoundHttpException('User not found');
@@ -420,21 +480,23 @@ class AdminController extends AbstractController
             'user' => $deletedUserData,
             'externalAuths' => $deletedUserExternalAuthData,
         ];
-        $jsonDataCombined = json_encode($combinedData);
+        $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
 
         // Encrypt combined JSON data using PGP encryption
         $pgpEncryptedService = new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
 
         // Handle encryption errors
-        if ($pgpEncryptedData[0] == UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
+        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
                 'The public key is not set. 
             Make sure to define a public key in pgp_public_key/public_key.asc'
             );
             return $this->redirectToRoute('admin_page');
-        } elseif ($pgpEncryptedData[0] == UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
+        }
+
+        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
             $this->addFlash(
                 'error_admin',
                 'The public key is empty. 
@@ -461,8 +523,8 @@ class AdminController extends AbstractController
 
         // Update user entity
         $user->setUuid($user->getId());
-        $user->setEmail('');
-        $user->setPhoneNumber('');
+        $user->setEmail(null);
+        $user->setPhoneNumber(null);
         $user->setPassword($user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);
@@ -471,6 +533,12 @@ class AdminController extends AbstractController
         // Update external auth entity
         foreach ($userExternalAuths as $externalAuth) {
             $em->remove($externalAuth);
+        }
+
+        if ($userNotifications) {
+            foreach ($userNotifications as $notification) {
+                $em->remove($notification);
+            }
         }
 
         // Persist changes
@@ -554,7 +622,6 @@ class AdminController extends AbstractController
 
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
-                // Check if the admin is trying to ban himself
                 if ($currentUser->getId() === $user->getId()) {
                     $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
@@ -563,13 +630,11 @@ class AdminController extends AbstractController
                 $this->disableProfiles($user);
             } else {
                 $user->setBannedAt(null);
-                $this->enableProfiles($user);
-            }
-
-            if ($form->get('isVerified')->getData()) {
-                $this->enableProfiles($user);
-            } else {
-                $this->disableProfiles($user);
+                if ($form->get('isVerified')->getData()) {
+                    $this->enableProfiles($user);
+                } else {
+                    $this->disableProfiles($user);
+                }
             }
 
             $userRepository->save($user, true);
@@ -1092,10 +1157,43 @@ class AdminController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+        if (!$tosTextEditor) {
+            $tosTextEditor = new TextEditor();
+            $tosTextEditor->setName(TextEditorName::TOS);
+            $tosTextEditor->setContent('');
+            $em->persist($tosTextEditor);
+        }
+        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY]);
+        if (!$privacyPolicyTextEditor) {
+            $privacyPolicyTextEditor = new TextEditor();
+            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY);
+            $privacyPolicyTextEditor->setContent('');
+            $em->persist($privacyPolicyTextEditor);
+        }
+        $em->flush();
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
+
+        foreach ($settings as $setting) {
+            if ($setting->getName() === 'TOS_EDITOR' || $setting->getName() === 'PRIVACY_POLICY_EDITOR') {
+                $em->remove($setting);
+                $em->flush();
+            }
+        }
+
+        $tosTextEditorSetting = new Setting();
+        $tosTextEditorSetting->setName('TOS_EDITOR');
+        $tosTextEditorSetting->setValue($tosTextEditor->getContent());
+        $privacyPolicyTextEditorSetting = new Setting();
+        $privacyPolicyTextEditorSetting->setName('PRIVACY_POLICY_EDITOR');
+        $privacyPolicyTextEditorSetting->setValue($privacyPolicyTextEditor->getContent());
+
+        $settings = array_merge($settings, [$tosTextEditorSetting, $privacyPolicyTextEditorSetting]);
 
         $form = $this->createForm(TermsType::class, null, [
             'settings' => $settings,
@@ -1107,30 +1205,66 @@ class AdminController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-            // Update the 'TOS_LINK' and 'PRIVACY_POLICY_LINK' settings
+            // Update settings
+            $tos = $submittedData['TOS'];
+            $privacyPolicy = $submittedData['PRIVACY_POLICY'];
             $tosLink = $submittedData['TOS_LINK'] ?? null;
             $privacyPolicyLink = $submittedData['PRIVACY_POLICY_LINK'] ?? null;
+            $tosTextEditor = $submittedData['TOS_EDITOR'] ?? '';
+            $privacyPolicyTextEditor = $submittedData['PRIVACY_POLICY_EDITOR'] ?? '';
 
-            // Check if the setting is an empty input
-            if ($tosLink === null) {
-                $tosLink = "";
-            }
-            if ($privacyPolicyLink === null) {
-                $privacyPolicyLink = "";
-            }
 
-            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
             if ($tosSetting) {
-                $tosSetting->setValue($tosLink);
+                $tosSetting->setValue($tos);
                 $em->persist($tosSetting);
             }
 
-            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
             if ($privacyPolicySetting) {
-                $privacyPolicySetting->setValue($privacyPolicyLink);
+                $privacyPolicySetting->setValue($privacyPolicy);
                 $em->persist($privacyPolicySetting);
             }
 
+            $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
+            if ($tosLinkSetting) {
+                $tosLinkSetting->setValue($tosLink);
+                $em->persist($tosLinkSetting);
+            }
+
+            $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
+            if ($privacyPolicyLinkSetting) {
+                $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
+                $em->persist($privacyPolicyLinkSetting);
+            }
+
+            if ($tosTextEditor) {
+                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+                if ($tosEditorSetting) {
+                    $config = HTMLPurifier_Config::createDefault();
+                    $config->set('Cache.DefinitionImpl', null);
+                    $purifier = new HTMLPurifier($config);
+
+                    $cleanHTML = $purifier->purify($tosTextEditor);
+                    $tosEditorSetting->setContent($cleanHTML);
+                }
+                $em->persist($tosEditorSetting);
+            }
+
+            if ($privacyPolicyTextEditor) {
+                $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
+                    'name' => TextEditorName::PRIVACY_POLICY
+                ]);
+                if ($privacyPolicyEditorSetting) {
+                    $config = HTMLPurifier_Config::createDefault();
+                    $config->set('Cache.DefinitionImpl', null);
+                    $purifier = new HTMLPurifier($config);
+
+                    $cleanHTML = $purifier->purify($privacyPolicyTextEditor);
+                    $privacyPolicyEditorSetting->setContent($cleanHTML);
+                }
+                $em->persist($privacyPolicyEditorSetting);
+            }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
@@ -1143,6 +1277,7 @@ class AdminController extends AbstractController
             );
 
 
+            $em->flush();
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
@@ -1155,6 +1290,13 @@ class AdminController extends AbstractController
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function sanitizeHtml(string $html): string
+    {
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', sys_get_temp_dir());
+        return (new \HTMLPurifier($config))->purify($html);
     }
 
     /**
@@ -1204,14 +1346,22 @@ class AdminController extends AbstractController
                     $value = $submittedData[$settingName] ?? null;
 
                     // Check for specific settings that need domain validation
-                    if (in_array($settingName, ['RADIUS_REALM_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM'])) {
-                        if (!$this->isValidDomain($value)) {
-                            $this->addFlash(
-                                'error_admin',
-                                "The value for $settingName is not a valid domain or does not resolve to an IP address."
-                            );
-                            return $this->redirectToRoute('admin_dashboard_settings_radius');
-                        }
+                    if (
+                        in_array(
+                            $settingName,
+                            [
+                                'RADIUS_REALM_NAME',
+                                'DOMAIN_NAME',
+                                'RADIUS_TLS_NAME',
+                                'NAI_REALM'
+                            ]
+                        ) && !$this->isValidDomain($value)
+                    ) {
+                        $this->addFlash(
+                            'error_admin',
+                            "The value for $settingName is not a valid domain or does not resolve to an IP address."
+                        );
+                        return $this->redirectToRoute('admin_dashboard_settings_radius');
                     }
 
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
@@ -1279,6 +1429,8 @@ class AdminController extends AbstractController
             // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
+            $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
+            $timeIntervalNotification = $submittedData['TIME_INTERVAL_NOTIFICATION'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
@@ -1300,6 +1452,17 @@ class AdminController extends AbstractController
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
             }
+            $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
+            if ($userDeleteTimeSetting) {
+                $userDeleteTimeSetting->setValue($userDeleteTime);
+                $em->persist($userDeleteTimeSetting);
+            }
+            $timeIntervalNotificationSetting = $settingsRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+            if ($timeIntervalNotificationSetting) {
+                $timeIntervalNotificationSetting->setValue($timeIntervalNotification);
+                $em->persist($timeIntervalNotificationSetting);
+            }
+
             // Flush the changes to the database
             $em->flush();
 
@@ -1417,7 +1580,8 @@ class AdminController extends AbstractController
     public function settingsAuths(
         Request $request,
         EntityManagerInterface $em,
-        GetSettings $getSettings
+        GetSettings $getSettings,
+        CertificateService $certificateService
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -1427,12 +1591,29 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
+        $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
+        $certificateLimitDate = strtotime($certificateService->getCertificateExpirationDate($certificatePath));
+        $realTime = time();
+        $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
+        $profileLimitDate = ((int)$timeLeft);
+        if ($profileLimitDate < 0) {
+            $profileLimitDate = 0;
+        }
+
+        $defaultTimeZone = date_default_timezone_get();
+        $dateTime = (new DateTime())
+            ->setTimestamp($certificateLimitDate)
+            ->setTimezone(new \DateTimeZone($defaultTimeZone));
+
+        // Convert to human-readable format
+        $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settings,
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
 
         $form->handleRequest($request);
-
 
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
@@ -1441,15 +1622,18 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_SAML_ENABLED',
                 'AUTH_METHOD_SAML_LABEL',
                 'AUTH_METHOD_SAML_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_SAML',
 
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
                 'VALID_DOMAINS_GOOGLE_LOGIN',
+                'PROFILE_LIMIT_DATE_GOOGLE',
 
                 'AUTH_METHOD_REGISTER_ENABLED',
                 'AUTH_METHOD_REGISTER_LABEL',
                 'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_EMAIL',
 
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
@@ -1458,6 +1642,7 @@ class AdminController extends AbstractController
                 'AUTH_METHOD_SMS_REGISTER_ENABLED',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
                 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+                'PROFILE_LIMIT_DATE_SMS',
             ];
 
             $labelsFields = [
@@ -1497,13 +1682,13 @@ class AdminController extends AbstractController
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];
+
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST,
                 new DateTime(),
                 $eventMetadata
             );
-
             $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
@@ -1514,6 +1699,8 @@ class AdminController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
     }
 
@@ -1626,7 +1813,8 @@ class AdminController extends AbstractController
                 'SMS_USER_ID',
                 'SMS_HANDLE',
                 'SMS_FROM',
-                'SMS_TIMER_RESEND'
+                'SMS_TIMER_RESEND',
+                'DEFAULT_REGION_PHONE_INPUTS'
             ];
 
             foreach ($settingsToUpdate as $settingName) {
@@ -1702,11 +1890,31 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
+        $interval = $startDate->diff($endDate);
+
+        if ($interval->days > 366) {
+            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            return $this->redirectToRoute('admin_dashboard_statistics');
+        }
+
         $fetchChartDevices = $this->fetchChartDevices($startDate, $endDate);
         $fetchChartAuthentication = $this->fetchChartAuthentication($startDate, $endDate);
         $fetchChartPlatformStatus = $this->fetchChartPlatformStatus($startDate, $endDate);
         $fetchChartUserVerified = $this->fetchChartUserVerified($startDate, $endDate);
         $fetchChartSMSEmail = $this->fetchChartSMSEmail($startDate, $endDate);
+
+        $memory_before = memory_get_usage();
+        $memory_after = memory_get_usage();
+        $memory_diff = $memory_after - $memory_before;
+
+        // Check that the memory usage does not exceed the PHP memory limit of 128M
+        if ($memory_diff > 128 * 1024 * 1024) {
+            $this->addFlash(
+                'error_admin',
+                'The data you requested is too large to be processed. Please try a smaller date range.'
+            );
+            return $this->redirectToRoute('admin_dashboard_statistics');
+        }
 
         return $this->render('admin/statistics.html.twig', [
             'data' => $data,
@@ -1715,8 +1923,8 @@ class AdminController extends AbstractController
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
             'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
-            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
-            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+            'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
+            'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
         ]);
     }
 
@@ -1728,6 +1936,8 @@ class AdminController extends AbstractController
      * @param int $page
      * @return Response
      * @throws \JsonException
+     * @throws \DateMalformedStringException
+     * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1739,15 +1949,9 @@ class AdminController extends AbstractController
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
-        // Get the submitted start and end dates from the query parameters
+        // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
         $endDateString = $request->request->get('endDate');
-
-        // Get the current date on the URL if the pagination of the AP Table was used
-        if ($startDateString == null || $endDateString == null) {
-            $startDateString = $request->query->get('startDate');
-            $endDateString = $request->query->get('endDate');
-        }
 
         // Convert the date strings to DateTime objects
         if ($startDateString) {
@@ -1764,15 +1968,34 @@ class AdminController extends AbstractController
             $endDate = new DateTime();
         }
 
+        $interval = $startDate->diff($endDate);
+        if ($interval->y > 1) {
+            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
+        }
+
         // Fetch all the required data, graphics etc...
         $fetchChartAuthenticationsFreeradius = $this->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $this->fetchChartRealmsFreeradius($startDate, $endDate);
-        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius($startDate, $endDate);
+        $fetchChartCurrentAuthFreeradius = $this->fetchChartCurrentAuthFreeradius();
         $fetchChartTrafficFreeradius = $this->fetchChartTrafficFreeradius($startDate, $endDate);
         $fetchChartSessionAverageFreeradius = $this->fetchChartSessionAverageFreeradius($startDate, $endDate);
         $fetchChartSessionTotalFreeradius = $this->fetchChartSessionTotalFreeradius($startDate, $endDate);
         $fetchChartWifiTags = $this->fetchChartWifiVersion($startDate, $endDate);
         $fetchChartApUsage = $this->fetchChartApUsage($startDate, $endDate);
+
+        $memory_before = memory_get_usage();
+        $memory_after = memory_get_usage();
+        $memory_diff = $memory_after - $memory_before;
+
+        // Check that the memory usage does not exceed the PHP memory limit of 128M
+        if ($memory_diff > 128 * 1024 * 1024) {
+            $this->addFlash(
+                'error_admin',
+                'The data you requested is too large to be processed. Please try a smaller date range.'
+            );
+            return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
+        }
 
         // Extract the connection attempts
         $authCounts = [
@@ -1858,8 +2081,8 @@ class AdminController extends AbstractController
             'totalTimeJson' => json_encode($fetchChartSessionTotalFreeradius, JSON_THROW_ON_ERROR),
             'wifiTagsJson' => json_encode($fetchChartWifiTags, JSON_THROW_ON_ERROR),
             'ApUsage' => $fetchChartApUsage,
-            'selectedStartDate' => $startDate ? $startDate->format('Y-m-d\TH:i') : '',
-            'selectedEndDate' => $endDate ? $endDate->format('Y-m-d\TH:i') : '',
+            'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
+            'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
             'paginationApUsage' => true
         ]);
@@ -1868,6 +2091,7 @@ class AdminController extends AbstractController
 
     /**
      * Exports the freeradius data
+     * @throws Exception
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
@@ -1978,7 +2202,7 @@ class AdminController extends AbstractController
             ];
         }
 
-        // Prepare the Wifi Standards Usage data for Excel
+        // Prepare the Wi-Fi Standards Usage data for Excel
         $wifiStandardsData = [];
         foreach ($fetchChartWifiTags['labels'] as $index => $wifi_Standards) {
             $wifiUsage = $fetchChartWifiTags['datasets'][0]['data'][$index] ?? 0;
@@ -2346,7 +2570,7 @@ class AdminController extends AbstractController
     /**
      * @throws Exception
      */
-    private function fetchChartAuthenticationsFreeradius(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    private function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
     {
         // Fetch all data with date filtering
         $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
@@ -2357,14 +2581,12 @@ class AdminController extends AbstractController
         // Determine the appropriate time granularity
         if ($interval->days > 365.2) {
             $granularity = 'year';
+        } elseif ($interval->days > 90) {
+            $granularity = 'month';
+        } elseif ($interval->days > 30) {
+            $granularity = 'week';
         } else {
-            if ($interval->days > 90) {
-                $granularity = 'month';
-            } elseif ($interval->days > 30) {
-                $granularity = 'week';
-            } else {
-                $granularity = 'day';
-            }
+            $granularity = 'day';
         }
 
         $authsCounts = [
@@ -2378,21 +2600,12 @@ class AdminController extends AbstractController
             $eventDateTime = new DateTime($event->getAuthdate());
 
             // Determine the time period based on granularity
-            switch ($granularity) {
-                case 'year':
-                    $period = $eventDateTime->format('Y');
-                    break;
-                case 'month':
-                    $period = $eventDateTime->format('Y-m');
-                    break;
-                case 'week':
-                    $period = $eventDateTime->format('o-W'); // 'o' for ISO-8601 year number, 'W' for week number
-                    break;
-                case 'day':
-                default:
-                    $period = $eventDateTime->format('Y-m-d');
-                    break;
-            }
+            $period = match ($granularity) {
+                'year' => $eventDateTime->format('Y'),
+                'month' => $eventDateTime->format('Y-m'),
+                'week' => $eventDateTime->format('o-W'),
+                default => $eventDateTime->format('Y-m-d'),
+            };
 
             // Initialize the period if not already set
             if (!isset($authsCounts['Accepted'][$period])) {
@@ -2434,12 +2647,11 @@ class AdminController extends AbstractController
      *
      * @throws Exception
      */
-    private function fetchChartRealmsFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartRealmsFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
@@ -2450,11 +2662,12 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $realm = $event['realm'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!$realm) {
                 continue;
@@ -2491,7 +2704,7 @@ class AdminController extends AbstractController
     /**
      * @throws Exception
      */
-    private function fetchChartCurrentAuthFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartCurrentAuthFreeradius(): array
     {
         // Get the active sessions using the findActiveSessions query
         $activeSessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
@@ -2512,12 +2725,11 @@ class AdminController extends AbstractController
      * Fetch data related to traffic passed on the freeradius database
      * @throws Exception
      */
-    private function fetchChartTrafficFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartTrafficFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
@@ -2529,11 +2741,12 @@ class AdminController extends AbstractController
             $totalInput = $content['total_input'];
             $totalOutput = $content['total_output'];
             $date = $content['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!isset($realmTraffic[$realm])) {
                 $realmTraffic[$realm] = [];
@@ -2566,12 +2779,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to session time (average) on the freeradius database
      */
-    private function fetchChartSessionAverageFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartSessionAverageFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
@@ -2582,11 +2794,12 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!isset($sessionAverageTimes[$groupKey])) {
                 $sessionAverageTimes[$groupKey] = ['totalTime' => 0, 'count' => 0];
@@ -2612,12 +2825,11 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to session time (total) on the freeradius database
      */
-    private function fetchChartSessionTotalFreeradius(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartSessionTotalFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
@@ -2628,11 +2840,12 @@ class AdminController extends AbstractController
         foreach ($events as $event) {
             $sessionTime = $event['acctSessionTime'];
             $date = $event['acctStartTime'];
-            $groupKey = $date->format(
-                $granularity === 'year' ? 'Y' :
-                    ($granularity === 'month' ? 'Y-m' :
-                        ($granularity === 'week' ? 'o-W' : 'Y-m-d'))
-            );
+            $groupKey = match ($granularity) {
+                'year' => $date->format('Y'),
+                'month' => $date->format('Y-m'),
+                'week' => $date->format('o-W'),
+                default => $date->format('Y-m-d'),
+            };
 
             if (!isset($sessionTotalTimes[$groupKey])) {
                 $sessionTotalTimes[$groupKey] = 0;
@@ -2656,18 +2869,17 @@ class AdminController extends AbstractController
     /**
      * Fetch data related to wifi tag usage on the freeradius database
      */
-    private function fetchChartWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate, $granularity) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
         $wifiUsage = [];
 
-        // Group the events based on the wifi Standard
+        // Group the events based on the Wi-Fi Standard
         foreach ($events as $event) {
             $connectInfo = $event['connectInfo_start'];
             $wifiStandard = $this->mapConnectInfoToWifiStandard($connectInfo);
@@ -2700,12 +2912,11 @@ class AdminController extends AbstractController
      *
      * @throws Exception
      */
-    private function fetchChartApUsage(?DateTime $startDate, ?DateTime $endDate): array
+    private function fetchChartApUsage(DateTime $startDate, DateTime $endDate): array
     {
-        list($startDate, $endDate) = $this->determineDateRangeAndGranularity(
+        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
             $startDate,
             $endDate,
-            $this->radiusAccountingRepository
         );
 
         $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
@@ -2753,7 +2964,6 @@ class AdminController extends AbstractController
         $dataValues = array_values($counts);
 
         $data = [];
-        $colors = [];
 
         // Calculate the colors with varying opacities
         $colors = $this->generateColorsWithOpacity($dataValues);
@@ -2987,14 +3197,12 @@ class AdminController extends AbstractController
         $blue = hexdec(substr($hash, 4, 2));
 
         // Format the RGB values into a CSS color string and convert to uppercase
-        $color = strtoupper(sprintf('#%02x%02x%02x', $red, $green, $blue));
-
-        return $color;
+        return strtoupper(sprintf('#%02x%02x%02x', $red, $green, $blue));
     }
 
 
     /**
-     * Handles the Page Style on the dasboard
+     * Handles the Page Style on the dashboard
      */
     /**
      * @param Request $request
@@ -3101,35 +3309,26 @@ class AdminController extends AbstractController
      */
     protected function mapConnectInfoToWifiStandard(string $connectInfo): string
     {
-        switch (true) {
-            case strpos($connectInfo, '802.11be') !== false:
-                return 'Wi-Fi 7';
-            case strpos($connectInfo, '802.11ax') !== false:
-                return 'Wi-Fi 6';
-            case strpos($connectInfo, '802.11ac') !== false:
-                return 'Wi-Fi 5';
-            case strpos($connectInfo, '802.11n') !== false:
-                return 'Wi-Fi 4';
-            case strpos($connectInfo, '802.11g') !== false:
-                return 'Wi-Fi 3';
-            case strpos($connectInfo, '802.11a') !== false:
-                return 'Wi-Fi 2';
-            case strpos($connectInfo, '802.11b') !== false:
-                return 'Wi-Fi 1';
-            default:
-                return 'Unknown';
-        }
+        return match (true) {
+            str_contains($connectInfo, '802.11be') => 'Wi-Fi 7',
+            str_contains($connectInfo, '802.11ax') => 'Wi-Fi 6',
+            str_contains($connectInfo, '802.11ac') => 'Wi-Fi 5',
+            str_contains($connectInfo, '802.11n') => 'Wi-Fi 4',
+            str_contains($connectInfo, '802.11g') => 'Wi-Fi 3',
+            str_contains($connectInfo, '802.11a') => 'Wi-Fi 2',
+            str_contains($connectInfo, '802.11b') => 'Wi-Fi 1',
+            default => 'Unknown',
+        };
     }
 
     /**
      * Determine date range and granularity
      *
-     * @param ?DateTime $startDate
-     * @param ?DateTime $endDate
-     * @param object $repository
+     * @param DateTime $startDate
+     * @param DateTime $endDate
      * @return array
      */
-    protected function determineDateRangeAndGranularity(?DateTime $startDate, ?DateTime $endDate, $repository): array
+    protected function determineDateRangeAndGranularity(DateTime $startDate, DateTime $endDate): array
     {
         // Calculate the time difference between start and end dates
         $interval = $startDate->diff($endDate);
@@ -3152,11 +3351,9 @@ class AdminController extends AbstractController
      * Generate colors with varying opacities based on data values
      *
      * @param array $values
-     * @param float $minOpacity
-     * @param float $maxOpacity
      * @return array
      */
-    private function generateColorsWithOpacity(array $values, float $minOpacity = 0.4, float $maxOpacity = 1): array
+    private function generateColorsWithOpacity(array $values): array
     {
         if (!empty(array_filter($values, static fn($value) => $value !== 0))) {
             $maxValue = max($values);
@@ -3164,15 +3361,15 @@ class AdminController extends AbstractController
 
             foreach ($values as $value) {
                 // Calculate the opacity relative to the max value, scaled to the opacity range
-                $opacity = $minOpacity + ($value / $maxValue) * ($maxOpacity - $minOpacity);
+                $opacity = 0.4 + ($value / $maxValue) * (1 - 0.4);
                 $opacity = round($opacity, 2); // Round to 2 decimal places for better control
                 $colors[] = "rgba(125, 185, 40, {$opacity})";
             }
 
             return $colors;
-        } else {
-            return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
         }
+
+        return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
     }
 
 
@@ -3184,10 +3381,7 @@ class AdminController extends AbstractController
             return false;
         }
         $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
-        if ($dnsRecords === false || empty($dnsRecords)) {
-            return false;
-        }
-        return true;
+        return !($dnsRecords === false || empty($dnsRecords));
     }
 
     /**
@@ -3195,9 +3389,9 @@ class AdminController extends AbstractController
      * @param mixed $value
      * @return string
      */
-    private function escapeSpreadsheetValue($value): string
+    private function escapeSpreadsheetValue(mixed $value): string
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof DateTime) {
             return $value->format('Y-m-d H:i:s');
         }
 
@@ -3205,9 +3399,7 @@ class AdminController extends AbstractController
 
         // Remove specific characters
         $charactersToRemove = ['=', '(', ')'];
-        $escapedValue = str_replace($charactersToRemove, '', $escapedValue);
-
-        return $escapedValue;
+        return str_replace($charactersToRemove, '', $escapedValue);
     }
 
     /**

@@ -89,6 +89,14 @@ class SMSType extends AbstractType
                     ]),
                 ],
             ],
+            'DEFAULT_REGION_PHONE_INPUTS' => [
+                'type' => TextType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
+                ],
+            ],
         ];
 
         foreach ($settingsToUpdate as $settingName => $config) {

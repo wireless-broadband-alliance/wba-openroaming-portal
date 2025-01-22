@@ -6,7 +6,6 @@
 
 {% block second_col %}
     {# Form Column #}
-
     {# Toasts  #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
@@ -18,6 +17,7 @@
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
     </div>
+
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
@@ -55,16 +55,16 @@
             {# Terms Checkbox #}
             <div class="mt-[28px] flex items-center justify-start gap-2">
 
-                {{ form_widget(registrationFormDemo.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
+                {{ form_widget(formTOS.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
                           rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
 
-                <label for="{{ registrationFormDemo.agreeTerms.vars.id }}" class="text-xs">
+                <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
-                    <a href="{{ data.TOS_LINK.value }}" target="_blank" class="underline text-primary font-semibold">
+                    <a href="{{ path('app_terms_conditions') }}" target="_blank" class="underline text-primary font-semibold">
                         terms & conditions of use
                     </a>
                     and
-                    <a href="{{ data.PRIVACY_POLICY_LINK.value }}" target="_blank"
+                    <a href="{{ path('app_privacy_policy') }}" target="_blank"
                        class="underline text-primary font-semibold">
                         privacy policy
                     </a>.
@@ -162,8 +162,8 @@
                     </p>
 
                     {% if app.user.isVerified %}
-                        <div class="flex flex-row justify-end items-center gap-1">
-                            <p class="text-[#707070]">Account Settings</p>
+                        <div class="flex flex-row justify-end items-center gap-2">
+                            <p class="text-sm text-[#707070]">Account Settings</p>
                             <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
                                     class="ml-auto duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
 
@@ -178,7 +178,7 @@
 
                     {# Widget User Settings #}
                     <div {{ stimulus_target('widget', 'modal') }}
-                            class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-10 ">
+                            class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
                         <div class="flex flex-row justify-center items-center h-full w-full">
                             {{ include('site/shared/_account_widget.html.twig') }}
                         </div>
@@ -194,60 +194,107 @@
                 <p class="font-bold text-lg">Obtain Your Profile:</p>
                 <p>To get started, select one of the following authentication methods:</p>
             </div>
+            <div {{ stimulus_controller('terms-widget') }}>
 
-            <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
-                {% if data.SAML_ENABLED.value %}
-                    <div>
-                        <a href="/saml/login" class="w-full btn-primary">
-                            {{ data.SAML_LABEL.value }}
-                        </a>
-                        <p class="text-xs mt-[8px]">{{ data.SAML_DESCRIPTION.value }}</p>
-                    </div>
-                {% endif %}
+                <div class="provider-list my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
+                    {% if data.SAML_ENABLED.value %}
+                        <div class="provider-btn">
+                            <a href="/saml/login" data-action="terms-widget#showModal">
+                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
+                                                                                        class="w-full btn-primary btn-disabled">
+                                    {{ data.SAML_LABEL.value }}
+                                </button>
+                            </a>
+                            <p class="text-xs mt-[8px]">{{ data.SAML_DESCRIPTION.value }}</p>
+                        </div>
+                    {% endif %}
 
-                {% if data.GOOGLE_LOGIN_ENABLED.value %}
-                    <div>
-                        <a href="{{ path('connect_google') }}" class="w-full btn-primary">
-                            {{ data.GOOGLE_LOGIN_LABEL.value }}
-                        </a>
-                        <p class="text-xs mt-[8px]">{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
-                    </div>
-                {% endif %}
+                    {% if data.GOOGLE_LOGIN_ENABLED.value %}
+                        <div class="provider-btn">
+                            <a href="{{ path('connect_google') }}" data-action="terms-widget#showModal">
+                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
+                                                                                        class="w-full btn-primary btn-disabled">
+                                    {{ data.GOOGLE_LOGIN_LABEL.value }}
+                                </button>
+                            </a>
+                            <p class="text-xs mt-[8px]">{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
+                        </div>
+                    {% endif %}
 
-                {% if data.EMAIL_REGISTER_ENABLED.value %}
-                    <div>
-                        <a href="{{ path('app_register') }}" class="w-full btn-primary">
-                            {{ data.REGISTER_LABEL.value }}
-                        </a>
-                        <p class="text-xs mt-[8px]">{{ data.REGISTER_DESCRIPTION.value }}</p>
-                    </div>
-                {% endif %}
+                    {% if data.EMAIL_REGISTER_ENABLED.value %}
+                        <div class="provider-btn">
+                            <a href="{{ path('app_register') }}" data-action="terms-widget#showModal" >
+                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
+                                                                                        class="w-full btn-primary btn-disabled">
+                                    {{ data.REGISTER_LABEL.value }}
+                                </button>
+                            </a>
+                            <p class="text-xs mt-[8px]">{{ data.REGISTER_DESCRIPTION.value }}</p>
+                        </div>
+                    {% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                    <div>
-                        <a href="{{ path('app_register_sms') }}" class="w-full btn-primary">
-                            {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
-                        </a>
-                        <p class="text-xs mt-[8px]">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
-                    </div>
-                {% endif %}
+                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                        <div class="provider-btn">
+                            <a href="{{ path('app_register_sms') }}" data-action="terms-widget#showModal">
+                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
+                                                                                        class="w-full btn-primary btn-disabled">
+                                    {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
+                                </button>
+                            </a>
+                            <p class="text-xs mt-[8px]">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
+                        </div>
+                    {% endif %}
 
-                {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
-                    <div class="w-full">
-                        <a href="{{ path('app_login') }}" class="w-full h-[50px] btn-secondary">
-                            {{ data.LOGIN_TRADITIONAL_LABEL.value }}
-                        </a>
-                        <p class="text-xs mt-[8px]">{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+                    {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
+                        <div class="provider-btn w-full">
+                            <a href="{{ path('app_login') }}" data-action="terms-widget#showModal">
+                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
+                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled">
+                                    {{ data.LOGIN_TRADITIONAL_LABEL.value }}
+                                </button>
+                            </a>
+                            <p class="text-xs mt-[8px]">{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {#  Terms and Conditions Check Box #}
+                {{ form_start(formTOS) }}
+                <div class="mt-[28px] flex items-center justify-start gap-2">
+                    {{ form_widget(formTOS.agreeTerms, {
+                        'attr': {
+                            'class': 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary',
+                            'id': 'agreeTermsCheckbox',
+                            'data-action': 'terms-widget#handleCheckboxChange',
+                            'data-terms-widget-target': 'agreeTerms'
+                        }
+                    }) }}
+                    <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
+                        I agree to the
+                        <a href="{{ path('app_terms_conditions') }}" target="_blank"
+                           class="underline text-primary font-semibold">terms & conditions of use</a>
+                        and
+                        <a href="{{ path('app_privacy_policy') }}" target="_blank"
+                           class="underline text-primary font-semibold">privacy policy</a>.
+                    </label>
+                </div>
+                {{ form_end(formTOS) }}
+
+                {# Confirmation Terms Modal  #}
+                <div class="z-20 modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                     data-terms-widget-target="confirmationModal" id="confirmationTermsModal">
+                    <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
+                        <p class="text-sm">You need to confirm the terms before proceeding.</p>
+                        <div class="mt-4 flex justify-center">
+                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close</button>
+                        </div>
                     </div>
-                {% endif %}
+                </div>
             </div>
-
-            {# Divider #}
             <div class="my-[25px] divider"></div>
 
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
 
         {% endif %}
     {% endif %}
-
 {% endblock %}

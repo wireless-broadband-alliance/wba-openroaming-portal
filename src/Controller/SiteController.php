@@ -3,18 +3,24 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Setting;
+use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
+use App\Enum\TextEditorName;
+use App\Enum\TextInputType;
 use App\Enum\UserProvider;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
+use App\Form\RevokeProfilesType;
+use App\Form\TOStype;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -22,17 +28,19 @@ use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeGenerator;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -50,7 +58,6 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
  */
 class SiteController extends AbstractController
 {
-    private MailerInterface $mailer;
     private UserRepository $userRepository;
     private UserExternalAuthRepository $userExternalAuthRepository;
     private ParameterBagInterface $parameterBag;
@@ -59,11 +66,12 @@ class SiteController extends AbstractController
     private EventRepository $eventRepository;
     private EventActions $eventActions;
     private VerificationCodeGenerator $verificationCodeGenerator;
+    private ProfileManager $profileManager;
+    private SendSMS $sendSMS;
 
     /**
      * SiteController constructor.
      *
-     * @param MailerInterface $mailer The mailer service used for sending emails.
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
@@ -71,10 +79,11 @@ class SiteController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeGenerator $verificationCodeGenerator
+     * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
+     * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
+     * @param SendSMS $sendSMS
      */
     public function __construct(
-        MailerInterface $mailer,
         UserRepository $userRepository,
         UserExternalAuthRepository $userExternalAuthRepository,
         ParameterBagInterface $parameterBag,
@@ -82,9 +91,10 @@ class SiteController extends AbstractController
         GetSettings $getSettings,
         EventRepository $eventRepository,
         EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator
+        VerificationCodeGenerator $verificationCodeGenerator,
+        ProfileManager $profileManager,
+        SendSMS $sendSMS
     ) {
-        $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->userExternalAuthRepository = $userExternalAuthRepository;
         $this->parameterBag = $parameterBag;
@@ -93,6 +103,8 @@ class SiteController extends AbstractController
         $this->eventRepository = $eventRepository;
         $this->eventActions = $eventActions;
         $this->verificationCodeGenerator = $verificationCodeGenerator;
+        $this->profileManager = $profileManager;
+        $this->sendSMS = $sendSMS;
     }
 
     /**
@@ -287,18 +299,87 @@ class SiteController extends AbstractController
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
-        $formResgistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        $formTOS = $this->createForm(TOStype::class);
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
-            'registrationFormDemo' => $formResgistrationDemo->createView(),
+            'formTOS' => $formTOS,
+            'formRevokeProfiles' => $formRevokeProfiles->createView(),
+            'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser
         ]);
     }
 
+    #[Route('/terms-conditions', name: 'app_terms_conditions')]
+    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TextInputType::TEXT_EDITOR
+        ) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
+            } else {
+                $content = '';
+            }
+            return $this->render('site/shared/tos/_tos.html.twig', [
+                'content' => $content,
+                'data' => $data
+            ]);
+        }
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TextInputType::LINK &&
+            $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
+        ) {
+                return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
+        }
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/privacy-policy', name: 'app_privacy_policy')]
+    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR
+        ) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
+            } else {
+                $content = '';
+            }
+            return $this->render('site/shared/tos/_privacy_policy.html.twig', [
+                'content' => $content,
+                'data' => $data
+            ]);
+        }
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TextInputType::LINK &&
+            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
+        ) {
+            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
+        }
+        return $this->redirectToRoute('app_landing');
+    }
 
     /**
      * Widget with data about the account of the user / upload new password
@@ -313,12 +394,35 @@ class SiteController extends AbstractController
         EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher,
     ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
         $user = $this->getUser();
         $oldFirstName = $user->getFirstName();
         $oldLastName = $user->getLastName();
+
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        $formRevokeProfiles->handleRequest($request);
+
+        if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
+            $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+            if (!$revokeProfiles) {
+                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
+                return $this->redirectToRoute('app_landing');
+            }
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::USER_REVOKE_PROFILES,
+                new DateTime(),
+                $eventMetaData
+            );
+
+            $this->addFlash('success', 'Your profiles associated with this account have been revoked.');
+            return $this->redirectToRoute('app_landing');
+        }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $form->handleRequest($request);
@@ -432,7 +536,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(ForgotPasswordEmailType::class, $user);
         $form->handleRequest($request);
 
@@ -486,6 +589,7 @@ class SiteController extends AbstractController
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
+                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         $randomPassword = bin2hex(random_bytes(4));
@@ -542,15 +646,14 @@ class SiteController extends AbstractController
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -575,7 +678,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(ForgotPasswordSMSType::class, $user);
         $form->handleRequest($request);
 
@@ -595,11 +697,8 @@ class SiteController extends AbstractController
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;
-                $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
-                    ? $latestEventMetadata['verificationAttempts']
-                    : 0;
-
-                if (!$latestEvent || $verificationAttempts < 3) {
+                $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
+                if (!$latestEvent || $verificationAttempts < 4) {
                     // Check if enough time has passed since the last attempt
                     if (
                         !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
@@ -621,11 +720,14 @@ class SiteController extends AbstractController
                             ];
                         }
 
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
+                            DateTimeInterface::ATOM
+                        );
                         $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
+                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         // save new password hashed on the db for the user
@@ -634,44 +736,19 @@ class SiteController extends AbstractController
                         $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
+                        // phpcs:enable
+                        // Send SMS
+                        $message = "Your new random account password is: "
+                            . $randomPassword
+                            . "%0A" . "Please make sure to login to complete the request";
+                        $this->sendSMS->sendSmsReset($recipient, $message);
 
-                        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-                        $apiUrl = $this->parameterBag->get('app.budget_api_url');
-
-                        // Fetch SMS credentials from the database
-                        $username = $data['SMS_USERNAME']['value'];
-                        $userId = $data['SMS_USER_ID']['value'];
-                        $handle = $data['SMS_HANDLE']['value'];
-                        $from = $data['SMS_FROM']['value'];
-                        $recipient = $user->getPhoneNumber();
-
-                        // Check if the user can get the SMS password and link
-                        if ($user && $attempts < 3) {
-                            $client = HttpClient::create();
-                            $uuid = $user->getUuid();
-                            $uuid = urlencode($uuid);
-                            $verificationCode = $user->getVerificationCode();
-                            $domainName = "/login";
-                            $message = "Your account password is: "
-                                . $randomPassword
-                                . "%0A" . "Login here: "
-                                . $requestStack->getCurrentRequest()->getSchemeAndHttpHost() . $domainName;
-                            // Adjust the API endpoint and parameters based on the Budget SMS documentation
-                            $apiUrl .= "?username=$username
-                            &userid=$userId
-                            &handle=$handle
-                            &to=$recipient
-                            &from=$from
-                            &msg=$message";
-                            $response = $client->request('GET', $apiUrl);
-                            // Handle the API response as needed
-                            $statusCode = $response->getStatusCode();
-                            $content = $response->getContent();
-                        }
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(
                             'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $user->getPhoneNumber(),
+                            $user->getUuid(),
                             $attemptsLeft
                         );
                         $this->addFlash('success', $message);
@@ -685,7 +762,7 @@ class SiteController extends AbstractController
                 } else {
                     $this->addFlash(
                         'warning',
-                        'You have exceeded the limits for verification password. 
+                        'You have exceeded the limits of request for a new password. 
                             Please contact our support for help.'
                     );
                 }
@@ -739,7 +816,6 @@ class SiteController extends AbstractController
         }
 
         $user = new User();
-        $event = new Event();
         $form = $this->createForm(NewPasswordAccountType::class, $user);
         $form->handleRequest($request);
 
@@ -862,9 +938,11 @@ class SiteController extends AbstractController
      *
      * @param EventRepository $eventRepository
      * @param MailerInterface $mailer
+     * @param Request $request
      * @return RedirectResponse A redirect response.
-     * @throws Exception
      * @throws TransportExceptionInterface
+     * @throws \DateMalformedStringException
+     * @throws NonUniqueResultException
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
@@ -954,9 +1032,11 @@ class SiteController extends AbstractController
         }
 
         if (!$currentUser->isVerified()) {
+            $formTOS = $this->createForm(TOStype::class);
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'data' => $data,
+                'formTOS' => $formTOS,
                 'user' => $currentUser
             ]);
         }
@@ -969,7 +1049,7 @@ class SiteController extends AbstractController
     /**
      * @param RequestStack $requestStack
      * @param UserRepository $userRepository
-     * @param EventRepository $eventRepository
+     * @param Request $request
      * @return Response
      */
     #[Route('/email/check', name: 'app_check_email_code')]
@@ -977,7 +1057,6 @@ class SiteController extends AbstractController
     public function verifyCode(
         RequestStack $requestStack,
         UserRepository $userRepository,
-        EventRepository $eventRepository,
         Request $request
     ): Response {
         // Get the current user
@@ -1103,5 +1182,14 @@ class SiteController extends AbstractController
 
         $referer = $request->headers->get('referer', $this->generateUrl('app_landing'));
         return $this->redirect($referer);
+    }
+
+    /**
+     * @param $user
+     * @return void
+     */
+    private function disableProfiles($user): void
+    {
+        $this->profileManager->disableProfiles($user);
     }
 }

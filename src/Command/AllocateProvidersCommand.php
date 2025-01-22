@@ -17,7 +17,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'reset:allocate-providers',
+    name: 'reset:allocateProviders',
     description: 'Allocate providers info from User Entity to the UserExternalAuth Entity',
 )]
 class AllocateProvidersCommand extends Command
@@ -33,7 +33,7 @@ class AllocateProvidersCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'reset:allocate-providers')
+            ->addArgument('arg1', InputArgument::OPTIONAL, 'reset:allocateProviders')
             ->addOption(
                 'yes',
                 'y',
@@ -101,8 +101,12 @@ class AllocateProvidersCommand extends Command
 
         // Check for Email Portal Account
         if (
-            $user->getEmail() && !$user->getPhoneNumber() && !$user->getGoogleId() && !$user->getSamlIdentifier(
-            ) && !$this->userExternalAuthExists($user, UserProvider::PORTAL_ACCOUNT, UserProvider::EMAIL)
+            !$user->getGoogleId() && !$user->getSamlIdentifier() && !$this->userExternalAuthExists(
+                $user,
+                UserProvider::PORTAL_ACCOUNT,
+                UserProvider::EMAIL
+            )
+            && ($user->getEmail() === $user->getUuid())
         ) {
             $this->createUserExternalAuth($user, UserProvider::PORTAL_ACCOUNT, UserProvider::EMAIL);
         }

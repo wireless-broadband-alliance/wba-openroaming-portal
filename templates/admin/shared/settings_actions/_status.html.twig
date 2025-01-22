@@ -5,7 +5,7 @@
         <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the platform and the email verification settings #}
-                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER'] %}
+                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
                          id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
@@ -15,7 +15,9 @@
                                 {% set displayName = {
                                     'PLATFORM_MODE': 'Platform Mode',
                                     'USER_VERIFICATION': 'User Verification',
-                                    'TURNSTILE_CHECKER': 'Turnstile Checker'
+                                    'TURNSTILE_CHECKER': 'Turnstile Checker',
+                                    'USER_DELETE_TIME' : 'Time to delete users(hours)',
+                                    'TIME_INTERVAL_NOTIFICATION' : 'Time to resend notifications(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -153,6 +155,14 @@
                                         </svg>
                                     </div>
                                 </label>
+                            </div>
+                        {% endif %}
+
+                        {% if setting.vars.name in ['USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
+                            <div class="flex flex-col items-center space-y-2 mt-5">
+                                <div class="flex flex-row justify-between hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 32}}) }}
+                                </div>
                             </div>
                         {% endif %}
 

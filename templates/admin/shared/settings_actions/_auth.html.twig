@@ -9,9 +9,9 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED', 'AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                            {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -19,6 +19,7 @@
                                     'AUTH_METHOD_SAML_ENABLED': 'Mode',
                                     'AUTH_METHOD_SAML_LABEL': 'Label',
                                     'AUTH_METHOD_SAML_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_SAML': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
 
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
@@ -30,10 +31,38 @@
                             </label>
                         </div>
 
-                        {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION'] %}
-                            <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
-                            </div>
+                        {% if setting.vars.name in ['AUTH_METHOD_SAML_LABEL', 'AUTH_METHOD_SAML_DESCRIPTION', 'PROFILE_LIMIT_DATE_SAML'] %}
+                            {% if setting.vars.name == 'PROFILE_LIMIT_DATE_SAML' %}
+                                <div class="flex items-center space-x-2 mt-5"
+                                     data-controller="certificate-limit"
+                                     data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                    {{ form_widget(setting, {
+                                        'attr': {
+                                            'class': 'form-widget',
+                                            'data-certificate-limit-target': 'input',
+                                            'data-radio-card-target': 'input'
+                                        }
+                                    }) }}
+                                    <button title='Applies remaning days ({{ humanReadableExpirationDate }}) on the certificate to sign and validate provisioning profiles'
+                                            type="button" class="btn-cert-date"
+                                            data-certificate-limit-target="button"
+                                            data-action="certificate-limit#updateDate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+                                             viewBox="0 0 24 24">
+                                            <g fill="none" stroke="currentColor" stroke-linecap="round"
+                                               stroke-linejoin="round" stroke-width="2">
+                                                <path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/>
+                                                <path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
+
                         {% endif %}
 
                         {% if setting.vars.name in ['AUTH_METHOD_SAML_ENABLED'] %}
@@ -96,10 +125,10 @@
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
                 {% for setting in form %}
                     {# Display only the authentication settings #}
-                    {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
+                    {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                              name="GoogleCards"
-                             id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                             id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                             {# Title and Icon #}
                             <div class="flex flex-row justify-between">
                                 <div class="text-base font-medium text-center break-normal md:break-all">
@@ -107,6 +136,7 @@
                                         'AUTH_METHOD_GOOGLE_LOGIN_ENABLED': 'Mode',
                                         'AUTH_METHOD_GOOGLE_LOGIN_LABEL': 'Label',
                                         'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION': 'Description',
+                                        'PROFILE_LIMIT_DATE_GOOGLE': 'Time to disable profiles(days)',
                                     }[setting.vars.name] ?? setting.vars.name %}
                                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                                 </div>
@@ -117,10 +147,37 @@
                                          alt="info_icon"/>
                                 </label>
                             </div>
-                            {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'] %}
-                                <div class="flex items-center space-x-2 mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input' }}) }}
-                                </div>
+                            {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'PROFILE_LIMIT_DATE_GOOGLE'] %}
+                                {% if setting.vars.name == 'PROFILE_LIMIT_DATE_GOOGLE' %}
+                                    <div class="flex items-center space-x-2 mt-5"
+                                         data-controller="certificate-limit"
+                                         data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                        {{ form_widget(setting, {
+                                            'attr': {
+                                                'class': 'form-widget',
+                                                'data-certificate-limit-target': 'input',
+                                                'data-radio-card-target': 'input'
+                                            }
+                                        }) }}
+                                        <button title='Applies remaning days ({{ humanReadableExpirationDate }}) on the certificate to sign and validate provisioning profiles'
+                                                type="button" class="btn-cert-date"
+                                                data-certificate-limit-target="button"
+                                                data-action="certificate-limit#updateDate">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+                                                 viewBox="0 0 24 24">
+                                                <g fill="none" stroke="currentColor" stroke-linecap="round"
+                                                   stroke-linejoin="round" stroke-width="2">
+                                                    <path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/>
+                                                    <path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <div class="flex items-center space-x-2 mt-5">
+                                        {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                    </div>
+                                {% endif %}
                             {% endif %}
                             {% if setting.vars.name in ['AUTH_METHOD_GOOGLE_LOGIN_ENABLED'] %}
                                 <div class="flex flex-col items-center space-y-2 mt-5">
@@ -229,10 +286,10 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED', 'AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="RegisterCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -240,6 +297,7 @@
                                     'AUTH_METHOD_REGISTER_ENABLED': 'Mode',
                                     'AUTH_METHOD_REGISTER_LABEL': 'Label',
                                     'AUTH_METHOD_REGISTER_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_EMAIL': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -250,10 +308,37 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION'] %}
-                            <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
-                            </div>
+                        {% if setting.vars.name in ['AUTH_METHOD_REGISTER_LABEL', 'AUTH_METHOD_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_EMAIL'] %}
+                            {% if setting.vars.name == 'PROFILE_LIMIT_DATE_EMAIL' %}
+                                <div class="flex items-center space-x-2 mt-5"
+                                     data-controller="certificate-limit"
+                                     data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                    {{ form_widget(setting, {
+                                        'attr': {
+                                            'class': 'form-widget',
+                                            'data-certificate-limit-target': 'input',
+                                            'data-radio-card-target': 'input'
+                                        }
+                                    }) }}
+                                    <button title='Applies remaning days ({{ humanReadableExpirationDate }}) on the certificate to sign and validate provisioning profiles'
+                                            type="button" class="btn-cert-date"
+                                            data-certificate-limit-target="button"
+                                            data-action="certificate-limit#updateDate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+                                             viewBox="0 0 24 24">
+                                            <g fill="none" stroke="currentColor" stroke-linecap="round"
+                                               stroke-linejoin="round" stroke-width="2">
+                                                <path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/>
+                                                <path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_REGISTER_ENABLED'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">
@@ -315,10 +400,10 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the authentication settings #}
-                {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
+                {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED', 'AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="SMSRegisterCards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -326,6 +411,7 @@
                                     'AUTH_METHOD_SMS_REGISTER_ENABLED': 'Mode',
                                     'AUTH_METHOD_SMS_REGISTER_LABEL': 'Label',
                                     'AUTH_METHOD_SMS_REGISTER_DESCRIPTION': 'Description',
+                                    'PROFILE_LIMIT_DATE_SMS': 'Time to disable profiles(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -336,10 +422,37 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] %}
-                            <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
-                            </div>
+                        {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_LABEL', 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'PROFILE_LIMIT_DATE_SMS'] %}
+                            {% if setting.vars.name == 'PROFILE_LIMIT_DATE_SMS' %}
+                                <div class="flex items-center space-x-2 mt-5"
+                                     data-controller="certificate-limit"
+                                     data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
+                                    {{ form_widget(setting, {
+                                        'attr': {
+                                            'class': 'form-widget',
+                                            'data-certificate-limit-target': 'input',
+                                            'data-radio-card-target': 'input'
+                                        }
+                                    }) }}
+                                    <button title='Applies remaning days ({{ humanReadableExpirationDate }}) on the certificate to sign and validate provisioning profiles'
+                                            type="button" class="btn-cert-date"
+                                            data-certificate-limit-target="button"
+                                            data-action="certificate-limit#updateDate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+                                             viewBox="0 0 24 24">
+                                            <g fill="none" stroke="currentColor" stroke-linecap="round"
+                                               stroke-linejoin="round" stroke-width="2">
+                                                <path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/>
+                                                <path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/>
+                                            </g>
+                                        </svg>
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2 mt-5">
+                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                                </div>
+                            {% endif %}
                         {% endif %}
                         {% if setting.vars.name in ['AUTH_METHOD_SMS_REGISTER_ENABLED'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">

@@ -68,6 +68,10 @@
                             <Value>@RADIUS_TLS_NAME@</Value>
                         </Node>
                     </Node>
+                    <Node>
+                        <NodeName>ExpirationDate</NodeName>
+                        <Value>@EXPIRATION_DATE@</Value>
+                    </Node>
                 </Node>
             </Node>
         </Node>

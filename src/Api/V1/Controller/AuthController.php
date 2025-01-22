@@ -270,7 +270,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
         }
 
@@ -280,7 +280,7 @@ class AuthController extends AbstractController
 
         try {
             $user = $this->googleController->fetchUserFromGoogle($data['code']);
-            if ($user === null) {
+            if (!$user) {
                 return (new BaseResponse(400, null, 'This code is not associated with a google account.'))->toResponse(
                 );
             }

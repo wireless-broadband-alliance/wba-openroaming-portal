@@ -196,8 +196,9 @@ class GetSettings
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue(
-            ) === 'true',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true',
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
@@ -227,8 +228,9 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue(
-            ) === 'true',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue() === 'true',
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
@@ -238,14 +240,16 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(
-            ),
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(),
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue(
-            ) === 'true',
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
+            // phpcs:enable
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
@@ -258,7 +262,6 @@ class GetSettings
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
         ];
-
 
         $data['TOS_LINK'] = [
             'value' => $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue(),
@@ -319,6 +322,32 @@ class GetSettings
         $data['SMS_TIMER_RESEND'] = [
             'value' => $settingRepository->findOneBy(['name' => 'SMS_TIMER_RESEND'])->getValue(),
             'description' => $this->getSettingDescription('SMS_TIMER_RESEND'),
+        ];
+
+        $data['TIME_INTERVAL_NOTIFICATION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION'])->getValue(),
+            'description' => $this->getSettingDescription('TIME_INTERVAL_NOTIFICATION'),
+        ];
+
+        $data['DEFAULT_REGION_PHONE_INPUTS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
+            'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
+        ];
+        $data['PROFILE_LIMIT_DATE_SAML'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SAML'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SAML'),
+        ];
+        $data['PROFILE_LIMIT_DATE_GOOGLE'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_GOOGLE'),
+        ];
+        $data['PROFILE_LIMIT_DATE_EMAIL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_EMAIL'),
+        ];
+        $data['PROFILE_LIMIT_DATE_SMS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SMS'])->getValue(),
+            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SMS'),
         ];
 
         return $data;
@@ -394,8 +423,12 @@ class GetSettings
             'SYNC_LDAP_SEARCH_FILTER' => 'The filter used when searching the LDAP directory.
              The placeholder `@ID` is replaced with the user\'s ID',
 
+            'TOS' => 'Terms and Conditions format',
+            'PRIVACY_POLICY' => 'Privacy policy format',
             'TOS_LINK' => 'Terms and Conditions URL',
             'PRIVACY_POLICY_LINK' => 'Privacy policy URL',
+            'TOS_EDITOR' => 'Terms and Conditions text editor',
+            'PRIVACY_POLICY_EDITOR' => 'Privacy policy text editor',
 
             'VALID_DOMAINS_GOOGLE_LOGIN' => 'When this is empty, it allows all the domains to authenticate. 
             Please only type the domains you want to be able to authenticate',
@@ -410,7 +443,13 @@ class GetSettings
             'SMS_USER_ID' => 'Budget SMS User ID',
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
-            'SMS_TIMER_RESEND' => 'Timer in minutes to make the user wait to resend a new SMS'
+            'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
+            'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
+            'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
+            'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
+            'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with GOOGLE login',
+            'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
+            'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
         ];
 
         return $descriptions[$settingName] ?? '';

@@ -43,8 +43,8 @@ class SecurityController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route('/login', name: 'app_login')]
-    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
+    #[Route('/login/{type}', name: 'app_login')]
+    public function login(Request $request, AuthenticationUtils $authenticationUtils, $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -55,13 +55,20 @@ class SecurityController extends AbstractController
 
         // Check if the user is already logged in and redirect them accordingly
         if ($this->getUser()) {
-            if ($this->isGranted('ROLE_ADMIN')) {
-                return $this->redirectToRoute('admin_page');
+            if ($type === 'admin') {
+                if ($this->isGranted('ROLE_ADMIN')) {
+                    $session = $request->getSession();
+                    $session->set('session_admin', true);
+                    return $this->redirectToRoute('admin_page');
+                }
+                $this->addFlash('error', 'Wrong credentials');
+                return $this->redirectToRoute('saml_logout');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
             if ($platformMode === PlatformMode::DEMO) {
                 return $this->redirectToRoute('saml_logout');
             }
+
             return $this->redirectToRoute('app_landing');
         }
 
@@ -78,13 +85,22 @@ class SecurityController extends AbstractController
             $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
             if ($user) {
                 // If the user is found, set their email as the last username to pre-fill the email field
-                $lastUsername = $user->getEmail();
+                $lastUsername = $user->getUuid();
             }
         }
 
         // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
-            $this->addFlash('error', 'Wrong credentials');
+            $this->addFlash('error', $error->getMessage());
+        }
+
+        if ($type === "admin") {
+            return $this->render('admin/login_landing.html.twig', [
+                'last_username' => $lastUsername,
+                'error' => $error,
+                'data' => $data,
+                'form' => $form,
+            ]);
         }
 
         return $this->render('site/login_landing.html.twig', [

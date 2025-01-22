@@ -41,7 +41,7 @@ class UserStatusChecker
                     403,
                     null,
                     // phpcs:disable Generic.Files.LineLength.TooLong
-                    "Your request cannot be processed at this time due to a pending action. If your account is active, please check your email for further instructions."
+                    "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
                     // phpcs:enable
                 );
         }

@@ -52,6 +52,8 @@ class ResetTermsSettingsCommand extends Command
         }
 
         $settings = [
+            ['name' => 'TOS', 'value' => 'LINK'],
+            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
             ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
         ];
