@@ -41,8 +41,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context) {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when SAML is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -104,8 +111,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context) {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -173,8 +187,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context) {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation(
+                                        'This field cannot be empty when EMAIL REGISTER is enabled.'
+                                    )->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -236,8 +258,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context) {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when SMS REGISTER is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -268,8 +297,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context) {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when LOGIN METHOD is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
