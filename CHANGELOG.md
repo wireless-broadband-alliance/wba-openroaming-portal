@@ -16,6 +16,18 @@ php bin/console app:set-saml-provider
 
 ---
 
+# Release v1.7.0
+
+> **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated. 
+> If you have version 1.5 or lower with data in these fields, you will have to first switch to version 1.6, 
+> run the Allocate Providers Command and then can you upgrade to version 1.7.
+
+- **Note**: The Allocate Providers Command has been discontinued and has therefore been removed
+
+```Bash
+php bin/console reset:allocate-providers
+```
+
 # Release V1.6.0
 
 - Fix bug on the date filtering on both statistics pages
