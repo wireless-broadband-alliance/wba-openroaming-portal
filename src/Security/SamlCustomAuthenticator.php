@@ -36,13 +36,14 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
     {
         // Get the SAML Response from the request
         $samlResponse = $request->request->get('SAMLResponse');
-
         if (!$samlResponse) {
             throw new AuthenticationException('Missing SAMLResponse in the request.');
         }
 
         $auth = $this->samlService->getActiveSamlProvider();
         $auth->processResponse();
+        dump($samlResponse, $auth);
+        die;
         if ($auth->getErrors()) {
             throw new AuthenticationException(implode(', ', $auth->getErrors()));
         }
@@ -53,12 +54,11 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
             throw new AuthenticationException('Missing NameID in SAML response.');
         }
         $attributes = $auth->getAttributes();
-
         try {
             // Factory will create or retrieve the user based on SAML attributes
             $user = $this->userFactory->createUser($nameId, $attributes);
         } catch (Exception $e) {
-            throw new AuthenticationException('Failed to process user from SAML response: '.$e->getMessage(), 0, $e);
+            throw new AuthenticationException('Failed to process user from SAML response: ' . $e->getMessage(), 0, $e);
         }
 
         // Return a SelfValidatingPassport including the user
