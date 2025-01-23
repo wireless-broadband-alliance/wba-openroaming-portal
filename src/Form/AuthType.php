@@ -192,8 +192,9 @@ class AuthType extends AbstractType
                                 $form = $context->getRoot();
                                 $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
                                 if ($authMethodSamlEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when EMAIL REGISTER is enabled.')
-                                        ->addViolation();
+                                    $context->buildViolation(
+                                        'This field cannot be empty when EMAIL REGISTER is enabled.'
+                                    )->addViolation();
                                 }
                             },
                         ]),
