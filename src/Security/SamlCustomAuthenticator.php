@@ -6,7 +6,6 @@ use App\Service\SamlActiveProviderService;
 use Exception;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\ValidationError;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -86,8 +85,13 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?JsonResponse
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?RedirectResponse
     {
-        return new JsonResponse(['error' => $exception->getMessage()], 401);
+        // Redirect to a custom error page or login page
+        $errorUrl = $this->urlGenerator->generate('app_landing', [
+            'error' => $exception->getMessage(),
+        ]);
+
+        return new RedirectResponse($errorUrl);
     }
 }
