@@ -5,10 +5,10 @@
         <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the platform and the email verification settings #}
-                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
+                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION', 'TWO_FACTOR_AUTH_STATUS'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
-                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card 3options_radio') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -18,6 +18,7 @@
                                     'TURNSTILE_CHECKER': 'Turnstile Checker',
                                     'USER_DELETE_TIME' : 'Time to delete users(hours)',
                                     'TIME_INTERVAL_NOTIFICATION' : 'Time to resend notifications(days)',
+                                    'TWO_FACTOR_AUTH_STATUS' : 'Two factor authentication status'
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -27,7 +28,7 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER'] %}
+                        {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'TWO_FACTOR_AUTH_STATUS'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                             </div>
@@ -104,6 +105,66 @@
                                            value="OFF"
                                            class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.USER_VERIFICATION.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"></path>
+                                        </svg>
+                                    </div>
+                                </label>
+                            </div>
+                        {% endif %}
+
+                        {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS'] %}
+                            <div class="flex flex-col items-center space-y-2 mt-5">
+                                {# Render "NOT_ENFORCED" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="onLabelEmail">
+                                    Not Enforced
+                                    <input type="radio" name="{{ form.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
+                                           id="onRadioEmail"
+                                           value="NOT_ENFORCED"
+                                           class="radio-input hidden" {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? 'checked' : '' }} {{ stimulus_action('3options_radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? '' : 'hidden' }}" {{ stimulus_target('3options_radio', 'option1') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"></path>
+                                        </svg>
+                                    </div>
+                                </label>
+
+                                {# Render "ENFORCED_FOR_LOCAL" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="offLabelEmail">
+                                    Enforced for Local accounts only
+                                    <input type="radio" name="{{ form.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
+                                           id="offRadioEmail"
+                                           value="ENFORCED_FOR_LOCAL"
+                                           class="radio-input hidden" {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? 'checked' : '' }} {{ stimulus_action('3options_radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? '' : 'hidden' }}" {{ stimulus_target('3options_radio', 'option2') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"></path>
+                                        </svg>
+                                    </div>
+                                </label>
+                                {# Render "ENFORCED_FOR_ALL" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="offLabelEmail">
+                                    Enforced for all accounts
+                                    <input type="radio" name="{{ form.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
+                                           id="offRadioEmail"
+                                           value="ENFORCED_FOR_ALL"
+                                           class="radio-input hidden" {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_ALL' ? 'checked' : '' }} {{ stimulus_action('3options_radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_ALL' ? '' : 'hidden' }}" {{ stimulus_target('3options_radio', 'option3') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">

@@ -10,6 +10,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
+use App\Enum\twoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\LDAPType;
@@ -588,6 +589,7 @@ class SettingsController extends AbstractController
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
+            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? twoFAType::NOT_ENFORCED;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {
@@ -610,6 +612,11 @@ class SettingsController extends AbstractController
             if ($userDeleteTimeSetting) {
                 $userDeleteTimeSetting->setValue($userDeleteTime);
                 $em->persist($userDeleteTimeSetting);
+            }
+            $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+            if ($twoFactorAuthStatusSetting) {
+                $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
+                $em->persist($twoFactorAuthStatusSetting);
             }
             // Flush the changes to the database
             $em->flush();

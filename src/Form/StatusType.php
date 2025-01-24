@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Enum\PlatformMode;
+use App\Enum\twoFAType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -117,6 +118,24 @@ class StatusType extends AbstractType
                             'message' => 'Please make sure to set a timer',
                         ]),
                     ],
+                ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_STATUS') {
+                $builder->add('TWO_FACTOR_AUTH_STATUS', ChoiceType::class, [
+                    'choices' => [
+                        twoFAType::NOT_ENFORCED => twoFAType::NOT_ENFORCED,
+                        twoFAType::ENFORCED_FOR_LOCAL => twoFAType::ENFORCED_FOR_LOCAL,
+                        twoFAType::ENFORCED_FOR_ALL => twoFAType::ENFORCED_FOR_ALL
+                    ],
+                    'data' => $settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'Please select an option',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please select an option',
                 ]);
             }
         }
