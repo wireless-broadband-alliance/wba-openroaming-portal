@@ -55,7 +55,7 @@ class SetSamlProviderCommand extends Command
 
             return self::SUCCESS;
         } catch (Exception $e) {
-            $output->writeln('<error>Error: '.$e->getMessage().'</error>');
+            $output->writeln('<error>Error: ' . $e->getMessage() . '</error>');
 
             return self::FAILURE;
         }

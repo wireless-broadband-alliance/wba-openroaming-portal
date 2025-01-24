@@ -7,18 +7,24 @@ use Exception;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\ValidationError;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class SamlCustomAuthenticator extends AbstractAuthenticator
 {
+    use TargetPathTrait;
+
     public function __construct(
         private readonly SamlActiveProviderService $samlService,
-        private readonly CustomSamlUserFactory $userFactory
+        private readonly CustomSamlUserFactory $userFactory,
+        private readonly UrlGeneratorInterface $urlGenerator
     ) {
     }
 
@@ -72,8 +78,12 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
         Request $request,
         TokenInterface $token,
         string $firewallName
-    ): ?JsonResponse {
-        return new JsonResponse(['message' => 'Authentication successful!']);
+    ): RedirectResponse {
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+            return new RedirectResponse($targetPath);
+        }
+
+        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?JsonResponse

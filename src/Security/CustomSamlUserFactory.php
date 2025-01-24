@@ -82,7 +82,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         }
 
         // Instead of userClass and mapping, use App\Entity\User directly
-        $user = new User($identifier);
+        $user = new User();
         $reflection = new ReflectionClass(User::class); // Hardcoded User entity
 
         /** @psalm-suppress MixedAssignment */
