@@ -29,16 +29,19 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     private SettingRepository $settingRepository;
 
     /**
-     * @param class-string<UserInterface> $userClass
-     * @param array<string, mixed> $mapping
-     * @param UserRepository $userRepository
-     * @param EntityManagerInterface $entityManager
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
+     * Default attribute mapping.
      */
+    private const ATTRIBUTE_MAPPING = [
+        'password' => 'notused',
+        'uuid' => '$samlUuid',
+        'email' => '$email',
+        'first_name' => '$givenName',
+        'last_name' => '$surname',
+        'isVerified' => 1,
+        'roles' => [],
+    ];
+
     public function __construct(
-        private readonly string $userClass,
-        private readonly array $mapping,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         GetSettings $getSettings,
@@ -59,8 +62,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($data['PLATFORM_MODE']['value'] === true) {
-            throw new RuntimeException("Get Away. 
-            It's impossible to use this authentication method in demo mode");
+            throw new RuntimeException(
+                "Get Away. 
+            It's impossible to use this authentication method in demo mode"
+            );
         }
 
         $uuid = $this->getAttributeValue($attributes, 'samlUuid');
@@ -76,11 +81,12 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             return $existingUser;
         }
 
-        $user = new $this->userClass($identifier);
-        $reflection = new ReflectionClass($this->userClass);
+        // Instead of userClass and mapping, use App\Entity\User directly
+        $user = new User($identifier);
+        $reflection = new ReflectionClass(User::class); // Hardcoded User entity
 
         /** @psalm-suppress MixedAssignment */
-        foreach ($this->mapping as $field => $attribute) {
+        foreach (self::ATTRIBUTE_MAPPING as $field => $attribute) {
             $property = $reflection->getProperty($field);
             $value = null;
 
@@ -99,7 +105,6 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
-        /** @var User $user */
         $user->setDisabled(false);
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();

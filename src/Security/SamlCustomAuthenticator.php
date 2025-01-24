@@ -42,8 +42,7 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
 
         $auth = $this->samlService->getActiveSamlProvider();
         $auth->processResponse();
-        dump($samlResponse, $auth);
-        die;
+
         if ($auth->getErrors()) {
             throw new AuthenticationException(implode(', ', $auth->getErrors()));
         }
