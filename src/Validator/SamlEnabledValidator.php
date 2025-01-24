@@ -6,7 +6,7 @@ use App\Repository\SamlProviderRepository;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class isSamlEnabledValidator extends ConstraintValidator
+class SamlEnabledValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly SamlProviderRepository $repository
@@ -20,10 +20,10 @@ class isSamlEnabledValidator extends ConstraintValidator
     public function validate(mixed $value, Constraint $constraint): void
     {
         // Ensure the constraint is of the correct type
-        if (!$constraint instanceof isSamlEnabled) {
+        if (!$constraint instanceof SamlEnabled) {
             throw new \InvalidArgumentException(sprintf(
                 'Expected instance of %s, got %s',
-                isSamlEnabled::class,
+                SamlEnabled::class,
                 get_class($constraint)
             ));
         }

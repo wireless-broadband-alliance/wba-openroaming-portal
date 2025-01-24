@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
-use App\Validator\isSamlEnabled;
+use App\Validator\SamlEnabled;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -34,7 +34,7 @@ class AuthType extends AbstractType
                 'type' => ChoiceType::class,
                 'options' => [
                     'constraints' => [
-                        new isSamlEnabled(),
+                        new SamlEnabled(),
                         // Custom Validator -> Check if there's any active provider to enable this Auth
                     ],
                 ]

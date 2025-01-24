@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
  * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-class isSamlEnabled extends Constraint
+class SamlEnabled extends Constraint
 {
     /**
      * @var string
