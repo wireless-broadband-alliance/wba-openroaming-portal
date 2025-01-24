@@ -722,6 +722,7 @@ class SettingsController extends AbstractController
      * @param EntityManagerInterface $em
      * @param GetSettings $getSettings
      * @return Response
+     * @throws \DateInvalidTimeZoneException
      */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Repository\SamlProviderRepository;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
+use RuntimeException;
 
 class SamlActiveProviderService
 {
@@ -24,7 +25,7 @@ class SamlActiveProviderService
             $activeProvider = $this->repository->findOneBy(['isActive' => true]);
 
             if (!$activeProvider) {
-                throw new \RuntimeException('No active SAML provider found.');
+                throw new RuntimeException('No active SAML provider found.');
             }
 
             // Generate settings dynamically
