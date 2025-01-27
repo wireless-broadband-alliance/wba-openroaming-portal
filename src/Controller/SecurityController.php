@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\PlatformMode;
+use App\Enum\twoFAType;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
 use LogicException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -68,7 +70,17 @@ class SecurityController extends AbstractController
             if ($platformMode === PlatformMode::DEMO) {
                 return $this->redirectToRoute('saml_logout');
             }
+            $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+            if ($twoFAplatformStatus) {
+                if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED) {
+                    if ($this->getUser()->getTwoFAcode()) {
+                        return $this->redirectToRoute('2FA_PAGE'); // change for 2fa page!!!
+                    }
+                    return $this->redirectToRoute('app_landing');
+                }
 
+                return $this->redirectToRoute('2FA_PAGE');
+            }
             return $this->redirectToRoute('app_landing');
         }
 
@@ -117,5 +129,19 @@ class SecurityController extends AbstractController
         throw new LogicException(
             'This method can be blank - it will be intercepted by the logout key on your firewall.'
         );
+    }
+
+    #[Route('/login/twoFactorAuth', name: 'app_email_code')]
+    #[IsGranted('ROLE_USER')]
+    public function email2fa(): Response
+    {
+        // Get the current user
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        if (!$currentUser) {
+            $this->addFlash('error', 'You must be logged in to access this page.');
+            return $this->redirectToRoute('app_landing');
+        }
     }
 }
