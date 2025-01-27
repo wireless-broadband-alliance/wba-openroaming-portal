@@ -3,14 +3,14 @@
 namespace App\Command;
 
 use App\Service\SamlActiveProviderService;
-use Doctrine\ORM\NonUniqueResultException;
+use OneLogin\Saml2\Error;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DebugSamlConfigCommand extends Command
+class DebugActiveSamlCommand extends Command
 {
-    protected static $defaultName = 'app:debug-saml-config';
+    protected static $defaultName = 'app:debug-active-saml';
 
     private SamlActiveProviderService $service;
 
@@ -22,9 +22,12 @@ class DebugSamlConfigCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Debug SAML configuration resolution.');
+        $this->setDescription('Debug Current Active SAML configuration.');
     }
 
+    /**
+     * @throws Error
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $config = $this->service->getActiveSamlProvider();

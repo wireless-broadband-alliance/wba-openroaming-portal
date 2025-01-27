@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\SamlProvider;
 use App\Entity\User;
+use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -17,9 +19,9 @@ class SamlProviderController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly settingRepository $settingRepository,
         private readonly GetSettings $getSettings,
+        private readonly SamlProviderRepository $samlProviderRepository,
         // private readonly EntityManagerInterface $entityManager,
-    )
-    {
+    ) {
     }
 
     #[Route('dashboard/saml-provider', name: 'admin_dashboard_saml_provider')]
@@ -31,8 +33,11 @@ class SamlProviderController extends AbstractController
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
+        $samlProviders = $this->samlProviderRepository->findAll();
+
         return $this->render('admin/settings_actions.html.twig', [
             'data' => $data,
+            'samlProviders' => $samlProviders,
             'current_user' => $currentUser,
         ]);
     }
