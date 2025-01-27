@@ -17,7 +17,7 @@ class SamlEnabled extends Constraint
      */
     public string $message = 'No active SAML provider found.';
 
-    public function __construct(string $message = null, array $groups = null, mixed $payload = null)
+    public function __construct(?string $message = null, ?array $groups = null, mixed $payload = null)
     {
         parent::__construct(groups: $groups, payload: $payload);
 

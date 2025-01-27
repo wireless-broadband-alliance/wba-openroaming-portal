@@ -37,7 +37,6 @@
 		"pixelopen/cloudflare-turnstile-bundle": "^0.3.0",
     "rector/rector": "^2.0",
 		"robrichards/xmlseclibs": "^3.1",
-		"sensio/framework-extra-bundle": "^6.2",
     "sentry/sentry-symfony": "^5.1.0",
 		"symfony/asset": "6.4.*",
 		"symfony/console": "6.4.*",
