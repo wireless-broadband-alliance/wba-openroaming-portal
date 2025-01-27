@@ -18,8 +18,28 @@ php-security-checker:
     - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
 
 
+test-rector:
+  image: "$CI_REGISTRY_IMAGE:develop"
+  allow_failure: false
+  before_script:
+  - cp .env.sample .env
+  - COMPOSER_CACHE_DIR=composer-cache composer install
+  script:
+  - vendor/bin/rector process src --dry-run
+  stage: test
+
+test-twig:
+  image: "$CI_REGISTRY_IMAGE:develop"
+  allow_failure: false
+  before_script:
+  - cp .env.sample .env
+  - COMPOSER_CACHE_DIR=composer-cache composer install
+  script:
+  - vendor/bin/twig-cs-fixer lint ./templates
+  stage: test
+
 test-phpstan :
-  image : "$CI_REGISTRY_IMAGE:tests"
+  image : "$CI_REGISTRY_IMAGE:develop"
   allow_failure : false
   before_script:
   - cp .env.sample .env
