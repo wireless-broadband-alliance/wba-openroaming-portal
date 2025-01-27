@@ -50,6 +50,12 @@ class SetSamlProviderCommand extends Command
             return self::FAILURE;
         }
 
+        // Validate camelCase
+        if (!preg_match('/^[a-z]+([A-Z][a-z]*)*$/', $name)) {
+            $output->writeln('<error>Name must be in camelCase format (e.g., mySamlProvider).</error>');
+            return self::FAILURE;
+        }
+
         try {
             $this->createAndPersistSamlProvider($name);
             $output->writeln('SAML Provider data has been set!');
