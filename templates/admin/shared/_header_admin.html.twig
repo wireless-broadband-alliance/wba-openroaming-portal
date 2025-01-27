@@ -6,6 +6,9 @@
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
         <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Page Style</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider' %}
+        <twig:ux:icon name="wba:list" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Saml Provider's</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
         <twig:ux:icon name="wba:cog" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Reset Password</h1>
