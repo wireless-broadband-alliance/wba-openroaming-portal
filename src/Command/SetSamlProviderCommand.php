@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use InvalidArgumentException;
@@ -97,6 +98,8 @@ class SetSamlProviderCommand extends Command
             $samlProvider->setSpEntityId($spEntityId);
             $samlProvider->setSpAcsUrl($spAcsUrl);
             $samlProvider->setActive(true);
+            $samlProvider->setCreatedAt(new DateTime());
+            $samlProvider->setUpdatedAt(new DateTime());
 
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
