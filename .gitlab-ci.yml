@@ -12,7 +12,7 @@ linting-psr12:
     - phpcs -s -p --colors --extensions=php --standard=PSR12 src/
 
 php-security-checker:
-  stage: lint
+  stage: test
   image: registry.gitlab.com/pipeline-components/php-security-checker:latest
   script:
     - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
