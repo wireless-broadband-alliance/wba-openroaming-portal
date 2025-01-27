@@ -124,18 +124,6 @@
             "config/packages/misd_phone_number.yaml"
         ]
     },
-    "php-http/discovery": {
-        "version": "1.18",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "1.18",
-            "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
-        },
-        "files": [
-            "config/packages/http_discovery.yaml"
-        ]
-    },
     "phpstan/phpstan": {
         "version": "1.10",
         "recipe": {
@@ -506,5 +494,14 @@
     },
     "twig/extra-bundle": {
         "version": "v3.5.1"
+    },
+    "vincentlanglet/twig-cs-fixer": {
+        "version": "3.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "d42582ae1bce86fd43491d6264c738b0867f8ffe"
+        }
     }
 }
