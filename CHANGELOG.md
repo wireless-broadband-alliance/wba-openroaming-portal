@@ -4,6 +4,7 @@
 # Release V1.7.0
 
 - Multiple Saml Providers
+- Update PHP to 8.4
 - **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
   exist
   associated accounts that have a saml provider.
