@@ -31,16 +31,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AdminController extends AbstractController
 {
-    /**
-     * @param MailerInterface $mailer
-     * @param UserRepository $userRepository
-     * @param UserExternalAuthRepository $userExternalAuthRepository
-     * @param ParameterBagInterface $parameterBag
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     * @param EventActions $eventActions
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator
-     */
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly UserRepository $userRepository,
@@ -55,17 +45,6 @@ class AdminController extends AbstractController
 
     /**
      * Dashboard Page Main Route
-     */
-    /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @param int|null $count
-     * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
@@ -237,12 +216,6 @@ class AdminController extends AbstractController
     /**
      * Handles the Page Style on the dashboard
      */
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
@@ -295,7 +268,7 @@ class AdminController extends AbstractController
                     $file = $form->get($settingName)->getData();
 
                     if ($file) { // submits the new file to the respective path
-                        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        $originalFilename = pathinfo((string)$file->getClientOriginalName(), PATHINFO_FILENAME);
                         // Use a unique id for the uploaded file to avoid overwriting
                         $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
