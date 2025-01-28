@@ -19,7 +19,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AuthType extends AbstractType
 {
-
     public function __construct(private readonly GetSettings $getSettings)
     {
     }

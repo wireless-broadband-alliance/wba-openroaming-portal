@@ -19,7 +19,6 @@ use Symfony\Component\Validator\Constraints\Length;
 
 class CustomType extends AbstractType
 {
-
     public function __construct(
         private readonly GetSettings $getSettings
     ) {

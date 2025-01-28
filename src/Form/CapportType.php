@@ -13,8 +13,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class CapportType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

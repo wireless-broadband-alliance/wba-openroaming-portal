@@ -19,7 +19,6 @@ use Symfony\Component\Validator\Constraints\Regex;
 class ForgotPasswordSMSType extends AbstractType
 {
     /**
-     *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.

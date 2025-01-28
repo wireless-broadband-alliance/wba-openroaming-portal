@@ -20,7 +20,7 @@ use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
-use App\Form\TOStype;
+use App\Form\TOSType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -277,7 +277,7 @@ class SiteController extends AbstractController
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
-        $formTOS = $this->createForm(TOStype::class);
+        $formTOS = $this->createForm(TOSType::class);
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
@@ -1006,7 +1006,7 @@ class SiteController extends AbstractController
         }
 
         if (!$currentUser->isVerified()) {
-            $formTOS = $this->createForm(TOStype::class);
+            $formTOS = $this->createForm(TOSType::class);
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'data' => $data,

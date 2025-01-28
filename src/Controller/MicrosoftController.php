@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -237,11 +238,8 @@ class MicrosoftController extends AbstractController
             // Get the current token and firewall name
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
-            // phpcs:disable Generic.Files.LineLength.TooLong
             /** @phpstan-ignore-next-line */
-            $firewallName = $token instanceof \Symfony\Component\Security\Core\Authentication\Token\TokenInterface ? $token->getFirewallName(
-            ) : 'main';
-            // phpcs:enable
+            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : 'main';
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
