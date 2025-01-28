@@ -33,12 +33,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class ProfileController extends AbstractController
 {
     private array $settings;
-    private EventActions $eventActions;
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ExpirationProfileService $expirationProfileService;
 
     /**
      * @param SettingRepository $settingRepository
@@ -49,20 +43,14 @@ class ProfileController extends AbstractController
      * @param ExpirationProfileService $expirationProfileService
      */
     public function __construct(
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ExpirationProfileService $expirationProfileService,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
+        private readonly GetSettings $getSettings,
+        private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ExpirationProfileService $expirationProfileService,
     ) {
         $this->settings = $this->getSettings($settingRepository);
-        $this->eventActions = $eventActions;
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->expirationProfileService = $expirationProfileService;
     }
 
     #[Route('/profile/android', name: 'profile_android')]
