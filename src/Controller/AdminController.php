@@ -31,15 +31,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AdminController extends AbstractController
 {
-    private MailerInterface $mailer;
-    private UserRepository $userRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ParameterBagInterface $parameterBag;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private EventActions $eventActions;
-    private VerificationCodeEmailGenerator $verificationCodeGenerator;
-
     /**
      * @param MailerInterface $mailer
      * @param UserRepository $userRepository
@@ -51,28 +42,20 @@ class AdminController extends AbstractController
      * @param VerificationCodeEmailGenerator $verificationCodeGenerator
      */
     public function __construct(
-        MailerInterface $mailer,
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ParameterBagInterface $parameterBag,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
-        VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly MailerInterface $mailer,
+        private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
-        $this->mailer = $mailer;
-        $this->userRepository = $userRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->parameterBag = $parameterBag;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->eventActions = $eventActions;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
-    /*
-    * Dashboard Page Main Route
-    */
+    /**
+     * Dashboard Page Main Route
+     */
     /**
      * @param Request $request
      * @param UserRepository $userRepository
