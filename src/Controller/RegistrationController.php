@@ -68,10 +68,6 @@ class RegistrationController extends AbstractController
      * Handle the email registration.
      */
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param EntityManagerInterface $entityManager
-     * @return Response
      * @throws RandomException
      * @throws TransportExceptionInterface
      * @throws Exception
@@ -155,8 +151,8 @@ class RegistrationController extends AbstractController
     }
 
     /**
-    * Handle the sms registration.
-    */
+     * Handle the sms registration.
+     */
     /**
      * @throws NonUniqueResultException
      * @throws RandomException
