@@ -20,7 +20,7 @@ class AppVersionExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('app_version', [$this, 'getAppVersion']),
+            new TwigFunction('app_version', $this->getAppVersion(...)),
         ];
     }
 

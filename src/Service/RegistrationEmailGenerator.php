@@ -11,10 +11,6 @@ use Symfony\Component\Mime\Address;
 
 class RegistrationEmailGenerator
 {
-    /**
-     * @param ParameterBagInterface $parameterBag
-     * @param MailerInterface $mailer
-     */
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
         private readonly MailerInterface $mailer,
