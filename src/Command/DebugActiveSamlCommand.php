@@ -12,11 +12,10 @@ class DebugActiveSamlCommand extends Command
 {
     protected static $defaultName = 'app:debug-active-saml';
 
-    private SamlActiveProviderService $service;
 
-    public function __construct(SamlActiveProviderService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly SamlActiveProviderService $service
+    ) {
         parent::__construct();
     }
 

@@ -19,13 +19,10 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class ClearEventCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-    private EventRepository $eventRepository;
-
-    public function __construct(EntityManagerInterface $entityManager, EventRepository $eventRepository)
-    {
-        $this->entityManager = $entityManager;
-        $this->eventRepository = $eventRepository;
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly EventRepository $eventRepository
+    ) {
         parent::__construct();
     }
 
