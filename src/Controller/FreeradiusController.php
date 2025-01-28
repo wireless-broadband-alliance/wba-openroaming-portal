@@ -27,7 +27,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class FreeradiusController extends AbstractController
 {
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly GetSettings $getSettings,
@@ -349,9 +348,9 @@ class FreeradiusController extends AbstractController
         $escapeSpreadSheetService = new EscapeSpreadSheet();
 
         foreach ($authData as $data) {
-            $sheet1->setCellValue('A'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['auth_date']))
-                ->setCellValue('B'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['Accepted']))
-                ->setCellValue('C'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['Rejected']));
+            $sheet1->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['auth_date']))
+                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['Accepted']))
+                ->setCellValue('C' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['Rejected']));
             $row++;
         }
 
@@ -367,8 +366,8 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($sessionData as $data) {
-            $sheet2->setCellValue('A'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['session_date']))
-                ->setCellValue('B'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['average_time']));
+            $sheet2->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['session_date']))
+                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['average_time']));
             $row++;
         }
 
@@ -383,8 +382,8 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($totalTimeData as $data) {
-            $sheet3->setCellValue('A'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['session_date']))
-                ->setCellValue('B'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_time']));
+            $sheet3->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['session_date']))
+                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_time']));
             $row++;
         }
 
@@ -402,21 +401,21 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($trafficData as $data) {
-            $sheet4->setCellValue('A'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['realm']))
+            $sheet4->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['realm']))
                 ->setCellValue(
-                    'B'.$row,
+                    'B' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input_flat'])
                 )
                 ->setCellValue(
-                    'C'.$row,
+                    'C' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_input'])
                 )
                 ->setCellValue(
-                    'D'.$row,
+                    'D' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output_flat'])
                 )
                 ->setCellValue(
-                    'E'.$row,
+                    'E' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_output'])
                 );
             $row++;
@@ -436,8 +435,8 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($realmUsageData as $data) {
-            $sheet5->setCellValue('A'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['realm']))
-                ->setCellValue('B'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_count']));
+            $sheet5->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['realm']))
+                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['total_count']));
             $row++;
         }
 
@@ -452,8 +451,8 @@ class FreeradiusController extends AbstractController
 
         $row = 2;
         foreach ($apUsageData as $data) {
-            $sheet6->setCellValue('A'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['ap_Name']))
-                ->setCellValue('B'.$row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['ap_Usage']));
+            $sheet6->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['ap_Name']))
+                ->setCellValue('B' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($data['ap_Usage']));
             $row++;
         }
 
@@ -469,11 +468,11 @@ class FreeradiusController extends AbstractController
         $row = 2;
         foreach ($wifiStandardsData as $data) {
             $sheet7->setCellValue(
-                'A'.$row,
+                'A' . $row,
                 $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Standards'])
             )
                 ->setCellValue(
-                    'B'.$row,
+                    'B' . $row,
                     $escapeSpreadSheetService->escapeSpreadsheetValue($data['wifi_Usage'])
                 );
             $row++;
@@ -483,7 +482,7 @@ class FreeradiusController extends AbstractController
         $sheet7->getColumnDimension('B')->setWidth(20);
 
         // Save the spreadsheet to a temporary file
-        $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics').'.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'freeradius_statistics') . '.xlsx';
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
