@@ -45,8 +45,6 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Find the latest 'USER_SMS_ATTEMPT' event for the given user.
      *
-     * @param User $user
-     * @return Event|null
      * @throws NonUniqueResultException
      */
     public function findLatestSmsAttemptEvent(User $user): ?Event
@@ -65,9 +63,7 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *
-     * @param User $user
      * @param $eventLog // from ENUM AnalyticalEventType
-     * @return Event|null
      * @throws NonUniqueResultException
      */
     public function findLatestRequestAttemptEvent(User $user, $eventLog): ?Event

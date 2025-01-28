@@ -32,7 +32,7 @@ class RegistrationFormSMSType extends AbstractType
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
-        $regionInputs = explode(',', $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
 
         $builder

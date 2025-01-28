@@ -28,7 +28,7 @@ class UserUpdateType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $regionInputs = explode(',', $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
 
         $builder
