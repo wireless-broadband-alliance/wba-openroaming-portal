@@ -7,17 +7,17 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class BaseResponse
 {
     /** @var int */
-    private $statusCode;
+    private int $statusCode;
 
     /** @var mixed */
-    private $data;
+    private mixed $data;
 
     /** @var string|null */
-    private $error;
+    private ?string $error;
 
-    private $headers;
+    private mixed $headers;
 
-    public function __construct(int $statusCode, $data = null, string $error = null, $headers = [])
+    public function __construct(int $statusCode, $data = null, ?string $error = null, $headers = [])
     {
         $this->statusCode = $statusCode;
         $this->data = $data;
