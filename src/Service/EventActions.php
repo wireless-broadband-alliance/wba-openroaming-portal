@@ -7,11 +7,10 @@ use App\Entity\User;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 
-class EventActions
+readonly class EventActions
 {
-    public function __construct(
-        private readonly EntityManagerInterface $entityManager
-    ) {
+    public function __construct(private EntityManagerInterface $entityManager)
+    {
     }
 
     public function saveEvent(User $user, string $eventName, DateTime $dateTime, array $eventMetadata): void

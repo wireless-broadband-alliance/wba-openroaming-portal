@@ -26,15 +26,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     /**
      * Default attribute mapping.
      */
-    private const ATTRIBUTE_MAPPING = [
-        'password' => 'notused',
-        'uuid' => '$samlUuid',
-        'email' => '$email',
-        'first_name' => '$givenName',
-        'last_name' => '$surname',
-        'isVerified' => 1,
-        'roles' => [],
-    ];
+    private readonly array $attribute_mapping;
 
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -42,6 +34,15 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
     ) {
+        $this->attribute_mapping = [
+            'password' => 'notused',
+            'uuid' => '$samlUuid',
+            'email' => '$email',
+            'first_name' => '$givenName',
+            'last_name' => '$surname',
+            'isVerified' => 1,
+            'roles' => [],
+        ];
     }
 
     /**
@@ -77,7 +78,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $reflection = new ReflectionClass(User::class); // Hardcoded User entity
 
         /** @psalm-suppress MixedAssignment */
-        foreach (self::ATTRIBUTE_MAPPING as $field => $attribute) {
+        foreach ($this->attribute_mapping as $field => $attribute) {
             $property = $reflection->getProperty($field);
             $value = null;
 

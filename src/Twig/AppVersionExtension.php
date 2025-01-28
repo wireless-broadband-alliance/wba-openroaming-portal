@@ -17,6 +17,7 @@ class AppVersionExtension extends AbstractExtension
         $this->projectDir = $kernel->getProjectDir();
     }
 
+    #[\Override]
     public function getFunctions(): array
     {
         return [
