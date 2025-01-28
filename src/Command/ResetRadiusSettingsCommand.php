@@ -19,12 +19,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class ResetRadiusSettingsCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager
+    ) {
         parent::__construct();
     }
 
