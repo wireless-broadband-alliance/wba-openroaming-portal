@@ -19,11 +19,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AuthType extends AbstractType
 {
-    private GetSettings $getSettings;
 
-    public function __construct(GetSettings $getSettings)
+    public function __construct(private readonly GetSettings $getSettings)
     {
-        $this->getSettings = $getSettings;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -50,7 +48,7 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
                         new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context) {
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
                                 if ($authMethodSamlEnabled === "true" && empty($value)) {
@@ -91,7 +89,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(
@@ -119,7 +117,7 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
                         new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context) {
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
                                 if ($authMethodSamlEnabled === "true" && empty($value)) {
@@ -166,7 +164,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(
@@ -245,7 +243,7 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
                         new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context) {
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
                                 if ($authMethodSamlEnabled === "true" && empty($value)) {
@@ -287,7 +285,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(
@@ -315,7 +313,7 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
                         new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context) {
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
                                 if ($authMethodSamlEnabled === "true" && empty($value)) {
@@ -354,7 +352,7 @@ class AuthType extends AbstractType
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
                         new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context) {
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
                                 if ($authMethodSamlEnabled === "true" && empty($value)) {
@@ -395,7 +393,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(

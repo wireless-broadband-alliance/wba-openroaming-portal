@@ -12,18 +12,17 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class CustomType extends AbstractType
 {
-    private GetSettings $getSettings;
 
-    public function __construct(GetSettings $getSettings)
-    {
-        $this->getSettings = $getSettings;
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

@@ -228,11 +228,6 @@ class MicrosoftController extends AbstractController
         return $user;
     }
 
-
-    /**
-     * @param User $user
-     * @return void
-     */
     public function authenticateUserMicrosoft(User $user): void
     {
         // Get the current request from the request stack
