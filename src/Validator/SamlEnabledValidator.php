@@ -12,11 +12,6 @@ class SamlEnabledValidator extends ConstraintValidator
         private readonly SamlProviderRepository $repository
     ) {
     }
-
-    /**
-     * @param mixed $value
-     * @param Constraint $constraint
-     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         // Ensure the constraint is of the correct type

@@ -12,9 +12,6 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class SamlEnabled extends Constraint
 {
-    /**
-     * @var string
-     */
     public string $message = 'No active SAML provider found.';
 
     public function __construct(?string $message = null, ?array $groups = null, mixed $payload = null)
