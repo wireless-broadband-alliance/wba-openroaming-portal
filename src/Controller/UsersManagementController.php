@@ -44,49 +44,26 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class UsersManagementController extends AbstractController
 {
-    private ProfileManager $profileManager;
-    private EventActions $eventActions;
-    private ParameterBagInterface $parameterBag;
-    private UserRepository $userRepository;
-    private EntityManagerInterface $entityManager;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private PgpEncryptionService $pgpEncryptionService;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private EventRepository $eventRepository;
-    private SendSMS $sendSMS;
-
     public function __construct(
-        ProfileManager $profileManager,
-        EventActions $eventActions,
-        ParameterBagInterface $parameterBag,
-        UserRepository $userRepository,
-        EntityManagerInterface $entityManager,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        PgpEncryptionService $pgpEncryptionService,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        EventRepository $eventRepository,
-        SendSMS $sendSMS,
+        private readonly ProfileManager $profileManager,
+        private readonly EventActions $eventActions,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly PgpEncryptionService $pgpEncryptionService,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventRepository $eventRepository,
+        private readonly SendSMS $sendSMS,
     ) {
-        $this->profileManager = $profileManager;
-        $this->eventActions = $eventActions;
-        $this->parameterBag = $parameterBag;
-        $this->userRepository = $userRepository;
-        $this->entityManager = $entityManager;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->pgpEncryptionService = $pgpEncryptionService;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->eventRepository = $eventRepository;
-        $this->sendSMS = $sendSMS;
     }
+
     #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_revoke_profiles', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function revokeUsers(
         Request $request,
         UserRepository $userRepository,
-        EntityManagerInterface $em,
         $id
     ): Response {
         /** @var User $currentUser */
@@ -126,19 +103,15 @@ class UsersManagementController extends AbstractController
         return $this->redirectToRoute('admin_page');
     }
 
-    /*
-    * Handle export of the Users Table on the Main Route
-    */
     /**
-     * @param EntityManagerInterface $entityManager
-     * @param Request $request
-     * @return Response
+     * Handle export of the Users Table on the Main Route
+     */
+    /**
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(
-        EntityManagerInterface $entityManager,
         Request $request
     ): Response {
         // Get the current logged-in user (admin)
@@ -256,14 +229,11 @@ class UsersManagementController extends AbstractController
         return $this->file($tempFile, 'users.xlsx');
     }
 
-    /*
-    * Deletes Users from the Portal, encrypts the data before delete and saves it
-    */
+    /**
+     * Deletes Users from the Portal, encrypts the data before delete and saves it
+     */
     /**
      * @param $id
-     * @param EntityManagerInterface $em
-     * @param Request $request
-     * @return Response
      * @throws \JsonException
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
@@ -317,7 +287,7 @@ class UsersManagementController extends AbstractController
         $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
 
         // Encrypt combined JSON data using PGP encryption
-        $pgpEncryptedService = new PgpEncryptionService();
+        new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
 
         // Handle encryption errors
@@ -392,17 +362,11 @@ class UsersManagementController extends AbstractController
         return $this->redirectToRoute('admin_page');
     }
 
-    /*
-    * Handles the edit of the Users by the admin
-    */
     /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param UserPasswordHasherInterface $passwordHasher
-     * @param EntityManagerInterface $em
-     * @param MailerInterface $mailer
+     * Handles the edit of the Users by the admin
+     */
+    /**
      * @param $id
-     * @return Response
      * @throws TransportExceptionInterface
      */
     #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
@@ -549,39 +513,38 @@ class UsersManagementController extends AbstractController
                 $currentTime = new DateTime();
 
                 // Retrieve the metadata from the latest event
-                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                ) : [];
                 $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
                     ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
                     : null;
-                $resetAttempts = isset(
-                    $latestEventMetadata['resetAttempts']
-                ) ? $latestEventMetadata['resetAttempts'] : 0;
+                $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
-                if (!$latestEvent || $resetAttempts < 3) {
-                    // Check if enough time has passed since the last reset
-                    if (
-                        !$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime &&
-                            $lastResetAccountPasswordTime->add($minInterval) < $currentTime)
-                    ) {
-                        $attempts = $resetAttempts + 1;
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                if (
+                    (!$latestEvent || $resetAttempts < 3) && (!$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime && $lastResetAccountPasswordTime->add(
+                        $minInterval
+                    ) < $currentTime))
+                ) {
+                    // phpcs:enable
+                    $attempts = $resetAttempts + 1;
 
-                        $message = "Your new account password is: " . $newPassword . "%0A";
-                        $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
+                    $message = "Your new account password is: " . $newPassword . "%0A";
+                    $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
 
-                        $eventMetadata = [
-                            'ip' => $request->getClientIp(),
-                            'edited' => $user->getUuid(),
-                            'by' => $currentUser->getUuid(),
-                            'resetAttempts' => $attempts,
-                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
-                        ];
-                        $this->eventActions->saveEvent(
-                            $user,
-                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
-                            new DateTime(),
-                            $eventMetadata
-                        );
-                    }
+                    $eventMetadata = [
+                        'ip' => $request->getClientIp(),
+                        'edited' => $user->getUuid(),
+                        'by' => $currentUser->getUuid(),
+                        'resetAttempts' => $attempts,
+                        'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                        new DateTime(),
+                        $eventMetadata
+                    );
                 }
             }
             $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
@@ -600,12 +563,11 @@ class UsersManagementController extends AbstractController
         );
     }
 
-    /*
+    /**
      * Render a confirmation password form
      */
     /**
      * @param string $type Type of action
-     * @return Response
      */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted('ROLE_ADMIN')]
