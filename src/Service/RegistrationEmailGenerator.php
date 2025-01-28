@@ -11,19 +11,14 @@ use Symfony\Component\Mime\Address;
 
 class RegistrationEmailGenerator
 {
-    private ParameterBagInterface $parameterBag;
-    private MailerInterface $mailer;
-
     /**
      * @param ParameterBagInterface $parameterBag
      * @param MailerInterface $mailer
      */
     public function __construct(
-        ParameterBagInterface $parameterBag,
-        MailerInterface $mailer,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly MailerInterface $mailer,
     ) {
-        $this->parameterBag = $parameterBag;
-        $this->mailer = $mailer;
     }
 
     /**
@@ -32,7 +27,7 @@ class RegistrationEmailGenerator
     public function sendRegistrationEmail(User $user, $password): void
     {
         // Send email to the user with the verification code
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from(
                 new Address(
                     $this->parameterBag->get('app.email_address'),
@@ -59,7 +54,7 @@ class RegistrationEmailGenerator
     public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
         // Send email to the user with the verification code
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from(
                 new Address(
                     $this->parameterBag->get('app.email_address'),
@@ -79,7 +74,7 @@ class RegistrationEmailGenerator
     public function sendNotifyExpiredProfile(User $user): void
     {
         // Send email to the user with the verification code
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from(
                 new Address(
                     $this->parameterBag->get('app.email_address'),

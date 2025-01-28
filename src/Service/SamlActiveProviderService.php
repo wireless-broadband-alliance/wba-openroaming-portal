@@ -11,8 +11,9 @@ class SamlActiveProviderService
 {
     private ?Auth $samlAuth = null;
 
-    public function __construct(private readonly SamlProviderRepository $repository)
-    {
+    public function __construct(
+        private readonly SamlProviderRepository $repository
+    ) {
     }
 
     /**
@@ -20,7 +21,7 @@ class SamlActiveProviderService
      */
     public function getActiveSamlProvider(): Auth
     {
-        if ($this->samlAuth === null) {
+        if (!$this->samlAuth instanceof Auth) {
             // Fetch active provider
             $activeProvider = $this->repository->findOneBy(['isActive' => true]);
 

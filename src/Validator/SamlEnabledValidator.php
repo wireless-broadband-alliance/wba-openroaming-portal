@@ -12,15 +12,18 @@ class SamlEnabledValidator extends ConstraintValidator
         private readonly SamlProviderRepository $repository
     ) {
     }
+
     public function validate(mixed $value, Constraint $constraint): void
     {
         // Ensure the constraint is of the correct type
         if (!$constraint instanceof SamlEnabled) {
-            throw new \InvalidArgumentException(sprintf(
-                'Expected instance of %s, got %s',
-                SamlEnabled::class,
-                get_class($constraint)
-            ));
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Expected instance of %s, got %s',
+                    SamlEnabled::class,
+                    $constraint::class
+                )
+            );
         }
 
         if ($value !== "true") {
@@ -33,7 +36,7 @@ class SamlEnabledValidator extends ConstraintValidator
         // If no active provider exists, reject the field value with a validation message
         if (!$activeProvider) {
             $this->context->buildViolation($constraint->message)
-            ->addViolation();
+                ->addViolation();
         }
     }
 }

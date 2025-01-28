@@ -10,7 +10,7 @@ use Twig\TwigFunction;
 
 class AppVersionExtension extends AbstractExtension
 {
-    private string $projectDir;
+    private readonly string $projectDir;
 
     public function __construct(KernelInterface $kernel)
     {

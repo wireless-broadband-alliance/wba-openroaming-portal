@@ -12,13 +12,10 @@ use Symfony\Component\Mime\Email;
 
 class VerificationCodeEmailGenerator
 {
-    private UserRepository $userRepository;
-    private ParameterBagInterface $parameterBag;
-
-    public function __construct(UserRepository $userRepository, ParameterBagInterface $parameterBag)
-    {
-        $this->userRepository = $userRepository;
-        $this->parameterBag = $parameterBag;
+    public function __construct(
+        private readonly UserRepository $userRepository,
+        private readonly ParameterBagInterface $parameterBag
+    ) {
     }
 
     /**

@@ -37,7 +37,7 @@ class RsaEncryptionService
 
             return [
                 'success' => true,
-                'data' => base64_encode($encryptedData),
+                'data' => base64_encode((string) $encryptedData),
             ];
         } catch (Exception $e) {
             return [
