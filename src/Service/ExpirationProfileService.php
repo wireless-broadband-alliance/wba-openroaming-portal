@@ -9,21 +9,16 @@ use Exception;
 
 class ExpirationProfileService
 {
-    private SettingRepository $settingRepository;
-    private CertificateService $certificateService;
-
-    public function __construct(SettingRepository $settingRepository, CertificateService $certificateService)
-    {
-        $this->settingRepository = $settingRepository;
-        $this->certificateService = $certificateService;
+    public function __construct(
+        private readonly SettingRepository $settingRepository,
+        private readonly CertificateService $certificateService
+    ) {
     }
 
     /**
      * Calculate the expiration and notification times for a user profile.
-     * @param string $provider
-     * @param string|null $providerId
-     * @param UserRadiusProfile $userRadiusProfile
-     * @param string $certificatePath
+     */
+    /**
      * @return array Contains 'limitTime' and 'notifyTime' as DateTime instances.
      * @throws Exception
      */
@@ -33,7 +28,9 @@ class ExpirationProfileService
         UserRadiusProfile $userRadiusProfile,
         string $certificatePath,
     ): array {
-        $certificateLimitDate = strtotime($this->certificateService->getCertificateExpirationDate($certificatePath));
+        $certificateLimitDate = strtotime(
+            (string)$this->certificateService->getCertificateExpirationDate($certificatePath)
+        );
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         $defaultExpireDays = ((int)$timeLeft);
@@ -77,10 +74,6 @@ class ExpirationProfileService
 
     /**
      * Get a setting value by name or return a default value.
-     *
-     * @param string $settingName
-     * @param int $defaultValue
-     * @return int
      */
     private function getSettingValue(string $settingName, int $defaultValue): int
     {

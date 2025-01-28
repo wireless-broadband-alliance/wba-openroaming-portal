@@ -13,18 +13,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CaptchaValidator
 {
-    private HttpClientInterface $httpClient;
-    private ParameterBagInterface $parameterBag;
-    private KernelInterface $kernel;
-
     public function __construct(
-        HttpClientInterface $httpClient,
-        ParameterBagInterface $parameterBag,
-        KernelInterface $kernel
+        private readonly HttpClientInterface $httpClient,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly KernelInterface $kernel
     ) {
-        $this->httpClient = $httpClient;
-        $this->parameterBag = $parameterBag;
-        $this->kernel = $kernel;
     }
 
     /**

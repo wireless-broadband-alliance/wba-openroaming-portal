@@ -9,11 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class EventActions
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager
+    ) {
     }
 
     public function saveEvent(User $user, string $eventName, DateTime $dateTime, array $eventMetadata): void
