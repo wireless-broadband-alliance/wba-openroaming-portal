@@ -35,18 +35,13 @@ class ProfileController extends AbstractController
     private array $settings;
 
     /**
-     * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param UserExternalAuthRepository $userExternalAuthRepository
-     * @param ExpirationProfileService $expirationProfileService
      */
     public function __construct(
         private readonly SettingRepository $settingRepository,
+        private readonly UserRepository $userRepository,
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
     ) {
@@ -59,7 +54,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/android', name: 'profile_android')]
     public function profileAndroid(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
@@ -73,7 +67,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -105,7 +99,7 @@ class ProfileController extends AbstractController
             '@EXPIRATION_DATE@'
         ], [
             $radiusUser->getUsername(),
-            base64_encode($radiusUser->getValue()),
+            base64_encode((string)$radiusUser->getValue()),
             $this->settings['DOMAIN_NAME'],
             $this->settings['RADIUS_TLS_NAME'],
             $this->settings['DISPLAY_NAME'],
@@ -140,7 +134,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     public function profileIos(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
@@ -150,7 +143,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -227,7 +220,9 @@ class ProfileController extends AbstractController
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
-            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+            throw new RuntimeException(
+                'Signing failed: ' . $exception->getMessage(), $exception->getCode(), $exception
+            );
         }
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
@@ -240,13 +235,13 @@ class ProfileController extends AbstractController
         // Save the event Action using the service
         $userAgent = $request->headers->get('User-Agent');
         $eventMetadata = [];
-        if (stripos($userAgent, 'iPhone') !== false || stripos($userAgent, 'iPad') !== false) {
+        if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS,
                 'ip' => $request->getClientIp(),
             ];
-        } elseif (stripos($userAgent, 'Mac OS') !== false) {
+        } elseif (stripos((string) $userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
@@ -262,7 +257,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/windows', name: 'profile_windows')]
     public function profileWindows(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UrlGeneratorInterface $urlGenerator,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
@@ -273,7 +267,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -325,7 +319,9 @@ class ProfileController extends AbstractController
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException(
-                'Signing failed: ' . $exception->getMessage(), $exception->getCode(), $exception
+                'Signing failed: ' . $exception->getMessage(),
+                $exception->getCode(),
+                $exception
             );
         }
         $uuid = uniqid("", true);

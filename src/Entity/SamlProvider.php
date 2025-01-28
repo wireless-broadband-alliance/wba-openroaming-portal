@@ -164,8 +164,10 @@ class SamlProvider
     public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): static
     {
         // Set the owning side to null (unless already changed)
-        if ($this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getSamlProvider(
-            ) === $this) {
+        if (
+            $this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getSamlProvider(
+            ) === $this
+        ) {
             $userExternalAuth->setSamlProvider(null);
         }
 
