@@ -27,10 +27,13 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SanitizeHTML;
 use App\Service\Statistics;
+use DateInvalidTimeZoneException;
 use DateTime;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,41 +44,22 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class SettingsController extends AbstractController
 {
-    private EventActions $eventActions;
-
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private UserRepository $userRepository;
-    private EntityManagerInterface $entityManager;
-    private RadiusAuthsRepository $radiusAuthsRepository;
-    private RadiusAccountingRepository $radiusAccountingRepository;
-
     public function __construct(
-        EventActions $eventActions,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        UserRepository $userRepository,
-        EntityManagerInterface $entityManager,
-        RadiusAuthsRepository $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository
+        private readonly EventActions $eventActions,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RadiusAuthsRepository $radiusAuthsRepository,
+        private readonly RadiusAccountingRepository $radiusAccountingRepository
     ) {
-        $this->eventActions = $eventActions;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->userRepository = $userRepository;
-        $this->entityManager = $entityManager;
-        $this->radiusAuthsRepository = $radiusAuthsRepository;
-        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
+
     /*
      * Check if the code and then return the correct action
      */
     /**
-     * @param RequestStack $requestStack
-     * @param EntityManagerInterface $em
      * @param string $type Type of action
-     * @return Response
-     * @throws Exception
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
@@ -310,12 +294,6 @@ class SettingsController extends AbstractController
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTerms(
@@ -454,12 +432,6 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
@@ -550,12 +522,6 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsStatus(
@@ -639,12 +605,6 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsLDAP(
@@ -717,13 +677,6 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     * @throws \DateInvalidTimeZoneException
-     */
     #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
@@ -741,7 +694,7 @@ class SettingsController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
-        $certificateLimitDate = strtotime($certificateService->getCertificateExpirationDate($certificatePath));
+        $certificateLimitDate = strtotime((string) $certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
         $profileLimitDate = ((int)$timeLeft);
@@ -750,9 +703,9 @@ class SettingsController extends AbstractController
         }
 
         $defaultTimeZone = date_default_timezone_get();
-        $dateTime = (new DateTime())
+        $dateTime = new DateTime()
             ->setTimestamp($certificateLimitDate)
-            ->setTimezone(new \DateTimeZone($defaultTimeZone));
+            ->setTimezone(new DateTimeZone($defaultTimeZone));
 
         // Convert to human-readable format
         $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
@@ -806,10 +759,8 @@ class SettingsController extends AbstractController
                 $value = $submittedData[$settingName] ?? null;
 
                 // Check if the setting is a label, to be impossible to set it null of empty
-                if (in_array($settingName, $labelsFields)) {
-                    if ($value === null || $value === "") {
-                        continue;
-                    }
+                if (in_array($settingName, $labelsFields) && ($value === null || $value === "")) {
+                    continue;
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
@@ -853,12 +804,6 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCAPPORT(
@@ -927,12 +872,6 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsSMS(
@@ -1006,12 +945,10 @@ class SettingsController extends AbstractController
     }
 
     /**
-     * Render Statistics  about the Portal data
+     * Render Statistics about the Portal data
      */
     /**
-     * @param Request $request
-     * @return Response
-     * @throws \JsonException
+     * @throws JsonException
      * @throws Exception
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
@@ -1025,19 +962,11 @@ class SettingsController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else {
-            $startDate = (new DateTime())->modify(
-                '-1 week'
-            );
-        }
+        $startDate = $startDateString ? new DateTime($startDateString) : new DateTime()->modify(
+            '-1 week'
+        );
 
-        if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else {
-            $endDate = new DateTime();
-        }
+        $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
         $interval = $startDate->diff($endDate);
 

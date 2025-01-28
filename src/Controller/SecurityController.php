@@ -19,10 +19,6 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-
     /**
      * SiteController constructor.
      *
@@ -31,13 +27,10 @@ class SecurityController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
     }
 
     /**
@@ -54,7 +47,7 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         // Check if the user is already logged in and redirect them accordingly
-        if ($this->getUser()) {
+        if ($this->getUser() instanceof \Symfony\Component\Security\Core\User\UserInterface) {
             if ($type === 'admin') {
                 if ($this->isGranted('ROLE_ADMIN')) {
                     $session = $request->getSession();
@@ -83,7 +76,7 @@ class SecurityController extends AbstractController
         if ($uuid) {
             // Try to find the user by UUID excluding admins
             $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-            if ($user) {
+            if ($user instanceof \App\Entity\User) {
                 // If the user is found, set their email as the last username to pre-fill the email field
                 $lastUsername = $user->getUuid();
             }
