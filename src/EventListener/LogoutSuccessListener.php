@@ -15,12 +15,6 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 class LogoutSuccessListener implements EventSubscriberInterface
 {
-    /**
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param SettingRepository $settingRepository
-     * @param EventActions $eventActions
-     */
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,

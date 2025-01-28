@@ -285,8 +285,10 @@ class MicrosoftController extends AbstractController
             // Get the current token and firewall name
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
+            // phpcs:disable Generic.Files.LineLength.TooLong
             /** @phpstan-ignore-next-line */
-            $firewallName = $token ? $token->getFirewallName() : 'main';
+            $firewallName = $token instanceof \Symfony\Component\Security\Core\Authentication\Token\TokenInterface ? $token->getFirewallName() : 'main';
+            // phpcs:enable
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
