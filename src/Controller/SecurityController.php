@@ -6,13 +6,20 @@ use App\Entity\User;
 use App\Enum\PlatformMode;
 use App\Enum\twoFAType;
 use App\Form\LoginFormType;
+use App\Form\TwoFAcode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\TOTPService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use LogicException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,6 +31,8 @@ class SecurityController extends AbstractController
     private UserRepository $userRepository;
     private SettingRepository $settingRepository;
     private GetSettings $getSettings;
+    private TOTPService $totpService;
+    private EntityManagerInterface $entityManager;
 
     /**
      * SiteController constructor.
@@ -35,11 +44,15 @@ class SecurityController extends AbstractController
     public function __construct(
         UserRepository $userRepository,
         SettingRepository $settingRepository,
-        GetSettings $getSettings
+        GetSettings $getSettings,
+        TOTPService $totpService,
+        EntityManagerInterface $entityManager
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
         $this->getSettings = $getSettings;
+        $this->totpService = $totpService;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -74,12 +87,12 @@ class SecurityController extends AbstractController
             if ($twoFAplatformStatus) {
                 if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED) {
                     if ($this->getUser()->getTwoFAcode()) {
-                        return $this->redirectToRoute('2FA_PAGE'); // change for 2fa page!!!
+                        return $this->redirectToRoute('app_verify2FA');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
 
-                return $this->redirectToRoute('2FA_PAGE');
+                return $this->redirectToRoute('app_verify2FA');
             }
             return $this->redirectToRoute('app_landing');
         }
@@ -131,17 +144,84 @@ class SecurityController extends AbstractController
         );
     }
 
-    #[Route('/login/twoFactorAuth', name: 'app_email_code')]
-    #[IsGranted('ROLE_USER')]
-    public function email2fa(): Response
-    {
-        // Get the current user
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
 
-        if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
-            return $this->redirectToRoute('app_landing');
+    #[Route(path: '/enable2FA', name: 'app_enable2FA')]
+    public function enable2FA(): RedirectResponse
+    {
+        $user = $this->getUser();
+        $secret = $this->totpService->generateSecret();
+        if ($user) {
+            $user->setTwoFAcode($secret);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        } else {
+            $this->addFlash('error', 'User not found');
         }
+
+        $provisioningUri = $this->totpService->generateTOTP($secret);
+
+        return $this->redirectToRoute('app_generateQRCode');
     }
+
+    #[Route(path: '/generateQRCode', name: 'app_generateQRCode')]
+    public function generateQRCode(): Response
+    {
+        $secret = $this->getUser()->getTwoFAcode();
+        $provisioningUri = $this->totpService->generateTOTP($secret);
+
+        $qrCode = new QrCode($provisioningUri);
+        $writer = new PngWriter();
+        $qrCodeImage = $writer->write($qrCode);
+
+        return new Response(
+            $qrCodeImage->getString(),
+            Response::HTTP_OK,
+            ['Content-Type' => $qrCodeImage->getMimeType()]
+        );
+    }
+
+    #[Route(path: '/verify2FA', name: 'app_verify2FA')]
+    public function verify2FA(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            $data = json_decode($request->getContent(), true);
+            $user = $this->getUser();
+            $secret = $user->getTwoFAcode();
+            $code = $data['code'];
+            if ($this->totpService->verifyTOTP($secret, $code)) {
+                return $this->redirectToRoute('app_landing');
+            }
+            $this->addFlash('error', 'Invalid code');
+        }
+        return $this->render('site/verify2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+        ]);
+    }
+/*
+    public function login(Request $request, TOTPService $totpService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // 1. Verificar credenciais (usuário e senha)
+        $user = $this->getDoctrine()
+            ->getRepository(User::class)
+            ->findOneBy(['email' => $data['email']]);
+
+        if (!$user || !password_verify($data['password'], $user->getPassword())) {
+            return $this->json(['error' => 'Invalid credentials'], 401);
+        }
+
+        // 2. Verificar o código TOTP
+        $code = $data['totp_code'] ?? null;
+        if (!$user->getTotpSecret() || !$totpService->verifyTOTP($user->getTotpSecret(), $code)) {
+            return $this->json(['error' => 'Invalid 2FA code'], 401);
+        }
+
+        // 3. Retornar um token JWT ou continuar a sessão
+        return $this->json(['message' => 'Login successful']);
+    }
+*/
 }

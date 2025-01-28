@@ -1712,7 +1712,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $twoFAcode = null;
 
     #[ORM\Column(nullable: false)]
