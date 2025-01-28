@@ -19,14 +19,10 @@ class SetSamlProviderCommand extends Command
 {
     protected static $defaultName = 'app:set-saml-provider';
 
-    private EntityManagerInterface $entityManager;
-    private ParameterBagInterface $parameterBag;
-
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
-    {
-        $this->entityManager = $entityManager;
-        $this->parameterBag = $parameterBag;
-
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ParameterBagInterface $parameterBag
+    ) {
         parent::__construct();
     }
 
@@ -51,8 +47,9 @@ class SetSamlProviderCommand extends Command
         }
 
         // Validate camelCase
-        if (!preg_match('/^[a-z]+([A-Z][a-z]*)*$/', $name)) {
+        if (!preg_match('/^[a-z]+([A-Z][a-z]*)*$/', (string)$name)) {
             $output->writeln('<error>Name must be in camelCase format (e.g., mySamlProvider).</error>');
+
             return self::FAILURE;
         }
 

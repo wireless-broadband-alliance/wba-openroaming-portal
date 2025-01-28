@@ -167,9 +167,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
 
     /**
-     * @param string|null $searchTerm
-     * @param string|null $filter
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
@@ -202,8 +199,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @param string|null $searchTerm
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
@@ -231,8 +226,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @param string|null $searchTerm
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */

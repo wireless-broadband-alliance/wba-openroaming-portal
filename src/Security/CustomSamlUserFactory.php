@@ -23,11 +23,6 @@ use function is_string;
 
 class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
-    private UserRepository $userRepository;
-    private EntityManagerInterface $entityManager;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-
     /**
      * Default attribute mapping.
      */
@@ -42,15 +37,11 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     ];
 
     public function __construct(
-        UserRepository $userRepository,
-        EntityManagerInterface $entityManager,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
+        private readonly UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
     ) {
-        $this->userRepository = $userRepository;
-        $this->entityManager = $entityManager;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
     }
 
     /**

@@ -70,7 +70,7 @@ class ResetAdminCommand extends Command
     {
         $admin = $this->userRepository->findAdmin();
 
-        if (!$admin) {
+        if (!$admin instanceof User) {
             $admin = new User();
             $admin->setUuid('admin@example.com');
             $admin->setEmail('admin@example.com');
