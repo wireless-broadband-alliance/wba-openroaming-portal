@@ -6,18 +6,17 @@
 
 {% block second_col %}
     {# Form Column #}
-    {# Toasts  #}
+    {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
         {% endfor %}
 
-        {# Flash error message  #}
+        {# Flash error message #}
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
     </div>
-
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
@@ -36,12 +35,12 @@
 
             {# Email #}
             <div class="relative mt-10">
-                {{ form_label(registrationFormDemo.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_label(registrationFormDemo.email, null, {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(registrationFormDemo.email, {
-                    'attr': {
-                        'class': 'form-widget',
-                        'placeholder': 'Enter your email'
-                    }
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'Enter your email',
+                    },
                 }) }}
             </div>
 
@@ -55,7 +54,7 @@
             {# Terms Checkbox #}
             <div class="mt-[28px] flex items-center justify-start gap-2">
 
-                {{ form_widget(formTOS.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
+                {{ form_widget(formTOS.agreeTerms, {attr: {class: 'w-5 h-5 peer relative appearance-none
                           rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
 
                 <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
@@ -110,7 +109,7 @@
 
         {% endif %}
 
-        {# Profile selector  #}
+        {# Profile selector #}
         <div class="mt-10 w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] text-[#212529] text-opacity-60">
 
             <h1 class="font-xl font-bold">DEMO MODE
@@ -196,19 +195,19 @@
             </div>
             <div {{ stimulus_controller('terms-widget') }}>
                 <div class="my-8 grid gap-4">
-                    {% include 'site/shared/_providers_login.html.twig' %}
+                    {{ include('site/shared/_providers_login.html.twig') }}
                 </div>
 
-                {#  Terms and Conditions Check Box #}
+                {# Terms and Conditions Check Box #}
                 {{ form_start(formTOS) }}
                 <div class="mt-[28px] flex items-center justify-start gap-2">
                     {{ form_widget(formTOS.agreeTerms, {
-                        'attr': {
-                            'class': 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary',
-                            'id': 'agreeTermsCheckbox',
+                        attr: {
+                            class: 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary',
+                            id: 'agreeTermsCheckbox',
                             'data-action': 'terms-widget#handleCheckboxChange',
-                            'data-terms-widget-target': 'agreeTerms'
-                        }
+                            'data-terms-widget-target': 'agreeTerms',
+                        },
                     }) }}
                     <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                         I agree to the
@@ -221,7 +220,7 @@
                 </div>
                 {{ form_end(formTOS) }}
 
-                {# Confirmation Terms Modal  #}
+                {# Confirmation Terms Modal #}
                 <div class="z-20 modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
                      data-terms-widget-target="confirmationModal" id="confirmationTermsModal">
                     <div class="modal-content bg-white p-5 rounded shadow-lg text-center">

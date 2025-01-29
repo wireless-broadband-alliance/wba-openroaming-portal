@@ -3,38 +3,38 @@
 
     {# SAML #}
     <div>
-        {% include 'admin/shared/settings_actions/auths_providers/_saml_Auth.html.twig' %}
+        {{ include('admin/shared/settings_actions/auths_providers/_saml_Auth.html.twig') }}
     </div>
 
     {# Google #}
     <div>
-        {% include 'admin/shared/settings_actions/auths_providers/_google_Auth.html.twig' %}
+        {{ include('admin/shared/settings_actions/auths_providers/_google_Auth.html.twig') }}
     </div>
 
     {# Microsoft #}
     <div>
-        {% include 'admin/shared/settings_actions/auths_providers/_microsoft_Auth.html.twig' %}
+        {{ include('admin/shared/settings_actions/auths_providers/_microsoft_Auth.html.twig') }}
     </div>
 
     {# EMAIL Register #}
     <div>
-        {% include 'admin/shared/settings_actions/auths_providers/_email_register_Auth.html.twig' %}
+        {{ include('admin/shared/settings_actions/auths_providers/_email_register_Auth.html.twig') }}
     </div>
 
     {# SMS REGISTER #}
     <div>
-        {% include 'admin/shared/settings_actions/auths_providers/_sms_register_Auth.html.twig' %}
+        {{ include('admin/shared/settings_actions/auths_providers/_sms_register_Auth.html.twig') }}
     </div>
 
     {# Login #}
     <div>
-        {% include 'admin/shared/settings_actions/auths_providers/_login_portal_Auth_html.twig' %}
+        {{ include('admin/shared/settings_actions/auths_providers/_login_portal_Auth.html.twig') }}
     </div>
 
     <div class="mt-8 divider-solid"></div>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingAUTH'}) }}"
+        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingAUTH'}) }}"
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             Reset

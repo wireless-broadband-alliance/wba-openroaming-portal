@@ -33,12 +33,12 @@
         <p class="font-semibold p-1">
             {% if user.isVerified is defined and user.isVerified == 0 %}
                 <span class="pill-error">
-					Not Verified
-				</span>
+                    Not Verified
+                </span>
             {% else %}
                 <span class="pill-success">
-					Verified
-				</span>
+                    Verified
+                </span>
             {% endif %}
         </p>
     </td>
@@ -48,12 +48,12 @@
         <p class="font-semibold p-1">
             {% if user.getBannedAt %}
                 <span class="pill-error">
-					{{ user.bannedat|date('d/m/Y H:i') }}
-				</span>
+                    {{ user.bannedat|date('d/m/Y H:i') }}
+                </span>
             {% else %}
                 <span class="pill-success">
-					Not Banned
-				</span>
+                    Not Banned
+                </span>
             {% endif %}
         </p>
     </td>
@@ -77,7 +77,7 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
                 <li>
-                    <a href="{{ path('admin_update', {id : user.id}) }}"
+                    <a href="{{ path('admin_update', {id: user.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
 
@@ -101,7 +101,7 @@
                 {% endif %}
                 <li {{ stimulus_controller('alert-revoke-profiles') }}>
                     <form method="POST"
-                          action="{{ path('admin_revoke_profiles', { 'id': user.id }) }}"
+                          action="{{ path('admin_revoke_profiles', {id: user.id}) }}"
                           data-alert-revoke-profiles-target="form">
                         {{ form_start(formRevokeProfiles) }}
                         {{ form_errors(formRevokeProfiles) }}
