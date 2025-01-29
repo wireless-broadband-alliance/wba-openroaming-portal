@@ -76,7 +76,7 @@ class SecurityController extends AbstractController
         if ($uuid) {
             // Try to find the user by UUID excluding admins
             $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-            if ($user instanceof \App\Entity\User) {
+            if ($user instanceof User) {
                 // If the user is found, set their email as the last username to pre-fill the email field
                 $lastUsername = $user->getUuid();
             }
@@ -88,7 +88,7 @@ class SecurityController extends AbstractController
         }
 
         if ($type === "admin") {
-            return $this->render('admin/login_landing.html.twig', [
+            return $this->render('admin/login_admin_landing.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
                 'data' => $data,
