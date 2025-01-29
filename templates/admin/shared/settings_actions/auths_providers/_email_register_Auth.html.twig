@@ -12,16 +12,16 @@
                 <div class="flex flex-row justify-between">
                     <div class="text-base font-medium text-center break-normal md:break-all">
                         {% set displayName = {
-                            'AUTH_METHOD_REGISTER_ENABLED': 'Mode',
-                            'AUTH_METHOD_REGISTER_LABEL': 'Label',
-                            'AUTH_METHOD_REGISTER_DESCRIPTION': 'Description',
-                            'PROFILE_LIMIT_DATE_EMAIL': 'Time to disable profiles(days)',
+                            AUTH_METHOD_REGISTER_ENABLED: 'Mode',
+                            AUTH_METHOD_REGISTER_LABEL: 'Label',
+                            AUTH_METHOD_REGISTER_DESCRIPTION: 'Description',
+                            PROFILE_LIMIT_DATE_EMAIL: 'Time to disable profiles(days)',
                         }[setting.vars.name] ?? setting.vars.name %}
                         <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                     </div>
                     <label class="flex items-center bg-opacity-40"
                     >
-                        <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                        <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                              src="{{ asset('resources/logos/info_icon.svg') }}"
                              alt="info_icon"/>
                     </label>
@@ -32,10 +32,10 @@
                              data-controller="certificate-limit"
                              data-certificate-limit-profile-limit-date-value='{{ profileLimitDate }}'>
                             {{ form_widget(setting, {
-                                'attr': {
-                                    'class': 'form-widget',
+                                attr: {
+                                    class: 'form-widget',
                                     'data-certificate-limit-target': 'input',
-                                }
+                                },
                             }) }}
                             <button type="button" class="btn-cert-date"
                                     data-certificate-limit-target="button"
@@ -52,7 +52,7 @@
                         </div>
                     {% else %}
                         <div class="flex items-center space-x-2 mt-5">
-                            {{ form_widget(setting, {'attr': {'class': 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                            {{ form_widget(setting, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
                         </div>
                     {% endif %}
                 {% endif %}
@@ -65,8 +65,8 @@
                             <input type="radio"
                                    name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
                                    value="true"
-                                   class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "true" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}  {{ stimulus_target('radio-card', 'on') }}>
-                            <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == "true" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                                   class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == 'true' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}  {{ stimulus_target('radio-card', 'on') }}>
+                            <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                      viewBox="0 0 14 10"
                                      fill="none">
@@ -83,8 +83,8 @@
                             <input type="radio"
                                    name="{{ form.AUTH_METHOD_REGISTER_ENABLED.vars.full_name }}"
                                    value="false"
-                                   class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == "false" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}>
-                            <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == "false" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                   class="radio-input hidden" {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.value == 'false' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}>
+                            <div class="custom-radio pr-3 pt-1.5 {{ form.AUTH_METHOD_REGISTER_ENABLED.vars.data == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                      viewBox="0 0 14 10"
                                      fill="none">
@@ -97,7 +97,7 @@
                     </div>
                 {% endif %}
 
-                {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                 <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                     {{ form_errors(setting) }}
