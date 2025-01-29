@@ -19,20 +19,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Statistics
 {
-    private EntityManagerInterface $entityManager;
-    private RadiusAuthsRepository $radiusAuthsRepository;
-    private RadiusAccountingRepository $radiusAccountingRepository;
-
-
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        RadiusAuthsRepository $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RadiusAuthsRepository $radiusAuthsRepository,
+        private readonly RadiusAccountingRepository $radiusAccountingRepository
     ) {
-        $this->entityManager = $entityManager;
-        $this->radiusAuthsRepository = $radiusAuthsRepository;
-        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
 
     /**
@@ -247,7 +238,7 @@ class Statistics
     public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
     {
         // Fetch all data with date filtering
-        $events = $this ->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
+        $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
 
         // Calculate the time difference between start and end dates
         $interval = $startDate->diff($endDate);
@@ -571,11 +562,9 @@ class Statistics
         }
 
         // Sort $result array BY DESC
-        usort($result, function ($a, $b) {
-            return $b['count'] <=> $a['count'];
-        });
+        usort($result, static fn($a, $b) => $b['count'] <=> $a['count']);
 
-        return (new StatisticsGenerators())->generateDatasetsWifiTags($result);
+        return new StatisticsGenerators()->generateDatasetsWifiTags($result);
     }
 
     /**
@@ -617,17 +606,13 @@ class Statistics
         }
 
         // Sort the result array by the count value with the highest usage
-        usort($result, static function ($highest, $lowest) {
-            return $lowest['count'] <=> $highest['count'];
-        });
+        usort($result, static fn($highest, $lowest) => $lowest['count'] <=> $highest['count']);
 
         return $result;
     }
 
     /**
      * Map connectInfo_start to Wifi standards
-     * @param string $connectInfo
-     * @return string
      */
     protected function mapConnectInfoToWifiStandard(string $connectInfo): string
     {
@@ -645,10 +630,6 @@ class Statistics
 
     /**
      * Determine date range and granularity
-     *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
-     * @return array
      */
     protected function determineDateRangeAndGranularity(DateTime $startDate, DateTime $endDate): array
     {

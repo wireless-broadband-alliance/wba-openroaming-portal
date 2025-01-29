@@ -7,7 +7,6 @@ use App\Enum\UserProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
-use League\OAuth2\Client\Provider\Microsoft\MicrosoftUser;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,18 +19,11 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class MicrosoftAuthenticator extends OAuth2Authenticator
 {
-    private ClientRegistry $clientRegistry;
-    private EntityManagerInterface $entityManager;
-    private RouterInterface $router;
-
     public function __construct(
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $entityManager,
-        RouterInterface $router
+        private readonly ClientRegistry $clientRegistry,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RouterInterface $router
     ) {
-        $this->clientRegistry = $clientRegistry;
-        $this->entityManager = $entityManager;
-        $this->router = $router;
     }
 
     public function supports(Request $request): ?bool

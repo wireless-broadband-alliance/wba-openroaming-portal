@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,18 +20,11 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class GoogleAuthenticator extends OAuth2Authenticator
 {
-    private ClientRegistry $clientRegistry;
-    private EntityManagerInterface $entityManager;
-    private RouterInterface $router;
-
     public function __construct(
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $entityManager,
-        RouterInterface $router
+        private readonly ClientRegistry $clientRegistry,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RouterInterface $router
     ) {
-        $this->clientRegistry = $clientRegistry;
-        $this->entityManager = $entityManager;
-        $this->router = $router;
     }
 
     public function supports(Request $request): ?bool

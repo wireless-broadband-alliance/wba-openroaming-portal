@@ -10,17 +10,18 @@ use Twig\TwigFunction;
 
 class AppVersionExtension extends AbstractExtension
 {
-    private string $projectDir;
+    private readonly string $projectDir;
 
     public function __construct(KernelInterface $kernel)
     {
         $this->projectDir = $kernel->getProjectDir();
     }
 
+    #[\Override]
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('app_version', [$this, 'getAppVersion']),
+            new TwigFunction('app_version', $this->getAppVersion(...)),
         ];
     }
 

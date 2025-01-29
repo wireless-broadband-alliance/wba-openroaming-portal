@@ -17,15 +17,10 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class ConfigController extends AbstractController
 {
-    private SettingRepository $settingRepository;
-    private ParameterBagInterface $parameterBag;
-
     public function __construct(
-        SettingRepository $settingRepository,
-        ParameterBagInterface $parameterBag,
+        private readonly SettingRepository $settingRepository,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
-        $this->settingRepository = $settingRepository;
-        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -34,11 +29,11 @@ class ConfigController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(): JsonResponse
     {
         $settings = $this->getSettings();
 
-        return (new BaseResponse(200, $settings))->toResponse();
+        return new BaseResponse(200, $settings)->toResponse();
     }
 
     private function getSettings(): array
@@ -96,10 +91,10 @@ class ConfigController extends AbstractController
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];
         $falseValues = ['OFF', 'FALSE', '0', 0, false];
-        if (in_array(strtoupper($value), $trueValues, true)) {
+        if (in_array(strtoupper((string)$value), $trueValues, true)) {
             return true;
         }
-        if (in_array(strtoupper($value), $falseValues, true)) {
+        if (in_array(strtoupper((string)$value), $falseValues, true)) {
             return false;
         }
         return (bool)$value;

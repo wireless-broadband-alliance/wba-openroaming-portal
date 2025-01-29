@@ -12,6 +12,6 @@ class Domain
             return false;
         }
         $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
-        return !($dnsRecords === false || empty($dnsRecords));
+        return $dnsRecords !== false && $dnsRecords !== [];
     }
 }

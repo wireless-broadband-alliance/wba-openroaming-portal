@@ -19,21 +19,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class LDAPSyncCommand extends Command
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private ProfileManager $profileManager;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        ProfileManager $profileManager,
-        UserExternalAuthRepository $userExternalAuthRepository
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly ProfileManager $profileManager,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->profileManager = $profileManager;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
         parent::__construct();
     }
 
@@ -95,7 +86,9 @@ class LDAPSyncCommand extends Command
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
-        ldap_bind($ldapConnection, $ldapUsername, $ldapPassword) or die("Could not bind to LDAP server.");
+        if (!ldap_bind($ldapConnection, $ldapUsername, $ldapPassword)) {
+            die("Could not bind to LDAP server.");
+        }
         $searchFilter = str_replace(
             "@ID",
             $identifier,

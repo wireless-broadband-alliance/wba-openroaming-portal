@@ -71,12 +71,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
                 ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('startDate', $startDate)
                 ->setParameter('endDate', $endDate);
-        } elseif ($startDate) {
+        } elseif ($startDate instanceof DateTime) {
             // If only start date is provided, search from start date to now
             $queryBuilder
                 ->andWhere('ra.acctStartTime >= :startDate')
                 ->setParameter('startDate', $startDate);
-        } elseif ($endDate) {
+        } elseif ($endDate instanceof DateTime) {
             // If only end date is provided, search from end date to the past
             $queryBuilder
                 ->andWhere('ra.acctStopTime <= :endDate')
@@ -86,11 +86,6 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $queryBuilder->getQuery();
     }
 
-    /**
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
-     * @return array
-     */
     public function findDistinctRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -103,12 +98,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
                 ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('startDate', $startDate)
                 ->setParameter('endDate', $endDate);
-        } elseif ($startDate) {
+        } elseif ($startDate instanceof DateTime) {
             // If only start date is provided, search from start date to now
             $queryBuilder
                 ->andWhere('ra.acctStartTime >= :startDate')
                 ->setParameter('startDate', $startDate);
-        } elseif ($endDate) {
+        } elseif ($endDate instanceof DateTime) {
             // If only end date is provided, search from end date to the past
             $queryBuilder
                 ->andWhere('ra.acctStopTime <= :endDate')
@@ -120,11 +115,6 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
-     * @return array
-     */
     public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -137,12 +127,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
                 ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('startDate', $startDate)
                 ->setParameter('endDate', $endDate);
-        } elseif ($startDate) {
+        } elseif ($startDate instanceof DateTime) {
             // If only start date is provided, search from start date to now
             $queryBuilder
                 ->andWhere('ra.acctStartTime >= :startDate')
                 ->setParameter('startDate', $startDate);
-        } elseif ($endDate) {
+        } elseif ($endDate instanceof DateTime) {
             // If only end date is provided, search from end date to the past
             $queryBuilder
                 ->andWhere('ra.acctStopTime <= :endDate')
@@ -154,11 +144,6 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
-     * @return array
-     */
     public function findWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -171,12 +156,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
                 ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('startDate', $startDate)
                 ->setParameter('endDate', $endDate);
-        } elseif ($startDate) {
+        } elseif ($startDate instanceof DateTime) {
             // If only start date is provided, search from start date to now
             $queryBuilder
                 ->andWhere('ra.acctStartTime >= :startDate')
                 ->setParameter('startDate', $startDate);
-        } elseif ($endDate) {
+        } elseif ($endDate instanceof DateTime) {
             // If only end date is provided, search from end date to the past
             $queryBuilder
                 ->andWhere('ra.acctStopTime <= :endDate')
@@ -188,11 +173,6 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
-     * @return array
-     */
     public function findApUsage(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -205,12 +185,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
                 ->andWhere('ra.acctStopTime <= :endDate')
                 ->setParameter('startDate', $startDate)
                 ->setParameter('endDate', $endDate);
-        } elseif ($startDate) {
+        } elseif ($startDate instanceof DateTime) {
             // If only start date is provided, search from start date to now
             $queryBuilder
                 ->andWhere('ra.acctStartTime >= :startDate')
                 ->setParameter('startDate', $startDate);
-        } elseif ($endDate) {
+        } elseif ($endDate instanceof DateTime) {
             // If only end date is provided, search from end date to the past
             $queryBuilder
                 ->andWhere('ra.acctStopTime <= :endDate')

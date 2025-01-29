@@ -18,7 +18,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -28,61 +27,24 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AdminController extends AbstractController
 {
-    private MailerInterface $mailer;
-    private UserRepository $userRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ParameterBagInterface $parameterBag;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private EventActions $eventActions;
-    private VerificationCodeEmailGenerator $verificationCodeGenerator;
-
-    /**
-     * @param MailerInterface $mailer
-     * @param UserRepository $userRepository
-     * @param UserExternalAuthRepository $userExternalAuthRepository
-     * @param ParameterBagInterface $parameterBag
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     * @param EventActions $eventActions
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator
-     */
     public function __construct(
-        MailerInterface $mailer,
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ParameterBagInterface $parameterBag,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
-        VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly MailerInterface $mailer,
+        private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
-        $this->mailer = $mailer;
-        $this->userRepository = $userRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->parameterBag = $parameterBag;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->eventActions = $eventActions;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
-    /*
-    * Dashboard Page Main Route
-    */
     /**
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param int $page
-     * @param string $sort
-     * @param string $order
-     * @param int|null $count
-     * @return Response
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * Dashboard Page Main Route
      */
     #[Route('/dashboard', name: 'admin_page')]
     #[IsGranted('ROLE_ADMIN')]
@@ -254,12 +216,6 @@ class AdminController extends AbstractController
     /**
      * Handles the Page Style on the dashboard
      */
-    /**
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @param GetSettings $getSettings
-     * @return Response
-     */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
@@ -312,7 +268,7 @@ class AdminController extends AbstractController
                     $file = $form->get($settingName)->getData();
 
                     if ($file) { // submits the new file to the respective path
-                        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                        $originalFilename = pathinfo((string)$file->getClientOriginalName(), PATHINFO_FILENAME);
                         // Use a unique id for the uploaded file to avoid overwriting
                         $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
 

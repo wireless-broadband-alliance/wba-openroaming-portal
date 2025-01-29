@@ -43,7 +43,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
         }
 
         $user->setPassword($newHashedPassword);
@@ -167,9 +167,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
 
     /**
-     * @param string|null $searchTerm
-     * @param string|null $filter
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
@@ -202,8 +199,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @param string|null $searchTerm
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
@@ -231,8 +226,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @param string|null $searchTerm
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */

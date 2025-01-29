@@ -10,7 +10,6 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\ExpirationProfileService;
-use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
@@ -33,40 +32,18 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 )]
 class NotifyUsersWhenProfileExpiresCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-    public ProfileManager $profileManager;
-    public PgpEncryptionService $pgpEncryptionService;
-    public SendSMS $sendSMS;
-    public RegistrationEmailGenerator $registrationEmailGenerator;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
-    private ExpirationProfileService $expirationProfileService;
-    private SettingRepository $settingRepository;
-    private NotificationRepository $notificationRepository;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        PgpEncryptionService $pgpEncryptionService,
-        SendSMS $sendSMS,
-        ProfileManager $profileManager,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
-        RegistrationEmailGenerator $registrationEmailGenerator,
-        ExpirationProfileService $expirationProfileService,
-        SettingRepository $settingRepository,
-        NotificationRepository $notificationRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SendSMS $sendSMS,
+        private readonly ProfileManager $profileManager,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
+        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
+        private readonly ExpirationProfileService $expirationProfileService,
+        private readonly SettingRepository $settingRepository,
+        private readonly NotificationRepository $notificationRepository,
     ) {
         parent::__construct();
-        $this->entityManager = $entityManager;
-        $this->pgpEncryptionService = $pgpEncryptionService;
-        $this->sendSMS = $sendSMS;
-        $this->profileManager = $profileManager;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
-        $this->registrationEmailGenerator = $registrationEmailGenerator;
-        $this->expirationProfileService = $expirationProfileService;
-        $this->settingRepository = $settingRepository;
-        $this->notificationRepository = $notificationRepository;
     }
 
     /**
@@ -203,9 +180,6 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
      * @throws ClientExceptionInterface
      * @throws NonUniqueResultException
      * @throws RedirectionExceptionInterface

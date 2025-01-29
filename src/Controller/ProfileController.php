@@ -33,42 +33,27 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class ProfileController extends AbstractController
 {
     private array $settings;
-    private EventActions $eventActions;
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ExpirationProfileService $expirationProfileService;
 
     /**
-     * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param UserExternalAuthRepository $userExternalAuthRepository
-     * @param ExpirationProfileService $expirationProfileService
      */
     public function __construct(
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ExpirationProfileService $expirationProfileService,
+        private readonly SettingRepository $settingRepository,
+        private readonly UserRepository $userRepository,
+        private readonly EventActions $eventActions,
+        private readonly GetSettings $getSettings,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ExpirationProfileService $expirationProfileService,
     ) {
         $this->settings = $this->getSettings($settingRepository);
-        $this->eventActions = $eventActions;
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->expirationProfileService = $expirationProfileService;
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/profile/android', name: 'profile_android')]
     public function profileAndroid(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
@@ -82,7 +67,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -92,7 +77,6 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $userRepository,
             $this->settings['RADIUS_REALM_NAME']
         );
 
@@ -115,7 +99,7 @@ class ProfileController extends AbstractController
             '@EXPIRATION_DATE@'
         ], [
             $radiusUser->getUsername(),
-            base64_encode($radiusUser->getValue()),
+            base64_encode((string)$radiusUser->getValue()),
             $this->settings['DOMAIN_NAME'],
             $this->settings['RADIUS_TLS_NAME'],
             $this->settings['DISPLAY_NAME'],
@@ -150,7 +134,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     public function profileIos(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
@@ -160,7 +143,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -170,7 +153,6 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $userRepository,
             $this->settings['RADIUS_REALM_NAME']
         );
 
@@ -238,7 +220,11 @@ class ProfileController extends AbstractController
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
-            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+            throw new RuntimeException(
+                'Signing failed: ' . $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
@@ -251,13 +237,13 @@ class ProfileController extends AbstractController
         // Save the event Action using the service
         $userAgent = $request->headers->get('User-Agent');
         $eventMetadata = [];
-        if (stripos($userAgent, 'iPhone') !== false || stripos($userAgent, 'iPad') !== false) {
+        if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS,
                 'ip' => $request->getClientIp(),
             ];
-        } elseif (stripos($userAgent, 'Mac OS') !== false) {
+        } elseif (stripos((string) $userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
@@ -273,7 +259,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/windows', name: 'profile_windows')]
     public function profileWindows(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UrlGeneratorInterface $urlGenerator,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
@@ -284,7 +269,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -292,7 +277,6 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $userRepository,
             $this->settings['RADIUS_REALM_NAME']
         );
         $profile = file_get_contents('../profile_templates/windows/template.xml');
@@ -336,7 +320,11 @@ class ProfileController extends AbstractController
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
-            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+            throw new RuntimeException(
+                'Signing failed: ' . $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
         $uuid = uniqid("", true);
         $signedProfileContents = file_get_contents($signedFilePath);
@@ -411,7 +399,6 @@ class ProfileController extends AbstractController
         User $user,
         RadiusUserRepository $radiusUserRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
-        UserRepository $userRepository,
         string $realmName
     ): RadiusUser {
         $radiusProfile = $radiusProfileRepository->findOneBy(
@@ -479,7 +466,7 @@ class ProfileController extends AbstractController
     private function getSettings(SettingRepository $settingRepository): array
     {
         $settings = $settingRepository->findAll();
-        return array_reduce($settings, function ($carry, $item) {
+        return array_reduce($settings, static function ($carry, $item) {
             $carry[$item->getName()] = $item->getValue();
             return $carry;
         }, []);
@@ -490,7 +477,7 @@ class ProfileController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($user->getDeletedAt()) {
+        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
             $this->addFlash(
                 'error',
                 'Your account has been deleted. Please, for more information contact our support.'
@@ -499,7 +486,7 @@ class ProfileController extends AbstractController
             return true;
         }
 
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() instanceof \DateTimeInterface) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             $this->redirectToRoute('app_landing');
             return true;

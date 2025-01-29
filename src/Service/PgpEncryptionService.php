@@ -23,7 +23,7 @@ class PgpEncryptionService
             ];
         }
 
-        if (empty($publicKeyContent)) {
+        if ($publicKeyContent === '' || $publicKeyContent === '0' || $publicKeyContent === false) {
             return [
                 UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT,
                 'The file does not exist or is not located in the correct path!
@@ -47,7 +47,7 @@ class PgpEncryptionService
             return $gpg->encrypt($data);
         } catch (Exception $e) {
             // Catch any exceptions and display the message for debugging
-            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());
+            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

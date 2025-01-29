@@ -13,7 +13,7 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -22,21 +22,12 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class GetCurrentUserController extends AbstractController
 {
-    private TokenStorageInterface $tokenStorage;
-    private UserStatusChecker $userStatusChecker;
-    private JWTTokenGenerator $JWTTokenGenerator;
-    private EventActions $eventActions;
-
     public function __construct(
-        TokenStorageInterface $tokenStorage,
-        UserStatusChecker $userStatusChecker,
-        JWTTokenGenerator $JWTTokenGenerator,
-        EventActions $eventActions
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly JWTTokenGenerator $JWTTokenGenerator,
+        private readonly EventActions $eventActions
     ) {
-        $this->tokenStorage = $tokenStorage;
-        $this->userStatusChecker = $userStatusChecker;
-        $this->JWTTokenGenerator = $JWTTokenGenerator;
-        $this->eventActions = $eventActions;
     }
 
     /**
@@ -58,15 +49,15 @@ class GetCurrentUserController extends AbstractController
             $jwtTokenString = $token->getCredentials();
 
             if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
-                return (new BaseResponse(
+                return new BaseResponse(
                     401,
                     null,
                     'JWT Token is invalid!'
-                ))->toResponse();
+                )->toResponse();
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-            if ($statusCheckerResponse !== null) {
+            if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
@@ -91,14 +82,14 @@ class GetCurrentUserController extends AbstractController
                 $eventMetadata
             );
 
-            return (new BaseResponse(200, $content))->toResponse();
+            return new BaseResponse(200, $content)->toResponse();
         }
 
         // Handle the case where the user is not authenticated
-        return (new BaseResponse(
+        return new BaseResponse(
             403,
             null,
             'Unauthorized - You do not have permission to access this resource'
-        ))->toResponse(); // Bad Request Response
+        )->toResponse(); // Bad Request Response
     }
 }

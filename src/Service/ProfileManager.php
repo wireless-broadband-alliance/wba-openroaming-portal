@@ -11,18 +11,11 @@ use App\Repository\UserRepository;
 
 class ProfileManager
 {
-    private UserRadiusProfileRepository $userRadiusProfile;
-    private RadiusUserRepository $radiusUserRepository;
-    private UserRepository $userRepository;
-
     public function __construct(
-        UserRadiusProfileRepository $userRadiusProfile,
-        RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository
+        private readonly UserRadiusProfileRepository $userRadiusProfile,
+        private readonly RadiusUserRepository $radiusUserRepository,
+        private readonly UserRepository $userRepository
     ) {
-        $this->userRadiusProfile = $userRadiusProfile;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userRepository = $userRepository;
     }
 
     private function updateProfiles(User $user, callable $updateCallback): void

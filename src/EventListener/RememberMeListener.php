@@ -7,9 +7,6 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 final class RememberMeListener
 {
-    /**
-     * @param InteractiveLoginEvent $event
-     */
     #[AsEventListener(event: 'security.interactive_login')]
     public function onSecurityInteractiveLogin(InteractiveLoginEvent $event): void
     {
@@ -30,14 +27,18 @@ final class RememberMeListener
 
             if (isset($preferences['rememberMe']) && $preferences['rememberMe'] === true) {
                 // Condition 2: rememberMe is true, back up the PHPSESSID and create a new one
-                setcookie("session_backup", $session->getId(), time() + (365 * 24 * 60 * 60), '/', '');
+                setcookie(
+                    "session_backup",
+                    $session->getId(),
+                    ['expires' => time() + (365 * 24 * 60 * 60), 'path' => '/', 'domain' => '']
+                );
                 $session->save();
             } else {
                 // Condition 3: rememberMe is false or not set, generate a new session with a new PHPSESSID
                 // Regenerate session ID to create a new PHPSESSID
                 $session->migrate(true);
             }
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             // In case of invalid JSON, fall back to generating a new session
             $session->migrate(true);
         }

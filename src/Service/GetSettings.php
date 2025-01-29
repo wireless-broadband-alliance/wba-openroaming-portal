@@ -2,39 +2,11 @@
 
 namespace App\Service;
 
-use App\Enum\OSTypes;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 
 class GetSettings
 {
-    private function detectDevice($userAgent)
-    {
-        $os = OSTypes::NONE;
-
-        // Windows
-        if (preg_match('/windows|win32/i', $userAgent)) {
-            $os = OSTypes::WINDOWS;
-        }
-
-        // macOS
-        if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            $os = OSTypes::MACOS;
-        }
-
-        // iOS
-        if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
-            $os = OSTypes::IOS;
-        }
-
-        // Android
-        if (preg_match('/android/i', $userAgent)) {
-            $os = OSTypes::ANDROID;
-        }
-
-        return $os;
-    }
-
     public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository): array
     {
         $data = [];

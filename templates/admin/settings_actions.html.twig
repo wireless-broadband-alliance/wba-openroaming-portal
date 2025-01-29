@@ -5,6 +5,8 @@
 {% block container %}
     {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
         {{ include('admin/shared/settings_actions/_custom_portal.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider' %}
+        {{ include('admin/shared/settings_actions/_saml_providers.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
         {{ include('admin/shared/settings_actions/_terms.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
