@@ -15,7 +15,7 @@ class AuthenticationEntryPoint implements AuthenticationEntryPointInterface
     ) {
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): RedirectResponse
+    public function start(Request $request, ?AuthenticationException $authException = null): RedirectResponse
     {
         // add a custom flash message and redirect to the home page
         /** @phpstan-ignore-next-line */

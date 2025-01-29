@@ -1915,11 +1915,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
     {
-        if ($this->userRadiusProfiles->removeElement($userRadiusProfile)) {
-            // set the owning side to null (unless already changed)
-            if ($userRadiusProfile->getUser() === $this) {
-                $userRadiusProfile->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->userRadiusProfiles->removeElement($userRadiusProfile) && $userRadiusProfile->getUser() === $this) {
+            $userRadiusProfile->setUser(null);
         }
 
         return $this;
@@ -1945,11 +1943,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): self
     {
-        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
-            // set the owning side to null (unless already changed)
-            if ($userExternalAuth->getUser() === $this) {
-                $userExternalAuth->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getUser() === $this) {
+            $userExternalAuth->setUser(null);
         }
 
         return $this;
@@ -1994,7 +1990,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\PrePersist]
     public function prePresist(): void
     {
-        if ($this->createdAt === null) {
+        if (!$this->createdAt instanceof \DateTimeInterface) {
             $this->createdAt = new \DateTimeImmutable();
         }
     }
@@ -2019,11 +2015,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeEvent(Event $event): static
     {
-        if ($this->event->removeElement($event)) {
-            // set the owning side to null (unless already changed)
-            if ($event->getUser() === $this) {
-                $event->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->event->removeElement($event) && $event->getUser() === $this) {
+            $event->setUser(null);
         }
 
         return $this;
@@ -2099,12 +2093,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function toApiResponse(array $additionalData = []): array
     {
         $userExternalAuths = $this->getUserExternalAuths()->map(
-            function (UserExternalAuth $userExternalAuth) {
-                return [
-                    'provider' => $userExternalAuth->getProvider(),
-                    'provider_id' => $userExternalAuth->getProviderId(),
-                ];
-            }
+            fn(UserExternalAuth $userExternalAuth) => [
+                'provider' => $userExternalAuth->getProvider(),
+                'provider_id' => $userExternalAuth->getProviderId(),
+            ]
         )->toArray();
 
         $responseData = [

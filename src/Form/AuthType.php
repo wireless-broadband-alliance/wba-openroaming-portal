@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Enum\EmailConfirmationStrategy;
 use App\Service\GetSettings;
+use App\Validator\SamlEnabled;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -18,11 +19,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AuthType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
+    public function __construct(private readonly GetSettings $getSettings)
     {
-        $this->getSettings = $getSettings;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -31,6 +29,12 @@ class AuthType extends AbstractType
             // SAML
             'AUTH_METHOD_SAML_ENABLED' => [
                 'type' => ChoiceType::class,
+                'options' => [
+                    'constraints' => [
+                        new SamlEnabled(),
+                        // Custom Validator -> Check if there's any active provider to enable this Auth
+                    ],
+                ]
             ],
             'AUTH_METHOD_SAML_LABEL' => [
                 'type' => TextType::class,
@@ -42,8 +46,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when SAML is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -77,7 +88,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(
@@ -104,8 +115,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -145,7 +163,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(
@@ -223,8 +241,16 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation(
+                                        'This field cannot be empty when EMAIL REGISTER is enabled.'
+                                    )->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -258,7 +284,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(
@@ -285,8 +311,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when SMS REGISTER is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -317,8 +350,15 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when LOGIN METHOD is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -352,7 +392,7 @@ class AuthType extends AbstractType
                         ),
                         // phpcs:enable
                     ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options) {
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             // Format the message with the human-readable expiration date
                             $context->buildViolation(

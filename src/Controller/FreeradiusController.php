@@ -17,52 +17,32 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class FreeradiusController extends AbstractController
 {
-    private EntityManagerInterface $entityManager;
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private ParameterBagInterface $parameterBag;
-    private EventActions $eventActions;
-    private RadiusAuthsRepository $radiusAuthsRepository;
-    private RadiusAccountingRepository $radiusAccountingRepository;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        ParameterBagInterface $parameterBag,
-        EventActions $eventActions,
-        RadiusAuthsRepository $radiusAuthsRepository,
-        RadiusAccountingRepository $radiusAccountingRepository
+        private readonly EntityManagerInterface $entityManager,
+        private readonly GetSettings $getSettings,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly EventActions $eventActions,
+        private readonly RadiusAuthsRepository $radiusAuthsRepository,
+        private readonly RadiusAccountingRepository $radiusAccountingRepository
     ) {
-        $this->entityManager = $entityManager;
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->parameterBag = $parameterBag;
-        $this->eventActions = $eventActions;
-        $this->radiusAuthsRepository = $radiusAuthsRepository;
-        $this->radiusAccountingRepository = $radiusAccountingRepository;
     }
 
     /**
      * Render Statistics about the freeradius data
      */
     /**
-     * @param Request $request
-     * @param int $page
-     * @return Response
      * @throws \JsonException
      * @throws \DateMalformedStringException
      * @throws Exception
@@ -82,23 +62,16 @@ class FreeradiusController extends AbstractController
         $endDateString = $request->request->get('endDate');
 
         // Convert the date strings to DateTime objects
-        if ($startDateString) {
-            $startDate = new DateTime($startDateString);
-        } else {
-            $startDate = (new DateTime())->modify(
-                '-1 week'
-            );
-        }
+        $startDate = $startDateString ? new DateTime($startDateString) : new DateTime()->modify(
+            '-1 week'
+        );
 
-        if ($endDateString) {
-            $endDate = new DateTime($endDateString);
-        } else {
-            $endDate = new DateTime();
-        }
+        $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
         $interval = $startDate->diff($endDate);
         if ($interval->days > 365) {
             $this->addFlash('error_admin', 'Maximum date range is 1 year');
+
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
 
@@ -129,6 +102,7 @@ class FreeradiusController extends AbstractController
                 'error_admin',
                 'The data you requested is too large to be processed. Please try a smaller date range.'
             );
+
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
 
@@ -225,7 +199,7 @@ class FreeradiusController extends AbstractController
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
-            'paginationApUsage' => true
+            'paginationApUsage' => true,
         ]);
     }
 
@@ -310,7 +284,7 @@ class FreeradiusController extends AbstractController
                 'total_input_flat' => $totalInput,
                 'total_input' => number_format($totalInput / (1024 * 1024 * 1024), 1),
                 'total_output_flat' => $totalOutput,
-                'total_output' => number_format($totalOutput / (1024 * 1024 * 1024), 1)
+                'total_output' => number_format($totalOutput / (1024 * 1024 * 1024), 1),
             ];
         }
 
@@ -340,7 +314,7 @@ class FreeradiusController extends AbstractController
 
         // Prepare the AP Usage data for Excel
         $apUsageData = [];
-        foreach ($fetchChartApUsage as $index => $session_date) {
+        foreach (array_keys($fetchChartApUsage) as $index) {
             $apName = $fetchChartApUsage[$index]['ap'] ?? 0;
             $apUsage = $fetchChartApUsage[$index]['count'] ?? 0;
             $apUsageData[] = [

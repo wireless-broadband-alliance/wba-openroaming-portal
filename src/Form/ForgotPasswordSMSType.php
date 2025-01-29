@@ -18,30 +18,22 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class ForgotPasswordSMSType extends AbstractType
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-
     /**
-     *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $regionInputs = explode(',', $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 

@@ -28,34 +28,31 @@ security:
             pattern: ^/
             lazy: true
             provider: app_user_provider
+            # Integrate multiple custom authenticators here.
+            custom_authenticators:
+                - App\Security\PasswordAuthenticator # Password-based authenticator
+                - App\Security\SamlCustomAuthenticator # SAML Custom authenticator
+
+            # Form login for password-based authentication.
             form_login:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-            custom_authenticator: App\Security\PasswordAuthenticator
-                # where to redirect after logout
-                # target: app_any_route
-            entry_point: App\Security\AuthenticationEntryPoint
-            saml:
-                ##  Match SAML attribute 'uid' with user identifier.
-                ##  Otherwise, used \OneLogin\Saml2\Auth::getNameId() method by default.
-#                 identifier_attribute: sAMAccountName
-                identifier_attribute: sAMAccountName
-                user_factory: saml_user_factory
-                persist_user: true
-                ##  Use the attribute's friendlyName instead of the name.
-                use_attribute_friendly_name: true
-                check_path: saml_acs
-                login_path: saml_login
+#            saml: This feature is disable because is being replaced by a custom authenticator
+#                identifier_attribute: sAMAccountName
+#                user_factory: saml_user_factory
+#                persist_user: true
+#                use_attribute_friendly_name: true
+#                check_path: saml_acs
+#                login_path: saml_login
+            # Logout configuration for users with SAML or password authentication.
             logout:
                 path: saml_logout
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
+                target: / # Redirect users to the homepage (or another path) after logout
+            # Entry point for authentication.
+            entry_point: App\Security\AuthenticationEntryPoint
+            # enable impersonation (if required in the future)
             # switch_user: true
-
-
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:

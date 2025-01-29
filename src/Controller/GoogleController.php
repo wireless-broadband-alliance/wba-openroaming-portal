@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -35,58 +36,22 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
  */
 class GoogleController extends AbstractController
 {
-    private ClientRegistry $clientRegistry;
-    private EntityManagerInterface $entityManager;
-    private UserPasswordHasherInterface $passwordEncoder;
-    private TokenStorageInterface $tokenStorage;
-    private RequestStack $requestStack;
-    private EventDispatcherInterface $eventDispatcher;
-    private EventActions $eventActions;
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-
-    /**
-     * @param ClientRegistry $clientRegistry
-     * @param EntityManagerInterface $entityManager
-     * @param UserPasswordHasherInterface $passwordEncoder
-     * @param TokenStorageInterface $tokenStorage
-     * @param RequestStack $requestStack
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param EventActions $eventActions
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param SettingRepository $settingRepository
-     */
     public function __construct(
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordEncoder,
-        TokenStorageInterface $tokenStorage,
-        RequestStack $requestStack,
-        EventDispatcherInterface $eventDispatcher,
-        EventActions $eventActions,
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $passwordEncoder,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly RequestStack $requestStack,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly EventActions $eventActions,
+        private readonly GetSettings $getSettings,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
     ) {
-        $this->clientRegistry = $clientRegistry;
-        $this->entityManager = $entityManager;
-        $this->passwordEncoder = $passwordEncoder;
-        $this->tokenStorage = $tokenStorage;
-        $this->requestStack = $requestStack;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->eventActions = $eventActions;
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
     }
 
-    /**
-     * @return RedirectResponse
-     */
     #[Route('/connect/google', name: 'connect_google')]
-    public function connectAction(): RedirectResponse
+    public function connect(): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -115,7 +80,7 @@ class GoogleController extends AbstractController
      * @throws Exception
      */
     #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
-    public function connectCheckAction(Request $request): RedirectResponse
+    public function connectCheck(Request $request): RedirectResponse
     {
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
@@ -151,12 +116,12 @@ class GoogleController extends AbstractController
         $user = $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
-        if ($user === null) {
+        if (!$user instanceof \App\Entity\User) {
             return $this->redirectToRoute('app_landing');
         }
 
         // Check if the user is banned
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() instanceof \DateTimeInterface) {
             $this->addFlash('error', "Your account has been banned");
             return $this->redirectToRoute('app_landing');
         }
@@ -168,11 +133,6 @@ class GoogleController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-
-    /**
-     * @param string $email
-     * @return bool
-     */
     private function isValidEmail(string $email): bool
     {
         // Retrieve the valid domains setting from the database
@@ -274,11 +234,6 @@ class GoogleController extends AbstractController
         return $user;
     }
 
-
-    /**
-     * @param User $user
-     * @return void
-     */
     public function authenticateUserGoogle(User $user): void
     {
         // Get the current request from the request stack
@@ -289,7 +244,7 @@ class GoogleController extends AbstractController
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
             /** @phpstan-ignore-next-line */
-            $firewallName = $token ? $token->getFirewallName() : 'main';
+            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : 'main';
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());

@@ -25,21 +25,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 )]
 class ResetAdminCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-    private EventActions $eventActions;
-    private UserPasswordHasherInterface $userPasswordHashed;
-    private UserRepository $userRepository;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $userPasswordHashed,
-        EventActions $eventActions,
-        UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $userPasswordHashed,
+        private readonly EventActions $eventActions,
+        private readonly UserRepository $userRepository,
     ) {
-        $this->entityManager = $entityManager;
-        $this->userPasswordHashed = $userPasswordHashed;
-        $this->eventActions = $eventActions;
-        $this->userRepository = $userRepository;
         parent::__construct();
     }
 
@@ -79,7 +70,7 @@ class ResetAdminCommand extends Command
     {
         $admin = $this->userRepository->findAdmin();
 
-        if (!$admin) {
+        if (!$admin instanceof User) {
             $admin = new User();
             $admin->setUuid('admin@example.com');
             $admin->setEmail('admin@example.com');

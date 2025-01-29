@@ -14,13 +14,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AdminUserFixture extends Fixture
 {
-    private EventActions $eventActions;
-
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHashed,
-        EventActions $eventActions
+        private readonly EventActions $eventActions
     ) {
-        $this->eventActions = $eventActions;
     }
 
     public function load(ObjectManager $manager): void

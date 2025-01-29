@@ -18,7 +18,7 @@ class StatisticsGenerators
         // Calculate the colors with varying opacities
         $colors = $this->generateColorsWithOpacity($dataValues);
 
-        foreach ($labels as $index => $type) {
+        foreach (array_keys($labels) as $index) {
             $data[] = $dataValues[$index];
         }
 
@@ -41,11 +41,11 @@ class StatisticsGenerators
     public function generateDatasetsSessionAverage(array $sessionTime): array
     {
         $labels = array_column($sessionTime, 'group');
-        $averageTimes = array_map(function ($item) {
+        $averageTimes = array_map(static function ($item) {
             return $item['averageSessionTime']; // Keep numerical values for plotting
         }, $sessionTime);
 
-        $averageTimesReadable = array_map(function ($seconds) {
+        $averageTimesReadable = array_map(static function ($seconds) {
             $hours = floor($seconds / 3600);
             $minutes = floor(($seconds % 3600) / 60);
             return sprintf('%dh %dm', $hours, $minutes);
@@ -76,11 +76,9 @@ class StatisticsGenerators
     public function generateDatasetsSessionTotal(array $sessionTime): array
     {
         $labels = array_column($sessionTime, 'group');
-        $totalTimes = array_map(function ($item) {
-            return $item['totalSessionTime'];
-        }, $sessionTime);
+        $totalTimes = array_map(static fn($item) => $item['totalSessionTime'], $sessionTime);
 
-        $totalTimesReadable = array_map(function ($seconds) {
+        $totalTimesReadable = array_map(static function ($seconds) {
             $hours = floor($seconds / 3600);
             $minutes = floor(($seconds % 3600) / 60);
             return sprintf('%dh %dm', $hours, $minutes);
@@ -188,9 +186,6 @@ class StatisticsGenerators
             'borderRadius' => "15",
         ];
 
-        // Extract unique colors
-        $uniqueColors = array_unique($colors);
-
         return [
             'labels' => $labels,
             'datasets' => $datasets,
@@ -252,13 +247,10 @@ class StatisticsGenerators
 
     /**
      * Generate colors with varying opacities based on data values
-     *
-     * @param array $values
-     * @return array
      */
     public function generateColorsWithOpacity(array $values): array
     {
-        if (!empty(array_filter($values, static fn($value) => $value !== 0))) {
+        if (array_filter($values, static fn($value) => $value !== 0) !== []) {
             $maxValue = max($values);
             $colors = [];
 

@@ -10,11 +10,9 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -25,35 +23,26 @@ use function is_string;
 
 class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
-    private UserRepository $userRepository;
-    private EntityManagerInterface $entityManager;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
-
     /**
-     * @param class-string<UserInterface> $userClass
-     * @param array<string, mixed> $mapping
-     * @param UserRepository $userRepository
-     * @param EntityManagerInterface $entityManager
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     * @param UserRadiusProfileRepository $userRadiusProfileRepository
+     * Default attribute mapping.
      */
+    private readonly array $attribute_mapping;
+
     public function __construct(
-        private readonly string $userClass,
-        private readonly array $mapping,
-        UserRepository $userRepository,
-        EntityManagerInterface $entityManager,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
+        private readonly UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
     ) {
-        $this->userRepository = $userRepository;
-        $this->entityManager = $entityManager;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
+        $this->attribute_mapping = [
+            'password' => 'notused',
+            'uuid' => '$samlUuid',
+            'email' => '$email',
+            'first_name' => '$givenName',
+            'last_name' => '$surname',
+            'isVerified' => 1,
+            'roles' => [],
+        ];
     }
 
     /**
@@ -65,8 +54,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($data['PLATFORM_MODE']['value'] === true) {
-            throw new RuntimeException("Get Away. 
-            It's impossible to use this authentication method in demo mode");
+            throw new RuntimeException(
+                "Get Away. 
+            It's impossible to use this authentication method in demo mode"
+            );
         }
 
         $uuid = $this->getAttributeValue($attributes, 'samlUuid');
@@ -82,11 +73,12 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             return $existingUser;
         }
 
-        $user = new $this->userClass($identifier);
-        $reflection = new ReflectionClass($this->userClass);
+        // Instead of userClass and mapping, use App\Entity\User directly
+        $user = new User();
+        $reflection = new ReflectionClass(User::class); // Hardcoded User entity
 
         /** @psalm-suppress MixedAssignment */
-        foreach ($this->mapping as $field => $attribute) {
+        foreach ($this->attribute_mapping as $field => $attribute) {
             $property = $reflection->getProperty($field);
             $value = null;
 
@@ -105,7 +97,6 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
-        /** @var User $user */
         $user->setDisabled(false);
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();

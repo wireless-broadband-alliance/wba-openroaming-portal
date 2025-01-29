@@ -18,29 +18,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserUpdateType extends AbstractType
 {
-    private UserRepository $userRepository;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-
-    /**
-     * @param UserRepository $userRepository
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     */
     public function __construct(
-        UserRepository $userRepository,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
+        private readonly UserRepository $userRepository,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
     ) {
-        $this->userRepository = $userRepository;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $regionInputs = explode(',', $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
 
         $builder

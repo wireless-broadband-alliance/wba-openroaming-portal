@@ -16,27 +16,12 @@ use Symfony\Component\Security\Http\SecurityEvents;
 
 class LoginSuccessListener implements EventSubscriberInterface
 {
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private EventActions $eventActions;
-
-    /**
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param SettingRepository $settingRepository
-     * @param EventActions $eventActions
-     */
     public function __construct(
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        EventActions $eventActions
+        private readonly GetSettings $getSettings,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions
     ) {
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->eventActions = $eventActions;
     }
 
     public static function getSubscribedEvents(): array
@@ -51,11 +36,7 @@ class LoginSuccessListener implements EventSubscriberInterface
         $user = $event->getAuthenticationToken()->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        if (!$data['PLATFORM_MODE']['value']) {
-            $platformMode = PlatformMode::LIVE;
-        } else {
-            $platformMode = PlatformMode::DEMO;
-        }
+        $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO : PlatformMode::LIVE;
 
         if ($user instanceof User) {
             // Defines the Event to the table

@@ -8,8 +8,6 @@ class EscapeSpreadSheet
 {
     /**
      * Escape a value to prevent spreadsheet injection for the export routes (EXPORT USERS || FREERADIUS)
-     * @param mixed $value
-     * @return string
      */
     public function escapeSpreadsheetValue(mixed $value): string
     {

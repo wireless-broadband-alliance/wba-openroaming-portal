@@ -38,9 +38,8 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -49,58 +48,26 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private EventRepository $eventRepository;
-    private EntityManagerInterface $entityManager;
-    private EventActions $eventActions;
-    private ParameterBagInterface $parameterBag;
-    private SendSMS $sendSMSService;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private UserPasswordHasherInterface $userPasswordHasher;
-    private VerificationCodeEmailGenerator $verificationCodeGenerator;
-    private CaptchaValidator $captchaValidator;
-    private RegistrationEmailGenerator $emailGenerator;
-    private ValidatorInterface $validator;
-
 
     public function __construct(
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        EventRepository $eventRepository,
-        EntityManagerInterface $entityManager,
-        EventActions $eventActions,
-        ParameterBagInterface $parameterBag,
-        SendSMS $sendSMSService,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        UserPasswordHasherInterface $userPasswordHasher,
-        VerificationCodeEmailGenerator $verificationCodeGenerator,
-        CaptchaValidator $captchaValidator,
-        RegistrationEmailGenerator $emailGenerator,
-        ValidatorInterface $validator
+        private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly EventRepository $eventRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly EventActions $eventActions,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly SendSMS $sendSMSService,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly CaptchaValidator $captchaValidator,
+        private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly ValidatorInterface $validator
     ) {
-        $this->userRepository = $userRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->eventRepository = $eventRepository;
-        $this->entityManager = $entityManager;
-        $this->eventActions = $eventActions;
-        $this->parameterBag = $parameterBag;
-        $this->sendSMSService = $sendSMSService;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->userPasswordHasher = $userPasswordHasher;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
-        $this->captchaValidator = $captchaValidator;
-        $this->emailGenerator = $emailGenerator;
-        $this->validator = $validator;
     }
 
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -116,18 +83,19 @@ class RegistrationController extends AbstractController
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
         if (!isset($data['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
         }
 
+        $errors = [];
         // Check for missing fields and add them to the array errors
         if (empty($data['email'])) {
             $errors[] = 'email';
@@ -135,13 +103,11 @@ class RegistrationController extends AbstractController
         if (empty($data['password'])) {
             $errors[] = 'password';
         }
-        if (!empty($errors)) {
-            return (
-            new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            )
             )->toResponse();
         }
 
@@ -152,14 +118,14 @@ class RegistrationController extends AbstractController
 
         if (count($emailViolations) > 0) {
             $errorMessage = $emailViolations[0]->getMessage();
-            return (new BaseResponse(400, null, $errorMessage))->toResponse();
+            return new BaseResponse(400, null, $errorMessage)->toResponse();
         }
 
         if ($this->userRepository->findOneBy(['email' => $data['email']])) {
-            return (new BaseResponse(
+            return new BaseResponse(
                 200,
                 ['message' => 'Registration successful. Please check your email for further instructions']
-            ))->toResponse(); // False success for RGPD policies
+            )->toResponse(); // False success for RGPD policies
         }
 
         $user = new User();
@@ -197,17 +163,13 @@ class RegistrationController extends AbstractController
             $eventMetaData
         );
 
-        return (new BaseResponse(
+        return new BaseResponse(
             200,
             ['message' => 'Registration successful. Please check your email for further instructions']
-        ))->toResponse();
+        )->toResponse();
     }
 
     /**
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param MailerInterface $mailer
-     * @param Request $request
-     * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -225,28 +187,28 @@ class RegistrationController extends AbstractController
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
+        $errors = [];
         if (empty($data['email'])) {
             $errors[] = 'email';
         }
-        if (!empty($errors)) {
-            return (
-            new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            ))->toResponse();
+            )->toResponse();
         }
 
         if (!isset($data['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
         }
 
         $emailConstraint = new Assert\Email();
@@ -256,7 +218,7 @@ class RegistrationController extends AbstractController
 
         if (count($emailViolations) > 0) {
             $errorMessage = $emailViolations[0]->getMessage();
-            return (new BaseResponse(400, null, $errorMessage))->toResponse();
+            return new BaseResponse(400, null, $errorMessage)->toResponse();
         }
 
         $user = $this->userRepository->findOneBy(['email' => $data['email']]);
@@ -264,13 +226,13 @@ class RegistrationController extends AbstractController
         if ($user) {
             if ($user->getBannedAt()) {
                 // This message exists in case of a user is banned the email/reset, to protect against RGPD
-                return (new BaseResponse(200, [
+                return new BaseResponse(200, [
                     // Correct success response
                     'message' => sprintf(
                         'If the email exist, we have sent you a new one to: %s.', // Forbidden request
                         $user->getEmail()
                     )
-                ]))->toResponse();
+                ])->toResponse();
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -293,7 +255,7 @@ class RegistrationController extends AbstractController
                 );
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
-                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;
@@ -307,7 +269,7 @@ class RegistrationController extends AbstractController
                             $minInterval
                         ) < $currentTime)
                 ) {
-                    if (!$latestEvent) {
+                    if (!$latestEvent instanceof Event) {
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
                         $latestEvent->setEventDatetime(new DateTime());
@@ -331,7 +293,7 @@ class RegistrationController extends AbstractController
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $email = (new TemplatedEmail())
+                    $email = new TemplatedEmail()
                         ->from(
                             new Address(
                                 $this->parameterBag->get('app.email_address'),
@@ -364,31 +326,31 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    return (new BaseResponse(200, [
+                    return new BaseResponse(200, [
                         // Correct success response
                         'message' => sprintf(
                             'If the email exist, we have sent you a new one to: %s.', // Actually success
                             $user->getEmail()
                         )
-                    ]))->toResponse();
+                    ])->toResponse();
                 }
                 // This message exists in case of a user spams the email/reset, to protect against RGPD
-                return (new BaseResponse(200, [
+                return new BaseResponse(200, [
                     // Correct success response
                     'message' => sprintf(
                         'If the email exist, we have sent you a new one to: %s.',
                         $user->getEmail()
                     )
-                ]))->toResponse(); // To many requests
+                ])->toResponse(); // To many requests
             }
         }
 
         // This message exists in case of a user spams the email/reset, to protect against RGPD
-        return (new BaseResponse(
+        return new BaseResponse(
             200,
             sprintf('If the email exist, we have sent you a new one to: %s', $data['email']),
             null,
-        ))->toResponse(); // Not Found User doesn't exist request
+        )->toResponse(); // Not Found User doesn't exist request
     }
 
     /**
@@ -408,12 +370,12 @@ class RegistrationController extends AbstractController
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
         if (!isset($data['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse();
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse();
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
@@ -431,40 +393,43 @@ class RegistrationController extends AbstractController
         if (empty($data['country_code'])) {
             $errors[] = 'country_code';
         }
-        if (!empty($errors)) {
-            return (new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            ))->toResponse();
+            )->toResponse();
         }
 
         // Validate phone number with country code
         try {
-            $parsedPhoneNumber = $phoneNumberUtil->parse($data['phone_number'], strtoupper($data['country_code']));
+            $parsedPhoneNumber = $phoneNumberUtil->parse(
+                $data['phone_number'],
+                strtoupper((string)$data['country_code'])
+            );
             if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
-                return (new BaseResponse(
+                return new BaseResponse(
                     400,
                     null,
                     'Invalid phone number format.'
-                ))->toResponse();
+                )->toResponse();
             }
-        } catch (NumberParseException $e) {
-            return (new BaseResponse(
+        } catch (NumberParseException) {
+            return new BaseResponse(
                 400,
                 null,
                 'Invalid phone number format or country code.'
-            ))->toResponse();
+            )->toResponse();
         }
 
         // Check for existing user with the same phone number
         $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
-            return (new BaseResponse(200, [
+            return new BaseResponse(200, [
                 // phpcs:disable Generic.Files.LineLength.TooLong
                 'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
                 // phpcs:enable
-            ]))->toResponse(); // False success for RGPD policies
+            ])->toResponse(); // False success for RGPD policies
         }
 
         // Create and populate the new user entity
@@ -505,32 +470,30 @@ class RegistrationController extends AbstractController
 
         // Send SMS
         try {
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            $message = "Your account password is: " . $data['password'] . "%0A" . "Verification code is: " . $user->getVerificationCode();
-            // phpcs:enable
+            $message = "Your account password is: "
+                . $data['password'] . "%0A" . "Verification code is: "
+                . $user->getVerificationCode();
             $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
 
             if ($result) {
-                return (new BaseResponse(
+                return new BaseResponse(
                     200,
-                    // phpcs:disable Generic.Files.LineLength.TooLong
-                    ['message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.']
-                    // phpcs:enable
-                ))->toResponse();
+                    [
+                        'message' =>
+                            'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
+                    ]
+                )->toResponse();
             }
         } catch (\RuntimeException) {
-            return (new BaseResponse(500, null, 'Failed to send SMS'))->toResponse(); // Internal Server Error
+            return new BaseResponse(500, null, 'Failed to send SMS')->toResponse(); // Internal Server Error
         }
 
         // Return fallback response
-        return (new BaseResponse(500, null, 'User registered but SMS could not be sent.'))->toResponse();
+        return new BaseResponse(500, null, 'User registered but SMS could not be sent.')->toResponse();
     }
 
 
     /**
-     * @param Request $request
-     * @param PhoneNumberUtil $phoneNumberUtil
-     * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
@@ -546,51 +509,51 @@ class RegistrationController extends AbstractController
     ): JsonResponse {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
         if (!isset($dataRequest['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($dataRequest['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse(); // Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
         }
 
+        $errors = [];
         if (empty($dataRequest['country_code'])) {
             $errors[] = 'country_code';
         }
         if (empty($dataRequest['phone_number'])) {
             $errors[] = 'phone_number';
         }
-        if (!empty($errors)) {
-            return (
-            new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            ))->toResponse();
+            )->toResponse();
         }
 
         // Validate phone number with country code
         try {
             $parsedPhoneNumber = $phoneNumberUtil->parse(
                 $dataRequest['phone_number'],
-                strtoupper($dataRequest['country_code'])
+                strtoupper((string)$dataRequest['country_code'])
             );
             if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
-                return (new BaseResponse(
+                return new BaseResponse(
                     400,
                     null,
                     'Invalid phone number format.'
-                ))->toResponse();
+                )->toResponse();
             }
-        } catch (NumberParseException $e) {
-            return (new BaseResponse(
+        } catch (NumberParseException) {
+            return new BaseResponse(
                 400,
                 null,
                 'Invalid phone number format or country code.'
-            ))->toResponse();
+            )->toResponse();
         }
 
         // Check for existing user with the same phone number
@@ -599,12 +562,12 @@ class RegistrationController extends AbstractController
         if ($user) {
             if ($user->getBannedAt()) {
                 // This message exists in case of a user is banned the sms/reset, to protect against RGPD
-                return (new BaseResponse(
+                return new BaseResponse(
                     200,
                     'If the phone number exist, we have sent you a new one to: %s',
                     $user->getEmail(),
                     null,
-                ))->toResponse(); // Too Many Requests Response
+                )->toResponse(); // Too Many Requests Response
             }
 
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
@@ -635,7 +598,7 @@ class RegistrationController extends AbstractController
                     $currentTime = new DateTime();
 
                     $verificationAttempts = 1;
-                    if ($latestEvent) {
+                    if ($latestEvent instanceof Event) {
                         $latestEventMetadata = $latestEvent->getEventMetadata();
                         $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
                         $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
@@ -647,12 +610,12 @@ class RegistrationController extends AbstractController
 
                             if ($allowedTime > $currentTime) {
                                 // Protect against spam and RGPD policies - simulate success without actual resend
-                                return (new BaseResponse(200, [
+                                return new BaseResponse(200, [
                                     'success' => sprintf(
                                         'If the phone number exists, we have sent a new code to: %s.',
                                         $user->getPhoneNumber()
                                     )
-                                ]))->toResponse();
+                                ])->toResponse();
                             }
 
                             $verificationAttempts++;
@@ -660,15 +623,15 @@ class RegistrationController extends AbstractController
                     }
                     $attemptsLeft = $maxAttempts - $verificationAttempts;
                     if ($attemptsLeft < 0) {
-                        return (new BaseResponse(
+                        return new BaseResponse(
                             429,
                             null,
                             'Limit of tries exceeded for regeneration. Contact support.'
-                        ))->toResponse();
+                        )->toResponse();
                     }
 
                     // Update or create the event record
-                    if (!$latestEvent) {
+                    if (!$latestEvent instanceof Event) {
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
                         $latestEvent->setEventDatetime($currentTime);
@@ -719,31 +682,30 @@ class RegistrationController extends AbstractController
                     );
 
                     if ($result) {
-                        return (new BaseResponse(200, [
+                        return new BaseResponse(200, [
                             'success' => sprintf(
-                                // phpcs:disable Generic.Files.LineLength.TooLong
-                                'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
-                                //phpcs:enable
+                                'If the phone number exists,' .
+                                ' we have sent a new code to: %s. You have %d attempt(s) left.',
                                 $user->getUuid(),
                                 $attemptsLeft
                             )
-                        ]))->toResponse();
+                        ])->toResponse();
                     }
                 } catch (\RuntimeException) {
-                    return (new BaseResponse(
+                    return new BaseResponse(
                         500,
                         null,
                         'An unexpected error occurred while processing the request',
-                    ))->toResponse(); // Internal Server Error
+                    )->toResponse(); // Internal Server Error
                 }
             }
         }
 
         // This message exists in case of the user doesn't exist on the sms/reset, to protect against RGPD
-        return (new BaseResponse(
+        return new BaseResponse(
             200,
             sprintf('If the phone number exists, we have sent you a new code to: %s', $dataRequest['phone_number']),
             null,
-        ))->toResponse();
+        )->toResponse();
     }
 }

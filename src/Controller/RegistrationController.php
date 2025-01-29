@@ -41,15 +41,6 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-    private SendSMS $sendSMS;
-    private TokenStorageInterface $tokenStorage;
-    private EventActions $eventActions;
-    private VerificationCodeEmailGenerator $verificationCodeGenerator;
-    private RegistrationEmailGenerator $emailGenerator;
-
     /**
      * Registration constructor.
      *
@@ -59,37 +50,24 @@ class RegistrationController extends AbstractController
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator
      * @param RegistrationEmailGenerator $emailGenerator Used to generate and send emails for the user
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        SendSMS $sendSMS,
-        TokenStorageInterface $tokenStorage,
-        EventActions $eventActions,
-        VerificationCodeEmailGenerator $verificationCodeGenerator,
-        RegistrationEmailGenerator $emailGenerator,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
+        private readonly SendSMS $sendSMS,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly EventActions $eventActions,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly RegistrationEmailGenerator $emailGenerator,
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
-        $this->sendSMS = $sendSMS;
-        $this->tokenStorage = $tokenStorage;
-        $this->eventActions = $eventActions;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
-        $this->emailGenerator = $emailGenerator;
     }
 
-    /*
-    * Handle the email registration.
-    */
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param EntityManagerInterface $entityManager
-     * @return Response
+     * Handle the email registration.
+     */
+    /**
      * @throws RandomException
      * @throws TransportExceptionInterface
      * @throws Exception
@@ -172,15 +150,10 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /*
-    * Handle the sms registration.
-    */
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param EntityManagerInterface $entityManager
-     * @param SessionInterface $session
-     * @return Response
+     * Handle the sms registration.
+     */
+    /**
      * @throws NonUniqueResultException
      * @throws RandomException
      * @throws ClientExceptionInterface
@@ -294,15 +267,10 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /*
+    /**
      * Handle the email link click to verify the user account.
      */
     /**
-     * @param RequestStack $requestStack
-     * @param UserRepository $userRepository
-     * @param TokenStorageInterface $tokenStorage
-     * @param EventDispatcherInterface $eventDispatcher
-     * @return Response
      * @throws NonUniqueResultException
      */
     #[Route('/login/link', name: 'app_confirm_account')]

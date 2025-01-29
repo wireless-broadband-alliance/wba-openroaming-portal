@@ -14,11 +14,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class SMSType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
+    public function __construct(private readonly GetSettings $getSettings)
     {
-        $this->getSettings = $getSettings;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
