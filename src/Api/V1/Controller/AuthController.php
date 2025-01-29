@@ -23,7 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -32,52 +32,20 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class AuthController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private UserPasswordHasherInterface $passwordHasher;
-    private jwtTokenGenerator $tokenGenerator;
-    private CaptchaValidator $captchaValidator;
-    private EntityManagerInterface $entityManager;
-    private GoogleController $googleController;
-    private MicrosoftController $microsoftController;
-    private UserStatusChecker $userStatusChecker;
-    private EventActions $eventActions;
-
-    /**
-     * @param UserRepository $userRepository
-     * @param UserPasswordHasherInterface $passwordHasher
-     * @param JWTTokenGenerator $tokenGenerator
-     * @param CaptchaValidator $captchaValidator
-     * @param EntityManagerInterface $entityManager
-     * @param GoogleController $googleController
-     * @param MicrosoftController $microsoftController
-     * @param UserStatusChecker $userStatusChecker
-     * @param EventActions $eventActions
-     */
     public function __construct(
-        UserRepository $userRepository,
-        UserPasswordHasherInterface $passwordHasher,
-        jwtTokenGenerator $tokenGenerator,
-        CaptchaValidator $captchaValidator,
-        EntityManagerInterface $entityManager,
-        GoogleController $googleController,
-        MicrosoftController $microsoftController,
-        UserStatusChecker $userStatusChecker,
-        EventActions $eventActions,
+        private readonly UserRepository $userRepository,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly jwtTokenGenerator $tokenGenerator,
+        private readonly CaptchaValidator $captchaValidator,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly GoogleController $googleController,
+        private readonly MicrosoftController $microsoftController,
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly EventActions $eventActions,
     ) {
-        $this->userRepository = $userRepository;
-        $this->passwordHasher = $passwordHasher;
-        $this->tokenGenerator = $tokenGenerator;
-        $this->captchaValidator = $captchaValidator;
-        $this->entityManager = $entityManager;
-        $this->googleController = $googleController;
-        $this->microsoftController = $microsoftController;
-        $this->userStatusChecker = $userStatusChecker;
-        $this->eventActions = $eventActions;
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -91,18 +59,18 @@ class AuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); # Bad Request Response
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
         if (!isset($data['turnstile_token'])) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed'))->toResponse(); # Bad Request Response
+            return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
         }
 
-
+        $errors = [];
         // Check for missing fields and add them to the array errors
         if (empty($data['uuid'])) {
             $errors[] = 'uuid';
@@ -110,30 +78,28 @@ class AuthController extends AbstractController
         if (empty($data['password'])) {
             $errors[] = 'password';
         }
-        if (!empty($errors)) {
-            return (
-            new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            )
             )->toResponse();
         }
 
         // Check if user exists are valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
-        if (!$user) {
-            return (new BaseResponse(400, null, 'Invalid credentials'))->toResponse();
+        if (!$user instanceof User) {
+            return new BaseResponse(400, null, 'Invalid credentials')->toResponse();
             // Bad Request Response
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return (new BaseResponse(401, null, 'Invalid credentials'))->toResponse(); # Unauthorized Request Response
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse !== null) {
+        if ($statusCheckerResponse instanceof BaseResponse) {
             return $statusCheckerResponse->toResponse();
         }
 
@@ -159,21 +125,16 @@ class AuthController extends AbstractController
         );
 
         // Return success response using BaseResponse
-        return (new BaseResponse(200, $responseData))->toResponse(); # Success Response
+        return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
 
-    /**
-     * @param Request $request
-     * @param Auth $samlAuth
-     * @return JsonResponse
-     */
     #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
         if (!$samlResponseBase64) {
-            return (new BaseResponse(400, null, 'SAML Response not found'))->toResponse(); // Bad Request
+            return new BaseResponse(400, null, 'SAML Response not found')->toResponse(); // Bad Request
         }
 
         try {
@@ -182,20 +143,20 @@ class AuthController extends AbstractController
 
             // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
-                return (new BaseResponse(
+                return new BaseResponse(
                     401,
                     null,
                     'Invalid SAML Assertion',
-                ))->toResponse(); // Unauthorized
+                )->toResponse(); // Unauthorized
             }
 
             // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
-                return (new BaseResponse(
+                return new BaseResponse(
                     401,
                     null,
                     'Authentication Failed'
-                ))->toResponse(); // Unauthorized
+                )->toResponse(); // Unauthorized
             }
 
             $sAMAccountName = $samlAuth->getNameId();
@@ -210,7 +171,7 @@ class AuthController extends AbstractController
             // Retrieve or create user based on SAML attributes
             $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
-            if (!$user) {
+            if (!$user instanceof User) {
                 // User does not exist, create a new user
                 $user = new User();
                 $user->setEmail($email);
@@ -235,7 +196,7 @@ class AuthController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse !== null) {
+            if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
@@ -260,13 +221,13 @@ class AuthController extends AbstractController
                 $eventMetadata
             );
 
-            return (new BaseResponse(200, $responseData))->toResponse(); // Success
+            return new BaseResponse(200, $responseData)->toResponse(); // Success
         } catch (Exception) {
-            return (new BaseResponse(
+            return new BaseResponse(
                 500,
                 null,
                 'SAML processing error',
-            ))->toResponse(); // Internal Server Error
+            )->toResponse(); // Internal Server Error
         }
     }
 
@@ -276,22 +237,22 @@ class AuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
         if (!isset($data['code'])) {
-            return (new BaseResponse(400, null, 'Missing authorization code!'))->toResponse();
+            return new BaseResponse(400, null, 'Missing authorization code!')->toResponse();
         }
 
         try {
             $user = $this->googleController->fetchUserFromGoogle($data['code']);
-            if (!$user) {
-                return (new BaseResponse(400, null, 'This code is not associated with a google account.'))->toResponse(
+            if (!$user instanceof User) {
+                return new BaseResponse(400, null, 'This code is not associated with a google account.')->toResponse(
                 );
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse !== null) {
+            if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
@@ -315,13 +276,13 @@ class AuthController extends AbstractController
                 $eventMetadata
             );
 
-            return (new BaseResponse(200, $formattedUserData, null))->toResponse();
+            return new BaseResponse(200, $formattedUserData, null)->toResponse();
         } catch (IdentityProviderException) {
             // Handle OAuth identity provider-specific errors
-            return (new BaseResponse(500, null, 'Authentication failed'))->toResponse();
+            return new BaseResponse(500, null, 'Authentication failed')->toResponse();
         } catch (Exception) {
             // Handle any other general errors
-            return (new BaseResponse(500, null, 'An error occurred'))->toResponse();
+            return new BaseResponse(500, null, 'An error occurred')->toResponse();
         }
     }
 
@@ -331,25 +292,25 @@ class AuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse();
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
         if (!isset($data['code'])) {
-            return (new BaseResponse(400, null, 'Missing authorization code!'))->toResponse();
+            return new BaseResponse(400, null, 'Missing authorization code!')->toResponse();
         }
 
         try {
             $user = $this->microsoftController->fetchUserFromMicrosoft($data['code']);
-            if (!$user) {
-                return (new BaseResponse(
+            if (!$user instanceof User) {
+                return new BaseResponse(
                     400,
                     null,
                     'This code is not associated with a microsoft account.'
-                ))->toResponse();
+                )->toResponse();
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse !== null) {
+            if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
 
@@ -373,13 +334,13 @@ class AuthController extends AbstractController
                 $eventMetadata
             );
 
-            return (new BaseResponse(200, $formattedUserData, null))->toResponse();
+            return new BaseResponse(200, $formattedUserData, null)->toResponse();
         } catch (IdentityProviderException) {
             // Handle OAuth identity provider-specific errors
-            return (new BaseResponse(500, null, 'Authentication failed'))->toResponse();
+            return new BaseResponse(500, null, 'Authentication failed')->toResponse();
         } catch (Exception) {
             // Handle any other general errors
-            return (new BaseResponse(500, null, 'An error occurred'))->toResponse();
+            return new BaseResponse(500, null, 'An error occurred')->toResponse();
         }
     }
 }

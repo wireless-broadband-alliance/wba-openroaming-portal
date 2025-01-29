@@ -6,23 +6,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class BaseResponse
 {
-    /** @var int */
-    private int $statusCode;
-
-    /** @var mixed */
-    private mixed $data;
-
-    /** @var string|null */
-    private ?string $error;
-
-    private mixed $headers;
-
-    public function __construct(int $statusCode, $data = null, ?string $error = null, $headers = [])
-    {
-        $this->statusCode = $statusCode;
-        $this->data = $data;
-        $this->error = $error;
-        $this->headers = $headers;
+    public function __construct(
+        private readonly int $statusCode,
+        private readonly mixed $data = null,
+        private readonly ?string $error = null,
+        private readonly mixed $headers = []
+    ) {
     }
 
     public function toResponse(): JsonResponse
