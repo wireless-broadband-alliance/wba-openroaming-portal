@@ -26,13 +26,13 @@
 
             <div class="flex space-x-2.5">
                 {# Previous page navigation #}
-                <a {% if currentPage > 1 %} href="{{ path(route, {'page': currentPage - 1, 'startDate': selectedStartDate, 'endDate': selectedEndDate}) }}" {% endif %}
+                <a {% if currentPage > 1 %} href="{{ path(route, {page: currentPage - 1, startDate: selectedStartDate, endDate: selectedEndDate}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
                     <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
                 </a>
 
                 {# Next page navigation #}
-                <a {% if currentPage < totalPages %} href="{{ path(route, {'page': currentPage + 1, 'startDate': selectedStartDate, 'endDate': selectedEndDate}) }}" {% endif %}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {page: currentPage + 1, startDate: selectedStartDate, endDate: selectedEndDate}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
                     <twig:ux:icon name="wba:right" class="w-4" fill="none"/>
                 </a>
