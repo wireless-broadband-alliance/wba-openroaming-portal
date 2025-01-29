@@ -7,9 +7,9 @@
 {% block second_col %}
     {# Form Column #}
 
-    {# Toasts  #}
+    {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
-        {# Flash error message  #}
+        {# Flash error message #}
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
@@ -39,32 +39,32 @@
 
     {# UUID #}
     <div class="relative mt-[32px]">
-        {{ form_label(form.uuid, label, { 'label_attr': {'class': 'form-label'} }) }}
+        {{ form_label(form.uuid, label, {label_attr: {class: 'form-label'}}) }}
         {{ form_widget(form.uuid, {
-            'attr': {
-                'class': 'form-widget',
-                'placeholder': 'Enter your '~label|lower,
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your ' ~ label|lower,
             },
-            'full_name' : 'uuid',
+            full_name: 'uuid',
         }) }}
     </div>
 
     {# Password #}
     <div class="relative mt-[32px]">
-        {{ form_label(form.password, null, { 'label_attr': {'class': 'form-label'} }) }}
+        {{ form_label(form.password, null, {label_attr: {class: 'form-label'}}) }}
         {{ form_widget(form.password, {
-            'attr': {
-                'class': 'form-widget',
-                'placeholder': 'Enter your password',
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your password',
             },
-            'full_name' : 'password',
+            full_name: 'password',
         }) }}
     </div>
 
     {# Turnstile Checker #}
     {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
         <div class="ml-3 mt-5">
-            {{ form_row(form.security, {'full_name': 'security'}) }}
+            {{ form_row(form.security, {full_name: 'security'}) }}
         </div>
     {% endif %}
 
@@ -85,7 +85,6 @@
     <div class="my-[25px] divider"></div>
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO') %}
 
-
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
             <p class="mt-2 text-sm">Did you forget your password? Get a new one for your
 
@@ -99,7 +98,6 @@
                 <a href="{{ path('app_site_forgot_password_sms') }}"
                    class="font-semibold text-primary underline">phone number</a>.
             {% endif %}
-
 
             {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
