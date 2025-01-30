@@ -7,6 +7,7 @@ use App\Enum\PlatformMode;
 use App\Enum\twoFAType;
 use App\Form\LoginFormType;
 use App\Form\TwoFAcode;
+use App\Form\TwoFactorPhoneNumber;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -86,13 +87,33 @@ class SecurityController extends AbstractController
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
                 if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED) {
-                    if ($this->getUser()->getTwoFAcode()) {
-                        return $this->redirectToRoute('app_verify2FA');
+                    if ($this->getUser()->getTwoFA()) {
+                        if ($this->getUser()->getTwoFAcode()) {
+                            return $this->redirectToRoute('app_verify2FA');
+                        }
+                        return $this->redirectToRoute('app_verify2FA_local');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-
-                return $this->redirectToRoute('app_verify2FA');
+                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL) {
+                    if ($this->getUser()->getTwoFA()) {
+                        if ($this->getUser()->getTwoFAcode()) {
+                            return $this->redirectToRoute('app_verify2FA');
+                        }
+                        return $this->redirectToRoute('app_verify2FA_local');
+                    }
+                    return $this->redirectToRoute('app_enable2FA');
+                }
+                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL) {
+                    if ($this->getUser()->getTwoFA()) {
+                        if ($this->getUser()->getTwoFAcode()) {
+                            return $this->redirectToRoute('app_verify2FA');
+                        }
+                        return $this->redirectToRoute('app_verify2FA_local');
+                    }
+                    return $this->redirectToRoute('app_enable2FA');
+                }
+                return $this->redirectToRoute('app_landing');
             }
             return $this->redirectToRoute('app_landing');
         }
@@ -144,9 +165,29 @@ class SecurityController extends AbstractController
         );
     }
 
-
     #[Route(path: '/enable2FA', name: 'app_enable2FA')]
-    public function enable2FA(): RedirectResponse
+    public function enable2FA(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFactorPhoneNumber::class, $this->getUser());
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            $data = $form->get('code')->getData();
+            $user = $this->getUser();
+            $secret = $user->getTwoFAcode();
+            $code = $data['code'];
+            if ($this->totpService->verifyTOTP($secret, $code)) {
+                return $this->redirectToRoute('app_landing');
+            }
+            $this->addFlash('error', 'Invalid code');
+        }
+        return $this->render('site/verify2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]
+    public function enable2FAapp(): RedirectResponse
     {
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
@@ -186,7 +227,7 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFAcode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            $data = json_decode($request->getContent(), true);
+            $data = $form->get('code')->getData();
             $user = $this->getUser();
             $secret = $user->getTwoFAcode();
             $code = $data['code'];
