@@ -8,6 +8,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use InvalidArgumentException;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,22 +16,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+#[AsCommand(
+    name: 'app:set-saml-provider',
+    description: 'Sets SAML Provider data from the ENV',
+)]
 class SetSamlProviderCommand extends Command
 {
-    protected static $defaultName = 'app:set-saml-provider';
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ParameterBagInterface $parameterBag
     ) {
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('Sets SAML Provider data from the ENV')
-            ->setHelp('This command allows to set SAML Provider data from the ENV');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
