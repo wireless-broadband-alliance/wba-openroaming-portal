@@ -97,7 +97,15 @@
     {# divider #}
     <div class="divider my-8"></div>
 
-    <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable 2FA</a>
+    <div>
+        <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+    {% if (user.twoFA and data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::NOT_ENFORCED')) %}
+        <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+    {% else %}
+        <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[240px] btn-primary">Enable with phone number</a>
+        <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[240px] btn-primary">Enable with application</a>
+    {% endif %}
+    </div>
 
     {# divider #}
     <div class="divider my-8"></div>

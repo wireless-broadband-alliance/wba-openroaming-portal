@@ -170,15 +170,29 @@ class SecurityController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFactorPhoneNumber::class, $this->getUser());
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            $data = $form->get('phoneNumber')->getData();
+        if ($this->getUser()->getPhoneNumber()) {
             $user = $this->getUser();
-            $secret = $user->getTwoFAcode();
-            $code = $data['code'];
-            if ($this->totpService->verifyTOTP($secret, $code)) {
-                return $this->redirectToRoute('app_landing');
+            if ($user) {
+                $user->setTwoFA(true);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+            } else {
+                $this->addFlash('error', 'User not found');
             }
-            $this->addFlash('error', 'Invalid code');
+            return $this->redirectToRoute('app_landing');
+        }
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            $phoneNumber = $form->get('phoneNumber')->getData();
+            $user = $this->getUser();
+            if ($user) {
+                $user->setTwoFA(true);
+                $user->setPhoneNumber($phoneNumber);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+            } else {
+                $this->addFlash('error', 'User not found');
+            }
+            return $this->redirectToRoute('app_landing');
         }
         return $this->render('site/enable2FA.html.twig', [
             'data' => $data,
@@ -239,28 +253,19 @@ class SecurityController extends AbstractController
             'form' => $form,
         ]);
     }
-/*
-    public function login(Request $request, TOTPService $totpService): JsonResponse
+
+    #[Route(path: '/disable2FA', name: 'app_disable2FA')]
+    public function disable2FA(): RedirectResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        // 1. Verificar credenciais (usuário e senha)
-        $user = $this->getDoctrine()
-            ->getRepository(User::class)
-            ->findOneBy(['email' => $data['email']]);
-
-        if (!$user || !password_verify($data['password'], $user->getPassword())) {
-            return $this->json(['error' => 'Invalid credentials'], 401);
+        $user = $this->getUser();
+        if ($user) {
+            $user->setTwoFA(false);
+            $user->setTwoFAcode(null);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        } else {
+            $this->addFlash('error', 'User not found');
         }
-
-        // 2. Verificar o código TOTP
-        $code = $data['totp_code'] ?? null;
-        if (!$user->getTotpSecret() || !$totpService->verifyTOTP($user->getTotpSecret(), $code)) {
-            return $this->json(['error' => 'Invalid 2FA code'], 401);
-        }
-
-        // 3. Retornar um token JWT ou continuar a sessão
-        return $this->json(['message' => 'Login successful']);
+        return $this->redirectToRoute('app_landing');
     }
-*/
 }
