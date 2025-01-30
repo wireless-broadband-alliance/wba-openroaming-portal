@@ -1,31 +1,31 @@
 {% set imageSettings = [
     {
-        'name': 'CUSTOMER_LOGO',
-        'displayName': 'Customer Logo',
-        'imagePath': asset(data.customerLogoName.value)
+        name: 'CUSTOMER_LOGO',
+        displayName: 'Customer Logo',
+        imagePath: asset(data.customerLogoName.value),
     },
     {
-        'name': 'OPENROAMING_LOGO',
-        'displayName': 'OpenRoaming Logo',
-        'imagePath': asset(data.openroamingLogoName.value)
+        name: 'OPENROAMING_LOGO',
+        displayName: 'OpenRoaming Logo',
+        imagePath: asset(data.openroamingLogoName.value),
     },
     {
-        'name': 'WALLPAPER_IMAGE',
-        'displayName': 'Wallpaper Image',
-        'imagePath': asset(data.wallpaperImageName.value)
-    }
+        name: 'WALLPAPER_IMAGE',
+        displayName: 'Wallpaper Image',
+        imagePath: asset(data.wallpaperImageName.value),
+    },
 ] %}
 
 {% set textSettings = [
-    { 'name': 'PAGE_TITLE', 'displayName': 'Page Title' },
-    { 'name': 'WELCOME_TEXT', 'displayName': 'Welcome Text' },
-    { 'name': 'WELCOME_DESCRIPTION', 'displayName': 'Welcome Description' },
-    { 'name': 'ADDITIONAL_LABEL', 'displayName': 'Additional Label' },
-    { 'name': 'CONTACT_EMAIL', 'displayName': 'Contact Email' }
+    {name: 'PAGE_TITLE', displayName: 'Page Title'},
+    {name: 'WELCOME_TEXT', displayName: 'Welcome Text'},
+    {name: 'WELCOME_DESCRIPTION', displayName: 'Welcome Description'},
+    {name: 'ADDITIONAL_LABEL', displayName: 'Additional Label'},
+    {name: 'CONTACT_EMAIL', displayName: 'Contact Email'},
 ] %}
 
 {% set choiceSettings = [
-    { 'name': 'CUSTOMER_LOGO_ENABLED', 'displayName': 'Show Customer Logo' },
+    {name: 'CUSTOMER_LOGO_ENABLED', displayName: 'Show Customer Logo'},
 ] %}
 
 <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
@@ -43,12 +43,12 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    'CUSTOMER_LOGO_ENABLED': 'Show Customer Logo'
+                                    CUSTOMER_LOGO_ENABLED: 'Show Customer Logo',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
                             <label class="flex items-center bg-opacity-40">
-                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
@@ -56,7 +56,7 @@
 
                         {% if setting.vars.name in ['CUSTOMER_LOGO_ENABLED'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                                {{ form_widget(setting, {attr: {class: 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                             </div>
 
                             <div class="flex flex-col items-center space-y-2 mt-5">
@@ -100,7 +100,7 @@
                             </div>
                         {% endif %}
 
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
@@ -124,7 +124,7 @@
     <div class="mt-8 divider-solid"></div>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingCustom'}) }}"
+        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCustom'}) }}"
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
             Reset

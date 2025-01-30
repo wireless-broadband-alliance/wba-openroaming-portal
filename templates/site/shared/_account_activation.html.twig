@@ -1,10 +1,10 @@
-{% set title = "Phone Number" %}
-{% set label = "phone number" %}
+{% set title = 'Phone Number' %}
+{% set label = 'phone number' %}
 {% set code_path = path('app_regenerate_sms_code') %}
 
 {% if app.user and app.user.email is defined and app.user.email is not empty %}
-    {% set title = "Email" %}
-    {% set label = "email" %}
+    {% set title = 'Email' %}
+    {% set label = 'email' %}
     {% set code_path = path('app_regenerate_email_code') %}
 {% endif %}
 

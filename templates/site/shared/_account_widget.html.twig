@@ -19,14 +19,14 @@
 
             <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                 <div class="relative w-full">
-                    {{ form_label(form.firstName, 'First Name', {'label_attr': { 'class': "form-label"}}) }}
-                    {{ form_widget(form.firstName, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                    {{ form_label(form.firstName, 'First Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                     {{ form_errors(form.firstName) }}
                 </div>
 
                 <div class="relative w-full">
-                    {{ form_label(form.lastName, 'Last Name', {'label_attr': { 'class': "form-label"}}) }}
-                    {{ form_widget(form.lastName, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                    {{ form_label(form.lastName, 'Last Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                     {{ form_errors(form.lastName) }}
                 </div>
             </div>
@@ -54,8 +54,8 @@
             <div class="flex flex-col gap-x-6 gap-y-8">
                 <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                     <div class="relative w-full">
-                        {{ form_label(formPassword.password, 'Current Password', {'label_attr': { 'class': "form-label"}}) }}
-                        {{ form_widget(formPassword.password, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                        {{ form_label(formPassword.password, 'Current Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                         {{ form_errors(formPassword.password) }}
                     </div>
 
@@ -64,14 +64,14 @@
 
                 <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                     <div class="relative w-full">
-                        {{ form_label(formPassword.newPassword, 'New Password', {'label_attr': { 'class': "form-label"}}) }}
-                        {{ form_widget(formPassword.newPassword, {'attr': { 'class': 'form-widget', 'minlength': 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                        {{ form_label(formPassword.newPassword, 'New Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                         {{ form_errors(formPassword.newPassword) }}
                     </div>
 
                     <div class="relative w-full">
-                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {'label_attr': { 'class': "form-label"}}) }}
-                        {{ form_widget(formPassword.confirmPassword, {'attr': { 'class': 'form-widget', 'minlength': 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'  }}) }}
+                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                         {{ form_errors(formPassword.confirmPassword) }}
                     </div>
                 </div>

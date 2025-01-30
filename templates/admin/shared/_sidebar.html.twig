@@ -17,11 +17,11 @@
     {# SideBar Buttons #}
     <div class="py-4 flex flex-col space-y-2 font-medium">
         {% set portalSettingsRoutes = [
-            "admin_dashboard_settings_status", "admin_dashboard_settings_terms", "admin_dashboard_settings_radius",
-            "admin_dashboard_settings_LDAP", "admin_dashboard_settings_auth", "admin_dashboard_settings_capport",
-            "admin_dashboard_settings_sms"
+            'admin_dashboard_settings_status', 'admin_dashboard_settings_terms', 'admin_dashboard_settings_radius',
+            'admin_dashboard_settings_LDAP', 'admin_dashboard_settings_auth', 'admin_dashboard_settings_capport',
+            'admin_dashboard_settings_sms',
         ] %}
-        {% set portalStatisticsRoutes = ["admin_dashboard_statistics", "admin_dashboard_statistics_freeradius"] %}
+        {% set portalStatisticsRoutes = ['admin_dashboard_statistics', 'admin_dashboard_statistics_freeradius'] %}
 
         {# User - Button #}
         <a href="{{ path('admin_page') }}">
@@ -65,7 +65,7 @@
         {# Portal Settings - Submenu #}
         <div class="relative" {{ stimulus_controller('nav-submenu') }}>
             <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-				{% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
+                {% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <twig:ux:icon name="wba:cog" class="w-5 mr-2" fill="none"/>
 
@@ -140,7 +140,7 @@
         {# Portal Statistics - Submenu #}
         <div class="relative" {{ stimulus_controller('nav-submenu') }}>
             <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-				{% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
+                {% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <twig:ux:icon name="wba:database" class="w-5 mr-2" fill="none"/>
 
@@ -162,7 +162,7 @@
                         </a>
                     </li>
                     <li>
-                        {#  SideBar Button - Freeradius Statistics - Button #}
+                        {# SideBar Button - Freeradius Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics_freeradius') }}">
                             <twig:ux:icon name="wba:hdd" class="w-5 mr-4" fill="none"/>
@@ -190,7 +190,7 @@
                 <ul class="mx-2">
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                           href="{{ path('admin_update', {id : app.user.id}) }}">
+                           href="{{ path('admin_update', {id: app.user.id}) }}">
                             <twig:ux:icon name="wba:user-circle" class="w-5 mr-4" fill="none"/>
                             Account
                         </a>

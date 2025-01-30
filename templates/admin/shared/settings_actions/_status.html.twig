@@ -13,24 +13,23 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    'PLATFORM_MODE': 'Platform Mode',
-                                    'USER_VERIFICATION': 'User Verification',
-                                    'TURNSTILE_CHECKER': 'Turnstile Checker',
-                                    'USER_DELETE_TIME' : 'Time to delete users(hours)',
-                                    'TIME_INTERVAL_NOTIFICATION' : 'Time to resend notifications(days)',
-                                    'TWO_FACTOR_AUTH_STATUS' : 'Two factor authentication status'
+                                    PLATFORM_MODE: 'Platform Mode',
+                                    USER_VERIFICATION: 'User Verification',
+                                    TURNSTILE_CHECKER: 'Turnstile Checker',
+                                    USER_DELETE_TIME: 'Time to delete users(hours)',
+                                    TIME_INTERVAL_NOTIFICATION: 'Time to resend notifications(days)',
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
                             <label class="flex items-center bg-opacity-40">
-                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
                         </div>
                         {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'TWO_FACTOR_AUTH_STATUS'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                                {{ form_widget(setting, {attr: {class: 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                             </div>
                         {% endif %}
 
@@ -222,12 +221,12 @@
                         {% if setting.vars.name in ['USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">
                                 <div class="flex flex-row justify-between hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 32}}) }}
+                                    {{ form_widget(setting, {attr: {class: 'form-widget', maxlength: 32}}) }}
                                 </div>
                             </div>
                         {% endif %}
 
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
@@ -249,7 +248,7 @@
         <div class="mt-6 divider-solid"></div>
 
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingStatus'}) }}"
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingStatus'}) }}"
                onclick="return confirm('Are you sure you want to reset to the default settings?')"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
                 Reset
