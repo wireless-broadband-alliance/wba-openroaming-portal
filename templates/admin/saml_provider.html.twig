@@ -1,0 +1,110 @@
+{% extends '/admin/base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% macro sortArrow(sortName, sort, sortDirection) %}
+    {% if sort == sortName %}
+        {% if sortDirection == 'asc' %}
+            <twig:ux:icon name="wba:c-up" class="inline-block w-4 h-4" fill="none"/>
+        {% else %}
+            <twig:ux:icon name="wba:c-down" class="inline-block w-4 h-4" fill="none"/>
+        {% endif %}
+    {% else %}
+        <twig:ux:icon name="wba:up-down" class="inline-block w-4 h-4" fill="none"/>
+    {% endif %}
+{% endmacro %}
+
+{% block container %}
+    <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
+        <div class="w-full">
+            <div class="sm:w-auto px-5 py-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
+                    <table class="table-auto border-collapse border border-gray-300 w-full">
+                        <thead class="text-sm text-gray-700 bg-veryLightGreen">
+                        <tr>
+                            <th class="px-12 py-3 text-left">Name</th>
+                            <th class="px-4 py-3 text-left">Entity ID</th>
+                            <th class="px-4 py-3 text-left">ACS URL</th>
+                            <th class="px-4 py-3 text-left">Enabled</th>
+                            <th class="px-6 py-3 text-left">Created At</th>
+                            <th class="px-6 py-3 text-left">Last Update At</th>
+                            <th class="px-6 py-3 text-left">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for samlProvider in samlProviders %}
+                            <tr class="{% if loop.index is odd %}bg-gray-50{% endif %}">
+                                <td class="px-4 py-2">{{ samlProvider.name }}</td>
+                                <td class="px-4 py-2">{{ samlProvider.idpEntityId }}</td>
+                                <td class="px-4 py-2">{{ samlProvider.idpSsoUrl }}</td>
+                                <td class="px-4 py-2">
+                                    {% if samlProvider.active %}
+                                        <span class="text-green-600">Yes</span>
+                                    {% else %}
+                                        <span class="text-red-600">No</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2">{{ samlProvider.createdAt|date('d/m/Y H:i') }}</td>
+                                <td class="px-4 py-2">
+                                    {% if samlProvider.updatedAt == samlProvider.createdAt %}
+                                        <span class="font-semibold p-1 pill-error">This field was never updated before</span>
+                                    {% else %}
+                                        {{ samlProvider.updatedAt|date('d/m/Y H:i') }}
+                                    {% endif %}
+                                </td>
+                                <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+                                    {# Items Button Dropdown #}
+                                    <button type="button"
+                                            class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                                            {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                                            {{ stimulus_target('nav-submenu', 'button') }}>
+                                        <twig:ux:icon name="wba:menu-dots" class="w-5 h-5"/>
+                                    </button>
+
+                                    {# Items List Dropdown #}
+                                    <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                                            {{ stimulus_target('nav-submenu', 'container') }}>
+                                        <ul class="p-2 text-gray-700 gap-y-2">
+                                            <li>
+                                                <a href="#" {# {{ path('saml_provider_edit', { id: samlProvider.id }) }} #}
+                                                   class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                                                    <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
+                                                    Edit
+                                                </a>
+                                            </li>
+                                            <li {{ stimulus_controller('alert') }}>
+                                                <form action="#" {# {{ path('saml_provider_delete', { id: samlProvider.id }) }} #}
+                                                      method="post" {{ stimulus_target('alert', 'form') }}>
+                                                    <input type="hidden" name="_method" value="DELETE">
+
+                                                    <a href="javascript:void(0)" data-user-id="{{ samlProvider.id }}"
+                                                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
+                                                       onclick="return confirm('Are you sure you want to delete this item?')">
+                                                        <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                                                        Delete
+                                                    </a>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td class="border border-gray-300 px-4 py-2 text-center" colspan="6">No providers
+                                    found
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="flex items-center space-x-6">
+                        <a href="{{ path('admin_dashboard_saml_provider_new') }}" class="btn-primary">
+                            New Saml Provider
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
