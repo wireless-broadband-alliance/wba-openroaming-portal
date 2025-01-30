@@ -7,9 +7,9 @@
 {% block second_col %}
     {# Form Column #}
 
-    {# Toasts  #}
+    {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
-        {# Flash error message  #}
+        {# Flash error message #}
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
@@ -27,9 +27,9 @@
     <div class="relative mt-10">
 
         {{ form_widget(form.code, {
-            'attr': {
-                'class': 'form-widget',
-                'placeholder': 'Enter your Code'
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your Code',
             }}) }}
 
     </div>
@@ -38,8 +38,8 @@
     <div class="my-[25px] divider"></div>
 
     {{ form_row(form.submit, {
-        'attr': {
-            'class': 'w-[160px] btn btn-primary',
+        attr: {
+            class: 'w-[160px] btn btn-primary',
         }}) }}
     {{ form_end(form) }}
 {% endblock %}
