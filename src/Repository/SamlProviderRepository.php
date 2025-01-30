@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\SamlProvider;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -15,6 +15,35 @@ class SamlProviderRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, SamlProvider::class);
+    }
+
+    public function findWithFilters(
+        ?string $filter,
+        ?string $searchTerm,
+        string $sort,
+        string $order,
+        int $page,
+        int $count
+    ): Paginator {
+        $queryBuilder = $this->createQueryBuilder('sp');
+
+        if ($filter === 'active') {
+            $queryBuilder->andWhere('sp.active = :active')->setParameter('active', true);
+        } elseif ($filter === 'inactive') {
+            $queryBuilder->andWhere('sp.active = :active')->setParameter('active', false);
+        }
+
+        if ($searchTerm) {
+            $queryBuilder
+                ->andWhere('sp.name LIKE :search OR sp.idpEntityId LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
+        }
+
+        $queryBuilder->orderBy('sp.' . $sort, $order);
+        $queryBuilder->setFirstResult(($page - 1) * $count);
+        $queryBuilder->setMaxResults($count);
+
+        return new Paginator($queryBuilder);
     }
 
     //    /**

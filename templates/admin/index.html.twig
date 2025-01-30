@@ -133,7 +133,6 @@
                         </tr>
                         </thead>
                         <tbody class="px-5">
-
                         {% for user in users %}
                             {{ include('admin/shared/_user.html.twig', {user: user}) }}
                         {% else %}
@@ -163,7 +162,7 @@
             {# Users Table Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('admin/shared/_pagination_users.html.twig', {label: 'Users per page', route: 'admin_page', occurrencies: allUsersCount}) }}
+                {{ include('admin/shared/pagination/_pagination_users.html.twig', {label: 'Users per page', route: 'admin_page', occurrencies: allUsersCount}) }}
             </div>
         </div>
     </div>
