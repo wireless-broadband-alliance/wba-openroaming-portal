@@ -116,7 +116,7 @@ class GoogleController extends AbstractController
         $user = $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
-        if (!$user instanceof \App\Entity\User) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
 

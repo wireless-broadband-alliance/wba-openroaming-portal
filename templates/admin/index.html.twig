@@ -22,7 +22,7 @@
 
                     {# Left Search Filters #}
                     <div class="flex items-center space-x-6 cursor-default">
-                        <a href="{{ path('admin_page', {'filter': 'all', 'u': app.request.query.get('u') }) }}"
+                        <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
                                 All
@@ -31,7 +31,7 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {'filter': constant('App\\Enum\\UserVerificationStatus::VERIFIED'), 'u': app.request.query.get('u') }) }}"
+                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED'), u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 Verified
@@ -40,7 +40,7 @@
                                 {{ verifiedUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {'filter': constant('App\\Enum\\UserVerificationStatus::BANNED'), 'u': app.request.query.get('u') }) }}"
+                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED'), u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 Banned
@@ -135,7 +135,7 @@
                         <tbody class="px-5">
 
                         {% for user in users %}
-                            {{ include('admin/shared/_user.html.twig', { 'user': user }) }}
+                            {{ include('admin/shared/_user.html.twig', {user: user}) }}
                         {% else %}
                             <tr>
                                 <td colspan="7">

@@ -98,8 +98,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw('RADIUS_REALM_NAME')) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                    'RADIUS_REALM_NAME'
-                );
+                'RADIUS_REALM_NAME'
+            );
             $token = $this->generateToken($androidLimit - $realmSize);
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
@@ -222,8 +222,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw('RADIUS_REALM_NAME')) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                    'RADIUS_REALM_NAME'
-                );
+                'RADIUS_REALM_NAME'
+            );
             $token = $this->generateToken($androidLimit - $realmSize);
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);

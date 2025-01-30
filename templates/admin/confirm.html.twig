@@ -5,7 +5,7 @@
 {% block container %}
     <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
         {% if type in ['settingMain', 'settingCustom', 'settingTerms', 'settingRadius', 'settingStatus', 'settingLDAP', 'settingCAPPORT', 'settingAUTH', 'settingSMS'] %}
-            <form action="{{ path('admin_confirm_checker', {'type': type}) }}"
+            <form action="{{ path('admin_confirm_checker', {type: type}) }}"
                   method="post">
                 <p class="block text-center text-lg mb-6">
                     Enter the verification code from your email
@@ -22,7 +22,7 @@
                 <div class="flex flex-col md:flex-row justify-center md:justify-between space-x-2 space-y-2 mt-4">
                     <div class="flex justify-start items-end pb-2">
                         <p>Click
-                            <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': type}) }}"
+                            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: type}) }}"
                                class="font-bold underline text-primary">here</a>
                             to generate a new email with a new code
                         </p>

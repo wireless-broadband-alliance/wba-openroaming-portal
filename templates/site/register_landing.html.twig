@@ -7,13 +7,13 @@
 {% block second_col %}
     {# Form Column #}
 
-    {# Toasts  #}
+    {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
         {% endfor %}
 
-        {# Flash warning message  #}
+        {# Flash warning message #}
         {% for message in app.session.flashbag.get('warning') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
@@ -34,12 +34,12 @@
 
     {# Email #}
     <div class="relative mt-[32px]">
-        {{ form_label(registrationForm.email, null, { 'label_attr': {'class': 'form-label'} }) }}
+        {{ form_label(registrationForm.email, null, {label_attr: {class: 'form-label'}}) }}
         {{ form_widget(registrationForm.email, {
-            'attr': {
-                'class': 'form-widget',
-                'placeholder': 'Enter your email'
-            }
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your email',
+            },
         }) }}
     </div>
 
