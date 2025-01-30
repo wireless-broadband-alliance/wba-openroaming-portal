@@ -27,7 +27,6 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SanitizeHTML;
 use App\Service\Statistics;
-use DateInvalidTimeZoneException;
 use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
