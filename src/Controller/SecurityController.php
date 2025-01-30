@@ -171,7 +171,7 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFactorPhoneNumber::class, $this->getUser());
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            $data = $form->get('code')->getData();
+            $data = $form->get('phoneNumber')->getData();
             $user = $this->getUser();
             $secret = $user->getTwoFAcode();
             $code = $data['code'];
@@ -180,7 +180,7 @@ class SecurityController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code');
         }
-        return $this->render('site/verify2FA.html.twig', [
+        return $this->render('site/enable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
         ]);
@@ -198,8 +198,6 @@ class SecurityController extends AbstractController
         } else {
             $this->addFlash('error', 'User not found');
         }
-
-        $provisioningUri = $this->totpService->generateTOTP($secret);
 
         return $this->redirectToRoute('app_generateQRCode');
     }
