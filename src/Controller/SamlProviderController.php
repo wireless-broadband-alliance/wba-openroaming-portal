@@ -25,7 +25,6 @@ class SamlProviderController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SamlProviderRepository $samlProviderRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly Domain $domainService,
     ) {
     }
 
@@ -61,25 +60,6 @@ class SamlProviderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Validate domains
-            $invalidColumn = null;
-            if (!$this->domainService->isValidDomain(parse_url($samlProvider->getIdpEntityId(), PHP_URL_HOST))) {
-                $invalidColumn = 'idpEntityId';
-            } elseif (!$this->domainService->isValidDomain(parse_url($samlProvider->getIdpSsoUrl(), PHP_URL_HOST))) {
-                $invalidColumn = 'idpSsoUrl';
-            } elseif (!$this->domainService->isValidDomain(parse_url($samlProvider->getSpAcsUrl(), PHP_URL_HOST))) {
-                $invalidColumn = 'spAcsUrl';
-            }
-            if ($invalidColumn) {
-                $this->addFlash(
-                    'error_admin',
-                    "The value for $invalidColumn is not a valid domain or does not resolve to an IP address."
-                );
-                return $this->render('admin/shared/_saml_provider_new.html.twig', [
-                    'form' => $form->createView(),
-                ]);
-            }
-
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 

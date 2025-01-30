@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Entity\SamlProvider;
+use App\Validator\CamelCase;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,8 +21,7 @@ class SamlProviderType extends AbstractType
                 'label' => 'Provider Name',
                 'constraints' => [
                     new NotBlank(),
-                    // Apply the custom noSpecialCharacter validator
-                    new noSpecialCharacter(),
+                    new CamelCase()// Apply the custom noSpecialCharacter validator
                 ],
             ])
             ->add('idpEntityId', TextType::class, [
@@ -33,12 +34,20 @@ class SamlProviderType extends AbstractType
                 'label' => 'SAML IDP SSO URL',
                 'constraints' => [
                     new NotBlank(),
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
                 ],
             ])
             ->add('spAcsUrl', TextType::class, [
                 'label' => 'SAML SP ACS URL',
                 'constraints' => [
                     new NotBlank(),
+                    new Assert\Url([
+                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'protocols' => ['http', 'https'],
+                    ]),
                 ],
             ])
             ->add('idpX509Cert', TextareaType::class, [
