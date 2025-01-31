@@ -26,7 +26,7 @@
 
     {# Active Status #}
     <td class="py-4 font-medium text-start">
-        <div class="flex justify-center">
+        <div class="flex justify-start">
             {% if samlProvider.isActive %}
                 <span class="pill-success">Active</span>
             {% else %}
@@ -36,7 +36,7 @@
     </td>
 
     {# Created At #}
-    <td class="px-4 py-4 font-medium text-center align-middle">
+    <td class="py-4 font-medium text-start">
         {{ samlProvider.createdAt|date('d/m/Y H:i') }}
     </td>
 
