@@ -2,17 +2,7 @@
 
 {% block title %}Admin Page WBA{% endblock %}
 
-{% macro sortArrow(sortName, sort, sortDirection) %}
-    {% if sort == sortName %}
-        {% if sortDirection == 'asc' %}
-            <twig:ux:icon name="wba:c-up" class="inline-block w-4 h-4" fill="none"/>
-        {% else %}
-            <twig:ux:icon name="wba:c-down" class="inline-block w-4 h-4" fill="none"/>
-        {% endif %}
-    {% else %}
-        <twig:ux:icon name="wba:up-down" class="inline-block w-4 h-4" fill="none"/>
-    {% endif %}
-{% endmacro %}
+{% import 'admin/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
@@ -98,7 +88,7 @@
                                 <h1 class="mr-2">UUID</h1>
                                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'uuid', order: activeSort == 'uuid' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                    {{ _self.sortArrow('uuid', activeSort, activeOrder) }}
+                                    {{ sharedSort.sortArrow('uuid', activeSort, activeOrder) }}
                                 </a>
                             </th>
 
@@ -122,8 +112,7 @@
                                 <h1 class="mr-2">CreatedAt</h1>
                                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-
-                                    {{ _self.sortArrow('createdAt', activeSort, activeOrder) }}
+                                    {{ sharedSort.sortArrow('createdAt', activeSort, activeOrder) }}
                                 </a>
                             </th>
 
