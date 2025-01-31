@@ -1722,6 +1722,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $verificationCodecreatedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
@@ -1813,6 +1816,18 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
         return $this;
     }
+
+    public function getVerificationCodecreatedAt(): ?\DateTimeInterface
+    {
+        return $this->verificationCodecreatedAt;
+    }
+
+    public function setVerificationCodecreatedAt(?\DateTimeInterface $verificationCodecreatedAt): void
+    {
+        $this->verificationCodecreatedAt = $verificationCodecreatedAt;
+    }
+
+
 
     /**
      * @see UserInterface
