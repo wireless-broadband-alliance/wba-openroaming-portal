@@ -1,0 +1,47 @@
+{% extends '/site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Form Column #}
+
+    {# Toasts #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {# Flash error message #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Two Factor Authentication Code</p>
+        <p class="text-lg"> Please enter the code sent to your phone number</p>
+    </div>
+    {{ form_start(form) }}
+    <div class="relative mt-10">
+
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your Code',
+            }}) }}
+
+    </div>
+
+    <p class="text-lg"> Click  <a href="{{ path('app_verify2FA_local') }}" style="color: green; text-decoration: underline;" >here</a> to resend code</p>
+
+    {# Divider #}
+    <div class="my-[25px] divider"></div>
+
+    {{ form_row(form.submit, {
+        attr: {
+            class: 'w-[160px] btn btn-primary',
+        }}) }}
+    {{ form_end(form) }}
+{% endblock %}

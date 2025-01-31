@@ -11,7 +11,9 @@ use App\Form\TwoFactorPhoneNumber;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\RegistrationEmailGenerator;
 use App\Service\TOTPService;
+use App\Service\VerificationCodeEmailGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Endroid\QrCode\Builder\Builder;
@@ -47,7 +49,8 @@ class SecurityController extends AbstractController
         SettingRepository $settingRepository,
         GetSettings $getSettings,
         TOTPService $totpService,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
         $this->userRepository = $userRepository;
         $this->settingRepository = $settingRepository;
@@ -89,7 +92,7 @@ class SecurityController extends AbstractController
                 if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED) {
                     if ($this->getUser()->getTwoFA()) {
                         if ($this->getUser()->getTwoFAcode()) {
-                            return $this->redirectToRoute('app_verify2FA');
+                            return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_verify2FA_local');
                     }
@@ -98,7 +101,7 @@ class SecurityController extends AbstractController
                 if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL) {
                     if ($this->getUser()->getTwoFA()) {
                         if ($this->getUser()->getTwoFAcode()) {
-                            return $this->redirectToRoute('app_verify2FA');
+                            return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_verify2FA_local');
                     }
@@ -107,7 +110,7 @@ class SecurityController extends AbstractController
                 if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL) {
                     if ($this->getUser()->getTwoFA()) {
                         if ($this->getUser()->getTwoFAcode()) {
-                            return $this->redirectToRoute('app_verify2FA');
+                            return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_verify2FA_local');
                     }
@@ -201,54 +204,71 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]
-    public function enable2FAapp(): RedirectResponse
+    public function enable2FAapp(): Response
     {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
         if ($user) {
             $user->setTwoFAcode($secret);
+            $user->setTwoFA(true);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'User not found');
         }
 
-        return $this->redirectToRoute('app_generateQRCode');
-    }
+        $formattedSecret = implode(' ', str_split($secret, 10));
 
-    #[Route(path: '/generateQRCode', name: 'app_generateQRCode')]
-    public function generateQRCode(): Response
-    {
-        $secret = $this->getUser()->getTwoFAcode();
         $provisioningUri = $this->totpService->generateTOTP($secret);
 
         $qrCode = new QrCode($provisioningUri);
         $writer = new PngWriter();
-        $qrCodeImage = $writer->write($qrCode);
+        $qrCodeResult = $writer->write($qrCode);
+        $qrCodeImage = base64_encode($qrCodeResult->getString());
 
-        return new Response(
-            $qrCodeImage->getString(),
-            Response::HTTP_OK,
-            ['Content-Type' => $qrCodeImage->getMimeType()]
-        );
+        return $this->render('site/enable2FAapp.html.twig', [
+            'qrCodeImage' => $qrCodeImage,
+            'provisioningUri' => $provisioningUri,
+            'secret' => $formattedSecret,
+            'data' => $data,
+        ]);
     }
 
-    #[Route(path: '/verify2FA', name: 'app_verify2FA')]
+    #[Route(path: '/verify2FAapp', name: 'app_verify2FA_app')]
     public function verify2FA(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFAcode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            $data = $form->get('code')->getData();
+            $code = $form->get('code')->getData();
             $user = $this->getUser();
             $secret = $user->getTwoFAcode();
-            $code = $data['code'];
             if ($this->totpService->verifyTOTP($secret, $code)) {
                 return $this->redirectToRoute('app_landing');
             }
             $this->addFlash('error', 'Invalid code');
         }
         return $this->render('site/verify2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route(path: '/verify2FA', name: 'app_verify2FA_local')]
+    public function verify2FAlocal(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        $this->verificationCodeGenerator->generateVerificationCode($this->getUser());
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            $formCode = $form->get('code')->getData();
+            if ($this->verificationCodeGenerator->validateCode($this->getUser(), $formCode)) {
+                return $this->redirectToRoute('app_landing');
+            }
+            $this->addFlash('error', 'Invalid code');
+        }
+        return $this->render('site/verify2FAlocal.html.twig', [
             'data' => $data,
             'form' => $form,
         ]);

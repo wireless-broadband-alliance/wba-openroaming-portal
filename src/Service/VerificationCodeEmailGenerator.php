@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Exception;
+use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
@@ -61,5 +62,11 @@ class VerificationCodeEmailGenerator
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
             ]);
+    }
+
+    public function validateCode(User $user, string $formCode): Bool
+    {
+        dd($user->getVerificationCode() === $formCode);
+        return $user->getVerificationCode() === $formCode;
     }
 }
