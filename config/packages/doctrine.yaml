@@ -14,8 +14,10 @@ doctrine:
         # either here or in the DATABASE_URL env var (see .env file)
         #server_version: '15'
     orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true # Enables the new implementation of proxies based on lazy ghosts instead of using the legacy implementation
         controller_resolver:
-            auto_mapping: true # Tells doctrine to automatically map entities in all registered bundles
+            auto_mapping: false # Tells doctrine to automatically map entities in all registered bundles
         default_entity_manager: default
         entity_managers:
             default:
