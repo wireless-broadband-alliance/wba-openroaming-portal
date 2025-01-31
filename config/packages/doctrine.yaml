@@ -3,8 +3,10 @@ doctrine:
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
+                server_version: '8.0.39'
             freeradius:
                 url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
+                server_version: '8.0.39'
         default_connection: default
 
 
