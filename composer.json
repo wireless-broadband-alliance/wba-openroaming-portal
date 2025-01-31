@@ -14,7 +14,6 @@
 		"ext-openssl": "*",
 		"composer": "*",
     "api-platform/core": "4.0.11",
-		"doctrine/annotations": "^2.0",
 		"doctrine/dbal": "^3",
 		"doctrine/doctrine-bundle": "^2.8",
 		"doctrine/doctrine-migrations-bundle": "^3.2",
