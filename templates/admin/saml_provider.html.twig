@@ -76,50 +76,56 @@
                         <thead class="text-sm text-gray-700 bg-veryLightGreen">
                         <tr>
                             {# Name Column #}
-                            <th scope="col" class="flex items-center px-12 py-3">
-                                <h1 class="mr-2">Name</h1>
-                                <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'name', order: activeSort == 'name' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
-                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                    {{ sharedSort.sortArrow('name', activeSort, activeOrder) }}
-                                </a>
+                            <th scope="col" class="px-10 py-3">
+                                <div class="flex items-center">
+                                    <h1 class="mr-2">Name</h1>
+                                    <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'name', order: activeSort == 'name' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                                       class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                        {{ sharedSort.sortArrow('name', activeSort, activeOrder) }}
+                                    </a>
+                                </div>
                             </th>
 
                             {# IDP Entity ID Column #}
-                            <th scope="col" class="px-8 py-3">
-                                <h1 class="mr-2">IDP Entity ID</h1>
+                            <th scope="col" class="px-4 py-4">
+                                <h1>IDP Entity ID</h1>
                             </th>
 
                             {# IDP SSO URL Column #}
-                            <th scope="col" class="px-8 py-3">
-                                <h1 class="mr-2">IDP SSO URL</h1>
+                            <th scope="col" class="px-4 py-4">
+                                <h1>IDP SSO URL</h1>
                             </th>
 
                             {# Active Status Column #}
-                            <th scope="col" class="px-8 py-3">
-                                <h1 class="mr-2">Active</h1>
+                            <th scope="col" class="py-3">
+                                <h1>Active</h1>
                             </th>
 
                             {# Created At Column #}
-                            <th scope="col" class="flex items-center px-8 py-3">
-                                <h1 class="mr-2">Created At</h1>
-                                <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
-                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                    {{ sharedSort.sortArrow('createdAt', activeSort, activeOrder) }}
-                                </a>
+                            <th scope="col" class="py-4">
+                                <div class="flex items-center">
+                                    <h1 class="mr-2">Created At</h1>
+                                    <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                                       class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                        {{ sharedSort.sortArrow('createdAt', activeSort, activeOrder) }}
+                                    </a>
+                                </div>
                             </th>
 
                             {# Updated At Column #}
-                            <th scope="col" class="flex items-center px-8 py-3">
-                                <h1 class="mr-2">Updated At</h1>
-                                <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'updatedAt', order: activeSort == 'updatedAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
-                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                    {{ sharedSort.sortArrow('updatedAt', activeSort, activeOrder) }}
-                                </a>
+                            <th scope="col" class="py-3">
+                                <div class="flex items-center justify-start">
+                                    <h1 class="mr-2">Updated At</h1>
+                                    <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'updatedAt', order: activeSort == 'updatedAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                                       class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                        {{ sharedSort.sortArrow('updatedAt', activeSort, activeOrder) }}
+                                    </a>
+                                </div>
                             </th>
 
                             {# Actions Column #}
-                            <th scope="col" class="px-8 py-3">
-                                <h1 class="mr-2">Actions</h1>
+                            <th scope="col" class="px-8 py-3 text-right">
+                                <span class="sr-only">Actions</span>
                             </th>
                         </tr>
                         </thead>
