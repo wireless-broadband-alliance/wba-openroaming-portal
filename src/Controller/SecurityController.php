@@ -260,13 +260,13 @@ class SecurityController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFAcode::class);
-        $this->verificationCodeGenerator->generateVerificationCode($this->getUser());
+        $this->verificationCodeGenerator->generate2FACode($this->getUser());
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $formCode = $form->get('code')->getData();
             if ($this->verificationCodeGenerator->validateCode($this->getUser(), $formCode)) {
                 return $this->redirectToRoute('app_landing');
             }
-            $this->addFlash('error', 'Invalid code');
+            $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
         return $this->render('site/verify2FAlocal.html.twig', [
             'data' => $data,

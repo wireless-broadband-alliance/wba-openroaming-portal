@@ -78,4 +78,19 @@ class VerificationCodeEmailGenerator
         }
         return $user->getVerificationCode() === $formCode;
     }
+
+    public function generate2FACode(User $user): int
+    {
+        // Generate a random verification code with 6 digits
+        $codeDate = $user->getVerificationCodecreatedAt();
+        if (!$codeDate) {
+            return $this->generateVerificationCode($user);
+        }
+        $now = new \DateTime();
+        $diff = $now->getTimestamp() - $codeDate->getTimestamp();
+        if ($diff >= 30) {
+            return $this->generateVerificationCode($user);;
+        }
+        return $user->getVerificationCode();
+    }
 }
