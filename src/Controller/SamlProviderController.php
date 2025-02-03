@@ -65,7 +65,7 @@ class SamlProviderController extends AbstractController
         $samlProviders = iterator_to_array($paginator->getIterator());
 
         // Count the total number of SAML Providers
-        $totalProviders = $this->samlProviderRepository->countSamlProviders($searchTerm);
+        $totalProviders = $this->samlProviderRepository->countSamlProviders($searchTerm, $filter);
         $activeProvidersCount = $this->samlProviderRepository->countSamlProviders($searchTerm, 'active');
         $inactiveProvidersCount = $this->samlProviderRepository->countSamlProviders($searchTerm, 'inactive');
 
