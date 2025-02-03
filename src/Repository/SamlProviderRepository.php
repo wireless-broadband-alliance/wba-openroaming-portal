@@ -26,29 +26,34 @@ class SamlProviderRepository extends ServiceEntityRepository
     ): Paginator {
         $queryBuilder = $this->createQueryBuilder('sp');
 
+        // Apply filter for active/inactive status
         if ($filter === 'active') {
             $queryBuilder->andWhere('sp.isActive = :active')->setParameter('active', true);
         } elseif ($filter === 'inactive') {
             $queryBuilder->andWhere('sp.isActive = :active')->setParameter('active', false);
         }
 
-        if ($searchTerm) {
+        // Apply search logic if searchTerm is present
+        if (!empty($searchTerm)) {
             $queryBuilder
                 ->andWhere(
                     'sp.name LIKE :search OR 
-                    sp.idpEntityId LIKE :search OR 
-                    sp.spEntityId LIKE :search OR 
-                    sp.spAcsUrl LIKE :search OR 
-                    sp.idpSsoUrl LIKE :search'
+                 sp.idpEntityId LIKE :search OR 
+                 sp.spEntityId LIKE :search OR
+                 sp.spAcsUrl LIKE :search OR
+                 sp.idpSsoUrl LIKE :search'
                 )
                 ->setParameter('search', '%' . $searchTerm . '%');
         }
 
+        // Add sorting
         $queryBuilder->orderBy('sp.' . $sort, $order);
+
+        // Add pagination
         $queryBuilder->setFirstResult(($page - 1) * $count);
         $queryBuilder->setMaxResults($count);
 
-        return new Paginator($queryBuilder);
+        return new Paginator($queryBuilder, true);
     }
 
     /**

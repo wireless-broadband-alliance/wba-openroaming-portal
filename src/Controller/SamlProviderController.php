@@ -35,12 +35,12 @@ class SamlProviderController extends AbstractController
     #[Route('/dashboard/saml-provider', name: 'admin_dashboard_saml_provider')]
     #[IsGranted('ROLE_ADMIN')]
     public function index(
+        Request $request,
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] string $sort = 'createdAt',
         #[MapQueryParameter] string $order = 'desc',
         #[MapQueryParameter] ?int $count = 7,
         #[MapQueryParameter] ?string $filter = 'all',
-        #[MapQueryParameter] ?string $searchTerm = null // Search term
     ): Response {
         // Retrieve settings for rendering in the template
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -50,6 +50,7 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
+        $searchTerm = $request->query->get('s');
         // Fetch the filtered, sorted, and paginated providers using the repository
         $paginator = $this->samlProviderRepository->searchWithFilters(
             $filter,
