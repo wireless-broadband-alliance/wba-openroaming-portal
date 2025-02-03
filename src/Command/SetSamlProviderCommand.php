@@ -49,6 +49,18 @@ class SetSamlProviderCommand extends Command
             return self::FAILURE;
         }
 
+        // Check if the provider already exists on the db
+        $duplicateField = $this->checkDuplicateSamlProvider($name);
+        if ($duplicateField) {
+            $output->writeln(
+                sprintf(
+                    '<error>A SAML Provider with the same %s already exists in the system!</error>',
+                    $duplicateField
+                )
+            );
+            return self::FAILURE;
+        }
+
         try {
             $this->createAndPersistSamlProvider($name);
             $output->writeln('SAML Provider data has been set!');
@@ -121,5 +133,35 @@ class SetSamlProviderCommand extends Command
             $this->entityManager->rollback();
             throw $e;
         }
+    }
+
+    private function checkDuplicateSamlProvider(string $name): ?string
+    {
+        $idpEntityId = $this->parameterBag->get('app.saml_idp_entity_id');
+        $spEntityId = $this->parameterBag->get('app.saml_sp_entity_id');
+
+        $existingProviderByName = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
+            'name' => $name,
+        ]);
+        if ($existingProviderByName) {
+            return 'name';
+        }
+
+        $existingProviderByIdpEntityId = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
+            'idpEntityId' => $idpEntityId,
+        ]);
+        if ($existingProviderByIdpEntityId) {
+            return 'IDP Entity ID';
+        }
+
+        $existingProviderBySpEntityId = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
+            'spEntityId' => $spEntityId,
+        ]);
+        if ($existingProviderBySpEntityId) {
+            return 'SP Entity ID';
+        }
+
+        // No duplicate found
+        return null;
     }
 }
