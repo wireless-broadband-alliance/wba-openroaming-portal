@@ -34,7 +34,7 @@ class SamlProviderRepository extends ServiceEntityRepository
         }
 
         // Apply search logic if searchTerm is present
-        if (!empty($searchTerm)) {
+        if ($searchTerm !== null && $searchTerm !== '' && $searchTerm !== '0') {
             $queryBuilder
                 ->andWhere(
                     'sp.name LIKE :search OR 
