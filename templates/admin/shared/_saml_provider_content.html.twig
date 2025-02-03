@@ -6,10 +6,12 @@
 
     {# IDP Entity ID #}
     <td class="px-4 py-4 font-medium">
-        <div class="overflow-x-auto max-w-[200px]">
-            <span class="whitespace-nowrap truncate block" title="{{ samlProvider.idpEntityId }}">
+        <div class="overflow-hidden max-w-[200px]">
+            <a href="{{ samlProvider.idpEntityId }}" target="_blank"
+               class="urls-table"
+               title="{{ samlProvider.idpEntityId }}">
                 {{ samlProvider.idpEntityId }}
-            </span>
+            </a>
         </div>
     </td>
 
@@ -17,9 +19,31 @@
     <td class="px-4 py-4 font-medium">
         <div class="overflow-hidden max-w-[200px]">
             <a href="{{ samlProvider.idpSsoUrl }}" target="_blank"
-               class="whitespace-nowrap truncate block text-blue-500 hover:underline"
+               class="urls-table"
                title="{{ samlProvider.idpSsoUrl }}">
                 {{ samlProvider.idpSsoUrl }}
+            </a>
+        </div>
+    </td>
+
+    {# SP Entity ID #}
+    <td class="px-4 py-4 font-medium">
+        <div class="overflow-hidden max-w-[200px]">
+            <a href="{{ samlProvider.spEntityId }}" target="_blank"
+               class="urls-table"
+               title="{{ samlProvider.spEntityId }}">
+                {{ samlProvider.spEntityId }}
+            </a>
+        </div>
+    </td>
+
+    {# SP ACS URL #}
+    <td class="px-4 py-4 font-medium">
+        <div class="overflow-hidden max-w-[200px]">
+            <a href="{{ samlProvider.spAcsUrl }}" target="_blank"
+               class="urls-table"
+               title="{{ samlProvider.spAcsUrl }}">
+                {{ samlProvider.spAcsUrl }}
             </a>
         </div>
     </td>

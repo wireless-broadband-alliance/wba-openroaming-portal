@@ -34,8 +34,8 @@ class SamlProvider
     #[ORM\Column(length: 255)]
     private ?string $spAcsUrl = null;
 
-    #[ORM\Column]
-    private ?bool $isActive = null;
+    #[ORM\Column(type:'boolean', options: ['default' => false])]
+    private bool $isActive;
 
     /**
      * @var Collection<int, UserExternalAuth>

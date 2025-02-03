@@ -20,16 +20,16 @@
                                 {{ allProvidersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_dashboard_saml_provider', {filter: 'active'}) }}"
+                        <a href="{{ path('admin_dashboard_saml_provider', {filter: 'active', s: app.request.query.get('s')}) }}"
                            class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == 'active' %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 Active
                             </h1>
                             <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
-                                1
+                                {{ activeProviderCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_dashboard_saml_provider', {filter: 'inactive'}) }}"
+                        <a href="{{ path('admin_dashboard_saml_provider', {filter: 'inactive', s: app.request.query.get('s')}) }}"
                            class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == 'inactive' %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 Inactive
@@ -96,6 +96,16 @@
                                 <h1>IDP SSO URL</h1>
                             </th>
 
+                            {# SP Entity ID Column #}
+                            <th scope="col" class="px-4 py-4">
+                                <h1>SP Entity ID</h1>
+                            </th>
+
+                            {# SP ACS URL Column #}
+                            <th scope="col" class="px-4 py-4">
+                                <h1>SP ACS URL</h1>
+                            </th>
+
                             {# Active Status Column #}
                             <th scope="col" class="py-3">
                                 <h1>Active</h1>
@@ -134,9 +144,19 @@
                             {{ include('admin/shared/_saml_provider_content.html.twig', {samlProvider: samlProvider}) }}
                         {% else %}
                             <tr>
-                                <td colspan="7" class="text-center py-4">
-                                    <div class="pill-error">
-                                        No SAML Providers found.
+                                <td colspan="7">
+                                    <div class="flex flex-row justify-center items-start mt-2">
+                                        <div class="pill-error">
+                                            {% if searchTerm %}
+                                                No SAML Providers found with "{{ searchTerm }}"
+                                            {% elseif app.request.query.get('filter') == 'active' %}
+                                                There are no active SAML Providers in the system
+                                            {% elseif app.request.query.get('filter') == 'inactive' %}
+                                                There are no inactive SAML Providers in the system
+                                            {% else %}
+                                                There are no SAML Providers in the system
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

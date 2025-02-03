@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\SamlProvider;
 use App\Entity\User;
+use App\Enum\SamlProviderStatus;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
@@ -37,48 +38,39 @@ class SamlProviderController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] string $sort = 'createdAt',
         #[MapQueryParameter] string $order = 'desc',
-        #[MapQueryParameter] ?int $count = 10,
+        #[MapQueryParameter] ?int $count = 7,
         #[MapQueryParameter] ?string $filter = 'all',
-        #[MapQueryParameter] ?string $s = null // Search term
+        #[MapQueryParameter] ?string $searchTerm = null // Search term
     ): Response {
+        // Retrieve settings for rendering in the template
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        // Validate $count parameter
+
+        // Validate the $count parameter
         if (!is_int($count) || $count <= 0) {
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        // Use filters and search term if provided
-        $queryBuilder = $this->samlProviderRepository->createQueryBuilder('sp');
+        // Fetch the filtered, sorted, and paginated providers using the repository
+        $paginator = $this->samlProviderRepository->searchWithFilters(
+            $filter,
+            $searchTerm,
+            $sort,
+            $order,
+            $page,
+            $count
+        );
 
-        // Filter by active/inactive status if they exist
-        if ($filter === 'active') {
-            $queryBuilder->andWhere('sp.active = :active')->setParameter('active', true);
-        } elseif ($filter === 'inactive') {
-            $queryBuilder->andWhere('sp.active = :active')->setParameter('active', false);
-        }
+        // Retrieve SAML Provider results for the current page
+        $samlProviders = iterator_to_array($paginator->getIterator());
 
-        // Apply search filter to name or IDP Entity ID
-        if ($s) {
-            $queryBuilder
-                ->andWhere('sp.name LIKE :search OR sp.idpEntityId LIKE :search')
-                ->setParameter('search', '%' . $s . '%');
-        }
+        // Count the total number of SAML Providers
+        $totalProviders = $this->samlProviderRepository->countSamlProviders($searchTerm);
+        $activeProvidersCount = $this->samlProviderRepository->countSamlProviders($searchTerm, 'active');
+        $inactiveProvidersCount = $this->samlProviderRepository->countSamlProviders($searchTerm, 'inactive');
 
-        // Add sorting and pagination
-        $queryBuilder->orderBy('sp.' . $sort, $order);
-        $queryBuilder->setFirstResult(($page - 1) * $count);
-        $queryBuilder->setMaxResults($count);
-
-        // Get the filtered results and total count
-        $paginator = $this->samlProviderRepository->findWithFilters($filter, $s, $sort, $order, $page, $count);
-        $samlProviders = $paginator->getIterator();
-        $totalProviders = count($paginator);
-        $activeProvidersCount = $this->samlProviderRepository->count(['isActive' => true]);
-        $inactiveProvidersCount = $this->samlProviderRepository->count(['isActive' => false]);
-
-        // Total of Pages
+        // Calculate the total number of pages
         $perPage = $count;
-        $totalPages = ceil($totalProviders / $perPage); // Calculate the total number of pages
+        $totalPages = ceil($totalProviders / $perPage);
 
         return $this->render('admin/saml_provider.html.twig', [
             'data' => $data,
@@ -90,12 +82,11 @@ class SamlProviderController extends AbstractController
             'activeSort' => $sort,
             'activeOrder' => $order,
             'filter' => $filter,
-            'searchTerm' => $s,
-            'paginator' => $paginator,
+            'searchTerm' => $searchTerm,
             'allProvidersCount' => $totalProviders,
             'activeProviderCount' => $activeProvidersCount,
             'inactiveProvidersCount' => $inactiveProvidersCount,
-            'totalPages' => $totalPages,
+            'totalPages' => $totalPages
         ]);
     }
 

@@ -4,12 +4,11 @@ namespace App\Repository;
 
 use App\Entity\SamlProvider;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<SamlProvider>
- */
 class SamlProviderRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -17,7 +16,7 @@ class SamlProviderRepository extends ServiceEntityRepository
         parent::__construct($registry, SamlProvider::class);
     }
 
-    public function findWithFilters(
+    public function searchWithFilters(
         ?string $filter,
         ?string $searchTerm,
         string $sort,
@@ -28,9 +27,9 @@ class SamlProviderRepository extends ServiceEntityRepository
         $queryBuilder = $this->createQueryBuilder('sp');
 
         if ($filter === 'active') {
-            $queryBuilder->andWhere('sp.active = :active')->setParameter('active', true);
+            $queryBuilder->andWhere('sp.isActive = :active')->setParameter('active', true);
         } elseif ($filter === 'inactive') {
-            $queryBuilder->andWhere('sp.active = :active')->setParameter('active', false);
+            $queryBuilder->andWhere('sp.isActive = :active')->setParameter('active', false);
         }
 
         if ($searchTerm) {
@@ -44,6 +43,35 @@ class SamlProviderRepository extends ServiceEntityRepository
         $queryBuilder->setMaxResults($count);
 
         return new Paginator($queryBuilder);
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function countSamlProviders(?string $searchTerm = null, ?string $filter = null): int
+    {
+        $qb = $this->createQueryBuilder('sp');
+        $qb->select('COUNT(sp.id)');
+
+        if ($searchTerm !== null) {
+            $qb->andWhere(
+                'sp.name LIKE :searchTerm OR
+             sp.idpEntityId LIKE :searchTerm'
+            )
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        if ($filter === 'active') {
+            $qb->andWhere('sp.isActive = :active')
+                ->setParameter('active', true);
+        } elseif ($filter === 'inactive') {
+            $qb->andWhere('sp.isActive = :active')
+                ->setParameter('active', false);
+        }
+
+        // Return the total count as a single scalar result
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     //    /**
