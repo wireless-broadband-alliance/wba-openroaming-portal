@@ -1,6 +1,9 @@
-<tr>
+<tr class="{% if samlProvider.id == activeProvider.id %} bg-green-100 border border-green-300 rounded-lg shadow-md{% endif %}">
     {# Name #}
     <td class="px-10 py-4 font-medium">
+        {% if samlProvider.id == activeProvider.id %}
+        <span class="font-bold text-green-800">[Active]</span>
+        {% endif %}
         {{ samlProvider.name }}
     </td>
 
@@ -48,17 +51,6 @@
         </div>
     </td>
 
-    {# Active Status #}
-    <td class="py-4 font-medium text-start">
-        <div class="flex justify-start">
-            {% if samlProvider.isActive %}
-                <span class="pill-success">Active</span>
-            {% else %}
-                <span class="pill-error">Inactive</span>
-            {% endif %}
-        </div>
-    </td>
-
     {# Created At #}
     <td class="py-4 font-medium text-start">
         {{ samlProvider.createdAt|date('d/m/Y H:i') }}
@@ -76,7 +68,11 @@
     {# Actions Dropdown #}
     <td class="px-10 py-4 text-right align-middle">
         <button type="button"
-                class="cursor-pointer p-2 rounded-lg hover:shadow duration-300 focus:outline-none focus:ring-2 focus:ring-lightGreen"
+                class="cursor-pointer p-2 rounded-lg
+                            {% if samlProvider is not null and activeProvider is not null and samlProvider.id == activeProvider.id %}
+                                bg-green-200
+                            {% endif %}
+                            hover:shadow duration-300 focus:outline-none focus:ring-2 focus:ring-lightGreen"
                 {{ stimulus_controller('nav-submenu') }}
                 {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
                 {{ stimulus_target('nav-submenu', 'button') }}>
