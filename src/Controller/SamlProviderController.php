@@ -4,13 +4,13 @@ namespace App\Controller;
 
 use App\Entity\SamlProvider;
 use App\Entity\User;
-use App\Enum\SamlProviderStatus;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +30,7 @@ class SamlProviderController extends AbstractController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route('/dashboard/saml-provider', name: 'admin_dashboard_saml_provider')]
     #[IsGranted('ROLE_ADMIN')]

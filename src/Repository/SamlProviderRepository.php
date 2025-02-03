@@ -34,7 +34,13 @@ class SamlProviderRepository extends ServiceEntityRepository
 
         if ($searchTerm) {
             $queryBuilder
-                ->andWhere('sp.name LIKE :search OR sp.idpEntityId LIKE :search')
+                ->andWhere(
+                    'sp.name LIKE :search OR 
+                    sp.idpEntityId LIKE :search OR 
+                    sp.spEntityId LIKE :search OR 
+                    sp.spAcsUrl LIKE :search OR 
+                    sp.idpSsoUrl LIKE :search'
+                )
                 ->setParameter('search', '%' . $searchTerm . '%');
         }
 
@@ -57,7 +63,10 @@ class SamlProviderRepository extends ServiceEntityRepository
         if ($searchTerm !== null) {
             $qb->andWhere(
                 'sp.name LIKE :searchTerm OR
-             sp.idpEntityId LIKE :searchTerm'
+                 sp.idpEntityId LIKE :searchTerm OR
+                 sp.spEntityId LIKE :searchTerm OR
+                 sp.spAcsUrl LIKE :searchTerm OR
+                 sp.idpSsoUrl LIKE :searchTerm'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
