@@ -1,8 +1,8 @@
-<tr class="{% if samlProvider.id == activeProvider.id %} bg-green-100 border border-green-300 rounded-lg shadow-md{% endif %}">
+<tr class="{% if samlProvider.isActive %} bg-green-100 border border-green-300 rounded-lg shadow-md{% endif %}">
     {# Name #}
     <td class="px-10 py-4 font-medium">
-        {% if samlProvider.id == activeProvider.id %}
-        <span class="font-bold text-green-800">[Active]</span>
+        {% if samlProvider.isActive %}
+            <span class="font-bold text-green-800">[Active]</span>
         {% endif %}
         {{ samlProvider.name }}
     </td>
@@ -10,44 +10,40 @@
     {# IDP Entity ID #}
     <td class="px-4 py-4 font-medium">
         <div class="overflow-hidden max-w-[200px]">
-            <a href="{{ samlProvider.idpEntityId }}" target="_blank"
-               class="urls-table"
+            <p class="urls-table"
                title="{{ samlProvider.idpEntityId }}">
                 {{ samlProvider.idpEntityId }}
-            </a>
+            </p>
         </div>
     </td>
 
     {# IDP SSO URL #}
     <td class="px-4 py-4 font-medium">
         <div class="overflow-hidden max-w-[200px]">
-            <a href="{{ samlProvider.idpSsoUrl }}" target="_blank"
-               class="urls-table"
+            <p class="urls-table"
                title="{{ samlProvider.idpSsoUrl }}">
                 {{ samlProvider.idpSsoUrl }}
-            </a>
+            </p>
         </div>
     </td>
 
     {# SP Entity ID #}
     <td class="px-4 py-4 font-medium">
         <div class="overflow-hidden max-w-[200px]">
-            <a href="{{ samlProvider.spEntityId }}" target="_blank"
-               class="urls-table"
+            <p class="urls-table"
                title="{{ samlProvider.spEntityId }}">
                 {{ samlProvider.spEntityId }}
-            </a>
+            </p>
         </div>
     </td>
 
     {# SP ACS URL #}
     <td class="px-4 py-4 font-medium">
         <div class="overflow-hidden max-w-[200px]">
-            <a href="{{ samlProvider.spAcsUrl }}" target="_blank"
-               class="urls-table"
+            <p class="urls-table"
                title="{{ samlProvider.spAcsUrl }}">
                 {{ samlProvider.spAcsUrl }}
-            </a>
+            </p>
         </div>
     </td>
 
@@ -69,7 +65,7 @@
     <td class="px-10 py-4 text-right align-middle">
         <button type="button"
                 class="cursor-pointer p-2 rounded-lg
-                            {% if samlProvider is not null and activeProvider is not null and samlProvider.id == activeProvider.id %}
+                            {% if samlProvider.isActive %}
                                 bg-green-200
                             {% endif %}
                             hover:shadow duration-300 focus:outline-none focus:ring-2 focus:ring-lightGreen"

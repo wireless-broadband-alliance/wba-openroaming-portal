@@ -137,11 +137,8 @@
                         </tr>
                         </thead>
                         <tbody class="px-5">
-                        {% set validProviders = ([activeProvider]|merge(samlProviders))|filter(provider => provider is not null) %}
-                        {% for samlProvider in validProviders %}
-                            <tr class="{% if activeProvider is not null and samlProvider.id == activeProvider.id %} bg-green-100 border border-green-300 rounded-lg shadow-md{% endif %}">
-                                {{ include('admin/shared/_saml_provider_content.html.twig', {samlProvider: samlProvider}) }}
-                            </tr>
+                        {% for samlProvider in samlProviders %}
+                            {{ include('admin/shared/_saml_provider_content.html.twig', {samlProvider: samlProvider}) }}
                         {% else %}
                             <tr>
                                 <td colspan="7">

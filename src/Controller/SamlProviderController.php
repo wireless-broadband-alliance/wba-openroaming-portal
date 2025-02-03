@@ -64,16 +64,6 @@ class SamlProviderController extends AbstractController
         // Retrieve SAML Provider results for the current page
         $samlProviders = iterator_to_array($paginator->getIterator());
 
-        // Get the active provider from the paginator results
-        $activeProvider = null;
-        foreach ($samlProviders as $key => $provider) {
-            if ($provider->isActive()) {
-                $activeProvider = $provider;
-                unset($samlProviders[$key]);
-                break;
-            }
-        }
-
         // Count the total number of SAML Providers
         $totalProviders = $this->samlProviderRepository->countSamlProviders($searchTerm);
         $activeProvidersCount = $this->samlProviderRepository->countSamlProviders($searchTerm, 'active');
@@ -86,7 +76,6 @@ class SamlProviderController extends AbstractController
         return $this->render('admin/saml_provider.html.twig', [
             'data' => $data,
             'samlProviders' => $samlProviders,
-            'activeProvider' => $activeProvider,
             'current_user' => $this->getUser(),
             'totalProviders' => $totalProviders,
             'currentPage' => $page,

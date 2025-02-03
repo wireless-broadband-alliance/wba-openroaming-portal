@@ -71,5 +71,5 @@
 }
 
 .urls-table {
-    @apply whitespace-nowrap truncate block text-inherit hover:text-blue-500 hover:underline transition duration-300;
+    @apply whitespace-nowrap truncate block;
 }
