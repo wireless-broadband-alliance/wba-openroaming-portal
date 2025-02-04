@@ -13,7 +13,8 @@
             <p class="urls-table" title="{{ samlProvider.idpEntityId }}">
                 {{ samlProvider.idpEntityId }}
             </p>
-            <button data-id="{{ samlProvider.idpEntityId }}" {{ stimulus_action('copy_url', 'copy') }} class="relative ml-2">
+            <button data-id="{{ samlProvider.idpEntityId }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
                 <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
             </button>
         </div>
@@ -25,7 +26,8 @@
             <p class="urls-table" title="{{ samlProvider.idpSsoUrl }}">
                 {{ samlProvider.idpSsoUrl }}
             </p>
-            <button data-id="{{ samlProvider.idpSsoUrl }}" {{ stimulus_action('copy_url', 'copy') }} class="relative ml-2">
+            <button data-id="{{ samlProvider.idpSsoUrl }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
                 <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
             </button>
         </div>
@@ -37,7 +39,8 @@
             <p class="urls-table" title="{{ samlProvider.spEntityId }}">
                 {{ samlProvider.spEntityId }}
             </p>
-            <button data-id="{{ samlProvider.spEntityId }}" {{ stimulus_action('copy_url', 'copy') }} class="relative ml-2">
+            <button data-id="{{ samlProvider.spEntityId }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
                 <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
             </button>
         </div>
@@ -49,7 +52,8 @@
             <p class="urls-table" title="{{ samlProvider.spAcsUrl }}">
                 {{ samlProvider.spAcsUrl }}
             </p>
-            <button data-id="{{ samlProvider.spAcsUrl }}" {{ stimulus_action('copy_url', 'copy') }} class="relative ml-2">
+            <button data-id="{{ samlProvider.spAcsUrl }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
                 <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
             </button>
         </div>
@@ -70,17 +74,41 @@
     </td>
 
     {# Actions Dropdown #}
-    <td class="px-10 py-4 text-right align-middle">
+    <td class="px-10 py-4 text-right align-middle" {{ stimulus_controller('nav-submenu') }}>
         <button type="button"
                 class="cursor-pointer p-2 rounded-lg
-                            {% if samlProvider.isActive %}
-                                bg-green-200
-                            {% endif %}
-                            hover:shadow duration-300 focus:outline-none focus:ring-2 focus:ring-lightGreen"
-                {{ stimulus_controller('nav-submenu') }}
+                        {% if samlProvider.isActive %}
+                            bg-green-200
+                        {% endif %}
+                        cursor-pointer p-2 rounded-lg hover:shadow duration-300"
                 {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
                 {{ stimulus_target('nav-submenu', 'button') }}>
             <twig:ux:icon name="wba:menu-dots" class="w-5 h-5"/>
         </button>
+
+        {# Items List Dropdown #}
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                {{ stimulus_target('nav-submenu', 'container') }}>
+            <ul class="p-2 text-gray-700 gap-y-2">
+                <li>
+                    <a href="#"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
+                        Edit
+                    </a>
+                </li>
+                <li>
+                    <form action="#"
+                          method="post">
+                        <input type="hidden" name="_method" value="ENABLE">
+                        <a href="#"
+                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                            <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
+                            Enable
+                        </a>
+                    </form>
+                </li>
+            </ul>
+        </div>
     </td>
 </tr>
