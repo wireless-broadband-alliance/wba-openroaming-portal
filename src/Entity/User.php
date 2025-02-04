@@ -1748,6 +1748,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?bool $isDisabled = false;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?TwoFactorAuthentication $twoFactorAuthentication = null;
+
 
     public function __construct()
     {
@@ -2156,5 +2159,22 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setTwoFA(?bool $twoFA): void
     {
         $this->twoFA = $twoFA;
+    }
+
+    public function getTwoFactorAuthentication(): ?TwoFactorAuthentication
+    {
+        return $this->twoFactorAuthentication;
+    }
+
+    public function setTwoFactorAuthentication(TwoFactorAuthentication $twoFactorAuthentication): static
+    {
+        // set the owning side of the relation if necessary
+        if ($twoFactorAuthentication->getUser() !== $this) {
+            $twoFactorAuthentication->setUser($this);
+        }
+
+        $this->twoFactorAuthentication = $twoFactorAuthentication;
+
+        return $this;
     }
 }
