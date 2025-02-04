@@ -98,14 +98,18 @@
                     </a>
                 </li>
                 <li>
-                    <form action="#"
-                          method="post">
-                        <input type="hidden" name="_method" value="ENABLE">
-                        <a href="#"
-                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                    <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
+                          method="post"
+                            {{ stimulus_target('saml-provider', 'form') }}>
+                        <input type="hidden" name="_method" value="POST"> <!-- Ensures method is POST -->
+                        <button type="submit"
+                                data-provider-id="{{ samlProvider.id }}"
+                                {{ stimulus_action('alert', 'enable_saml') }}
+                                {{ stimulus_target('alert', 'button') }}
+                                class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
                             <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
                             Enable
-                        </a>
+                        </button>
                     </form>
                 </li>
             </ul>

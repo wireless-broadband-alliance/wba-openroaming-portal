@@ -4,11 +4,15 @@ namespace App\Controller;
 
 use App\Entity\SamlProvider;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\PlatformMode;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +30,7 @@ class SamlProviderController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SamlProviderRepository $samlProviderRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly EventActions $eventActions
     ) {
     }
 
@@ -118,5 +123,58 @@ class SamlProviderController extends AbstractController
             'data' => $data,
             'current_user' => $currentUser,
         ]);
+    }
+
+    #[Route('/saml-provider/enableSaml/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    public function enableSamlProvider(
+        int $id,
+        Request $request,
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Find the new SamlProvider to be enabled
+        $samlProvider = $this->samlProviderRepository->find($id);
+        if (!$samlProvider) {
+            $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
+
+        // Find and disable the currently active SAML Provider (if any)
+        $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+        if ($previousSamlProvider) {
+            $previousSamlProvider->setActive(false);
+        }
+        $samlProvider->setActive(true);
+        $this->entityManager->persist($samlProvider);
+        if ($previousSamlProvider) {
+            $this->entityManager->persist($previousSamlProvider);
+        }
+        $this->entityManager->flush();
+
+        // Log the event metadata (tracking the change)
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE,
+            'samlProviderEnabled' => $samlProvider->getName(),
+            'previousSamlProvider' => $previousSamlProvider ? $previousSamlProvider->getName() : 'None',
+            'ip' => $request->getClientIp(),
+            'by' => $currentUser->getUuid(),
+        ];
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::ADMIN_ENABLED_SAML_PROVIDER,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        $this->addFlash(
+            'success_admin',
+            sprintf(
+                'SAML Provider "%s" is now enabled.',
+                $samlProvider->getName()
+            )
+        );
+        return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
 }
