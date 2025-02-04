@@ -4,10 +4,10 @@ namespace App\Command;
 
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
+use App\Service\SamlProviderChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -24,7 +24,8 @@ class SetSamlProviderCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly ParameterBagInterface $parameterBag
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly SamlProviderChecker $samlProviderChecker,
     ) {
         parent::__construct();
     }
@@ -49,8 +50,29 @@ class SetSamlProviderCommand extends Command
             return self::FAILURE;
         }
 
-        // Check if the provider already exists on the db
-        $duplicateField = $this->checkDuplicateSamlProvider($name);
+        $idpEntityId = $this->parameterBag->get('app.saml_idp_entity_id');
+        $idpSsoUrl = $this->parameterBag->get('app.saml_idp_sso_url');
+        $idpX509Cert = $this->parameterBag->get('app.saml_idp_x509_cert');
+        $spEntityId = $this->parameterBag->get('app.saml_sp_entity_id');
+        $spAcsUrl = $this->parameterBag->get('app.saml_sp_acs_url');
+
+        // Validate that required parameters exist
+        if (empty($idpEntityId) || empty($idpSsoUrl) || empty($idpX509Cert) || empty($spEntityId) || empty($spAcsUrl)) {
+            $output->writeln(
+                '<error>One or more required SAML parameters are missing. Check your environment configuration.</error>'
+            );
+
+            return self::FAILURE;
+        }
+
+        // Use SamlProviderChecker to validate duplicate entries based on all parameters
+        $duplicateField = $this->samlProviderChecker->checkDuplicateSamlProvider(
+            $name,
+            $idpEntityId,
+            $idpSsoUrl,
+            $spEntityId,
+            $spAcsUrl
+        );
         if ($duplicateField) {
             $output->writeln(
                 sprintf(
@@ -62,7 +84,14 @@ class SetSamlProviderCommand extends Command
         }
 
         try {
-            $this->createAndPersistSamlProvider($name);
+            $this->createAndPersistSamlProvider(
+                $name,
+                $idpEntityId,
+                $idpSsoUrl,
+                $idpX509Cert,
+                $spEntityId,
+                $spAcsUrl
+            );
             $output->writeln('SAML Provider data has been set!');
 
             return self::SUCCESS;
@@ -76,20 +105,15 @@ class SetSamlProviderCommand extends Command
     /**
      * @throws Exception
      */
-    private function createAndPersistSamlProvider(string $name): void
-    {
-        $idpEntityId = $this->parameterBag->get('app.saml_idp_entity_id');
-        $idpSsoUrl = $this->parameterBag->get('app.saml_idp_sso_url');
-        $idpX509Cert = $this->parameterBag->get('app.saml_idp_x509_cert');
-        $spEntityId = $this->parameterBag->get('app.saml_sp_entity_id');
-        $spAcsUrl = $this->parameterBag->get('app.saml_sp_acs_url');
-
-        // Validate required SAML fields
-        if (empty($idpEntityId) || empty($idpSsoUrl) || empty($idpX509Cert) || empty($spEntityId) || empty($spAcsUrl)) {
-            throw new InvalidArgumentException('One or more SAML configuration values are missing!');
-        }
-
-        $this->entityManager->beginTransaction(); // Begin a database transaction for atomicity
+    private function createAndPersistSamlProvider(
+        string $name,
+        string $idpEntityId,
+        string $idpSsoUrl,
+        string $idpX509Cert,
+        string $spEntityId,
+        string $spAcsUrl
+    ): void {
+        $this->entityManager->beginTransaction();
 
         try {
             // Ensure only 1 provider can be active:
@@ -121,7 +145,7 @@ class SetSamlProviderCommand extends Command
                     ->findBy(['samlProvider' => $activeProvider]); // Find all users linked to the old provider
 
                 foreach ($userExternalAuths as $userExternalAuth) {
-                    $userExternalAuth->setSamlProvider($samlProvider); // Link them to the new provider
+                    $userExternalAuth->setSamlProvider($samlProvider);
                     $this->entityManager->persist($userExternalAuth);
                 }
 
@@ -133,35 +157,5 @@ class SetSamlProviderCommand extends Command
             $this->entityManager->rollback();
             throw $e;
         }
-    }
-
-    private function checkDuplicateSamlProvider(string $name): ?string
-    {
-        $idpEntityId = $this->parameterBag->get('app.saml_idp_entity_id');
-        $spEntityId = $this->parameterBag->get('app.saml_sp_entity_id');
-
-        $existingProviderByName = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
-            'name' => $name,
-        ]);
-        if ($existingProviderByName) {
-            return 'name';
-        }
-
-        $existingProviderByIdpEntityId = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
-            'idpEntityId' => $idpEntityId,
-        ]);
-        if ($existingProviderByIdpEntityId) {
-            return 'IDP Entity ID';
-        }
-
-        $existingProviderBySpEntityId = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
-            'spEntityId' => $spEntityId,
-        ]);
-        if ($existingProviderBySpEntityId) {
-            return 'SP Entity ID';
-        }
-
-        // No duplicate found
-        return null;
     }
 }

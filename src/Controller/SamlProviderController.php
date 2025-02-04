@@ -125,7 +125,7 @@ class SamlProviderController extends AbstractController
         ]);
     }
 
-    #[Route('/saml-provider/enableSaml/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
     public function enableSamlProvider(
         int $id,
         Request $request,
