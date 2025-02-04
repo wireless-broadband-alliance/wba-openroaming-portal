@@ -78,7 +78,7 @@
                         <thead class="text-sm text-gray-700 bg-veryLightGreen">
                         <tr>
                             {# Name Column #}
-                            <th scope="col" class="flex items-center px-12 py-3">
+                            <th scope="col" class="flex items-center px-10 py-3">
                                 <div class="flex items-center">
                                     <h1 class="mr-2">Name</h1>
                                     <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'name', order: activeSort == 'name' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"

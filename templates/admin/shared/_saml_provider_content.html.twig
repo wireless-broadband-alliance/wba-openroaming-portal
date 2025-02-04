@@ -98,19 +98,26 @@
                     </a>
                 </li>
                 <li>
-                    <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
-                          method="post"
-                            {{ stimulus_target('saml-provider', 'form') }}>
-                        <input type="hidden" name="_method" value="POST"> <!-- Ensures method is POST -->
-                        <button type="submit"
-                                data-provider-id="{{ samlProvider.id }}"
-                                {{ stimulus_action('alert', 'enable_saml') }}
-                                {{ stimulus_target('alert', 'button') }}
-                                class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
-                            <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
-                            Enable
-                        </button>
-                    </form>
+                    {% if samlProvider.isActive %}
+                        <span class="flex flex-row items-center px-2 py-2 text-gray-500 cursor-default">
+                            <twig:ux:icon name="wba:check-circle" class="w-5 mr-3" fill="none"/>
+                            Provider Currently Activated
+                        </span>
+                    {% else %}
+                        <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
+                              method="post"
+                                {{ stimulus_target('saml-provider', 'form') }}>
+                            <input type="hidden" name="_method" value="POST">
+                            <button type="submit"
+                                    data-provider-id="{{ samlProvider.id }}"
+                                    {{ stimulus_action('alert', 'enable_saml') }}
+                                    {{ stimulus_target('alert', 'button') }}
+                                    class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
+                                <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
+                                Enable
+                            </button>
+                        </form>
+                    {% endif %}
                 </li>
             </ul>
         </div>
