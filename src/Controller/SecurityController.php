@@ -262,7 +262,6 @@ class SecurityController extends AbstractController
         $form = $this->createForm(TwoFAcode::class);
         $this->verificationCodeGenerator->generate2FACode($this->getUser());
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            ///!!!!! send message !!!!!!
             $formCode = $form->get('code')->getData();
             if ($this->verificationCodeGenerator->validateCode($this->getUser(), $formCode)) {
                 return $this->redirectToRoute('app_landing');

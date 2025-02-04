@@ -15,8 +15,7 @@ class VerificationCodeEmailGenerator
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly SendSMS $sendSMS
+        private readonly ParameterBagInterface $parameterBag
     ) {
     }
 
@@ -85,17 +84,12 @@ class VerificationCodeEmailGenerator
         // Generate a random verification code with 6 digits
         $codeDate = $user->getVerificationCodecreatedAt();
         if (!$codeDate) {
-            $code = $this->generateVerificationCode($user);
-            $this->sendSMS->sendSms($user->getPhoneNumber(), "Your OpenRoaming security code is: " . $code);
-            return $code;
-
+            return $this->generateVerificationCode($user);
         }
         $now = new \DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         if ($diff >= 30) {
-            $code = $this->generateVerificationCode($user);
-            $this->sendSMS->sendSms($user->getPhoneNumber(), "Your OpenRoaming security code is: " . $code);
-            return $code;
+            return $this->generateVerificationCode($user);;
         }
         return $user->getVerificationCode();
     }
