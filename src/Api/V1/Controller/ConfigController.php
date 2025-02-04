@@ -4,12 +4,12 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Enum\TextInputType;
+use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -20,6 +20,7 @@ class ConfigController extends AbstractController
     public function __construct(
         private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
+        private readonly SamlProviderRepository $samlProviderRepository
     ) {
     }
 
@@ -65,12 +66,7 @@ class ConfigController extends AbstractController
             'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
         ];
 
-        $data['saml'] = [
-            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
-        ];
+        $data['saml'] = $this->getActiveSamlProvider();
 
         return $data;
     }
@@ -122,5 +118,31 @@ class ConfigController extends AbstractController
         }
 
         return '';
+    }
+
+    public function getActiveSamlProvider(): array
+    {
+        // Find active SAML provider
+        $activeSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+
+        // Handle the case where no active provider is defined
+        if (!$activeSamlProvider) {
+            return [
+                'message' => 'No active SAML provider is defined.',
+                'SAML_IDP_ENTITY_ID' => null,
+                'SAML_IDP_SSO_URL' => null,
+                'SAML_IDP_X509_CERT' => null,
+                'SAML_SP_ENTITY_ID' => null,
+            ];
+        }
+
+        // Return the required fields
+        return [
+            'SAML_PROVIDER_NAME' => $activeSamlProvider->getName(),
+            'SAML_IDP_ENTITY_ID' => $activeSamlProvider->getIdpEntityId(),
+            'SAML_IDP_SSO_URL' => $activeSamlProvider->getIdpSsoUrl(),
+            'SAML_IDP_X509_CERT' => $activeSamlProvider->getIdpX509Cert(),
+            'SAML_SP_ENTITY_ID' => $activeSamlProvider->getSpEntityId(),
+        ];
     }
 }

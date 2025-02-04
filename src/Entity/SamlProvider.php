@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\SamlProviderRepository;
+use App\Validator\UniqueField;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SamlProviderRepository::class)]
+#[UniqueField]
 class SamlProvider
 {
     #[ORM\Id]
@@ -34,8 +36,8 @@ class SamlProvider
     #[ORM\Column(length: 255)]
     private ?string $spAcsUrl = null;
 
-    #[ORM\Column]
-    private ?bool $isActive = null;
+    #[ORM\Column(type:'boolean', options: ['default' => false])]
+    private bool $isActive;
 
     /**
      * @var Collection<int, UserExternalAuth>
