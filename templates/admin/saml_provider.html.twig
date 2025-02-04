@@ -78,7 +78,7 @@
                         <thead class="text-sm text-gray-700 bg-veryLightGreen">
                         <tr>
                             {# Name Column #}
-                            <th scope="col" class="px-10 py-3">
+                            <th scope="col" class="flex items-center px-12 py-3">
                                 <div class="flex items-center">
                                     <h1 class="mr-2">Name</h1>
                                     <a href="{{ path('admin_dashboard_saml_provider', {...app.request.query.all, sort: 'name', order: activeSort == 'name' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
@@ -89,7 +89,7 @@
                             </th>
 
                             {# IDP Entity ID Column #}
-                            <th scope="col" class="px-4 py-4">
+                            <th scope="col" class="px-4 py-3 -ml-4">
                                 <h1>IDP Entity ID</h1>
                             </th>
 
@@ -164,8 +164,9 @@
             </div>
 
             {# Pagination #}
-            <div class="w-full mt-6">
-                {{ include('admin/shared/pagination/_pagination_samlProviders.html.twig', {label: 'Providers per page', route: 'saml_providers_list', occurrencies: allProvidersCount}) }}
+            <div class="m-8">
+                <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+                {{ include('admin/shared/pagination/_pagination_samlProviders.html.twig', {label: 'Providers per page', route: 'admin_dashboard_saml_provider', occurrencies: allProvidersCount}) }}
             </div>
         </div>
     </div>

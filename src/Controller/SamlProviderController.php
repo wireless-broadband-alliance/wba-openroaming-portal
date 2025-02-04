@@ -79,7 +79,7 @@ class SamlProviderController extends AbstractController
             'current_user' => $this->getUser(),
             'totalProviders' => $totalProviders,
             'currentPage' => $page,
-            'countPerPage' => $count,
+            'count' => $count,
             'activeSort' => $sort,
             'activeOrder' => $order,
             'filter' => $filter,
