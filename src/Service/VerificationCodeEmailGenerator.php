@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use DateTime;
 use Exception;
 use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -66,29 +67,49 @@ class VerificationCodeEmailGenerator
 
     public function validateCode(User $user, string $formCode): Bool
     {
-        $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
+        if ($user->getTwoFactorAuthentication()) {
+            $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
+        } else {
+            $codeDate = null;
+        }
         if (!$codeDate) {
             return false;
         }
-        $now = new \DateTime();
+        $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         if ($diff >= 30) {
             return false;
         }
-        return $user->getVerificationCode() === $formCode;
+        return $user->getTwoFactorAuthentication()->getCode() === $formCode;
+    }
+
+    public function twoFACode(User $user): int
+    {
+        // Generate a random verification code with 7 digits
+        $verificationCode = random_int(1000000, 9999999);
+        if ($user->getTwoFactorAuthentication()) {
+            $user->getTwoFactorAuthentication()->setCode($verificationCode);
+            $user->getTwoFactorAuthentication()->setCodeGeneratedAt(new DateTime());
+        }
+        $this->userRepository->save($user, true);
+
+        return $verificationCode;
     }
 
     public function generate2FACode(User $user): int
     {
-        // Generate a random verification code with 6 digits
-        $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
-        if (!$codeDate) {
-            return $this->generateVerificationCode($user);
+        if ($user->getTwoFactorAuthentication()) {
+            $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
+        } else {
+            $codeDate = null;
         }
-        $now = new \DateTime();
+        if (!$codeDate) {
+            return $this->twoFACode($user);
+        }
+        $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         if ($diff >= 30) {
-            return $this->generateVerificationCode($user);
+            return $this->twoFACode($user);
         }
         return $user->getVerificationCode();
     }

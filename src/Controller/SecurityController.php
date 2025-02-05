@@ -92,17 +92,28 @@ class SecurityController extends AbstractController
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
                 if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED) {
-                    if ($this->getUser()->getTwoFA()) {
-                        if ($this->getUser()->getTwoFAcode()) {
+                    if ($this->getUser()->getTwoFactorAuthentication()) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) {
+                            return $this->redirectToRoute('app_landing');
+                        }
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                            return $this->redirectToRoute('app_verify2FA_local');
+                        }
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
-                        return $this->redirectToRoute('app_verify2FA_local');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
                 if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL) {
-                    if ($this->getUser()->getTwoFA()) {
-                        if ($this->getUser()->getTwoFAcode()) {
+                    if ($this->getUser()->getTwoFactorAuthentication()) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) {
+                            return $this->redirectToRoute('app_enable2FA');
+                        }
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                            return $this->redirectToRoute('app_verify2FA_local');
+                        }
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_verify2FA_local');
@@ -110,11 +121,17 @@ class SecurityController extends AbstractController
                     return $this->redirectToRoute('app_enable2FA');
                 }
                 if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL) {
-                    if ($this->getUser()->getTwoFA()) {
-                        if ($this->getUser()->getTwoFAcode()) {
+                    if ($this->getUser()->getTwoFactorAuthentication()) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) {
+                            return $this->redirectToRoute('app_enable2FA');
+                        }
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                            return $this->redirectToRoute('app_verify2FA_local');
+                        }
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_enable2FA');
                     }
                     return $this->redirectToRoute('app_enable2FA');
                 }
@@ -262,7 +279,7 @@ class SecurityController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $code = $form->get('code')->getData();
             $user = $this->getUser();
-            $secret = $user->getTwoFAcode();
+            $secret = $user->getTwoFactorAuthentication()->getSecret();
             if ($this->totpService->verifyTOTP($secret, $code)) {
                 return $this->redirectToRoute('app_landing');
             }

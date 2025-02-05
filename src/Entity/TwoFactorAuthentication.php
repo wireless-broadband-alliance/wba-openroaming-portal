@@ -83,12 +83,12 @@ class TwoFactorAuthentication
         return $this;
     }
 
-    public function getCodeGeneratedAt(): ?\DateTimeImmutable
+    public function getCodeGeneratedAt(): ?\DateTimeInterface
     {
         return $this->codeGeneratedAt;
     }
 
-    public function setCodeGeneratedAt(?\DateTimeImmutable $codeGeneratedAt): static
+    public function setCodeGeneratedAt(?\DateTimeInterface $codeGeneratedAt): static
     {
         $this->codeGeneratedAt = $codeGeneratedAt;
 

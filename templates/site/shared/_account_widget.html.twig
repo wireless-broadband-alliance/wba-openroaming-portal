@@ -104,7 +104,7 @@
                 <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
             {% else %}
                 <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-                {% if not user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP') %}
+                {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP')) %}
                 <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to change for Authentication App</p> </p>
                 {% endif %}
             {% endif %}
