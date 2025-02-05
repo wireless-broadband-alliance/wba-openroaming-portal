@@ -91,7 +91,7 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
                 <li>
-                    <a href="#"
+                    <a href="{{ path('admin_dashboard_saml_provider_edit', {id: samlProvider.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
                         Edit
@@ -104,19 +104,22 @@
                             Provider Currently Activated
                         </span>
                     {% else %}
-                        <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
-                              method="post"
-                                {{ stimulus_target('saml-provider', 'form') }}>
-                            <input type="hidden" name="_method" value="POST">
-                            <button type="submit"
-                                    data-provider-id="{{ samlProvider.id }}"
-                                    {{ stimulus_action('alert', 'enable_saml') }}
-                                    {{ stimulus_target('alert', 'button') }}
-                                    class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
-                                <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
-                                Enable
-                            </button>
-                        </form>
+                        <div {{ stimulus_controller('alert') }}>
+                            <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
+                                  method="post"
+                                    {{ stimulus_target('saml-provider', 'form') }}>
+                                <input type="hidden" name="_method" value="POST">
+                                <button type="submit"
+                                        data-provider-id="{{ samlProvider.id }}"
+                                        data-provider-name="{{ samlProvider.name }}"
+                                        {{ stimulus_action('alert', 'enable_saml') }}
+                                        {{ stimulus_target('alert', 'button') }}
+                                        class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
+                                    <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
+                                    Enable
+                                </button>
+                            </form>
+                        </div>
                     {% endif %}
                 </li>
             </ul>

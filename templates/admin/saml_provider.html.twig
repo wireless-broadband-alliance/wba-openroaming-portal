@@ -138,7 +138,7 @@
                         </thead>
                         <tbody class="px-5">
                         {% for samlProvider in samlProviders %}
-                            {{ include('admin/shared/_saml_provider_content.html.twig', {samlProvider: samlProvider}) }}
+                            {{ include('admin/shared/saml_providers/_saml_provider_content.html.twig', {samlProvider: samlProvider}) }}
                         {% else %}
                             <tr>
                                 <td colspan="7">

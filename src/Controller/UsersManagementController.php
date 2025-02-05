@@ -256,13 +256,20 @@ class UsersManagementController extends AbstractController
         }
 
         $getUUID = $user->getUuid();
+        // Generate the full phone number from the correct lib bundle
+        $phoneNumber = null;
+        if ($user->getPhoneNumber()) {
+            $phoneNumber = "+" .
+                $user->getPhoneNumber()->getCountryCode() .
+                $user->getPhoneNumber()->getNationalNumber();
+        }
 
         // Prepare user data for encryption
         $deletedUserData = [
             'id' => $user->getId(),
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail() ?? 'This value is empty',
-            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
+            'phoneNumber' => $phoneNumber ?? 'This value is empty',
             'firstName' => $user->getFirstName() ?? 'This value is empty',
             'lastName' => $user->getLastName() ?? 'This value is empty',
             'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
@@ -287,7 +294,6 @@ class UsersManagementController extends AbstractController
         $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
 
         // Encrypt combined JSON data using PGP encryption
-        new PgpEncryptionService();
         $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
 
         // Handle encryption errors
