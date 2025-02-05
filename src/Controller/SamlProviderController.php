@@ -110,10 +110,19 @@ class SamlProviderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Find and disable the currently active SAML Provider (if any)
+            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+            if ($previousSamlProvider) {
+                $previousSamlProvider->setActive(false);
+            }
+
+            $samlProvider->setActive(true);
+            $samlProvider->setCreatedAt(new DateTime());
+            $samlProvider->setUpdatedAt(new DateTime());
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'SAML Provider added successfully.');
+            $this->addFlash('success_admin', 'SAML Provider added successfully.');
 
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
@@ -124,6 +133,18 @@ class SamlProviderController extends AbstractController
             'current_user' => $currentUser,
         ]);
     }
+
+//    #[Route('dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
+//    public function editSamlProvider(
+//        int $id,
+//        Request $request,
+//    ): Response {
+//        /** @var User $currentUser */
+//        $currentUser = $this->getUser();
+//
+//        dd('testing edit users');
+//    }
+
 
     #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
     public function enableSamlProvider(

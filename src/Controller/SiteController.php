@@ -50,6 +50,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
@@ -145,7 +146,7 @@ class SiteController extends AbstractController
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select Operating System!');
-                } elseif (!$this->getUser() instanceof \Symfony\Component\Security\Core\User\UserInterface) {
+                } elseif (!$this->getUser() instanceof UserInterface) {
                     $user = new User();
                     $userAuths = new UserExternalAuth();
                     $form = $this->createForm(RegistrationFormType::class, $user);

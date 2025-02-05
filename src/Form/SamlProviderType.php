@@ -45,6 +45,13 @@ class SamlProviderType extends AbstractType
                     new UniqueField(['field' => 'idpSsoUrl'])
                 ],
             ])
+            ->add('spEntityId', TextType::class, [
+                'label' => 'SAML IDP Entity ID',
+                'constraints' => [
+                    new NotBlank(),
+                    new UniqueField(['field' => 'spEntityId'])
+                ],
+            ])
             ->add('spAcsUrl', TextType::class, [
                 'label' => 'SAML SP ACS URL',
                 'constraints' => [
