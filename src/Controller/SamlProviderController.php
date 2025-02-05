@@ -122,8 +122,22 @@ class SamlProviderController extends AbstractController
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
-            $this->addFlash('success_admin', 'SAML Provider added successfully.');
+            // Log the event metadata (tracking the change)
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE,
+                'samlProviderAdded' => $samlProvider->getName(),
+                'ip' => $request->getClientIp(),
+                'by' => $currentUser->getUuid(),
+            ];
 
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::ADMIN_ADDED_SAML_PROVIDER,
+                new DateTime(),
+                $eventMetaData
+            );
+
+            $this->addFlash('success_admin', 'SAML Provider added successfully.');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
@@ -175,18 +189,8 @@ class SamlProviderController extends AbstractController
 
             $this->addFlash(
                 'success_admin',
-                sprintf(
-                    'SAML Provider "%s" is now enabled.',
-                    $samlProvider->getName()
-                )
+                sprintf('"%s" has been updated successfully.', $samlProvider->getName())
             );
-
-            $samlProviderName = $samlProvider->getName();
-            $this->addFlash(
-                'success_admin',
-                sprintf('"%s" has been updated successfully.', $samlProviderName)
-            );
-
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 

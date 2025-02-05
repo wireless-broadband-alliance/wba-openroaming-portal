@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\SamlProvider;
 use App\Validator\CamelCase;
 use App\Validator\UniqueField;
-use App\Validator\UniqueSamlProvider;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
