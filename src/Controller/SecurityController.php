@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\TwoFactorAuthentication;
 use App\Entity\User;
 use App\Enum\PlatformMode;
 use App\Enum\twoFAType;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Form\TwoFAcode;
 use App\Form\TwoFactorPhoneNumber;
@@ -172,11 +174,21 @@ class SecurityController extends AbstractController
     public function enable2FA(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFactorPhoneNumber::class, $this->getUser());
-        if ($this->getUser()->getPhoneNumber()) {
-            $user = $this->getUser();
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'User not found');
+        }
+        if (!$user->getTwoFactorAuthentication()) {
+            $twoFA = new TwoFactorAuthentication();
+            $twoFA->setUser($user);
+            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED);
+            $user->setTwoFactorAuthentication($twoFA);
+            $this->entityManager->persist($twoFA);
+        }
+        $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
+        if ($user->getPhoneNumber()) {
             if ($user) {
-                $user->setTwoFA(true);
+                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
             } else {
@@ -186,9 +198,8 @@ class SecurityController extends AbstractController
         }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
-            $user = $this->getUser();
             if ($user) {
-                $user->setTwoFA(true);
+                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS);
                 $user->setPhoneNumber($phoneNumber);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -210,9 +221,17 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
         if ($user) {
-            $user->setTwoFAcode($secret);
-            $user->setTwoFA(true);
+            if (!$user->getTwoFActorAuthentication()){
+                $twoFA = new TwoFactorAuthentication();
+                $twoFA->setUser($user);
+                $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED);
+                $user->setTwoFactorAuthentication($twoFA);
+                $this->entityManager->persist($twoFA);
+            }
+            $twoFA = $user->getTwoFactorAuthentication();
+            $twoFA->setSecret($secret);
             $this->entityManager->persist($user);
+            $this->entityManager->persist($twoFA);
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'User not found');
@@ -278,13 +297,29 @@ class SecurityController extends AbstractController
     public function disable2FA(): RedirectResponse
     {
         $user = $this->getUser();
-        if ($user) {
-            $user->setTwoFA(false);
-            $user->setTwoFAcode(null);
+        if ($user && $user->getTwoFactorAuthentication()) {
+            /** @var TwoFactorAuthentication $twoFA */
+            $twoFA = $user->getTwoFactorAuthentication();
+            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED);
+            $this->entityManager->persist($twoFA);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'User not found');
+        }
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm')]
+    public function enable2FAappValidate(): Response
+    {
+        $user = $this->getUser();
+        $twoFA = $user->getTwoFactorAuthentication();
+        if ($user && $twoFA) {
+            $twoFA->setType(UserTwoFactorAuthenticationStatus::APP);
+            $this->entityManager->persist($twoFA);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
         }
         return $this->redirectToRoute('app_landing');
     }

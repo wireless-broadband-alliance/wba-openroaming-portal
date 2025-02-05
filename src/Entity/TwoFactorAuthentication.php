@@ -18,7 +18,7 @@ class TwoFactorAuthentication
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $secret = null;
 
     #[ORM\Column(length: 255, nullable: true)]

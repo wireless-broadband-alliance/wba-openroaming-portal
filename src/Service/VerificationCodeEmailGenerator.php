@@ -31,7 +31,6 @@ class VerificationCodeEmailGenerator
         // Generate a random verification code with 6 digits
         $verificationCode = random_int(100000, 999999);
         $user->setVerificationCode($verificationCode);
-        $user->setVerificationCodecreatedAt(new \DateTime());
         $this->userRepository->save($user, true);
 
         return $verificationCode;
@@ -67,7 +66,7 @@ class VerificationCodeEmailGenerator
 
     public function validateCode(User $user, string $formCode): Bool
     {
-        $codeDate = $user->getVerificationCodecreatedAt();
+        $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
         if (!$codeDate) {
             return false;
         }
@@ -82,14 +81,14 @@ class VerificationCodeEmailGenerator
     public function generate2FACode(User $user): int
     {
         // Generate a random verification code with 6 digits
-        $codeDate = $user->getVerificationCodecreatedAt();
+        $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
         if (!$codeDate) {
             return $this->generateVerificationCode($user);
         }
         $now = new \DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         if ($diff >= 30) {
-            return $this->generateVerificationCode($user);;
+            return $this->generateVerificationCode($user);
         }
         return $user->getVerificationCode();
     }
