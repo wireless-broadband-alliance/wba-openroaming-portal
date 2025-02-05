@@ -6,6 +6,12 @@
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
         <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Page Style</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_new' %}
+        <twig:ux:icon name="wba:layout-grid-add" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Add New Saml Provider</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
+        <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Edit Saml Provider</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider' %}
         <twig:ux:icon name="wba:list" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Saml Provider's</h1>
