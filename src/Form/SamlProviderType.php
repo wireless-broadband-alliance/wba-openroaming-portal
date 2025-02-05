@@ -3,8 +3,7 @@
 namespace App\Form;
 
 use App\Entity\SamlProvider;
-use App\Validator\CamelCase;
-use App\Validator\UniqueField;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -15,6 +14,11 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class SamlProviderType extends AbstractType
 {
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -25,8 +29,18 @@ class SamlProviderType extends AbstractType
                     new NotBlank([
                         'message' => 'Please enter a valid provider name'
                     ]),
-                    new CamelCase(), // Apply the custom noSpecialCharacter validator
-                    new UniqueField(['field' => 'name'])
+                    new Assert\Callback(function ($value, $context): void {
+                        // Check for uniqueness of the 'name' field in the database
+                        $existingProvider = $this->entityManager->getRepository(SamlProvider::class)
+                            ->findOneBy(['name' => $value]);
+
+                        $currentProvider = $context->getRoot()->getData();
+                        if ($existingProvider && $existingProvider->getId() !== $currentProvider->getId()) {
+                            $context->buildViolation('The provider name "{{ value }}" is already in use.')
+                                ->setParameter('{{ value }}', $value)
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ])
             ->add('idpEntityId', TextType::class, [
@@ -34,9 +48,20 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider id'
+                        'message' => 'Please enter a valid provider ID'
                     ]),
-                    new UniqueField(['field' => 'idpEntityId'])
+                    new Assert\Callback(function ($value, $context): void {
+                        // Validation for uniqueness of 'idpEntityId'
+                        $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
+                            ->findOneBy(['idpEntityId' => $value]);
+
+                        $currentProvider = $context->getRoot()->getData();
+                        if ($existingEntity && $existingEntity->getId() !== $currentProvider->getId()) {
+                            $context->buildViolation('The SAML IDP Entity ID "{{ value }}" is already in use.')
+                                ->setParameter('{{ value }}', $value)
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ])
             ->add('idpSsoUrl', TextType::class, [
@@ -44,23 +69,45 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                            'message' => 'Please enter a valid provider SSO URL'
-                        ]),
+                        'message' => 'Please enter a valid provider SSO URL'
+                    ]),
+                    new Assert\Callback(function ($value, $context): void {
+                        // Validation for uniqueness of 'idpEntityId'
+                        $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
+                            ->findOneBy(['idpSsoUrl' => $value]);
+
+                        $currentProvider = $context->getRoot()->getData();
+                        if ($existingEntity && $existingEntity->getId() !== $currentProvider->getId()) {
+                            $context->buildViolation('The SAML IDP SSO URL "{{ value }}" is already in use.')
+                                ->setParameter('{{ value }}', $value)
+                                ->addViolation();
+                        }
+                    }),
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
                     ]),
-                    new UniqueField(['field' => 'idpSsoUrl'])
                 ],
             ])
             ->add('spEntityId', TextType::class, [
-                'label' => 'SAML IDP Entity ID',
+                'label' => 'SAML SP Entity ID',
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider id'
+                        'message' => 'Please enter a valid provider ID'
                     ]),
-                    new UniqueField(['field' => 'spEntityId'])
+                    new Assert\Callback(function ($value, $context): void {
+                        // Validation for uniqueness of 'idpEntityId'
+                        $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
+                            ->findOneBy(['spEntityId' => $value]);
+
+                        $currentProvider = $context->getRoot()->getData();
+                        if ($existingEntity && $existingEntity->getId() !== $currentProvider->getId()) {
+                            $context->buildViolation('The SAML SP Entity ID "{{ value }}" is already in use.')
+                                ->setParameter('{{ value }}', $value)
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ])
             ->add('spAcsUrl', TextType::class, [
@@ -68,13 +115,24 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider acs'
+                        'message' => 'Please enter a valid provider ACS URL'
                     ]),
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
                     ]),
-                    new UniqueField(['field' => 'spAcsUrl'])
+                    new Assert\Callback(function ($value, $context): void {
+                        // Validation for uniqueness of 'idpEntityId'
+                        $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
+                            ->findOneBy(['spAcsUrl' => $value]);
+
+                        $currentProvider = $context->getRoot()->getData();
+                        if ($existingEntity && $existingEntity->getId() !== $currentProvider->getId()) {
+                            $context->buildViolation('The SAML SP ACS URL "{{ value }}" is already in use.')
+                                ->setParameter('{{ value }}', $value)
+                                ->addViolation();
+                        }
+                    }),
                 ],
             ])
             ->add('idpX509Cert', TextareaType::class, [
@@ -82,13 +140,11 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider X509 Certificate'
+                        'message' => 'Please enter a valid provider X509 certificate'
                     ]),
-                    new UniqueField(['field' => 'idpX509Cert'])
                 ],
             ]);
     }
-
 
     public function configureOptions(OptionsResolver $resolver): void
     {
