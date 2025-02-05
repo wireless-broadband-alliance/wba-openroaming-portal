@@ -30,7 +30,7 @@ class SamlProviderController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SamlProviderRepository $samlProviderRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly EventActions $eventActions
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -127,23 +127,75 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        return $this->render('admin/shared/_saml_provider_new.html.twig', [
+        return $this->render('admin/shared/saml_providers/_saml_provider_new.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'current_user' => $currentUser,
         ]);
     }
 
-//    #[Route('dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
-//    public function editSamlProvider(
-//        int $id,
-//        Request $request,
-//    ): Response {
-//        /** @var User $currentUser */
-//        $currentUser = $this->getUser();
-//
-//        dd('testing edit users');
-//    }
+    #[Route('dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function editSamlProvider(
+        int $id,
+        Request $request,
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Find the new SamlProvider to be enabled
+        $samlProvider = $this->samlProviderRepository->find($id);
+        if (!$samlProvider) {
+            $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
+
+        $form = $this->createForm(SamlProviderType::class, $samlProvider);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $samlProvider->setUpdatedAt(new DateTime());
+            $this->entityManager->persist($samlProvider);
+            $this->entityManager->flush();
+
+            // Log the event metadata (tracking the change)
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE,
+                'samlProviderEdited' => $samlProvider->getName(),
+                'ip' => $request->getClientIp(),
+                'by' => $currentUser->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::ADMIN_EDITED_SAML_PROVIDER,
+                new DateTime(),
+                $eventMetaData
+            );
+
+            $this->addFlash(
+                'success_admin',
+                sprintf(
+                    'SAML Provider "%s" is now enabled.',
+                    $samlProvider->getName()
+                )
+            );
+
+            $samlProviderName = $samlProvider->getName();
+            $this->addFlash(
+                'success_admin',
+                sprintf('"%s" has been updated successfully.', $samlProviderName)
+            );
+
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
+
+        return $this->render('admin/shared/saml_providers/_saml_provider_edit.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data,
+            'current_user' => $currentUser,
+        ]);
+    }
 
 
     #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]

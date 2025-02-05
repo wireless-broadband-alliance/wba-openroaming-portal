@@ -91,7 +91,7 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
                 <li>
-                    <a href="#"
+                    <a href="{{ path('admin_dashboard_saml_provider_edit', {id: samlProvider.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
                         Edit
