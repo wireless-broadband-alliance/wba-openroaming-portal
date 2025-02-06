@@ -14,10 +14,6 @@
 
     {{ form_start(form) }}
     {{ form_errors(form) }}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
-        <div {{ stimulus_controller('alert') }}>
-        <div {{ stimulus_target('saml-provider', 'form') }}>
-    {% endif %}
     <div class="p-6 mx-auto bg-white rounded-lg">
         {# Provider Name #}
         <div class="relative">
@@ -81,9 +77,6 @@
         <div class="flex flex-row justify-end md:w-full mt-6">
             <button type="submit"
                     class="btn-primary"
-                    data-provider-name="{{ samlProvider.name }}"
-                    {{ stimulus_action('alert', 'edit_saml_provider_submit') }}
-                    {{ stimulus_target('alert', 'button') }}
             >
                 Apply Changes
             </button>
@@ -96,10 +89,6 @@
             >
                 Submit Changes
             </button>
-        </div>
-    {% endif %}
-    {% if app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
-        </div>
         </div>
     {% endif %}
     {{ form_end(form) }}

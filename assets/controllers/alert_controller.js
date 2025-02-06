@@ -34,13 +34,4 @@ export default class extends Controller {
             this.formTarget.submit();
         }
     }
-
-    edit_saml_provider_submit() {
-        const providerName = this.buttonTarget.getAttribute('data-provider-name');
-        // Show warning message
-        if (confirm(`Are you sure you want to apply the current configuration for this provider: ${providerName}?`)) {
-            // If confirmed, submit the form
-            this.formTarget.submit();
-        }
-    }
 }
