@@ -17,9 +17,7 @@ export default class extends Controller {
         }
     }
 
-    enable_saml(event) {
-        // Prevent the default behavior of the submit button
-        event.preventDefault();
+    enable_saml() {
         const providerName = this.buttonTarget.getAttribute('data-provider-name');
         // Show warning message
         if (confirm(`Are you sure you want to enable SAML for provider ID ${providerName}?`)) {
@@ -37,9 +35,7 @@ export default class extends Controller {
         }
     }
 
-    edit_saml_provider_submit(event) {
-        // Prevent the default behavior of the submit button
-        event.preventDefault();
+    edit_saml_provider_submit() {
         const providerName = this.buttonTarget.getAttribute('data-provider-name');
         // Show warning message
         if (confirm(`Are you sure you want to apply the current configuration for this provider: ${providerName}?`)) {
