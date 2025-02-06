@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -33,10 +32,8 @@ class CaptchaValidator
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      */
     public function validate(string $token, ?string $clientIp): array
@@ -45,11 +42,18 @@ class CaptchaValidator
             return ['success' => true];
         }
 
-        // Prepare request payload
+        if (empty($token)) {
+            $this->logger->warning('CAPTCHA validation token is empty.', [
+                'client_ip' => $clientIp,
+            ]);
+            return ['success' => false];
+        }
+
+        // Prepare API payload
         $payload = [
-            'secret' => $this->parameterBag->get('app.turnstile_key'),
+            'secret' => $this->parameterBag->get('app.turnstile_secret'),
             'response' => $token,
-            'remoteip' => $clientIp
+            'remoteip' => $clientIp,
         ];
 
         try {
@@ -57,22 +61,42 @@ class CaptchaValidator
                 'POST',
                 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
                 [
-                    'body' => $payload,
+                    'body' => http_build_query($payload),
                 ]
             );
 
-            return $response->toArray();
-        } catch (Exception $e) {
-            $this->logger->error('Turnstile validation failed.', [
+            $responseData = $response->toArray();
+            if ($responseData['success'] ?? false) {
+                return [
+                    'success' => true,
+                ];
+            }
+
+            $this->logger->warning('CAPTCHA validation failed.', [
+                'response' => $responseData,
+                'client_ip' => $clientIp,
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'CAPTCHA validation failed!',
+            ];
+        } catch (
+            TransportExceptionInterface |
+            ClientExceptionInterface |
+            RedirectionExceptionInterface |
+            ServerExceptionInterface |
+            DecodingExceptionInterface $e
+        ) {
+            // Log exception details for debugging
+            $this->logger->error('Exception occurred during CAPTCHA validation.', [
                 'error' => $e->getMessage(),
                 'payload' => $payload,
             ]);
 
-            // Ensure the return value is an array containing the failure details
             return [
                 'success' => false,
-                'error' => $e->getMessage(),
-                'payload' => $payload,
+                'error' => 'CAPTCHA validation failed!',
             ];
         }
     }

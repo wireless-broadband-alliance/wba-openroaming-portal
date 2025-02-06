@@ -11,6 +11,7 @@ parameters:
   app.export_freeradius_statistics: '%env(EXPORT_FREERADIUS_STATISTICS)%'
   app.pgp_public_key: '%env(ENABLE_DELETE_USERS_UI)%'
   app.turnstile_key: '%env(TURNSTILE_KEY)%'
+  app.turnstile_secret: '%env(TURNSTILE_SECRET)%'
   app.google_client_id: '%env(GOOGLE_CLIENT_ID)%'
   app.sentry_dsn: '%env(SENTRY_DSN)%'
   app.saml_idp_entity_id: '%env(SAML_IDP_ENTITY_ID)%'
