@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -16,15 +18,18 @@ class CaptchaValidator
     private HttpClientInterface $httpClient;
     private ParameterBagInterface $parameterBag;
     private KernelInterface $kernel;
+    private LoggerInterface $logger;
 
     public function __construct(
         HttpClientInterface $httpClient,
         ParameterBagInterface $parameterBag,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        LoggerInterface $logger
     ) {
         $this->httpClient = $httpClient;
         $this->parameterBag = $parameterBag;
         $this->kernel = $kernel;
+        $this->logger = $logger;
     }
 
     /**
@@ -34,22 +39,41 @@ class CaptchaValidator
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      */
-    public function validate(string $token, ?string $clientIp): bool
+    public function validate(string $token, ?string $clientIp): array
     {
         if ($token === 'openroaming' && $this->kernel->getEnvironment() === 'dev') {
-            return true;
+            return ['success' => true];
         }
 
-        $response = $this->httpClient->request('POST', 'https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-            'body' => [
-                'secret' => $this->parameterBag->get('app.turnstile_key'),
-                'response' => $token,
-                'remoteIp' => $clientIp,
-            ],
-        ]);
+        // Prepare request payload
+        $payload = [
+            'secret' => $this->parameterBag->get('app.turnstile_key'),
+            'response' => $token,
+            'remoteip' => $clientIp
+        ];
 
-        $data = $response->toArray();
+        try {
+            $response = $this->httpClient->request(
+                'POST',
+                'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+                [
+                    'body' => $payload,
+                ]
+            );
 
-        return $data['success'] ?? false;
+            return $response->toArray();
+        } catch (Exception $e) {
+            $this->logger->error('Turnstile validation failed.', [
+                'error' => $e->getMessage(),
+                'payload' => $payload,
+            ]);
+
+            // Ensure the return value is an array containing the failure details
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'payload' => $payload,
+            ];
+        }
     }
 }
