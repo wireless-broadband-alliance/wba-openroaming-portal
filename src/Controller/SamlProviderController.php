@@ -198,6 +198,7 @@ class SamlProviderController extends AbstractController
             'form' => $form->createView(),
             'data' => $data,
             'current_user' => $currentUser,
+            'samlProvider' => $samlProvider
         ]);
     }
 

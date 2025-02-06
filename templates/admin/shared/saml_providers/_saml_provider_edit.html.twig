@@ -3,31 +3,75 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block container %}
-    <div class="max-w-4xl mx-auto mt-8">
-        <div class="bg-white shadow-md rounded-lg p-6">
-            {{ form_start(form, {attr: {class: 'space-y-4'}}) }}
+    {# Content - Edit SamlProvider #}
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ samlProvider.name }}</h1>
+    {{ form_start(form) }}
+    {{ form_errors(form) }}
+    <div {{ stimulus_controller('alert') }}>
+        <div {{ stimulus_target('saml-provider', 'form') }}>
 
-            {% for field in form %}
-                <div class="space-y-2">
-                    {{ form_label(field, null, {
-                        label_attr: {class: 'block text-sm font-medium text-gray-700'},
-                    }) }}
-                    {{ form_widget(field, {
-                        attr: {class: 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200'},
-                    }) }}
-                    {{ form_errors(field, {
-                        attr: {class: 'text-sm text-red-500'},
-                    }) }}
+            <div class="p-6 mx-auto bg-white rounded-lg">
+                <div class="relative">
+                    {{ form_label(form.name, 'Provider Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
+                    <div class="text-red-500 m-2">
+                        {{ form_errors(form.name) }}
+                    </div>
                 </div>
-            {% endfor %}
 
-            <div class="mt-6 text-right">
-                <button class="bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-300">
-                    Submit
-                </button>
+                <div class="my-7 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="relative">
+                        {{ form_label(form.idpEntityId, 'IDP Entity ID', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.idpEntityId, {attr: {class: 'form-widget'}}) }}
+                        <div class="text-red-500 m-2">
+                            {{ form_errors(form.idpEntityId) }}
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        {{ form_label(form.idpSsoUrl, 'IDP SSO URL', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.idpSsoUrl, {attr: {class: 'form-widget'}}) }}
+                        <div class="text-red-500 m-2">
+                            {{ form_errors(form.idpSsoUrl) }}
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        {{ form_label(form.spEntityId, 'SP Entity ID', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.spEntityId, {attr: {class: 'form-widget'}}) }}
+                        <div class="text-red-500 m-2">
+                            {{ form_errors(form.spEntityId) }}
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        {{ form_label(form.spAcsUrl, 'SP ACS URL', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.spAcsUrl, {attr: {class: 'form-widget'}}) }}
+                        <div class="text-red-500 m-2">
+                            {{ form_errors(form.spAcsUrl) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    {{ form_label(form.idpX509Cert, 'IDP X5099 Certificate', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.idpX509Cert, {attr: {class: 'form-widget-text-area'}}) }}
+                    <div class="text-red-500 m-2">
+                        {{ form_errors(form.idpX509Cert) }}
+                    </div>
+                </div>
             </div>
 
-            {{ form_end(form) }}
+            <div class="flex flex-row justify-end md:w-full mt-6">
+                <button type="submit"
+                        data-provider-name="{{ samlProvider.name }}"
+                        {{ stimulus_action('alert', 'edit_saml_provider_submit') }}
+                        {{ stimulus_target('alert', 'button') }}
+                        class="btn-primary">
+                    Apply Changes
+                </button>
+            </div>
         </div>
     </div>
+    {{ form_end(form) }}
 {% endblock %}

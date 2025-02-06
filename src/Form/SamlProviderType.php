@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\SamlProvider;
+use App\Validator\CamelCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -29,6 +30,7 @@ class SamlProviderType extends AbstractType
                     new NotBlank([
                         'message' => 'Please enter a valid provider name'
                     ]),
+                    new CamelCase(),
                     new Assert\Callback(function ($value, $context): void {
                         // Check for uniqueness of the 'name' field in the database
                         $existingProvider = $this->entityManager->getRepository(SamlProvider::class)
@@ -48,7 +50,7 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider ID'
+                        'message' => 'Please enter a valid provider IDP Entity ID'
                     ]),
                     new Assert\Callback(function ($value, $context): void {
                         // Validation for uniqueness of 'idpEntityId'
@@ -69,7 +71,7 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider SSO URL'
+                        'message' => 'Please enter a valid provider IDP SSO URL'
                     ]),
                     new Assert\Callback(function ($value, $context): void {
                         // Validation for uniqueness of 'idpEntityId'
@@ -94,7 +96,7 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider ID'
+                        'message' => 'Please enter a valid provider SP Entity ID'
                     ]),
                     new Assert\Callback(function ($value, $context): void {
                         // Validation for uniqueness of 'idpEntityId'
@@ -115,7 +117,7 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider ACS URL'
+                        'message' => 'Please enter a valid provider SP ACS URL'
                     ]),
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
@@ -140,7 +142,7 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider X509 certificate'
+                        'message' => 'Please enter a valid provider IDP X509 certificate'
                     ]),
                 ],
             ]);
