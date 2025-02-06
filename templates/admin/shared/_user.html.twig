@@ -92,7 +92,7 @@
 
                             <a href="javascript:void(0)" data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}"
                                     {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
-                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
                                 <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
                                 Delete
                             </a>

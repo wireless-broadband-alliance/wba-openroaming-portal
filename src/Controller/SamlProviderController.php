@@ -6,9 +6,11 @@ use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -31,6 +33,7 @@ class SamlProviderController extends AbstractController
         private readonly SamlProviderRepository $samlProviderRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
     ) {
     }
 
@@ -253,5 +256,25 @@ class SamlProviderController extends AbstractController
             )
         );
         return $this->redirectToRoute('admin_dashboard_saml_provider');
+    }
+
+    #[Route('dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
+    public function deleteSamlProvider(int $id): Response
+    {
+        //** @var User $currentUser */
+        // $currentUser = $this->getUser();
+
+        // Find the new SamlProvider to be enabled
+        $samlProvider = $this->samlProviderRepository->find($id);
+        $userExternalAuth = $this->userExternalAuthRepository->findBy([
+            'provider' => UserProvider::SAML,
+            'samlProvider' => $samlProvider
+        ]);
+        dd($userExternalAuth);
+
+        if (!$samlProvider) {
+            $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
     }
 }

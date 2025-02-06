@@ -98,6 +98,13 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ path('admin_dashboard_saml_provider_edit', {id: samlProvider.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
+                        <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                        Delete
+                    </a>
+                </li>
+                <li>
                     {% if samlProvider.isActive %}
                         <span class="flex flex-row items-center px-2 py-2 text-gray-500 cursor-default">
                             <twig:ux:icon name="wba:check-circle" class="w-5 mr-3" fill="none"/>
