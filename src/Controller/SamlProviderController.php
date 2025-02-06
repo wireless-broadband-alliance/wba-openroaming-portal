@@ -140,8 +140,7 @@ class SamlProviderController extends AbstractController
             $this->addFlash('success_admin', 'SAML Provider added successfully.');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
-
-        return $this->render('admin/shared/saml_providers/_saml_provider_new.html.twig', [
+        return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'current_user' => $currentUser,
@@ -194,7 +193,7 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        return $this->render('admin/shared/saml_providers/_saml_provider_edit.html.twig', [
+        return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'current_user' => $currentUser,

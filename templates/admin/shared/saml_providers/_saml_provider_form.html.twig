@@ -1,0 +1,106 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block container %}
+    {# Form Title (Dynamic for "Add" or "Edit") #}
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">
+        {% if samlProvider.name is defined and samlProvider.name %}
+            {{ samlProvider.name }}
+        {% else %}
+            Add New Saml Provider
+        {% endif %}
+    </h1>
+
+    {{ form_start(form) }}
+    {{ form_errors(form) }}
+    {% if app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
+        <div {{ stimulus_controller('alert') }}>
+        <div {{ stimulus_target('saml-provider', 'form') }}>
+    {% endif %}
+    <div class="p-6 mx-auto bg-white rounded-lg">
+        {# Provider Name #}
+        <div class="relative">
+            {{ form_label(form.name, 'Provider Name', {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.name, {attr: {class: 'form-widget'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.name) }}
+            </div>
+        </div>
+
+        {# Two-Column Fields Section #}
+        <div class="my-7 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {# IDP Entity ID #}
+            <div class="relative">
+                {{ form_label(form.idpEntityId, 'IDP Entity ID', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.idpEntityId, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.idpEntityId) }}
+                </div>
+            </div>
+
+            {# IDP SSO URL #}
+            <div class="relative">
+                {{ form_label(form.idpSsoUrl, 'IDP SSO URL', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.idpSsoUrl, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.idpSsoUrl) }}
+                </div>
+            </div>
+
+            {# SP Entity ID #}
+            <div class="relative">
+                {{ form_label(form.spEntityId, 'SP Entity ID', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.spEntityId, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.spEntityId) }}
+                </div>
+            </div>
+
+            {# SP ACS URL #}
+            <div class="relative">
+                {{ form_label(form.spAcsUrl, 'SP ACS URL', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.spAcsUrl, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.spAcsUrl) }}
+                </div>
+            </div>
+        </div>
+
+        {# IDP X509 Certificate #}
+        <div class="relative">
+            {{ form_label(form.idpX509Cert, 'IDP X509 Certificate', {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.idpX509Cert, {attr: {class: 'form-widget-text-area'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.idpX509Cert) }}
+            </div>
+        </div>
+    </div>
+    {% if app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
+        {# Apply Changes (Edit - Saml Provider) #}
+        <div class="flex flex-row justify-end md:w-full mt-6">
+            <button type="submit"
+                    class="btn-primary"
+                    data-provider-name="{{ samlProvider.name }}"
+                    {{ stimulus_action('alert', 'edit_saml_provider_submit') }}
+                    {{ stimulus_target('alert', 'button') }}
+            >
+                Apply Changes
+            </button>
+        </div>
+    {% else %}
+        {# Submit Changes (New - SamlProvider) #}
+        <div class="flex flex-row justify-end md:w-full mt-6">
+            <button type="submit"
+                    class="btn-primary"
+            >
+                Submit Changes
+            </button>
+        </div>
+    {% endif %}
+    {% if app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
+        </div>
+        </div>
+    {% endif %}
+    {{ form_end(form) }}
+{% endblock %}
