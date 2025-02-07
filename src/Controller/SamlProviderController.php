@@ -270,7 +270,7 @@ class SamlProviderController extends AbstractController
             'provider' => UserProvider::SAML,
             'samlProvider' => $samlProvider
         ]);
-        dd($userExternalAuth);
+        dd($samlProvider, $userExternalAuth);
 
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');

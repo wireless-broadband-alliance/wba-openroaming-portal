@@ -23,7 +23,7 @@ class SamlActiveProviderService
     {
         if (!$this->samlAuth instanceof Auth) {
             // Fetch active provider
-            $activeProvider = $this->repository->findOneBy(['isActive' => true]);
+            $activeProvider = $this->repository->findOneBy(['isActive' => true, 'deletedAt' => null]);
 
             if (!$activeProvider) {
                 throw new RuntimeException('No active SAML provider found.');

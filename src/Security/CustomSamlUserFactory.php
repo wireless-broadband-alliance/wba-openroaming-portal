@@ -9,6 +9,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -33,6 +34,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
+        private readonly SamlProviderRepository $samlProviderRepository,
     ) {
         $this->attribute_mapping = [
             'password' => 'notused',
@@ -68,7 +70,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 
         if ($existingUser) {
             if ($existingUser->isDisabled()) {
-                throw new \RuntimeException('User Disabled');
+                throw new RuntimeException('User Disabled');
             }
             return $existingUser;
         }
@@ -97,12 +99,34 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
+        $activeProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
+        if (!$activeProvider) {
+            throw new RuntimeException('No active SAML provider found.');
+        }
+
+        $email = array_key_exists('urn:oid:1.2.840.113549.1.9.1', $attributes)
+            ? $attributes['urn:oid:1.2.840.113549.1.9.1'][0]
+            : null;
+
+        $firstName = array_key_exists('urn:oid:2.5.4.42', $attributes)
+            ? $attributes['urn:oid:2.5.4.42'][0]
+            : null;
+
+        $lastName = array_key_exists('urn:oid:2.5.4.4', $attributes)
+            ? $attributes['urn:oid:2.5.4.4'][0]
+            : null;
+
         $user->setDisabled(false);
+        $user->setEmail($email);
+        $user->setFirstName($firstName);
+        $user->setLastName($lastName);
+
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::SAML)
-            ->setProviderId($samlIdentifier);
+            ->setProviderId($samlIdentifier)
+            ->setSamlProvider($activeProvider);
 
         // Persist the external auth entity
         $this->entityManager->persist($user);
