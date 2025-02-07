@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
@@ -18,6 +19,9 @@ use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use function is_string;
@@ -28,6 +32,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
      * Default attribute mapping.
      */
     private readonly array $attribute_mapping;
+    private readonly SessionInterface $session;
 
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -35,7 +40,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly SamlProviderRepository $samlProviderRepository,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        RequestStack $requestStack,
     ) {
+        $this->session = $requestStack->getSession();
         $this->attribute_mapping = [
             'password' => 'notused',
             'uuid' => '$samlUuid',
@@ -70,7 +78,14 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 
         if ($existingUser) {
             if ($existingUser->isDisabled()) {
-                throw new RuntimeException('User Disabled');
+                /** @phpstan-ignore-next-line */ // To avoid conflicts with RECTOR
+                $this->session->getFlashBag()->add(
+                    'error',
+                    'This account is disabled. Please contact support.'
+                );
+                $redirect = new RedirectResponse($this->urlGenerator->generate('app_landing'));
+                $redirect->send();
+                exit; // Stop further authentication execution
             }
             return $existingUser;
         }
