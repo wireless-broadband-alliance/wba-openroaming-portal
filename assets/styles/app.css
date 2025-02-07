@@ -41,6 +41,10 @@
     @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
 }
 
+.form-widget-text-area {
+    @apply form-widget h-48;
+}
+
 .form-select {
     @apply bg-white border rounded-lg px-3 py-1 text-[#656565] border-[#CECECE] focus:border-primary;
 }

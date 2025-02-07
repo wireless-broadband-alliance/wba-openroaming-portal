@@ -6,12 +6,17 @@ use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\ProfileManager;
+use App\Service\SamlProviderDeletionService;
+use App\Service\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -31,6 +36,10 @@ class SamlProviderController extends AbstractController
         private readonly SamlProviderRepository $samlProviderRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ProfileManager $profileManager,
+        private readonly UserDeletionService $userDeletionService,
+        private readonly SamlProviderDeletionService $samlProviderDeletionService,
     ) {
     }
 
@@ -111,7 +120,7 @@ class SamlProviderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Find and disable the currently active SAML Provider (if any)
-            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
             if ($previousSamlProvider) {
                 $previousSamlProvider->setActive(false);
             }
@@ -140,8 +149,7 @@ class SamlProviderController extends AbstractController
             $this->addFlash('success_admin', 'SAML Provider added successfully.');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
-
-        return $this->render('admin/shared/saml_providers/_saml_provider_new.html.twig', [
+        return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'current_user' => $currentUser,
@@ -194,15 +202,17 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        return $this->render('admin/shared/saml_providers/_saml_provider_edit.html.twig', [
+        return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'current_user' => $currentUser,
+            'samlProvider' => $samlProvider
         ]);
     }
 
 
     #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function enableSamlProvider(
         int $id,
         Request $request,
@@ -218,7 +228,7 @@ class SamlProviderController extends AbstractController
         }
 
         // Find and disable the currently active SAML Provider (if any)
-        $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+        $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
         if ($previousSamlProvider) {
             $previousSamlProvider->setActive(false);
         }
@@ -251,6 +261,72 @@ class SamlProviderController extends AbstractController
                 'SAML Provider "%s" is now enabled.',
                 $samlProvider->getName()
             )
+        );
+        return $this->redirectToRoute('admin_dashboard_saml_provider');
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    #[Route('dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteSamlProvider(
+        int $id,
+        Request $request
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Find the new SamlProvider to be enabled
+        $samlProvider = $this->samlProviderRepository->find($id);
+        if (!$samlProvider) {
+            $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
+
+        $getSamlProviderName = $samlProvider->getName();
+        $userExternalAuth = $this->userExternalAuthRepository->findBy([
+            'provider' => UserProvider::SAML,
+            'samlProvider' => $samlProvider
+        ]);
+
+        foreach ($userExternalAuth as $userExternalAuths) {
+            $user = $userExternalAuths->getUser();
+            if (!$user) {
+                continue; // Skip profile disabling if the user doesn't exist
+            }
+            if (!$user->getDeletedAt()) {
+                // Disable profiles
+                $this->profileManager->disableProfiles($user);
+                // Delete associated accounts
+                $deleteUserResult = $this->userDeletionService->deleteUser(
+                    $user,
+                    $userExternalAuth,
+                    $request,
+                    $currentUser
+                );
+                // Handle the failure response in case of missing PGP details
+                if (!$deleteUserResult['success']) {
+                    $this->addFlash('error_admin', $deleteUserResult['message']);
+                    return $this->redirectToRoute('admin_page');
+                }
+            }
+        }
+
+        $deleteSamlProviderResult = $this->samlProviderDeletionService->deleteSamlProvider(
+            $samlProvider,
+            $request,
+            $currentUser,
+        );
+        // Handle the failure response in case of missing PGP details
+        if (!$deleteSamlProviderResult['success']) {
+            $this->addFlash('error_admin', $deleteSamlProviderResult['message']);
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $this->addFlash(
+            'success_admin',
+            sprintf('User with the UUID "%s" deleted successfully.', $getSamlProviderName)
         );
         return $this->redirectToRoute('admin_dashboard_saml_provider');
     }

@@ -20,19 +20,19 @@ class SamlProvider
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $idpEntityId = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $idpSsoUrl = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $idpX509Cert = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $spEntityId = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $spAcsUrl = null;
 
     #[ORM\Column(type:'boolean', options: ['default' => false])]
@@ -49,6 +49,9 @@ class SamlProvider
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
 
     public function __construct()
     {
@@ -77,7 +80,7 @@ class SamlProvider
         return $this->idpEntityId;
     }
 
-    public function setIdpEntityId(string $idpEntityId): static
+    public function setIdpEntityId(?string $idpEntityId): static
     {
         $this->idpEntityId = $idpEntityId;
 
@@ -89,7 +92,7 @@ class SamlProvider
         return $this->idpSsoUrl;
     }
 
-    public function setIdpSsoUrl(string $idpSsoUrl): static
+    public function setIdpSsoUrl(?string $idpSsoUrl): static
     {
         $this->idpSsoUrl = $idpSsoUrl;
 
@@ -101,7 +104,7 @@ class SamlProvider
         return $this->idpX509Cert;
     }
 
-    public function setIdpX509Cert(string $idpX509Cert): static
+    public function setIdpX509Cert(?string $idpX509Cert): static
     {
         $this->idpX509Cert = $idpX509Cert;
 
@@ -113,7 +116,7 @@ class SamlProvider
         return $this->spEntityId;
     }
 
-    public function setSpEntityId(string $spEntityId): static
+    public function setSpEntityId(?string $spEntityId): static
     {
         $this->spEntityId = $spEntityId;
 
@@ -125,7 +128,7 @@ class SamlProvider
         return $this->spAcsUrl;
     }
 
-    public function setSpAcsUrl(string $spAcsUrl): static
+    public function setSpAcsUrl(?string $spAcsUrl): static
     {
         $this->spAcsUrl = $spAcsUrl;
 
@@ -195,6 +198,18 @@ class SamlProvider
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }

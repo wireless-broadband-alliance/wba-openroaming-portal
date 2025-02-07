@@ -11,7 +11,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
                     {# Filter Section - Example Filters for Active/Inactive Providers #}
                     <div class="flex items-center space-x-6">
-                        <a href="{{ path('admin_dashboard_saml_provider', {filter: 'all'}) }}"
+                        <a href="{{ path('admin_dashboard_saml_provider', {filter: 'all', s: app.request.query.get('s')}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
                                 All

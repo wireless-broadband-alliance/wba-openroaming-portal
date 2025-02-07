@@ -25,6 +25,7 @@ class SamlProviderRepository extends ServiceEntityRepository
         int $count
     ): Paginator {
         $queryBuilder = $this->createQueryBuilder('sp');
+        $queryBuilder->andWhere('sp.deletedAt IS NULL');
 
         // Apply filter for active/inactive status
         if ($filter === 'active') {
@@ -64,6 +65,7 @@ class SamlProviderRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('sp');
         $qb->select('COUNT(sp.id)');
+        $qb->andWhere('sp.deletedAt IS NULL');
 
         if ($searchTerm !== null) {
             $qb->andWhere(
