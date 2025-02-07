@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TwoFactorAuthenticationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,6 +31,17 @@ class TwoFactorAuthentication
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $codeGeneratedAt = null;
+
+    /**
+     * @var Collection<int, OTPcode>
+     */
+    #[ORM\OneToMany(mappedBy: 'twoFactorAuthentication', targetEntity: OTPcode::class, orphanRemoval: true)]
+    private Collection $oTPcodes;
+
+    public function __construct()
+    {
+        $this->oTPcodes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -91,6 +104,36 @@ class TwoFactorAuthentication
     public function setCodeGeneratedAt(?\DateTimeInterface $codeGeneratedAt): static
     {
         $this->codeGeneratedAt = $codeGeneratedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OTPcode>
+     */
+    public function getOTPcodes(): Collection
+    {
+        return $this->oTPcodes;
+    }
+
+    public function addOTPcode(OTPcode $oTPcode): static
+    {
+        if (!$this->oTPcodes->contains($oTPcode)) {
+            $this->oTPcodes->add($oTPcode);
+            $oTPcode->setTwoFactorAuthentication($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOTPcode(OTPcode $oTPcode): static
+    {
+        if ($this->oTPcodes->removeElement($oTPcode)) {
+            // set the owning side to null (unless already changed)
+            if ($oTPcode->getTwoFactorAuthentication() === $this) {
+                $oTPcode->setTwoFactorAuthentication(null);
+            }
+        }
 
         return $this;
     }
