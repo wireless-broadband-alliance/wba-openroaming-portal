@@ -84,6 +84,12 @@ class SetSamlProviderCommand extends Command
         }
 
         try {
+//           Create a new service to "check if the values are valid and if they return something", example:
+//           SAML_IDP_ENTITY_ID= // Needs to generate a valid json URL
+//           SAML_IDP_SSO_URL= // Need to generate the authentication page
+//           SAML_IDP_X509_CERT=
+//           SAML_SP_ENTITY_ID= // Needs to generate valid SAML Response format
+//           SAML_SP_ACS_URL=
             $this->createAndPersistSamlProvider(
                 $name,
                 $idpEntityId,
