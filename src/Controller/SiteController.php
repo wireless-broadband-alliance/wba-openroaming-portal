@@ -13,7 +13,9 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
+use App\Enum\twoFAType;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -111,6 +113,18 @@ class SiteController extends AbstractController
             // Check if the user is verified
             if (!$verification) {
                 return $this->redirectToRoute('app_email_code');
+            }
+            // Checks the 2FA status of the platform, if mandatory forces the user to configure it
+            if ($data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL and
+                $currentUser->getUserExternalAuths()->get(0)->getProvider() === UserProvider::PORTAL_ACCOUNT and
+                (!$currentUser->getTwoFactorAuthentication() or
+                    $currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED)) {
+                return $this->redirectToRoute('app_enable2FA');
+            }
+            if ($data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL and
+                (!$currentUser->getTwoFactorAuthentication() or
+                    $currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED)) {
+                return $this->redirectToRoute('app_enable2FA');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
