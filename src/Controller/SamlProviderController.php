@@ -15,6 +15,8 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
+use App\Service\SamlProviderDeletionService;
+use App\Service\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -36,6 +38,8 @@ class SamlProviderController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ProfileManager $profileManager,
+        private readonly UserDeletionService $userDeletionService,
+        private readonly SamlProviderDeletionService $samlProviderDeletionService,
     ) {
     }
 
@@ -208,6 +212,7 @@ class SamlProviderController extends AbstractController
 
 
     #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function enableSamlProvider(
         int $id,
         Request $request,
@@ -260,11 +265,17 @@ class SamlProviderController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
-    public function deleteSamlProvider(int $id): Response
-    {
-        //** @var User $currentUser */
-        // $currentUser = $this->getUser();
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteSamlProvider(
+        int $id,
+        Request $request
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         // Find the new SamlProvider to be enabled
         $samlProvider = $this->samlProviderRepository->find($id);
@@ -273,6 +284,7 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
+        $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
             'provider' => UserProvider::SAML,
             'samlProvider' => $samlProvider
@@ -283,9 +295,39 @@ class SamlProviderController extends AbstractController
             if (!$user) {
                 continue; // Skip profile disabling if the user doesn't exist
             }
-            $this->profileManager->disableProfiles($user);
+            if (!$user->getDeletedAt()) {
+                // Disable profiles
+                $this->profileManager->disableProfiles($user);
+                // Delete associated accounts
+                $deleteUserResult = $this->userDeletionService->deleteUser(
+                    $user,
+                    $userExternalAuth,
+                    $request,
+                    $currentUser
+                );
+                // Handle the failure response in case of missing PGP details
+                if (!$deleteUserResult['success']) {
+                    $this->addFlash('error_admin', $deleteUserResult['message']);
+                    return $this->redirectToRoute('admin_page');
+                }
+            }
         }
 
-        dd($samlProvider, $userExternalAuth);
+        $deleteSamlProviderResult = $this->samlProviderDeletionService->deleteSamlProvider(
+            $samlProvider,
+            $request,
+            $currentUser,
+        );
+        // Handle the failure response in case of missing PGP details
+        if (!$deleteSamlProviderResult['success']) {
+            $this->addFlash('error_admin', $deleteSamlProviderResult['message']);
+            return $this->redirectToRoute('admin_page');
+        }
+
+        $this->addFlash(
+            'success_admin',
+            sprintf('User with the UUID "%s" deleted successfully.', $getSamlProviderName)
+        );
+        return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
 }
