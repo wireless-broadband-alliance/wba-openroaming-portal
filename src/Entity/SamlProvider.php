@@ -80,7 +80,7 @@ class SamlProvider
         return $this->idpEntityId;
     }
 
-    public function setIdpEntityId(string $idpEntityId): static
+    public function setIdpEntityId(?string $idpEntityId): static
     {
         $this->idpEntityId = $idpEntityId;
 
@@ -92,7 +92,7 @@ class SamlProvider
         return $this->idpSsoUrl;
     }
 
-    public function setIdpSsoUrl(string $idpSsoUrl): static
+    public function setIdpSsoUrl(?string $idpSsoUrl): static
     {
         $this->idpSsoUrl = $idpSsoUrl;
 
@@ -104,7 +104,7 @@ class SamlProvider
         return $this->idpX509Cert;
     }
 
-    public function setIdpX509Cert(string $idpX509Cert): static
+    public function setIdpX509Cert(?string $idpX509Cert): static
     {
         $this->idpX509Cert = $idpX509Cert;
 
@@ -116,7 +116,7 @@ class SamlProvider
         return $this->spEntityId;
     }
 
-    public function setSpEntityId(string $spEntityId): static
+    public function setSpEntityId(?string $spEntityId): static
     {
         $this->spEntityId = $spEntityId;
 
@@ -128,7 +128,7 @@ class SamlProvider
         return $this->spAcsUrl;
     }
 
-    public function setSpAcsUrl(string $spAcsUrl): static
+    public function setSpAcsUrl(?string $spAcsUrl): static
     {
         $this->spAcsUrl = $spAcsUrl;
 
