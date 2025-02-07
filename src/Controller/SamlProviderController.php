@@ -14,6 +14,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\ProfileManager;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -34,6 +35,7 @@ class SamlProviderController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ProfileManager $profileManager,
     ) {
     }
 
@@ -266,15 +268,24 @@ class SamlProviderController extends AbstractController
 
         // Find the new SamlProvider to be enabled
         $samlProvider = $this->samlProviderRepository->find($id);
-        $userExternalAuth = $this->userExternalAuthRepository->findBy([
-            'provider' => UserProvider::SAML,
-            'samlProvider' => $samlProvider
-        ]);
-        dd($samlProvider, $userExternalAuth);
-
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
+
+        $userExternalAuth = $this->userExternalAuthRepository->findBy([
+            'provider' => UserProvider::SAML,
+            'samlProvider' => $samlProvider
+        ]);
+
+        foreach ($userExternalAuth as $userExternalAuths) {
+            $user = $userExternalAuths->getUser();
+            if (!$user) {
+                continue; // Skip profile disabling if the user doesn't exist
+            }
+            $this->profileManager->disableProfiles($user);
+        }
+
+        dd($samlProvider, $userExternalAuth);
     }
 }
