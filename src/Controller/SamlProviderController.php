@@ -114,7 +114,7 @@ class SamlProviderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Find and disable the currently active SAML Provider (if any)
-            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
             if ($previousSamlProvider) {
                 $previousSamlProvider->setActive(false);
             }
@@ -221,7 +221,7 @@ class SamlProviderController extends AbstractController
         }
 
         // Find and disable the currently active SAML Provider (if any)
-        $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+        $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
         if ($previousSamlProvider) {
             $previousSamlProvider->setActive(false);
         }
