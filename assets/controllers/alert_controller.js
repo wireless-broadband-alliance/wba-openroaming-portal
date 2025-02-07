@@ -17,6 +17,15 @@ export default class extends Controller {
         }
     }
 
+    delete_saml() {
+        const saml_name = this.buttonTarget.getAttribute('data-provider-name');
+        // Show warning message
+        if (confirm(`Are you sure you want to delete this SAML Provider "${saml_name}"? All the users associated with this provider will also be eliminated`)) {
+            // If confirmed, submit the form
+            this.formTarget.submit();
+        }
+    }
+
     enable_saml() {
         const providerName = this.buttonTarget.getAttribute('data-provider-name');
         // Show warning message

@@ -99,11 +99,19 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ path('admin_dashboard_saml_provider_delete', {id: samlProvider.id}) }}"
-                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
-                            <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
-                            Delete
-                        </a>
+                        <form action="{{ path('admin_dashboard_saml_provider_delete', {id: samlProvider.id}) }}"
+                                {{ stimulus_target('alert', 'form') }} method="post">
+                            <input type="hidden" name="_method" value="ENABLE">
+                            <a href="javascript:void(0)"
+                               data-provider-id="{{ samlProvider.id }}"
+                               data-provider-name="{{ samlProvider.name }}"
+                                    {{ stimulus_action('alert', 'delete_saml') }}
+                                    {{ stimulus_target('alert', 'button') }}
+                               class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400">
+                                <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                                Delete
+                            </a>
+                        </form>
                     </li>
                     <li>
                         {% if samlProvider.isActive %}
