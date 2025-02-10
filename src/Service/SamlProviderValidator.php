@@ -80,6 +80,6 @@ class SamlProviderValidator
 
     private function isValidJson(string $json): bool
     {
-        return json_validate($json, 512, JSON_THROW_ON_ERROR);
+        return json_validate($json, 512, JSON_INVALID_UTF8_IGNORE);
     }
 }
