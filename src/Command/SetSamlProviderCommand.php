@@ -96,6 +96,16 @@ class SetSamlProviderCommand extends Command
             );
             return self::FAILURE;
         }
+        $checkIdpX509Cert = $this->samlProviderValidator->validateCertificate($idpX509Cert);
+        if ($checkIdpX509Cert) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to validate the SAML Provider Certificate: %s</error>',
+                    $checkIdpX509Cert
+                )
+            );
+            return self::FAILURE;
+        }
 
         try {
 //           Create a new service to "check if the values are valid and if they return something", example:
