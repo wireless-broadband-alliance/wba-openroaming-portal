@@ -43,4 +43,12 @@ export default class extends Controller {
             this.formTarget.submit();
         }
     }
+
+    revoke_saml() {
+        const providerName = this.buttonTarget.getAttribute('data-provider-name');
+        if (confirm(`Are you sure you want to revoke all profiles associated with the SAML Provider: ${providerName}?`)) {
+            // If confirmed, submit the form
+            this.formTarget.submit();
+        }
+    }
 }
