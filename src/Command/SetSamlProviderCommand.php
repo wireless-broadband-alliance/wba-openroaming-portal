@@ -91,7 +91,7 @@ class SetSamlProviderCommand extends Command
                 sprintf(
                     '<error>Failed to validate the SAML Provider URL (%s): %s</error>',
                     $idpSsoUrl,
-                    $checkIdpEntityId // Display the specific error returned by the validator
+                    $checkIdpEntityId
                 )
             );
             return self::FAILURE;
@@ -106,13 +106,24 @@ class SetSamlProviderCommand extends Command
             );
             return self::FAILURE;
         }
+        $checkSpEntityId = $this->samlProviderValidator->validateSamlMetadata($spEntityId);
+        if ($checkSpEntityId) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to validate the SAML Provider Metadata (%s): %s</error>',
+                    $spEntityId,
+                    $checkSpEntityId
+                )
+            );
+            return self::FAILURE;
+        }
 
         try {
 //           Create a new service to "check if the values are valid and if they return something", example:
-//           SAML_IDP_ENTITY_ID= // Needs to generate a valid json URL
+//           SAML_IDP_ENTITY_ID= done
 //           SAML_IDP_SSO_URL= // Need to generate the authentication page
-//           SAML_IDP_X509_CERT=
-//           SAML_SP_ENTITY_ID= // Needs to generate valid SAML Response format
+//           SAML_IDP_X509_CERT= done
+//           SAML_SP_ENTITY_ID= done
 //           SAML_SP_ACS_URL=
             $this->createAndPersistSamlProvider(
                 $name,

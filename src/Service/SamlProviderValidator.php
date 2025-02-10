@@ -146,4 +146,69 @@ class SamlProviderValidator
 
         return null;
     }
+
+    /**
+     * Validates the SAML Metadata XML for the specified URL.
+     *
+     * @param string $metadataUrl The URL of the SAML Metadata (XML).
+     * @return string|null Returns an error message if invalid, or null if valid.
+     */
+    public function validateSamlMetadata(string $metadataUrl): ?string
+    {
+        // Check if the URL is valid
+        if (!filter_var($metadataUrl, FILTER_VALIDATE_URL)) {
+            return 'The provided metadata URL is not a valid URL.';
+        }
+
+        // Fetch the XML metadata
+        $metadataXml = @file_get_contents($metadataUrl);
+        if ($metadataXml === false) {
+            return 'Failed to fetch metadata from the URL.';
+        }
+
+        // Suppress errors and load the XML document
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($metadataXml);
+
+        if ($xml === false) {
+            $errors = libxml_get_errors();
+            libxml_clear_errors();
+
+            return 'The metadata XML is not well-formed: ' . implode(
+                ', ',
+                array_map(static fn($e) => $e->message, $errors)
+            );
+        }
+
+        // Check for the root element EntityDescriptor
+        $ns = 'urn:oasis:names:tc:SAML:2.0:metadata';
+        if ($xml->getName() !== 'EntityDescriptor' || $xml->getNamespaces()['md'] !== $ns) {
+            return 'The root element is not a valid SAML EntityDescriptor.';
+        }
+
+        // Validate required attributes on EntityDescriptor
+        $validUntil = isset($xml['validUntil']) ? strtotime((string)$xml['validUntil']) : null;
+        if ($validUntil && $validUntil < time()) {
+            return 'The metadata has expired. ValidUntil: ' . date('Y-m-d H:i:s', $validUntil);
+        }
+
+        $entityID = (string)$xml['entityID'];
+        if ($entityID === '' || $entityID === '0') {
+            return 'The metadata is missing the required entityID attribute.';
+        }
+
+        // Validate SPSSODescriptor element
+        $spSsoDescriptor = $xml->children($ns)->SPSSODescriptor;
+        if (!$spSsoDescriptor) {
+            return 'The metadata is missing the SPSSODescriptor element.';
+        }
+
+        // Validate assertion consumer service (ACS)
+        $acs = $spSsoDescriptor->AssertionConsumerService;
+        if (!$acs) {
+            return 'The SPSSODescriptor does not define an AssertionConsumerService.';
+        }
+
+        return null;
+    }
 }
