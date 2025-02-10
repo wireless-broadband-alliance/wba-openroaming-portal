@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Entity\SamlProvider;
 use Doctrine\ORM\EntityManagerInterface;
 
-class SamlProviderChecker
+class SamlProviderValidator
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager
@@ -55,5 +55,31 @@ class SamlProviderChecker
         }
 
         return null;
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    public function validateJsonUrlSamlProvider(string $url): ?string
+    {
+        // Check if URL is valid
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return 'The provided URL is not valid.';
+        }
+
+        // Make a request to the given URL
+        $response = @file_get_contents($url);
+
+        // Validate JSON structure
+        if ($response === false || !$this->isValidJson($response)) {
+            return 'The response from the URL is not a valid JSON object.';
+        }
+
+        return null; // Validation passed
+    }
+
+    private function isValidJson(string $json): bool
+    {
+        return json_validate($json, 512, JSON_THROW_ON_ERROR);
     }
 }

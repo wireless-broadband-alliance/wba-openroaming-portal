@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
-use App\Service\SamlProviderChecker;
+use App\Service\SamlProviderValidator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -25,11 +25,14 @@ class SetSamlProviderCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ParameterBagInterface $parameterBag,
-        private readonly SamlProviderChecker $samlProviderChecker,
+        private readonly SamlProviderValidator $samlProviderValidator,
     ) {
         parent::__construct();
     }
 
+    /**
+     * @throws \JsonException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         /** @var QuestionHelper $helper */
@@ -65,8 +68,8 @@ class SetSamlProviderCommand extends Command
             return self::FAILURE;
         }
 
-        // Use SamlProviderChecker to validate duplicate entries based on all parameters
-        $duplicateField = $this->samlProviderChecker->checkDuplicateSamlProvider(
+        // Use SamlProviderValidator to validate duplicate entries based on all parameters
+        $duplicateField = $this->samlProviderValidator->checkDuplicateSamlProvider(
             $name,
             $idpEntityId,
             $idpSsoUrl,
@@ -78,6 +81,17 @@ class SetSamlProviderCommand extends Command
                 sprintf(
                     '<error>A SAML Provider with the same %s already exists in the system!</error>',
                     $duplicateField
+                )
+            );
+            return self::FAILURE;
+        }
+        $checkIdpEntityId = $this->samlProviderValidator->validateJsonUrlSamlProvider($idpSsoUrl);
+        if ($checkIdpEntityId) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to validate the SAML Provider URL (%s): %s</error>',
+                    $idpSsoUrl,
+                    $checkIdpEntityId // Display the specific error returned by the validator
                 )
             );
             return self::FAILURE;
