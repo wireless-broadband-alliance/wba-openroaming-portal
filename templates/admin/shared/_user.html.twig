@@ -80,7 +80,6 @@
                     <a href="{{ path('admin_update', {id: user.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
-
                         Edit
                     </a>
                 </li>
@@ -105,7 +104,7 @@
                             {{ stimulus_target('alert', 'form') }}>
                         {{ form_start(formRevokeProfiles) }}
                         {{ form_errors(formRevokeProfiles) }}
-                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="_method" value="REVOKE">
                         <a href="javascript:void(0)"
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
                                 {{ stimulus_action('alert', 'revoke_profiles') }}

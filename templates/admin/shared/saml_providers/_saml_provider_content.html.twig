@@ -90,67 +90,65 @@
         <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
-                <div {{ stimulus_controller('alert') }}>
-                    <li>
-                        <a href="{{ path('admin_dashboard_saml_provider_edit', {id: samlProvider.id}) }}"
-                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                            <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
-                            Edit
+                <li {{ stimulus_controller('alert') }}>
+                    <a href="{{ path('admin_dashboard_saml_provider_edit', {id: samlProvider.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
+                        Edit
+                    </a>
+                </li>
+                <li {{ stimulus_controller('alert') }}>
+                    <form action="{{ path('admin_dashboard_saml_provider_revoke', {id: samlProvider.id}) }}"
+                            {{ stimulus_target('alert', 'form') }} method="POST">
+                        <input type="hidden" name="_method" value="REVOKE">
+                        <a href="javascript:void(0)"
+                           data-provider-id="{{ samlProvider.id }}"
+                           data-provider-name="{{ samlProvider.name }}"
+                                {{ stimulus_action('alert', 'revoke_saml') }}
+                                {{ stimulus_target('alert', 'button') }}
+                           class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
+                            <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
+                            Revoke Profiles
                         </a>
-                    </li>
-                    <li>
-                        <form action="{{ path('admin_dashboard_saml_provider_revoke', {id: samlProvider.id}) }}"
-                                {{ stimulus_target('alert', 'form') }} method="post">
-                            <input type="hidden" name="_method" value="ENABLE">
-                            <a href="javascript:void(0)"
-                               data-provider-id="{{ samlProvider.id }}"
-                               data-provider-name="{{ samlProvider.name }}"
-                                    {{ stimulus_action('alert', 'revoke_saml') }}
-                                    {{ stimulus_target('alert', 'button') }}
-                               class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
-                                <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
-                                Revoke Profiles
-                            </a>
-                        </form>
-                    </li>
-                    <li>
-                        <form action="{{ path('admin_dashboard_saml_provider_delete', {id: samlProvider.id}) }}"
-                                {{ stimulus_target('alert', 'form') }} method="post">
-                            <input type="hidden" name="_method" value="ENABLE">
-                            <a href="javascript:void(0)"
-                               data-provider-id="{{ samlProvider.id }}"
-                               data-provider-name="{{ samlProvider.name }}"
-                                    {{ stimulus_action('alert', 'delete_saml') }}
-                                    {{ stimulus_target('alert', 'button') }}
-                               class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400">
-                                <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
-                                Delete
-                            </a>
-                        </form>
-                    </li>
-                    <li>
-                        {% if samlProvider.isActive %}
-                            <span class="flex flex-row items-center px-2 py-2 text-gray-500 cursor-default">
+                    </form>
+                </li>
+                <li {{ stimulus_controller('alert') }}>
+                    <form action="{{ path('admin_dashboard_saml_provider_delete', {id: samlProvider.id}) }}"
+                            {{ stimulus_target('alert', 'form') }} method="POST">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <a href="javascript:void(0)"
+                           data-provider-id="{{ samlProvider.id }}"
+                           data-provider-name="{{ samlProvider.name }}"
+                                {{ stimulus_action('alert', 'delete_saml') }}
+                                {{ stimulus_target('alert', 'button') }}
+                           class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400">
+                            <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                            Delete
+                        </a>
+                    </form>
+                </li>
+                <li {{ stimulus_controller('alert') }}>
+                    {% if samlProvider.isActive %}
+                        <span class="flex flex-row items-center px-2 py-2 text-gray-500 cursor-default">
                             <twig:ux:icon name="wba:check-circle" class="w-5 mr-3" fill="none"/>
                             Provider Currently Activated
                         </span>
-                        {% else %}
-                            <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
-                                    {{ stimulus_target('alert', 'form') }} method="post">
-                                <input type="hidden" name="_method" value="ENABLE">
-                                <a href="javascript:void(0)"
-                                   data-provider-id="{{ samlProvider.id }}"
-                                   data-provider-name="{{ samlProvider.name }}"
-                                        {{ stimulus_action('alert', 'enable_saml') }}
-                                        {{ stimulus_target('alert', 'button') }}
-                                   class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
-                                    <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
-                                    Enable
-                                </a>
-                            </form>
-                        {% endif %}
-                    </li>
-                </div>
+                    {% else %}
+                        <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
+                                {{ stimulus_target('alert', 'form') }} method="post">
+                            <input type="hidden" name="_method" value="ENABLE">
+                            <a href="javascript:void(0)"
+                               data-provider-id="{{ samlProvider.id }}"
+                               data-provider-name="{{ samlProvider.name }}"
+                                    {{ stimulus_action('alert', 'enable_saml') }}
+                                    {{ stimulus_target('alert', 'button') }}
+                               class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
+                                <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
+                                Enable
+                            </a>
+                        </form>
+                    {% endif %}
+                </li>
             </ul>
         </div>
     </td>
