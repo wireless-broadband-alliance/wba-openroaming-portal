@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\SamlProvider;
 use App\Validator\CamelCase;
+use App\Validator\SamlMetadata;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -110,6 +111,7 @@ class SamlProviderType extends AbstractType
                                 ->addViolation();
                         }
                     }),
+                    new SamlMetadata()
                 ],
             ])
             ->add('spAcsUrl', TextType::class, [
