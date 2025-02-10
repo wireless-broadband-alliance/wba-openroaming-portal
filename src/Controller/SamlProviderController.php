@@ -220,7 +220,6 @@ class SamlProviderController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Find the new SamlProvider to be enabled
         $samlProvider = $this->samlProviderRepository->find($id);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
@@ -277,7 +276,6 @@ class SamlProviderController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Find the new SamlProvider to be enabled
         $samlProvider = $this->samlProviderRepository->find($id);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
@@ -327,6 +325,65 @@ class SamlProviderController extends AbstractController
         $this->addFlash(
             'success_admin',
             sprintf('User with the UUID "%s" deleted successfully.', $getSamlProviderName)
+        );
+        return $this->redirectToRoute('admin_dashboard_saml_provider');
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    #[Route('dashboard/saml-provider/revoke/{id}', name: 'admin_dashboard_saml_provider_revoke', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function revokeSamlProvider(
+        int $id,
+        Request $request
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        $samlProvider = $this->samlProviderRepository->find($id);
+        if (!$samlProvider) {
+            $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
+
+        $getSamlProviderName = $samlProvider->getName();
+        $userExternalAuth = $this->userExternalAuthRepository->findBy([
+            'provider' => UserProvider::SAML,
+            'samlProvider' => $samlProvider
+        ]);
+
+        foreach ($userExternalAuth as $userExternalAuths) {
+            $user = $userExternalAuths->getUser();
+            if (!$user) {
+                continue; // Skip revoke action if the user doesn't exist
+            }
+            if (!$user->getDeletedAt()) {
+                // Disable profiles
+                $this->profileManager->disableProfiles($user, true);
+            }
+        }
+
+        $eventMetadata = [
+            'samlProvider' => $samlProvider->getName(),
+            'revokedBy' => $currentUser->getUuid(),
+            'ip' => $request->getClientIp(),
+        ];
+
+        // Log the revoke action of the SAML provider profiles
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::REVOKED_SAML_PROVIDER_BY,
+            new DateTime(),
+            $eventMetadata
+        );
+
+        $this->addFlash(
+            'success_admin',
+            sprintf(
+                'All Profiles associated with this SamlProvider "%s" have been revoked successfully.',
+                $getSamlProviderName
+            )
         );
         return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
