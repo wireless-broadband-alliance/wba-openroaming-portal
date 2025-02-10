@@ -4,6 +4,9 @@ namespace App\Form;
 
 use App\Entity\SamlProvider;
 use App\Validator\CamelCase;
+use App\Validator\SamlMetadata;
+use App\Validator\SAMLProviderUrl;
+use App\Validator\X509Certificate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -64,6 +67,7 @@ class SamlProviderType extends AbstractType
                                 ->addViolation();
                         }
                     }),
+                    new SAMLProviderUrl()
                 ],
             ])
             ->add('idpSsoUrl', TextType::class, [
@@ -110,6 +114,7 @@ class SamlProviderType extends AbstractType
                                 ->addViolation();
                         }
                     }),
+                    new SamlMetadata()
                 ],
             ])
             ->add('spAcsUrl', TextType::class, [
@@ -144,6 +149,7 @@ class SamlProviderType extends AbstractType
                     new NotBlank([
                         'message' => 'Please enter a valid provider IDP X509 certificate'
                     ]),
+                    new X509Certificate()
                 ],
             ]);
     }

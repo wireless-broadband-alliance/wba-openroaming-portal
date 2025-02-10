@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
-use App\Service\SamlProviderChecker;
+use App\Service\SamlProviderValidator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -25,11 +25,14 @@ class SetSamlProviderCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ParameterBagInterface $parameterBag,
-        private readonly SamlProviderChecker $samlProviderChecker,
+        private readonly SamlProviderValidator $samlProviderValidator,
     ) {
         parent::__construct();
     }
 
+    /**
+     * @throws \JsonException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         /** @var QuestionHelper $helper */
@@ -65,8 +68,8 @@ class SetSamlProviderCommand extends Command
             return self::FAILURE;
         }
 
-        // Use SamlProviderChecker to validate duplicate entries based on all parameters
-        $duplicateField = $this->samlProviderChecker->checkDuplicateSamlProvider(
+        // Use SamlProviderValidator to validate duplicate entries based on all parameters
+        $duplicateField = $this->samlProviderValidator->checkDuplicateSamlProvider(
             $name,
             $idpEntityId,
             $idpSsoUrl,
@@ -82,14 +85,40 @@ class SetSamlProviderCommand extends Command
             );
             return self::FAILURE;
         }
+        $checkIdpEntityId = $this->samlProviderValidator->validateJsonUrlSamlProvider($idpEntityId);
+        if ($checkIdpEntityId) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to validate the SAML Provider URL (%s): %s</error>',
+                    $idpSsoUrl,
+                    $checkIdpEntityId
+                )
+            );
+            return self::FAILURE;
+        }
+        $checkIdpX509Cert = $this->samlProviderValidator->validateCertificate($idpX509Cert);
+        if ($checkIdpX509Cert) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to validate the SAML Provider Certificate: %s</error>',
+                    $checkIdpX509Cert
+                )
+            );
+            return self::FAILURE;
+        }
+        $checkSpEntityId = $this->samlProviderValidator->validateSamlMetadata($spEntityId);
+        if ($checkSpEntityId) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to validate the SAML Provider Metadata (%s): %s</error>',
+                    $spEntityId,
+                    $checkSpEntityId
+                )
+            );
+            return self::FAILURE;
+        }
 
         try {
-//           Create a new service to "check if the values are valid and if they return something", example:
-//           SAML_IDP_ENTITY_ID= // Needs to generate a valid json URL
-//           SAML_IDP_SSO_URL= // Need to generate the authentication page
-//           SAML_IDP_X509_CERT=
-//           SAML_SP_ENTITY_ID= // Needs to generate valid SAML Response format
-//           SAML_SP_ACS_URL=
             $this->createAndPersistSamlProvider(
                 $name,
                 $idpEntityId,
