@@ -14,10 +14,6 @@ class SamlMetadataValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, SamlMetadata::class);
         }
 
-        if (null === $value || '' === $value) {
-            return;
-        }
-
         if (!is_string($value)) {
             // If the value is not a string, raise a violation
             $this->context->buildViolation('The SAML Metadata URL should be a valid string.')

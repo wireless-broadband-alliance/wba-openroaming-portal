@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\SamlProvider;
 use App\Validator\CamelCase;
 use App\Validator\SamlMetadata;
+use App\Validator\SAMLProviderUrl;
 use App\Validator\X509Certificate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
@@ -66,6 +67,7 @@ class SamlProviderType extends AbstractType
                                 ->addViolation();
                         }
                     }),
+                    new SAMLProviderUrl()
                 ],
             ])
             ->add('idpSsoUrl', TextType::class, [

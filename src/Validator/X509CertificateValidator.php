@@ -14,11 +14,6 @@ class X509CertificateValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, X509Certificate::class);
         }
 
-        if (null === $value || '' === $value) {
-            // Let NotBlank handle empty values.
-            return;
-        }
-
         if (!is_string($value)) {
             $this->context->buildViolation('The certificate must be a valid string.')
                 ->addViolation();
