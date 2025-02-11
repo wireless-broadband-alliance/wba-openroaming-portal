@@ -89,7 +89,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
             $lastNotification = $this->notificationRepository->findLastNotificationByType(
                 $user,
-                NotificationType::PROFILE_EXPIRATION
+                NotificationType::PROFILE_EXPIRATION->value
             );
 
             $sendNotification = true;
@@ -110,7 +110,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $userRadiusProfile->getStatus() === 1
             ) {
                 $notification = new Notification();
-                $notification->setType(NotificationType::PROFILE_EXPIRATION);
+                $notification->setType(NotificationType::PROFILE_EXPIRATION->value);
                 $notification->setUser($user);
                 $notification->setLastNotification($realTime);
 
