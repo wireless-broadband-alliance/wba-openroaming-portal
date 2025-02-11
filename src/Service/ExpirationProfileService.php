@@ -38,22 +38,22 @@ class ExpirationProfileService
 
         // Determine expiration time based on provider and provider ID
         switch ($provider) {
-            case UserProvider::GOOGLE_ACCOUNT:
+            case UserProvider::GOOGLE_ACCOUNT->value:
                 $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_GOOGLE', $defaultExpireDays);
                 break;
 
-            case UserProvider::MICROSOFT_ACCOUNT:
+            case UserProvider::MICROSOFT_ACCOUNT->value:
                 $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_MICROSOFT', $defaultExpireDays);
                 break;
 
-            case UserProvider::SAML:
+            case UserProvider::SAML->value:
                 $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_SAML', $defaultExpireDays);
                 break;
 
-            case UserProvider::PORTAL_ACCOUNT:
-                if ($providerId === UserProvider::EMAIL) {
+            case UserProvider::PORTAL_ACCOUNT->value:
+                if ($providerId === UserProvider::EMAIL->value) {
                     $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_EMAIL', $defaultExpireDays);
-                } elseif ($providerId === UserProvider::PHONE_NUMBER) {
+                } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
                     $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_SMS', $defaultExpireDays);
                 }
                 break;

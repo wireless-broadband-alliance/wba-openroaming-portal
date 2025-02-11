@@ -90,7 +90,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->join('u.userExternalAuths', 'uea')
             ->andWhere('uea.provider = :provider')
             ->andWhere('uea.provider_id is not null')
-            ->setParameter('provider', UserProvider::SAML)
+            ->setParameter('provider', UserProvider::SAML->value)
             ->getQuery()
             ->getResult();
     }

@@ -188,7 +188,7 @@ class AuthController extends AbstractController
                 // Create and persist the UserExternalAuth entity
                 $userAuth = new UserExternalAuth();
                 $userAuth->setUser($user)
-                    ->setProvider(UserProvider::SAML)
+                    ->setProvider(UserProvider::SAML->value)
                     ->setProviderId($sAMAccountName);
 
                 $this->entityManager->persist($userAuth);

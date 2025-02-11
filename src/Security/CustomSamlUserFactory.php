@@ -139,7 +139,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
-            ->setProvider(UserProvider::SAML)
+            ->setProvider(UserProvider::SAML->value)
             ->setProviderId($samlIdentifier)
             ->setSamlProvider($activeProvider);
 

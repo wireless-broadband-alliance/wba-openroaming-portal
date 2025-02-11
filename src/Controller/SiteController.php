@@ -158,8 +158,8 @@ class SiteController extends AbstractController
                         $user->setCreatedAt(new \DateTime());
                         $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                        $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                        $userAuths->setProviderId(UserProvider::EMAIL);
+                        $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                        $userAuths->setProviderId(UserProvider::EMAIL->value);
                         $userAuths->setUser($user);
                         $entityManager->persist($user);
                         $entityManager->persist($userAuths);
@@ -168,7 +168,7 @@ class SiteController extends AbstractController
                             'platform' => PlatformMode::DEMO,
                             'uuid' => $user->getUuid(),
                             'ip' => $request->getClientIp(),
-                            'registrationType' => UserProvider::EMAIL,
+                            'registrationType' => UserProvider::EMAIL->value,
                         ];
                         $this->eventActions->saveEvent(
                             $user,
@@ -525,8 +525,8 @@ class SiteController extends AbstractController
                 // Check if the user has an external auth with PortalAccount and a valid email as providerId
                 foreach ($userExternalAuths as $auth) {
                     if (
-                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
-                        $auth->getProviderId() === UserProvider::EMAIL
+                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                        $auth->getProviderId() === UserProvider::EMAIL->value
                     ) {
                         $hasValidPortalAccount = true;
                         break;

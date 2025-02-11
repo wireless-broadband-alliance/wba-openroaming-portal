@@ -118,8 +118,8 @@ class RegistrationController extends AbstractController
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                $userAuths->setProviderId(UserProvider::EMAIL);
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
@@ -129,7 +129,7 @@ class RegistrationController extends AbstractController
                     'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
-                    'registrationType' => UserProvider::EMAIL,
+                    'registrationType' => UserProvider::EMAIL->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
@@ -215,8 +215,8 @@ class RegistrationController extends AbstractController
 
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                $userAuths->setProviderId(UserProvider::PHONE_NUMBER);
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
@@ -226,7 +226,7 @@ class RegistrationController extends AbstractController
                     'platform' => PlatformMode::LIVE,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
-                    'registrationType' => UserProvider::PHONE_NUMBER,
+                    'registrationType' => UserProvider::PHONE_NUMBER->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,

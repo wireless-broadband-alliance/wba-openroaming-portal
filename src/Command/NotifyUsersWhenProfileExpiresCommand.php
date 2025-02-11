@@ -137,9 +137,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     foreach ($userExternalAuths as $externalAuth) {
                         // If email is not sent, try to use phoneNumber
                         if (
-                            ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT) &&
+                            ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) &&
                             $user->getPhoneNumber() &&
-                            $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER
+                            $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
                         ) {
                             $this->sendSMS->sendSms(
                                 $user->getPhoneNumber(),

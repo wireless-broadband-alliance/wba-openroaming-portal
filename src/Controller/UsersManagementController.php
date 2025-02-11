@@ -376,9 +376,9 @@ class UsersManagementController extends AbstractController
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            if ($user->getEmail() && $userExternalAuth->getProviderId() == UserProvider::EMAIL) {
+            if ($user->getEmail() && $userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
                 // Send email
-                $email = (new Email())
+                $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your Password Reset Details')
@@ -404,7 +404,7 @@ class UsersManagementController extends AbstractController
                 );
             }
 
-            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
+            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
@@ -422,13 +422,14 @@ class UsersManagementController extends AbstractController
                     : null;
                 $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
-                // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
-                    (!$latestEvent || $resetAttempts < 3) && (!$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime && $lastResetAccountPasswordTime->add(
-                        $minInterval
-                    ) < $currentTime))
+                    (!$latestEvent || $resetAttempts < 3)
+                    && (!$latestEvent
+                        || ($lastResetAccountPasswordTime instanceof DateTime
+                            && $lastResetAccountPasswordTime->add(
+                                $minInterval
+                            ) < $currentTime))
                 ) {
-                    // phpcs:enable
                     $attempts = $resetAttempts + 1;
 
                     $message = "Your new account password is: " . $newPassword . "%0A";

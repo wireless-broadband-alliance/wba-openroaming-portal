@@ -88,9 +88,9 @@ class Statistics
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            UserProvider::SAML => 0,
-            UserProvider::GOOGLE_ACCOUNT => 0,
-            UserProvider::PORTAL_ACCOUNT => 0,
+            UserProvider::SAML->value => 0,
+            UserProvider::GOOGLE_ACCOUNT->value => 0,
+            UserProvider::PORTAL_ACCOUNT->value => 0,
         ];
 
         // Loop through the users and categorize them based on the provider
@@ -221,7 +221,7 @@ class Statistics
         // Call the repository method to get portal user counts
         /** @var UserExternalAuthRepository $userExternalAuthRepository */
         $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
-            UserProvider::PORTAL_ACCOUNT,
+            UserProvider::PORTAL_ACCOUNT->value,
             $startDate,
             $endDate
         );

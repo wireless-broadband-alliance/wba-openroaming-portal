@@ -284,7 +284,7 @@ class SamlProviderController extends AbstractController
 
         $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
-            'provider' => UserProvider::SAML,
+            'provider' => UserProvider::SAML->value,
             'samlProvider' => $samlProvider
         ]);
 
@@ -349,7 +349,7 @@ class SamlProviderController extends AbstractController
 
         $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
-            'provider' => UserProvider::SAML,
+            'provider' => UserProvider::SAML->value,
             'samlProvider' => $samlProvider
         ]);
 

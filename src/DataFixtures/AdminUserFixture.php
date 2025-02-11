@@ -34,8 +34,8 @@ class AdminUserFixture extends Fixture
         // Create and set up the UserExternalAuth entity
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($admin);
-        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
-        $userExternalAuth->setProviderId(UserProvider::EMAIL);
+        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+        $userExternalAuth->setProviderId(UserProvider::EMAIL->value);
         $manager->persist($userExternalAuth);
 
         // Save the event Action using the service

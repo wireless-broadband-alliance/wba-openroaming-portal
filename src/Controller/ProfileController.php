@@ -20,6 +20,7 @@ use App\Service\ExpirationProfileService;
 use App\Service\GetSettings;
 use App\Utils\CacheUtils;
 use DateTime;
+use DateTimeInterface;
 use Exception;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,7 +84,7 @@ class ProfileController extends AbstractController
         $expirationDate = $this->expirationProfileService->calculateExpiration(
             $userExternalAuth->getProvider(),
             $userExternalAuth->getProviderId(),
-            (new UserRadiusProfile())->setIssuedAt(
+            new UserRadiusProfile()->setIssuedAt(
                 new DateTime()
             ), // Pass a new DateTime if the user does not have a profile with the account
             '../signing-keys/cert.pem'
@@ -159,7 +160,7 @@ class ProfileController extends AbstractController
         $expirationDate = $this->expirationProfileService->calculateExpiration(
             $userExternalAuth->getProvider(),
             $userExternalAuth->getProviderId(),
-            (new UserRadiusProfile())->setIssuedAt(
+            new UserRadiusProfile()->setIssuedAt(
                 new DateTime()
             ), // Pass a new DateTime if the user does not have a profile with the account
             '../signing-keys/cert.pem'
@@ -243,7 +244,7 @@ class ProfileController extends AbstractController
                 'type' => OSTypes::IOS,
                 'ip' => $request->getClientIp(),
             ];
-        } elseif (stripos((string) $userAgent, 'Mac OS') !== false) {
+        } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::MACOS,
@@ -417,7 +418,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
-            $radiusProfile->setIssuedAt(new \DateTime());
+            $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
@@ -477,7 +478,7 @@ class ProfileController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
+        if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 'Your account has been deleted. Please, for more information contact our support.'
@@ -486,7 +487,7 @@ class ProfileController extends AbstractController
             return true;
         }
 
-        if ($user->getBannedAt() instanceof \DateTimeInterface) {
+        if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             $this->redirectToRoute('app_landing');
             return true;
@@ -499,18 +500,18 @@ class ProfileController extends AbstractController
         }
 
         if (
-            !$user->isVerified() &&
-            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL &&
+            !$user->isVerified()
         ) {
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            if ($userExternalAuths === UserProvider::EMAIL) {
+            if ($userExternalAuths === UserProvider::EMAIL->value) {
                 $this->addFlash(
                     'error',
                     'Your account is not verified to download a profile, 
                     before being able to download a profile you need to confirm your account by 
                     clicking on the link send to you via email!'
                 );
-            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER) {
+            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER->value) {
                 $this->addFlash(
                     'error',
                     'Your account is not verified to download a profile, 

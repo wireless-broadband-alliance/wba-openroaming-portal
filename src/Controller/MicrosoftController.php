@@ -168,7 +168,7 @@ class MicrosoftController extends AbstractController
     ): ?User {
         // Check if a user with the given Google user ID exists in UserExternalAuth
         $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-            'provider' => UserProvider::MICROSOFT_ACCOUNT,
+            'provider' => UserProvider::MICROSOFT_ACCOUNT->value,
             'provider_id' => $microsoftUserId
         ]);
 
@@ -205,7 +205,7 @@ class MicrosoftController extends AbstractController
 
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
-            ->setProvider(UserProvider::MICROSOFT_ACCOUNT)
+            ->setProvider(UserProvider::MICROSOFT_ACCOUNT->value)
             ->setProviderId($microsoftUserId);
 
         $randomPassword = bin2hex(random_bytes(8));
@@ -220,7 +220,7 @@ class MicrosoftController extends AbstractController
             'platform' => PlatformMode::LIVE,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
-            'registrationType' => UserProvider::MICROSOFT_ACCOUNT,
+            'registrationType' => UserProvider::MICROSOFT_ACCOUNT->value,
         ];
 
         $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $event_metadata);
