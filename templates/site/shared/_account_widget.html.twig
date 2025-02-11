@@ -97,20 +97,20 @@
     {# divider #}
     <div class="divider my-8"></div>
 
-    <div>
+    <div {{ stimulus_controller('alert') }}>
         <form method="POST"
               action="{{ path('app_site_account_user') }}"
-              data-controller="alert-revoke-profiles"
-              data-alert-revoke-profiles-target="form">
+              data-controller="alert"
+              data-alert-target="form">
             <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
 
             {{ form_start(formRevokeProfiles) }}
             {{ form_errors(formRevokeProfiles) }}
 
             <button class="mt-6 w-[240px] btn-logout"
-                    data-action="alert-revoke-profiles#revoke_profiles"
-                    data-alert-revoke-profiles-target="button"
-                    data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}{{ auth.providerId }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}{{ app.user.uuid }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}{{ app.user.uuid }}{% endif %}{% endfor %}{% else %}{{ app.user.uuid }}{% endif %}"
+                    data-action="alert#revoke_profiles"
+                    data-alert-target="button"
+                    data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}"
                     type="button">
                 Revoke Account Profiles
             </button>
