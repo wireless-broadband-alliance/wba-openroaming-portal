@@ -59,7 +59,8 @@
 
                 <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
-                    <a href="{{ path('app_terms_conditions') }}" target="_blank" class="underline text-primary font-semibold">
+                    <a href="{{ path('app_terms_conditions') }}" target="_blank"
+                       class="underline text-primary font-semibold">
                         terms & conditions of use
                     </a>
                     and
@@ -145,13 +146,9 @@
                         You are currently authenticated as
                         {% if userExternalAuths[user.id] is defined %}
                             {% for auth in userExternalAuths[user.id] %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}
+                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
                                     {{ auth.providerId }}
-                                {% endif %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}
-                                    {{ app.user.uuid }}
-                                {% endif %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}
+                                {% else %}
                                     {{ app.user.uuid }}
                                 {% endif %}
                             {% endfor %}
@@ -226,7 +223,8 @@
                     <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
                         <p class="text-sm">You need to confirm the terms before proceeding.</p>
                         <div class="mt-4 flex justify-center">
-                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close</button>
+                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close
+                            </button>
                         </div>
                     </div>
                 </div>
