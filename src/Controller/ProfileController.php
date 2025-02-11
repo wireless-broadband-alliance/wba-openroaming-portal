@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
@@ -500,7 +500,7 @@ class ProfileController extends AbstractController
         }
 
         if (
-            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL &&
+            $data['USER_VERIFICATION']['value'] === OperationMode::ON->value &&
             !$user->isVerified()
         ) {
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);

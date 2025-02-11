@@ -15,13 +15,14 @@
         {% endfor %}
     </div>
 
-    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Admin login Page</p>
-        <p class="text-lg">Please login using your admin credentials. Once logged in, you'll have access to the admin dashboard.</p>
+        <p class="text-lg">Please login using your admin credentials. Once logged in, you'll have access to the admin
+            dashboard.</p>
     </div>
     {{ form_start(form) }}
 
@@ -60,7 +61,7 @@
     </div>
 
     {# Turnstile Checker #}
-    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
         <div class="ml-3 mt-5">
             {{ form_row(form.security, {full_name: 'security'}) }}
         </div>

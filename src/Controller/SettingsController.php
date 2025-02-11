@@ -7,7 +7,7 @@ use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Form\AuthType;
@@ -552,7 +552,7 @@ class SettingsController extends AbstractController
             $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
-                EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
+                OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {

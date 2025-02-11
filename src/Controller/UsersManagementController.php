@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\ResetPasswordType;
@@ -116,7 +116,7 @@ class UsersManagementController extends AbstractController
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
-        if ($exportUsers === EmailConfirmationStrategy::NO_EMAIL) {
+        if ($exportUsers === OperationMode::OFF->value) {
             $this->addFlash('error_admin', 'This operation is disabled for security reasons');
             return $this->redirectToRoute('admin_page');
         }

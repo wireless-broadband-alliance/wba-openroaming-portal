@@ -8,7 +8,7 @@ use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
@@ -105,7 +105,7 @@ class SiteController extends AbstractController
         // And Check if the user dont have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
-            $data["USER_VERIFICATION"]["value"] === EmailConfirmationStrategy::EMAIL &&
+            $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
             $this->getUser()
         ) {
             $verification = $currentUser->isVerified();
@@ -184,10 +184,10 @@ class SiteController extends AbstractController
                         );
                     }
 
-                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
-                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }

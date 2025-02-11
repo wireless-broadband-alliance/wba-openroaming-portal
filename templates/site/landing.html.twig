@@ -18,11 +18,11 @@
         {% endfor %}
     </div>
 
-    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-lg">Download and install an OpenRoaming profile tailored to your device, as part of the
             WBA OpenRoaming demo program.</p>
         <p class="mt-3">WBA’s profiles are proven to work across a broad range of devices, including iOS, Android,
@@ -45,7 +45,7 @@
             </div>
 
             {# Turnstile Checker #}
-            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
                 <div class="ml-3 mt-5">
                     {{ form_widget(registrationFormDemo.security) }}
                 </div>
@@ -83,7 +83,7 @@
             <div class="my-[25px] divider"></div>
 
         {% else %}
-            {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
                 {% if not app.user.isVerified %}
                     {{ include('site/shared/_account_activation.html.twig') }}
                 {% endif %}
@@ -114,7 +114,7 @@
         <div class="mt-10 w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] text-[#212529] text-opacity-60">
 
             <h1 class="font-xl font-bold">DEMO MODE
-                – {{ data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') ? 'UNCONFIRMED' : 'CONFIRMED' }}
+                – {{ data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::OFF').value ? 'UNCONFIRMED' : 'CONFIRMED' }}
                 EMAIL SYSTEM</h1>
 
             <p class="font-lg">This portal if for testing purposes only and should not be used in production
@@ -128,7 +128,7 @@
                     {{ include('site/shared/_os_selection.html.twig') }}
                 </form>
             {% else %}
-                {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
                     {{ include('site/shared/_account_activation.html.twig') }}
                 {% else %}
                     <form method="post" novalidate>

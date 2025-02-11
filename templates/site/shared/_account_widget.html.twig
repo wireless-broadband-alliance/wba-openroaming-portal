@@ -78,7 +78,7 @@
             </div>
 
             {# Turnstile Checker #}
-            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
                 <div class="ml-3 mt-5">
                     {{ form_widget(formPassword.security) }}
                 </div>
