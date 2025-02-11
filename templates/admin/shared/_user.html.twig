@@ -109,7 +109,8 @@
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
                                 {{ stimulus_action('alert', 'revoke_profiles') }}
                                 {{ stimulus_target('alert', 'button') }}
-                           data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}{{ auth.providerId }}{% elseif auth.provider in [constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT'), constant('App\\Enum\\UserProvider::MICROSOFT_ACCOUNT'), constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT')] %}{{ user.uuid }}{% endif %}{% endfor %}{% else %}{{ user.uuid }}{% endif %}">
+                           data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ user.uuid }}{% endif %}{% endfor %}{% endif %}"
+                        >
                             <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
                             Revoke
                         </a>
