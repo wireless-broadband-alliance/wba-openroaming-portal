@@ -211,7 +211,7 @@ class SecurityController extends AbstractController
             } else {
                 $this->addFlash('error', 'User not found');
             }
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_otpCodes');
         }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
@@ -223,7 +223,7 @@ class SecurityController extends AbstractController
             } else {
                 $this->addFlash('error', 'User not found');
             }
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_otpCodes');
         }
         return $this->render('site/enable2FA.html.twig', [
             'data' => $data,
@@ -280,6 +280,9 @@ class SecurityController extends AbstractController
             $code = $form->get('code')->getData();
             $user = $this->getUser();
             $secret = $user->getTwoFactorAuthentication()->getSecret();
+            if ($this->verificationCodeGenerator->validateOTPCodes($this->getUser(), $code)) {
+                return $this->redirectToRoute('app_landing');
+            }
             if ($this->totpService->verifyTOTP($secret, $code)) {
                 return $this->redirectToRoute('app_landing');
             }
@@ -299,6 +302,9 @@ class SecurityController extends AbstractController
         $this->verificationCodeGenerator->generate2FACode($this->getUser());
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $formCode = $form->get('code')->getData();
+            if ($this->verificationCodeGenerator->validateOTPCodes($this->getUser(), $formCode)) {
+                return $this->redirectToRoute('app_landing');
+            }
             if ($this->verificationCodeGenerator->validateCode($this->getUser(), $formCode)) {
                 return $this->redirectToRoute('app_landing');
             }
@@ -338,6 +344,23 @@ class SecurityController extends AbstractController
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         }
-        return $this->redirectToRoute('app_landing');
+        return $this->redirectToRoute('app_otpCodes');
     }
+
+    #[Route(path: '/enable2FA/codes', name: 'app_otpCodes')]
+    public function twoFAcodes(): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $user = $this->getUser();
+        if ($user) {
+            $this->verificationCodeGenerator->generateOTPcodes($user);
+            return $this->render('site/otpCodes.html.twig', [
+                'data' => $data,
+                'codes' => $user->getTwoFactorAuthentication()->getOTPcodes()
+            ]);
+        }
+        $this->addFlash('error', 'User not found');
+        return $this->redirectToRoute('app_otpCodes');
+    }
+
 }

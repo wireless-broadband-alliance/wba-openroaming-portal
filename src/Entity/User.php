@@ -1712,17 +1712,8 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $twoFAcode = null;
-
-    #[ORM\Column(nullable: false)]
-    private ?bool  $twoFA = false;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $verificationCodecreatedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
@@ -1819,17 +1810,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
         return $this;
     }
-
-    public function getVerificationCodecreatedAt(): ?\DateTimeInterface
-    {
-        return $this->verificationCodecreatedAt;
-    }
-
-    public function setVerificationCodecreatedAt(?\DateTimeInterface $verificationCodecreatedAt): void
-    {
-        $this->verificationCodecreatedAt = $verificationCodecreatedAt;
-    }
-
 
 
     /**
@@ -2139,26 +2119,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->isDisabled = $isDisabled;
 
         return $this;
-    }
-
-    public function getTwoFAcode(): ?string
-    {
-        return $this->twoFAcode;
-    }
-
-    public function setTwoFAcode(?string $twoFAcode): void
-    {
-        $this->twoFAcode = $twoFAcode;
-    }
-
-    public function getTwoFA(): ?bool
-    {
-        return $this->twoFA;
-    }
-
-    public function setTwoFA(?bool $twoFA): void
-    {
-        $this->twoFA = $twoFA;
     }
 
     public function getTwoFactorAuthentication(): ?TwoFactorAuthentication

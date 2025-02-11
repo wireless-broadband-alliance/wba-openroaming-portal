@@ -2,11 +2,13 @@
 
 namespace App\Service;
 
+use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use DateTime;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
@@ -16,7 +18,8 @@ class VerificationCodeEmailGenerator
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly ParameterBagInterface $parameterBag
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -112,5 +115,54 @@ class VerificationCodeEmailGenerator
             return $this->twoFACode($user);
         }
         return $user->getVerificationCode();
+    }
+
+    public function generateOTPcodes(User $user): void
+    {
+        $twoFA = $user->getTwoFactorAuthentication();
+        if ($twoFA && $twoFA->getOTPcodes()) {
+            foreach ($twoFA->getOTPcodes() as $code) {
+                $this->entityManager->remove($code);
+            }
+        }
+        $nCodes = 6;
+        $createdCodes = 0;
+        while ($createdCodes < $nCodes) {
+            $code = $this->generateMixedCode();
+            $otp = new OTPcode();
+            $otp->setTwoFactorAuthentication($twoFA);
+            $otp->setCode($code);
+            $otp->setActive(true);
+            $otp->setCreatedAt(new DateTime());
+            $twoFA->addOTPcode($otp);
+            $this->entityManager->persist($otp);
+            $createdCodes++;
+        }
+        $this->entityManager->persist($twoFA);
+        $this->entityManager->flush();
+    }
+
+    public function validateOTPCodes(User $user, string $formCode): Bool
+    {
+        $twoFAcodes = $user->getTwoFactorAuthentication()->getOTPcodes();
+        foreach ($twoFAcodes as $code) {
+            if ($code->getCode() === $formCode && $code->isActive()) {
+                $code->setActive(false);
+                $this->entityManager->persist($code);
+                $this->entityManager->flush();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function generateMixedCode(int $length = 8): string
+    {
+        $bytes = random_bytes($length / 2);
+        $hexCode = bin2hex($bytes);
+
+        $alphanumericCode = str_replace(['a', 'b', 'c', 'd', 'e', 'f'], ['X', 'Y', 'Z', 'P', 'Q', 'R'], $hexCode);
+
+        return strtoupper(substr($alphanumericCode, 0, $length));
     }
 }

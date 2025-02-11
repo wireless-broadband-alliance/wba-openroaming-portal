@@ -20,28 +20,20 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two Factor Authentication Code</p>
-        <p class="text-lg"> Please enter the code sent to your phone number</p>
+        <p class="font-bold text-xl">Two Factor Authentication Codes</p>
+        <p class="text-lg"> Please save these codes for use in case you lose your device. </p>
     </div>
-    {{ form_start(form) }}
-    <div class="relative mt-10">
-
-        {{ form_widget(form.code, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'Enter your Code',
-            }}) }}
-
+    <div class="relative mt-5">
+        <ul>
+            {% for code in codes %}
+                <li>- {{ code.code }}</li>
+            {% endfor %}
+        </ul>
     </div>
-
-    <p class="text-lg mt-5"> Click  <a href="{{ path('app_verify2FA_local') }}" style="color: green; text-decoration: underline;" >here</a> to resend code</p>
 
     {# Divider #}
-    <div class="my-[25px] divider"></div>
+    <div>
+        <a href="{{ path('app_landing') }}" class="mt-6 w-[180px] btn-primary">Done</a>
+    </div>
 
-    {{ form_row(form.submit, {
-        attr: {
-            class: 'w-[160px] btn btn-primary',
-        }}) }}
-    {{ form_end(form) }}
 {% endblock %}
