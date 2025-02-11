@@ -217,7 +217,7 @@ class MicrosoftController extends AbstractController
         $this->entityManager->flush();
 
         $event_metadata = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
             'registrationType' => UserProvider::MICROSOFT_ACCOUNT->value,

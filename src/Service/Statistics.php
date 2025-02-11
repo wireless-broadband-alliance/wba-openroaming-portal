@@ -134,8 +134,8 @@ class Statistics
         $events = $repository->findBy(['event_name' => 'USER_CREATION']);
 
         $statusCounts = [
-            PlatformMode::LIVE => 0,
-            PlatformMode::DEMO => 0,
+            PlatformMode::LIVE->value => 0,
+            PlatformMode::DEMO->value => 0,
         ];
 
         // Loop through the events and count the status of the user when created

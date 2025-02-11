@@ -29,7 +29,7 @@
             macOS, and Windows, ensuring optimal compatibility.</p>
     </div>
 
-    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO') %}
+    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO').value %}
         {% if not app.user %}
             {{ form_start(registrationFormDemo) }}
 

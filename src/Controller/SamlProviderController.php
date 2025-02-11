@@ -133,7 +133,7 @@ class SamlProviderController extends AbstractController
 
             // Log the event metadata (tracking the change)
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'samlProviderAdded' => $samlProvider->getName(),
                 'ip' => $request->getClientIp(),
                 'by' => $currentUser->getUuid(),
@@ -182,7 +182,7 @@ class SamlProviderController extends AbstractController
 
             // Log the event metadata (tracking the change)
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'samlProviderEdited' => $samlProvider->getName(),
                 'ip' => $request->getClientIp(),
                 'by' => $currentUser->getUuid(),
@@ -240,7 +240,7 @@ class SamlProviderController extends AbstractController
 
         // Log the event metadata (tracking the change)
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'samlProviderEnabled' => $samlProvider->getName(),
             'previousSamlProvider' => $previousSamlProvider ? $previousSamlProvider->getName() : 'None',
             'ip' => $request->getClientIp(),

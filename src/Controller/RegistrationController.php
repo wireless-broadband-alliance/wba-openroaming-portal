@@ -126,7 +126,7 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE,
+                    'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
                     'registrationType' => UserProvider::EMAIL->value,
@@ -223,7 +223,7 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::LIVE,
+                    'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
                     'registrationType' => UserProvider::PHONE_NUMBER->value,
@@ -306,7 +306,7 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::LIVE,
+                    'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
                 ];

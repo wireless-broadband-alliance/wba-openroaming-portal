@@ -165,7 +165,7 @@ class SiteController extends AbstractController
                         $entityManager->persist($userAuths);
                         // Defines the Event to the table
                         $eventMetadata = [
-                            'platform' => PlatformMode::DEMO,
+                            'platform' => PlatformMode::DEMO->value,
                             'uuid' => $user->getUuid(),
                             'ip' => $request->getClientIp(),
                             'registrationType' => UserProvider::EMAIL->value,
@@ -388,7 +388,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
             ];
@@ -408,7 +408,7 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
                 'Old data' => [
@@ -464,7 +464,7 @@ class SiteController extends AbstractController
             $em->flush();
 
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
             ];
@@ -553,13 +553,13 @@ class SiteController extends AbstractController
                             $lastVerificationCodeTime->add($minInterval) < $currentTime)
                     ) {
                         // Save event with attempt count and current time
-                        if (!$latestEvent instanceof \App\Entity\Event) {
+                        if (!$latestEvent instanceof Event) {
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                             $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE,
+                                'platform' => PlatformMode::LIVE->value,
                                 'ip' => $request->getClientIp(),
                                 'uuid' => $user->getUuid(),
                             ];
@@ -689,13 +689,13 @@ class SiteController extends AbstractController
                         $attempts = $verificationAttempts + 1;
 
                         // Save event with attempt count and current time
-                        if (!$latestEvent instanceof \App\Entity\Event) {
+                        if (!$latestEvent instanceof Event) {
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
                             $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
                             $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE,
+                                'platform' => PlatformMode::LIVE->value,
                                 'ip' => $request->getClientIp(),
                                 'uuid' => $user->getUuid(),
                             ];
@@ -828,7 +828,7 @@ class SiteController extends AbstractController
             $entityManager->flush();
 
             $eventMetadata = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'ip' => $request->getClientIp(),
                 'uuid' => $user->getUuid(),
             ];
@@ -959,13 +959,13 @@ class SiteController extends AbstractController
                 $mailer->send($email);
 
                 // Save event with attempt count and current time
-                if (!$latestEvent instanceof \App\Entity\Event) {
+                if (!$latestEvent instanceof Event) {
                     $latestEvent = new Event();
                     $latestEvent->setUser($currentUser);
                     $latestEvent->setEventDatetime(new DateTime());
                     $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
                     $latestEventMetadata = [
-                        'platform' => PlatformMode::LIVE,
+                        'platform' => PlatformMode::LIVE->value,
                         'uuid' => $currentUser->getEmail(),
                         'ip' => $request->getClientIp(),
                     ];
@@ -1053,7 +1053,7 @@ class SiteController extends AbstractController
             $userRepository->save($currentUser, true);
 
             $eventMetadata = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'ip' => $request->getClientIp(),
                 'uuid' => $currentUser->getUuid(),
             ];

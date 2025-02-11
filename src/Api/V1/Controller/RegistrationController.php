@@ -274,7 +274,7 @@ class RegistrationController extends AbstractController
                         $latestEvent->setEventDatetime(new DateTime());
                         $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
                         $latestEventMetadata = [
-                            'platform' => PlatformMode::LIVE,
+                            'platform' => PlatformMode::LIVE->value,
                             'ip' => $request->getClientIp(),
                             'uuid' => $user->getUuid(),
                         ];

@@ -551,7 +551,7 @@ class SettingsController extends AbstractController
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::LIVE) ?
+            $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);

@@ -36,7 +36,7 @@ class LoginSuccessListener implements EventSubscriberInterface
         $user = $event->getAuthenticationToken()->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO : PlatformMode::LIVE;
+        $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
 
         if ($user instanceof User) {
             // Defines the Event to the table

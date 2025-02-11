@@ -49,8 +49,8 @@ class StatusType extends AbstractType
             } elseif ($settingName === 'PLATFORM_MODE') {
                 $builder->add('PLATFORM_MODE', ChoiceType::class, [
                     'choices' => [
-                        PlatformMode::DEMO => PlatformMode::DEMO,
-                        PlatformMode::LIVE => PlatformMode::LIVE,
+                        PlatformMode::DEMO->value => PlatformMode::DEMO->value,
+                        PlatformMode::LIVE->value => PlatformMode::LIVE->value,
                     ],
                     'data' => $settingValue,
                     'attr' => [

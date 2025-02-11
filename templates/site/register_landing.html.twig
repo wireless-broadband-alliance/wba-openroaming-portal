@@ -57,7 +57,7 @@
         <button type="submit" class="btn-primary">
             Create Account
         </button>
-        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::DEMO') %}
+        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_landing') }}" class="btn-secondary">
                 Choose Another
             </a>

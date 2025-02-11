@@ -76,7 +76,7 @@ class UsersManagementController extends AbstractController
         }
 
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'userRevoked' => $user->getUuid(),
             'ip' => $request->getClientIp(),
             'by' => $currentUser->getUuid(),
