@@ -87,7 +87,7 @@ class ProfileController extends AbstractController
         }
 
         $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
-            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
@@ -104,7 +104,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service
@@ -211,7 +211,7 @@ class ProfileController extends AbstractController
         }
 
         $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
-            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
@@ -228,7 +228,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service

@@ -95,9 +95,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
             $sendNotification = true;
 
             if ($notificationResendInterval && $lastNotification) {
-                $dateToResend = (new DateTime(
+                $dateToResend = new DateTime(
                     $lastNotification->getLastNotification()->format('Y-m-d H:i:s')
-                ))->modify('+' . $notificationResendInterval->getValue() . ' days');
+                )->modify('+' . $notificationResendInterval->getValue() . ' days');
 
                 if ($realTime < $dateToResend) {
                     $sendNotification = false;
@@ -116,7 +116,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
                 try {
                     // Priority: Send Email Notification
-                    if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with a email
+                    if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with an email
                         $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail(
                             $user,
                             $timeLeftDays + 1
@@ -176,7 +176,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
     private function disableProfiles($user): void
     {
-        $this->profileManager->disableProfiles($user, true);
+        $this->profileManager->disableProfiles($user, true, true);
     }
 
     /**

@@ -402,7 +402,7 @@ class ProfileController extends AbstractController
         string $realmName
     ): RadiusUser {
         $radiusProfile = $radiusProfileRepository->findOneBy(
-            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
@@ -416,7 +416,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new \DateTime());
 
             // Get the expiration date from the service
