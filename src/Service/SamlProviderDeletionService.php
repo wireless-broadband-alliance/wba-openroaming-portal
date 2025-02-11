@@ -46,11 +46,11 @@ class SamlProviderDeletionService
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
         // Handle encryption errors
-        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
+        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
             return ['success' => false, 'message' => 'Public key is missing. Please provide one.'];
         }
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
+        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
             return ['success' => false, 'message' => 'Public key is empty. Please provide valid key content.'];
         }
 

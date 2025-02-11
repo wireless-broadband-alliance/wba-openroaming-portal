@@ -70,7 +70,7 @@ class Statistics
                 }
             }
         }
-        return (new StatisticsGenerators())->generateDatasets($profileCounts);
+        return new StatisticsGenerators()->generateDatasets($profileCounts);
     }
 
     /**
@@ -117,7 +117,7 @@ class Statistics
             }
         }
 
-        return (new StatisticsGenerators())->generateDatasets($userCounts);
+        return new StatisticsGenerators()->generateDatasets($userCounts);
     }
 
     /**
@@ -162,7 +162,7 @@ class Statistics
             }
         }
 
-        return (new StatisticsGenerators())->generateDatasets($statusCounts);
+        return new StatisticsGenerators()->generateDatasets($statusCounts);
     }
 
     /**
@@ -179,9 +179,9 @@ class Statistics
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            UserVerificationStatus::VERIFIED => 0,
-            UserVerificationStatus::NEED_VERIFICATON => 0,
-            UserVerificationStatus::BANNED => 0,
+            UserVerificationStatus::VERIFIED->value => 0,
+            UserVerificationStatus::NEED_VERIFICATION->value => 0,
+            UserVerificationStatus::BANNED->value => 0,
         ];
 
         // Loop through the users and categorize them based on isVerified and bannedAt
@@ -196,18 +196,18 @@ class Statistics
                 $ban = $user->getBannedAt();
 
                 if ($verification) {
-                    $userCounts[UserVerificationStatus::VERIFIED]++;
+                    $userCounts[UserVerificationStatus::VERIFIED->value]++;
                 } else {
-                    $userCounts[UserVerificationStatus::NEED_VERIFICATON]++;
+                    $userCounts[UserVerificationStatus::NEED_VERIFICATION->value]++;
                 }
 
                 if ($ban) {
-                    $userCounts[UserVerificationStatus::BANNED]++;
+                    $userCounts[UserVerificationStatus::BANNED->value]++;
                 }
             }
         }
 
-        return (new StatisticsGenerators())->generateDatasets($userCounts);
+        return new StatisticsGenerators()->generateDatasets($userCounts);
     }
 
     /**
@@ -226,7 +226,7 @@ class Statistics
             $endDate
         );
 
-        return (new StatisticsGenerators())->generateDatasets($portalUsersCounts);
+        return new StatisticsGenerators()->generateDatasets($portalUsersCounts);
     }
 
     /**
@@ -304,7 +304,7 @@ class Statistics
         }
 
         // Return an array containing both the generated datasets and the counts
-        return (new StatisticsGenerators())->generateDatasetsAuths($authsCounts);
+        return new StatisticsGenerators()->generateDatasetsAuths($authsCounts);
     }
 
     /**
@@ -383,7 +383,7 @@ class Statistics
         }
 
         // Return the counts per realm
-        return (new StatisticsGenerators())->generateDatasetsRealmsCounting($realmCounts);
+        return new StatisticsGenerators()->generateDatasetsRealmsCounting($realmCounts);
     }
 
     /**
@@ -481,7 +481,7 @@ class Statistics
             ];
         }
 
-        return (new StatisticsGenerators())->generateDatasetsSessionAverage($result);
+        return new StatisticsGenerators()->generateDatasetsSessionAverage($result);
     }
 
 
@@ -525,12 +525,12 @@ class Statistics
             ];
         }
 
-        return (new StatisticsGenerators())->generateDatasetsSessionTotal($result);
+        return new StatisticsGenerators()->generateDatasetsSessionTotal($result);
     }
 
 
     /**
-     * Fetch data related to wifi tag usage on the freeradius database
+     * Fetch data related to Wi-Fi tag usage on the freeradius database
      */
     public function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): array
     {

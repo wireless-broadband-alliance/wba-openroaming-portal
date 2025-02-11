@@ -21,8 +21,8 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED'), u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
+                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 Verified
                             </h1>
@@ -30,8 +30,8 @@
                                 {{ verifiedUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED'), u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
+                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 Banned
                             </h1>

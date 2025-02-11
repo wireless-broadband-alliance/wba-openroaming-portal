@@ -104,10 +104,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === UserVerificationStatus::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :isVerified')
                 ->setParameter('isVerified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED) {
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
         }
 
@@ -121,10 +121,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->where('u.roles NOT LIKE :role')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === UserVerificationStatus::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :Verified')
-                ->setParameter(UserVerificationStatus::VERIFIED, true);
-        } elseif ($filter === UserVerificationStatus::BANNED) {
+                ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
@@ -188,10 +188,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        if ($filter === UserVerificationStatus::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :Verified')
                 ->setParameter('Verified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED) {
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
