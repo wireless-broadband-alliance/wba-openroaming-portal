@@ -305,8 +305,8 @@ class SiteController extends AbstractController
             $tosFormat &&
             $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
             } else {
                 $content = '';
             }
@@ -338,8 +338,10 @@ class SiteController extends AbstractController
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value])) {
+                $content = $textEditorRepository->findOneBy(
+                    ['name' => TextEditorName::PRIVACY_POLICY->value]
+                )->getContent();
             } else {
                 $content = '';
             }
@@ -715,10 +717,9 @@ class SiteController extends AbstractController
                         $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber(
-                        )->getNationalNumber();
-                        // phpcs:enable
+                        $recipient = "+" .
+                            $user->getPhoneNumber()->getCountryCode() .
+                            $user->getPhoneNumber()->getNationalNumber();
                         // Send SMS
                         $message = "Your new random account password is: "
                             . $randomPassword

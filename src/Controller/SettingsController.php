@@ -305,17 +305,17 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         $textEditorRepository = $em->getRepository(TextEditor::class);
-        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
         if (!$tosTextEditor) {
             $tosTextEditor = new TextEditor();
-            $tosTextEditor->setName(TextEditorName::TOS);
+            $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
             $em->persist($tosTextEditor);
         }
-        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY]);
+        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
         if (!$privacyPolicyTextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
-            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY);
+            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
             $em->persist($privacyPolicyTextEditor);
         }
@@ -386,7 +386,7 @@ class SettingsController extends AbstractController
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
-                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
                 if ($tosEditorSetting) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
@@ -396,7 +396,7 @@ class SettingsController extends AbstractController
 
             if ($privacyPolicyTextEditor) {
                 $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
-                    'name' => TextEditorName::PRIVACY_POLICY
+                    'name' => TextEditorName::PRIVACY_POLICY->value
                 ]);
                 if ($privacyPolicyEditorSetting) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
