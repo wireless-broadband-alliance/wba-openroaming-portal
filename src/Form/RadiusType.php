@@ -135,8 +135,8 @@ class RadiusType extends AbstractType
                     $formFieldOptions['data'] = $setting->getValue();
                     if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
                         $formFieldOptions['choices'] = [
-                            'WPA 2' => ProfileType::WPA2,
-                            'WPA 3' => ProfileType::WPA3,
+                            'WPA 2' => ProfileType::WPA2->value,
+                            'WPA 3' => ProfileType::WPA3->value,
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                         $formFieldOptions['required'] = true;
