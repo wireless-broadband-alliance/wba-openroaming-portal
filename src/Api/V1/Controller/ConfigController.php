@@ -103,17 +103,17 @@ class ConfigController extends AbstractController
         $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
         $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
 
-        if ($tosType === TextInputType::LINK) {
+        if ($tosType === TextInputType::LINK->value) {
             return $tosLink;
         }
-        if ($tosType === TextInputType::TEXT_EDITOR) {
+        if ($tosType === TextInputType::TEXT_EDITOR->value) {
             return $this->generateUrl('app_terms_conditions', [], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
-        if ($privacyPolicyType === TextInputType::LINK) {
+        if ($privacyPolicyType === TextInputType::LINK->value) {
             return $privacyPolicyLink;
         }
-        if ($privacyPolicyType === TextInputType::TEXT_EDITOR) {
+        if ($privacyPolicyType === TextInputType::TEXT_EDITOR->value) {
             return $this->generateUrl('app_privacy_policy', [], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 

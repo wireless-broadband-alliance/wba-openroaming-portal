@@ -303,7 +303,7 @@ class SiteController extends AbstractController
         $textEditorRepository = $em->getRepository(TextEditor::class);
         if (
             $tosFormat &&
-            $tosFormat->getValue() === TextInputType::TEXT_EDITOR
+            $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
             if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
@@ -317,7 +317,7 @@ class SiteController extends AbstractController
         }
         if (
             $tosFormat &&
-            $tosFormat->getValue() === TextInputType::LINK &&
+            $tosFormat->getValue() === TextInputType::LINK->value &&
             $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
         ) {
             return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
@@ -336,7 +336,7 @@ class SiteController extends AbstractController
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
         if (
             $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR
+            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
             if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
@@ -350,7 +350,7 @@ class SiteController extends AbstractController
         }
         if (
             $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::LINK &&
+            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
             $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
         ) {
             return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
