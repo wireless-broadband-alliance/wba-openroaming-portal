@@ -40,10 +40,10 @@ class Statistics
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
-            OSTypes::ANDROID => 0,
-            OSTypes::WINDOWS => 0,
-            OSTypes::MACOS => 0,
-            OSTypes::IOS => 0,
+            OSTypes::ANDROID->value => 0,
+            OSTypes::WINDOWS->value => 0,
+            OSTypes::MACOS->value => 0,
+            OSTypes::IOS->value => 0,
         ];
 
         // Filter and count profile types based on the date criteria

@@ -122,7 +122,7 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::ANDROID,
+            'type' => OSTypes::ANDROID->value,
             'ip' => $request->getClientIp(),
         ];
 
@@ -241,13 +241,13 @@ class ProfileController extends AbstractController
         if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::IOS,
+                'type' => OSTypes::IOS->value,
                 'ip' => $request->getClientIp(),
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::MACOS,
+                'type' => OSTypes::MACOS->value,
                 'ip' => $request->getClientIp(),
             ];
         }
@@ -335,7 +335,7 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::WINDOWS,
+            'type' => OSTypes::WINDOWS->value,
             'ip' => $request->getClientIp(),
         ];
 
