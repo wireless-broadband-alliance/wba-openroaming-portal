@@ -276,14 +276,17 @@ class SecurityController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFAcode::class);
+        $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $code = $form->get('code')->getData();
             $user = $this->getUser();
             $secret = $user->getTwoFactorAuthentication()->getSecret();
             if ($this->verificationCodeGenerator->validateOTPCodes($this->getUser(), $code)) {
+                $session->set('2fa_verified', true);
                 return $this->redirectToRoute('app_landing');
             }
             if ($this->totpService->verifyTOTP($secret, $code)) {
+                $session->set('2fa_verified', true);
                 return $this->redirectToRoute('app_landing');
             }
             $this->addFlash('error', 'Invalid code');
@@ -300,12 +303,15 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFAcode::class);
         $this->verificationCodeGenerator->generate2FACode($this->getUser());
+        $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $formCode = $form->get('code')->getData();
             if ($this->verificationCodeGenerator->validateOTPCodes($this->getUser(), $formCode)) {
+                $session->set('2fa_verified', true);
                 return $this->redirectToRoute('app_landing');
             }
             if ($this->verificationCodeGenerator->validateCode($this->getUser(), $formCode)) {
+                $session->set('2fa_verified', true);
                 return $this->redirectToRoute('app_landing');
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');

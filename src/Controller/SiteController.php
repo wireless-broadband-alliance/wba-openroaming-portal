@@ -101,6 +101,19 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $session = $request->getSession();
+        if ($currentUser && $currentUser->getTwoFactorAuthentication()) {
+            if (!($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) &&
+                !$session->has('2fa_verified')) {
+                if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                    return $this->redirectToRoute('app_verify2FA_local');
+                }
+                if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
+                    return $this->redirectToRoute('app_verify2FA_app');
+                }
+
+            }
+        }
 
         // Check if the user is logged in and verification of the user
         // And Check if the user dont have a forgot_password_request active
