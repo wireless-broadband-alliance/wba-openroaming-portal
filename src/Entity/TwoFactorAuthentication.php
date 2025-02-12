@@ -128,17 +128,15 @@ class TwoFactorAuthentication
 
     public function removeOTPcode(OTPcode $oTPcode): static
     {
-        if ($this->oTPcodes->removeElement($oTPcode)) {
-            // set the owning side to null (unless already changed)
-            if (
-                $this->oTPcodes->removeElement($oTPcode) &&
+        // set the owning side to null (unless already changed)
+        if (
+            $this->oTPcodes->removeElement($oTPcode) &&
+            ($this->oTPcodes->removeElement($oTPcode) &&
                 ($this->oTPcodes->removeElement($oTPcode) &&
-                    $oTPcode->getTwoFactorAuthentication() === $this)
-            ) {
-                $oTPcode->setTwoFactorAuthentication(null);
-            }
+                    ($this->oTPcodes->removeElement($oTPcode) &&
+                        $oTPcode->getTwoFactorAuthentication() === $this)))) {
+        $oTPcode->setTwoFactorAuthentication(null);
         }
-
-        return $this;
-    }
+          return $this;
+        }
 }
