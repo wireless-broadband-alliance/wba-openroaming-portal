@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\TwoFactorAuthentication;
 use App\Entity\User;
 use App\Enum\PlatformMode;
-use App\Enum\twoFAType;
+use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Form\TwoFAcode;
@@ -81,7 +81,7 @@ class SecurityController extends AbstractController
             }
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
-                if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED->value) {
+                if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
                         if (
                             $this->getUser()->getTwoFactorAuthentication()->getType() ===
@@ -104,7 +104,7 @@ class SecurityController extends AbstractController
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL->value) {
+                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
                         if (
                             $this->getUser()->getTwoFactorAuthentication()->getType() ===
@@ -128,7 +128,7 @@ class SecurityController extends AbstractController
                     }
                     return $this->redirectToRoute('app_enable2FA');
                 }
-                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL->value) {
+                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_ALL->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
                         if (
                             $this->getUser()->getTwoFactorAuthentication()->getType() ===
