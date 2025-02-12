@@ -276,7 +276,7 @@ class AdminController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST,
+                AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );

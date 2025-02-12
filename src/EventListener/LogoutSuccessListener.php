@@ -46,7 +46,12 @@ class LogoutSuccessListener implements EventSubscriberInterface
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'uuid' => $user->getUuid(),
             ];
-            $this->eventActions->saveEvent($user, AnalyticalEventType::LOGOUT_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::LOGOUT_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
         }
     }
 }

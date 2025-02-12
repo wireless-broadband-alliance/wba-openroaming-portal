@@ -228,8 +228,18 @@ class GoogleController extends AbstractController
             'registrationType' => UserProvider::GOOGLE_ACCOUNT->value,
         ];
 
-        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $event_metadata);
-        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_VERIFICATION, new DateTime(), []);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::USER_CREATION->value,
+            new DateTime(),
+            $event_metadata
+        );
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::USER_VERIFICATION->value,
+            new DateTime(),
+            []
+        );
 
         return $user;
     }

@@ -127,7 +127,12 @@ class ProfileController extends AbstractController
         ];
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $response;
     }
@@ -252,7 +257,12 @@ class ProfileController extends AbstractController
             ];
         }
 
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $response;
     }
@@ -340,7 +350,12 @@ class ProfileController extends AbstractController
         ];
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $this->redirect(
             'ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate(

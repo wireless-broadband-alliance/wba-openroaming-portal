@@ -158,7 +158,7 @@ class ProfileController extends AbstractController
 
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::CONFIG_PROFILE_ANDROID,
+            AnalyticalEventType::CONFIG_PROFILE_ANDROID->value,
             new DateTime(),
             $eventMetadata
         );
@@ -288,7 +288,7 @@ class ProfileController extends AbstractController
 
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::CONFIG_PROFILE_IOS,
+            AnalyticalEventType::CONFIG_PROFILE_IOS->value,
             new DateTime(),
             $eventMetadata
         );

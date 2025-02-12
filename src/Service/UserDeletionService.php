@@ -96,7 +96,7 @@ class UserDeletionService
         ];
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::DELETED_USER_BY,
+            AnalyticalEventType::DELETED_USER_BY->value,
             new DateTime(),
             $eventMetadata
         );

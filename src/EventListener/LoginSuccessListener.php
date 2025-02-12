@@ -47,7 +47,7 @@ class LoginSuccessListener implements EventSubscriberInterface
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+                AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );

@@ -83,7 +83,7 @@ class UsersManagementController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::ADMIN_REVOKE_PROFILES,
+            AnalyticalEventType::ADMIN_REVOKE_PROFILES->value,
             new DateTime(),
             $eventMetaData
         );
@@ -216,7 +216,7 @@ class UsersManagementController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST,
+            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST->value,
             new DateTime(),
             $eventMetadata
         );
@@ -340,7 +340,7 @@ class UsersManagementController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -398,7 +398,7 @@ class UsersManagementController extends AbstractController
 
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                     new DateTime(),
                     $eventMetadata
                 );

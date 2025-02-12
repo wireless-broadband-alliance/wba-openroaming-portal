@@ -165,7 +165,7 @@ class SendSMS
                     ];
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        AnalyticalEventType::USER_SMS_ATTEMPT->value,
                         new DateTime(),
                         $eventMetadata
                     );

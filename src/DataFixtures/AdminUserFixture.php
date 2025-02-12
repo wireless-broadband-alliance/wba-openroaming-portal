@@ -39,8 +39,8 @@ class AdminUserFixture extends Fixture
         $manager->persist($userExternalAuth);
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION, new DateTime(), []);
-        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION, new DateTime(), []);
+        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION->value, new DateTime(), []);
+        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION->value, new DateTime(), []);
 
 
         $manager->flush();

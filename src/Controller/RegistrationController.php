@@ -133,7 +133,7 @@ class RegistrationController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_CREATION,
+                    AnalyticalEventType::USER_CREATION->value,
                     new DateTime(),
                     $eventMetaData
                 );
@@ -230,7 +230,7 @@ class RegistrationController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_CREATION,
+                    AnalyticalEventType::USER_CREATION->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -312,7 +312,7 @@ class RegistrationController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_VERIFICATION,
+                    AnalyticalEventType::USER_VERIFICATION->value,
                     new DateTime(),
                     $eventMetadata
                 );

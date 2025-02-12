@@ -80,7 +80,7 @@ class SamlProviderDeletionService
         // Log the deletion of the SAML provider
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::DELETED_SAML_PROVIDER_BY,
+            AnalyticalEventType::DELETED_SAML_PROVIDER_BY->value,
             new DateTime(),
             $eventMetadata
         );

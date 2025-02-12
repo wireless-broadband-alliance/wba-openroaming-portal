@@ -172,7 +172,7 @@ class SiteController extends AbstractController
                         ];
                         $this->eventActions->saveEvent(
                             $user,
-                            AnalyticalEventType::USER_CREATION,
+                            AnalyticalEventType::USER_CREATION->value,
                             new DateTime(),
                             $eventMetadata
                         );
@@ -394,7 +394,7 @@ class SiteController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_REVOKE_PROFILES,
+                AnalyticalEventType::USER_REVOKE_PROFILES->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -422,7 +422,7 @@ class SiteController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -470,7 +470,7 @@ class SiteController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -537,7 +537,7 @@ class SiteController extends AbstractController
                 if ($hasValidPortalAccount) {
                     $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                         $user,
-                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
+                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
                     $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
@@ -557,7 +557,7 @@ class SiteController extends AbstractController
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
                             $latestEventMetadata = [
                                 'platform' => PlatformMode::LIVE->value,
                                 'ip' => $request->getClientIp(),
@@ -666,7 +666,7 @@ class SiteController extends AbstractController
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST
+                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value
                 );
                 // Retrieve the SMS resend interval from the settings
                 $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
@@ -693,7 +693,7 @@ class SiteController extends AbstractController
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
                             $latestEventMetadata = [
                                 'platform' => PlatformMode::LIVE->value,
                                 'ip' => $request->getClientIp(),
@@ -834,7 +834,7 @@ class SiteController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED,
+                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -936,7 +936,7 @@ class SiteController extends AbstractController
         if (!$isVerified) {
             $latestEvent = $eventRepository->findLatestRequestAttemptEvent(
                 $currentUser,
-                AnalyticalEventType::USER_EMAIL_ATTEMPT
+                AnalyticalEventType::USER_EMAIL_ATTEMPT->value
             );
             $minInterval = new DateInterval('PT2M');
             $currentTime = new DateTime();
@@ -963,7 +963,7 @@ class SiteController extends AbstractController
                     $latestEvent = new Event();
                     $latestEvent->setUser($currentUser);
                     $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
+                    $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT->value);
                     $latestEventMetadata = [
                         'platform' => PlatformMode::LIVE->value,
                         'uuid' => $currentUser->getEmail(),
@@ -971,7 +971,7 @@ class SiteController extends AbstractController
                     ];
                 }
 
-                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
                 $latestEventMetadata['verificationAttempts'] = $attempts;
                 $latestEvent->setEventMetadata($latestEventMetadata);
 
@@ -1059,7 +1059,7 @@ class SiteController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::USER_VERIFICATION,
+                AnalyticalEventType::USER_VERIFICATION->value,
                 new DateTime(),
                 $eventMetadata
             );

@@ -91,7 +91,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -118,7 +118,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_TERMS_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_TERMS_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -145,7 +145,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -169,7 +169,7 @@ class SettingsController extends AbstractController
                 $event = new Event();
                 $event->setUser($currentUser);
                 $event->setEventDatetime(new DateTime());
-                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
+                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST->value);
                 $event->setEventMetadata([
                     'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid()
@@ -199,7 +199,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -226,7 +226,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -253,7 +253,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -280,7 +280,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST,
+                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -410,7 +410,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_TERMS_REQUEST,
+                AnalyticalEventType::SETTING_TERMS_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -503,7 +503,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST,
+                    AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -585,7 +585,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST,
+                AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -658,7 +658,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST,
+                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -784,7 +784,7 @@ class SettingsController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST,
+                AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -854,7 +854,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST,
+                AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -925,7 +925,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_SMS_CONF_REQUEST,
+                AnalyticalEventType::SETTING_SMS_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
