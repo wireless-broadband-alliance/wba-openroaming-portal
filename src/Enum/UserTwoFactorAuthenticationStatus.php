@@ -2,11 +2,11 @@
 
 namespace App\Enum;
 
-enum UserTwoFactorAuthenticationStatus
+enum UserTwoFactorAuthenticationStatus: string
 {
-    public const DISABLED = 'DISABLED';
-    public const APP = 'APP';
-    public const SMS = 'SMS';
-    public const EMAIL = 'EMAIL';
+    case DISABLED = 'DISABLED';
+    case APP = 'APP';
+    case SMS = 'SMS';
+    case EMAIL = 'EMAIL';
 
 }

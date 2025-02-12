@@ -2,10 +2,10 @@
 
 namespace App\Enum;
 
-enum twoFAType
+enum twoFAType: string
 {
-    public const NOT_ENFORCED = "NOT_ENFORCED";
-    Public const ENFORCED_FOR_LOCAL = "ENFORCED_FOR_LOCAL";
-    Public const ENFORCED_FOR_ALL = "ENFORCED_FOR_ALL";
+    case NOT_ENFORCED = "NOT_ENFORCED";
+    case ENFORCED_FOR_LOCAL = "ENFORCED_FOR_LOCAL";
+    case ENFORCED_FOR_ALL = "ENFORCED_FOR_ALL";
 
 }

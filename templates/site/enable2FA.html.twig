@@ -15,11 +15,11 @@
         {% endfor %}
     </div>
 
-    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Phone Number</p>
         <p class="text-lg"> Please enter your phone number to receive the verification code </p>
     </div>
@@ -55,7 +55,7 @@
             class: 'w-[160px] btn btn-primary',
         }}) }}
     {{ form_end(form) }}
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to switch to the authentication app</p> </p>
     </div>
 {% endblock %}

@@ -93,6 +93,7 @@
             {{ form_end(formPassword) }}
         </form>
     </div>
+    {% if (user.twoFactorAuthentication) %}
     {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::NOT_ENFORCED') %}
     {# divider #}
     <div class="divider my-8"></div>
@@ -182,6 +183,13 @@
                 {% endif %}
             </div>
         {% endif %}
+    {% endif %}
+    {% else %}
+    <div class="divider my-8"></div>
+    <div>
+        <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+        <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
+    </div>
     {% endif %}
     {# divider #}
     <div class="divider my-8"></div>

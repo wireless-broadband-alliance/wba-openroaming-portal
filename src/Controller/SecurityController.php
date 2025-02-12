@@ -91,44 +91,44 @@ class SecurityController extends AbstractController
             }
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
-                if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED) {
+                if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
                             return $this->redirectToRoute('app_landing');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
                             return $this->redirectToRoute('app_verify2FA_local');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL) {
+                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
                             return $this->redirectToRoute('app_enable2FA');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
                             return $this->redirectToRoute('app_verify2FA_local');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_verify2FA_local');
                     }
                     return $this->redirectToRoute('app_enable2FA');
                 }
-                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL) {
+                if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
                             return $this->redirectToRoute('app_enable2FA');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
                             return $this->redirectToRoute('app_verify2FA_local');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
+                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_enable2FA');
@@ -198,14 +198,14 @@ class SecurityController extends AbstractController
         if (!$user->getTwoFactorAuthentication()) {
             $twoFA = new TwoFactorAuthentication();
             $twoFA->setUser($user);
-            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED);
+            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
             $user->setTwoFactorAuthentication($twoFA);
             $this->entityManager->persist($twoFA);
         }
         $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
         if ($user->getPhoneNumber()) {
             if ($user) {
-                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS);
+                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
             } else {
@@ -216,7 +216,7 @@ class SecurityController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
             if ($user) {
-                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS);
+                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
                 $user->setPhoneNumber($phoneNumber);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -241,7 +241,7 @@ class SecurityController extends AbstractController
             if (!$user->getTwoFActorAuthentication()){
                 $twoFA = new TwoFactorAuthentication();
                 $twoFA->setUser($user);
-                $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED);
+                $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
                 $user->setTwoFactorAuthentication($twoFA);
                 $this->entityManager->persist($twoFA);
             }
@@ -329,7 +329,7 @@ class SecurityController extends AbstractController
         if ($user && $user->getTwoFactorAuthentication()) {
             /** @var TwoFactorAuthentication $twoFA */
             $twoFA = $user->getTwoFactorAuthentication();
-            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED);
+            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
             $this->entityManager->persist($twoFA);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
@@ -345,7 +345,7 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         $twoFA = $user->getTwoFactorAuthentication();
         if ($user && $twoFA) {
-            $twoFA->setType(UserTwoFactorAuthenticationStatus::APP);
+            $twoFA->setType(UserTwoFactorAuthenticationStatus::APP->value);
             $this->entityManager->persist($twoFA);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
