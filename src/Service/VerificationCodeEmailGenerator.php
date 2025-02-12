@@ -97,7 +97,7 @@ class VerificationCodeEmailGenerator
         return $verificationCode;
     }
 
-    public function generate2FACode(User $user): int
+    public function generate2FACode(User $user)
     {
         $codeDate = $user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication ?
             $user->getTwoFactorAuthentication()->getCodeGeneratedAt() : null;

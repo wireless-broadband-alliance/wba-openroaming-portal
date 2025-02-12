@@ -120,9 +120,9 @@ class StatusType extends AbstractType
             } elseif ($settingName === 'TWO_FACTOR_AUTH_STATUS') {
                 $builder->add('TWO_FACTOR_AUTH_STATUS', ChoiceType::class, [
                     'choices' => [
-                        TwoFAType::NOT_ENFORCED => TwoFAType::NOT_ENFORCED,
-                        TwoFAType::ENFORCED_FOR_LOCAL => TwoFAType::ENFORCED_FOR_LOCAL,
-                        TwoFAType::ENFORCED_FOR_ALL => TwoFAType::ENFORCED_FOR_ALL
+                        TwoFAType::NOT_ENFORCED->value => TwoFAType::NOT_ENFORCED->value,
+                        TwoFAType::ENFORCED_FOR_LOCAL->value => TwoFAType::ENFORCED_FOR_LOCAL->value,
+                        TwoFAType::ENFORCED_FOR_ALL->value => TwoFAType::ENFORCED_FOR_ALL->value
                     ],
                     'data' => $settingValue,
                     'attr' => [
