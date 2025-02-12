@@ -10,7 +10,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
-use App\Enum\twoFaType;
+use App\Enum\twoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\LDAPType;
@@ -554,7 +554,7 @@ class SettingsController extends AbstractController
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
-            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? twoFaType::NOT_ENFORCED;
+            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? twoFAType::NOT_ENFORCED;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {

@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
-use App\Enum\twoFaType;
+use App\Enum\twoFAType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -120,9 +120,9 @@ class StatusType extends AbstractType
             } elseif ($settingName === 'TWO_FACTOR_AUTH_STATUS') {
                 $builder->add('TWO_FACTOR_AUTH_STATUS', ChoiceType::class, [
                     'choices' => [
-                        twoFaType::NOT_ENFORCED => twoFaType::NOT_ENFORCED,
-                        twoFaType::ENFORCED_FOR_LOCAL => twoFaType::ENFORCED_FOR_LOCAL,
-                        twoFaType::ENFORCED_FOR_ALL => twoFaType::ENFORCED_FOR_ALL
+                        twoFAType::NOT_ENFORCED => twoFAType::NOT_ENFORCED,
+                        twoFAType::ENFORCED_FOR_LOCAL => twoFAType::ENFORCED_FOR_LOCAL,
+                        twoFAType::ENFORCED_FOR_ALL => twoFAType::ENFORCED_FOR_ALL
                     ],
                     'data' => $settingValue,
                     'attr' => [
