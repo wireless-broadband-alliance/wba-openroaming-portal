@@ -33,8 +33,10 @@
             {% endblock %}
             {# Cookie Banner #}
             {% block cookie %}
-                <div class="grid grid-cols-1 gap-[5px] ">
-                    {{ include('site/shared/_cookie_banner.html.twig') }}
+                <div class="grid grid-cols-1 gap-[5px]">
+                    {% if isEEAUser %}
+                        {{ include('site/shared/_cookie_banner.html.twig') }}
+                    {% endif %}
                 </div>
             {% endblock %}
         </div>

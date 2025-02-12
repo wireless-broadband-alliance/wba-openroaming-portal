@@ -26,6 +26,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
+use App\Service\EEAUserDetector;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -72,6 +73,8 @@ class SiteController extends AbstractController
      * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
+     * @param SendSMS $sendSMS Call the function to send SMS using BudgetSms api
+     * @param EEAUserDetector $EEAUserDetector Checks if the user belongs to the EA for cookies policies
      */
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -83,14 +86,15 @@ class SiteController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
-        private readonly SendSMS $sendSMS
+        private readonly SendSMS $sendSMS,
+        private readonly EEAUserDetector $EEAUserDetector,
     ) {
     }
 
     #[Route('/', name: 'app_landing')]
     public function landing(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
+        UserPasswordHasherInterface $userPasswordEncoder,
         UserAuthenticatorInterface $userAuthenticator,
         PasswordAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
@@ -100,9 +104,11 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        // Check if the user is from the EU
+        $isEEAUser = $this->EEAUserDetector->isEEAUser();
 
         // Check if the user is logged in and verification of the user
-        // And Check if the user dont have a forgot_password_request active
+        // And check if the user don't have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
@@ -155,8 +161,8 @@ class SiteController extends AbstractController
                         $user = $form->getData();
 
                         $user->setEmail($user->getEmail());
-                        $user->setCreatedAt(new \DateTime());
-                        $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                        $user->setCreatedAt(new DateTime());
+                        $user->setPassword($userPasswordEncoder->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                         $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                         $userAuths->setProviderId(UserProvider::EMAIL->value);
@@ -204,10 +210,7 @@ class SiteController extends AbstractController
                         $payload['radio-os'] = $payload['detected-os'];
                     }
                 }
-                if (
-                    $payload['radio-os'] !== 'none' && $this->getUser(
-                    ) instanceof \Symfony\Component\Security\Core\User\UserInterface
-                ) {
+                if ($payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface) {
                     /**
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
@@ -239,8 +242,7 @@ class SiteController extends AbstractController
                 }
             }
             if (
-                $payload['radio-os'] !== 'none' && $this->getUser(
-                ) instanceof UserInterface
+                $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
             ) {
                 /**
                  * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
@@ -288,7 +290,8 @@ class SiteController extends AbstractController
             'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
-            'user' => $currentUser
+            'user' => $currentUser,
+            'isEEAUser' => $isEEAUser,
         ]);
     }
 
@@ -904,7 +907,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
 
-        return (new TemplatedEmail())
+        return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
