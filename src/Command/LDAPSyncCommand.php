@@ -45,7 +45,7 @@ class LDAPSyncCommand extends Command
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
             foreach ($userExternalAuths as $externalAuth) {
-                if ($externalAuth->getProvider() === UserProvider::SAML) {
+                if ($externalAuth->getProvider() === UserProvider::SAML->value) {
                     $providerId = $externalAuth->getProviderId();
                     $io->writeln('Syncing ' . $providerId . ' with LDAP');
 

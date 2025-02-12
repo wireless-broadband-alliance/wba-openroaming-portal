@@ -77,7 +77,7 @@ class GetCurrentUserController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::GET_USER_API,
+                AnalyticalEventType::GET_USER_API->value,
                 new DateTime(),
                 $eventMetadata
             );

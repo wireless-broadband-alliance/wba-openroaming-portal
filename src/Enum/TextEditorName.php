@@ -2,8 +2,8 @@
 
 namespace App\Enum;
 
-enum TextEditorName
+enum TextEditorName: string
 {
-    public const TOS = 'TOS';
-    public const PRIVACY_POLICY = 'PRIVACY_POLICY';
+    case TOS = 'TOS';
+    case PRIVACY_POLICY = 'PRIVACY_POLICY';
 }

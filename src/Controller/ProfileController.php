@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
@@ -20,6 +20,7 @@ use App\Service\ExpirationProfileService;
 use App\Service\GetSettings;
 use App\Utils\CacheUtils;
 use DateTime;
+use DateTimeInterface;
 use Exception;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,7 +84,7 @@ class ProfileController extends AbstractController
         $expirationDate = $this->expirationProfileService->calculateExpiration(
             $userExternalAuth->getProvider(),
             $userExternalAuth->getProviderId(),
-            (new UserRadiusProfile())->setIssuedAt(
+            new UserRadiusProfile()->setIssuedAt(
                 new DateTime()
             ), // Pass a new DateTime if the user does not have a profile with the account
             '../signing-keys/cert.pem'
@@ -121,12 +122,17 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::ANDROID,
+            'type' => OSTypes::ANDROID->value,
             'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $response;
     }
@@ -159,7 +165,7 @@ class ProfileController extends AbstractController
         $expirationDate = $this->expirationProfileService->calculateExpiration(
             $userExternalAuth->getProvider(),
             $userExternalAuth->getProviderId(),
-            (new UserRadiusProfile())->setIssuedAt(
+            new UserRadiusProfile()->setIssuedAt(
                 new DateTime()
             ), // Pass a new DateTime if the user does not have a profile with the account
             '../signing-keys/cert.pem'
@@ -240,18 +246,23 @@ class ProfileController extends AbstractController
         if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::IOS,
+                'type' => OSTypes::IOS->value,
                 'ip' => $request->getClientIp(),
             ];
-        } elseif (stripos((string) $userAgent, 'Mac OS') !== false) {
+        } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::MACOS,
+                'type' => OSTypes::MACOS->value,
                 'ip' => $request->getClientIp(),
             ];
         }
 
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $response;
     }
@@ -334,12 +345,17 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::WINDOWS,
+            'type' => OSTypes::WINDOWS->value,
             'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $this->redirect(
             'ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate(
@@ -402,7 +418,7 @@ class ProfileController extends AbstractController
         string $realmName
     ): RadiusUser {
         $radiusProfile = $radiusProfileRepository->findOneBy(
-            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
@@ -416,8 +432,8 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
-            $radiusProfile->setIssuedAt(new \DateTime());
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
+            $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
@@ -477,7 +493,7 @@ class ProfileController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
+        if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 'Your account has been deleted. Please, for more information contact our support.'
@@ -486,7 +502,7 @@ class ProfileController extends AbstractController
             return true;
         }
 
-        if ($user->getBannedAt() instanceof \DateTimeInterface) {
+        if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             $this->redirectToRoute('app_landing');
             return true;
@@ -499,18 +515,18 @@ class ProfileController extends AbstractController
         }
 
         if (
-            !$user->isVerified() &&
-            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+            $data['USER_VERIFICATION']['value'] === OperationMode::ON->value &&
+            !$user->isVerified()
         ) {
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            if ($userExternalAuths === UserProvider::EMAIL) {
+            if ($userExternalAuths === UserProvider::EMAIL->value) {
                 $this->addFlash(
                     'error',
                     'Your account is not verified to download a profile, 
                     before being able to download a profile you need to confirm your account by 
                     clicking on the link send to you via email!'
                 );
-            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER) {
+            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER->value) {
                 $this->addFlash(
                     'error',
                     'Your account is not verified to download a profile, 

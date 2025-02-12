@@ -45,7 +45,7 @@ class MicrosoftAuthenticator extends OAuth2Authenticator
 
                 // Check if the user is already linked via Microsoft
                 $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-                    'provider' => UserProvider::MICROSOFT_ACCOUNT,
+                    'provider' => UserProvider::MICROSOFT_ACCOUNT->value,
                     'provider_id' => $microsoftId,
                 ]);
 

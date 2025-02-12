@@ -29,19 +29,26 @@ class ProfileManager
         }
     }
 
-    public function disableProfiles(User $user, ?bool $skipDisableAccount = null): bool
+    public function disableProfiles(User $user, ?bool $skipDisableAccount = null, ?bool $isProfileExpired = null): bool
     {
         if (!$skipDisableAccount && $user->isDisabled()) {
             return false;
         }
         $hasActiveProfiles = false;
-        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles) {
-            if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE) {
+
+        // Pass $isProfileExpired into the closure
+        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles, $isProfileExpired) {
+            if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE->value) {
                 return false;
             }
 
             $hasActiveProfiles = true; // Active profile was found
-            $profile->setStatus(UserRadiusProfileStatus::REVOKED);
+            if ($isProfileExpired) {
+                $profile->setStatus(UserRadiusProfileStatus::EXPIRED->value);
+            } else {
+                $profile->setStatus(UserRadiusProfileStatus::REVOKED->value);
+            }
+
             $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
             if ($radiusUser) {
                 $this->radiusUserRepository->remove($radiusUser);
@@ -66,7 +73,7 @@ class ProfileManager
         }
 
         $this->updateProfiles($user, function ($profile) {
-            if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE) {
+            if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE->value) {
                 return false;
             }
 
@@ -79,7 +86,7 @@ class ProfileManager
                 $radiusUser->setValue($profile->getRadiusToken());
                 $this->radiusUserRepository->save($radiusUser);
             }
-            $profile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $profile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $this->userRadiusProfile->save($profile);
 
             return true;

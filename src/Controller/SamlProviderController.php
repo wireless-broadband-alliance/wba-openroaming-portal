@@ -133,7 +133,7 @@ class SamlProviderController extends AbstractController
 
             // Log the event metadata (tracking the change)
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'samlProviderAdded' => $samlProvider->getName(),
                 'ip' => $request->getClientIp(),
                 'by' => $currentUser->getUuid(),
@@ -141,7 +141,7 @@ class SamlProviderController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::ADMIN_ADDED_SAML_PROVIDER,
+                AnalyticalEventType::ADMIN_ADDED_SAML_PROVIDER->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -182,7 +182,7 @@ class SamlProviderController extends AbstractController
 
             // Log the event metadata (tracking the change)
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
+                'platform' => PlatformMode::LIVE->value,
                 'samlProviderEdited' => $samlProvider->getName(),
                 'ip' => $request->getClientIp(),
                 'by' => $currentUser->getUuid(),
@@ -190,7 +190,7 @@ class SamlProviderController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::ADMIN_EDITED_SAML_PROVIDER,
+                AnalyticalEventType::ADMIN_EDITED_SAML_PROVIDER->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -240,7 +240,7 @@ class SamlProviderController extends AbstractController
 
         // Log the event metadata (tracking the change)
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'samlProviderEnabled' => $samlProvider->getName(),
             'previousSamlProvider' => $previousSamlProvider ? $previousSamlProvider->getName() : 'None',
             'ip' => $request->getClientIp(),
@@ -249,7 +249,7 @@ class SamlProviderController extends AbstractController
 
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::ADMIN_ENABLED_SAML_PROVIDER,
+            AnalyticalEventType::ADMIN_ENABLED_SAML_PROVIDER->value,
             new DateTime(),
             $eventMetaData
         );
@@ -284,7 +284,7 @@ class SamlProviderController extends AbstractController
 
         $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
-            'provider' => UserProvider::SAML,
+            'provider' => UserProvider::SAML->value,
             'samlProvider' => $samlProvider
         ]);
 
@@ -349,7 +349,7 @@ class SamlProviderController extends AbstractController
 
         $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
-            'provider' => UserProvider::SAML,
+            'provider' => UserProvider::SAML->value,
             'samlProvider' => $samlProvider
         ]);
 
@@ -373,7 +373,7 @@ class SamlProviderController extends AbstractController
         // Log the revoke action of the SAML provider profiles
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::REVOKED_SAML_PROVIDER_BY,
+            AnalyticalEventType::REVOKED_SAML_PROVIDER_BY->value,
             new DateTime(),
             $eventMetadata
         );

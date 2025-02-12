@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum NotificationType
+enum NotificationType: string
 {
-    public const PROFILE_EXPIRATION = 'PROFILE_EXPIRATION';
+    case PROFILE_EXPIRATION = 'PROFILE_EXPIRATION';
 }

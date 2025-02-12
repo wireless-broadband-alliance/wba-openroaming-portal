@@ -2,9 +2,9 @@
 
 namespace App\Enum;
 
-enum UserRadiusProfileStatus
+enum UserRadiusProfileStatus: int
 {
-    public const ACTIVE = 1;
-    public const REVOKED = 2;
-    public const EXPIRED = 3;
+    case ACTIVE = 1;
+    case REVOKED = 2;
+    case EXPIRED = 3;
 }

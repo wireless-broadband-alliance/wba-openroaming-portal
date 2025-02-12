@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -51,8 +51,8 @@ class CapportType extends AbstractType
                     $formFieldOptions['data'] = $setting->getValue();
                     if ($settingName === 'CAPPORT_ENABLED') {
                         $formFieldOptions['choices'] = [
-                            EmailConfirmationStrategy::EMAIL => 'true',
-                            EmailConfirmationStrategy::NO_EMAIL => 'false',
+                            OperationMode::ON->value => 'true',
+                            OperationMode::OFF->value => 'false',
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                         $formFieldOptions['required'] = true;

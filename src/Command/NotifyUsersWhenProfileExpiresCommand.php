@@ -89,15 +89,15 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
             $lastNotification = $this->notificationRepository->findLastNotificationByType(
                 $user,
-                NotificationType::PROFILE_EXPIRATION
+                NotificationType::PROFILE_EXPIRATION->value
             );
 
             $sendNotification = true;
 
             if ($notificationResendInterval && $lastNotification) {
-                $dateToResend = (new DateTime(
+                $dateToResend = new DateTime(
                     $lastNotification->getLastNotification()->format('Y-m-d H:i:s')
-                ))->modify('+' . $notificationResendInterval->getValue() . ' days');
+                )->modify('+' . $notificationResendInterval->getValue() . ' days');
 
                 if ($realTime < $dateToResend) {
                     $sendNotification = false;
@@ -110,13 +110,13 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $userRadiusProfile->getStatus() === 1
             ) {
                 $notification = new Notification();
-                $notification->setType(NotificationType::PROFILE_EXPIRATION);
+                $notification->setType(NotificationType::PROFILE_EXPIRATION->value);
                 $notification->setUser($user);
                 $notification->setLastNotification($realTime);
 
                 try {
                     // Priority: Send Email Notification
-                    if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with a email
+                    if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with an email
                         $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail(
                             $user,
                             $timeLeftDays + 1
@@ -137,9 +137,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     foreach ($userExternalAuths as $externalAuth) {
                         // If email is not sent, try to use phoneNumber
                         if (
-                            ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT) &&
+                            ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) &&
                             $user->getPhoneNumber() &&
-                            $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER
+                            $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
                         ) {
                             $this->sendSMS->sendSms(
                                 $user->getPhoneNumber(),
@@ -176,7 +176,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
     private function disableProfiles($user): void
     {
-        $this->profileManager->disableProfiles($user, true);
+        $this->profileManager->disableProfiles($user, true, true);
     }
 
     /**

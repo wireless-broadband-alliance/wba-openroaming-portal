@@ -2,8 +2,8 @@
 
 namespace App\Enum;
 
-enum PlatformMode
+enum PlatformMode: string
 {
-    public const LIVE = 'Live';
-    public const DEMO = 'Demo';
+    case LIVE = 'Live';
+    case DEMO = 'Demo';
 }
