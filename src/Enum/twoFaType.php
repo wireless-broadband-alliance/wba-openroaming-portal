@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum twoFAType: string
+enum twoFaType: string
 {
     case NOT_ENFORCED = "NOT_ENFORCED";
     case ENFORCED_FOR_LOCAL = "ENFORCED_FOR_LOCAL";
