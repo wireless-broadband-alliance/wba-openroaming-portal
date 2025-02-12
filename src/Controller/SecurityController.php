@@ -209,7 +209,7 @@ class SecurityController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             $this->addFlash('error', 'User not found');
         }
         if (!$user->getTwoFactorAuthentication()) {
@@ -221,7 +221,7 @@ class SecurityController extends AbstractController
         }
         $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
         if ($user->getPhoneNumber()) {
-            if ($user) {
+            if ($user instanceof User) {
                 $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -232,7 +232,7 @@ class SecurityController extends AbstractController
         }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
-            if ($user) {
+            if ($user instanceof User) {
                 $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
                 $user->setPhoneNumber($phoneNumber);
                 $this->entityManager->persist($user);
@@ -254,8 +254,8 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
-        if ($user) {
-            if (!$user->getTwoFActorAuthentication()) {
+        if ($user instanceof User) {
+            if (!$user->getTwoFActorAuthentication() instanceof TwoFactorAuthentication) {
                 $twoFA = new TwoFactorAuthentication();
                 $twoFA->setUser($user);
                 $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
@@ -375,7 +375,7 @@ class SecurityController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
-        if ($user) {
+        if ($user instanceof User) {
             $this->verificationCodeGenerator->generateOTPcodes($user);
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\OTPcode;
+use App\Entity\TwoFactorAuthentication;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use DateTime;
@@ -70,12 +71,9 @@ class VerificationCodeEmailGenerator
 
     public function validateCode(User $user, string $formCode): bool
     {
-        if ($user->getTwoFactorAuthentication()) {
-            $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
-        } else {
-            $codeDate = null;
-        }
-        if (!$codeDate) {
+        $codeDate = $user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication ?
+            $user->getTwoFactorAuthentication()->getCodeGeneratedAt() : null;
+        if (!$codeDate instanceof \DateTimeInterface) {
             return false;
         }
         $now = new DateTime();
@@ -90,7 +88,7 @@ class VerificationCodeEmailGenerator
     {
         // Generate a random verification code with 7 digits
         $verificationCode = random_int(1000000, 9999999);
-        if ($user->getTwoFactorAuthentication()) {
+        if ($user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
             $user->getTwoFactorAuthentication()->setCode($verificationCode);
             $user->getTwoFactorAuthentication()->setCodeGeneratedAt(new DateTime());
         }
@@ -101,12 +99,9 @@ class VerificationCodeEmailGenerator
 
     public function generate2FACode(User $user): int
     {
-        if ($user->getTwoFactorAuthentication()) {
-            $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
-        } else {
-            $codeDate = null;
-        }
-        if (!$codeDate) {
+        $codeDate = $user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication ?
+            $user->getTwoFactorAuthentication()->getCodeGeneratedAt() : null;
+        if (!$codeDate instanceof \DateTimeInterface) {
             return $this->twoFACode($user);
         }
         $now = new DateTime();

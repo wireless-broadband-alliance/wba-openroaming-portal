@@ -130,7 +130,9 @@ class TwoFactorAuthentication
     {
         if ($this->oTPcodes->removeElement($oTPcode)) {
             // set the owning side to null (unless already changed)
-            if ($oTPcode->getTwoFactorAuthentication() === $this) {
+            if ($this->oTPcodes->removeElement($oTPcode) &&
+                ($this->oTPcodes->removeElement($oTPcode) &&
+                    $oTPcode->getTwoFactorAuthentication() === $this)) {
                 $oTPcode->setTwoFactorAuthentication(null);
             }
         }
