@@ -157,7 +157,7 @@ class SendSMS
                     $attempts = 1;
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'platform' => PlatformMode::LIVE,
+                        'platform' => PlatformMode::LIVE->value,
                         'ip' => $_SERVER['REMOTE_ADDR'],
                         'uuid' => $user->getUuid(),
                         'verificationAttempts' => 0,
@@ -165,7 +165,7 @@ class SendSMS
                     ];
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        AnalyticalEventType::USER_SMS_ATTEMPT->value,
                         new DateTime(),
                         $eventMetadata
                     );

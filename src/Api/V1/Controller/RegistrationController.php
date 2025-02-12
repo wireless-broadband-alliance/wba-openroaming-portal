@@ -140,8 +140,8 @@ class RegistrationController extends AbstractController
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
-        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
-        $userExternalAuth->setProviderId(UserProvider::EMAIL);
+        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+        $userExternalAuth->setProviderId(UserProvider::EMAIL->value);
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userExternalAuth);
@@ -151,13 +151,13 @@ class RegistrationController extends AbstractController
 
         $eventMetaData = [
             'uuid' => $user->getEmail(),
-            'provider' => UserProvider::PORTAL_ACCOUNT,
-            'registrationType' => UserProvider::EMAIL,
+            'provider' => UserProvider::PORTAL_ACCOUNT->value,
+            'registrationType' => UserProvider::EMAIL->value,
             'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::USER_CREATION,
+            AnalyticalEventType::USER_CREATION->value,
             new DateTime(),
             $eventMetaData
         );
@@ -239,8 +239,8 @@ class RegistrationController extends AbstractController
 
             foreach ($userExternalAuths as $auth) {
                 if (
-                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
-                    $auth->getProviderId() === UserProvider::EMAIL
+                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                    $auth->getProviderId() === UserProvider::EMAIL->value
                 ) {
                     $hasValidPortalAccount = true;
                     break;
@@ -250,7 +250,7 @@ class RegistrationController extends AbstractController
             if ($hasValidPortalAccount) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
+                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 );
                 $minInterval = new DateInterval('PT2M');
                 $currentTime = new DateTime();
@@ -272,9 +272,9 @@ class RegistrationController extends AbstractController
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
                         $latestEvent->setEventDatetime(new DateTime());
-                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
                         $latestEventMetadata = [
-                            'platform' => PlatformMode::LIVE,
+                            'platform' => PlatformMode::LIVE->value,
                             'ip' => $request->getClientIp(),
                             'uuid' => $user->getUuid(),
                         ];
@@ -320,7 +320,7 @@ class RegistrationController extends AbstractController
 
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API,
+                        AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API->value,
                         new DateTime(),
                         $eventMetadata
                     );
@@ -445,8 +445,8 @@ class RegistrationController extends AbstractController
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
-        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
-        $userExternalAuth->setProviderId(UserProvider::PHONE_NUMBER);
+        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+        $userExternalAuth->setProviderId(UserProvider::PHONE_NUMBER->value);
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userExternalAuth);
@@ -455,14 +455,14 @@ class RegistrationController extends AbstractController
         // Save user creation event
         $eventMetaData = [
             'uuid' => $user->getUuid(),
-            'provider' => UserProvider::PORTAL_ACCOUNT,
-            'registrationType' => UserProvider::PHONE_NUMBER,
+            'provider' => UserProvider::PORTAL_ACCOUNT->value,
+            'registrationType' => UserProvider::PHONE_NUMBER->value,
             'ip' => $request->getClientIp(),
         ];
 
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::USER_CREATION,
+            AnalyticalEventType::USER_CREATION->value,
             new DateTime(),
             $eventMetaData
         );
@@ -574,8 +574,8 @@ class RegistrationController extends AbstractController
 
             foreach ($userExternalAuths as $auth) {
                 if (
-                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
-                    $auth->getProviderId() === UserProvider::PHONE_NUMBER
+                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                    $auth->getProviderId() === UserProvider::PHONE_NUMBER->value
                 ) {
                     $hasValidPortalAccount = true;
                     break;
@@ -634,7 +634,7 @@ class RegistrationController extends AbstractController
                         $latestEvent = new Event();
                         $latestEvent->setUser($user);
                         $latestEvent->setEventDatetime($currentTime);
-                        $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT);
+                        $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT->value);
                     }
 
                     $eventMetadata = [
@@ -647,7 +647,7 @@ class RegistrationController extends AbstractController
 
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        AnalyticalEventType::USER_SMS_ATTEMPT->value,
                         $currentTime,
                         $eventMetadata
                     );
@@ -675,7 +675,7 @@ class RegistrationController extends AbstractController
 
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API,
+                        AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API->value,
                         new DateTime(),
                         $eventMetadata
                     );

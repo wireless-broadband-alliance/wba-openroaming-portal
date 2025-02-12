@@ -49,7 +49,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
 
                 // Fetch the existing user by provider and provider ID
                 $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-                    'provider' => UserProvider::GOOGLE_ACCOUNT,
+                    'provider' => UserProvider::GOOGLE_ACCOUNT->value,
                     'provider_id' => $googleId,
                 ]);
 

@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -34,7 +34,7 @@ class ForgotPasswordEmailType extends AbstractType
         $builder->add('email', EmailType::class);
 
         // Check if TURNSTILE_CHECKER value is ON
-        if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
+        if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',

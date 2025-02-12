@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use App\Validator\SamlEnabled;
 use Symfony\Component\Form\AbstractType;
@@ -425,8 +425,8 @@ class AuthType extends AbstractType
                         ])
                     ) {
                         $formFieldOptions['choices'] = [
-                            EmailConfirmationStrategy::EMAIL => 'true',
-                            EmailConfirmationStrategy::NO_EMAIL => 'false',
+                            OperationMode::ON->value => 'true',
+                            OperationMode::OFF->value => 'false',
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                     }

@@ -5,7 +5,7 @@
 {% block container %}
     {# Freeradius Statistics #}
     <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
-        {% if exportFreeradiusStatistics == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        {% if exportFreeradiusStatistics == constant('App\\Enum\\OperationMode::ON').value %}
             <div class="mr-auto flex items-center space-x-6">
                 <a href="{{ path('admin_page_export_freeradius', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
                    onclick="return confirm('Are you sure you want to export data' +
@@ -287,7 +287,7 @@
             {# AccessPoints Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('admin/shared/_pagination_ApUsage.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
+                {{ include('admin/shared/pagination/_pagination_ApUsage.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
             </div>
         </div>
     </div>

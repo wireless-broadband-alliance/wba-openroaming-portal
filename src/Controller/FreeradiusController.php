@@ -492,7 +492,7 @@ class FreeradiusController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST,
+            AnalyticalEventType::EXPORT_FREERADIUS_STATISTICS_REQUEST->value,
             new DateTime(),
             $eventMetadata
         );

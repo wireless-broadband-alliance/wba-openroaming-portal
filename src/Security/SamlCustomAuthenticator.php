@@ -29,8 +29,8 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): bool
     {
-        // This authenticator only supports requests to '/saml/acs'
-        return $request->getPathInfo() === '/saml/acs';
+        // Check if the request contains the SAMLResponse parameter
+        return $request->request->has('SAMLResponse');
     }
 
     /**

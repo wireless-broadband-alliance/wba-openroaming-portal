@@ -7,7 +7,7 @@ use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\twoFAType;
@@ -92,7 +92,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -119,7 +119,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_TERMS_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_TERMS_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -146,7 +146,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -170,7 +170,7 @@ class SettingsController extends AbstractController
                 $event = new Event();
                 $event->setUser($currentUser);
                 $event->setEventDatetime(new DateTime());
-                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST);
+                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST->value);
                 $event->setEventMetadata([
                     'ip' => $request->getClientIp(),
                     'uuid' => $currentUser->getUuid()
@@ -200,7 +200,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -227,7 +227,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -254,7 +254,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST,
+                    AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -281,7 +281,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST,
+                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -306,17 +306,17 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         $textEditorRepository = $em->getRepository(TextEditor::class);
-        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
         if (!$tosTextEditor) {
             $tosTextEditor = new TextEditor();
-            $tosTextEditor->setName(TextEditorName::TOS);
+            $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
             $em->persist($tosTextEditor);
         }
-        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY]);
+        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
         if (!$privacyPolicyTextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
-            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY);
+            $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
             $em->persist($privacyPolicyTextEditor);
         }
@@ -387,7 +387,7 @@ class SettingsController extends AbstractController
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
-                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS]);
+                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
                 if ($tosEditorSetting) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
@@ -397,7 +397,7 @@ class SettingsController extends AbstractController
 
             if ($privacyPolicyTextEditor) {
                 $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
-                    'name' => TextEditorName::PRIVACY_POLICY
+                    'name' => TextEditorName::PRIVACY_POLICY->value
                 ]);
                 if ($privacyPolicyEditorSetting) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
@@ -411,7 +411,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_TERMS_REQUEST,
+                AnalyticalEventType::SETTING_TERMS_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -504,7 +504,7 @@ class SettingsController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $currentUser,
-                    AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST,
+                    AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -552,8 +552,8 @@ class SettingsController extends AbstractController
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
             $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::LIVE) ?
-                EmailConfirmationStrategy::EMAIL : $submittedData['USER_VERIFICATION'] ?? null;
+            $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
+                OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
             $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? twoFAType::NOT_ENFORCED;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
@@ -592,7 +592,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST,
+                AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -665,7 +665,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST,
+                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -791,7 +791,7 @@ class SettingsController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST,
+                AnalyticalEventType::SETTING_AUTHS_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -861,7 +861,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST,
+                AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -932,7 +932,7 @@ class SettingsController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_SMS_CONF_REQUEST,
+                AnalyticalEventType::SETTING_SMS_CONF_REQUEST->value,
                 new DateTime(),
                 $eventMetadata
             );

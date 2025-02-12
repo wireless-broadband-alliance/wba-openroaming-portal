@@ -2,12 +2,12 @@
 
 namespace App\Enum;
 
-enum UserProvider
+enum UserProvider: string
 {
-    public const SAML = 'SAML Account';
-    public const GOOGLE_ACCOUNT = 'Google Account';
-    public const MICROSOFT_ACCOUNT = 'Microsoft Account';
-    public const PORTAL_ACCOUNT = 'Portal Account';
-    public const EMAIL = 'Email';
-    public const PHONE_NUMBER = 'Phone Number';
+    case SAML = 'SAML Account';
+    case GOOGLE_ACCOUNT = 'Google Account';
+    case MICROSOFT_ACCOUNT = 'Microsoft Account';
+    case PORTAL_ACCOUNT = 'Portal Account';
+    case EMAIL = 'Email';
+    case PHONE_NUMBER = 'Phone Number';
 }

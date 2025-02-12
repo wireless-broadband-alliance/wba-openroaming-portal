@@ -40,10 +40,10 @@ class Statistics
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
-            OSTypes::ANDROID => 0,
-            OSTypes::WINDOWS => 0,
-            OSTypes::MACOS => 0,
-            OSTypes::IOS => 0,
+            OSTypes::ANDROID->value => 0,
+            OSTypes::WINDOWS->value => 0,
+            OSTypes::MACOS->value => 0,
+            OSTypes::IOS->value => 0,
         ];
 
         // Filter and count profile types based on the date criteria
@@ -70,7 +70,7 @@ class Statistics
                 }
             }
         }
-        return (new StatisticsGenerators())->generateDatasets($profileCounts);
+        return new StatisticsGenerators()->generateDatasets($profileCounts);
     }
 
     /**
@@ -88,9 +88,9 @@ class Statistics
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            UserProvider::SAML => 0,
-            UserProvider::GOOGLE_ACCOUNT => 0,
-            UserProvider::PORTAL_ACCOUNT => 0,
+            UserProvider::SAML->value => 0,
+            UserProvider::GOOGLE_ACCOUNT->value => 0,
+            UserProvider::PORTAL_ACCOUNT->value => 0,
         ];
 
         // Loop through the users and categorize them based on the provider
@@ -117,7 +117,7 @@ class Statistics
             }
         }
 
-        return (new StatisticsGenerators())->generateDatasets($userCounts);
+        return new StatisticsGenerators()->generateDatasets($userCounts);
     }
 
     /**
@@ -134,8 +134,8 @@ class Statistics
         $events = $repository->findBy(['event_name' => 'USER_CREATION']);
 
         $statusCounts = [
-            PlatformMode::LIVE => 0,
-            PlatformMode::DEMO => 0,
+            PlatformMode::LIVE->value => 0,
+            PlatformMode::DEMO->value => 0,
         ];
 
         // Loop through the events and count the status of the user when created
@@ -162,7 +162,7 @@ class Statistics
             }
         }
 
-        return (new StatisticsGenerators())->generateDatasets($statusCounts);
+        return new StatisticsGenerators()->generateDatasets($statusCounts);
     }
 
     /**
@@ -179,9 +179,9 @@ class Statistics
         $users = $repository->findExcludingAdmin();
 
         $userCounts = [
-            UserVerificationStatus::VERIFIED => 0,
-            UserVerificationStatus::NEED_VERIFICATON => 0,
-            UserVerificationStatus::BANNED => 0,
+            UserVerificationStatus::VERIFIED->value => 0,
+            UserVerificationStatus::NEED_VERIFICATION->value => 0,
+            UserVerificationStatus::BANNED->value => 0,
         ];
 
         // Loop through the users and categorize them based on isVerified and bannedAt
@@ -196,18 +196,18 @@ class Statistics
                 $ban = $user->getBannedAt();
 
                 if ($verification) {
-                    $userCounts[UserVerificationStatus::VERIFIED]++;
+                    $userCounts[UserVerificationStatus::VERIFIED->value]++;
                 } else {
-                    $userCounts[UserVerificationStatus::NEED_VERIFICATON]++;
+                    $userCounts[UserVerificationStatus::NEED_VERIFICATION->value]++;
                 }
 
                 if ($ban) {
-                    $userCounts[UserVerificationStatus::BANNED]++;
+                    $userCounts[UserVerificationStatus::BANNED->value]++;
                 }
             }
         }
 
-        return (new StatisticsGenerators())->generateDatasets($userCounts);
+        return new StatisticsGenerators()->generateDatasets($userCounts);
     }
 
     /**
@@ -221,12 +221,12 @@ class Statistics
         // Call the repository method to get portal user counts
         /** @var UserExternalAuthRepository $userExternalAuthRepository */
         $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
-            UserProvider::PORTAL_ACCOUNT,
+            UserProvider::PORTAL_ACCOUNT->value,
             $startDate,
             $endDate
         );
 
-        return (new StatisticsGenerators())->generateDatasets($portalUsersCounts);
+        return new StatisticsGenerators()->generateDatasets($portalUsersCounts);
     }
 
     /**
@@ -304,7 +304,7 @@ class Statistics
         }
 
         // Return an array containing both the generated datasets and the counts
-        return (new StatisticsGenerators())->generateDatasetsAuths($authsCounts);
+        return new StatisticsGenerators()->generateDatasetsAuths($authsCounts);
     }
 
     /**
@@ -383,7 +383,7 @@ class Statistics
         }
 
         // Return the counts per realm
-        return (new StatisticsGenerators())->generateDatasetsRealmsCounting($realmCounts);
+        return new StatisticsGenerators()->generateDatasetsRealmsCounting($realmCounts);
     }
 
     /**
@@ -481,7 +481,7 @@ class Statistics
             ];
         }
 
-        return (new StatisticsGenerators())->generateDatasetsSessionAverage($result);
+        return new StatisticsGenerators()->generateDatasetsSessionAverage($result);
     }
 
 
@@ -525,12 +525,12 @@ class Statistics
             ];
         }
 
-        return (new StatisticsGenerators())->generateDatasetsSessionTotal($result);
+        return new StatisticsGenerators()->generateDatasetsSessionTotal($result);
     }
 
 
     /**
-     * Fetch data related to wifi tag usage on the freeradius database
+     * Fetch data related to Wi-Fi tag usage on the freeradius database
      */
     public function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): array
     {

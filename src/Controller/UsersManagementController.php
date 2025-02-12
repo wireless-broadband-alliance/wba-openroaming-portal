@@ -2,15 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\DeletedUserData;
-use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
-use App\Enum\UserVerificationStatus;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
@@ -20,9 +17,9 @@ use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\PgpEncryptionService;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
+use App\Service\UserDeletionService;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,7 +30,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -51,11 +47,11 @@ class UsersManagementController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly PgpEncryptionService $pgpEncryptionService,
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
+        private readonly UserDeletionService $userDeletionService,
     ) {
     }
 
@@ -80,14 +76,14 @@ class UsersManagementController extends AbstractController
         }
 
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'userRevoked' => $user->getUuid(),
             'ip' => $request->getClientIp(),
             'by' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::ADMIN_REVOKE_PROFILES,
+            AnalyticalEventType::ADMIN_REVOKE_PROFILES->value,
             new DateTime(),
             $eventMetaData
         );
@@ -120,7 +116,7 @@ class UsersManagementController extends AbstractController
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
-        if ($exportUsers === EmailConfirmationStrategy::NO_EMAIL) {
+        if ($exportUsers === OperationMode::OFF->value) {
             $this->addFlash('error_admin', 'This operation is disabled for security reasons');
             return $this->redirectToRoute('admin_page');
         }
@@ -220,7 +216,7 @@ class UsersManagementController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST,
+            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST->value,
             new DateTime(),
             $eventMetadata
         );
@@ -233,132 +229,38 @@ class UsersManagementController extends AbstractController
      * Deletes Users from the Portal, encrypts the data before delete and saves it
      */
     /**
-     * @param $id
      * @throws \JsonException
      */
     #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
-        $id,
-        EntityManagerInterface $em,
-        Request $request
+        int $id,
+        Request $request,
     ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Fetch user and external auths
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
-
         if (!$user) {
-            throw new NotFoundHttpException('User not found');
+            throw $this->createNotFoundException('User not found.');
         }
+        $getUserUuid = $user->getUuid();
 
         if ($user->getDeletedAt() !== null) {
             $this->addFlash('error_admin', 'This user has already been deleted.');
             return $this->redirectToRoute('admin_page');
         }
 
-        $getUUID = $user->getUuid();
-
-        // Prepare user data for encryption
-        $deletedUserData = [
-            'id' => $user->getId(),
-            'uuid' => $user->getUuid(),
-            'email' => $user->getEmail() ?? 'This value is empty',
-            'phoneNumber' => $user->getPhoneNumber() ?? 'This value is empty',
-            'firstName' => $user->getFirstName() ?? 'This value is empty',
-            'lastName' => $user->getLastName() ?? 'This value is empty',
-            'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
-            'bannedAt' => $user->getBannedAt() ? $user->getBannedAt()->format('Y-m-d H:i:s') : null,
-            'deletedAt' => new DateTime(),
-        ];
-
-        // Prepare external auth data for encryption
-        $deletedUserExternalAuthData = [];
-        foreach ($userExternalAuths as $externalAuth) {
-            $deletedUserExternalAuthData[] = [
-                'provider' => $externalAuth->getProvider(),
-                'providerId' => $externalAuth->getProviderId()
-            ];
-        }
-
-        // Combine user data and external auth data
-        $combinedData = [
-            'user' => $deletedUserData,
-            'externalAuths' => $deletedUserExternalAuthData,
-        ];
-        $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
-
-        // Encrypt combined JSON data using PGP encryption
-        new PgpEncryptionService();
-        $pgpEncryptedData = $this->pgpEncryptionService->encrypt($jsonDataCombined);
-
-        // Handle encryption errors
-        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT) {
-            $this->addFlash(
-                'error_admin',
-                'The public key is not set. 
-            Make sure to define a public key in pgp_public_key/public_key.asc'
-            );
+        $result = $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
+        // Handle the success or failure response
+        if (!$result['success']) {
+            $this->addFlash('error_admin', $result['message']);
             return $this->redirectToRoute('admin_page');
         }
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT) {
-            $this->addFlash(
-                'error_admin',
-                'The public key is empty. 
-            Make sure to define content for the public key in pgp_public_key/public_key.asc'
-            );
-            return $this->redirectToRoute('admin_page');
-        }
-
-        // Persist encrypted data
-        $deletedUserData = new DeletedUserData();
-        $deletedUserData->setPgpEncryptedJsonFile($pgpEncryptedData);
-        $deletedUserData->setUser($user);
-
-        $event = new Event();
-        $event->setUser($user);
-        $event->setEventDatetime(new DateTime());
-        $event->setEventName(AnalyticalEventType::DELETED_USER_BY);
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $event->setEventMetadata([
-            'deletedBy' => $currentUser->getUuid(),
-            'ip' => $request->getClientIp(),
-        ]);
-
-        // Update user entity
-        $user->setUuid($user->getId());
-        $user->setEmail(null);
-        $user->setPhoneNumber(null);
-        $user->setPassword($user->getId());
-        $user->setFirstName(null);
-        $user->setLastName(null);
-        $user->setDeletedAt(new DateTime());
-
-        // Update external auth entity
-        foreach ($userExternalAuths as $externalAuth) {
-            $em->remove($externalAuth);
-        }
-
-        // Persist changes
-        $this->profileManager->disableProfiles($user);
-        $em->persist($deletedUserData);
-        $em->persist($user);
-        $em->flush();
-
-        // Save deletion event
-        $eventMetadata = [
-            'uuid' => $getUUID,
-            'deletedBy' => $currentUser->getUuid(),
-            'ip' => $request->getClientIp(),
-        ];
-        $this->eventActions->saveEvent(
-            $currentUser,
-            AnalyticalEventType::DELETED_USER_BY,
-            new DateTime(),
-            $eventMetadata
-        );
-
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUUID));
+        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUserUuid));
         return $this->redirectToRoute('admin_page');
     }
 
@@ -438,7 +340,7 @@ class UsersManagementController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -474,9 +376,9 @@ class UsersManagementController extends AbstractController
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            if ($user->getEmail() && $userExternalAuth->getProviderId() == UserProvider::EMAIL) {
+            if ($user->getEmail() && $userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
                 // Send email
-                $email = (new Email())
+                $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your Password Reset Details')
@@ -496,13 +398,13 @@ class UsersManagementController extends AbstractController
 
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                     new DateTime(),
                     $eventMetadata
                 );
             }
 
-            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
+            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
@@ -520,13 +422,14 @@ class UsersManagementController extends AbstractController
                     : null;
                 $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
-                // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
-                    (!$latestEvent || $resetAttempts < 3) && (!$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime && $lastResetAccountPasswordTime->add(
-                        $minInterval
-                    ) < $currentTime))
+                    (!$latestEvent || $resetAttempts < 3)
+                    && (!$latestEvent
+                        || ($lastResetAccountPasswordTime instanceof DateTime
+                            && $lastResetAccountPasswordTime->add(
+                                $minInterval
+                            ) < $currentTime))
                 ) {
-                    // phpcs:enable
                     $attempts = $resetAttempts + 1;
 
                     $message = "Your new account password is: " . $newPassword . "%0A";
