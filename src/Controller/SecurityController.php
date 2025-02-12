@@ -13,12 +13,10 @@ use App\Form\TwoFactorPhoneNumber;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
-use App\Service\RegistrationEmailGenerator;
 use App\Service\TOTPService;
 use App\Service\VerificationCodeEmailGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use LogicException;
@@ -33,11 +31,6 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-    private TOTPService $totpService;
-    private EntityManagerInterface $entityManager;
 
     /**
      * SiteController constructor.
@@ -45,20 +38,19 @@ class SecurityController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param TOTPService $totpService The service for communicate with two factor authentication applications
+     * @param EntityManagerInterface $entityManager The service for manage all entities
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
+     *  of the user account
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        TOTPService $totpService,
-        EntityManagerInterface $entityManager,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
+        private readonly TOTPService $totpService,
+        private readonly EntityManagerInterface $entityManager,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
-        $this->totpService = $totpService;
-        $this->entityManager = $entityManager;
     }
 
     /**
