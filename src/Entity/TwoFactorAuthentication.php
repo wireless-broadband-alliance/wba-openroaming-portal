@@ -134,9 +134,10 @@ class TwoFactorAuthentication
             ($this->oTPcodes->removeElement($oTPcode) &&
                 ($this->oTPcodes->removeElement($oTPcode) &&
                     ($this->oTPcodes->removeElement($oTPcode) &&
-                        $oTPcode->getTwoFactorAuthentication() === $this)))) {
-        $oTPcode->setTwoFactorAuthentication(null);
+                        $oTPcode->getTwoFactorAuthentication() === $this)))
+        ) {
+            $oTPcode->setTwoFactorAuthentication(null);
         }
-          return $this;
-        }
+        return $this;
+    }
 }
