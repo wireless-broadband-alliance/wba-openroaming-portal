@@ -8,5 +8,4 @@ enum UserTwoFactorAuthenticationStatus: string
     case APP = 'APP';
     case SMS = 'SMS';
     case EMAIL = 'EMAIL';
-
 }

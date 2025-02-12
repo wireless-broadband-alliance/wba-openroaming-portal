@@ -31,10 +31,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-
     /**
      * SiteController constructor.
-     *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
@@ -85,13 +83,22 @@ class SecurityController extends AbstractController
             if ($twoFAplatformStatus) {
                 if ($twoFAplatformStatus->getValue() === twoFAType::NOT_ENFORCED->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value
+                        ) {
                             return $this->redirectToRoute('app_landing');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
                             return $this->redirectToRoute('app_verify2FA_local');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::APP->value
+                        ) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                     }
@@ -99,13 +106,22 @@ class SecurityController extends AbstractController
                 }
                 if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_LOCAL->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value
+                        ) {
                             return $this->redirectToRoute('app_enable2FA');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
                             return $this->redirectToRoute('app_verify2FA_local');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::APP->value
+                        ) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_verify2FA_local');
@@ -114,13 +130,22 @@ class SecurityController extends AbstractController
                 }
                 if ($twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL->value) {
                     if ($this->getUser()->getTwoFactorAuthentication()) {
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value
+                        ) {
                             return $this->redirectToRoute('app_enable2FA');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
                             return $this->redirectToRoute('app_verify2FA_local');
                         }
-                        if ($this->getUser()->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
+                        if (
+                            $this->getUser()->getTwoFactorAuthentication()->getType() ===
+                            UserTwoFactorAuthenticationStatus::APP->value
+                        ) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
                         return $this->redirectToRoute('app_enable2FA');
@@ -230,7 +255,7 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
         if ($user) {
-            if (!$user->getTwoFActorAuthentication()){
+            if (!$user->getTwoFActorAuthentication()) {
                 $twoFA = new TwoFactorAuthentication();
                 $twoFA->setUser($user);
                 $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
@@ -360,5 +385,4 @@ class SecurityController extends AbstractController
         $this->addFlash('error', 'User not found');
         return $this->redirectToRoute('app_otpCodes');
     }
-
 }

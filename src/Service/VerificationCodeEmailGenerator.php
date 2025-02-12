@@ -68,7 +68,7 @@ class VerificationCodeEmailGenerator
             ]);
     }
 
-    public function validateCode(User $user, string $formCode): Bool
+    public function validateCode(User $user, string $formCode): bool
     {
         if ($user->getTwoFactorAuthentication()) {
             $codeDate = $user->getTwoFactorAuthentication()->getCodeGeneratedAt();
@@ -142,7 +142,7 @@ class VerificationCodeEmailGenerator
         $this->entityManager->flush();
     }
 
-    public function validateOTPCodes(User $user, string $formCode): Bool
+    public function validateOTPCodes(User $user, string $formCode): bool
     {
         $twoFAcodes = $user->getTwoFactorAuthentication()->getOTPcodes();
         foreach ($twoFAcodes as $code) {
