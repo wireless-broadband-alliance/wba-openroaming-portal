@@ -15,7 +15,6 @@ class EEAUserDetector
 
     /**
      * Check if the user is from the EEA based on the server's timezone.
-     *
      */
     public function isEEAUser(): bool
     {

@@ -26,7 +26,6 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordAuthenticator;
-use App\Service\EEAUserDetector;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -74,7 +73,6 @@ class SiteController extends AbstractController
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      * @param SendSMS $sendSMS Call the function to send SMS using BudgetSms api
-     * @param EEAUserDetector $EEAUserDetector Checks if the user belongs to the EA for cookies policies
      */
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -87,7 +85,6 @@ class SiteController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly SendSMS $sendSMS,
-        private readonly EEAUserDetector $EEAUserDetector,
     ) {
     }
 
@@ -104,8 +101,6 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        // Check if the user is from the EU
-        $isEEAUser = $this->EEAUserDetector->isEEAUser();
 
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
@@ -291,7 +286,6 @@ class SiteController extends AbstractController
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
-            'isEEAUser' => $isEEAUser,
         ]);
     }
 
