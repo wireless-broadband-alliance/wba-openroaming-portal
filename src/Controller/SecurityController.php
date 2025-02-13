@@ -19,6 +19,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use libphonenumber\PhoneNumber;
 use LogicException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,7 +84,7 @@ class SecurityController extends AbstractController
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
                 if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
-                    if ($user->getTwoFactorAuthentication()) {
+                    if ($user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
                         if (
                             $user->getTwoFactorAuthentication()->getType() ===
                             UserTwoFactorAuthenticationStatus::DISABLED->value
@@ -106,7 +107,7 @@ class SecurityController extends AbstractController
                     return $this->redirectToRoute('app_landing');
                 }
                 if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value) {
-                    if ($user->getTwoFactorAuthentication()) {
+                    if ($user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
                         if (
                             $user->getTwoFactorAuthentication()->getType() ===
                             UserTwoFactorAuthenticationStatus::DISABLED->value
@@ -130,7 +131,7 @@ class SecurityController extends AbstractController
                     return $this->redirectToRoute('app_enable2FA');
                 }
                 if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_ALL->value) {
-                    if ($user->getTwoFactorAuthentication()) {
+                    if ($user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
                         if (
                             $user->getTwoFactorAuthentication()->getType() ===
                             UserTwoFactorAuthenticationStatus::DISABLED->value
@@ -214,7 +215,7 @@ class SecurityController extends AbstractController
         if (!$user instanceof User) {
             $this->addFlash('error', 'User not found');
         }
-        if (!$user->getTwoFactorAuthentication()) {
+        if (!$user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
             $twoFA = new TwoFactorAuthentication();
             $twoFA->setUser($user);
             $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
@@ -222,7 +223,7 @@ class SecurityController extends AbstractController
             $this->entityManager->persist($twoFA);
         }
         $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
-        if ($user->getPhoneNumber()) {
+        if ($user->getPhoneNumber() instanceof PhoneNumber) {
             if ($user instanceof User) {
                 $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
                 $this->entityManager->persist($user);
