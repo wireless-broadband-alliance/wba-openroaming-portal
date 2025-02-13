@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\SamlProviderType;
+use App\Repository\EventRepository;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -36,6 +37,7 @@ class SamlProviderController extends AbstractController
         private readonly SamlProviderRepository $samlProviderRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly EventRepository $eventRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ProfileManager $profileManager,
         private readonly UserDeletionService $userDeletionService,
@@ -357,6 +359,13 @@ class SamlProviderController extends AbstractController
             $user = $userExternalAuths->getUser();
             if (!$user) {
                 continue; // Skip revoke action if the user doesn't exist
+            }
+            $hasRevokeEvent = $this->eventRepository->findOneBy([
+                'user' => $user,
+                'event_name' => AnalyticalEventType::USER_REVOKE_PROFILES->value
+            ]);
+            if ($hasRevokeEvent) {
+                continue; // Skip the user if associated with USER_REVOKE_PROFILES
             }
             if (!$user->getDeletedAt()) {
                 // Disable profiles
