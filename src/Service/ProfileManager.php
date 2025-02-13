@@ -15,6 +15,7 @@ class ProfileManager
         private readonly UserRadiusProfileRepository $userRadiusProfile,
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserRepository $userRepository,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository
     ) {
     }
 
@@ -94,5 +95,13 @@ class ProfileManager
         $user->setDisabled(false);
         $this->userRepository->save($user, true);
         $this->radiusUserRepository->flush();
+    }
+
+    public function getActiveProfilesByUser(User $user): array
+    {
+        return $this->userRadiusProfileRepository->findBy([
+            'user' => $user,
+            'status' => UserRadiusProfileStatus::ACTIVE->value,
+        ]);
     }
 }
