@@ -1,4 +1,4 @@
-import { Controller } from "@hotwired/stimulus";
+import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["agreeTerms", "confirmationModal", "button"];
@@ -24,8 +24,8 @@ export default class extends Controller {
         if (!this.agreeTermsTarget.checked) {
             this.confirmationModalTarget.classList.remove("hidden");
         } else {
-            const href = event.currentTarget.getAttribute("href"); // Get href of clicked link
-            window.location.href = href;
+             // Get href of clicked link
+            window.location.href = event.currentTarget.getAttribute("href");
         }
     }
 
@@ -58,8 +58,6 @@ export default class extends Controller {
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
         for (let button of this.buttonTargets) {
-            // Set or remove the "disabled" property
-            button.disabled = !isChecked;
 
             // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
