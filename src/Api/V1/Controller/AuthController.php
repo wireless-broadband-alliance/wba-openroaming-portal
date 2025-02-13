@@ -119,7 +119,7 @@ class AuthController extends AbstractController
 
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::AUTH_LOCAL_API,
+            AnalyticalEventType::AUTH_LOCAL_API->value,
             new DateTime(),
             $eventMetadata
         );
@@ -188,7 +188,7 @@ class AuthController extends AbstractController
                 // Create and persist the UserExternalAuth entity
                 $userAuth = new UserExternalAuth();
                 $userAuth->setUser($user)
-                    ->setProvider(UserProvider::SAML)
+                    ->setProvider(UserProvider::SAML->value)
                     ->setProviderId($sAMAccountName);
 
                 $this->entityManager->persist($userAuth);
@@ -216,7 +216,7 @@ class AuthController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::AUTH_SAML_API,
+                AnalyticalEventType::AUTH_SAML_API->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -271,7 +271,7 @@ class AuthController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::AUTH_GOOGLE_API,
+                AnalyticalEventType::AUTH_GOOGLE_API->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -329,7 +329,7 @@ class AuthController extends AbstractController
 
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::AUTH_GOOGLE_API,
+                AnalyticalEventType::AUTH_MICROSOFT_API->value,
                 new DateTime(),
                 $eventMetadata
             );

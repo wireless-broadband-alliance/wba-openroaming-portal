@@ -58,7 +58,7 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('saml_logout');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
-            if ($platformMode === PlatformMode::DEMO) {
+            if ($platformMode === PlatformMode::DEMO->value) {
                 return $this->redirectToRoute('saml_logout');
             }
 

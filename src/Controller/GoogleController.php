@@ -173,7 +173,7 @@ class GoogleController extends AbstractController
     ): ?User {
         // Check if a user with the given Google user ID exists in UserExternalAuth
         $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-            'provider' => UserProvider::GOOGLE_ACCOUNT,
+            'provider' => UserProvider::GOOGLE_ACCOUNT->value,
             'provider_id' => $googleUserId
         ]);
 
@@ -210,7 +210,7 @@ class GoogleController extends AbstractController
 
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
-            ->setProvider(UserProvider::GOOGLE_ACCOUNT)
+            ->setProvider(UserProvider::GOOGLE_ACCOUNT->value)
             ->setProviderId($googleUserId);
 
         $randomPassword = bin2hex(random_bytes(8));
@@ -222,14 +222,24 @@ class GoogleController extends AbstractController
         $this->entityManager->flush();
 
         $event_metadata = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
-            'registrationType' => UserProvider::GOOGLE_ACCOUNT,
+            'registrationType' => UserProvider::GOOGLE_ACCOUNT->value,
         ];
 
-        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $event_metadata);
-        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_VERIFICATION, new DateTime(), []);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::USER_CREATION->value,
+            new DateTime(),
+            $event_metadata
+        );
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::USER_VERIFICATION->value,
+            new DateTime(),
+            []
+        );
 
         return $user;
     }

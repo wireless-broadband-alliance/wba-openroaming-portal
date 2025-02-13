@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -133,8 +133,8 @@ class CustomType extends AbstractType
             // Specific logic for CUSTOMER_LOGO_ENABLED
             if ($settingName === 'CUSTOMER_LOGO_ENABLED') {
                 $formFieldOptions['choices'] = [
-                    EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
-                    EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
+                    OperationMode::ON->value => OperationMode::ON->value,
+                    OperationMode::OFF->value => OperationMode::OFF->value,
                 ];
                 $formFieldOptions['placeholder'] = 'Select an option';
                 $formFieldOptions['required'] = true;

@@ -5,7 +5,7 @@
     <div class="flex flex-col justify-center items-center">
         <h1 class="pt-4 font-semibold text-center text-2xl">OpenRoaming Admin</h1>
 
-        {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
             <a href="{{ path('admin_page') }}">
                 <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.customerLogoName.value }}" alt="Logo"/>
             </a>

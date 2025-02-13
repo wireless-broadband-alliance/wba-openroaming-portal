@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
@@ -106,7 +106,7 @@ class RegistrationController extends AbstractController
                     'warning',
                     'User with the same email already exists, please try to Login using the link below.'
                 );
-            } elseif ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
+            } elseif ($data['USER_VERIFICATION']['value'] === OperationMode::ON->value) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -118,22 +118,22 @@ class RegistrationController extends AbstractController
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                $userAuths->setProviderId(UserProvider::EMAIL);
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
 
                 // Defines the Event to the table
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE,
+                    'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
-                    'registrationType' => UserProvider::EMAIL,
+                    'registrationType' => UserProvider::EMAIL->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_CREATION,
+                    AnalyticalEventType::USER_CREATION->value,
                     new DateTime(),
                     $eventMetaData
                 );
@@ -215,22 +215,22 @@ class RegistrationController extends AbstractController
 
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                $userAuths->setProviderId(UserProvider::PHONE_NUMBER);
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::LIVE,
+                    'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
-                    'registrationType' => UserProvider::PHONE_NUMBER,
+                    'registrationType' => UserProvider::PHONE_NUMBER->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_CREATION,
+                    AnalyticalEventType::USER_CREATION->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -306,13 +306,13 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::LIVE,
+                    'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_VERIFICATION,
+                    AnalyticalEventType::USER_VERIFICATION->value,
                     new DateTime(),
                     $eventMetadata
                 );

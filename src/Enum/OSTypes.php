@@ -2,12 +2,12 @@
 
 namespace App\Enum;
 
-enum OSTypes
+enum OSTypes: string
 {
-    public const ANDROID = 'Android';
-    public const IOS = 'iOS';
-    public const LINUX = 'Linux';
-    public const MACOS = 'macOS';
-    public const WINDOWS = 'Windows';
-    public const NONE = 'none';
+    case ANDROID = 'Android';
+    case IOS = 'iOS';
+    case LINUX = 'Linux';
+    case MACOS = 'macOS';
+    case WINDOWS = 'Windows';
+    case NONE = 'none';
 }

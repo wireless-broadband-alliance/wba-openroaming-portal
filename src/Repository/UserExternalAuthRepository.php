@@ -68,17 +68,17 @@ class UserExternalAuthRepository extends ServiceEntityRepository
 
         // Initialize counts
         $counts = [
-            UserProvider::PHONE_NUMBER => 0,
-            UserProvider::EMAIL => 0,
+            UserProvider::PHONE_NUMBER->value => 0,
+            UserProvider::EMAIL->value => 0,
         ];
 
         // Count occurrences of each providerId
         foreach ($results as $result) {
             $providerId = $result['provider_id'];
-            if ($providerId === UserProvider::EMAIL) {
-                $counts[UserProvider::EMAIL]++;
-            } elseif ($providerId === UserProvider::PHONE_NUMBER) {
-                $counts[UserProvider::PHONE_NUMBER]++;
+            if ($providerId === UserProvider::EMAIL->value) {
+                $counts[UserProvider::EMAIL->value]++;
+            } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
+                $counts[UserProvider::PHONE_NUMBER->value]++;
             }
         }
 

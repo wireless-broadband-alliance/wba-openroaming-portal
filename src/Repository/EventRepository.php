@@ -53,7 +53,7 @@ class EventRepository extends ServiceEntityRepository
             ->andWhere('e.user = :user')
             ->andWhere('e.event_name = :event_name')
             ->setParameter('user', $user)
-            ->setParameter('event_name', AnalyticalEventType::USER_SMS_ATTEMPT)
+            ->setParameter('event_name', AnalyticalEventType::USER_SMS_ATTEMPT->value)
             ->orderBy('e.event_datetime', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="flex justify-center">
-                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
                         <img class="w-[170px] h-[58px] object-scale-down object-right my-4"
                              src="{{ data.customerLogoName.value }}" alt="Logo"/>
                     {% endif %}

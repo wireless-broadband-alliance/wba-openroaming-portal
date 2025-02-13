@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\ResetPasswordType;
@@ -76,14 +76,14 @@ class UsersManagementController extends AbstractController
         }
 
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'userRevoked' => $user->getUuid(),
             'ip' => $request->getClientIp(),
             'by' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::ADMIN_REVOKE_PROFILES,
+            AnalyticalEventType::ADMIN_REVOKE_PROFILES->value,
             new DateTime(),
             $eventMetaData
         );
@@ -116,7 +116,7 @@ class UsersManagementController extends AbstractController
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
-        if ($exportUsers === EmailConfirmationStrategy::NO_EMAIL) {
+        if ($exportUsers === OperationMode::OFF->value) {
             $this->addFlash('error_admin', 'This operation is disabled for security reasons');
             return $this->redirectToRoute('admin_page');
         }
@@ -216,7 +216,7 @@ class UsersManagementController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST,
+            AnalyticalEventType::EXPORT_USERS_TABLE_REQUEST->value,
             new DateTime(),
             $eventMetadata
         );
@@ -340,7 +340,7 @@ class UsersManagementController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -376,9 +376,9 @@ class UsersManagementController extends AbstractController
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            if ($user->getEmail() && $userExternalAuth->getProviderId() == UserProvider::EMAIL) {
+            if ($user->getEmail() && $userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
                 // Send email
-                $email = (new Email())
+                $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
                     ->subject('Your Password Reset Details')
@@ -398,13 +398,13 @@ class UsersManagementController extends AbstractController
 
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                     new DateTime(),
                     $eventMetadata
                 );
             }
 
-            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() == UserProvider::PHONE_NUMBER) {
+            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
@@ -422,13 +422,14 @@ class UsersManagementController extends AbstractController
                     : null;
                 $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
-                // phpcs:disable Generic.Files.LineLength.TooLong
                 if (
-                    (!$latestEvent || $resetAttempts < 3) && (!$latestEvent || ($lastResetAccountPasswordTime instanceof DateTime && $lastResetAccountPasswordTime->add(
-                        $minInterval
-                    ) < $currentTime))
+                    (!$latestEvent || $resetAttempts < 3)
+                    && (!$latestEvent
+                        || ($lastResetAccountPasswordTime instanceof DateTime
+                            && $lastResetAccountPasswordTime->add(
+                                $minInterval
+                            ) < $currentTime))
                 ) {
-                    // phpcs:enable
                     $attempts = $resetAttempts + 1;
 
                     $message = "Your new account password is: " . $newPassword . "%0A";
