@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
@@ -69,7 +70,11 @@ class UsersManagementController extends AbstractController
             $this->addFlash('error', 'User not found.');
             return $this->redirectToRoute('app_landing');
         }
-        $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+        $revokeProfiles = $this->profileManager->disableProfiles(
+            $user,
+            UserRadiusProfileRevokeReason::ADMIN_REVOKED_PROFILE->value,
+            true
+        );
         if (!$revokeProfiles) {
             $this->addFlash('error_admin', 'This account doesn\'t have profiles associated!');
             return $this->redirectToRoute('admin_page');
@@ -321,13 +326,20 @@ class UsersManagementController extends AbstractController
                     return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
                 }
                 $user->setBannedAt(new DateTime());
-                $this->profileManager->disableProfiles($user);
+                $this->profileManager->disableProfiles(
+                    $user,
+                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value
+                );
             } else {
                 $user->setBannedAt(null);
                 if ($form->get('isVerified')->getData()) {
                     $this->profileManager->enableProfiles($user);
                 } else {
-                    $this->profileManager->disableProfiles($user);
+                    $this->profileManager->disableProfiles(
+                        $user,
+                        UserRadiusProfileRevokeReason::ADMIN_REMOVED_USER_VERIFICATION->value,
+                        true
+                    );
                 }
             }
 

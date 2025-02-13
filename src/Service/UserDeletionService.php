@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\DeletedUserData;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -82,7 +83,10 @@ class UserDeletionService
             $this->entityManager->remove($externalAuth);
         }
 
-        $this->profileManager->disableProfiles($user);
+        $this->profileManager->disableProfiles(
+            $user,
+            UserRadiusProfileRevokeReason::USER_ACCOUNT_DELETED->value
+        );
 
         // Persist changes
         $this->entityManager->persist($deletedUserDataEntity);

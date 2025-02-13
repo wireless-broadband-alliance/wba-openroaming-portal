@@ -14,6 +14,7 @@ use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
 use App\Enum\UserProvider;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -205,8 +206,7 @@ class SiteController extends AbstractController
                     }
                 }
                 if (
-                    $payload['radio-os'] !== 'none' && $this->getUser(
-                    ) instanceof \Symfony\Component\Security\Core\User\UserInterface
+                    $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
                 ) {
                     /**
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
@@ -239,8 +239,7 @@ class SiteController extends AbstractController
                 }
             }
             if (
-                $payload['radio-os'] !== 'none' && $this->getUser(
-                ) instanceof UserInterface
+                $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
             ) {
                 /**
                  * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
@@ -382,7 +381,11 @@ class SiteController extends AbstractController
         $formRevokeProfiles->handleRequest($request);
 
         if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
-            $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+            $revokeProfiles = $this->profileManager->disableProfiles(
+                $user,
+                UserRadiusProfileRevokeReason::USER_REVOKED_PROFILE->value,
+                true
+            );
             if (!$revokeProfiles) {
                 $this->addFlash('error', 'This account doesn\'t have profiles associated!');
                 return $this->redirectToRoute('app_landing');
@@ -1149,13 +1152,5 @@ class SiteController extends AbstractController
 
         $referer = $request->headers->get('referer', $this->generateUrl('app_landing'));
         return $this->redirect($referer);
-    }
-
-    /**
-     * @param $user
-     */
-    private function disableProfiles($user): void
-    {
-        $this->profileManager->disableProfiles($user);
     }
 }

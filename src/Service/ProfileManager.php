@@ -14,7 +14,8 @@ class ProfileManager
     public function __construct(
         private readonly UserRadiusProfileRepository $userRadiusProfile,
         private readonly RadiusUserRepository $radiusUserRepository,
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository
     ) {
     }
 
@@ -29,25 +30,25 @@ class ProfileManager
         }
     }
 
-    public function disableProfiles(User $user, ?bool $skipDisableAccount = null, ?bool $isProfileExpired = null): bool
+    public function disableProfiles(User $user, string $revokedReason, ?bool $skipDisableAccount = null): bool
     {
         if (!$skipDisableAccount && $user->isDisabled()) {
             return false;
         }
+
         $hasActiveProfiles = false;
 
-        // Pass $isProfileExpired into the closure
-        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles, $isProfileExpired) {
+        // Pass $revokedReason into the closure
+        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles, $revokedReason) {
             if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE->value) {
                 return false;
             }
 
-            $hasActiveProfiles = true; // Active profile was found
-            if ($isProfileExpired) {
-                $profile->setStatus(UserRadiusProfileStatus::EXPIRED->value);
-            } else {
-                $profile->setStatus(UserRadiusProfileStatus::REVOKED->value);
-            }
+            $hasActiveProfiles = true; // Mark that there are active profiles to be revoked
+
+            // Set status to REVOKED
+            $profile->setStatus(UserRadiusProfileStatus::REVOKED->value);
+            $profile->setRevokedReason($revokedReason);
 
             $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
             if ($radiusUser) {
@@ -94,5 +95,13 @@ class ProfileManager
         $user->setDisabled(false);
         $this->userRepository->save($user, true);
         $this->radiusUserRepository->flush();
+    }
+
+    public function getActiveProfilesByUser(User $user): array
+    {
+        return $this->userRadiusProfileRepository->findBy([
+            'user' => $user,
+            'status' => UserRadiusProfileStatus::ACTIVE->value,
+        ]);
     }
 }
