@@ -114,6 +114,22 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @method array searchWithFilter(string $filter, ?string $searchTerm = null)
+     *
+     * Searches for users based on provided filter and optional search term.
+     *
+     * Filters out users with roles matching 'ROLE_ADMIN'.
+     * Applies additional filtering based on verification status.
+     * Filters out users who have a non-null deletedAt value.
+     * Joins the SAML provider data if applicable.
+     * Supports partial matching for UUID, email, first name, last name, or SAML provider name using a search term.
+     *
+     * @param string $filter The filter criterion (e.g., verified, banned).
+     * @param string|null $searchTerm An optional partial search term to match user attributes or SAML provider name.
+     *
+     * @return array A list of matched users, ordered by creation date in descending order.
+     */
     public function searchWithFilter(string $filter, ?string $searchTerm = null): array
     {
         $qb = $this->createQueryBuilder('u');
@@ -121,6 +137,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->where('u.roles NOT LIKE :role')
             ->setParameter('role', '%ROLE_ADMIN%');
 
+        // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :Verified')
                 ->setParameter(UserVerificationStatus::VERIFIED->value, true);
@@ -128,19 +145,27 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
+        // Exclude deleted users
         $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
 
+        // Join with UserExternalAuth to access SAMLProvider
+        $qb->leftJoin('u.userExternalAuths', 'ua');
+        $qb->leftJoin('ua.samlProvider', 'sp');
+
+        // Apply the search term, if provided
         if ($searchTerm) {
             $qb->andWhere(
                 $qb->expr()->orX(
                     'u.uuid LIKE :searchTerm',
                     'u.email LIKE :searchTerm',
                     'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm'
+                    'u.last_name LIKE :searchTerm',
+                    'sp.name LIKE :searchTerm' // Search using the provider name
                 )
             )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
+        // Order by creation date (newest first)
         return $qb->orderBy('u.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
