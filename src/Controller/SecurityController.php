@@ -281,7 +281,7 @@ class SecurityController extends AbstractController
         $qrCode = new QrCode($provisioningUri);
         $writer = new PngWriter();
         $qrCodeResult = $writer->write($qrCode);
-        $qrCodeImage = base64_encode((string) $qrCodeResult->getString());
+        $qrCodeImage = base64_encode($qrCodeResult->getString());
 
         return $this->render('site/enable2FAapp.html.twig', [
             'qrCodeImage' => $qrCodeImage,
