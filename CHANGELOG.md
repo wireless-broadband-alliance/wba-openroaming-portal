@@ -3,17 +3,11 @@
 
 # Release V1.7.0
 
-- Multiple Saml Providers
 - Update PHP to 8.4
-- **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
-  exist
-  associated accounts that have a saml provider.
-
-> **Important**: This command must be executed **before running any migrations**.
-
-```bash
-php bin/console app:set-saml-provider
-```
+- Rework **cookies integration only EEA users** (checks for current location of the user to show the cookies banner) -
+  Using
+  GeoLite2 from Maxmind
+- SideBar Admin UI changes
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.
 > If you have version 1.5 or lower with data in these fields, you will have to first switch to version 1.6,
@@ -23,6 +17,20 @@ php bin/console app:set-saml-provider
 
 ```Bash
 php bin/console reset:allocate-providers
+```
+
+## Multiple Saml Providers Integration
+
+Integrated support for Multiple SAML Providers with management features accessible via the UI
+
+- **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
+  exist
+  associated accounts that have a saml provider.
+
+> **Important**: This command must be executed **before running any migrations**.
+
+```bash
+php bin/console app:set-saml-provider
 ```
 
 # Release V1.6.0
