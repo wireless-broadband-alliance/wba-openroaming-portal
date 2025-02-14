@@ -26,15 +26,17 @@
             <div class="relative mt-5 border border-gray-300 rounded-md">
                 <button
                         data-action="clipboard#copyToClipboard"
-                        class="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 text-xs rounded-md hover:bg-blue-600">
+                        class="absolute top-2 right-2 btn-primary text-xs px-2 py-1">
                     Copy
                 </button>
                 <pre id="code-to-copy"
                      data-clipboard-target="code"
-                     class="p-4 bg-gray-100 text-sm font-mono rounded-md overflow-x-auto text-left">
-            {% for code in codes %}
-                {{ code.code }}
-            {% endfor %}
+                     class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
+                    <div class="grid grid-cols-4 gap-4">
+                        {% for code in codes %}
+                            <div>{{ code.code }}</div>
+                        {% endfor %}
+                    </div>
                 </pre>
             </div>
         </div>
