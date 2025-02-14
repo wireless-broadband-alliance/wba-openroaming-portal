@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-semibold p-5">Users Management</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
         <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">Page Style</h1>
+        <h1 class="text-2xl font-semibold p-5">Landing Page Configuration</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_new' %}
         <twig:ux:icon name="wba:layout-grid-add" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Add New Saml Provider</h1>
@@ -14,7 +14,7 @@
         <h1 class="text-2xl font-semibold p-5">Edit Saml Provider</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider' %}
         <twig:ux:icon name="wba:list" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">Saml Provider's</h1>
+        <h1 class="text-2xl font-semibold p-5">Identity Provide - Saml</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
         <twig:ux:icon name="wba:cog" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Reset Password</h1>
@@ -26,7 +26,7 @@
         <h1 class="text-2xl font-semibold p-5">Terms and Policies</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
         <twig:ux:icon name="wba:file-space" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">Radius Configuration</h1>
+        <h1 class="text-2xl font-semibold p-5">Radius Profile Configuration</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
         <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Platform Status</h1>
