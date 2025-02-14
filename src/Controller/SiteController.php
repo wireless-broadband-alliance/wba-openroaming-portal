@@ -73,6 +73,7 @@ class SiteController extends AbstractController
      * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
+     * @param SendSMS $sendSMS Call the function to send SMS using BudgetSms api
      */
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -84,14 +85,14 @@ class SiteController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
-        private readonly SendSMS $sendSMS
+        private readonly SendSMS $sendSMS,
     ) {
     }
 
     #[Route('/', name: 'app_landing')]
     public function landing(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
+        UserPasswordHasherInterface $userPasswordEncoder,
         UserAuthenticatorInterface $userAuthenticator,
         PasswordAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
@@ -103,7 +104,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         // Check if the user is logged in and verification of the user
-        // And Check if the user dont have a forgot_password_request active
+        // And check if the user don't have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
@@ -156,8 +157,8 @@ class SiteController extends AbstractController
                         $user = $form->getData();
 
                         $user->setEmail($user->getEmail());
-                        $user->setCreatedAt(new \DateTime());
-                        $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                        $user->setCreatedAt(new DateTime());
+                        $user->setPassword($userPasswordEncoder->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                         $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                         $userAuths->setProviderId(UserProvider::EMAIL->value);
@@ -205,9 +206,7 @@ class SiteController extends AbstractController
                         $payload['radio-os'] = $payload['detected-os'];
                     }
                 }
-                if (
-                    $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
-                ) {
+                if ($payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface) {
                     /**
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
@@ -287,7 +286,7 @@ class SiteController extends AbstractController
             'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
-            'user' => $currentUser
+            'user' => $currentUser,
         ]);
     }
 
@@ -907,7 +906,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
 
-        return (new TemplatedEmail())
+        return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
