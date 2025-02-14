@@ -120,7 +120,7 @@ class VerificationCodeEmailGenerator
                 $this->entityManager->remove($code);
             }
         }
-        $nCodes = 6;
+        $nCodes = 12;
         $createdCodes = 0;
         while ($createdCodes < $nCodes) {
             $code = $this->generateMixedCode();
