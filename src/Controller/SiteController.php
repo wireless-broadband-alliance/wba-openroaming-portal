@@ -107,13 +107,21 @@ class SiteController extends AbstractController
         $session = $request->getSession();
         if (
             $currentUser && $currentUser->getTwoFactorAuthentication() &&
-            ($currentUser->getTwoFactorAuthentication()->getType() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+            (
+                $currentUser->getTwoFactorAuthentication()->getType() !==
+                UserTwoFactorAuthenticationStatus::DISABLED->value &&
                 !$session->has('2fa_verified'))
         ) {
-            if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
+            if (
+                $currentUser->getTwoFactorAuthentication()->getType() ===
+                UserTwoFactorAuthenticationStatus::SMS->value
+            ) {
                 return $this->redirectToRoute('app_verify2FA_local');
             }
-            if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
+            if (
+                $currentUser->getTwoFactorAuthentication()->getType() ===
+                UserTwoFactorAuthenticationStatus::APP->value
+            ) {
                 return $this->redirectToRoute('app_verify2FA_app');
             }
         }
