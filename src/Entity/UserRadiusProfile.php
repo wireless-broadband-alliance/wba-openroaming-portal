@@ -33,6 +33,9 @@ class UserRadiusProfile
     #[ORM\Column]
     private ?int $status = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $revoked_reason = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,6 +109,18 @@ class UserRadiusProfile
     public function setStatus(int $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getRevokedReason(): ?string
+    {
+        return $this->revoked_reason;
+    }
+
+    public function setRevokedReason(?string $revoked_reason): static
+    {
+        $this->revoked_reason = $revoked_reason;
 
         return $this;
     }

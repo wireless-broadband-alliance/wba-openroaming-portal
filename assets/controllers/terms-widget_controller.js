@@ -1,13 +1,13 @@
-import { Controller } from "@hotwired/stimulus";
+import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["agreeTerms", "confirmationModal", "button"];
 
     connect() {
-
+        const isEEAUser = this.element.dataset.isEeaUser === "true";
         // Load the saved state of the terms checkbox from localStorage, if allowed by cookies
         const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
-        if (hasCookies) {
+        if (hasCookies || isEEAUser === false) {
             const savedTermsState = localStorage.getItem("termsAccepted");
             if (savedTermsState !== null) {
                 this.updateTermsCheckbox(JSON.parse(savedTermsState));
@@ -24,8 +24,8 @@ export default class extends Controller {
         if (!this.agreeTermsTarget.checked) {
             this.confirmationModalTarget.classList.remove("hidden");
         } else {
-            const href = event.currentTarget.getAttribute("href"); // Get href of clicked link
-            window.location.href = href;
+             // Get href of clicked link
+            window.location.href = event.currentTarget.getAttribute("href");
         }
     }
 
@@ -36,9 +36,13 @@ export default class extends Controller {
             this.confirmationModalTarget.classList.add("hidden");
             // Save the terms state only if cookies are allowed
             const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
-            if (hasCookies) {
+            const isEEAUser = this.element.dataset.isEeaUser === "true";
+            if (hasCookies || !isEEAUser) {
                 this.saveTermsState(isChecked);
             }
+        } else {
+            // Remove the saved terms state from the localStorage if the user unchecks
+            localStorage.removeItem("termsAccepted");
         }
 
         // Enable/Disable submit buttons based on the checkbox state
@@ -58,8 +62,6 @@ export default class extends Controller {
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
         for (let button of this.buttonTargets) {
-            // Set or remove the "disabled" property
-            button.disabled = !isChecked;
 
             // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);

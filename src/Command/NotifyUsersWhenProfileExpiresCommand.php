@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Notification;
 use App\Enum\NotificationType;
 use App\Enum\UserProvider;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\NotificationRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -166,17 +167,16 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 $realTime > $limitTime &&
                 $userRadiusProfile->getStatus() === 1
             ) {
-                $this->disableProfiles($user);
+                $this->profileManager->disableProfiles(
+                    $user,
+                    UserRadiusProfileRevokeReason::PROFILE_EXPIRED->value,
+                    true
+                );
                 $this->registrationEmailGenerator->sendNotifyExpiredProfile($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
             }
         }
-    }
-
-    private function disableProfiles($user): void
-    {
-        $this->profileManager->disableProfiles($user, true, true);
     }
 
     /**
