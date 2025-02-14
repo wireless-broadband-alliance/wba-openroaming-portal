@@ -107,13 +107,13 @@ class SiteController extends AbstractController
         $session = $request->getSession();
         if (
             $currentUser && $currentUser->getTwoFactorAuthentication() &&
-            ($currentUser->getTwoFactorAuthentication()->getType() !== UserTwoFactorAuthenticationStatus::DISABLED &&
+            ($currentUser->getTwoFactorAuthentication()->getType() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
                 !$session->has('2fa_verified'))
         ) {
-            if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS) {
+            if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::SMS->value) {
                 return $this->redirectToRoute('app_verify2FA_local');
             }
-            if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP) {
+            if ($currentUser->getTwoFactorAuthentication()->getType() === UserTwoFactorAuthenticationStatus::APP->value) {
                 return $this->redirectToRoute('app_verify2FA_app');
             }
         }
@@ -131,19 +131,19 @@ class SiteController extends AbstractController
             }
             // Checks the 2FA status of the platform, if mandatory forces the user to configure it
             if (
-                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL &&
-                $currentUser->getUserExternalAuths()->get(0)->getProvider() === UserProvider::PORTAL_ACCOUNT &&
+                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                $currentUser->getUserExternalAuths()->get(0)->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
                 (!$currentUser->getTwoFactorAuthentication() ||
                     $currentUser->getTwoFactorAuthentication()->getType() ===
-                    UserTwoFactorAuthenticationStatus::DISABLED)
+                    UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {
                 return $this->redirectToRoute('app_enable2FA');
             }
             if (
-                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL &&
+                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
                 (!$currentUser->getTwoFactorAuthentication() ||
                     $currentUser->getTwoFactorAuthentication()->getType() ===
-                    UserTwoFactorAuthenticationStatus::DISABLED)
+                    UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {
                 return $this->redirectToRoute('app_enable2FA');
             }
