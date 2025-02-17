@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,8 +29,8 @@ final class APIStatusListener
         if (str_starts_with($pathInfo, $this->apiEntryPoint)) {
             $apiStatus = $this->getApiStatus();
 
-            // If API status is disabled, block the request
-            if (!$apiStatus) {
+            // If API status is disabled (not ON), block the request
+            if ($apiStatus !== OperationMode::ON->value) {
                 $response = new JsonResponse([
                     'success' => false,
                     'message' => 'The API is currently disabled.',
@@ -40,9 +41,9 @@ final class APIStatusListener
         }
     }
 
-    private function getApiStatus(): bool
+    private function getApiStatus(): string
     {
         $setting = $this->settingRepository->findOneBy(['name' => 'API_STATUS']);
-        return $setting && strtolower((string)$setting->getValue()) === 'true';
+        return $setting ? trim((string)$setting->getValue()) : OperationMode::OFF->value;
     }
 }
