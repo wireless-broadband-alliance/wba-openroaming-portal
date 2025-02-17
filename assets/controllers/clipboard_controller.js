@@ -8,11 +8,10 @@ export default class extends Controller {
 
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
-                alert('✅ Text copied to clipboard!');
+                alert('Text copied to clipboard!');
             })
-            .catch(err => {
-                console.error('Error copying to clipboard: ', err);
-                alert('⚠ Unable to copy the text.');
+            .catch(() => {
+                alert('Unable to copy the text.');
             });
     }
 }

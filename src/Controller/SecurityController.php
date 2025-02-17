@@ -229,7 +229,7 @@ class SecurityController extends AbstractController
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
             } else {
-                $this->addFlash('error', 'User not found');
+                return $this->redirectToRoute('app_landing');
             }
             return $this->redirectToRoute('app_otpCodes');
         }
