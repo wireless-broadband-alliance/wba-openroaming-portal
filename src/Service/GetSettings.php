@@ -142,7 +142,7 @@ class GetSettings
         ];
 
         $data['API_STATUS'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'API_STATUS'])->getValue() === 'true',
+            'value' => $settingRepository->findOneBy(['name' => 'API_STATUS'])->getValue(),
             'description' => $this->getSettingDescription('API_STATUS'),
         ];
 

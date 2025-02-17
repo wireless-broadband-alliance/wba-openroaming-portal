@@ -19,7 +19,7 @@ final class Version20250217113001 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('API_STATUS', 'true')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('API_STATUS', 'ON')");
     }
 
     public function down(Schema $schema): void
