@@ -461,6 +461,8 @@ class GetSettings
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
+            'TIME_INTERVAL_NOTIFICATION' =>
+                'The notification interval (in days) to alert a user before their profile expires',
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
             'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
             'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',
