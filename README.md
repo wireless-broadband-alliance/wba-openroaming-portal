@@ -305,6 +305,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     This system requires all
     the users to check and verify is session before creating an account.
     To prevent bots.
+12. `API_STATUS`: Defines whether the API is enabled or disabled.
 
 12. `PAGE_TITLE`: The title displayed on the webpage.
 13. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
