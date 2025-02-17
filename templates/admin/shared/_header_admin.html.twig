@@ -51,6 +51,21 @@
     {% endif %}
 </div>
 
+{% set eeaStatus = isEEAUser() %}
+
+{% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_IP').value %}
+    <div class="alert alert-danger">Debug: Missing IP address for the user.</div>
+{% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
+    <div class="alert alert-warning">Debug: Unable to determine user location due to a location error.</div>
+{% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::IN_EEA').value %}
+    <div class="alert alert-success">Debug: Cookies being called and user is from EU (success).</div>
+{% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
+    <div class="alert alert-info">Debug: Cookies being called and user is NOT from EU (failure).</div>
+{% else %}
+    <div class="alert alert-danger">Debug: An unexpected error occurred while determining user location (fallback).
+    </div>
+{% endif %}
+
 {# Error Message Container #}
 {% for message in app.session.flashbag.get('error_admin') %}
     <div class="transition duration-500 animate-pulse mt-2 mr-2 text-red-500 text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>

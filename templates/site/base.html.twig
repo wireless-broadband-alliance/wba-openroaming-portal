@@ -34,7 +34,7 @@
             {# Cookie Banner #}
             {% block cookie %}
                 <div class="grid grid-cols-1 gap-[5px]">
-                    {% if isEEAUser() != constant('App\\Enum\\GeoLocation\IsEEAHandler::IN_EEA').value %}
+                    {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::IN_EEA').value %}
                         {{ include('site/shared/_cookie_banner.html.twig') }}
                     {% endif %}
                 </div>

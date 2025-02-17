@@ -37,7 +37,7 @@ class EEAUserDetector
         }
 
         // Get location data from the retrieved IP
-        $locationData = $this->getLocationFromIp('93.184.216.34');
+        $locationData = $this->getLocationFromIp($ip);
 
         // Handle errors returned from getLocationFromIp
         if ($locationData === GeoLocationErrorCodes::MISSING_FILE->value) {
