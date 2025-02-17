@@ -86,6 +86,7 @@ class SettingsController extends AbstractController
                 $this->addFlash('success_admin', 'The setting has been reset successfully!');
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -113,6 +114,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -140,6 +142,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -167,6 +170,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -194,6 +198,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -221,6 +226,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -248,6 +254,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -278,6 +285,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -408,6 +416,7 @@ class SettingsController extends AbstractController
             }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -501,6 +510,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -591,6 +601,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid()
             ];
             $this->eventActions->saveEvent(
@@ -664,6 +675,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -791,6 +803,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
 
@@ -862,6 +875,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -933,6 +947,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(

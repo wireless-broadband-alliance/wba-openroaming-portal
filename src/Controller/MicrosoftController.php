@@ -217,9 +217,10 @@ class MicrosoftController extends AbstractController
         $this->entityManager->flush();
 
         $event_metadata = [
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
             'platform' => PlatformMode::LIVE->value,
             'uuid' => $user->getUuid(),
-            'ip' => $_SERVER['REMOTE_ADDR'],
             'registrationType' => UserProvider::MICROSOFT_ACCOUNT->value,
         ];
 

@@ -150,10 +150,10 @@ class RegistrationController extends AbstractController
         $this->emailGenerator->sendRegistrationEmail($user, $data['password']);
 
         $eventMetaData = [
+            'ip' => $request->getClientIp(),
             'uuid' => $user->getEmail(),
             'provider' => UserProvider::PORTAL_ACCOUNT->value,
             'registrationType' => UserProvider::EMAIL->value,
-            'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
             $user,
@@ -315,6 +315,7 @@ class RegistrationController extends AbstractController
                     // Defines the Event to the table
                     $eventMetadata = [
                         'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
                         'uuid' => $user->getUuid(),
                     ];
 
@@ -639,6 +640,7 @@ class RegistrationController extends AbstractController
 
                     $eventMetadata = [
                         'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
                         'uuid' => $user->getUuid(),
                         'lastVerificationCodeTime' => $currentTime->format(DateTimeInterface::ATOM),
                         'verificationAttempts' => $verificationAttempts,
@@ -670,6 +672,7 @@ class RegistrationController extends AbstractController
                     // Defines the Event to the table
                     $eventMetadata = [
                         'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
                         'uuid' => $user->getUuid(),
                     ];
 

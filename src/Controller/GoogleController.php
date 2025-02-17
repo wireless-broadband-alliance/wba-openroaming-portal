@@ -225,6 +225,7 @@ class GoogleController extends AbstractController
             'platform' => PlatformMode::LIVE->value,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
             'registrationType' => UserProvider::GOOGLE_ACCOUNT->value,
         ];
 
