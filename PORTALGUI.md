@@ -85,7 +85,7 @@ primary features:
 
 ### 1. Admin Login
 
-The admin dashboard is only accessible after a secure login, accessible via https://<portalurl>/login
+The admin dashboard is only accessible after a secure login, accessible via https://<portalurl>/login/admin
 To access the dashboard, administrators must provide their
 credentials **(default is: admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and private
 entry point to control the platform.
