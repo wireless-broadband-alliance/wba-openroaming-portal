@@ -9,15 +9,15 @@ export default class extends Controller {
     }
 
     toggle(event) {
-        if (event.target.value === "NOT_ENFORCED" ) {
+        if (event.target.value === "option1" ) {
             this.option1Target.classList.remove('hidden');
             this.option2Target.classList.add('hidden');
             this.option3Target.classList.add('hidden');
-        } if (event.target.value === "ENFORCED_FOR_LOCAL" ) {
+        } if (event.target.value === "option2" ) {
             this.option1Target.classList.add('hidden');
             this.option2Target.classList.remove('hidden');
             this.option3Target.classList.add('hidden');
-        } if (event.target.value === "ENFORCED_FOR_ALL" ) {
+        } if (event.target.value === "option3" ) {
             this.option1Target.classList.add('hidden');
             this.option2Target.classList.add('hidden');
             this.option3Target.classList.remove('hidden');

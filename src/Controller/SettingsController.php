@@ -543,6 +543,7 @@ class SettingsController extends AbstractController
 
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Get the submitted data
             $submittedData = $form->getData();
@@ -580,6 +581,15 @@ class SettingsController extends AbstractController
             }
             $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFactorAuthStatusSetting) {
+                if ($twoFactorAuthStatus === 'option1') {
+                    $twoFactorAuthStatus = TwoFAType::NOT_ENFORCED->value;
+                }
+                if ($twoFactorAuthStatus === 'option2') {
+                    $twoFactorAuthStatus = TwoFAType::ENFORCED_FOR_LOCAL->value;
+                }
+                if ($twoFactorAuthStatus === 'option3') {
+                    $twoFactorAuthStatus = TwoFAType::ENFORCED_FOR_ALL->value;
+                }
                 $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
                 $em->persist($twoFactorAuthStatusSetting);
             }
