@@ -41,28 +41,23 @@ class EEAUserDetector
 
         // Handle errors returned from getLocationFromIp
         if ($locationData === GeoLocationErrorCodes::MISSING_FILE->value) {
-            return IsEEAHandler::LOCATION_ERROR->value;
+            return IsEEAHandler::MISSING_FILE->value;
         }
 
         if ($locationData === GeoLocationErrorCodes::INVALID_DB->value) {
-            return IsEEAHandler::LOCATION_ERROR->value;
+            return IsEEAHandler::INVALID_DB->value;
         }
 
         if ($locationData === GeoLocationErrorCodes::GENERIC_ERROR->value) {
-            return IsEEAHandler::LOCATION_ERROR->value;
+            return IsEEAHandler::GENERIC_ERROR->value;
         }
 
-        // Handle success cases
-        if ($locationData === GeoLocationErrorCodes::IN_EU->value) {
-            return IsEEAHandler::IN_EEA->value;
-        }
-
-        if ($locationData === GeoLocationErrorCodes::NOT_IN_EU->value) {
+        if ($locationData === GeoLocationErrorCodes::NOT_IN_EEA->value) {
             return IsEEAHandler::NOT_IN_EEA->value;
         }
 
-        // Fallback in case an unhandled state occurs
-        return IsEEAHandler::LOCATION_ERROR->value;
+        // Handle success cases && fallback in case an unhandled state occurs for cookies implementation
+        return IsEEAHandler::IN_EEA->value;
     }
 
     /**
@@ -100,8 +95,8 @@ class EEAUserDetector
             $record = $reader->city($ip);
 
             return $record->country->isInEuropeanUnion
-                ? GeoLocationErrorCodes::IN_EU->value
-                : GeoLocationErrorCodes::NOT_IN_EU->value;
+                ? GeoLocationErrorCodes::IN_EEA->value
+                : GeoLocationErrorCodes::NOT_IN_EEA->value;
         } catch (InvalidDatabaseException) {
             return GeoLocationErrorCodes::INVALID_DB->value;
         } catch (Exception) {
