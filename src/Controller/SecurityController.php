@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\TwoFactorAuthentication;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -12,9 +13,11 @@ use App\Form\TwoFAcode;
 use App\Form\TwoFactorPhoneNumber;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
 use App\Service\VerificationCodeEmailGenerator;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Endroid\QrCode\QrCode;
@@ -49,6 +52,7 @@ class SecurityController extends AbstractController
         private readonly TOTPService $totpService,
         private readonly EntityManagerInterface $entityManager,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -241,6 +245,17 @@ class SecurityController extends AbstractController
                 $user->setPhoneNumber($phoneNumber);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
             } else {
                 $this->addFlash('error', 'User not found');
             }
@@ -305,10 +320,32 @@ class SecurityController extends AbstractController
                 $secret = $user->getTwoFactorAuthentication()->getSecret();
                 if ($this->verificationCodeGenerator->validateOTPCodes($user, $code)) {
                     $session->set('2fa_verified', true);
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::VERIFY_OTP_2FA->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
                     return $this->redirectToRoute('app_landing');
                 }
                 if ($this->totpService->verifyTOTP($secret, $code)) {
                     $session->set('2fa_verified', true);
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::VERIFY_APP_2FA->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
                     return $this->redirectToRoute('app_landing');
                 }
                 $this->addFlash('error', 'Invalid code');
@@ -325,16 +362,40 @@ class SecurityController extends AbstractController
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFAcode::class);
-        $this->verificationCodeGenerator->generate2FACode($this->getUser());
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->verificationCodeGenerator->generate2FACode($user);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $formCode = $form->get('code')->getData();
-            if ($this->verificationCodeGenerator->validateOTPCodes($this->getUser(), $formCode)) {
+            if ($this->verificationCodeGenerator->validateOTPCodes($user, $formCode)) {
                 $session->set('2fa_verified', true);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::VERIFY_OTP_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
                 return $this->redirectToRoute('app_landing');
             }
-            if ($this->verificationCodeGenerator->validateCode($this->getUser(), $formCode)) {
+            if ($this->verificationCodeGenerator->validateCode($user, $formCode)) {
                 $session->set('2fa_verified', true);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::VERIFY_LOCAL_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
                 return $this->redirectToRoute('app_landing');
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
@@ -346,7 +407,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/disable2FA', name: 'app_disable2FA')]
-    public function disable2FA(): RedirectResponse
+    public function disable2FA(Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -357,6 +418,17 @@ class SecurityController extends AbstractController
             $this->entityManager->persist($twoFA);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::DISABLE_2FA->value,
+                new DateTime(),
+                $eventMetaData
+            );
         } else {
             $this->addFlash('error', 'User not found');
         }
@@ -364,7 +436,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm')]
-    public function enable2FAappValidate(): Response
+    public function enable2FAappValidate(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -375,18 +447,40 @@ class SecurityController extends AbstractController
                 $this->entityManager->persist($twoFA);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::ENABLE_APP_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
             }
         }
         return $this->redirectToRoute('app_otpCodes');
     }
 
     #[Route(path: '/enable2FA/codes', name: 'app_otpCodes')]
-    public function twoFAcodes(): Response
+    public function twoFAcodes(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
         if ($user instanceof User) {
             $this->verificationCodeGenerator->generateOTPcodes($user);
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::GENERATE_OTP_2FA->value,
+                new DateTime(),
+                $eventMetaData
+            );
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,
                 'codes' => $user->getTwoFactorAuthentication()->getOTPcodes()
