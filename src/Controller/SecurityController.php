@@ -435,7 +435,7 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm')]
+    #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm', methods: ['POST'])]
     public function enable2FAappValidate(Request $request): Response
     {
         /** @var User $user */
