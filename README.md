@@ -40,7 +40,7 @@ These are some of the most important tools used on the development of this proje
 ### Prerequisites:
 
 - Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
-- Knowledge about Linux OS (required to setup the project)
+- Knowledge about Linux OS (required to set up the project)
 - Radius DB and a stack IDP prepared to use the portal
 - Docker (required for running the application)
 - Docker compose (responsible for managing multiple containers)
@@ -53,7 +53,6 @@ There are two options to retrieve the project:
 1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains
    only the required components to run the OpenRoaming Provisioning Portal,
    including `.env.sample`, `docker-compose.yml`, and other necessary files.
-
 
 2. **Clone the Repository**: If the user is familiar with Git and want to access the complete source code, can clone the
    repository using the following command:
@@ -299,73 +298,80 @@ The Same uuid may result in conflicts between different portals, resulting in pr
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
 certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
-9. `PLATFORM_MODE`: Live || Demo.
-   When demo, only "demo login" is displayed, and SAML and other login
+1. `PLATFORM_MODE`: Live || Demo.
+   When in Demo, only "demo login" is displayed, and SAML and other login
    methods are disabled regardless of other settings. A demo warning will also be displayed.
-10. `USER_VERIFICATION`: ON || OFF.
-    When it\'s ON it activates the email verification system.
-    This system requires all
-    the users to verify its own account before they download any profile.
-11. `TURNSTILE_CHECKER`: ON || OFF.
-    When it\'s ON, it activates the turnstile verification system.
-    This system requires all
-    the users to check and verify is session before creating an account.
-    To prevent bots.
-12. `API_STATUS`: Defines whether the API is enabled or disabled.
+2. `USER_VERIFICATION`: ON || OFF.
+   When it\'s ON it activates the email verification system.
+   This system requires all
+   the users to verify its own account before they download any profile.
+3. `TURNSTILE_CHECKER`: ON || OFF.
+   When it\'s ON, it activates the turnstile verification system.
+   This system requires all
+   the users to check and verify is session before creating an account.
+   To prevent bots.
+4. `API_STATUS`: Defines whether the API is enabled or disabled.
 
-13. `PAGE_TITLE`: The title displayed on the webpage.
-14. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
-15. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
-16. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-17. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-18. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-19. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-20. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
+5. `PAGE_TITLE`: The title displayed on the webpage.
+6. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
+7. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
+8. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+9. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+10. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+11. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+12. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
     with a Google account login.
-21. `CONTACT_EMAIL`: The email address for contact inquiries.
+13. `VALID_DOMAINS_MICROSOFT_LOGIN`: Defines the valid domains to authenticate with Microsoft Azure, when it's empty, he
+    lets anyone
+    with a Microsoft account login.
+14. `CONTACT_EMAIL`: The email address for contact inquiries.
 
-22. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-23. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
-24. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
-25. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
-26. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-27. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-28. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
-29. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
-30. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
-31. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
-32. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
-33. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-34. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
-35. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
-36. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
+15. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
+16. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
+17. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
+18. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
+19. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
+20. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+21. `AUTH_METHOD_MICROSOFT_LOGIN_ENABLED`: Enable or disable Google authentication method.
+22. `AUTH_METHOD_MICROSOFT_LOGIN_LABEL`: The label for Google authentication button on the login page.
+23. `AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+24. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
+25. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
+26. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
+27. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
+28. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
+29. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
+30. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
+31. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
+32. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
 
-37. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-38. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-39. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-40. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-41. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-42. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+33. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+34. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+35. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+36. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+37. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+38. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
     The placeholder `@ID` is replaced with the user's ID.
 
-43. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-44. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-45. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-46. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-47. `SMS_USERNAME`: Budget SMS Username.
-48. `SMS_USER_ID`: Budget SMS User ID.
-49. `SMS_HANDLE`: Budget SMS Handle hash.
-50. `SMS_FROM`: Entity sending the SMS for the users.
-51. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+39. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+40. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+41. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+42. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+43. `SMS_USERNAME`: Budget SMS Username.
+44. `SMS_USER_ID`: Budget SMS User ID.
+45. `SMS_HANDLE`: Budget SMS Handle hash.
+46. `SMS_FROM`: Entity sending the SMS for the users.
+47. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-52. `TOS_LINK`: Terms and Conditions URL.
-53. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-54. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-55. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-56. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-57. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-58. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-59. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+48. `TOS_LINK`: Terms and Conditions URL.
+49. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+50. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+51. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+52. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+53. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+54. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+55. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+56. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
