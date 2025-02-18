@@ -24,7 +24,7 @@ class EEAUserExtension extends AbstractExtension
     /**
      * Check if the current user is from the EEA
      */
-    public function isEEAUser(): bool
+    public function isEEAUser(): int
     {
         return $this->eeaUserDetector->isEEAUser();
     }
