@@ -56,6 +56,6 @@
         }}) }}
     {{ form_end(form) }}
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to switch to the authentication app</p> </p>
+        <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to switch to the authentication app</p> </p>
     </div>
 {% endblock %}

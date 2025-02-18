@@ -104,10 +104,10 @@
                 <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
             {% else %}
                 <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to change for Authentication App</p>
-                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 {% endif %}
             {% endif %}
         {% else %}
@@ -127,8 +127,8 @@
                         <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
                     {% else %}
                         {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                            <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to change for Authentication App</p>
-                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                            <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                         {% endif %}
                     {% endif %}
                 {% else %}
@@ -140,7 +140,7 @@
                 <div class="divider my-8"></div>
                 <div>
                     <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 </div>
                 {% endif %}
         {% else %}
@@ -151,10 +151,10 @@
                 <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
             {% else %}
                 <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to change for Authentication App</p>
-                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 {% endif %}
             {% endif %}
             </div>
@@ -171,11 +171,11 @@
                         <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
                     {% else %}
                         {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                            <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" style="color: green; text-decoration: underline;" >here</a> to change for Authentication App</p>
-                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                            <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline"> >here</a> to change for Authentication App</p>
+                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline">>here</a> to generate new OTP codes</p>
                         {% endif %}
                         {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" style="color: green; text-decoration: underline;" >here</a> to generate new OTP codes</p>
+                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline"> >here</a> to generate new OTP codes</p>
                         {% endif %}
                     {% endif %}
                 {% else %}
