@@ -17,14 +17,14 @@ class OTPcode
 
     #[ORM\ManyToOne(inversedBy: 'oTPcodes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?TwoFactorAuthentication $twoFactorAuthentication;
+    private TwoFactorAuthentication $twoFactorAuthentication;
 
     #[ORM\Column(length: 10)]
     private ?string $code = null;
 
     #[ORM\Column]
     #[ORM\JoinColumn(nullable: false)]
-    private ?bool $active;
+    private bool $active;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?DateTimeInterface $createdAt = null;
