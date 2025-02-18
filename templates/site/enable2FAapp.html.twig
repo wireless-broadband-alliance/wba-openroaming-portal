@@ -9,6 +9,10 @@
 
     {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
+        {% for message in app.session.flashbag.get('success') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
+        {% endfor %}
+
         {# Flash error message #}
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
