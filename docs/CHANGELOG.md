@@ -8,6 +8,7 @@
   Using
   GeoLite2 from Maxmind
 - New docs for GEOLITEGUI and setup
+- New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
 - Microsoft Login Implementation - New authentication provider / New endpoint
 
