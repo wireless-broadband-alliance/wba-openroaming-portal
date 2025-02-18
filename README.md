@@ -245,6 +245,11 @@ link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile
 And for any **production deployment**, please follow the
 link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
 
+### 🌍 GeoLite GUI Documentation
+
+For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
+the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
+
 ### 🕷️ API Platform
 
 The following configurations are required for the API of the project.
