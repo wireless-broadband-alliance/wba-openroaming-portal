@@ -16,7 +16,7 @@ class TwoFAcode extends AbstractType
             ->add('code', TextType::class, [
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'You should agree to our terms.',
+                        'message' => 'You should enter a code.',
                     ]),
                 ],
             ])

@@ -383,7 +383,7 @@ class SecurityController extends AbstractController
                 );
                 return $this->redirectToRoute('app_landing');
             }
-            if ($this->verificationCodeGenerator->validateCode($user, $formCode)) {
+            if ($this->verificationCodeGenerator->validate2FACode($user, $formCode)) {
                 $session->set('2fa_verified', true);
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,

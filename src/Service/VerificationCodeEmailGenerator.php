@@ -69,7 +69,7 @@ class VerificationCodeEmailGenerator
             ]);
     }
 
-    public function validateCode(User $user, string $formCode): bool
+    public function validate2FACode(User $user, string $formCode): bool
     {
         $codeDate = $user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication ?
             $user->getTwoFactorAuthentication()->getCodeGeneratedAt() : null;
