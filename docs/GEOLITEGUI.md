@@ -21,16 +21,32 @@ The GeoLite2-City database is distributed by MaxMind, and you need to follow the
 
 ## 3. Download the GeoLite2-City.mmdb File
 
-1. Once logged in, navigate to the **Manage License Keys** page in your MaxMind account.
-2. Click on **Generate new license key**.
-3. Follow the instructions on the page to generate a license key associated with your account.
-4. Use the following command in your terminal to download the GeoLite2-City database file:
-   ```bash
-   wget "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY_HERE&suffix=tar.gz" -O GeoLite2-City.tar.gz
-   ```
-    - Replace `YOUR_LICENSE_KEY_HERE` with the license key generated in step 3.
-    - The `-O GeoLite2-City.tar.gz` option specifies the name of the downloaded file.
-5. Save the downloaded `.tar.gz` file to your preferred location.
+### Recommended Method: Download from the MaxMind Account's Download File Section
+
+1. **Log in to Your MaxMind Account**
+    - Visit the [MaxMind Login Page](https://www.maxmind.com/en/account/login).
+    - Enter your credentials to access your account.
+
+2. **Navigate to the Download File Section**
+    - After logging in, go to the **Download Files** area in your MaxMind account.
+
+3. **Locate the GeoLite2-City Database**
+    - Find the **GeoLite2-City** category in the list of available files.
+    - Click on the **Download GZIP** button to download the latest version of the GeoLite2-City database.
+
+### Alternative Method: Using the `wget` Command
+
+This method allows you to automate the download process from the command line.
+
+1. **Generate a License Key in MaxMind**
+    - Log in to your MaxMind account and go to the **Manage License Keys** section.
+    - Generate a new license key if one doesn’t already exist.
+
+2. **Download the Database Using `wget`**
+    - Replace `YOUR_LICENSE_KEY_HERE` with the license key you just generated, and use the following command:
+      ```bash
+      wget "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY_HERE&suffix=tar.gz" -O GeoLite2-City.tar.gz
+      ```
 
 ---
 
