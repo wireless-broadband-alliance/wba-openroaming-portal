@@ -84,7 +84,7 @@ class EEAUserDetector
     private function getLocationFromIp(string $ip): string
     {
         try {
-            $databasePath = __DIR__ . '/../../docs/GeoLiteDB/GeoLite2-City.mmdb';
+            $databasePath = __DIR__ . '/../../docs/geoLiteDB/GeoLite2-City.mmdb';
 
             // Check if the database file exists
             if (!file_exists($databasePath)) {

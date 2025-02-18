@@ -4,7 +4,7 @@
 
 ### 1. Main Page Overview - Live Mode
 
-![Main_Page_Demo_False](assets/wba_screenshots/main_page_live_mode.png)
+![Main_Page_Demo_False](../../assets/wba_screenshots/main_page_live_mode.png)
 
 The main page in platform mode (**Live**) provides a user-friendly interface for users with
 individual accounts.
@@ -18,7 +18,7 @@ safely and quickly connect to Wi-Fi networks.
 
 ### 2. Verification Step
 
-![Verification_Step](assets/wba_screenshots/verification_step.png)
+![Verification_Step](../../assets/wba_screenshots/verification_step.png)
 
 The platform begins the verification procedure to validate the user after registration or when in demo mode. The
 verification system sends an email or sms to the user's provided email or phone number address.
@@ -33,7 +33,7 @@ improves the platform's security by preventing unwanted access.
 
 ### 3. After Verification
 
-![After_Verification](assets/wba_screenshots/after_verification.png)
+![After_Verification](../../assets/wba_screenshots/after_verification.png)
 
 After successfully completing the verification process, the user will be directed to this page.
 The actions taken during the verification process depend on the mode in
@@ -92,7 +92,7 @@ entry point to control the platform.
 
 ### 2. Admin Page
 
-![Admin_Page](assets/wba_screenshots/admin_page.png)
+![Admin_Page](../../assets/wba_screenshots/admin_page.png)
 
 Administrators are presented with the dashboard overview after successfully logging in.
 Administrators may quickly
