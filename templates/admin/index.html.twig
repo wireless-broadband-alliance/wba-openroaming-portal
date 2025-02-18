@@ -10,13 +10,13 @@
         {% set message = '' %}
         {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
             {% set message = 'Unable to determine user location due to a location error with the GeoLite2 database.
-             Please check the docs/GeoLiteDB/GeoLiteConfiguration.md file in for troubleshooting steps.' %}
+             Please check the docs/GeoLiteDB/GEOLITEGUI.md file in for troubleshooting steps.' %}
         {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
             {% set message = 'The required GeoLite2-City.mmdb file is missing.
-             Please ensure this file is included. Refer to the docs/GeoLiteDB/GeoLiteConfiguration.md file for more details.' %}
+             Please ensure this file is included. Refer to the docs/GeoLiteDB/GEOLITEGUI.md file for more details.' %}
         {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
             {% set message = 'The GeoLite2-City.mmdb file is invalid.
-             Please verify the integrity of this file. Consult the docs/GeoLiteDB/GeoLiteConfiguration.md file for further guidance.' %}
+             Please verify the integrity of this file. Consult the docs/GeoLiteDB/GEOLITEGUI.md file for further guidance.' %}
         {% endif %}
 
         {% if message != '' %}

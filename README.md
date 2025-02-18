@@ -130,12 +130,12 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-Follow this link for more information on API documentation: [Api Guide](docs/projectConfiguration/APIGUI.md)
+Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
 # ⚙️ Installation Guide
 
 Follow this link for more information on installing this
-project: [Installation Guide](docs/projectConfiguration/INSTALATION.md).
+project: [Installation Guide](docs/INSTALATION.md).
 
 # Portal Overview & Baseline Operation
 
@@ -162,7 +162,7 @@ When this mode is activated, **it's not required** to verify the user account se
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
 
-Follow this link for a portal user interface overview: [Portal Guide](docs/projectConfiguration/PORTALGUI.md).
+Follow this link for a portal user interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ## 🔧 Environment Variables
 
