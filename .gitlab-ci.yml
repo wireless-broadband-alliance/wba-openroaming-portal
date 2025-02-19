@@ -49,6 +49,14 @@ test-phpstan :
 
   stage : test
 
+eslint:
+  image: node:latest
+  script:
+    - npm install
+    - npx eslint assets/controllers/
+  stage: test
+
+
 build_image:
   stage: build
   script:
