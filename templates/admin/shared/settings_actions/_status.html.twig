@@ -127,8 +127,11 @@
                                     <input type="radio" name="{{ form.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                            id="onRadioEmail"
                                            value="option1"
-                                           class="radio-input hidden" {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? 'checked' : '' }} {{ stimulus_action('three-options_radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
-                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? '' : 'hidden' }}" {{ stimulus_target('three-options_radio', 'option1') }}>
+                                           class="radio-input hidden"
+                                            {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? 'checked' : '' }}
+                                           data-action="input->three-options-radio#toggle">
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? '' : 'hidden' }}"
+                                         data-option-target="option1">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -146,8 +149,11 @@
                                     <input type="radio" name="{{ form.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                            id="offRadioEmail"
                                            value="option2"
-                                           class="radio-input hidden" {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? 'checked' : '' }} {{ stimulus_action('three-options_radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
-                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? '' : 'hidden' }}" {{ stimulus_target('three-options_radio', 'option2') }}>
+                                           class="radio-input hidden"
+                                            {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? 'checked' : '' }}
+                                           data-action="input->three-options-radio#toggle">
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? '' : 'hidden' }}"
+                                         data-option-target="option2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -157,6 +163,7 @@
                                         </svg>
                                     </div>
                                 </label>
+
                                 {# Render "ENFORCED_FOR_ALL" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                        name="offLabelEmail">
@@ -164,8 +171,11 @@
                                     <input type="radio" name="{{ form.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                            id="offRadioEmail"
                                            value="option3"
-                                           class="radio-input hidden" {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_ALL' ? 'checked' : '' }} {{ stimulus_action('three-options_radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
-                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_ALL' ? '' : 'hidden' }}" {{ stimulus_target('three-options_radio', 'option3') }}>
+                                           class="radio-input hidden"
+                                            {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_ALL' ? 'checked' : '' }}
+                                           data-action="input->three-options-radio#toggle">
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_ALL' ? '' : 'hidden' }}"
+                                         data-option-target="option3">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
