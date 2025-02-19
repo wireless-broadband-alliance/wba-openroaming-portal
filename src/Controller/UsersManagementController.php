@@ -56,7 +56,7 @@ class UsersManagementController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_revoke_profiles', methods: ['POST'])]
+    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_user_revoke_profiles', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function revokeUsers(
         Request $request,
@@ -111,7 +111,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
+    #[Route('/dashboard/export/users', name: 'admin_user_export')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(
         Request $request
@@ -238,7 +238,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
+    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_user_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
         int $id,
@@ -275,10 +275,9 @@ class UsersManagementController extends AbstractController
      * Handles the edit of the Users by the admin
      */
     /**
-     * @param $id
      * @throws TransportExceptionInterface
      */
-    #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
+    #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_user_edit')]
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(
         Request $request,
