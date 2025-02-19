@@ -53,6 +53,9 @@ class SamlProvider
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
+    #[ORM\OneToOne(mappedBy: 'samlProvider', cascade: ['persist', 'remove'])]
+    private ?LdapCredential $ldapCredential = null;
+
     public function __construct()
     {
         $this->userExternalAuths = new ArrayCollection();
@@ -210,6 +213,23 @@ class SamlProvider
     public function setDeletedAt(?\DateTimeInterface $deletedAt): static
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getLdapCredential(): ?LdapCredential
+    {
+        return $this->ldapCredential;
+    }
+
+    public function setLdapCredential(LdapCredential $ldapCredential): static
+    {
+        // set the owning side of the relation if necessary
+        if ($ldapCredential->getSamlProvider() !== $this) {
+            $ldapCredential->setSamlProvider($this);
+        }
+
+        $this->ldapCredential = $ldapCredential;
 
         return $this;
     }

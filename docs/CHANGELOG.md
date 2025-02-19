@@ -4,6 +4,7 @@
 # Release V1.7.0
 
 - Update PHP to 8.4
+- Add revoke reason everytime a profile is revoked
 - Rework **cookies integration only EEA users** (checks for current location of the user to show the cookies banner) -
   Using
   GeoLite2 from Maxmind
