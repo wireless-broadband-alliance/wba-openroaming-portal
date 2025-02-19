@@ -85,8 +85,10 @@ class SecurityController extends AbstractController
             if ($platformMode === PlatformMode::DEMO->value) {
                 return $this->redirectToRoute('saml_logout');
             }
+            // Get 2fa status on platform
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
+                // Check 2fa status on platform, after that we need to check user status to decide what case we have
                 if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
                     if ($user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
                         if (
@@ -219,6 +221,7 @@ class SecurityController extends AbstractController
         if (!$user instanceof User) {
             $this->addFlash('error', 'User not found');
         }
+        // If the user doesn't have an instance of 'TwoFactorAuthentication' we need to create one for him.
         if (!$user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
             $twoFA = new TwoFactorAuthentication();
             $twoFA->setUser($user);
@@ -227,6 +230,7 @@ class SecurityController extends AbstractController
             $this->entityManager->persist($twoFA);
         }
         $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
+        // if the user already has a phone number in the bd, there is no need to type it again.
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             if ($user instanceof User) {
                 $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
@@ -238,6 +242,7 @@ class SecurityController extends AbstractController
             }
             return $this->redirectToRoute('app_otpCodes');
         }
+        // If he doesn't have it, he has to type it
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
             if ($user instanceof User) {
@@ -259,6 +264,7 @@ class SecurityController extends AbstractController
             } else {
                 $this->addFlash('error', 'User not found');
             }
+            // After that we give him the otp codes
             return $this->redirectToRoute('app_otpCodes');
         }
         return $this->render('site/enable2FA.html.twig', [
@@ -274,6 +280,7 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
         if ($user instanceof User) {
+            // If the user doesn't have an instance of 'TwoFactorAuthentication' we need to create one for him.
             if (!$user->getTwoFActorAuthentication() instanceof TwoFactorAuthentication) {
                 $twoFA = new TwoFactorAuthentication();
                 $twoFA->setUser($user);
@@ -293,7 +300,7 @@ class SecurityController extends AbstractController
         $formattedSecret = implode(' ', str_split($secret, 10));
 
         $provisioningUri = $this->totpService->generateTOTP($secret);
-
+        // Generate the qr code to activate 2fa through the app.
         $qrCode = new QrCode($provisioningUri);
         $writer = new PngWriter();
         $qrCodeResult = $writer->write($qrCode);
@@ -314,10 +321,13 @@ class SecurityController extends AbstractController
         $form = $this->createForm(TwoFAcode::class);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
             $code = $form->get('code')->getData();
             $user = $this->getUser();
             if ($user instanceof User) {
+                // Get the secret code to communicate with app.
                 $secret = $user->getTwoFactorAuthentication()->getSecret();
+                // Check if the used code is one of the OTP codes
                 if ($this->verificationCodeGenerator->validateOTPCodes($user, $code)) {
                     $session->set('2fa_verified', true);
                     $eventMetaData = [
@@ -333,6 +343,7 @@ class SecurityController extends AbstractController
                     );
                     return $this->redirectToRoute('app_landing');
                 }
+                // Check if the code used is the one generated in the application.
                 if ($this->totpService->verifyTOTP($secret, $code)) {
                     $session->set('2fa_verified', true);
                     $eventMetaData = [
@@ -367,7 +378,9 @@ class SecurityController extends AbstractController
         $this->verificationCodeGenerator->generate2FACode($user);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
             $formCode = $form->get('code')->getData();
+            // Check if the used code is one of the OTP codes
             if ($this->verificationCodeGenerator->validateOTPCodes($user, $formCode)) {
                 $session->set('2fa_verified', true);
                 $eventMetaData = [
@@ -383,6 +396,7 @@ class SecurityController extends AbstractController
                 );
                 return $this->redirectToRoute('app_landing');
             }
+            // Check if the code used is the one generated in the BD.
             if ($this->verificationCodeGenerator->validate2FACode($user, $formCode)) {
                 $session->set('2fa_verified', true);
                 $eventMetaData = [
@@ -414,6 +428,7 @@ class SecurityController extends AbstractController
         if ($user && $user->getTwoFactorAuthentication()) {
             /** @var TwoFactorAuthentication $twoFA */
             $twoFA = $user->getTwoFactorAuthentication();
+            // Mark 2fa as disabled.
             $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
             $this->entityManager->persist($twoFA);
             $this->entityManager->persist($user);
@@ -443,6 +458,7 @@ class SecurityController extends AbstractController
         if ($user) {
             $twoFA = $user->getTwoFactorAuthentication();
             if ($twoFA instanceof TwoFactorAuthentication) {
+                //Mark 2fa as Enable via app.
                 $twoFA->setType(UserTwoFactorAuthenticationStatus::APP->value);
                 $this->entityManager->persist($twoFA);
                 $this->entityManager->persist($user);
@@ -469,6 +485,7 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user = $this->getUser();
         if ($user instanceof User) {
+            // Generate OTP codes
             $this->verificationCodeGenerator->generateOTPcodes($user);
             $eventMetaData = [
                 'platform' => PlatformMode::LIVE->value,

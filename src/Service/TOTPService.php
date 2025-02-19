@@ -13,7 +13,9 @@ class TOTPService
 
     public function generateTOTP(string $secret): string
     {
+        // Create an identifier code to communicate with the app
         $totp = TOTP::create($secret);
+        // Identifier labels in the communication
         $totp->setLabel('OpenRoaming');
         $totp->setIssuer('OpenRoaming');
 
@@ -22,6 +24,7 @@ class TOTPService
 
     public function verifyTOTP(string $secret, string $code): bool
     {
+        // communication with the app using the user secret code to verify the code introduced
         return TOTP::create($secret)->verify($code);
     }
 }
