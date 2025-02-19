@@ -9,18 +9,19 @@ export default class extends Controller {
     }
 
     toggle(event) {
-        if (event.target.value === "option1" ) {
-            this.option1Target.classList.remove('hidden');
-            this.option2Target.classList.add('hidden');
-            this.option3Target.classList.add('hidden');
-        } if (event.target.value === "option2" ) {
-            this.option1Target.classList.add('hidden');
-            this.option2Target.classList.remove('hidden');
-            this.option3Target.classList.add('hidden');
-        } if (event.target.value === "option3" ) {
-            this.option1Target.classList.add('hidden');
-            this.option2Target.classList.add('hidden');
-            this.option3Target.classList.remove('hidden');
-        }
+        const selectedOption = event.target.value;
+
+        const targets = ["option1", "option2", "option3"];
+
+        targets.forEach((targetName) => {
+            const targetElement = this[`${targetName}Target`];
+            if (targetElement) {
+                if (targetName === selectedOption) {
+                    targetElement.classList.remove('hidden');
+                } else {
+                    targetElement.classList.add('hidden');
+                }
+            }
+        });
     }
 }
