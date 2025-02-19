@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\SamlProviderRepository;
-use App\Validator\UniqueField;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -35,7 +34,7 @@ class SamlProvider
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $spAcsUrl = null;
 
-    #[ORM\Column(type:'boolean', options: ['default' => false])]
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isActive;
 
     /**
@@ -172,8 +171,7 @@ class SamlProvider
     {
         // Set the owning side to null (unless already changed)
         if (
-            $this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getSamlProvider(
-            ) === $this
+            $this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getSamlProvider() === $this
         ) {
             $userExternalAuth->setSamlProvider(null);
         }

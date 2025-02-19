@@ -314,17 +314,17 @@ class UsersManagementController extends AbstractController
             $user = $form->getData();
 
             // Verifies if the isVerified is removed to the logged account
-            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() == 0) {
+            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() === 0) {
                 $user->isVerified();
                 $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
-                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 if ($currentUser->getId() === $user->getId()) {
                     $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
-                    return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                    return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
                 }
                 $user->setBannedAt(new DateTime());
                 $this->profileManager->disableProfiles(
@@ -378,7 +378,7 @@ class UsersManagementController extends AbstractController
 
             if ($newPassword !== $confirmPassword) {
                 $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
-                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
             // Get the User Provider && ProviderId

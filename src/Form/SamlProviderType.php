@@ -9,9 +9,12 @@ use App\Validator\SAMLProviderUrl;
 use App\Validator\X509Certificate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -47,6 +50,10 @@ class SamlProviderType extends AbstractType
                         }
                     }),
                 ],
+            ])
+            ->add('isActive', CheckboxType::class, [
+                'label' => 'Enable SAML Provider',
+                'required' => false,
             ])
             ->add('idpEntityId', TextType::class, [
                 'label' => 'SAML IDP Entity ID',
@@ -152,6 +159,36 @@ class SamlProviderType extends AbstractType
                     new X509Certificate()
                 ],
             ]);
+
+        // Dynamically add LDAP fields based on user choice
+        $builder
+            ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
+                $form = $event->getForm();
+                $data = $event->getData();
+
+                // Dynamically add LDAPCredentialType if `isActive`
+                $ldapCredential = $data->getLdapCredential();
+                if ($ldapCredential && $ldapCredential->isActive()) {
+                    $form->add('ldapCredential', LDAPCredentialType::class, [
+                        'label' => false,
+                        'required' => false,
+                    ]);
+                }
+            });
+
+        // Handle the user's choice dynamically for isActive
+        $builder
+            ->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event): void {
+                $form = $event->getForm();
+                $data = $event->getData();
+                // Dynamically add LDAPCredentialType if `isActive` is checked in the submitted data
+                if (!empty($data['ldapCredential']['isActive'])) {
+                    $form->add('ldapCredential', LDAPCredentialType::class, [
+                        'label' => false,
+                        'required' => false,
+                    ]);
+                }
+            });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
