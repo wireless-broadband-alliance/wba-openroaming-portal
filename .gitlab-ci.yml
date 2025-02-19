@@ -57,6 +57,13 @@ eslint:
   stage: test
 
 
+prettier:
+  image: node:latest
+  script:
+    - npm install
+    - npx prettier --check assets/controllers/
+  stage: test
+
 build_image:
   stage: build
   script:
