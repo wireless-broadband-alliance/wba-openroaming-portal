@@ -6,6 +6,10 @@ use OTPHP\TOTP;
 
 class TOTPService
 {
+    /**
+     * TOTP -> Time-Based One-Time Password
+     * Service that communicates with 2fa applications
+     */
     public function generateSecret(): string
     {
         return TOTP::create()->getSecret();
