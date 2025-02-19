@@ -2,8 +2,12 @@
 
 namespace App\Command;
 
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
+use App\Repository\LdapCredentialRepository;
+use App\Repository\SamlProviderRepository;
+use App\Repository\SettingRepository;
 use App\Service\SamlProviderValidator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,7 +29,10 @@ class SetSamlProviderCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ParameterBagInterface $parameterBag,
+        private readonly SamlProviderRepository $samlProviderRepository,
         private readonly SamlProviderValidator $samlProviderValidator,
+        private readonly SettingRepository $settingRepository,
+        private readonly LdapCredentialRepository $ldapCredentialRepository,
     ) {
         parent::__construct();
     }
@@ -119,6 +126,7 @@ class SetSamlProviderCommand extends Command
         }
 
         try {
+            // Try to create and persist the SAML Provider
             $this->createAndPersistSamlProvider(
                 $name,
                 $idpEntityId,
@@ -127,12 +135,50 @@ class SetSamlProviderCommand extends Command
                 $spEntityId,
                 $spAcsUrl
             );
-            $output->writeln('SAML Provider data has been set!');
+            $output->writeln('<info>SAML Provider data has been set!</info>');
 
-            return self::SUCCESS;
-        } catch (Exception $e) {
-            $output->writeln('<error>Error: ' . $e->getMessage() . '</error>');
+            try {
+                // Fetch LDAP configuration from SettingRepository
+                $server = $this->settingRepository->findOneBy([
+                    'name' => 'SYNC_LDAP_SERVER'
+                ])?->getValue();
+                $bindUserDn = $this->settingRepository->findOneBy([
+                    'name' => 'SYNC_LDAP_BIND_USER_DN'
+                ])?->getValue();
+                $bindUserPassword = $this->settingRepository->findOneBy([
+                    'name' => 'SYNC_LDAP_BIND_USER_PASSWORD'
+                ])?->getValue();
+                $searchBaseDn = $this->settingRepository->findOneBy([
+                    'name' => 'SYNC_LDAP_SEARCH_BASE_DN'
+                ])?->getValue();
+                $searchFilter = $this->settingRepository->findOneBy([
+                    'name' => 'SYNC_LDAP_SEARCH_FILTER'
+                ])?->getValue();
 
+                // Try to create and persist the LDAP Credential
+                $this->createAndPersistLdapCredential(
+                    $server,
+                    $bindUserDn,
+                    $bindUserPassword,
+                    $searchBaseDn,
+                    $searchFilter,
+                    $output
+                );
+                $output->writeln('<info>LDAP Credential has been created successfully!</info>');
+            } catch (Exception $ldapException) {
+                // Handle LDAP creation failure
+                $output->writeln(
+                    '<error>Failed to create LDAP Credential: ' . $ldapException->getMessage() . '</error>'
+                );
+                return self::FAILURE;
+            }
+
+            return self::SUCCESS; // Both operations succeeded
+        } catch (Exception $samlException) {
+            // Handle SAML Provider creation failure
+            $output->writeln(
+                '<error>Failed to create SAML Provider: ' . $samlException->getMessage() . '</error>'
+            );
             return self::FAILURE;
         }
     }
@@ -153,7 +199,7 @@ class SetSamlProviderCommand extends Command
         try {
             // Ensure only 1 provider can be active:
             // Find the currently active provider and deactivate it
-            $activeProvider = $this->entityManager->getRepository(SamlProvider::class)->findOneBy(['isActive' => true]);
+            $activeProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
             if ($activeProvider) {
                 $activeProvider->setActive(false);
                 $this->entityManager->persist($activeProvider);
@@ -191,6 +237,72 @@ class SetSamlProviderCommand extends Command
         } catch (Exception $e) {
             $this->entityManager->rollback();
             throw $e;
+        }
+    }
+
+    /**
+     * Attempts to insert or update LDAP credentials without affecting the SAML Provider insertion.
+     */
+    private function createAndPersistLdapCredential(
+        string $server,
+        ?string $bindUserDn,
+        ?string $bindUserPassword,
+        ?string $searchBaseDn,
+        ?string $searchFilter,
+        OutputInterface $output
+    ): void {
+        // Abort if the server is not configured
+        if ($server === '' || $server === '0') {
+            $output->writeln(
+                '<comment>LDAP server configuration is missing or empty. '
+                . 'Skipping LDAP credential creation.</comment>'
+            );
+            return;
+        }
+
+        try {
+            $activeProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
+            if (!$activeProvider) {
+                $output->writeln(
+                    '<comment>Active LDAP server configuration is missing or incomplete. '
+                    . 'LDAP credential creation has been skipped.</comment>'
+                );
+                return;
+            }
+            // Check if there's an existing LDAPCredential linked to this SAML Provider
+            $ldapCredential = $this->ldapCredentialRepository->findOneBy(['samlProvider' => $activeProvider]);
+
+            if ($ldapCredential) {
+                // Overwrite the existing LDAPCredential values
+                $ldapCredential->setServer($server)
+                    ->setBindUserDn($bindUserDn)
+                    ->setBindUserPassword($bindUserPassword)
+                    ->setSearchBaseDn($searchBaseDn)
+                    ->setSearchFilter($searchFilter)
+                    ->setIsActive(true);
+
+                $output->writeln('<comment>Existing LDAP Credential updated for the SAML Provider.</comment>');
+            } else {
+                // Create a new LDAPCredential
+                $ldapCredential = new LdapCredential();
+                $ldapCredential->setServer($server)
+                    ->setBindUserDn($bindUserDn)
+                    ->setBindUserPassword($bindUserPassword)
+                    ->setSearchBaseDn($searchBaseDn)
+                    ->setSearchFilter($searchFilter)
+                    ->setIsActive(true)
+                    ->setSamlProvider($activeProvider);
+            }
+
+            $this->entityManager->persist($ldapCredential);
+            $this->entityManager->flush();
+        } catch (Exception $e) {
+            $output->writeln(
+                sprintf(
+                    '<error>Failed to insert or update LDAP Credential: %s</error>',
+                    $e->getMessage()
+                )
+            );
         }
     }
 }
