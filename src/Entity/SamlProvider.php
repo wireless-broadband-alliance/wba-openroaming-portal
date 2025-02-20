@@ -55,6 +55,9 @@ class SamlProvider
     #[ORM\OneToOne(mappedBy: 'samlProvider', cascade: ['persist', 'remove'])]
     private ?LdapCredential $ldapCredential = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $isLDAPActive = null;
+
     public function __construct()
     {
         $this->userExternalAuths = new ArrayCollection();
@@ -149,11 +152,6 @@ class SamlProvider
         return $this;
     }
 
-    public function isLDAPActive(): ?bool
-    {
-        return $this->ldapCredential?->isLDAPActive();
-    }
-
     /**
      * @return Collection<int, UserExternalAuth>
      */
@@ -233,6 +231,18 @@ class SamlProvider
         }
 
         $this->ldapCredential = $ldapCredential;
+
+        return $this;
+    }
+
+    public function getIsLDAPActive(): ?bool
+    {
+        return $this->isLDAPActive;
+    }
+
+    public function setIsLDAPActive(bool $isLDAPActive): static
+    {
+        $this->isLDAPActive = $isLDAPActive;
 
         return $this;
     }

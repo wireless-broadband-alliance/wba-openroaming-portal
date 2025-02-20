@@ -29,9 +29,6 @@ class LdapCredential
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $searchFilter = null;
 
-    #[ORM\Column]
-    private ?bool $isLDAPActive = null;
-
     #[ORM\OneToOne(inversedBy: 'ldapCredential', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?SamlProvider $samlProvider = null;
@@ -100,18 +97,6 @@ class LdapCredential
     public function setSearchFilter(?string $searchFilter): static
     {
         $this->searchFilter = $searchFilter;
-
-        return $this;
-    }
-
-    public function isLDAPActive(): ?bool
-    {
-        return $this->isLDAPActive;
-    }
-
-    public function setIsLDAPActive(bool $isLDAPActive): static
-    {
-        $this->isLDAPActive = $isLDAPActive;
 
         return $this;
     }

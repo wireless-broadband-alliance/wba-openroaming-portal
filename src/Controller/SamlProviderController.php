@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -10,7 +9,6 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
-use App\Form\LDAPCredentialType;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
@@ -122,10 +120,6 @@ class SamlProviderController extends AbstractController
         $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
         $formSamlProvider->handleRequest($request);
 
-        $ldapCredential = new LDAPCredential();
-        $formLDAPCredential = $this->createForm(LDAPCredentialType::class, $ldapCredential);
-        $formLDAPCredential->handleRequest($request);
-
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
             // Find and disable the currently active SAML Provider (if any)
             $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
@@ -160,7 +154,6 @@ class SamlProviderController extends AbstractController
         }
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'formSamlProvider' => $formSamlProvider->createView(),
-            'formLDAPCredential' => $formLDAPCredential->createView(),
             'data' => $data,
             'current_user' => $currentUser,
         ]);

@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Validator\CamelCase;
 use App\Validator\SamlMetadata;
@@ -16,8 +17,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfonycasts\DynamicForms\DependentField;
-use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class SamlProviderType extends AbstractType
 {
@@ -28,9 +27,7 @@ class SamlProviderType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $dynamicBuilder = new DynamicFormBuilder($builder);
-
-        $dynamicBuilder
+        $builder
             ->add('name', TextType::class, [
                 'label' => 'Provider Name',
                 'empty_data' => '',
@@ -157,29 +154,16 @@ class SamlProviderType extends AbstractType
                     new X509Certificate()
                 ],
             ])
-            ->add('useLDAP', CheckboxType::class, [
+            ->add('isLDAPActive', CheckboxType::class, [
                 'label' => 'Enable LDAP',
-                'mapped' => false,
+                'mapped' => true,
+                'required' => false,
+            ])
+            ->add('ldapCredential', LDAPCredentialType::class, [
+                'label' => 'LDAP Configuration',
+                'data_class' => LdapCredential::class,
                 'required' => false,
             ]);
-
-
-        // Add the dependent LDAP Credential configuration
-        $dynamicBuilder->addDependent(
-            'ldapCredential',
-            'useLDAP', // Explicit dependency on the 'useLDAP' checkbox
-            function (DependentField $field, ?bool $useLDAP): void {
-                if (!$useLDAP) {
-                    return;
-                }
-
-                // If user wants LDAP, render the LDAPCredentialType
-                $field->add(LDAPCredentialType::class, [
-                    'label' => 'LDAP Configuration',
-                    'required' => false,
-                ]);
-            }
-        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
