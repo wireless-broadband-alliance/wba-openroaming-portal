@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\DeletedSamlProviderData;
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -25,6 +26,8 @@ class SamlProviderDeletionService
         Request $request,
         User $currentUser
     ): array {
+        $getSamlProviderName = $samlProvider->getName();
+        $getLdapCredentialServer = $samlProvider->getLdapCredential()?->getServer();
         // Prepare data for the SAML Provider to be deleted
         $deletedSamlProviderData = [
             'id' => $samlProvider->getId(),
@@ -37,6 +40,14 @@ class SamlProviderDeletionService
             'createdAt' => $samlProvider->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updatedAt' => $samlProvider->getUpdatedAt()?->format('Y-m-d H:i:s'),
             'deletedAt' => new DateTime(),
+            'ldapCredentials' => $samlProvider->getLdapCredential() instanceof LdapCredential ? [
+                'server' => $samlProvider->getLdapCredential()->getServer(),
+                'bindUserDn' => $samlProvider->getLdapCredential()->getBindUserDn(),
+                'bindUserPassword' => $samlProvider->getLdapCredential()->getBindUserPassword(),
+                'searchBaseDn' => $samlProvider->getLdapCredential()->getSearchBaseDn(),
+                'searchFilter' => $samlProvider->getLdapCredential()->getSearchFilter(),
+                'updatedAt' => $samlProvider->getLdapCredential()->getUpdatedAt()?->format('Y-m-d H:i:s'),
+            ] : null,
         ];
 
         // Prepare JSON data for encryption
@@ -62,6 +73,18 @@ class SamlProviderDeletionService
         $samlProvider->setSpEntityId(null);
         $samlProvider->setSpAcsUrl(null);
         $samlProvider->setIdpX509Cert(null);
+
+        $ldapCredential = $samlProvider->getLdapCredential();
+        if ($ldapCredential instanceof LdapCredential) {
+            $ldapCredential->setUpdatedAt(new DateTime()); // Update timestamp
+            $ldapCredential->setServer('This credential was deleted');
+            $ldapCredential->setBindUserDn('This credential was deleted');
+            $ldapCredential->setBindUserPassword('This credential was deleted');
+            $ldapCredential->setSearchBaseDn(null);
+            $ldapCredential->setSearchFilter(null);
+            $this->entityManager->persist($ldapCredential);
+        }
+
         $deletedSamlProviderData = new DeletedSamlProviderData();
         $deletedSamlProviderData
             ->setPgpEncryptedJsonFile($pgpEncryptedData)
@@ -72,7 +95,8 @@ class SamlProviderDeletionService
         $this->entityManager->flush();
 
         $eventMetadata = [
-            'samlProvider' => $samlProvider->getName(),
+            'samlProvider' => $getSamlProviderName,
+            'ldapCredential' => $getLdapCredentialServer,
             'deletedBy' => $currentUser->getUuid(),
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
