@@ -149,6 +149,11 @@ class SamlProvider
         return $this;
     }
 
+    public function isLDAPActive(): ?bool
+    {
+        return $this->ldapCredential?->isLDAPActive();
+    }
+
     /**
      * @return Collection<int, UserExternalAuth>
      */

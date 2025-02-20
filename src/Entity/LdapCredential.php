@@ -29,7 +29,7 @@ class LdapCredential
     private ?string $searchFilter = null;
 
     #[ORM\Column]
-    private ?bool $isActive = null;
+    private ?bool $isLDAPActive = null;
 
     #[ORM\OneToOne(inversedBy: 'ldapCredential', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
@@ -100,14 +100,14 @@ class LdapCredential
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function isLDAPActive(): ?bool
     {
-        return $this->isActive;
+        return $this->isLDAPActive;
     }
 
-    public function setIsActive(bool $isActive): static
+    public function setIsLDAPActive(bool $isLDAPActive): static
     {
-        $this->isActive = $isActive;
+        $this->isLDAPActive = $isLDAPActive;
 
         return $this;
     }

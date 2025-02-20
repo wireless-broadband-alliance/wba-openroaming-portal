@@ -279,7 +279,7 @@ class SetSamlProviderCommand extends Command
                     ->setBindUserPassword($bindUserPassword)
                     ->setSearchBaseDn($searchBaseDn)
                     ->setSearchFilter($searchFilter)
-                    ->setIsActive(true);
+                    ->setIsLDAPActive(true);
 
                 $output->writeln('<comment>Existing LDAP Credential updated for the SAML Provider.</comment>');
             } else {
@@ -290,7 +290,7 @@ class SetSamlProviderCommand extends Command
                     ->setBindUserPassword($bindUserPassword)
                     ->setSearchBaseDn($searchBaseDn)
                     ->setSearchFilter($searchFilter)
-                    ->setIsActive(true)
+                    ->setIsLDAPActive(true)
                     ->setSamlProvider($activeProvider);
             }
 
