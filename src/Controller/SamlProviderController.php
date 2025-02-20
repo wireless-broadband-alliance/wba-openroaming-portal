@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -125,11 +126,37 @@ class SamlProviderController extends AbstractController
             $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
             if ($previousSamlProvider) {
                 $previousSamlProvider->setActive(false);
+                $previousSamlProvider->setIsLdapActive(false);
+                $this->entityManager->persist($previousSamlProvider);
             }
 
             $samlProvider->setActive(true);
             $samlProvider->setCreatedAt(new DateTime());
             $samlProvider->setUpdatedAt(new DateTime());
+            if ($samlProvider->getIsLDAPActive() === true) {
+                $ldapCredential = $samlProvider->getLdapCredential();
+                if ($ldapCredential instanceof LdapCredential) {
+                    $ldapCredential->setSamlProvider($samlProvider);
+                    $ldapCredential->setUpdatedAt(new DateTime());
+                    $this->entityManager->persist($ldapCredential);
+
+                    $eventMetaData = [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'platform' => PlatformMode::LIVE->value,
+                        'ldapCredentialAdded' => $ldapCredential->getServer(),
+                        'by' => $currentUser->getUuid(),
+                    ];
+
+                    $this->eventActions->saveEvent(
+                        $currentUser,
+                        AnalyticalEventType::ADMIN_ADDED_LDAP_CREDENTIAL->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+                }
+            }
+
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
@@ -152,6 +179,7 @@ class SamlProviderController extends AbstractController
             $this->addFlash('success_admin', 'SAML Provider added successfully.');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
+
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,

@@ -23,14 +23,14 @@ class LDAPCredentialType extends AbstractType
             ])
             ->add('bindUserDn', TextType::class, [
                 'label' => 'Bind User DN',
-                'required' => false,
+                'required' => true,
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
             ])
             ->add('bindUserPassword', PasswordType::class, [
                 'label' => 'Bind User Password',
-                'required' => false,
+                'required' => true,
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
