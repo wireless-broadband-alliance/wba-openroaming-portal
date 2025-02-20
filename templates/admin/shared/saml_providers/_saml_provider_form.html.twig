@@ -78,66 +78,62 @@
         <div class="mt-8 space-x-4 relative flex flex-row">
             <p class="font-bold">Do you want to enable LDAP ?</p>
             <label class="inline-flex items-center cursor-pointer">
-                {{ form_widget(formSamlProvider.useLDAP, {attr: {class: 'sr-only peer', 'data-action': 'change->widget#toggle'}}) }}
+                {{ form_widget(formSamlProvider.isLDAPActive, {attr: {class: 'sr-only peer', 'data-action': 'change->widget#toggle'}}) }}
                 <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                {{ form_errors(formSamlProvider.useLDAP) }}
+                {{ form_errors(formSamlProvider.isLDAPActive) }}
             </label>
         </div>
 
-        {# LDAP Configuration Section initially hidden #}
-        <div data-widget-target="modal" class="hidden">
-            <div class="p-6 mt-8 mx-auto bg-white rounded-lg">
-                {{ form_start(formLDAPCredential) }}
+        {# Render the LDAP Configuration Section Conditionally #}
+        {% if formSamlProvider.isLDAPActive.vars.value %}
+            <div data-widget-target="modal" class="p-6 mt-8 mx-auto bg-white rounded-lg">
                 <div class="grid gap-6">
-                    {# First row with 3 columns #}
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="relative">
-                            {{ form_label(formLDAPCredential.server, 'Synchronization LDAP Server', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formLDAPCredential.server, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapCredential.server, 'Synchronization LDAP Server', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapCredential.server, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formLDAPCredential.server) }}
+                                {{ form_errors(formSamlProvider.ldapCredential.server) }}
                             </div>
                         </div>
 
                         <div class="relative">
-                            {{ form_label(formLDAPCredential.searchBaseDn, 'Search Base Distinguished Name', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formLDAPCredential.searchBaseDn, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapCredential.searchBaseDn, 'Search Base Distinguished Name', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapCredential.searchBaseDn, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formLDAPCredential.searchBaseDn) }}
+                                {{ form_errors(formSamlProvider.ldapCredential.searchBaseDn) }}
                             </div>
                         </div>
 
                         <div class="relative">
-                            {{ form_label(formLDAPCredential.searchFilter, 'LDAP Search Filter', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formLDAPCredential.searchFilter, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapCredential.searchFilter, 'LDAP Search Filter', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapCredential.searchFilter, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formLDAPCredential.searchFilter) }}
+                                {{ form_errors(formSamlProvider.ldapCredential.searchFilter) }}
                             </div>
                         </div>
                     </div>
 
-                    {# Second row with 2 columns #}
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="relative">
-                            {{ form_label(formLDAPCredential.bindUserDn, 'Bind Distinguished Name', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formLDAPCredential.bindUserDn, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapCredential.bindUserDn, 'Bind Distinguished Name', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapCredential.bindUserDn, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formLDAPCredential.bindUserDn) }}
+                                {{ form_errors(formSamlProvider.ldapCredential.bindUserDn) }}
                             </div>
                         </div>
 
                         <div class="relative">
-                            {{ form_label(formLDAPCredential.bindUserPassword, 'Bind Distinguished Password', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formLDAPCredential.bindUserPassword, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapCredential.bindUserPassword, 'Bind Distinguished Password', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapCredential.bindUserPassword, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formLDAPCredential.bindUserPassword) }}
+                                {{ form_errors(formSamlProvider.ldapCredential.bindUserPassword) }}
                             </div>
                         </div>
                     </div>
                 </div>
-                {{ form_end(formLDAPCredential) }}
             </div>
-        </div>
+        {% endif %}
     </div>
 
     {# Submit Buttons (Add/Edit Logic) #}
