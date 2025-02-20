@@ -17,22 +17,37 @@ class LDAPCredentialType extends AbstractType
             ->add('server', TextType::class, [
                 'label' => 'LDAP Server',
                 'required' => true,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ])
             ->add('bindUserDn', TextType::class, [
                 'label' => 'Bind User DN',
                 'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ])
             ->add('bindUserPassword', PasswordType::class, [
                 'label' => 'Bind User Password',
                 'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ])
             ->add('searchBaseDn', TextType::class, [
                 'label' => 'Search Base DN',
                 'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ])
             ->add('searchFilter', TextType::class, [
                 'label' => 'Search Filter',
                 'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ]);
     }
 
