@@ -207,6 +207,26 @@ class SamlProviderController extends AbstractController
         $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
         $formSamlProvider->handleRequest($request);
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
+            $ldapCredential = $samlProvider->getLdapCredential();
+            if ($ldapCredential instanceof LdapCredential) {
+                $ldapCredential->setUpdatedAt(new DateTime());
+                $this->entityManager->persist($ldapCredential);
+
+                $eventMetaData = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'ldapCredentialEdited' => $ldapCredential->getServer(),
+                    'by' => $currentUser->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::ADMIN_EDITED_LDAP_CREDENTIAL->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+            }
             $samlProvider->setUpdatedAt(new DateTime());
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
