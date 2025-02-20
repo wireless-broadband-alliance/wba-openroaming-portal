@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -9,6 +10,7 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
+use App\Form\LDAPCredentialType;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
@@ -117,10 +119,14 @@ class SamlProviderController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $samlProvider = new SamlProvider();
-        $form = $this->createForm(SamlProviderType::class, $samlProvider);
-        $form->handleRequest($request);
+        $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
+        $formSamlProvider->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        $ldapCredential = new LDAPCredential();
+        $formLDAPCredential = $this->createForm(LDAPCredentialType::class, $ldapCredential);
+        $formLDAPCredential->handleRequest($request);
+
+        if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
             // Find and disable the currently active SAML Provider (if any)
             $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
             if ($previousSamlProvider) {
@@ -153,7 +159,8 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
-            'form' => $form->createView(),
+            'formSamlProvider' => $formSamlProvider->createView(),
+            'formLDAPCredential' => $formLDAPCredential->createView(),
             'data' => $data,
             'current_user' => $currentUser,
         ]);
@@ -176,9 +183,9 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        $form = $this->createForm(SamlProviderType::class, $samlProvider);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
+        $formSamlProvider->handleRequest($request);
+        if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
             $samlProvider->setUpdatedAt(new DateTime());
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
@@ -206,7 +213,7 @@ class SamlProviderController extends AbstractController
         }
 
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
-            'form' => $form->createView(),
+            'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
             'current_user' => $currentUser,
             'samlProvider' => $samlProvider

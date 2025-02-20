@@ -13,11 +13,11 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfonycasts\DynamicForms\DependentField;
+use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class SamlProviderType extends AbstractType
 {
@@ -28,17 +28,19 @@ class SamlProviderType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
+        $dynamicBuilder = new DynamicFormBuilder($builder);
+
+        $dynamicBuilder
             ->add('name', TextType::class, [
                 'label' => 'Provider Name',
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider name'
+                        'message' => 'Please enter a valid provider name.'
                     ]),
                     new CamelCase(),
+                    // Ensure 'name' is unique
                     new Assert\Callback(function ($value, $context): void {
-                        // Check for uniqueness of the 'name' field in the database
                         $existingProvider = $this->entityManager->getRepository(SamlProvider::class)
                             ->findOneBy(['name' => $value]);
 
@@ -51,19 +53,15 @@ class SamlProviderType extends AbstractType
                     }),
                 ],
             ])
-            ->add('isActive', CheckboxType::class, [
-                'label' => 'Enable SAML Provider',
-                'required' => false,
-            ])
             ->add('idpEntityId', TextType::class, [
                 'label' => 'SAML IDP Entity ID',
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider IDP Entity ID'
+                        'message' => 'Please enter a valid SAML IDP Entity ID.'
                     ]),
+                    // Ensure 'idpEntityId' is unique
                     new Assert\Callback(function ($value, $context): void {
-                        // Validation for uniqueness of 'idpEntityId'
                         $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
                             ->findOneBy(['idpEntityId' => $value]);
 
@@ -82,10 +80,10 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider IDP SSO URL'
+                        'message' => 'Please enter a valid SAML IDP SSO URL.'
                     ]),
                     new Assert\Callback(function ($value, $context): void {
-                        // Validation for uniqueness of 'idpEntityId'
+                        // Ensure 'idpSsoUrl' is unique
                         $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
                             ->findOneBy(['idpSsoUrl' => $value]);
 
@@ -97,7 +95,7 @@ class SamlProviderType extends AbstractType
                         }
                     }),
                     new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'message' => 'The value "{{ value }}" is not a valid URL.',
                         'protocols' => ['http', 'https'],
                     ]),
                 ],
@@ -107,10 +105,10 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider SP Entity ID'
+                        'message' => 'Please enter a valid SAML SP Entity ID.'
                     ]),
                     new Assert\Callback(function ($value, $context): void {
-                        // Validation for uniqueness of 'idpEntityId'
+                        // Ensure 'spEntityId' is unique
                         $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
                             ->findOneBy(['spEntityId' => $value]);
 
@@ -129,14 +127,14 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider SP ACS URL'
+                        'message' => 'Please enter a valid SAML SP ACS URL.'
                     ]),
                     new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'message' => 'The value "{{ value }}" is not a valid URL.',
                         'protocols' => ['http', 'https'],
                     ]),
                     new Assert\Callback(function ($value, $context): void {
-                        // Validation for uniqueness of 'idpEntityId'
+                        // Ensure 'spAcsUrl' is unique
                         $existingEntity = $this->entityManager->getRepository(SamlProvider::class)
                             ->findOneBy(['spAcsUrl' => $value]);
 
@@ -154,41 +152,34 @@ class SamlProviderType extends AbstractType
                 'empty_data' => '',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a valid provider IDP X509 certificate'
+                        'message' => 'Please enter a valid SAML IDP X509 certificate.'
                     ]),
                     new X509Certificate()
                 ],
+            ])
+            ->add('useLDAP', CheckboxType::class, [
+                'label' => 'Enable LDAP',
+                'mapped' => false,
+                'required' => false,
             ]);
 
-        // Dynamically add LDAP fields based on user choice
-        $builder
-            ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
-                $form = $event->getForm();
-                $data = $event->getData();
 
-                // Dynamically add LDAPCredentialType if `isActive`
-                $ldapCredential = $data->getLdapCredential();
-                if ($ldapCredential && $ldapCredential->isActive()) {
-                    $form->add('ldapCredential', LDAPCredentialType::class, [
-                        'label' => false,
-                        'required' => false,
-                    ]);
+        // Add the dependent LDAP Credential configuration
+        $dynamicBuilder->addDependent(
+            'ldapCredential',
+            'useLDAP', // Explicit dependency on the 'useLDAP' checkbox
+            function (DependentField $field, ?bool $useLDAP): void {
+                if (!$useLDAP) {
+                    return;
                 }
-            });
 
-        // Handle the user's choice dynamically for isActive
-        $builder
-            ->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event): void {
-                $form = $event->getForm();
-                $data = $event->getData();
-                // Dynamically add LDAPCredentialType if `isActive` is checked in the submitted data
-                if (!empty($data['ldapCredential']['isActive'])) {
-                    $form->add('ldapCredential', LDAPCredentialType::class, [
-                        'label' => false,
-                        'required' => false,
-                    ]);
-                }
-            });
+                // If user wants LDAP, render the LDAPCredentialType
+                $field->add(LDAPCredentialType::class, [
+                    'label' => 'LDAP Configuration',
+                    'required' => false,
+                ]);
+            }
+        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
