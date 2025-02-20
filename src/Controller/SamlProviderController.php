@@ -11,6 +11,7 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
 use App\Form\SamlProviderType;
+use App\Repository\LdapCredentialRepository;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -108,7 +109,7 @@ class SamlProviderController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/saml-provider/new', name: 'admin_dashboard_saml_provider_new')]
+    #[Route('/dashboard/saml-provider/new', name: 'admin_dashboard_saml_provider_new')]
     #[IsGranted('ROLE_ADMIN')]
     public function addSamlProvider(Request $request): Response
     {
@@ -187,7 +188,7 @@ class SamlProviderController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
+    #[Route('/dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
     #[IsGranted('ROLE_ADMIN')]
     public function editSamlProvider(
         int $id,
@@ -195,29 +196,47 @@ class SamlProviderController extends AbstractController
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        // Find the new SamlProvider to be enabled
+        // Find the SAML Provider by ID
         $samlProvider = $this->samlProviderRepository->find($id);
+
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
+        $ldapCredential = $samlProvider->getLdapCredential();
+        // Capture the bindUserPassword before any changes are made
+        $originalPassword = null;
+        if ($ldapCredential instanceof LdapCredential) {
+            $originalPassword = $ldapCredential->getBindUserPassword();
+        }
+
         $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
         $formSamlProvider->handleRequest($request);
+
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
-            $ldapCredential = $samlProvider->getLdapCredential();
-            if ($samlProvider->isActive() === false && $samlProvider->getIsLDAPActive() === true) {
+            if (!$samlProvider->isActive() && $samlProvider->getIsLDAPActive()) {
                 $this->addFlash('error_admin', 'LDAP cannot be active if the provider is disabled.');
                 return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
                     'id' => $samlProvider->getId(),
                 ]);
             }
+
+            $ldapCredential = $samlProvider->getLdapCredential();
             if ($ldapCredential instanceof LdapCredential) {
+                // Check if password is not set or is empty
+                if (!$ldapCredential->getBindUserPassword() || trim($ldapCredential->getBindUserPassword()) === '') {
+                    // Assign previously saved password if found
+                        $ldapCredential->setBindUserPassword($originalPassword);
+                }
+
                 $ldapCredential->setUpdatedAt(new DateTime());
                 $this->entityManager->persist($ldapCredential);
 
+                // Log the LDAP Credential edit
                 $eventMetaData = [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
@@ -233,11 +252,12 @@ class SamlProviderController extends AbstractController
                     $eventMetaData
                 );
             }
+
             $samlProvider->setUpdatedAt(new DateTime());
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
-            // Log the event metadata (tracking the change)
+            // Log the SAML Provider edit
             $eventMetaData = [
                 'platform' => PlatformMode::LIVE->value,
                 'samlProviderEdited' => $samlProvider->getName(),
@@ -263,12 +283,12 @@ class SamlProviderController extends AbstractController
             'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
             'current_user' => $currentUser,
-            'samlProvider' => $samlProvider
+            'samlProvider' => $samlProvider,
         ]);
     }
 
 
-    #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function enableSamlProvider(
         int $id,
@@ -323,7 +343,7 @@ class SamlProviderController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteSamlProvider(
         int $id,
@@ -391,7 +411,7 @@ class SamlProviderController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('dashboard/saml-provider/revoke/{id}', name: 'admin_dashboard_saml_provider_revoke', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/revoke/{id}', name: 'admin_dashboard_saml_provider_revoke', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function revokeSamlProvider(
         int $id,

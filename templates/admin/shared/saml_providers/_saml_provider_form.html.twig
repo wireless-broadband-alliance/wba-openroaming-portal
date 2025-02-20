@@ -126,6 +126,10 @@
                         <div class="relative">
                             {{ form_label(formSamlProvider.ldapCredential.bindUserPassword, 'Bind Distinguished Password', {label_attr: {class: 'form-label'}}) }}
                             {{ form_widget(formSamlProvider.ldapCredential.bindUserPassword, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-gray-500 text-sm mx-2 mt-2">
+                                Leaving this field empty while editing will retain the current password saved in the
+                                portal.
+                            </div>
                             <div class="text-red-500 m-2">
                                 {{ form_errors(formSamlProvider.ldapCredential.bindUserPassword) }}
                             </div>
