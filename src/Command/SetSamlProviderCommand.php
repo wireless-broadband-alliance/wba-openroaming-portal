@@ -214,6 +214,7 @@ class SetSamlProviderCommand extends Command
             $samlProvider->setSpEntityId($spEntityId);
             $samlProvider->setSpAcsUrl($spAcsUrl);
             $samlProvider->setActive(true);
+            $samlProvider->setIsLDAPActive(false);
             $samlProvider->setCreatedAt(new DateTime());
             $samlProvider->setUpdatedAt(new DateTime());
 
