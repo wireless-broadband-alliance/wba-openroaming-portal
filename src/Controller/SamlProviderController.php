@@ -11,7 +11,6 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
 use App\Form\SamlProviderType;
-use App\Repository\LdapCredentialRepository;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -208,9 +207,14 @@ class SamlProviderController extends AbstractController
         }
 
         $ldapCredential = $samlProvider->getLdapCredential();
-        // Capture the bindUserPassword before any changes are made
+
+        // Capture all the required fields before any changes are made
+        $originalServer = null;
+        $originalUserDn = null;
         $originalPassword = null;
         if ($ldapCredential instanceof LdapCredential) {
+            $originalServer = $ldapCredential->getServer();
+            $originalUserDn = $ldapCredential->getBindUserDn();
             $originalPassword = $ldapCredential->getBindUserPassword();
         }
 
@@ -227,11 +231,20 @@ class SamlProviderController extends AbstractController
 
             $ldapCredential = $samlProvider->getLdapCredential();
             if ($ldapCredential instanceof LdapCredential) {
-                // Check if password is not set or is empty
+                // Check if any of the required fields are not set or empty
+                if (!$ldapCredential->getServer() || trim($ldapCredential->getServer()) === '') {
+                    // Assign previously saved server if found
+                    $ldapCredential->setServer($originalServer);
+                }
+                if (!$ldapCredential->getBindUserDn() || trim($ldapCredential->getBindUserDn()) === '') {
+                    // Assign previously saved UserDn if found
+                    $ldapCredential->setBindUserDn($originalUserDn);
+                }
                 if (!$ldapCredential->getBindUserPassword() || trim($ldapCredential->getBindUserPassword()) === '') {
                     // Assign previously saved password if found
-                        $ldapCredential->setBindUserPassword($originalPassword);
+                    $ldapCredential->setBindUserPassword($originalPassword);
                 }
+
 
                 $ldapCredential->setUpdatedAt(new DateTime());
                 $this->entityManager->persist($ldapCredential);

@@ -8,6 +8,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class LDAPCredentialType extends AbstractType
 {
@@ -17,6 +19,21 @@ class LDAPCredentialType extends AbstractType
             ->add('server', TextType::class, [
                 'label' => 'LDAP Server',
                 'required' => true,
+                'constraints' => [
+                    // Callback for conditional validation
+                    new Callback(function ($value, ExecutionContextInterface $context): void {
+                        // Access the parent form data to check the value of isLDAPActive
+                        $formData = $context->getRoot()->getData();
+
+                        // Check if isLDAPActive is true
+                        if (empty($value) && $formData->getIsLDAPActive()) {
+                            $context->buildViolation('Please enter a valid LDAP Server.')
+                                ->atPath('server') // Reference the field causing the error
+                                ->addViolation();
+                        }
+                    }),
+                ],
+                'empty_data' => '',
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
@@ -24,6 +41,21 @@ class LDAPCredentialType extends AbstractType
             ->add('bindUserDn', TextType::class, [
                 'label' => 'Bind User DN',
                 'required' => true,
+                'constraints' => [
+                    // Callback for conditional validation
+                    new Callback(function ($value, ExecutionContextInterface $context): void {
+                        // Access the parent form data to check the value of isLDAPActive
+                        $formData = $context->getRoot()->getData();
+
+                        // Check if isLDAPActive is true
+                        if (empty($value) && $formData->getIsLDAPActive()) {
+                            $context->buildViolation('Please enter a valid Bind Distinguished Name.')
+                                ->atPath('bindUserDn') // Reference the field causing the error
+                                ->addViolation();
+                        }
+                    }),
+                ],
+                'empty_data' => '',
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
