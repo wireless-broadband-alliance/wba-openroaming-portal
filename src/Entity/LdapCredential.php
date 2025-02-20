@@ -17,10 +17,10 @@ class LdapCredential
     #[ORM\Column(length: 255)]
     private ?string $server = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $bindUserDn = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $bindUserPassword = null;
 
     #[ORM\Column(length: 255, nullable: true)]
