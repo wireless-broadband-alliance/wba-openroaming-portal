@@ -68,6 +68,7 @@ class SamlProviderDeletionService
         $samlProvider->setDeletedAt(new DateTime());
         $samlProvider->setName($samlProvider->getId());
         $samlProvider->setActive(false);
+        $samlProvider->setIsLDAPActive(false);
         $samlProvider->setIdpEntityId($samlProvider->getId());
         $samlProvider->setIdpSsoUrl(null);
         $samlProvider->setSpEntityId(null);
