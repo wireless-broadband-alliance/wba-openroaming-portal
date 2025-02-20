@@ -208,6 +208,12 @@ class SamlProviderController extends AbstractController
         $formSamlProvider->handleRequest($request);
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
             $ldapCredential = $samlProvider->getLdapCredential();
+            if ($samlProvider->isActive() === false && $samlProvider->getIsLDAPActive() === true) {
+                $this->addFlash('error_admin', 'LDAP cannot be active if the provider is disabled.');
+                return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
+                    'id' => $samlProvider->getId(),
+                ]);
+            }
             if ($ldapCredential instanceof LdapCredential) {
                 $ldapCredential->setUpdatedAt(new DateTime());
                 $this->entityManager->persist($ldapCredential);
@@ -281,12 +287,11 @@ class SamlProviderController extends AbstractController
         $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
         if ($previousSamlProvider) {
             $previousSamlProvider->setActive(false);
+            $previousSamlProvider->setIsLdapActive(false);
+            $this->entityManager->persist($previousSamlProvider);
         }
         $samlProvider->setActive(true);
         $this->entityManager->persist($samlProvider);
-        if ($previousSamlProvider) {
-            $this->entityManager->persist($previousSamlProvider);
-        }
         $this->entityManager->flush();
 
         // Log the event metadata (tracking the change)
