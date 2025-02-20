@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\LdapCredentialRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LdapCredentialRepository::class)]
@@ -34,6 +35,9 @@ class LdapCredential
     #[ORM\OneToOne(inversedBy: 'ldapCredential', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?SamlProvider $samlProvider = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
 
     public function getId(): ?int
     {
@@ -120,6 +124,18 @@ class LdapCredential
     public function setSamlProvider(SamlProvider $samlProvider): static
     {
         $this->samlProvider = $samlProvider;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

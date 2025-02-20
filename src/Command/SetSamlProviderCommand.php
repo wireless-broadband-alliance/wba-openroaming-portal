@@ -279,7 +279,8 @@ class SetSamlProviderCommand extends Command
                     ->setBindUserPassword($bindUserPassword)
                     ->setSearchBaseDn($searchBaseDn)
                     ->setSearchFilter($searchFilter)
-                    ->setIsLDAPActive(true);
+                    ->setIsLDAPActive(true)
+                    ->setUpdatedAt(new DateTime());
 
                 $output->writeln('<comment>Existing LDAP Credential updated for the SAML Provider.</comment>');
             } else {
@@ -291,7 +292,10 @@ class SetSamlProviderCommand extends Command
                     ->setSearchBaseDn($searchBaseDn)
                     ->setSearchFilter($searchFilter)
                     ->setIsLDAPActive(true)
-                    ->setSamlProvider($activeProvider);
+                    ->setSamlProvider($activeProvider)
+                    ->setUpdatedAt(new DateTime());
+
+                $output->writeln('<comment>New LDAP Credential generated for the SAML Provider.</comment>');
             }
 
             $this->entityManager->persist($ldapCredential);
