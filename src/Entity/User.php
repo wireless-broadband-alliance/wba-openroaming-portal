@@ -1739,8 +1739,24 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?bool $isDisabled = false;
 
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
-    private ?TwoFactorAuthentication $twoFactorAuthentication = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $twoFAsecret = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $twoFAtype = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $twoFAcode = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $twoFAcodeGeneratedAt = null;
+
+    /**
+     * @var Collection<int, OTPcode>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: OTPcode::class, orphanRemoval: true)]
+    private Collection $oTPcodes;
+
 
 
     public function __construct()
@@ -1748,6 +1764,79 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
         $this->event = new ArrayCollection();
+    }
+
+    public function getTwoFAsecret(): ?string
+    {
+        return $this->twoFAsecret;
+    }
+
+    public function setTwoFAsecret(?string $twoFAsecret): void
+    {
+        $this->twoFAsecret = $twoFAsecret;
+    }
+
+    public function getTwoFAtype(): ?string
+    {
+        return $this->twoFAtype;
+    }
+
+    public function setTwoFAtype(?string $twoFAtype): void
+    {
+        $this->twoFAtype = $twoFAtype;
+    }
+
+    public function getTwoFAcode(): ?string
+    {
+        return $this->twoFAcode;
+    }
+
+    public function setTwoFAcode(?string $twoFAcode): void
+    {
+        $this->twoFAcode = $twoFAcode;
+    }
+
+    public function getTwoFAcodeGeneratedAt(): ?\DateTimeInterface
+    {
+        return $this->twoFAcodeGeneratedAt;
+    }
+
+    public function setTwoFAcodeGeneratedAt(?\DateTimeInterface $twoFAcodeGeneratedAt): void
+    {
+        $this->twoFAcodeGeneratedAt = $twoFAcodeGeneratedAt;
+    }
+
+    /**
+     * @return Collection<int, OTPcode>
+     */
+    public function getOTPcodes(): Collection
+    {
+        return $this->oTPcodes;
+    }
+
+    public function addOTPcode(OTPcode $oTPcode): static
+    {
+        if (!$this->oTPcodes->contains($oTPcode)) {
+            $this->oTPcodes->add($oTPcode);
+            $oTPcode->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOTPcode(OTPcode $oTPcode): static
+    {
+        // set the owning side to null (unless already changed)
+        if (
+            $this->oTPcodes->removeElement($oTPcode) &&
+            ($this->oTPcodes->removeElement($oTPcode) &&
+                ($this->oTPcodes->removeElement($oTPcode) &&
+                    ($this->oTPcodes->removeElement($oTPcode) &&
+                        $oTPcode->getTwoFactorAuthentication() === $this)))
+        ) {
+            $oTPcode->setTwoFactorAuthentication(null);
+        }
+        return $this;
     }
 
     public function getId(): ?int
@@ -2117,23 +2206,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setDisabled(bool $isDisabled): static
     {
         $this->isDisabled = $isDisabled;
-
-        return $this;
-    }
-
-    public function getTwoFactorAuthentication(): ?TwoFactorAuthentication
-    {
-        return $this->twoFactorAuthentication;
-    }
-
-    public function setTwoFactorAuthentication(TwoFactorAuthentication $twoFactorAuthentication): static
-    {
-        // set the owning side of the relation if necessary
-        if ($twoFactorAuthentication->getUser() !== $this) {
-            $twoFactorAuthentication->setUser($this);
-        }
-
-        $this->twoFactorAuthentication = $twoFactorAuthentication;
 
         return $this;
     }

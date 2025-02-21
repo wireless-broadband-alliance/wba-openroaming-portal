@@ -2,13 +2,9 @@
 
 namespace App\Service;
 
-use App\Entity\OTPcode;
-use App\Entity\TwoFactorAuthentication;
+
 use App\Entity\User;
 use App\Repository\UserRepository;
-use DateTime;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;

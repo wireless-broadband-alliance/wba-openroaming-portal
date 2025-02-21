@@ -18,8 +18,7 @@ class TwoFAService
     }
     public function validate2FACode(User $user, string $formCode): bool
     {
-        $codeDate = $user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication ?
-            $user->getTwoFactorAuthentication()->getCodeGeneratedAt() : null;
+        $codeDate = $user->getTwoFACodeGeneratedAt();
         // if the user don't have code in the BD return false
         if (!$codeDate instanceof \DateTimeInterface) {
             return false;
@@ -31,17 +30,15 @@ class TwoFAService
         if ($diff >= 30) {
             return false;
         }
-        return $user->getTwoFactorAuthentication()->getCode() === $formCode;
+        return $user->getTwoFACode() === $formCode;
     }
 
     public function twoFACode(User $user): int
     {
         // Generate a random verification code with 7 digits
         $verificationCode = random_int(1000000, 9999999);
-        if ($user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
-            $user->getTwoFactorAuthentication()->setCode($verificationCode);
-            $user->getTwoFactorAuthentication()->setCodeGeneratedAt(new DateTime());
-        }
+        $user->setTwoFACode($verificationCode);
+        $user->setTwoFACodeGeneratedAt(new DateTime());
         $this->userRepository->save($user, true);
 
         return $verificationCode;
@@ -49,8 +46,7 @@ class TwoFAService
 
     public function generate2FACode(User $user)
     {
-        $codeDate = $user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication ?
-            $user->getTwoFactorAuthentication()->getCodeGeneratedAt() : null;
+        $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user don't have an older code return a new one
         if (!$codeDate instanceof \DateTimeInterface) {
             return $this->twoFACode($user);
@@ -61,15 +57,14 @@ class TwoFAService
         if ($diff >= 30) {
             return $this->twoFACode($user);
         }
-        return $user->getVerificationCode();
+        return $user->getTwoFAcode();
     }
 
     public function generateOTPcodes(User $user): void
     {
-        $twoFA = $user->getTwoFactorAuthentication();
         // if the user already have code we need to remove that codes before generate new ones.
-        if ($twoFA && $twoFA->getOTPcodes()) {
-            foreach ($twoFA->getOTPcodes() as $code) {
+        if ($user->getOTPcodes()) {
+            foreach ($user->getOTPcodes() as $code) {
                 $this->entityManager->remove($code);
             }
         }
@@ -78,22 +73,22 @@ class TwoFAService
         while ($createdCodes < $nCodes) {
             $code = $this->generateMixedCode();
             $otp = new OTPcode();
-            $otp->setTwoFactorAuthentication($twoFA);
+            $otp->setUser($user);
             $otp->setCode($code);
             $otp->setActive(true);
             $otp->setCreatedAt(new DateTime());
-            $twoFA->addOTPcode($otp);
+            $user->addOTPcode($otp);
             $this->entityManager->persist($otp);
             $createdCodes++;
         }
-        $this->entityManager->persist($twoFA);
+        $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
 
     public function validateOTPCodes(User $user, string $formCode): bool
     {
         // Get the OTP codes from user
-        $twoFAcodes = $user->getTwoFactorAuthentication()->getOTPcodes();
+        $twoFAcodes = $user->getOTPcodes();
         foreach ($twoFAcodes as $code) {
             // Verify if the code exists and if this code is valid
             if ($code->getCode() === $formCode && $code->isActive()) {

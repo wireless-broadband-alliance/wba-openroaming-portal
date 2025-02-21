@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\TwoFactorAuthentication;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
@@ -59,19 +58,11 @@ class TwoFAController extends AbstractController
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
         }
-        // If the user doesn't have an instance of 'TwoFactorAuthentication' we need to create one for him.
-        if (!$user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
-            $twoFA = new TwoFactorAuthentication();
-            $twoFA->setUser($user);
-            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
-            $user->setTwoFactorAuthentication($twoFA);
-            $this->entityManager->persist($twoFA);
-        }
         $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
         // if the user already has a phone number in the bd, there is no need to type it again.
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             if ($user instanceof User) {
-                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
                 $this->entityManager->persist($user);
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,
@@ -95,7 +86,7 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
             if ($user instanceof User) {
-                $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
+                $user->setTwoFAsecret(UserTwoFactorAuthenticationStatus::SMS->value);
                 $user->setPhoneNumber($phoneNumber);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -130,18 +121,8 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
         if ($user instanceof User) {
-            // If the user doesn't have an instance of 'TwoFactorAuthentication' we need to create one for him.
-            if (!$user->getTwoFActorAuthentication() instanceof TwoFactorAuthentication) {
-                $twoFA = new TwoFactorAuthentication();
-                $twoFA->setUser($user);
-                $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $user->setTwoFactorAuthentication($twoFA);
-                $this->entityManager->persist($twoFA);
-            }
-            $twoFA = $user->getTwoFactorAuthentication();
-            $twoFA->setSecret($secret);
+            $user->setTwoFAsecret($secret);
             $this->entityManager->persist($user);
-            $this->entityManager->persist($twoFA);
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
@@ -177,7 +158,7 @@ class TwoFAController extends AbstractController
             $user = $this->getUser();
             if ($user instanceof User) {
                 // Get the secret code to communicate with app.
-                $secret = $user->getTwoFactorAuthentication()->getSecret();
+                $secret = $user->gettwoFASecret();
                 // Check if the used code is one of the OTP codes
                 if ($this->twoFAService->validateOTPCodes($user, $code)) {
                     $session->set('2fa_verified', true);
@@ -276,12 +257,9 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if ($user && $user->getTwoFactorAuthentication()) {
-            /** @var TwoFactorAuthentication $twoFA */
-            $twoFA = $user->getTwoFactorAuthentication();
+        if ($user) {
             // Mark 2fa as disabled.
-            $twoFA->setType(UserTwoFactorAuthenticationStatus::DISABLED->value);
-            $this->entityManager->persist($twoFA);
+            $user->setTwoFAType(UserTwoFactorAuthenticationStatus::DISABLED->value);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
             $eventMetaData = [
@@ -308,25 +286,21 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if ($user) {
-            $twoFA = $user->getTwoFactorAuthentication();
-            if ($twoFA instanceof TwoFactorAuthentication) {
-                //Mark 2fa as Enable via app.
-                $twoFA->setType(UserTwoFactorAuthenticationStatus::APP->value);
-                $this->entityManager->persist($twoFA);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::ENABLE_APP_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
-            }
+            //Mark 2fa as Enable via app.
+            $user->setTwoFAType(UserTwoFactorAuthenticationStatus::APP->value);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::ENABLE_APP_2FA->value,
+                new DateTime(),
+                $eventMetaData
+            );
         }
         return $this->redirectToRoute('app_otpCodes');
     }
@@ -352,7 +326,7 @@ class TwoFAController extends AbstractController
             );
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,
-                'codes' => $user->getTwoFactorAuthentication()->getOTPcodes()
+                'codes' => $user->getOTPcodes()
             ]);
         }
         $this->addFlash('error', 'User not found');

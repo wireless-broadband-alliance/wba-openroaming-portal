@@ -17,7 +17,7 @@ class OTPcode
 
     #[ORM\ManyToOne(inversedBy: 'oTPcodes')]
     #[ORM\JoinColumn(nullable: false)]
-    private TwoFactorAuthentication $twoFactorAuthentication;
+    private User $user;
 
     #[ORM\Column(length: 10)]
     private ?string $code = null;
@@ -34,16 +34,14 @@ class OTPcode
         return $this->id;
     }
 
-    public function getTwoFactorAuthentication(): ?TwoFactorAuthentication
+    public function getUser(): User
     {
-        return $this->twoFactorAuthentication;
+        return $this->user;
     }
 
-    public function setTwoFactorAuthentication(?TwoFactorAuthentication $twoFactorAuthentication): static
+    public function setUser(User $user): void
     {
-        $this->twoFactorAuthentication = $twoFactorAuthentication;
-
-        return $this;
+        $this->user = $user;
     }
 
     public function getCode(): ?string
