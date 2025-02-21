@@ -3,10 +3,10 @@
 namespace App\Command;
 
 use App\Entity\LdapCredential;
+use App\Entity\SamlProvider;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\SamlProviderRepository;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
@@ -26,6 +26,7 @@ class LDAPSyncCommand extends Command
         private readonly UserRepository $userRepository,
         private readonly ProfileManager $profileManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly SamlProvider $samlProvider,
         private readonly SamlProviderRepository $samlProviderRepository,
     ) {
         parent::__construct();
@@ -52,13 +53,15 @@ class LDAPSyncCommand extends Command
             return Command::FAILURE;
         }
 
-        // Retrieve the LDAP Credential associated with the active SAML Provider
-        $ldapCredential = $samlProvider->getLdapCredential();
-
-        if (!$ldapCredential) {
+        // Check if the SAML Provider has valid LDAP configuration
+        if (
+            !$samlProvider->getLdapServer() ||
+            !$samlProvider->getLdapBindUserDn() ||
+            !$samlProvider->getLdapBindUserPassword()
+        ) {
             $io->writeln(
                 sprintf(
-                    '<error>No LDAP Credential is associated with the active SAML Provider (%s).</error>',
+                    '<error>No valid LDAP configuration is associated with the active SAML Provider (%s).</error>',
                     $samlProvider->getName()
                 )
             );
@@ -76,7 +79,7 @@ class LDAPSyncCommand extends Command
                     $providerId = $externalAuth->getProviderId();
                     $io->writeln('Syncing ' . $providerId . ' with LDAP');
 
-                    $ldapUser = $this->fetchUserFromLDAP($providerId, $ldapCredential);
+                    $ldapUser = $this->fetchUserFromLDAP($providerId);
                     if (is_null($ldapUser)) {
                         $io->writeln('User ' . $providerId . ' not found in LDAP, disabling');
                         $this->profileManager->disableProfiles(
@@ -113,11 +116,11 @@ class LDAPSyncCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function fetchUserFromLDAP(string $identifier, LdapCredential $ldapCredential)
+    private function fetchUserFromLDAP(string $identifier)
     {
-        $ldapServer = $ldapCredential->getServer();
-        $ldapUsername = $ldapCredential->getBindUserDn();
-        $ldapPassword = $ldapCredential->getBindUserPassword();
+        $ldapServer = $this->samlProvider->getLdapServer();
+        $ldapUsername = $this->samlProvider->getLdapBindUserDn();
+        $ldapPassword = $this->samlProvider->getLdapBindUserPassword();
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -128,9 +131,9 @@ class LDAPSyncCommand extends Command
         $searchFilter = str_replace(
             "@ID",
             $identifier,
-            $ldapCredential->getSearchFilter()
+            $this->samlProvider->getLdapSearchFilter()
         );
-        $searchBaseDN = $ldapCredential->getSearchBaseDn();
+        $searchBaseDN = $this->samlProvider->getLdapSearchBaseDn();
         $searchResult = ldap_search(
             $ldapConnection,
             $searchBaseDN,
