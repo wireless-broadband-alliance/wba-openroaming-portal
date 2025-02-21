@@ -219,7 +219,8 @@ class SecurityController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof User) {
-            $this->addFlash('error', 'User not found');
+            $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
         }
         // If the user doesn't have an instance of 'TwoFactorAuthentication' we need to create one for him.
         if (!$user->getTwoFactorAuthentication() instanceof TwoFactorAuthentication) {
@@ -237,7 +238,7 @@ class SecurityController extends AbstractController
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
             } else {
-                $this->addFlash('error', 'User not found');
+                $this->addFlash('error', 'You must be logged in to access this page');
                 return $this->redirectToRoute('app_landing');
             }
             return $this->redirectToRoute('app_otpCodes');
@@ -262,7 +263,8 @@ class SecurityController extends AbstractController
                     $eventMetaData
                 );
             } else {
-                $this->addFlash('error', 'User not found');
+                $this->addFlash('error', 'You must be logged in to access this page');
+                return $this->redirectToRoute('app_landing');
             }
             // After that we give him the otp codes
             return $this->redirectToRoute('app_otpCodes');
@@ -294,7 +296,8 @@ class SecurityController extends AbstractController
             $this->entityManager->persist($twoFA);
             $this->entityManager->flush();
         } else {
-            $this->addFlash('error', 'User not found');
+            $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
         }
 
         $formattedSecret = implode(' ', str_split($secret, 10));
@@ -445,7 +448,8 @@ class SecurityController extends AbstractController
                 $eventMetaData
             );
         } else {
-            $this->addFlash('error', 'User not found');
+            $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
         }
         return $this->redirectToRoute('app_landing');
     }
