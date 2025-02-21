@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DebugActiveSamlCommand extends Command
 {
     public function __construct(
-        private readonly SamlActiveProviderService $service
+        private readonly SamlActiveProviderService $samlActiveProvider
     ) {
         parent::__construct();
     }
@@ -26,7 +26,7 @@ class DebugActiveSamlCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $config = $this->service->getActiveSamlProvider();
+        $config = $this->samlActiveProvider->getActiveSamlProvider();
         $output->writeln('Resolved Configuration:');
         $output->writeln(print_r($config, true));
 
