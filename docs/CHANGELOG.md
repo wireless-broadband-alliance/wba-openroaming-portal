@@ -29,7 +29,7 @@ Integrated support for Multiple SAML Providers with management features accessib
 
 - **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
   exist
-  associated accounts that have a saml provider.
+  associated accounts that have a saml provider. This command also associated a LDAPCredential if she exists.
 
 > **Important**: This command must be executed **before running any migrations**.
 

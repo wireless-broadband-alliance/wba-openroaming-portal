@@ -95,7 +95,6 @@ All the present items can be customizable:
 - **Terms and Policies**
 - **Radius Configuration**
 - **Authentication Methods**
-- **LDAP Synchronization**
 - **User Engagement**
 - **SMS Configuration**
 
@@ -345,33 +344,25 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 31. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
 32. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
 
-33. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-34. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-35. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-36. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-37. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-38. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
-    The placeholder `@ID` is replaced with the user's ID.
+33. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+34. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+35. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+36. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+37. `SMS_USERNAME`: Budget SMS Username.
+38. `SMS_USER_ID`: Budget SMS User ID.
+39. `SMS_HANDLE`: Budget SMS Handle hash.
+40. `SMS_FROM`: Entity sending the SMS for the users.
+41. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-39. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-40. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-41. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-42. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-43. `SMS_USERNAME`: Budget SMS Username.
-44. `SMS_USER_ID`: Budget SMS User ID.
-45. `SMS_HANDLE`: Budget SMS Handle hash.
-46. `SMS_FROM`: Entity sending the SMS for the users.
-47. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
-
-48. `TOS_LINK`: Terms and Conditions URL.
-49. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-50. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-51. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-52. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-53. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-54. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-55. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-56. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+42. `TOS_LINK`: Terms and Conditions URL.
+43. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+44. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+45. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+46. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+47. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+48. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+49. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+50. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
