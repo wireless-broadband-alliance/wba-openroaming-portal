@@ -271,7 +271,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/disable2FA', name: 'app_disable2FA')]
+    #[Route(path: '/disable2FA', name: 'app_disable2FA', methods: ['POST'])]
     public function disable2FA(Request $request): RedirectResponse
     {
         /** @var User $user */
