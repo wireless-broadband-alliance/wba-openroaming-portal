@@ -135,9 +135,10 @@ class SamlProviderController extends AbstractController
 
             // Log the event metadata (tracking the change)
             $eventMetaData = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => PlatformMode::LIVE->value,
                 'samlProviderAdded' => $samlProvider->getName(),
-                'ip' => $request->getClientIp(),
                 'by' => $currentUser->getUuid(),
             ];
 

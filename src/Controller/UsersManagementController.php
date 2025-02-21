@@ -81,9 +81,10 @@ class UsersManagementController extends AbstractController
         }
 
         $eventMetaData = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'platform' => PlatformMode::LIVE->value,
             'userRevoked' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
             'by' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
@@ -217,6 +218,7 @@ class UsersManagementController extends AbstractController
 
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
@@ -347,6 +349,7 @@ class UsersManagementController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'edited' => $user->getUuid(),
                 'by' => $currentUser->getUuid(),
             ];
@@ -404,6 +407,7 @@ class UsersManagementController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'edited ' => $user->getUuid(),
                     'by' => $currentUser->getUuid(),
                 ];
@@ -456,7 +460,7 @@ class UsersManagementController extends AbstractController
                     ];
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI,
+                        AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                         new DateTime(),
                         $eventMetadata
                     );

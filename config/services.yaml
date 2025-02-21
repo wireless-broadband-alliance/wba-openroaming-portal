@@ -18,6 +18,7 @@ parameters:
   app.saml_idp_sso_url: '%env(SAML_IDP_SSO_URL)%'
   app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
   app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
+  app.saml_sp_acs_url: '%env(SAML_SP_ACS_URL)%'
 services:
     App\EventListener\JWTExceptionListener:
         tags:

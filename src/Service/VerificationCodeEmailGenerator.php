@@ -58,7 +58,7 @@ class VerificationCodeEmailGenerator
 
         $verificationCode = $this->generateVerificationCode($user);
 
-        return (new TemplatedEmail())
+        return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your Settings Reset Details')

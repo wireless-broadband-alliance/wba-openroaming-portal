@@ -209,7 +209,7 @@ class FreeradiusController extends AbstractController
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function exportFreeradius(Request $request, EntityManagerInterface $entityManager): Response
+    public function exportFreeradius(Request $request): Response
     {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -488,6 +488,7 @@ class FreeradiusController extends AbstractController
 
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $currentUser->getUuid(),
         ];
         $this->eventActions->saveEvent(
