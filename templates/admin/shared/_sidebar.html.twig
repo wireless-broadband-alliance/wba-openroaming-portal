@@ -22,9 +22,8 @@
         ] %}
         {% set userAuthenticationRoutes = [
             'admin_dashboard_settings_auth', 'admin_dashboard_settings_radius',
-            'admin_dashboard_saml_provider', 'admin_dashboard_settings_LDAP',
-            'admin_dashboard_settings_sms', 'admin_dashboard_saml_provider_edit',
-            'admin_dashboard_saml_provider_new',
+            'admin_dashboard_saml_provider', 'admin_dashboard_settings_sms',
+            'admin_dashboard_saml_provider_edit', 'admin_dashboard_saml_provider_new',
         ] %}
         {% set portalStatisticsRoutes = [
             'admin_dashboard_statistics',
@@ -151,13 +150,6 @@
                             </ul>
                         </div>
                     </div>
-                    <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
-                           href="{{ path('admin_dashboard_settings_LDAP') }}">
-                            <twig:ux:icon name="wba:sync" class="w-5 mr-4" fill="none"/>
-                            LDAP Synchronization
-                        </a>
-                    </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_sms') }}">

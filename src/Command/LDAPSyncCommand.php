@@ -24,7 +24,6 @@ class LDAPSyncCommand extends Command
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly ProfileManager $profileManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly SamlProviderRepository $samlProviderRepository,

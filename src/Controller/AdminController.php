@@ -165,13 +165,6 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
         }
 
-        if ($type === 'settingLDAP') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingLDAP']);
-        }
-
         if ($type === 'settingCAPPORT') {
             $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);

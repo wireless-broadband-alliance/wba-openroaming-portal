@@ -99,13 +99,6 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
 
-            ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
-            ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
-            ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
-            ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
-            ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
-            ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
-
             ['name' => 'TOS', 'value' => 'LINK'],
             ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
