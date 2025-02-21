@@ -16,6 +16,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
+use App\Service\TwoFAService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,7 +43,7 @@ class SecurityController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param TOTPService $totpService The service for communicate with two factor authentication applications
      * @param EntityManagerInterface $entityManager The service for manage all entities
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
+     * @param TwoFAService $twoFAService Generates a new codes and configure 2FA
      *  of the user account
      */
     public function __construct(
@@ -51,8 +52,8 @@ class SecurityController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly TOTPService $totpService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly EventActions $eventActions,
+        private readonly TwoFAService $twoFAService,
     ) {
     }
 
@@ -342,7 +343,7 @@ class SecurityController extends AbstractController
                 // Get the secret code to communicate with app.
                 $secret = $user->getTwoFactorAuthentication()->getSecret();
                 // Check if the used code is one of the OTP codes
-                if ($this->verificationCodeGenerator->validateOTPCodes($user, $code)) {
+                if ($this->twoFAService->validateOTPCodes($user, $code)) {
                     $session->set('2fa_verified', true);
                     $eventMetaData = [
                         'platform' => PlatformMode::LIVE->value,
@@ -389,13 +390,13 @@ class SecurityController extends AbstractController
         $form = $this->createForm(TwoFAcode::class);
         /** @var User $user */
         $user = $this->getUser();
-        $this->verificationCodeGenerator->generate2FACode($user);
+        $this->twoFAService->generate2FACode($user);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             // Check if the used code is one of the OTP codes
-            if ($this->verificationCodeGenerator->validateOTPCodes($user, $formCode)) {
+            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
                 $session->set('2fa_verified', true);
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,
@@ -411,7 +412,7 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
             // Check if the code used is the one generated in the BD.
-            if ($this->verificationCodeGenerator->validate2FACode($user, $formCode)) {
+            if ($this->twoFAService->validate2FACode($user, $formCode)) {
                 $session->set('2fa_verified', true);
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,
@@ -501,7 +502,7 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         if ($user instanceof User) {
             // Generate OTP codes
-            $this->verificationCodeGenerator->generateOTPcodes($user);
+            $this->twoFAService->generateOTPcodes($user);
             $eventMetaData = [
                 'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
