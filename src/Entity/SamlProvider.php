@@ -52,11 +52,26 @@ class SamlProvider
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
-    #[ORM\OneToOne(mappedBy: 'samlProvider', cascade: ['persist', 'remove'])]
-    private ?LdapCredential $ldapCredential = null;
-
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $isLDAPActive = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapServer = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapBindUserDn = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapBindUserPassword = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapSearchBaseDn = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapSearchFilter = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $ldapUpdatedAt = null;
 
     public function __construct()
     {
@@ -218,23 +233,6 @@ class SamlProvider
         return $this;
     }
 
-    public function getLdapCredential(): ?LdapCredential
-    {
-        return $this->ldapCredential;
-    }
-
-    public function setLdapCredential(LdapCredential $ldapCredential): static
-    {
-        // set the owning side of the relation if necessary
-        if ($ldapCredential->getSamlProvider() !== $this) {
-            $ldapCredential->setSamlProvider($this);
-        }
-
-        $this->ldapCredential = $ldapCredential;
-
-        return $this;
-    }
-
     public function getIsLDAPActive(): ?bool
     {
         return $this->isLDAPActive;
@@ -243,6 +241,78 @@ class SamlProvider
     public function setIsLDAPActive(bool $isLDAPActive): static
     {
         $this->isLDAPActive = $isLDAPActive;
+
+        return $this;
+    }
+
+    public function getLdapServer(): ?string
+    {
+        return $this->ldapServer;
+    }
+
+    public function setLdapServer(?string $ldapServer): static
+    {
+        $this->ldapServer = $ldapServer;
+
+        return $this;
+    }
+
+    public function getLdapBindUserDn(): ?string
+    {
+        return $this->ldapBindUserDn;
+    }
+
+    public function setLdapBindUserDn(?string $ldapBindUserDn): static
+    {
+        $this->ldapBindUserDn = $ldapBindUserDn;
+
+        return $this;
+    }
+
+    public function getLdapBindUserPassword(): ?string
+    {
+        return $this->ldapBindUserPassword;
+    }
+
+    public function setLdapBindUserPassword(?string $ldapBindUserPassword): static
+    {
+        $this->ldapBindUserPassword = $ldapBindUserPassword;
+
+        return $this;
+    }
+
+    public function getLdapSearchBaseDn(): ?string
+    {
+        return $this->ldapSearchBaseDn;
+    }
+
+    public function setLdapSearchBaseDn(?string $ldapSearchBaseDn): static
+    {
+        $this->ldapSearchBaseDn = $ldapSearchBaseDn;
+
+        return $this;
+    }
+
+    public function getLdapSearchFilter(): ?string
+    {
+        return $this->ldapSearchFilter;
+    }
+
+    public function setLdapSearchFilter(?string $ldapSearchFilter): static
+    {
+        $this->ldapSearchFilter = $ldapSearchFilter;
+
+        return $this;
+    }
+
+    public function getLdapUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->ldapUpdatedAt;
+    }
+
+    public function setLdapUpdatedAt(?\DateTimeInterface $ldapUpdatedAt): static
+    {
+        $this->ldapUpdatedAt = $ldapUpdatedAt;
 
         return $this;
     }
