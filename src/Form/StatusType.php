@@ -157,16 +157,17 @@ class StatusType extends AbstractType
                 $builder->get('TWO_FACTOR_AUTH_STATUS')->addEventListener(
                     FormEvents::SUBMIT,
                     function (FormEvent $event) {
-                    $data = $event->getData();
-                    $mappedValue = match ($data) {
-                        'option1' => TwoFAType::NOT_ENFORCED->value,
-                        'option2' => TwoFAType::ENFORCED_FOR_LOCAL->value,
-                        'option3' => TwoFAType::ENFORCED_FOR_ALL->value,
-                        default => $data,
-                    };
+                        $data = $event->getData();
+                        $mappedValue = match ($data) {
+                            'option1' => TwoFAType::NOT_ENFORCED->value,
+                            'option2' => TwoFAType::ENFORCED_FOR_LOCAL->value,
+                            'option3' => TwoFAType::ENFORCED_FOR_ALL->value,
+                            default => $data,
+                        };
 
-                    $event->setData($mappedValue);
-                });
+                        $event->setData($mappedValue);
+                    }
+                );
             }
         }
     }
