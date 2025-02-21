@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
@@ -88,6 +87,7 @@ class SettingsController extends AbstractController
                 $this->addFlash('success_admin', 'The setting has been reset successfully!');
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -115,6 +115,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -142,6 +143,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -167,17 +169,18 @@ class SettingsController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash('success_admin', 'The platform mode status has been reset successfully!');
 
-                $event = new Event();
-                $event->setUser($currentUser);
-                $event->setEventDatetime(new DateTime());
-                $event->setEventName(AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST->value);
-                $event->setEventMetadata([
+                $eventMetadata = [
                     'ip' => $request->getClientIp(),
-                    'uuid' => $currentUser->getUuid()
-                ]);
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
 
-                $em->persist($event);
-                $em->flush();
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
@@ -196,6 +199,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -223,6 +227,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -250,6 +255,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -273,10 +279,14 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The configuration SMS settings has been clear successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    'The configuration SMS settings has been clear successfully!'
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -407,6 +417,7 @@ class SettingsController extends AbstractController
             }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -500,6 +511,7 @@ class SettingsController extends AbstractController
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
@@ -551,6 +563,7 @@ class SettingsController extends AbstractController
             // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
+            $apiStatus = $submittedData['API_STATUS'] ?? null;
             $userDeleteTime = $submittedData['USER_DELETE_TIME'] ?? 5;
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
@@ -574,6 +587,13 @@ class SettingsController extends AbstractController
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $em->persist($turnstileCheckerSetting);
             }
+
+            $apiStatusSetting = $settingsRepository->findOneBy(['name' => 'API_STATUS']);
+            if ($apiStatusSetting) {
+                $apiStatusSetting->setValue($apiStatus);
+                $em->persist($apiStatusSetting);
+            }
+
             $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
             if ($userDeleteTimeSetting) {
                 $userDeleteTimeSetting->setValue($userDeleteTime);
@@ -598,6 +618,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid()
             ];
             $this->eventActions->saveEvent(
@@ -671,6 +692,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -798,6 +820,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
 
@@ -869,6 +892,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -940,6 +964,7 @@ class SettingsController extends AbstractController
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(

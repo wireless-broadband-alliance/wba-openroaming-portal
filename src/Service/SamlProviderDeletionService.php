@@ -75,6 +75,7 @@ class SamlProviderDeletionService
             'samlProvider' => $samlProvider->getName(),
             'deletedBy' => $currentUser->getUuid(),
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
         ];
 
         // Log the deletion of the SAML provider

@@ -141,6 +141,11 @@ class GetSettings
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
+        $data['API_STATUS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'API_STATUS'])->getValue(),
+            'description' => $this->getSettingDescription('API_STATUS'),
+        ];
+
         $turnstile_checker = $settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
         if ($turnstile_checker !== null) {
             $data['TURNSTILE_CHECKER'] = [
@@ -178,9 +183,9 @@ class GetSettings
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'])->getValue() === 'true',
-            // phpcs:enable
+            'value' => $settingRepository->findOneBy([
+                    'name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'
+                ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
@@ -195,10 +200,9 @@ class GetSettings
         ];
 
         $data['MICROSOFT_LOGIN_ENABLED'] = [
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'])->getValue(
-            ) === 'true',
-            // phpcs:enable
+            'value' => $settingRepository->findOneBy([
+                    'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
+                ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'),
         ];
 
@@ -228,9 +232,9 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'])->getValue() === 'true',
-            // phpcs:enable
+            'value' => $settingRepository->findOneBy([
+                    'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
@@ -240,16 +244,16 @@ class GetSettings
         ];
 
         $data['LOGIN_TRADITIONAL_DESCRIPTION'] = [
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'])->getValue(),
-            // phpcs:enable
+            'value' => $settingRepository->findOneBy([
+                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'
+            ])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'])->getValue() === 'true',
-            // phpcs:enable
+            'value' => $settingRepository->findOneBy([
+                    'name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'
+                ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
@@ -381,6 +385,7 @@ class GetSettings
             and SAML and other login methods are disabled regardless of other settings. 
             A demo warning will also be displayed.',
 
+            'API_STATUS' => 'Defines whether the API is enabled or disabled.',
             'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system.
             This system requires all the users to verify is own account before they download any profile',
 
@@ -410,9 +415,8 @@ class GetSettings
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => 'The description for Google authentication on the login page',
             'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => 'Enable or disable Microsoft authentication method',
             'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => 'The label for Microsoft authentication button on the login page',
-            // phpcs:disable Generic.Files.LineLength.TooLong
-            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => 'The description for Microsoft authentication on the login page',
-            // phpcs:enable
+            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' =>
+                'The description for Microsoft authentication on the login page',
             'AUTH_METHOD_REGISTER_ENABLED' => 'Enable or disable Register authentication method',
             'AUTH_METHOD_REGISTER_LABEL' => 'The label for Register authentication button on the login page',
             'AUTH_METHOD_REGISTER_DESCRIPTION' => 'The description for Register authentication on the login page',
@@ -464,6 +468,8 @@ class GetSettings
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
+            'TIME_INTERVAL_NOTIFICATION' =>
+                'The notification interval (in days) to alert a user before their profile expires',
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
             'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
             'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',

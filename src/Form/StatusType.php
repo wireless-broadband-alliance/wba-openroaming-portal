@@ -81,6 +81,23 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => 'Please select an option',
                 ]);
+            } elseif ($settingName === 'API_STATUS') {
+                $builder->add('API_STATUS', ChoiceType::class, [
+                    'choices' => [
+                        OperationMode::ON->value => OperationMode::ON->value,
+                        OperationMode::OFF->value => OperationMode::OFF->value,
+                    ],
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'data' => $settingValue,
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'Please select an option',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please select an option',
+                ]);
             } elseif ($settingName === 'USER_DELETE_TIME') {
                 $builder->add('USER_DELETE_TIME', IntegerType::class, [
                     'attr' => [

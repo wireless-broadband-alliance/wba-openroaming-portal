@@ -207,9 +207,10 @@ class SiteController extends AbstractController
                         $entityManager->persist($userAuths);
                         // Defines the Event to the table
                         $eventMetadata = [
+                            'ip' => $request->getClientIp(),
+                            'user_agent' => $request->headers->get('User-Agent'),
                             'platform' => PlatformMode::DEMO->value,
                             'uuid' => $user->getUuid(),
-                            'ip' => $request->getClientIp(),
                             'registrationType' => UserProvider::EMAIL->value,
                         ];
                         $this->eventActions->saveEvent(
@@ -430,9 +431,10 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -450,9 +452,10 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $eventMetaData = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
                 'Old data' => [
                     'First Name' => $oldFirstName,
                     'Last Name' => $oldLastName,
@@ -506,9 +509,10 @@ class SiteController extends AbstractController
             $em->flush();
 
             $eventMetaData = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -870,8 +874,9 @@ class SiteController extends AbstractController
             $entityManager->flush();
 
             $eventMetadata = [
-                'platform' => PlatformMode::LIVE->value,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
@@ -1095,8 +1100,9 @@ class SiteController extends AbstractController
             $userRepository->save($currentUser, true);
 
             $eventMetadata = [
-                'platform' => PlatformMode::LIVE->value,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(

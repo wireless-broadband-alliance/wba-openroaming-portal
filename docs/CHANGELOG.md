@@ -7,8 +7,10 @@
 - Rework **cookies integration only EEA users** (checks for current location of the user to show the cookies banner) -
   Using
   GeoLite2 from Maxmind
+- New docs for GEOLITEGUI and setup
+- New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
-- Microsoft Login Implementation - New authentication provider / New endpoint 
+- Microsoft Login Implementation - New authentication provider / New endpoint
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.
 > If you have version 1.5 or lower with data in these fields, you will have to first switch to version 1.6,

@@ -153,6 +153,7 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $currentUser->getUuid(),
         ];
 
@@ -283,6 +284,7 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $currentUser->getUuid(),
         ];
 

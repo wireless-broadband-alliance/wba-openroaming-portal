@@ -114,6 +114,7 @@ class AuthController extends AbstractController
         // Defines the Event to the table
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
         ];
 
@@ -211,6 +212,7 @@ class AuthController extends AbstractController
             // Defines the Event to the table
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
             ];
 
@@ -247,8 +249,7 @@ class AuthController extends AbstractController
         try {
             $user = $this->googleController->fetchUserFromGoogle($data['code']);
             if (!$user instanceof User) {
-                return new BaseResponse(400, null, 'This code is not associated with a google account.')->toResponse(
-                );
+                return new BaseResponse(400, null, 'This code is not associated with a google account.')->toResponse();
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
@@ -266,6 +267,7 @@ class AuthController extends AbstractController
             // Defines the Event to the table
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
             ];
 
@@ -324,6 +326,7 @@ class AuthController extends AbstractController
             // Defines the Event to the table
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
             ];
 

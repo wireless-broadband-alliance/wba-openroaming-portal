@@ -121,9 +121,10 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Transfer-Encoding', 'base64');
 
         $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::ANDROID->value,
-            'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service
@@ -245,15 +246,17 @@ class ProfileController extends AbstractController
         $eventMetadata = [];
         if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
             $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => $this->settings['PLATFORM_MODE'],
                 'type' => OSTypes::IOS->value,
-                'ip' => $request->getClientIp(),
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
-                'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::MACOS->value,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => $this->settings['PLATFORM_MODE'],
+                'type' => OSTypes::MACOS->value
             ];
         }
 
@@ -344,9 +347,10 @@ class ProfileController extends AbstractController
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
         $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'platform' => $this->settings['PLATFORM_MODE'],
             'type' => OSTypes::WINDOWS->value,
-            'ip' => $request->getClientIp(),
         ];
 
         // Save the event Action using the service

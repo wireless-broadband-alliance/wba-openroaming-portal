@@ -5,6 +5,24 @@
 {% import 'admin/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
+    <div class="p-5">
+        {% set eeaStatus = isEEAUser() %}
+        {% set message = '' %}
+        {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
+            {% set message = 'Unable to determine user location due to a location error with the GeoLite2 database.
+             Please check the docs/geoLiteDB/GEOLITEGUI.md file in for troubleshooting steps.' %}
+        {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
+            {% set message = 'The required GeoLite2-City.mmdb file is missing.
+             Please ensure this file is included. Refer to the docs/geoLiteDB/GEOLITEGUI.md file for more details.' %}
+        {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
+            {% set message = 'The GeoLite2-City.mmdb file is invalid.
+             Please verify the integrity of this file. Consult the docs/geoLiteDB/GEOLITEGUI.md file for further guidance.' %}
+        {% endif %}
+
+        {% if message != '' %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endif %}
+    </div>
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">

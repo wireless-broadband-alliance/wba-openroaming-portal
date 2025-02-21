@@ -2,43 +2,62 @@
 
 namespace App\Service;
 
+use App\Enum\GeoLocation\GeoLocationErrorCodes;
+use App\Enum\GeoLocation\IsEEAHandler;
 use Exception;
 use GeoIp2\Database\Reader;
+use MaxMind\Db\Reader\InvalidDatabaseException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class EEAUserDetector
 {
     public function __construct(
-        private readonly RequestStack $requestStack
+        private readonly RequestStack $requestStack,
     ) {
     }
 
+
     /**
-     * Checks if the user is from the European Economic Area (EEA).
+     * Determines if the current user is located within the European Economic Area (EEA).
      *
-     * This function retrieves the user's IP address and checks their geographical location
-     * using the MaxMind GeoLite2 database. It returns true if the user is located within
-     * a country in the EEA, and false otherwise.
+     * This method retrieves the user's IP address and uses GeoLite2 location data
+     * to determine the user's geographical region and whether it falls within the EEA.
+     * It handles multiple error scenarios including missing IP, database errors, and
+     * unhandled location states.
      *
      */
-    public function isEEAUser(): bool
+    public function isEEAUser(): int
     {
         $ip = $this->getUserIp();
+
+        // Handle missing IP
         if (!$ip) {
-            return false; // Fallback if no IP is found
+            return IsEEAHandler::MISSING_IP->value;
         }
 
         // Get location data from the retrieved IP
         $locationData = $this->getLocationFromIp($ip);
 
-        // Ensure we got valid location data
-        if ($locationData === null) {
-            return false;
+        // Handle errors returned from getLocationFromIp
+        if ($locationData === GeoLocationErrorCodes::MISSING_FILE->value) {
+            return IsEEAHandler::MISSING_FILE->value;
         }
 
-        // Check if the country is in the EU
-        return $locationData['isInEU'];
+        if ($locationData === GeoLocationErrorCodes::INVALID_DB->value) {
+            return IsEEAHandler::INVALID_DB->value;
+        }
+
+        if ($locationData === GeoLocationErrorCodes::GENERIC_ERROR->value) {
+            return IsEEAHandler::GENERIC_ERROR->value;
+        }
+
+        if ($locationData === GeoLocationErrorCodes::NOT_IN_EEA->value) {
+            return IsEEAHandler::NOT_IN_EEA->value;
+        }
+
+        // Handle success cases && fallback in case an unhandled state occurs for cookies implementation
+        return IsEEAHandler::IN_EEA->value;
     }
 
     /**
@@ -62,20 +81,26 @@ class EEAUserDetector
      * belongs to a country in the European Union and the country's ISO Alpha-2 code.
      *
      */
-    private function getLocationFromIp(string $ip): ?array
+    private function getLocationFromIp(string $ip): string
     {
         try {
-            $databasePath = __DIR__ . '/../../docs/GeoLiteDB/GeoLite2-City.mmdb';
+            $databasePath = __DIR__ . '/../../docs/geoLiteDB/GeoLite2-City.mmdb';
+
+            // Check if the database file exists
+            if (!file_exists($databasePath)) {
+                return GeoLocationErrorCodes::MISSING_FILE->value;
+            }
 
             $reader = new Reader($databasePath);
             $record = $reader->city($ip);
 
-            return [
-                'isInEU' => $record->country->isInEuropeanUnion, // Use MaxMind's EU flag directly
-                'countryCode' => $record->country->isoCode,      // ISO Alpha-2 code for debug or audit purposes
-            ];
+            return $record->country->isInEuropeanUnion
+                ? GeoLocationErrorCodes::IN_EEA->value
+                : GeoLocationErrorCodes::NOT_IN_EEA->value;
+        } catch (InvalidDatabaseException) {
+            return GeoLocationErrorCodes::INVALID_DB->value;
         } catch (Exception) {
-            return null;
+            return GeoLocationErrorCodes::GENERIC_ERROR->value;
         }
     }
 }
