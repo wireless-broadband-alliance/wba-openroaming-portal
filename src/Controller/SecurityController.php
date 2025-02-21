@@ -236,6 +236,17 @@ class SecurityController extends AbstractController
             if ($user instanceof User) {
                 $user->getTwoFactorAuthentication()->setType(UserTwoFactorAuthenticationStatus::SMS->value);
                 $this->entityManager->persist($user);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
                 $this->entityManager->flush();
             } else {
                 $this->addFlash('error', 'You must be logged in to access this page');
