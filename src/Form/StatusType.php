@@ -154,7 +154,9 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => 'Please select an option',
                 ]);
-                $builder->get('TWO_FACTOR_AUTH_STATUS')->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
+                $builder->get('TWO_FACTOR_AUTH_STATUS')->addEventListener(
+                    FormEvents::SUBMIT,
+                    function (FormEvent $event) {
                     $data = $event->getData();
                     $mappedValue = match ($data) {
                         'option1' => TwoFAType::NOT_ENFORCED->value,
