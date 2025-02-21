@@ -117,5 +117,4 @@ class TwoFAService
 
         return strtoupper(substr($alphanumericCode, 0, $length));
     }
-
 }
