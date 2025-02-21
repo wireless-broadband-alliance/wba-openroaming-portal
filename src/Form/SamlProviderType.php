@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Validator\CamelCase;
 use App\Validator\SamlMetadata;
@@ -11,12 +10,15 @@ use App\Validator\X509Certificate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class SamlProviderType extends AbstractType
 {
@@ -159,10 +161,60 @@ class SamlProviderType extends AbstractType
                 'mapped' => true,
                 'required' => false,
             ])
-            ->add('ldapCredential', LDAPCredentialType::class, [
-                'label' => 'LDAP Configuration',
-                'data_class' => LdapCredential::class,
+            ->add('ldapServer', TextType::class, [
+                'label' => 'LDAP Server',
                 'required' => false,
+                'constraints' => [
+                    new Callback(function ($value, ExecutionContextInterface $context): void {
+                        $formData = $context->getRoot()->getData();
+                        if (empty($value) && $formData->getIsLDAPActive()) {
+                            $context->buildViolation('Please enter a valid LDAP Server.')
+                                ->atPath('ldapServer')
+                                ->addViolation();
+                        }
+                    }),
+                ],
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
+            ])
+            ->add('ldapBindUserDn', TextType::class, [
+                'label' => 'Bind User DN',
+                'required' => false,
+                'constraints' => [
+                    new Callback(function ($value, ExecutionContextInterface $context): void {
+                        $formData = $context->getRoot()->getData();
+                        if (empty($value) && $formData->getIsLDAPActive()) {
+                            $context->buildViolation('Please enter a valid Bind Distinguished Name.')
+                                ->atPath('ldapBindUserDn')
+                                ->addViolation();
+                        }
+                    }),
+                ],
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
+            ])
+            ->add('ldapBindUserPassword', PasswordType::class, [
+                'label' => 'Bind User Password',
+                'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
+            ])
+            ->add('ldapSearchBaseDn', TextType::class, [
+                'label' => 'Search Base DN',
+                'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
+            ])
+            ->add('ldapSearchFilter', TextType::class, [
+                'label' => 'Search Filter',
+                'required' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ]);
     }
 

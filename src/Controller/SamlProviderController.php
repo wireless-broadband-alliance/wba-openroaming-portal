@@ -123,44 +123,43 @@ class SamlProviderController extends AbstractController
 
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
             // Find and disable the currently active SAML Provider (if any)
-            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
+            $previousSamlProvider = $this->samlProviderRepository->findOneBy([
+                'isActive' => true,
+                'deletedAt' => null,
+            ]);
             if ($previousSamlProvider) {
                 $previousSamlProvider->setActive(false);
                 $previousSamlProvider->setIsLdapActive(false);
                 $this->entityManager->persist($previousSamlProvider);
             }
 
-            $samlProvider->setActive(true);
-            $samlProvider->setCreatedAt(new DateTime());
-            $samlProvider->setUpdatedAt(new DateTime());
+            $samlProvider->setActive(true)
+                ->setCreatedAt(new DateTime())
+                ->setUpdatedAt(new DateTime());
+
+            // If LDAP is active, log the LDAP-specific event
             if ($samlProvider->getIsLDAPActive() === true) {
-                $ldapCredential = $samlProvider->getLdapCredential();
-                if ($ldapCredential instanceof LdapCredential) {
-                    $ldapCredential->setSamlProvider($samlProvider);
-                    $ldapCredential->setUpdatedAt(new DateTime());
-                    $this->entityManager->persist($ldapCredential);
+                $eventMetaData = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'ldapCredentialAdded' => $samlProvider->getLdapServer(),
+                    'by' => $currentUser->getUuid(),
+                ];
 
-                    $eventMetaData = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'platform' => PlatformMode::LIVE->value,
-                        'ldapCredentialAdded' => $ldapCredential->getServer(),
-                        'by' => $currentUser->getUuid(),
-                    ];
-
-                    $this->eventActions->saveEvent(
-                        $currentUser,
-                        AnalyticalEventType::ADMIN_ADDED_LDAP_CREDENTIAL->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
-                }
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::ADMIN_ADDED_LDAP_CREDENTIAL->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
             }
 
+            // Persist the new SAML Provider & Save to DB
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
-            // Log the event metadata (tracking the change)
+            // Log the general addition of the new SAML Provider
             $eventMetaData = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
@@ -176,10 +175,12 @@ class SamlProviderController extends AbstractController
                 $eventMetaData
             );
 
+            // Show a success flash message and redirect
             $this->addFlash('success_admin', 'SAML Provider added successfully.');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
+        // Render the form if not submitted or invalid
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
             'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
@@ -199,24 +200,17 @@ class SamlProviderController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Find the SAML Provider by ID
-        $samlProvider = $this->samlProviderRepository->find($id);
-
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        $ldapCredential = $samlProvider->getLdapCredential();
-
         // Capture all the required fields before any changes are made
-        $originalServer = null;
-        $originalUserDn = null;
-        $originalPassword = null;
-        if ($ldapCredential instanceof LdapCredential) {
-            $originalServer = $ldapCredential->getServer();
-            $originalUserDn = $ldapCredential->getBindUserDn();
-            $originalPassword = $ldapCredential->getBindUserPassword();
-        }
+        $originalServer = $samlProvider->getLdapServer();
+        $originalUserDn = $samlProvider->getLdapBindUserDn();
+        $originalPassword = $samlProvider->getLdapBindUserPassword();
+        $originalIsLdapActive = $samlProvider->getIsLdapActive();
 
         $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
         $formSamlProvider->handleRequest($request);
@@ -229,35 +223,60 @@ class SamlProviderController extends AbstractController
                 ]);
             }
 
-            $ldapCredential = $samlProvider->getLdapCredential();
-            if ($ldapCredential instanceof LdapCredential) {
-                // Check if any of the required fields are not set or empty
-                if (!$ldapCredential->getServer() || trim($ldapCredential->getServer()) === '') {
-                    // Assign previously saved server if found
-                    $ldapCredential->setServer($originalServer);
-                }
-                if (!$ldapCredential->getBindUserDn() || trim($ldapCredential->getBindUserDn()) === '') {
-                    // Assign previously saved UserDn if found
-                    $ldapCredential->setBindUserDn($originalUserDn);
-                }
-                if (!$ldapCredential->getBindUserPassword() || trim($ldapCredential->getBindUserPassword()) === '') {
-                    // Assign previously saved password if found
-                    $ldapCredential->setBindUserPassword($originalPassword);
+            // Check if isLDAPActive has changed
+            if ($samlProvider->getIsLDAPActive() !== $originalIsLdapActive) {
+                if ($samlProvider->getIsLDAPActive()) {
+                    // Ensure no other Active SAML Provider with LDAP is enabled
+                    $existingActiveProvider = $this->samlProviderRepository->findOneBy([
+                        'isActive' => true,
+                        'isLDAPActive' => true,
+                    ]);
+
+                    // If an active SAML provider with LDAP is found, prevent enabling LDAP
+                    if ($existingActiveProvider && $existingActiveProvider !== $samlProvider) {
+                        $this->addFlash(
+                            'error_admin',
+                            'You cannot enable LDAP if another SAML Provider with LDAP is already enabled.'
+                        );
+                        return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
+                            'id' => $samlProvider->getId(),
+                        ]);
+                    }
+
+                    // Validate LDAP fields are not empty
+                    if (!$samlProvider->getLdapServer() || trim((string)$samlProvider->getLdapServer()) === '') {
+                        $samlProvider->setLdapServer($originalServer);
+                    }
+                    if (
+                        !$samlProvider->getLdapBindUserDn() || trim(
+                            (string)$samlProvider->getLdapBindUserDn()
+                        ) === ''
+                    ) {
+                        $samlProvider->setLdapBindUserDn($originalUserDn);
+                    }
+                    if (
+                        !$samlProvider->getLdapBindUserPassword() || trim(
+                            (string)
+                            $samlProvider->getLdapBindUserPassword()
+                        ) === ''
+                    ) {
+                        $samlProvider->setLdapBindUserPassword($originalPassword);
+                    }
                 }
 
+                $samlProvider->setLdapUpdatedAt(new DateTime());
+                $this->entityManager->persist($samlProvider);
 
-                $ldapCredential->setUpdatedAt(new DateTime());
-                $this->entityManager->persist($ldapCredential);
-
-                // Log the LDAP Credential edit
                 $eventMetaData = [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'platform' => PlatformMode::LIVE->value,
-                    'ldapCredentialEdited' => $ldapCredential->getServer(),
+                    'oldLdapCredential' => $originalServer,
+                    'ldapCredentialEdited' => $samlProvider->getLdapServer(),
                     'by' => $currentUser->getUuid(),
                 ];
 
+                // Save the activation/deactivation event
                 $this->eventActions->saveEvent(
                     $currentUser,
                     AnalyticalEventType::ADMIN_EDITED_LDAP_CREDENTIAL->value,
@@ -310,7 +329,7 @@ class SamlProviderController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $samlProvider = $this->samlProviderRepository->find($id);
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
@@ -365,7 +384,7 @@ class SamlProviderController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $samlProvider = $this->samlProviderRepository->find($id);
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');

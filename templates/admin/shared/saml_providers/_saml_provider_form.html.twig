@@ -90,48 +90,48 @@
                 <div class="grid gap-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="relative">
-                            {{ form_label(formSamlProvider.ldapCredential.server, 'Synchronization LDAP Server', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formSamlProvider.ldapCredential.server, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapServer, 'Synchronization LDAP Server', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapServer, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formSamlProvider.ldapCredential.server) }}
+                                {{ form_errors(formSamlProvider.ldapServer) }}
                             </div>
                         </div>
 
                         <div class="relative">
-                            {{ form_label(formSamlProvider.ldapCredential.searchBaseDn, 'Search Base Distinguished Name', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formSamlProvider.ldapCredential.searchBaseDn, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapSearchBaseDn, 'Search Base Distinguished Name', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapSearchBaseDn, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formSamlProvider.ldapCredential.searchBaseDn) }}
+                                {{ form_errors(formSamlProvider.ldapSearchBaseDn) }}
                             </div>
                         </div>
 
                         <div class="relative">
-                            {{ form_label(formSamlProvider.ldapCredential.searchFilter, 'LDAP Search Filter', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formSamlProvider.ldapCredential.searchFilter, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapSearchFilter, 'LDAP Search Filter', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapSearchFilter, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formSamlProvider.ldapCredential.searchFilter) }}
+                                {{ form_errors(formSamlProvider.ldapSearchFilter) }}
                             </div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="relative">
-                            {{ form_label(formSamlProvider.ldapCredential.bindUserDn, 'Bind Distinguished Name', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formSamlProvider.ldapCredential.bindUserDn, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapBindUserDn, 'Bind Distinguished Name', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapBindUserDn, {attr: {class: 'form-widget'}}) }}
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formSamlProvider.ldapCredential.bindUserDn) }}
+                                {{ form_errors(formSamlProvider.ldapBindUserDn) }}
                             </div>
                         </div>
 
                         <div class="relative">
-                            {{ form_label(formSamlProvider.ldapCredential.bindUserPassword, 'Bind Distinguished Password', {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formSamlProvider.ldapCredential.bindUserPassword, {attr: {class: 'form-widget'}}) }}
+                            {{ form_label(formSamlProvider.ldapBindUserPassword, 'Bind Distinguished Password', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapBindUserPassword, {attr: {class: 'form-widget'}}) }}
                             <div class="text-gray-500 text-sm mx-2 mt-2">
                                 Leaving this field empty while editing will retain the current password saved in the
                                 portal.
                             </div>
                             <div class="text-red-500 m-2">
-                                {{ form_errors(formSamlProvider.ldapCredential.bindUserPassword) }}
+                                {{ form_errors(formSamlProvider.ldapBindUserPassword) }}
                             </div>
                         </div>
                     </div>
