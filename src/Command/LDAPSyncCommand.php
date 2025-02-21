@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -26,7 +25,6 @@ class LDAPSyncCommand extends Command
         private readonly UserRepository $userRepository,
         private readonly ProfileManager $profileManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly SamlProvider $samlProvider,
         private readonly SamlProviderRepository $samlProviderRepository,
     ) {
         parent::__construct();
@@ -79,7 +77,7 @@ class LDAPSyncCommand extends Command
                     $providerId = $externalAuth->getProviderId();
                     $io->writeln('Syncing ' . $providerId . ' with LDAP');
 
-                    $ldapUser = $this->fetchUserFromLDAP($providerId);
+                    $ldapUser = $this->fetchUserFromLDAP($providerId, $samlProvider);
                     if (is_null($ldapUser)) {
                         $io->writeln('User ' . $providerId . ' not found in LDAP, disabling');
                         $this->profileManager->disableProfiles(
@@ -116,11 +114,11 @@ class LDAPSyncCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function fetchUserFromLDAP(string $identifier)
+    private function fetchUserFromLDAP(string $identifier, SamlProvider $samlProvider)
     {
-        $ldapServer = $this->samlProvider->getLdapServer();
-        $ldapUsername = $this->samlProvider->getLdapBindUserDn();
-        $ldapPassword = $this->samlProvider->getLdapBindUserPassword();
+        $ldapServer = $samlProvider->getLdapServer();
+        $ldapUsername = $samlProvider->getLdapBindUserDn();
+        $ldapPassword = $samlProvider->getLdapBindUserPassword();
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -131,9 +129,9 @@ class LDAPSyncCommand extends Command
         $searchFilter = str_replace(
             "@ID",
             $identifier,
-            $this->samlProvider->getLdapSearchFilter()
+            $samlProvider->getLdapSearchFilter()
         );
-        $searchBaseDN = $this->samlProvider->getLdapSearchBaseDn();
+        $searchBaseDN = $samlProvider->getLdapSearchBaseDn();
         $searchResult = ldap_search(
             $ldapConnection,
             $searchBaseDN,

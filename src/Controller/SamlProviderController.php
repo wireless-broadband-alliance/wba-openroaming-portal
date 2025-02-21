@@ -208,7 +208,6 @@ class SamlProviderController extends AbstractController
 
         // Capture all the required fields before any changes are made
         $originalServer = $samlProvider->getLdapServer();
-        $originalUserDn = $samlProvider->getLdapBindUserDn();
         $originalPassword = $samlProvider->getLdapBindUserPassword();
         $originalIsLdapActive = $samlProvider->getIsLdapActive();
 
@@ -242,28 +241,7 @@ class SamlProviderController extends AbstractController
                             'id' => $samlProvider->getId(),
                         ]);
                     }
-
-                    // Validate LDAP fields are not empty
-                    if (!$samlProvider->getLdapServer() || trim((string)$samlProvider->getLdapServer()) === '') {
-                        $samlProvider->setLdapServer($originalServer);
-                    }
-                    if (
-                        !$samlProvider->getLdapBindUserDn() || trim(
-                            (string)$samlProvider->getLdapBindUserDn()
-                        ) === ''
-                    ) {
-                        $samlProvider->setLdapBindUserDn($originalUserDn);
-                    }
-                    if (
-                        !$samlProvider->getLdapBindUserPassword() || trim(
-                            (string)
-                            $samlProvider->getLdapBindUserPassword()
-                        ) === ''
-                    ) {
-                        $samlProvider->setLdapBindUserPassword($originalPassword);
-                    }
                 }
-
                 $samlProvider->setLdapUpdatedAt(new DateTime());
                 $this->entityManager->persist($samlProvider);
 
@@ -283,6 +261,12 @@ class SamlProviderController extends AbstractController
                     new DateTime(),
                     $eventMetaData
                 );
+            }
+            $formPassword = $formSamlProvider->get('ldapBindUserPassword')->getData();
+
+            // If the password field is empty, restore the original value
+            if (in_array(trim((string)$formPassword), ['', '0'], true)) {
+                $samlProvider->setLdapBindUserPassword($originalPassword);
             }
 
             $samlProvider->setUpdatedAt(new DateTime());
