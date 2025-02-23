@@ -156,7 +156,7 @@ class StatusType extends AbstractType
                 ]);
                 $builder->get('TWO_FACTOR_AUTH_STATUS')->addEventListener(
                     FormEvents::SUBMIT,
-                    function (FormEvent $event) {
+                    function (FormEvent $event): void {
                         $data = $event->getData();
                         $mappedValue = match ($data) {
                             'option1' => TwoFAType::NOT_ENFORCED->value,

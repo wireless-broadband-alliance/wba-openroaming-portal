@@ -1831,10 +1831,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
             $this->oTPcodes->removeElement($oTPcode) &&
             ($this->oTPcodes->removeElement($oTPcode) &&
                 ($this->oTPcodes->removeElement($oTPcode) &&
-                    ($this->oTPcodes->removeElement($oTPcode) &&
-                        $oTPcode->getTwoFactorAuthentication() === $this)))
+                    ($this->oTPcodes->removeElement($oTPcode))))
         ) {
-            $oTPcode->setTwoFactorAuthentication(null);
+            $this->oTPcodes->removeElement($oTPcode);
         }
         return $this;
     }
