@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\PlatformMode;
-use App\Enum\TwoFATypeEnum;
+use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Enum\UserType;
 use App\Form\LoginFormType;
@@ -70,7 +70,7 @@ class SecurityController extends AbstractController
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
                 // Check 2fa status on platform, after that we need to check user status to decide what case we have
-                if ($twoFAplatformStatus->getValue() === TwoFATypeEnum::NOT_ENFORCED->value) {
+                if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
@@ -92,7 +92,7 @@ class SecurityController extends AbstractController
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === TwoFATypeEnum::ENFORCED_FOR_LOCAL->value) {
+                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
@@ -114,7 +114,7 @@ class SecurityController extends AbstractController
                     }
                     return $this->redirectToRoute('app_verify2FA_local');
                 }
-                if ($twoFAplatformStatus->getValue() === TwoFATypeEnum::ENFORCED_FOR_ALL->value) {
+                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_ALL->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||

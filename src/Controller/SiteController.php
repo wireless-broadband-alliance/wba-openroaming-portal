@@ -13,7 +13,7 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
-use App\Enum\TwoFATypeEnum;
+use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -139,7 +139,7 @@ class SiteController extends AbstractController
             }
             // Checks the 2FA status of the platform, if mandatory forces the user to configure it
             if (
-                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFATypeEnum::ENFORCED_FOR_LOCAL->value &&
+                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL->value &&
                 $currentUser->getUserExternalAuths()->get(0)->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
                 ($currentUser->getTwoFAType() !== null ||
                     $currentUser->getTwoFAType() ===
@@ -148,7 +148,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_enable2FA');
             }
             if (
-                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFATypeEnum::ENFORCED_FOR_ALL->value &&
+                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
                 ($currentUser->getTwoFAType() !== null ||
                     $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::DISABLED->value)

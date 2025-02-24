@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\TwoFATypeEnum;
+use App\Enum\TwoFAType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,9 +29,9 @@ class TwoFASettingsType extends AbstractType
             if ($settingName === 'TWO_FACTOR_AUTH_STATUS') {
                 $builder->add('TWO_FACTOR_AUTH_STATUS', ChoiceType::class, [
                     'choices' => [
-                        'Not Enforced' => TwoFATypeEnum::NOT_ENFORCED->value,
-                        'Enforced for Local accounts only' => TwoFATypeEnum::ENFORCED_FOR_LOCAL->value,
-                        'Enforced for All accounts' => TwoFATypeEnum::ENFORCED_FOR_ALL->value,
+                        'Not Enforced' => TwoFAType::NOT_ENFORCED->value,
+                        'Enforced for Local accounts only' => TwoFAType::ENFORCED_FOR_LOCAL->value,
+                        'Enforced for All accounts' => TwoFAType::ENFORCED_FOR_ALL->value,
                     ],
                     'data' => $settingValue,
                     'attr' => [
