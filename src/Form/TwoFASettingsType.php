@@ -4,12 +4,16 @@ namespace App\Form;
 
 use App\Enum\TwoFAType;
 use App\Service\GetSettings;
+use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 
 class TwoFASettingsType extends AbstractType
 {
@@ -54,6 +58,13 @@ class TwoFASettingsType extends AbstractType
                         new NotBlank([
                             'message' => 'This field cannot be blank.',
                         ]),
+                        new Length([
+                            'min' => 3,
+                            'minMessage' => ' This field cannot be shorter than {{ limit }} characters',
+                            'max' => 64,
+                            'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        ]),
+                        new NoSpecialCharacters()
                     ],
                     'invalid_message' => 'Please enter a valid label.',
                 ]);
@@ -67,8 +78,32 @@ class TwoFASettingsType extends AbstractType
                         new NotBlank([
                             'message' => 'This field cannot be blank.',
                         ]),
+                        new Length([
+                            'min' => 3,
+                            'minMessage' => ' This field cannot be shorter than {{ limit }} characters',
+                            'max' => 32,
+                            'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        ]),
+                        new NoSpecialCharacters()
                     ],
                     'invalid_message' => 'Please enter a valid label.',
+                ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME') {
+                $builder->add('TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', IntegerType::class, [
+                    'data' => $settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'This field cannot be blank.',
+                        ]),
+                        new Range([
+                            'min' => 60,
+                            'minMessage' => 'This value cannot be less than {{ limit }} seconds.',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please enter a valid number.',
                 ]);
             }
         }
