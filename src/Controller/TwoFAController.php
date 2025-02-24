@@ -51,14 +51,12 @@ class TwoFAController extends AbstractController
     #[Route(path: '/enable2FA', name: 'app_enable2FA')]
     public function enable2FA(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof User) {
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
         }
-        $form = $this->createForm(TwoFactorPhoneNumber::class, $user);
         // if the user already has a phone number in the bd, there is no need to type it again.
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             if ($user instanceof User) {
@@ -83,58 +81,26 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_otpCodes');
         }
         // if the user already has a email in the bd, there is no need to type it again.
-        if ($user instanceof User) {
-            if ($user->getEmail()) {
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
-                $this->entityManager->persist($user);
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
+        if ($user->getEmail()) {
+            $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
+            $this->entityManager->persist($user);
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
                 ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                new DateTime(),
+                $eventMetaData
                 );
-                $this->entityManager->flush();
+            $this->entityManager->flush();
             } else {
-                $this->addFlash('error', 'You must be logged in to access this page');
-                return $this->redirectToRoute('app_landing');
-            }
-            return $this->redirectToRoute('app_otpCodes');
+            $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
         }
-        // If he doesn't have it, he has to type it
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            $phoneNumber = $form->get('phoneNumber')->getData();
-            if ($user instanceof User) {
-                $user->setTwoFAsecret(UserTwoFactorAuthenticationStatus::SMS->value);
-                $user->setPhoneNumber($phoneNumber);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
-            } else {
-                $this->addFlash('error', 'You must be logged in to access this page');
-                return $this->redirectToRoute('app_landing');
-            }
-            // After that we give him the otp codes
-            return $this->redirectToRoute('app_otpCodes');
-        }
-        return $this->render('site/enable2FA.html.twig', [
-            'data' => $data,
-            'form' => $form,
-        ]);
+        return $this->redirectToRoute('app_otpCodes');
     }
 
     #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]

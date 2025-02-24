@@ -144,17 +144,15 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_email_code');
             }
             // Checks the 2FA status of the platform, if mandatory forces the user to configure it
-            if ($currentUser->getUserExternalAuths()) {
-                if (
-                    $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL->value &&
+            if (
+                $currentUser->getUserExternalAuths() &&
+                ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
+                    TwoFAType::ENFORCED_FOR_LOCAL->value &&
                     $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                    UserProvider::PORTAL_ACCOUNT->value &&
-                    ($currentUser->getTwoFAType() === null ||
+                    UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
                         $currentUser->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value)
-                ) {
-                    return $this->redirectToRoute('app_enable2FA');
-                }
+                        UserTwoFactorAuthenticationStatus::DISABLED->value))) {
+                return $this->redirectToRoute('app_enable2FA');
             }
             if (
                 $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
