@@ -151,7 +151,8 @@ class SiteController extends AbstractController
                     $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
                     UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
                         $currentUser->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value))) {
+                        UserTwoFactorAuthenticationStatus::DISABLED->value))
+            ) {
                 return $this->redirectToRoute('app_enable2FA');
             }
             if (

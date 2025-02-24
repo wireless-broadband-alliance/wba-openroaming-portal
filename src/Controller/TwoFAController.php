@@ -94,9 +94,9 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::ENABLE_LOCAL_2FA->value,
                 new DateTime(),
                 $eventMetaData
-                );
+            );
             $this->entityManager->flush();
-            } else {
+        } else {
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
         }
