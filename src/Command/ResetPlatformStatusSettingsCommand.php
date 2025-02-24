@@ -15,7 +15,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'reset:statusSettings',
-    description: 'Reset Platform Mode and the Email Verification Settings',
+    description: 'Reset Platform Status Settings',
 )]
 class ResetPlatformStatusSettingsCommand extends Command
 {
@@ -29,7 +29,7 @@ class ResetPlatformStatusSettingsCommand extends Command
     {
         $this
             ->setName('reset:statusSettings')
-            ->setDescription('Reset Platform Mode and the Email Verification Settings')
+            ->setDescription('Reset Platform Status Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -38,7 +38,7 @@ class ResetPlatformStatusSettingsCommand extends Command
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will reset the Platform Mode and the Email Verification settings. [y/N] ',
+                'This action will reset all the Platform Status settings. [y/N] ',
                 false
             );
             /** @var QuestionHelper $helper */
@@ -55,7 +55,6 @@ class ResetPlatformStatusSettingsCommand extends Command
             ['name' => 'API_STATUS', 'value' => 'ON'],
             ['name' => 'USER_DELETE_TIME', 'value' => '5'],
             ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
-            ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
         ];
 
         $this->entityManager->beginTransaction();
@@ -85,7 +84,7 @@ class ResetPlatformStatusSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> The Platform mode and the Email Verification settings have been set to the default values.
+<info>Success:</info> The Platform Status settings have been set to the default values.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;
