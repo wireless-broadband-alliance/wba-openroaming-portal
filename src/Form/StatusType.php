@@ -4,14 +4,11 @@ namespace App\Form;
 
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
-use App\Enum\TwoFAType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
@@ -136,38 +133,6 @@ class StatusType extends AbstractType
                         ]),
                     ],
                 ]);
-            } elseif ($settingName === 'TWO_FACTOR_AUTH_STATUS') {
-                $builder->add('TWO_FACTOR_AUTH_STATUS', ChoiceType::class, [
-                    'choices' => [
-                        'Option 1 Label' => 'option1',
-                        'Option 2 Label' => 'option2',
-                        'Option 3 Label' => 'option3',
-                    ],
-                    'data' => $settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => 'Please select an option',
-                        ]),
-                    ],
-                    'invalid_message' => 'Please select an option',
-                ]);
-                $builder->get('TWO_FACTOR_AUTH_STATUS')->addEventListener(
-                    FormEvents::SUBMIT,
-                    function (FormEvent $event): void {
-                        $data = $event->getData();
-                        $mappedValue = match ($data) {
-                            'option1' => TwoFAType::NOT_ENFORCED->value,
-                            'option2' => TwoFAType::ENFORCED_FOR_LOCAL->value,
-                            'option3' => TwoFAType::ENFORCED_FOR_ALL->value,
-                            default => $data,
-                        };
-
-                        $event->setData($mappedValue);
-                    }
-                );
             }
         }
     }

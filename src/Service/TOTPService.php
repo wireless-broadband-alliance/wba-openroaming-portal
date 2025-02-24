@@ -2,10 +2,16 @@
 
 namespace App\Service;
 
+use App\Repository\SettingRepository;
 use OTPHP\TOTP;
 
 class TOTPService
 {
+    public function __construct(
+        private readonly SettingRepository $settingRepository,
+    ) {
+    }
+
     /**
      * TOTP -> Time-Based One-Time Password
      * Service that communicates with 2fa applications
@@ -20,8 +26,8 @@ class TOTPService
         // Create an identifier code to communicate with the app
         $totp = TOTP::create($secret);
         // Identifier labels in the communication
-        $totp->setLabel('OpenRoaming');
-        $totp->setIssuer('OpenRoaming');
+        $totp->setLabel($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_LABEL']));
+        $totp->setIssuer($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_ISSUER']));
 
         return $totp->getProvisioningUri(); // URI for QR Code
     }

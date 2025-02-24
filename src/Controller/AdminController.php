@@ -186,6 +186,13 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
         }
 
+        if ($type === 'settingTwoAF') {
+            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
+            $this->mailer->send($email);
+            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTwoAF']);
+        }
+
         if ($type === 'settingSMS') {
             $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);

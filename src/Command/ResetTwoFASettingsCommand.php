@@ -14,10 +14,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:statusSettings',
-    description: 'Reset Platform Status Settings',
+    name: 'reset:twoFASettings',
+    description: 'Reset Two Factor Authentication Settings',
 )]
-class ResetPlatformStatusSettingsCommand extends Command
+class ResetTwoFASettingsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager
@@ -28,8 +28,8 @@ class ResetPlatformStatusSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:statusSettings')
-            ->setDescription('Reset Platform Status Settings')
+            ->setName('reset:twoFASettings')
+            ->setDescription('Reset Two Factor Authentication Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -38,7 +38,7 @@ class ResetPlatformStatusSettingsCommand extends Command
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will reset all the Platform Status settings. [y/N] ',
+                'This action will reset all the Two Factor Authentication settings. [y/N] ',
                 false
             );
             /** @var QuestionHelper $helper */
@@ -49,12 +49,10 @@ class ResetPlatformStatusSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
-            ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
-            ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
-            ['name' => 'API_STATUS', 'value' => 'ON'],
-            ['name' => 'USER_DELETE_TIME', 'value' => '5'],
-            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
+            ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'Openroaming'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'Openroaming'],
+            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
         ];
 
         $this->entityManager->beginTransaction();
@@ -84,7 +82,7 @@ class ResetPlatformStatusSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> The Platform Status settings have been set to the default values.
+<info>Success:</info> The Two Factor Authenticator settings have been set to the default values.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;
