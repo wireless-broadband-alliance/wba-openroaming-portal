@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TwoFAType;
+use App\Enum\TwoFATypeEnum;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -159,9 +160,9 @@ class StatusType extends AbstractType
                     function (FormEvent $event): void {
                         $data = $event->getData();
                         $mappedValue = match ($data) {
-                            'option1' => TwoFAType::NOT_ENFORCED->value,
-                            'option2' => TwoFAType::ENFORCED_FOR_LOCAL->value,
-                            'option3' => TwoFAType::ENFORCED_FOR_ALL->value,
+                            'option1' => TwoFATypeEnum::NOT_ENFORCED->value,
+                            'option2' => TwoFATypeEnum::ENFORCED_FOR_LOCAL->value,
+                            'option3' => TwoFATypeEnum::ENFORCED_FOR_ALL->value,
                             default => $data,
                         };
 
