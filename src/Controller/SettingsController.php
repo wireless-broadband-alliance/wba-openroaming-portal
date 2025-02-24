@@ -17,6 +17,7 @@ use App\Form\RadiusType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
+use App\Form\TwoFAType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
@@ -627,6 +628,64 @@ class SettingsController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
+        ]);
+    }
+
+
+    #[Route('/dashboard/settings/twoFA', name: 'admin_dashboard_settings_two_fa')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsTwoFA(
+        Request $request,
+        EntityManagerInterface $em,
+        GetSettings $getSettings
+    ): Response {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $formTwoFA = $this->createForm(TwoFAType::class, null, [
+            'settings' => $settings,
+        ]);
+        $formTwoFA->handleRequest($request);
+        if ($formTwoFA->isSubmitted() && $formTwoFA->isValid()) {
+            // Get the submitted data
+            $submittedData = $formTwoFA->getData();
+
+            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFATypeEnum::NOT_ENFORCED;
+
+            $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+            if ($twoFactorAuthStatusSetting) {
+                $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
+                $em->persist($twoFactorAuthStatusSetting);
+            }
+            $em->flush();
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid()
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_PLATFORM_2FA_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_two_fa');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'formTwoFA' => $formTwoFA->createView(),
         ]);
     }
 
