@@ -293,7 +293,7 @@ class SettingsController extends AbstractController
                     $eventMetadata
                 );
 
-                return $this->redirectToRoute('admin_dashboard_settings_auth');
+                return $this->redirectToRoute('admin_dashboard_settings_two_fa');
             }
 
             if ($type === 'settingSMS') {
