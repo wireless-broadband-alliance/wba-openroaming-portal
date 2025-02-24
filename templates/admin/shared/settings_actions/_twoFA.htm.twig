@@ -2,7 +2,7 @@
     {{ form_start(formTwoFA, {attr: {enctype: 'multipart/form-data'}}) }}
     {{ form_errors(formTwoFA) }}
 
-    <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
+    <div class="grid gap-4 lg:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {% for setting in formTwoFA %}
             {# Display only the 2FA settings #}
             {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS', 'TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER'] %}
@@ -42,9 +42,9 @@
                                        id="onRadioEmail"
                                        value="NOT_ENFORCED"
                                        class="radio-input hidden"
-                                       {% if formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::NOT_ENFORCED').value %}checked{% endif %}
+                                       {% if formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}checked{% endif %}
                                        data-action="input->three-options-radio#toggle">
-                                <div class="custom-radio pr-3 pt-1.5 {% if formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data != constant('App\\Enum\\TwoFATypeEnum::NOT_ENFORCED').value %}hidden{% endif %}"
+                                <div class="custom-radio pr-3 pt-1.5 {% if formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data != constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}hidden{% endif %}"
                                      data-option-target="NOT_ENFORCED">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                          viewBox="0 0 14 10"
@@ -64,9 +64,9 @@
                                        id="offRadioEmail"
                                        value="ENFORCED_FOR_LOCAL"
                                        class="radio-input hidden"
-                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_LOCAL').value ? 'checked' : '' }}
+                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value ? 'checked' : '' }}
                                        data-action="input->three-options-radio#toggle">
-                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_LOCAL').value ? '' : 'hidden' }}"
+                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value ? '' : 'hidden' }}"
                                      data-option-target="ENFORCED_FOR_LOCAL">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                          viewBox="0 0 14 10"
@@ -86,9 +86,9 @@
                                        id="offRadioEmail"
                                        value="ENFORCED_FOR_ALL"
                                        class="radio-input hidden"
-                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_ALL').value ? 'checked' : '' }}
+                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value ? 'checked' : '' }}
                                        data-action="input->three-options-radio#toggle">
-                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_ALL').value ? '' : 'hidden' }}"
+                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value ? '' : 'hidden' }}"
                                      data-option-target="ENFORCED_FOR_ALL">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                          viewBox="0 0 14 10"
