@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\OTPcode;
-use App\Entity\TwoFactorAuthentication;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use DateTime;
@@ -11,9 +10,17 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class TwoFAService
 {
+    /**
+     * Registration constructor.
+     *
+     * @param UserRepository $userRepository The repository for accessing user data.
+     * @param SendSMS $sendSMS Calls the sendSMS service
+     *
+     */
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
+        private readonly SendSMS $sendSMS,
     ) {
     }
     public function validate2FACode(User $user, string $formCode): bool
@@ -55,18 +62,33 @@ class TwoFAService
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user don't have an older code return a new one
         if (!$codeDate instanceof \DateTimeInterface) {
-            return $this->twoFACode($user);
+            // Generate code
+            $code = $this->twoFACode($user);
+            // Send SMS
+            $message = "Your Two Factor Authentication Code is " . $code;
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            return $code;
         }
         $codeIsActive = $user->getTwoFACodeIsActive();
         if (!$codeIsActive) {
-            return $this->twoFACode($user);
+            // Generate code
+            $code = $this->twoFACode($user);
+            // Send SMS
+            $message = "Your Two Factor Authentication Code is " . $code;
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            return $code;
         }
         $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         // Only create a new code if the oldest one was expired
         $timeToExpireCode = 30; // PUT HERE THE NEW SETTING WITH THIS VALUE
         if ($diff >= $timeToExpireCode) {
-            return $this->twoFACode($user);
+            // Generate code
+            $code = $this->twoFACode($user);
+            // Send SMS
+            $message = "Your Two Factor Authentication Code is " . $code;
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            return $code;
         }
         return $user->getTwoFAcode();
     }
