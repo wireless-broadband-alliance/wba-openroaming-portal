@@ -1748,7 +1748,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $twoFAcode = null;
 
-    #[ORM\Column( nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?bool $twoFAcodeIsActive = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]

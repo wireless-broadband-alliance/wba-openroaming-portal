@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +20,8 @@ class TwoFAService
      * Registration constructor.
      *
      * @param UserRepository $userRepository The repository for accessing user data.
+     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
+     * @param GetSettings $getSettings The instance of GetSettings class.
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param MailerInterface $mailer Called for send emails
      */
@@ -28,10 +31,13 @@ class TwoFAService
         private readonly SendSMS $sendSMS,
         private readonly MailerInterface $mailer,
         private readonly ParameterBagInterface $parameterBag,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
     ) {
     }
     public function validate2FACode(User $user, string $formCode): bool
     {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // if the user don't have code in the BD return false
         if (!$codeDate instanceof \DateTimeInterface) {
@@ -41,7 +47,7 @@ class TwoFAService
         // Difference between created time and now
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         // If 30 seconds have passed since the code was created return false.
-        $timeToExpireCode = 30; // PUT HERE THE NEW SETTING WITH THIS VALUE
+        $timeToExpireCode = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($diff >= $timeToExpireCode) {
             return false;
         }
@@ -66,6 +72,7 @@ class TwoFAService
 
     public function generate2FACode(User $user)
     {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user don't have an older code return a new one
         if (!$codeDate instanceof \DateTimeInterface) {
@@ -86,7 +93,7 @@ class TwoFAService
         $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         // Only create a new code if the oldest one was expired
-        $timeToExpireCode = 30; // PUT HERE THE NEW SETTING WITH THIS VALUE
+        $timeToExpireCode = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($diff >= $timeToExpireCode) {
             // Generate code
             $code = $this->twoFACode($user);

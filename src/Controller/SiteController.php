@@ -147,7 +147,8 @@ class SiteController extends AbstractController
             if ($currentUser->getUserExternalAuths()) {
                 if (
                     $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL->value &&
-                    $currentUser->getUserExternalAuths()->get(0)->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                    UserProvider::PORTAL_ACCOUNT->value &&
                     ($currentUser->getTwoFAType() === null ||
                         $currentUser->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value)
