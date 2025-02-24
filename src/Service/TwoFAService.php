@@ -27,10 +27,15 @@ class TwoFAService
         // Difference between created time and now
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         // If 30 seconds have passed since the code was created return false.
-        if ($diff >= 30) {
+        $timeToExpireCode = 30; // PUT HERE THE NEW SETTING WITH THIS VALUE
+        if ($diff >= $timeToExpireCode) {
             return false;
         }
-        return $user->getTwoFACode() === $formCode;
+        if ($user->getTwoFACode() === $formCode) {
+            $user->setTwoFAcodeIsActive(false);
+            return true;
+        }
+        return false;
     }
 
     public function twoFACode(User $user): int
@@ -39,6 +44,7 @@ class TwoFAService
         $verificationCode = random_int(1000000, 9999999);
         $user->setTwoFACode($verificationCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
 
         return $verificationCode;
@@ -51,10 +57,15 @@ class TwoFAService
         if (!$codeDate instanceof \DateTimeInterface) {
             return $this->twoFACode($user);
         }
+        $codeIsActive = $user->getTwoFACodeIsActive();
+        if (!$codeIsActive) {
+            return $this->twoFACode($user);
+        }
         $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         // Only create a new code if the oldest one was expired
-        if ($diff >= 30) {
+        $timeToExpireCode = 30; // PUT HERE THE NEW SETTING WITH THIS VALUE
+        if ($diff >= $timeToExpireCode) {
             return $this->twoFACode($user);
         }
         return $user->getTwoFAcode();

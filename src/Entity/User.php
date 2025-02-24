@@ -1748,6 +1748,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $twoFAcode = null;
 
+    #[ORM\Column( nullable: true)]
+    private ?bool $twoFAcodeIsActive = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $twoFAcodeGeneratedAt = null;
 
@@ -1765,6 +1768,18 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->userExternalAuths = new ArrayCollection();
         $this->event = new ArrayCollection();
     }
+
+    public function getTwoFAcodeIsActive(): ?bool
+    {
+        return $this->twoFAcodeIsActive;
+    }
+
+    public function setTwoFAcodeIsActive(?bool $twoFAcodeIsActive): void
+    {
+        $this->twoFAcodeIsActive = $twoFAcodeIsActive;
+    }
+
+
 
     public function getTwoFAsecret(): ?string
     {
