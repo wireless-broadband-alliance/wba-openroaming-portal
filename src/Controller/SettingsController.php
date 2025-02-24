@@ -9,7 +9,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
-use App\Enum\TwoFATypeEnum;
+use App\Enum\TwoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\LDAPType;
@@ -565,7 +565,7 @@ class SettingsController extends AbstractController
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
-            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFATypeEnum::NOT_ENFORCED;
+            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {
@@ -650,16 +650,25 @@ class SettingsController extends AbstractController
         ]);
         $formTwoFA->handleRequest($request);
         if ($formTwoFA->isSubmitted() && $formTwoFA->isValid()) {
-            // Get the submitted data
             $submittedData = $formTwoFA->getData();
 
-            // Assuming "TWO_FACTOR_AUTH_STATUS" is a key in $submittedData
-            $twoFactorAuthValue = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? null;
+            // List of 2FA settings to handle
+            $settingsToHandle = [
+                'TWO_FACTOR_AUTH_STATUS',
+                'TWO_FACTOR_AUTH_APP_LABEL',
+                'TWO_FACTOR_AUTH_APP_ISSUER',
+                'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME',
+            ];
 
-            $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
-            if ($twoFactorAuthStatusSetting) {
-                $twoFactorAuthStatusSetting->setValue($twoFactorAuthValue);
-                $this->entityManager->persist($twoFactorAuthStatusSetting);
+            foreach ($settingsToHandle as $settingName) {
+                $settingValue = $submittedData[$settingName] ?? '';
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    // Update existing setting
+                    $setting->setValue($settingValue);
+                }
+
+                $this->entityManager->persist($setting);
             }
             $this->entityManager->flush();
 
