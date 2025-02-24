@@ -5,15 +5,17 @@
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {% for setting in formTwoFA %}
             {# Display only the 2FA settings #}
-            {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS'] %}
+            {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS', 'TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="statusCards"
-                     id="{{ setting.vars.name }}" {{ stimulus_controller('radio card three-options_radio') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
+                     id="{{ setting.vars.name }}" {{ stimulus_controller('radio card three-options_radio') }}>
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
-                                TWO_FACTOR_AUTH_STATUS: 'Two factor authentication status',
+                                TWO_FACTOR_AUTH_STATUS: 'Two factor authentication Status',
+                                TWO_FACTOR_AUTH_APP_LABEL: 'Two factor authentication App Label',
+                                TWO_FACTOR_AUTH_APP_ISSUER: 'Two factor authentication App Issuer',
                             }
                                 [setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
@@ -99,6 +101,11 @@
                             </label>
                         </div>
                     {% endif %}
+                    {% if setting.vars.name in ['TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER'] %}
+                        <div class="mt-5">
+                            {{ form_widget(setting, {attr: {class: 'form-widget'}}) }}
+                        </div>
+                    {% endif %}
 
                     {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
@@ -113,7 +120,7 @@
     <div class="mt-6 divider-solid"></div>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingStatus'}) }}"
+        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingStatus'}) }}" {# TODO Need to update this #}
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             Reset

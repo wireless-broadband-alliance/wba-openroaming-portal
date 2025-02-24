@@ -6,6 +6,7 @@ use App\Enum\TwoFATypeEnum;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -42,6 +43,32 @@ class TwoFASettingsType extends AbstractType
                         ]),
                     ],
                     'invalid_message' => 'Please select a valid option',
+                ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_APP_LABEL') {
+                $builder->add('TWO_FACTOR_AUTH_APP_LABEL', TextType::class, [
+                    'data' => $settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'This field cannot be blank.',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please enter a valid label.',
+                ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_APP_ISSUER') {
+                $builder->add('TWO_FACTOR_AUTH_APP_ISSUER', TextType::class, [
+                    'data' => $settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'This field cannot be blank.',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please enter a valid label.',
                 ]);
             }
         }
