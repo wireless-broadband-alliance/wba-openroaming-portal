@@ -120,6 +120,12 @@ class SiteController extends AbstractController
             }
             if (
                 $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
                 UserTwoFactorAuthenticationStatus::APP->value
             ) {
                 return $this->redirectToRoute('app_verify2FA_app');
@@ -142,7 +148,7 @@ class SiteController extends AbstractController
                 if (
                     $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_LOCAL->value &&
                     $currentUser->getUserExternalAuths()->get(0)->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                    ($currentUser->getTwoFAType() !== null ||
+                    ($currentUser->getTwoFAType() === null ||
                         $currentUser->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value)
                 ) {
@@ -151,7 +157,7 @@ class SiteController extends AbstractController
             }
             if (
                 $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
-                ($currentUser->getTwoFAType() !== null ||
+                ($currentUser->getTwoFAType() === null ||
                     $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {

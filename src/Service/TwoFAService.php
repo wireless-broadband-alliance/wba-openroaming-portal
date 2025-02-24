@@ -4,9 +4,14 @@ namespace App\Service;
 
 use App\Entity\OTPcode;
 use App\Entity\User;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 
 class TwoFAService
 {
@@ -15,12 +20,14 @@ class TwoFAService
      *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SendSMS $sendSMS Calls the sendSMS service
-     *
+     * @param MailerInterface $mailer Called for send emails
      */
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
         private readonly SendSMS $sendSMS,
+        private readonly MailerInterface $mailer,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
     }
     public function validate2FACode(User $user, string $formCode): bool
@@ -64,18 +71,16 @@ class TwoFAService
         if (!$codeDate instanceof \DateTimeInterface) {
             // Generate code
             $code = $this->twoFACode($user);
-            // Send SMS
-            $message = "Your Two Factor Authentication Code is " . $code;
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            // Send code
+            $this->sendCode($user, $code);
             return $code;
         }
         $codeIsActive = $user->getTwoFACodeIsActive();
         if (!$codeIsActive) {
             // Generate code
             $code = $this->twoFACode($user);
-            // Send SMS
-            $message = "Your Two Factor Authentication Code is " . $code;
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            // Send code
+            $this->sendCode($user, $code);
             return $code;
         }
         $now = new DateTime();
@@ -85,9 +90,8 @@ class TwoFAService
         if ($diff >= $timeToExpireCode) {
             // Generate code
             $code = $this->twoFACode($user);
-            // Send SMS
-            $message = "Your Two Factor Authentication Code is " . $code;
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            // Send code
+            $this->sendCode($user, $code);
             return $code;
         }
         return $user->getTwoFAcode();
@@ -144,5 +148,33 @@ class TwoFAService
         $alphanumericCode = str_replace(['a', 'b', 'c', 'd', 'e', 'f'], ['X', 'Y', 'Z', 'P', 'Q', 'R'], $hexCode);
 
         return strtoupper(substr($alphanumericCode, 0, $length));
+    }
+
+    private function sendCode(User $user, string $code): void
+    {
+        $messageType = $user->getTwoFAtype();
+        if ($messageType === UserTwoFactorAuthenticationStatus::SMS) {
+            $message = "Your Two Factor Authentication Code is " . $code;
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+        }
+        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL) {
+            // Send email to the user with the verification code
+            $email = new TemplatedEmail()
+                ->from(
+                    new Address(
+                        $this->parameterBag->get('app.email_address'),
+                        $this->parameterBag->get('app.sender_name')
+                    )
+                )
+                ->to($user->getEmail())
+                ->subject('Your OpenRoaming Registration Details')
+                ->htmlTemplate('email/user_code.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'verificationCode' => $code,
+                ]);
+
+            $this->mailer->send($email);
+        }
     }
 }

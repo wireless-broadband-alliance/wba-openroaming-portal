@@ -93,104 +93,85 @@
             {{ form_end(formPassword) }}
         </form>
     </div>
-    {% if (user.twoFactorAuthentication) %}
-    {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::NOT_ENFORCED').value %}
+
     {# divider #}
     <div class="divider my-8"></div>
     <div>
         <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-        {% if (user.twoFactorAuthentication) %}
-            {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value and data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::NOT_ENFORCED').value) %}
+        {# When the app status is NOT_ENFORCED #}
+        {% if ( data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+            {% if (user.twoFAtype == null) %}
                 <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
-            {% else %}
-                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
                 <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
-                {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
-                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
-                {% endif %}
-            {% endif %}
-        {% else %}
-            <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
-        {% endif %}
-    </div>
-    {% endif %}
-    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::ENFORCED_FOR_LOCAL').value) %}
-        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
-            {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-            {# divider #}
-            <div class="divider my-8"></div>
-            <div>
-                <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-                {% if (user.twoFactorAuthentication) %}
-                    {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                        <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
-                    {% else %}
-                        {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                            <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
-                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
-                        {% endif %}
-                    {% endif %}
-                {% else %}
-                    <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                <div class="divider my-8"></div>
-                <div>
-                    <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
-                </div>
-                {% endif %}
-        {% else %}
-            <div class="divider my-8"></div>
-            <div>
-                <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-            {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value and data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::NOT_ENFORCED').value) %}
-                <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
-            {% else %}
                 <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
                 <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
-                {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+        {% endif %}
+        {# When the app status is ENFORCED_FOR_LOCAL #}
+        {% if ( data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+            {# Local users #}
+            {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT')) %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
                     <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
                 {% endif %}
-            {% endif %}
-            </div>
-        {% endif %}
-    {% endif %}
-    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\twoFAType::ENFORCED_FOR_ALL').value) %}
-        {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-            {# divider #}
-            <div class="divider my-8"></div>
-            <div>
-                <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-                {% if (user.twoFactorAuthentication) %}
-                    {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                        <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
-                    {% else %}
-                        {% if not (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                            <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline"> >here</a> to change for Authentication App</p>
-                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline">>here</a> to generate new OTP codes</p>
-                        {% endif %}
-                        {% if (user.twoFactorAuthentication.type == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                            <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline"> >here</a> to generate new OTP codes</p>
-                        {% endif %}
-                    {% endif %}
-                {% else %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                {% endif %}
+                {# Local users #}
+            {% else %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                     <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
                 {% endif %}
-            </div>
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                    <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                    <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+                {% endif %}
+            {% endif %}
         {% endif %}
-    {% endif %}
-    {% else %}
-    <div class="divider my-8"></div>
-    <div>
-        <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-        <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
+        {# When the app status is ENFORCED_FOR_ALL #}
+        {% if ( data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+            {% endif %}
+        {% endif %}
     </div>
-    {% endif %}
     {# divider #}
     <div class="divider my-8"></div>
 

@@ -82,6 +82,29 @@ class TwoFAController extends AbstractController
             }
             return $this->redirectToRoute('app_otpCodes');
         }
+        // if the user already has a email in the bd, there is no need to type it again.
+        if ($user instanceof User) {
+            if ($user->getEmail()) {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
+                $this->entityManager->persist($user);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $this->entityManager->flush();
+            } else {
+                $this->addFlash('error', 'You must be logged in to access this page');
+                return $this->redirectToRoute('app_landing');
+            }
+            return $this->redirectToRoute('app_otpCodes');
+        }
         // If he doesn't have it, he has to type it
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $phoneNumber = $form->get('phoneNumber')->getData();
@@ -249,6 +272,7 @@ class TwoFAController extends AbstractController
         return $this->render('site/verify2FAlocal.html.twig', [
             'data' => $data,
             'form' => $form,
+            'user' => $user,
         ]);
     }
 
