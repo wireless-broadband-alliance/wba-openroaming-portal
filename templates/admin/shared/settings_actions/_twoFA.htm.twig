@@ -38,13 +38,14 @@
                                 Not Enforced
                                 <input type="radio" name="{{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                        id="onRadioEmail"
-                                       value="option1"
+                                       value="NOT_ENFORCED"
                                        class="radio-input hidden"
-                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? 'checked' : '' }}
+                                       {% if formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::NOT_ENFORCED').value %}checked{% endif %}
                                        data-action="input->three-options-radio#toggle">
-                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == 'NOT_ENFORCED' ? '' : 'hidden' }}"
-                                     data-option-target="option1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                <div class="custom-radio pr-3 pt-1.5 {% if formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data != constant('App\\Enum\\TwoFATypeEnum::NOT_ENFORCED').value %}hidden{% endif %}"
+                                     data-option-target="NOT_ENFORCED">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                         viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
                                               d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
@@ -59,13 +60,14 @@
                                 Enforced for Local accounts only
                                 <input type="radio" name="{{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                        id="offRadioEmail"
-                                       value="option2"
+                                       value="ENFORCED_FOR_LOCAL"
                                        class="radio-input hidden"
-                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? 'checked' : '' }}
+                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_LOCAL').value ? 'checked' : '' }}
                                        data-action="input->three-options-radio#toggle">
-                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == 'ENFORCED_FOR_LOCAL' ? '' : 'hidden' }}"
-                                     data-option-target="option2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10"
+                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_LOCAL').value ? '' : 'hidden' }}"
+                                     data-option-target="ENFORCED_FOR_LOCAL">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                         viewBox="0 0 14 10"
                                          fill="none">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
                                               d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
@@ -74,6 +76,27 @@
                                 </div>
                             </label>
 
+                            {# Render "ENFORCED_FOR_ALL" Radio Input #}
+                            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                   name="offLabelEmail">
+                                Enforced for all accounts
+                                <input type="radio" name="{{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
+                                       id="offRadioEmail"
+                                       value="ENFORCED_FOR_ALL"
+                                       class="radio-input hidden"
+                                        {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_ALL').value ? 'checked' : '' }}
+                                       data-action="input->three-options-radio#toggle">
+                                <div class="custom-radio pr-3 pt-1.5 {{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.data == constant('App\\Enum\\TwoFATypeEnum::ENFORCED_FOR_ALL').value ? '' : 'hidden' }}"
+                                     data-option-target="ENFORCED_FOR_ALL">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                         viewBox="0 0 14 10"
+                                         fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                              fill="#210124"></path>
+                                    </svg>
+                                </div>
+                            </label>
                         </div>
                     {% endif %}
 

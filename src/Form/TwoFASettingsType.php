@@ -10,7 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class TwoFAType extends AbstractType
+class TwoFASettingsType extends AbstractType
 {
     public function __construct(
         private readonly GetSettings $getSettings
