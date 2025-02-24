@@ -5,7 +5,7 @@
     <div class="grid gap-4 lg:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {% for setting in formTwoFA %}
             {# Display only the 2FA settings #}
-            {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS', 'TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER'] %}
+            {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS', 'TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER', 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="statusCards"
                      id="{{ setting.vars.name }}" {{ stimulus_controller('radio card three-options_radio') }}>
@@ -16,6 +16,7 @@
                                 TWO_FACTOR_AUTH_STATUS: 'Two factor authentication Status',
                                 TWO_FACTOR_AUTH_APP_LABEL: 'Two factor authentication App Label',
                                 TWO_FACTOR_AUTH_APP_ISSUER: 'Two factor authentication App Issuer',
+                                TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME: 'Two factor authentication Expiration Time (secs)',
                             }
                                 [setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
@@ -101,7 +102,7 @@
                             </label>
                         </div>
                     {% endif %}
-                    {% if setting.vars.name in ['TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER'] %}
+                    {% if setting.vars.name in ['TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER', 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'] %}
                         <div class="mt-5">
                             {{ form_widget(setting, {attr: {class: 'form-widget'}}) }}
                         </div>

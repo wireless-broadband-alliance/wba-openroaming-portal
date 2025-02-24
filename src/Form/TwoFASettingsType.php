@@ -90,7 +90,7 @@ class TwoFASettingsType extends AbstractType
                 ]);
             } elseif ($settingName === 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME') {
                 $builder->add('TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', IntegerType::class, [
-                    'data' => $settingValue,
+                    'data' => (int)$settingValue,
                     'attr' => [
                         'description' => $description,
                     ],
