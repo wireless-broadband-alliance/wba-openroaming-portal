@@ -9,6 +9,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
+use App\Enum\TwoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\LDAPType;
@@ -16,6 +17,7 @@ use App\Form\RadiusType;
 use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
+use App\Form\TwoFASettingsType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingRepository;
@@ -63,7 +65,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function checkSettings(
         RequestStack $requestStack,
-        EntityManagerInterface $em,
         Request $request,
         string $type
     ): Response {
@@ -267,6 +268,34 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
+            if ($type === 'settingTwoAF') {
+                $command = 'php bin/console reset:twoFASettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The Two Factor settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_PLATFORM_2FA_RESET_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_two_fa');
+            }
+
             if ($type === 'settingSMS') {
                 $command = 'php bin/console reset:smsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
@@ -307,39 +336,38 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTerms(
         Request $request,
-        EntityManagerInterface $em,
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
         $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
         if (!$tosTextEditor) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
-            $em->persist($tosTextEditor);
+            $this->entityManager->persist($tosTextEditor);
         }
         $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
         if (!$privacyPolicyTextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
-            $em->persist($privacyPolicyTextEditor);
+            $this->entityManager->persist($privacyPolicyTextEditor);
         }
-        $em->flush();
+        $this->entityManager->flush();
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         foreach ($settings as $setting) {
             if ($setting->getName() === 'TOS_EDITOR' || $setting->getName() === 'PRIVACY_POLICY_EDITOR') {
-                $em->remove($setting);
-                $em->flush();
+                $this->entityManager->remove($setting);
+                $this->entityManager->flush();
             }
         }
 
@@ -374,25 +402,25 @@ class SettingsController extends AbstractController
             $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
             if ($tosSetting) {
                 $tosSetting->setValue($tos);
-                $em->persist($tosSetting);
+                $this->entityManager->persist($tosSetting);
             }
 
             $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
             if ($privacyPolicySetting) {
                 $privacyPolicySetting->setValue($privacyPolicy);
-                $em->persist($privacyPolicySetting);
+                $this->entityManager->persist($privacyPolicySetting);
             }
 
             $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
             if ($tosLinkSetting) {
                 $tosLinkSetting->setValue($tosLink);
-                $em->persist($tosLinkSetting);
+                $this->entityManager->persist($tosLinkSetting);
             }
 
             $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
             if ($privacyPolicyLinkSetting) {
                 $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
-                $em->persist($privacyPolicyLinkSetting);
+                $this->entityManager->persist($privacyPolicyLinkSetting);
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
@@ -401,7 +429,7 @@ class SettingsController extends AbstractController
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
                 }
-                $em->persist($tosEditorSetting);
+                $this->entityManager->persist($tosEditorSetting);
             }
 
             if ($privacyPolicyTextEditor) {
@@ -412,7 +440,7 @@ class SettingsController extends AbstractController
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
                 }
-                $em->persist($privacyPolicyEditorSetting);
+                $this->entityManager->persist($privacyPolicyEditorSetting);
             }
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
@@ -427,7 +455,7 @@ class SettingsController extends AbstractController
             );
 
 
-            $em->flush();
+            $this->entityManager->flush();
             $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
@@ -444,14 +472,16 @@ class SettingsController extends AbstractController
 
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsRadius(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
-    {
+    public function settingsRadius(
+        Request $request,
+        GetSettings $getSettings
+    ): Response {
         $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $domainService = new Domain();
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(RadiusType::class, null, [
@@ -504,7 +534,7 @@ class SettingsController extends AbstractController
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                     if ($setting) {
                         $setting->setValue($value);
-                        $em->persist($setting);
+                        $this->entityManager->persist($setting);
                     }
                 }
 
@@ -537,7 +567,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsStatus(
         Request $request,
-        EntityManagerInterface $em,
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
@@ -545,15 +574,13 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(StatusType::class, null, [
             'settings' => $settings,
         ]);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             // Get the submitted data
             $submittedData = $form->getData();
@@ -566,38 +593,44 @@ class SettingsController extends AbstractController
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
+            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED->value;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {
                 $platformModeSetting->setValue($platformMode);
-                $em->persist($platformModeSetting);
+                $this->entityManager->persist($platformModeSetting);
             }
 
             $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'USER_VERIFICATION']);
             if ($emailVerificationSetting) {
                 $emailVerificationSetting->setValue($emailVerification);
-                $em->persist($emailVerificationSetting);
+                $this->entityManager->persist($emailVerificationSetting);
             }
 
             $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
             if ($turnstileCheckerSetting) {
                 $turnstileCheckerSetting->setValue($turnstileChecker);
-                $em->persist($turnstileCheckerSetting);
+                $this->entityManager->persist($turnstileCheckerSetting);
             }
 
             $apiStatusSetting = $settingsRepository->findOneBy(['name' => 'API_STATUS']);
             if ($apiStatusSetting) {
                 $apiStatusSetting->setValue($apiStatus);
-                $em->persist($apiStatusSetting);
+                $this->entityManager->persist($apiStatusSetting);
             }
 
             $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
             if ($userDeleteTimeSetting) {
                 $userDeleteTimeSetting->setValue($userDeleteTime);
-                $em->persist($userDeleteTimeSetting);
+                $this->entityManager->persist($userDeleteTimeSetting);
+            }
+            $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+            if ($twoFactorAuthStatusSetting) {
+                $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
+                $this->entityManager->persist($twoFactorAuthStatusSetting);
             }
             // Flush the changes to the database
-            $em->flush();
+            $this->entityManager->flush();
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
@@ -625,11 +658,77 @@ class SettingsController extends AbstractController
         ]);
     }
 
+
+    #[Route('/dashboard/settings/twoFA', name: 'admin_dashboard_settings_two_fa')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsTwoFA(
+        Request $request,
+        GetSettings $getSettings
+    ): Response {
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $formTwoFA = $this->createForm(TwoFASettingsType::class, null, [
+            'settings' => $settings,
+        ]);
+        $formTwoFA->handleRequest($request);
+        if ($formTwoFA->isSubmitted() && $formTwoFA->isValid()) {
+            $submittedData = $formTwoFA->getData();
+
+            // List of 2FA settings to handle
+            $settingsToHandle = [
+                'TWO_FACTOR_AUTH_STATUS',
+                'TWO_FACTOR_AUTH_APP_LABEL',
+                'TWO_FACTOR_AUTH_APP_ISSUER',
+                'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME',
+            ];
+
+            foreach ($settingsToHandle as $settingName) {
+                $settingValue = $submittedData[$settingName] ?? '';
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting) {
+                    // Update existing setting
+                    $setting->setValue($settingValue);
+                }
+
+                $this->entityManager->persist($setting);
+            }
+            $this->entityManager->flush();
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid()
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_PLATFORM_2FA_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_two_fa');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'current_user' => $currentUser,
+            'formTwoFA' => $formTwoFA->createView(),
+        ]);
+    }
+
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsLDAP(
         Request $request,
-        EntityManagerInterface $em,
         GetSettings $getSettings
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -637,7 +736,7 @@ class SettingsController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(LDAPType::class, null, [
@@ -669,7 +768,7 @@ class SettingsController extends AbstractController
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
-                    $em->persist($setting);
+                    $this->entityManager->persist($setting);
                 }
             }
 
@@ -702,7 +801,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,
-        EntityManagerInterface $em,
         GetSettings $getSettings,
         CertificateService $certificateService
     ): Response {
@@ -711,7 +809,7 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
@@ -794,7 +892,7 @@ class SettingsController extends AbstractController
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
-                    $em->persist($setting);
+                    $this->entityManager->persist($setting);
                 }
                 if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN' || $settingName === 'VALID_DOMAINS_MICROSOFT_LOGIN') {
                     continue;
@@ -832,7 +930,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCAPPORT(
         Request $request,
-        EntityManagerInterface $em,
         GetSettings $getSettings
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -840,7 +937,7 @@ class SettingsController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(CapportType::class, null, [
@@ -869,7 +966,7 @@ class SettingsController extends AbstractController
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
-                    $em->persist($setting);
+                    $this->entityManager->persist($setting);
                 }
             }
 
@@ -901,7 +998,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsSMS(
         Request $request,
-        EntityManagerInterface $em,
         GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
@@ -909,7 +1005,7 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
         $form = $this->createForm(SMSType::class, null, [
@@ -941,7 +1037,7 @@ class SettingsController extends AbstractController
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                 if ($setting) {
                     $setting->setValue($value);
-                    $em->persist($setting);
+                    $this->entityManager->persist($setting);
                 }
             }
 

@@ -4,7 +4,7 @@
 
 {% block container %}
     <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
-        {% if type in ['settingMain', 'settingCustom', 'settingTerms', 'settingRadius', 'settingStatus', 'settingLDAP', 'settingCAPPORT', 'settingAUTH', 'settingSMS'] %}
+        {% if type in ['settingMain', 'settingCustom', 'settingTerms', 'settingRadius', 'settingStatus', 'settingLDAP', 'settingCAPPORT', 'settingAUTH', 'settingTwoFA', 'settingSMS'] %}
             <form action="{{ path('admin_confirm_checker', {type: type}) }}"
                   method="post">
                 <p class="block text-center text-lg mb-6">
