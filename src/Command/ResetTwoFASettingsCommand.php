@@ -50,8 +50,8 @@ class ResetTwoFASettingsCommand extends Command
 
         $settings = [
             ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'Openroaming'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'Openroaming'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
             ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
         ];
 

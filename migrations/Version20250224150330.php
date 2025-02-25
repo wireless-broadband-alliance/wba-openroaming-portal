@@ -20,8 +20,8 @@ final class Version20250224150330 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('TWO_FACTOR_AUTH_APP_LABEL', 'Openroaming')");
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('TWO_FACTOR_AUTH_APP_ISSUER', 'Openroaming')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('TWO_FACTOR_AUTH_APP_LABEL', 'OpenRoaming')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('TWO_FACTOR_AUTH_APP_ISSUER', 'OpenRoaming')");
         $this->addSql("INSERT INTO Setting (name, value) VALUES ('TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', '60')");
     }
 

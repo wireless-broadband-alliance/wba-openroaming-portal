@@ -65,8 +65,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'API_STATUS', 'value' => 'ON'],
 
             ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'Openroaming'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'Openroaming'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
             ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
