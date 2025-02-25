@@ -10,10 +10,12 @@ use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\VerificationCodeEmailGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
@@ -57,6 +59,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 
     /**
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
@@ -135,6 +138,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $user->setEmail($email);
         $user->setFirstName($firstName);
         $user->setLastName($lastName);
+        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED);
 
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();
