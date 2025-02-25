@@ -69,7 +69,7 @@ class SecurityController extends AbstractController
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        $user->getTwoFAType() === null
+                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
                         return $this->redirectToRoute('app_landing');
                     }
@@ -91,7 +91,7 @@ class SecurityController extends AbstractController
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        $user->getTwoFAType() === null
+                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
                         return $this->redirectToRoute('app_enable2FA');
                     }
@@ -113,7 +113,7 @@ class SecurityController extends AbstractController
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        $user->getTwoFAType() === null
+                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
                         return $this->redirectToRoute('app_enable2FA');
                     }
