@@ -46,6 +46,7 @@ class ConfigController extends AbstractController
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
             'TOS' => $this->resolveTosValue(),
             'PRIVACY_POLICY' => $this->resolveTosValue(),
+            'TWO_FACTOR_AUTH_STATUS' => $this->getSettingValueRaw('TWO_FACTOR_AUTH_STATUS'),
         ];
 
         $data['auth'] = [

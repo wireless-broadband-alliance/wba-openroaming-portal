@@ -26,6 +26,7 @@ class SettingFixture extends Fixture
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
+            ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
             ['name' => 'API_STATUS', 'value' => 'OFF'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],

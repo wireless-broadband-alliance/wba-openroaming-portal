@@ -55,3 +55,4 @@ COPY service-config/nginx/sites /etc/nginx/conf.d
 COPY --chown=www-data:www-data . /var/www/openroaming
 RUN mkdir /run/php
 CMD ["/usr/bin/supervisord"]
+

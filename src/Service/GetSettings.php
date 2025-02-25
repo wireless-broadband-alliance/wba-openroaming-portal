@@ -162,6 +162,26 @@ class GetSettings
             ];
         }
 
+        $data['TWO_FACTOR_AUTH_STATUS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS'])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_STATUS'),
+        ];
+
+        $data['TWO_FACTOR_AUTH_APP_LABEL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_LABEL'])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_APP_LABEL'),
+        ];
+
+        $data['TWO_FACTOR_AUTH_APP_ISSUER'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_ISSUER'])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_APP_ISSUER'),
+        ];
+
+        $data['TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'),
+        ];
+
         $data['SAML_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
@@ -386,6 +406,11 @@ class GetSettings
 
             'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to between genuine users and bots.
              This can be used in Live or Demo modes.',
+
+            'TWO_FACTOR_AUTH_STATUS' => 'The status of two factor authentication when users log in to the platform',
+            'TWO_FACTOR_AUTH_APP_LABEL' => 'Platform identifier in two factor application',
+            'TWO_FACTOR_AUTH_APP_ISSUER' => 'Issuer identifier in two factor application',
+            'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME' => 'Local two-factor authentication code expiration time',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',

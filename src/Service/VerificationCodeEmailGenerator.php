@@ -14,7 +14,7 @@ class VerificationCodeEmailGenerator
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly ParameterBagInterface $parameterBag
+        private readonly ParameterBagInterface $parameterBag,
     ) {
     }
 

@@ -11,6 +11,10 @@
         {{ include('admin/shared/settings_actions/_radius.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
         {{ include('admin/shared/settings_actions/_status.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_two_fa' %}
+        {{ include('admin/shared/settings_actions/_twoFA.htm.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
+        {{ include('admin/shared/settings_actions/_LDAP.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
         {{ include('admin/shared/settings_actions/_auth.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}

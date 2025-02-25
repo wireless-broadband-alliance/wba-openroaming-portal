@@ -11,6 +11,8 @@
 - New docs for GEOLITEGUI and setup
 - New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
+- Two Factor Authentication was added on users login
+- New settings page for 2fa
 - Microsoft Login Implementation - New authentication provider / New endpoint
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.

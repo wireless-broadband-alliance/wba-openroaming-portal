@@ -64,6 +64,11 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
             ['name' => 'API_STATUS', 'value' => 'ON'],
 
+            ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
+            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
+            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
+
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
             ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
             ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],

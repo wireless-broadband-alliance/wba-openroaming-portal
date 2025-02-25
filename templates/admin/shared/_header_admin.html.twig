@@ -30,6 +30,12 @@
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
         <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Platform Status</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_two_fa' %}
+        <twig:ux:icon name="wba:2fa" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Two Factor Authenticator</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
+        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">LDAP Synchronization</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
         <twig:ux:icon name="wba:at" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Authentication Methods</h1>

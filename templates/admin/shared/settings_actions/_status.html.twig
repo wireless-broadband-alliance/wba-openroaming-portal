@@ -2,13 +2,13 @@
     <form action="{{ path('admin_dashboard_settings_status') }}" method="post" enctype="multipart/form-data">
 
         {{ form_row(form._token) }}
-        <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
+        <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card ') }}>
             {% for setting in form %}
                 {# Display only the platform and the email verification settings #}
-                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'API_STATUS', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
+                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION', 'API_STATUS'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
-                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card three-options_radio') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -19,7 +19,8 @@
                                     API_STATUS: 'Api Status',
                                     USER_DELETE_TIME: 'Time to delete users(hours)',
                                     TIME_INTERVAL_NOTIFICATION: 'Time to resend notifications(days)',
-                                }[setting.vars.name] ?? setting.vars.name %}
+                                }
+                                    [setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
                             <label class="flex items-center bg-opacity-40">

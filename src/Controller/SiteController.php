@@ -13,7 +13,9 @@ use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
+use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
@@ -102,7 +104,33 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-
+        $session = $request->getSession();
+        if (
+            $currentUser &&
+            (
+                $currentUser->getTwoFAType() !==
+                UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$session->has('2fa_verified'))
+        ) {
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::SMS->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::APP->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_app');
+            }
+        }
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
         if (
@@ -114,6 +142,26 @@ class SiteController extends AbstractController
             // Check if the user is verified
             if (!$verification) {
                 return $this->redirectToRoute('app_email_code');
+            }
+            // Checks the 2FA status of the platform, if mandatory forces the user to configure it
+            if (
+                $currentUser->getUserExternalAuths() &&
+                ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
+                    TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                    UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::DISABLED->value))
+            ) {
+                return $this->redirectToRoute('app_enable2FA');
+            }
+            if (
+                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
+                ($currentUser->getTwoFAType() === null ||
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::DISABLED->value)
+            ) {
+                return $this->redirectToRoute('app_enable2FA');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
