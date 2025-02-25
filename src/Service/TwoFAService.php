@@ -44,9 +44,7 @@ class TwoFAService
             return false;
         }
         $now = new DateTime();
-        // Difference between created time and now
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
-        // If 30 seconds have passed since the code was created return false.
         $timeToExpireCode = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($diff >= $timeToExpireCode) {
             return false;
