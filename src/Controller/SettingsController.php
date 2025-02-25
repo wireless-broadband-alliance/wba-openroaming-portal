@@ -593,7 +593,7 @@ class SettingsController extends AbstractController
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
-            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED;
+            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED->value;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting) {

@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -1742,14 +1743,14 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $twoFAsecret = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $twoFAtype = null;
+    #[ORM\Column(length: 255)]
+    private UserTwoFactorAuthenticationStatus $twoFAtype = UserTwoFactorAuthenticationStatus::DISABLED;
 
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $twoFAcode = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $twoFAcodeIsActive = null;
+    #[ORM\Column]
+    private bool $twoFAcodeIsActive = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $twoFAcodeGeneratedAt = null;
@@ -1791,12 +1792,12 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->twoFAsecret = $twoFAsecret;
     }
 
-    public function getTwoFAtype(): ?string
+    public function getTwoFAtype(): UserTwoFactorAuthenticationStatus
     {
         return $this->twoFAtype;
     }
 
-    public function setTwoFAtype(?string $twoFAtype): void
+    public function setTwoFAtype(UserTwoFactorAuthenticationStatus $twoFAtype): void
     {
         $this->twoFAtype = $twoFAtype;
     }
