@@ -27,7 +27,7 @@ final class Version20250224120017 extends AbstractMigration
         $this->addSql('ALTER TABLE OTPcode CHANGE twoFactorAuthentication_id user_id INT NOT NULL');
         $this->addSql('ALTER TABLE OTPcode ADD CONSTRAINT FK_D672B040A76ED395 FOREIGN KEY (user_id) REFERENCES User (id)');
         $this->addSql('CREATE INDEX IDX_D672B040A76ED395 ON OTPcode (user_id)');
-        $this->addSql('ALTER TABLE User ADD twoFAsecret VARCHAR(255) DEFAULT NULL, ADD twoFAtype VARCHAR(255) DEFAULT NULL, ADD twoFAcode VARCHAR(10) DEFAULT NULL, ADD twoFAcodeGeneratedAt DATETIME DEFAULT NULL');
+        $this->addSql('ALTER TABLE User ADD twoFAsecret VARCHAR(255) DEFAULT NULL, ADD twoFAtype VARCHAR(255) DEFAULT 0, ADD twoFAcode VARCHAR(10) DEFAULT NULL, ADD twoFAcodeGeneratedAt DATETIME DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
