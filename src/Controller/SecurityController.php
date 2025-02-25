@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\PlatformMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Enum\UserType;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -53,14 +52,10 @@ class SecurityController extends AbstractController
 
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
-            if ($type === UserType::ADMIN->value) {
-                if ($this->isGranted('ROLE_ADMIN')) {
-                    $session = $request->getSession();
-                    $session->set('session_admin', true);
-                    return $this->redirectToRoute('admin_page');
-                }
-                $this->addFlash('error', 'Wrong credentials');
-                return $this->redirectToRoute('saml_logout');
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $session = $request->getSession();
+                $session->set('session_admin', true);
+                return $this->redirectToRoute('admin_page');
             }
             $platformMode = $data['PLATFORM_MODE']['value'];
             if ($platformMode === PlatformMode::DEMO->value) {
@@ -163,7 +158,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        if ($type === UserType::ADMIN->value) {
+        if ($this->isGranted('ROLE_ADMIN')) {
             return $this->render('admin/login_admin_landing.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
