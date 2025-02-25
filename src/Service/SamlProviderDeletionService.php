@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\DeletedSamlProviderData;
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -25,18 +26,27 @@ class SamlProviderDeletionService
         Request $request,
         User $currentUser
     ): array {
+        $getSamlProviderName = $samlProvider->getName();
+        $getLdapCredentialServer = $samlProvider->getLdapServer();
         // Prepare data for the SAML Provider to be deleted
         $deletedSamlProviderData = [
             'id' => $samlProvider->getId(),
-            'name' => $samlProvider->getName(),
+            'name' => $getSamlProviderName,
             'idpEntityId' => $samlProvider->getIdpEntityId(),
             'idpSsoUrl' => $samlProvider->getIdpSsoUrl(),
-            'spEntityId' => $samlProvider->getIdpEntityId(),
+            'spEntityId' => $samlProvider->getSpEntityId(),
             'spAcsUrl' => $samlProvider->getSpAcsUrl(),
             'idpX509Cert' => $samlProvider->getIdpX509Cert(),
             'createdAt' => $samlProvider->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updatedAt' => $samlProvider->getUpdatedAt()?->format('Y-m-d H:i:s'),
-            'deletedAt' => new DateTime(),
+            'deletedAt' => new DateTime()->format('Y-m-d H:i:s'),
+            'isLDAPActive' => $samlProvider->getIsLDAPActive(),
+            'ldapServer' => $getLdapCredentialServer,
+            'ldapBindUserDn' => $samlProvider->getLdapBindUserDn(),
+            'ldapBindUserPassword' => $samlProvider->getLdapBindUserPassword(),
+            'ldapSearchBaseDn' => $samlProvider->getLdapSearchBaseDn(),
+            'ldapSearchFilter' => $samlProvider->getLdapSearchFilter(),
+            'ldapUpdatedAt' => $samlProvider->getLdapUpdatedAt()?->format('Y-m-d H:i:s'),
         ];
 
         // Prepare JSON data for encryption
@@ -55,13 +65,23 @@ class SamlProviderDeletionService
         }
 
         $samlProvider->setDeletedAt(new DateTime());
-        $samlProvider->setName($samlProvider->getId());
+        $samlProvider->setName((string)$samlProvider->getId());
         $samlProvider->setActive(false);
-        $samlProvider->setIdpEntityId($samlProvider->getId());
+        $samlProvider->setIsLDAPActive(false);
+        $samlProvider->setIdpEntityId((string)$samlProvider->getId());
         $samlProvider->setIdpSsoUrl(null);
         $samlProvider->setSpEntityId(null);
         $samlProvider->setSpAcsUrl(null);
         $samlProvider->setIdpX509Cert(null);
+        $samlProvider->setLdapServer(null);
+        $samlProvider->setLdapBindUserDn(null);
+        $samlProvider->setLdapBindUserPassword(null);
+        $samlProvider->setLdapSearchBaseDn(null);
+        $samlProvider->setLdapSearchFilter(null);
+        $samlProvider->setLdapUpdatedAt(new DateTime());
+
+        $this->entityManager->persist($samlProvider);
+
         $deletedSamlProviderData = new DeletedSamlProviderData();
         $deletedSamlProviderData
             ->setPgpEncryptedJsonFile($pgpEncryptedData)
@@ -72,7 +92,8 @@ class SamlProviderDeletionService
         $this->entityManager->flush();
 
         $eventMetadata = [
-            'samlProvider' => $samlProvider->getName(),
+            'samlProvider' => $getSamlProviderName,
+            'ldapCredential' => $getLdapCredentialServer,
             'deletedBy' => $currentUser->getUuid(),
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),

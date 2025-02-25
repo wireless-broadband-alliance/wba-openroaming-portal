@@ -21,13 +21,11 @@ final class Version20250206172649 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE SamlProvider ADD deletedAt DATETIME DEFAULT NULL');
-        $this->addSql('ALTER TABLE User DROP saml_identifier, DROP googleId');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE User ADD saml_identifier INT DEFAULT NULL, ADD googleId INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE SamlProvider DROP deletedAt');
     }
 }

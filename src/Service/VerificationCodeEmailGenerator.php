@@ -29,7 +29,7 @@ class VerificationCodeEmailGenerator
     {
         // Generate a random verification code with 6 digits
         $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
+        $user->setVerificationCode((string)$verificationCode);
         $this->userRepository->save($user, true);
 
         return $verificationCode;

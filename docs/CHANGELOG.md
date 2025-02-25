@@ -4,6 +4,7 @@
 # Release V1.7.0
 
 - Update PHP to 8.4
+- Add revoke reason everytime a profile is revoked
 - Rework **cookies integration only EEA users** (checks for current location of the user to show the cookies banner) -
   Using
   GeoLite2 from Maxmind
@@ -30,7 +31,7 @@ Integrated support for Multiple SAML Providers with management features accessib
 
 - **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
   exist
-  associated accounts that have a saml provider.
+  associated accounts that have a saml provider. This command also associated a LDAPCredential if she exists.
 
 > **Important**: This command must be executed **before running any migrations**.
 

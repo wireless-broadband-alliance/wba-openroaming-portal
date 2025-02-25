@@ -95,7 +95,6 @@ All the present items can be customizable:
 - **Terms and Policies**
 - **Radius Configuration**
 - **Authentication Methods**
-- **LDAP Synchronization**
 - **User Engagement**
 - **SMS Configuration**
 

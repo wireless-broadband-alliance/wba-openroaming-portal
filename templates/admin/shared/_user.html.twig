@@ -81,7 +81,7 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
                 <li>
-                    <a href="{{ path('admin_update', {id: user.id}) }}"
+                    <a href="{{ path('admin_user_edit', {id: user.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
                         Edit
@@ -89,7 +89,7 @@
                 </li>
                 {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
                     <li {{ stimulus_controller('alert') }}>
-                        <form action="{{ path('admin_delete', {id: user.id}) }}"
+                        <form action="{{ path('admin_user_delete', {id: user.id}) }}"
                               method="post" {{ stimulus_target('alert', 'form') }}>
                             <input type="hidden" name="_method" value="DELETE">
 
@@ -104,7 +104,7 @@
                 {% endif %}
                 <li {{ stimulus_controller('alert') }}>
                     <form method="POST"
-                          action="{{ path('admin_revoke_profiles', {id: user.id}) }}"
+                          action="{{ path('admin_user_revoke_profiles', {id: user.id}) }}"
                             {{ stimulus_target('alert', 'form') }}>
                         {{ form_start(formRevokeProfiles) }}
                         {{ form_errors(formRevokeProfiles) }}

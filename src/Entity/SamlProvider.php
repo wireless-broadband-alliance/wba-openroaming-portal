@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\SamlProviderRepository;
-use App\Validator\UniqueField;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -35,7 +34,7 @@ class SamlProvider
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $spAcsUrl = null;
 
-    #[ORM\Column(type:'boolean', options: ['default' => false])]
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isActive;
 
     /**
@@ -52,6 +51,27 @@ class SamlProvider
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $isLDAPActive = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapServer = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapBindUserDn = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapBindUserPassword = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapSearchBaseDn = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapSearchFilter = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $ldapUpdatedAt = null;
 
     public function __construct()
     {
@@ -169,8 +189,7 @@ class SamlProvider
     {
         // Set the owning side to null (unless already changed)
         if (
-            $this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getSamlProvider(
-            ) === $this
+            $this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getSamlProvider() === $this
         ) {
             $userExternalAuth->setSamlProvider(null);
         }
@@ -210,6 +229,90 @@ class SamlProvider
     public function setDeletedAt(?\DateTimeInterface $deletedAt): static
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getIsLDAPActive(): ?bool
+    {
+        return $this->isLDAPActive;
+    }
+
+    public function setIsLDAPActive(bool $isLDAPActive): static
+    {
+        $this->isLDAPActive = $isLDAPActive;
+
+        return $this;
+    }
+
+    public function getLdapServer(): ?string
+    {
+        return $this->ldapServer;
+    }
+
+    public function setLdapServer(?string $ldapServer): static
+    {
+        $this->ldapServer = $ldapServer;
+
+        return $this;
+    }
+
+    public function getLdapBindUserDn(): ?string
+    {
+        return $this->ldapBindUserDn;
+    }
+
+    public function setLdapBindUserDn(?string $ldapBindUserDn): static
+    {
+        $this->ldapBindUserDn = $ldapBindUserDn;
+
+        return $this;
+    }
+
+    public function getLdapBindUserPassword(): ?string
+    {
+        return $this->ldapBindUserPassword;
+    }
+
+    public function setLdapBindUserPassword(?string $ldapBindUserPassword): static
+    {
+        $this->ldapBindUserPassword = $ldapBindUserPassword;
+
+        return $this;
+    }
+
+    public function getLdapSearchBaseDn(): ?string
+    {
+        return $this->ldapSearchBaseDn;
+    }
+
+    public function setLdapSearchBaseDn(?string $ldapSearchBaseDn): static
+    {
+        $this->ldapSearchBaseDn = $ldapSearchBaseDn;
+
+        return $this;
+    }
+
+    public function getLdapSearchFilter(): ?string
+    {
+        return $this->ldapSearchFilter;
+    }
+
+    public function setLdapSearchFilter(?string $ldapSearchFilter): static
+    {
+        $this->ldapSearchFilter = $ldapSearchFilter;
+
+        return $this;
+    }
+
+    public function getLdapUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->ldapUpdatedAt;
+    }
+
+    public function setLdapUpdatedAt(?\DateTimeInterface $ldapUpdatedAt): static
+    {
+        $this->ldapUpdatedAt = $ldapUpdatedAt;
 
         return $this;
     }

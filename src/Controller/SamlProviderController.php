@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -107,7 +108,7 @@ class SamlProviderController extends AbstractController
         ]);
     }
 
-    #[Route('dashboard/saml-provider/new', name: 'admin_dashboard_saml_provider_new')]
+    #[Route('/dashboard/saml-provider/new', name: 'admin_dashboard_saml_provider_new')]
     #[IsGranted('ROLE_ADMIN')]
     public function addSamlProvider(Request $request): Response
     {
@@ -117,23 +118,48 @@ class SamlProviderController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $samlProvider = new SamlProvider();
-        $form = $this->createForm(SamlProviderType::class, $samlProvider);
-        $form->handleRequest($request);
+        $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
+        $formSamlProvider->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
             // Find and disable the currently active SAML Provider (if any)
-            $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
+            $previousSamlProvider = $this->samlProviderRepository->findOneBy([
+                'isActive' => true,
+                'deletedAt' => null,
+            ]);
             if ($previousSamlProvider) {
                 $previousSamlProvider->setActive(false);
+                $previousSamlProvider->setIsLdapActive(false);
+                $this->entityManager->persist($previousSamlProvider);
             }
 
-            $samlProvider->setActive(true);
-            $samlProvider->setCreatedAt(new DateTime());
-            $samlProvider->setUpdatedAt(new DateTime());
+            $samlProvider->setActive(true)
+                ->setCreatedAt(new DateTime())
+                ->setUpdatedAt(new DateTime());
+
+            // If LDAP is active, log the LDAP-specific event
+            if ($samlProvider->getIsLDAPActive() === true) {
+                $eventMetaData = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'ldapCredentialAdded' => $samlProvider->getLdapServer(),
+                    'by' => $currentUser->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::ADMIN_ADDED_LDAP_CREDENTIAL->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+            }
+
+            // Persist the new SAML Provider & Save to DB
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
-            // Log the event metadata (tracking the change)
+            // Log the general addition of the new SAML Provider
             $eventMetaData = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
@@ -149,17 +175,20 @@ class SamlProviderController extends AbstractController
                 $eventMetaData
             );
 
+            // Show a success flash message and redirect
             $this->addFlash('success_admin', 'SAML Provider added successfully.');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
+
+        // Render the form if not submitted or invalid
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
-            'form' => $form->createView(),
+            'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
             'current_user' => $currentUser,
         ]);
     }
 
-    #[Route('dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
+    #[Route('/dashboard/saml-provider/edit/{id}', name: 'admin_dashboard_saml_provider_edit')]
     #[IsGranted('ROLE_ADMIN')]
     public function editSamlProvider(
         int $id,
@@ -167,23 +196,84 @@ class SamlProviderController extends AbstractController
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        // Find the new SamlProvider to be enabled
-        $samlProvider = $this->samlProviderRepository->find($id);
+        // Find the SAML Provider by ID
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        $form = $this->createForm(SamlProviderType::class, $samlProvider);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        // Capture all the required fields before any changes are made
+        $originalServer = $samlProvider->getLdapServer();
+        $originalPassword = $samlProvider->getLdapBindUserPassword();
+        $originalIsLdapActive = $samlProvider->getIsLdapActive();
+
+        $formSamlProvider = $this->createForm(SamlProviderType::class, $samlProvider);
+        $formSamlProvider->handleRequest($request);
+
+        if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
+            if (!$samlProvider->isActive() && $samlProvider->getIsLDAPActive()) {
+                $this->addFlash('error_admin', 'LDAP cannot be active if the provider is disabled.');
+                return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
+                    'id' => $samlProvider->getId(),
+                ]);
+            }
+
+            // Check if isLDAPActive has changed
+            if ($samlProvider->getIsLDAPActive() !== $originalIsLdapActive) {
+                if ($samlProvider->getIsLDAPActive()) {
+                    // Ensure no other Active SAML Provider with LDAP is enabled
+                    $existingActiveProvider = $this->samlProviderRepository->findOneBy([
+                        'isActive' => true,
+                        'isLDAPActive' => true,
+                    ]);
+
+                    // If an active SAML provider with LDAP is found, prevent enabling LDAP
+                    if ($existingActiveProvider && $existingActiveProvider !== $samlProvider) {
+                        $this->addFlash(
+                            'error_admin',
+                            'You cannot enable LDAP if another SAML Provider with LDAP is already enabled.'
+                        );
+                        return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
+                            'id' => $samlProvider->getId(),
+                        ]);
+                    }
+                }
+                $samlProvider->setLdapUpdatedAt(new DateTime());
+                $this->entityManager->persist($samlProvider);
+
+                $eventMetaData = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'oldLdapCredential' => $originalServer,
+                    'ldapCredentialEdited' => $samlProvider->getLdapServer(),
+                    'by' => $currentUser->getUuid(),
+                ];
+
+                // Save the activation/deactivation event
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::ADMIN_EDITED_LDAP_CREDENTIAL->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+            }
+            $formPassword = $formSamlProvider->get('ldapBindUserPassword')->getData();
+
+            // If the password field is empty, restore the original value
+            if (in_array(trim((string)$formPassword), ['', '0'], true)) {
+                $samlProvider->setLdapBindUserPassword($originalPassword);
+            }
+
             $samlProvider->setUpdatedAt(new DateTime());
             $this->entityManager->persist($samlProvider);
             $this->entityManager->flush();
 
-            // Log the event metadata (tracking the change)
+            // Log the SAML Provider edit
             $eventMetaData = [
                 'platform' => PlatformMode::LIVE->value,
                 'samlProviderEdited' => $samlProvider->getName(),
@@ -206,15 +296,15 @@ class SamlProviderController extends AbstractController
         }
 
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
-            'form' => $form->createView(),
+            'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
             'current_user' => $currentUser,
-            'samlProvider' => $samlProvider
+            'samlProvider' => $samlProvider,
         ]);
     }
 
 
-    #[Route('dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function enableSamlProvider(
         int $id,
@@ -223,7 +313,7 @@ class SamlProviderController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $samlProvider = $this->samlProviderRepository->find($id);
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
@@ -233,12 +323,11 @@ class SamlProviderController extends AbstractController
         $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
         if ($previousSamlProvider) {
             $previousSamlProvider->setActive(false);
+            $previousSamlProvider->setIsLdapActive(false);
+            $this->entityManager->persist($previousSamlProvider);
         }
         $samlProvider->setActive(true);
         $this->entityManager->persist($samlProvider);
-        if ($previousSamlProvider) {
-            $this->entityManager->persist($previousSamlProvider);
-        }
         $this->entityManager->flush();
 
         // Log the event metadata (tracking the change)
@@ -270,7 +359,7 @@ class SamlProviderController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/delete/{id}', name: 'admin_dashboard_saml_provider_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteSamlProvider(
         int $id,
@@ -279,7 +368,7 @@ class SamlProviderController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $samlProvider = $this->samlProviderRepository->find($id);
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
             return $this->redirectToRoute('admin_dashboard_saml_provider');
@@ -338,7 +427,7 @@ class SamlProviderController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('dashboard/saml-provider/revoke/{id}', name: 'admin_dashboard_saml_provider_revoke', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/revoke/{id}', name: 'admin_dashboard_saml_provider_revoke', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function revokeSamlProvider(
         int $id,

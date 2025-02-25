@@ -51,7 +51,7 @@
 
 /* buttons */
 .btn-primary {
-    @apply h-[50px] px-2 rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center text-center items-center text-white font-semibold text-center;
+    @apply h-[50px] px-2 rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center items-center text-white font-semibold text-center;
 }
 
 .btn-secondary {

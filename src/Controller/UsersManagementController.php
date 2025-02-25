@@ -56,7 +56,7 @@ class UsersManagementController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_revoke_profiles', methods: ['POST'])]
+    #[Route('/dashboard/revoke/{id<\d+>}', name: 'admin_user_revoke_profiles', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function revokeUsers(
         Request $request,
@@ -111,7 +111,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    #[Route('/dashboard/export/users', name: 'admin_page_export_users')]
+    #[Route('/dashboard/export/users', name: 'admin_user_export')]
     #[IsGranted('ROLE_ADMIN')]
     public function exportUsers(
         Request $request
@@ -238,7 +238,7 @@ class UsersManagementController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_delete', methods: ['POST'])]
+    #[Route('/dashboard/delete/{id<\d+>}', name: 'admin_user_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteUsers(
         int $id,
@@ -275,10 +275,9 @@ class UsersManagementController extends AbstractController
      * Handles the edit of the Users by the admin
      */
     /**
-     * @param $id
      * @throws TransportExceptionInterface
      */
-    #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_update')]
+    #[Route('/dashboard/edit/{id<\d+>}', name: 'admin_user_edit')]
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(
         Request $request,
@@ -315,17 +314,17 @@ class UsersManagementController extends AbstractController
             $user = $form->getData();
 
             // Verifies if the isVerified is removed to the logged account
-            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() == 0) {
+            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() === 0) {
                 $user->isVerified();
                 $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
-                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 if ($currentUser->getId() === $user->getId()) {
                     $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
-                    return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                    return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
                 }
                 $user->setBannedAt(new DateTime());
                 $this->profileManager->disableProfiles(
@@ -379,7 +378,7 @@ class UsersManagementController extends AbstractController
 
             if ($newPassword !== $confirmPassword) {
                 $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
-                return $this->redirectToRoute('admin_update', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
             // Get the User Provider && ProviderId

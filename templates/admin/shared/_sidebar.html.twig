@@ -31,12 +31,14 @@
         ] %}
         {% set identityProviderRoutes = [
             'admin_dashboard_saml_provider',
+            'admin_dashboard_saml_provider_edit',
+            'admin_dashboard_saml_provider_new',
         ] %}
 
         {# User - Button #}
         <a href="{{ path('admin_page') }}">
             <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-                {% if app.request.attributes.get('_route') == 'admin_page' %}selected{% endif %}">
+                {% if app.request.attributes.get('_route') in ['admin_page', 'admin_user_edit'] %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
                     <twig:ux:icon name="wba:user" class="w-5 mr-2" fill="none"/>
                     Users Management
@@ -147,7 +149,7 @@
                         <div class="px-2 py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in identityProviderRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
                             <ul class="mx-2">
                                 <li>
-                                    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_saml_provider' %}selected{% endif %}"
+                                    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') in ['admin_dashboard_saml_provider', 'admin_dashboard_saml_provider_edit', 'admin_dashboard_saml_provider_new'] %}selected{% endif %}"
                                        href="{{ path('admin_dashboard_saml_provider') }}">
                                         Saml
                                     </a>
@@ -155,13 +157,6 @@
                             </ul>
                         </div>
                     </div>
-                    <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
-                           href="{{ path('admin_dashboard_settings_LDAP') }}">
-                            <twig:ux:icon name="wba:sync" class="w-5 mr-4" fill="none"/>
-                            LDAP Synchronization
-                        </a>
-                    </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_sms') }}">
@@ -228,7 +223,7 @@
                 <ul class="mx-2">
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                           href="{{ path('admin_update', {id: app.user.id}) }}">
+                           href="{{ path('admin_user_edit', {id: app.user.id}) }}">
                             <twig:ux:icon name="wba:user-circle" class="w-5 mr-4" fill="none"/>
                             Account
                         </a>
