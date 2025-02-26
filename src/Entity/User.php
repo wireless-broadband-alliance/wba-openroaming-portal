@@ -1744,7 +1744,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private ?string $twoFAsecret = null;
 
     #[ORM\Column(length: 255)]
-    private UserTwoFactorAuthenticationStatus $twoFAtype = UserTwoFactorAuthenticationStatus::DISABLED;
+    private int $twoFAtype = 0;
 
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $twoFAcode = null;
@@ -1792,12 +1792,12 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->twoFAsecret = $twoFAsecret;
     }
 
-    public function getTwoFAtype(): UserTwoFactorAuthenticationStatus
+    public function getTwoFAtype(): int
     {
         return $this->twoFAtype;
     }
 
-    public function setTwoFAtype(UserTwoFactorAuthenticationStatus $twoFAtype): void
+    public function setTwoFAtype(int $twoFAtype): void
     {
         $this->twoFAtype = $twoFAtype;
     }
