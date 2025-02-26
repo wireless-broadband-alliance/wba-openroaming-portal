@@ -31,7 +31,7 @@ class SamlEnabledValidator extends ConstraintValidator
         }
 
         // Fetch an active SAML provider
-        $activeProvider = $this->repository->findOneBy(['isActive' => true]);
+        $activeProvider = $this->repository->findOneBy(['isActive' => true, 'deletedAt' => null]);
 
         // If no active provider exists, reject the field value with a validation message
         if (!$activeProvider) {
