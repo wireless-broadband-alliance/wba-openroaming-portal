@@ -23,36 +23,57 @@
 
     {# TODO: Update JS to use stimulus instead of native JS (file: statistics_controller.js) #}
     {# Charts #}
-    <div class="grid gap-8 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3" {{ stimulus_controller('statistics') }}>
+    <div class="grid gap-8 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
         {# Devices #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
             <h1 class="text-lg font-medium text-left">Devices</h1>
-            <canvas class="max-w-full" id="devicesChart" data-devices
+            <canvas class="max-w-full"
+                    data-controller="statistics"
+                    data-statistics-target="chart"
+                    data-chart-type="bar"
                     data-chart-data="{{ devicesDataJson }}"></canvas>
         </div>
+
         {# Authentication #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
             <h1 class="text-lg font-medium text-left">Authentication</h1>
-            <canvas class="max-w-full" id="authenticationChart" data-authentication
+            <canvas class="max-w-full"
+                    data-controller="statistics"
+                    data-statistics-target="chart"
+                    data-chart-type="bar"
                     data-chart-data="{{ authenticationDataJson }}"></canvas>
         </div>
+
         {# SMS & Email #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
             <h1 class="text-lg font-medium text-left">Portal with SMS or Email</h1>
-            <canvas class="max-w-full" id="SMSEmailChart" data-SMSEmail
+            <canvas class="max-w-full"
+                    data-controller="statistics"
+                    data-statistics-target="chart"
+                    data-chart-type="bar"
                     data-chart-data="{{ SMSEmailDataJson }}"></canvas>
         </div>
+
         {# Platform Status #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
             <h1 class="text-lg font-medium text-left">User created in</h1>
-            <canvas class="max-w-full" id="platformStatusChart" data-platformStatus
-                    data-chart-data="{{ platformStatusDataJson }}"></canvas>
+            <canvas class="max-w-full"
+                    data-controller="statistics"
+                    data-statistics-target="chart"
+                    data-chart-type="bar" {# Change horizontalBar to bar #}
+                    data-chart-data="{{ platformStatusDataJson }}"
+                    data-index-axis="y"></canvas> {# Add this to flag indexAxis = y #}
         </div>
+
         {# Users Management #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
             <h1 class="text-lg font-medium text-left">Users Management</h1>
-            <canvas class="max-w-full" id="userVerifiedChart" data-userVerified
-                    data-chart-data="{{ usersVerifiedDataJson }}"></canvas>
+            <canvas class="max-w-full"
+                    data-controller="statistics"
+                    data-statistics-target="chart"
+                    data-chart-type="bar" {# Change horizontalBar to bar #}
+                    data-chart-data="{{ usersVerifiedDataJson }}"
+                    data-index-axis="y"></canvas>
         </div>
     </div>
 {% endblock %}

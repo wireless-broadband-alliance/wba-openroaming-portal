@@ -1,128 +1,64 @@
-import { Controller } from "@hotwired/stimulus";
-import { Chart } from "chart.js";
+import {Controller} from "@hotwired/stimulus";
+import {Chart} from "chart.js";
 
 export default class extends Controller {
+    static targets = ["chart"];
+
+    /**
+     * Called when the controller connects to the DOM.
+     * Automatically initializes the chart for the connected canvas element.
+     */
     connect() {
-        document.addEventListener("DOMContentLoaded", () => {
-            // Get the chart elements for devices and authentication
-            const devicesChartElement = document.getElementById("devicesChart");
-            const authenticationChartElement = document.getElementById("authenticationChart");
-            const platformStatusChartElement = document.getElementById("platformStatusChart");
-            const userVerifiedChartElement = document.getElementById("userVerifiedChart");
-            const SMSEmailChartElement = document.getElementById("SMSEmailChart");
+        const target = this.chartTarget;
+        if (!target) return console.error("Chart target not found!");
 
-            if (
-                devicesChartElement &&
-                authenticationChartElement &&
-                platformStatusChartElement &&
-                userVerifiedChartElement
-            ) {
-                // Get the chart data from the data attributes on the elements
-                const devicesData = JSON.parse(devicesChartElement.getAttribute("data-chart-data"));
-                const authenticationData = JSON.parse(authenticationChartElement.getAttribute("data-chart-data"));
-                const platformStatusData = JSON.parse(platformStatusChartElement.getAttribute("data-chart-data"));
-                const userVerifiedData = JSON.parse(userVerifiedChartElement.getAttribute("data-chart-data"));
-                const SMSEmailChartData = JSON.parse(SMSEmailChartElement.getAttribute("data-chart-data"));
+        const chartData = target.dataset.chartData;
+        const chartType = target.dataset.chartType || "bar";  // Default to type "bar" if not specified
 
-                // Create the Chart.js charts with the fetched data for devices and authentication
-                const devicesChart = new Chart(devicesChartElement, {
-                    type: "bar",
-                    data: devicesData,
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false, // Hide the legend (labels at the top)
-                            },
-                        },
-                        scales: {
-                            y: {
-                                ticks: {
-                                    precision: 0,
-                                },
-                            },
+        // Initialize the chart
+        this.initChart(target, chartData, chartType);
+    }
+
+    /**
+     * Initializes a Chart.js chart with the given configuration.
+     * @param {HTMLElement} target - The canvas element
+     * @param {String} data - The chart data in JSON format
+     * @param {String} chartType - The chart type (e.g., "bar", "line")
+     */
+    initChart(target, data, chartType) {
+        console.log(`Initializing chart of type "${chartType}" for:`, target);
+
+        const parsedData = JSON.parse(data);
+
+        // Default chart options
+        const chartOptions = {
+            type: chartType, // Chart type (e.g., "bar")
+            data: parsedData,
+            options: {
+                plugins: {
+                    legend: {
+                        display: false, // Hide the legend (labels at the top)
+                    },
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            precision: 0,
                         },
                     },
-                });
+                },
+            },
+        };
 
-                const authenticationChart = new Chart(authenticationChartElement, {
-                    type: "bar",
-                    data: authenticationData,
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false,
-                            },
-                        },
-                        scales: {
-                            y: {
-                                ticks: {
-                                    precision: 0,
-                                },
-                            },
-                        },
-                    },
-                });
+        // Dynamic handling for horizontal/vertical bar charts
+        if (target.dataset.indexAxis === "y") { // Check if indexAxis is set to y
+            chartOptions.options.indexAxis = "y"; // Set the bar chart as horizontal
+            chartOptions.options.scales = {
+                x: {ticks: {precision: 0}}, // Customize for horizontal bars
+            };
+        }
 
-                const platformStatusChart = new Chart(platformStatusChartElement, {
-                    type: "bar",
-                    data: platformStatusData,
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false,
-                            },
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    precision: 0,
-                                },
-                            },
-                        },
-                        indexAxis: "y",
-                    },
-                });
-
-                const userVerifiedChart = new Chart(userVerifiedChartElement, {
-                    type: "bar",
-                    data: userVerifiedData,
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false,
-                            },
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    precision: 0,
-                                },
-                            },
-                        },
-                        indexAxis: "y",
-                    },
-                });
-
-                const SMSEmailChart = new Chart(SMSEmailChartElement, {
-                    type: "bar",
-                    data: SMSEmailChartData,
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false,
-                            },
-                        },
-                        scales: {
-                            y: {
-                                ticks: {
-                                    precision: 0,
-                                },
-                            },
-                        },
-                        indexAxis: "x",
-                    },
-                });
-            }
-        });
+        // Create the chart
+        new Chart(target, chartOptions);
     }
 }
