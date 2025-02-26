@@ -44,9 +44,13 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
                 <h1 style="color: red;">⚠️ Development Mode Detected ⚠️</h1>
                 <p><strong>Running Symfony in development mode on this domain is unsafe.</strong></p>
                 <p>To ensure security, development mode is only allowed on local environments.</p>
-                <p>If you are a developer, please use your local environment (e.g., <strong>127.0.0.1</strong>), as this message will not appear there.</p>
-                <p>If you are <bold>NOT</bold> a developer, you made a massive security mistake while setting up the platform, this error is here preventing any further damage</p>
-                <p style="color: red;"><bold>IF THIS URL IS ACCESSIBLE TO ANY NETWORK (WAN OR LAN) ASSUME THIS ENVIRONMENT AND ALL ITS DATA HAS BEEN COMPROMISED AND ACT ACCORDINGLY BY TRIGGERING YOUR FULL INCIDENT RESPONSE PLAN</bold></p>
+                <p>If you are a developer, please use your local environment (e.g., <strong>127.0.0.1</strong>),
+                 as this message will not appear there.</p>
+                <p>If you are <bold>NOT</bold> a developer, you made a massive security mistake while setting
+                 up the platform, this error is here preventing any further damage</p>
+                <p style="color: red;"><bold>IF THIS URL IS ACCESSIBLE TO ANY NETWORK (WAN OR LAN) ASSUME
+                 THIS ENVIRONMENT AND ALL ITS DATA HAS BEEN COMPROMISED AND ACT ACCORDINGLY BY TRIGGERING YOUR FULL
+                  INCIDENT RESPONSE PLAN</bold></p>
             HTML;
 
             $response = new Response($message, Response::HTTP_FORBIDDEN);
@@ -70,4 +74,5 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
         }
         return false;
     }
+
 }
