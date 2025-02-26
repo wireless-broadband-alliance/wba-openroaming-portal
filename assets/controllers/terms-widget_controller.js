@@ -1,4 +1,4 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["agreeTerms", "confirmationModal", "button"];
@@ -63,7 +63,6 @@ export default class extends Controller {
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
         for (let button of this.buttonTargets) {
-
             // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
 

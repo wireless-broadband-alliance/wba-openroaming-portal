@@ -1,4 +1,4 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["banner", "modalCookie", "consentForm"];
@@ -22,7 +22,6 @@ export default class extends Controller {
         if (hasAcceptedCookies || hasSavedPreferences) {
             this.hideBanner();
         }
-
     }
 
     showBanner() {
@@ -49,7 +48,6 @@ export default class extends Controller {
     }
 
     rejectCookies() {
-
         this.clearAllCookies();
 
         this.closeModal();
