@@ -1,4 +1,4 @@
-import { Controller } from "@hotwired/stimulus";
+import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["button", "input"];
@@ -6,8 +6,6 @@ export default class extends Controller {
     initial_values = [];
 
     connect() {
-        const button = this.buttonTarget;
-
         // Store the initial values each input
         for (let i of this.inputTargets) {
             this.initial_values[i.id] = i.value;
