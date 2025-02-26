@@ -1,5 +1,5 @@
-import {Controller} from "@hotwired/stimulus";
-import {Chart} from "chart.js";
+import { Controller } from "@hotwired/stimulus";
+import { Chart } from "chart.js";
 
 export default class extends Controller {
     static targets = ["chart"];
@@ -10,7 +10,7 @@ export default class extends Controller {
 
         // Determine the action from dataset (optional dynamic)
         const chartData = target.dataset.chartData;
-        const chartType = target.id;  // Chart type (example: "authAttemptsChart")
+        const chartType = target.id; // Chart type (example: "authAttemptsChart")
 
         // Initialize the chart
         this.initChart(target, chartData, chartType);

@@ -1,5 +1,5 @@
-import {Controller} from "@hotwired/stimulus";
-import {Chart} from "chart.js";
+import { Controller } from "@hotwired/stimulus";
+import { Chart } from "chart.js";
 
 export default class extends Controller {
     static targets = ["chart"];
@@ -13,7 +13,7 @@ export default class extends Controller {
         if (!target) return console.error("Chart target not found!");
 
         const chartData = target.dataset.chartData;
-        const chartType = target.dataset.chartType || "bar";  // Default to type "bar" if not specified
+        const chartType = target.dataset.chartType || "bar"; // Default to type "bar" if not specified
 
         // Initialize the chart
         this.initChart(target, chartData, chartType);
@@ -51,10 +51,11 @@ export default class extends Controller {
         };
 
         // Dynamic handling for horizontal/vertical bar charts
-        if (target.dataset.indexAxis === "y") { // Check if indexAxis is set to y
+        if (target.dataset.indexAxis === "y") {
+            // Check if indexAxis is set to y
             chartOptions.options.indexAxis = "y"; // Set the bar chart as horizontal
             chartOptions.options.scales = {
-                x: {ticks: {precision: 0}}, // Customize for horizontal bars
+                x: { ticks: { precision: 0 } }, // Customize for horizontal bars
             };
         }
 
