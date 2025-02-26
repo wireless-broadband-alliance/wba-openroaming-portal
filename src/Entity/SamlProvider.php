@@ -19,20 +19,20 @@ class SamlProvider
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $idpEntityId = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $idpEntityId;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $idpSsoUrl = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $idpSsoUrl;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $idpX509Cert = null;
+    #[ORM\Column(type: Types::TEXT, nullable: false)]
+    private string $idpX509Cert;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $spEntityId = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $spEntityId;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $spAcsUrl = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $spAcsUrl;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isActive;
