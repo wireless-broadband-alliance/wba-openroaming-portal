@@ -2,10 +2,10 @@
 
 namespace App\Enum;
 
-enum UserTwoFactorAuthenticationStatus: string
+enum UserTwoFactorAuthenticationStatus: int
 {
-    case DISABLED = 'DISABLED';
-    case APP = 'APP';
-    case SMS = 'SMS';
-    case EMAIL = 'EMAIL';
+    case DISABLED = 0;
+    case APP = 1;
+    case SMS = 2;
+    case EMAIL = 3;
 }
