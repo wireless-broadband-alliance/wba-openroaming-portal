@@ -73,4 +73,4 @@ pgp_public_key/*
 .git/hooks/pre-commit
 ###> script for pipelines before commits ###
 
-docs/geoLiteDB/GeoLite2-City.mmdb
+geoLiteDB/GeoLite2-City.mmdb
