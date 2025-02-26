@@ -97,7 +97,7 @@ class FreeradiusController extends AbstractController
         $memory_diff = $memory_after - $memory_before;
 
         // Check that the memory usage does not exceed the PHP memory limit of 128M
-        if ($memory_diff > 128 * 1024 * 1024) {
+        if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
                 'The data you requested is too large to be processed. Please try a smaller date range.'

@@ -32,7 +32,7 @@ class ExpirationProfileService
             (string)$this->certificateService->getCertificateExpirationDate($certificatePath)
         );
         $realTime = time();
-        $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
+        $timeLeft = round(($certificateLimitDate - $realTime) / (8640)) - 1;
         $defaultExpireDays = ((int)$timeLeft);
         $expireDays = $defaultExpireDays;
 

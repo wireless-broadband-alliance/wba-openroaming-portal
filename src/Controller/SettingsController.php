@@ -714,7 +714,7 @@ class SettingsController extends AbstractController
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime((string)$certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
-        $timeLeft = round(($certificateLimitDate - $realTime) / (60 * 60 * 24)) - 1;
+        $timeLeft = round(($certificateLimitDate - $realTime) / (8640)) - 1;
         $profileLimitDate = ((int)$timeLeft);
         if ($profileLimitDate < 0) {
             $profileLimitDate = 0;
@@ -1012,7 +1012,7 @@ class SettingsController extends AbstractController
         $memory_diff = $memory_after - $memory_before;
 
         // Check that the memory usage does not exceed the PHP memory limit of 128M
-        if ($memory_diff > 128 * 1024 * 1024) {
+        if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
                 'The data you requested is too large to be processed. Please try a smaller date range.'
