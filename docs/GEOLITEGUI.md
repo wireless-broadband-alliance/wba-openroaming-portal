@@ -64,8 +64,7 @@ This method allows you to automate the download process from the command line.
 
 ## 5. Use the MMDB File
 
-- Place the `GeoLite2-City.mmdb` file in the designated directory, specifically at **docs/geoLiteDB/GeoLite2-City.mmdb
-  **.
+- Place the `GeoLite2-City.mmdb` file in the designated directory, specifically at **geoLiteDB/GeoLite2-City.mmdb**.
 - Ensure portal is configured to correctly reference this file path for accessing the database.
 - Verify the file path is accessible and readable by your portal to prevent potential runtime issues.
 
@@ -77,7 +76,7 @@ After placing the `GeoLite2-City.mmdb` file in the specified directory, ensure t
 to avoid access issues. Use the following permissions as a reference:
 
 ```bash
-root@your-system:/var/www/openroaming/docs/geoLiteDB# ls -la
+root@your-system:/var/www/openroaming/geoLiteDB# ls -la
 total 57464
 drwxrwxr-x 2 root root     4096 Feb 18 11:48 .
 drwxr-xr-x 4 root root     4096 Feb 18 12:08 ..
@@ -95,8 +94,8 @@ drwxr-xr-x 4 root root     4096 Feb 18 12:08 ..
 To apply these permissions, you can run:
 
 ```bash
-chmod 775 /var/www/openroaming/docs/geoLiteDB
-chmod 664 /var/www/openroaming/docs/geoLiteDB/GeoLite2-City.mmdb
+chmod 775 /var/www/openroaming/geoLiteDB
+chmod 664 /var/www/openroaming/geoLiteDB/GeoLite2-City.mmdb
 ```
 
 Ensure the file and directory ownership matches your system's requirements, typically the user running the web server.
