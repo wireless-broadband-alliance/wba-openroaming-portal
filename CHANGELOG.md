@@ -140,7 +140,7 @@ To use this command, run the following code in the root folder of the project:
 php bin/console reset:allocate-providers
 ```
 
-- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](INSTALATION.md), it's
+- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](docs/INSTALATION.md), it's
   required to back up the user data for legal purposes)
 - Forgot password for user's - landing page implementation (widget for user on the landing page after login)
 - CloudFlare TurnStile Implementation - Landing page
