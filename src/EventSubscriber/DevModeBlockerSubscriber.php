@@ -63,10 +63,10 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
         foreach ($this->approvedDomains as $pattern) {
             // Convert wildcard patterns to regex
             $regex = '/^' . str_replace(
-                    ['.', '*'],
-                    ['\.', '.*'],
-                    $pattern
-                ) . '$/';
+                ['.', '*'],
+                ['\.', '.*'],
+                $pattern
+            ) . '$/';
 
             if (preg_match($regex, $host)) {
                 return true;
