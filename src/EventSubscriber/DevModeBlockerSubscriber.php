@@ -74,5 +74,4 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
         }
         return false;
     }
-
 }
