@@ -107,10 +107,6 @@ class SiteController extends AbstractController
         $session = $request->getSession();
         $sessionAdmin = $session->get('session_admin');
         if ($sessionAdmin) {
-            $this->addFlash(
-                'error',
-                'You cannot access this page with admin login'
-            );
             return $this->redirectToRoute('saml_logout');
         }
         if (

@@ -49,10 +49,9 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginFormType::class, $user_sigin);
         $form->handleRequest($request);
         $user = $this->getUser();
-
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
-            if ($this->isGranted('ROLE_ADMIN')) {
+            if ($this->isGranted('ROLE_ADMIN') && $type === 'admin') {
                 $session = $request->getSession();
                 $session->set('session_admin', true);
                 return $this->redirectToRoute('admin_page');
