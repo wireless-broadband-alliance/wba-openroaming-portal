@@ -19,14 +19,14 @@
 
             <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                 <div class="relative w-full">
-                    {{ form_label(form.firstName, 'First Name', {'label_attr': { 'class': "form-label"}}) }}
-                    {{ form_widget(form.firstName, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                    {{ form_label(form.firstName, 'First Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                     {{ form_errors(form.firstName) }}
                 </div>
 
                 <div class="relative w-full">
-                    {{ form_label(form.lastName, 'Last Name', {'label_attr': { 'class': "form-label"}}) }}
-                    {{ form_widget(form.lastName, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                    {{ form_label(form.lastName, 'Last Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                     {{ form_errors(form.lastName) }}
                 </div>
             </div>
@@ -54,8 +54,8 @@
             <div class="flex flex-col gap-x-6 gap-y-8">
                 <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                     <div class="relative w-full">
-                        {{ form_label(formPassword.password, 'Current Password', {'label_attr': { 'class': "form-label"}}) }}
-                        {{ form_widget(formPassword.password, {'attr': {'class': 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                        {{ form_label(formPassword.password, 'Current Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                         {{ form_errors(formPassword.password) }}
                     </div>
 
@@ -64,21 +64,21 @@
 
                 <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                     <div class="relative w-full">
-                        {{ form_label(formPassword.newPassword, 'New Password', {'label_attr': { 'class': "form-label"}}) }}
-                        {{ form_widget(formPassword.newPassword, {'attr': { 'class': 'form-widget', 'minlength': 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed' }}) }}
+                        {{ form_label(formPassword.newPassword, 'New Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                         {{ form_errors(formPassword.newPassword) }}
                     </div>
 
                     <div class="relative w-full">
-                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {'label_attr': { 'class': "form-label"}}) }}
-                        {{ form_widget(formPassword.confirmPassword, {'attr': { 'class': 'form-widget', 'minlength': 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'  }}) }}
+                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                         {{ form_errors(formPassword.confirmPassword) }}
                     </div>
                 </div>
             </div>
 
             {# Turnstile Checker #}
-            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
                 <div class="ml-3 mt-5">
                     {{ form_widget(formPassword.security) }}
                 </div>
@@ -96,21 +96,99 @@
 
     {# divider #}
     <div class="divider my-8"></div>
-
     <div>
+        <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+        {# When the app status is NOT_ENFORCED #}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+            {% if (user.twoFAtype == null) %}
+                <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+            {% endif %}
+        {% endif %}
+        {# When the app status is ENFORCED_FOR_LOCAL #}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+            {# Local users #}
+            {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT')) %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                {% endif %}
+                {# Local users #}
+            {% else %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                    <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[180px] btn-primary">Enable </a>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                    <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+                {% endif %}
+                {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                    <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                    <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+                    <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        {# When the app status is ENFORCED_FOR_ALL #}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                <p class="text-lg"> Click  <a href="{{ path('app_otpCodes') }}" class="text-green-500 underline" >here</a> to generate new OTP codes</p>
+                <p class="text-lg"> Click  <a href="{{ path('app_enable2FA_app') }}" class="text-green-500 underline" >here</a> to change for Authentication App</p>
+            {% endif %}
+        {% endif %}
+    </div>
+    {# divider #}
+    <div class="divider my-8"></div>
+
+    <div {{ stimulus_controller('alert') }}>
         <form method="POST"
               action="{{ path('app_site_account_user') }}"
-              data-controller="alert-revoke-profiles"
-              data-alert-revoke-profiles-target="form">
+              data-controller="alert"
+              data-alert-target="form">
             <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
 
             {{ form_start(formRevokeProfiles) }}
             {{ form_errors(formRevokeProfiles) }}
 
             <button class="mt-6 w-[240px] btn-logout"
-                    data-action="alert-revoke-profiles#revoke_profiles"
-                    data-alert-revoke-profiles-target="button"
-                    data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}{{ auth.providerId }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}{{ app.user.uuid }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}{{ app.user.uuid }}{% endif %}{% endfor %}{% else %}{{ app.user.uuid }}{% endif %}"
+                    data-action="alert#revoke_profiles"
+                    data-alert-target="button"
+                    data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}"
                     type="button">
                 Revoke Account Profiles
             </button>

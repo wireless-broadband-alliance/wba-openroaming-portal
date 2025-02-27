@@ -6,47 +6,46 @@
 
 {% block second_col %}
     {# Form Column #}
-    {# Toasts  #}
+    {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
         {% endfor %}
 
-        {# Flash error message  #}
+        {# Flash error message #}
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
     </div>
 
-
-    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-lg">Download and install an OpenRoaming profile tailored to your device, as part of the
             WBA OpenRoaming demo program.</p>
         <p class="mt-3">WBA’s profiles are proven to work across a broad range of devices, including iOS, Android,
             macOS, and Windows, ensuring optimal compatibility.</p>
     </div>
 
-    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO') %}
+    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO').value %}
         {% if not app.user %}
             {{ form_start(registrationFormDemo) }}
 
             {# Email #}
             <div class="relative mt-10">
-                {{ form_label(registrationFormDemo.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_label(registrationFormDemo.email, null, {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(registrationFormDemo.email, {
-                    'attr': {
-                        'class': 'form-widget',
-                        'placeholder': 'Enter your email'
-                    }
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'Enter your email',
+                    },
                 }) }}
             </div>
 
             {# Turnstile Checker #}
-            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
                 <div class="ml-3 mt-5">
                     {{ form_widget(registrationFormDemo.security) }}
                 </div>
@@ -55,12 +54,13 @@
             {# Terms Checkbox #}
             <div class="mt-[28px] flex items-center justify-start gap-2">
 
-                {{ form_widget(formTOS.agreeTerms, {'attr': {'class': 'w-5 h-5 peer relative appearance-none
+                {{ form_widget(formTOS.agreeTerms, {attr: {class: 'w-5 h-5 peer relative appearance-none
                           rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
 
                 <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                     I agree to the
-                    <a href="{{ path('app_terms_conditions') }}" target="_blank" class="underline text-primary font-semibold">
+                    <a href="{{ path('app_terms_conditions') }}" target="_blank"
+                       class="underline text-primary font-semibold">
                         terms & conditions of use
                     </a>
                     and
@@ -83,7 +83,7 @@
             <div class="my-[25px] divider"></div>
 
         {% else %}
-            {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+            {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
                 {% if not app.user.isVerified %}
                     {{ include('site/shared/_account_activation.html.twig') }}
                 {% endif %}
@@ -110,11 +110,11 @@
 
         {% endif %}
 
-        {# Profile selector  #}
+        {# Profile selector #}
         <div class="mt-10 w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] text-[#212529] text-opacity-60">
 
             <h1 class="font-xl font-bold">DEMO MODE
-                – {{ data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::NO_EMAIL') ? 'UNCONFIRMED' : 'CONFIRMED' }}
+                – {{ data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::OFF').value ? 'UNCONFIRMED' : 'CONFIRMED' }}
                 EMAIL SYSTEM</h1>
 
             <p class="font-lg">This portal if for testing purposes only and should not be used in production
@@ -128,7 +128,7 @@
                     {{ include('site/shared/_os_selection.html.twig') }}
                 </form>
             {% else %}
-                {% if data.USER_VERIFICATION.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
                     {{ include('site/shared/_account_activation.html.twig') }}
                 {% else %}
                     <form method="post" novalidate>
@@ -146,13 +146,9 @@
                         You are currently authenticated as
                         {% if userExternalAuths[user.id] is defined %}
                             {% for auth in userExternalAuths[user.id] %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}
+                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
                                     {{ auth.providerId }}
-                                {% endif %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}
-                                    {{ app.user.uuid }}
-                                {% endif %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}
+                                {% else %}
                                     {{ app.user.uuid }}
                                 {% endif %}
                             {% endfor %}
@@ -195,79 +191,20 @@
                 <p>To get started, select one of the following authentication methods:</p>
             </div>
             <div {{ stimulus_controller('terms-widget') }}>
-
-                <div class="provider-list my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
-                    {% if data.SAML_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="/saml/login" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.SAML_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.SAML_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.GOOGLE_LOGIN_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="{{ path('connect_google') }}" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.GOOGLE_LOGIN_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.EMAIL_REGISTER_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="{{ path('app_register') }}" data-action="terms-widget#showModal" >
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.REGISTER_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.REGISTER_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                        <div class="provider-btn">
-                            <a href="{{ path('app_register_sms') }}" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full btn-primary btn-disabled">
-                                    {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if data.LOGIN_TRADITIONAL_ENABLED.value %}
-                        <div class="provider-btn w-full">
-                            <a href="{{ path('app_login') }}" data-action="terms-widget#showModal">
-                                <button {{ stimulus_target('terms-widget', 'button') }} type="submit"
-                                                                                        class="w-full h-[50px] btn-secondary btn-secondary-disabled">
-                                    {{ data.LOGIN_TRADITIONAL_LABEL.value }}
-                                </button>
-                            </a>
-                            <p class="text-xs mt-[8px]">{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
-                        </div>
-                    {% endif %}
+                <div class="my-8 grid gap-4">
+                    {{ include('site/shared/_providers_login.html.twig') }}
                 </div>
 
-                {#  Terms and Conditions Check Box #}
+                {# Terms and Conditions Check Box #}
                 {{ form_start(formTOS) }}
                 <div class="mt-[28px] flex items-center justify-start gap-2">
                     {{ form_widget(formTOS.agreeTerms, {
-                        'attr': {
-                            'class': 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary',
-                            'id': 'agreeTermsCheckbox',
+                        attr: {
+                            class: 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary',
+                            id: 'agreeTermsCheckbox',
                             'data-action': 'terms-widget#handleCheckboxChange',
-                            'data-terms-widget-target': 'agreeTerms'
-                        }
+                            'data-terms-widget-target': 'agreeTerms',
+                        },
                     }) }}
                     <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                         I agree to the
@@ -280,13 +217,14 @@
                 </div>
                 {{ form_end(formTOS) }}
 
-                {# Confirmation Terms Modal  #}
+                {# Confirmation Terms Modal #}
                 <div class="z-20 modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
                      data-terms-widget-target="confirmationModal" id="confirmationTermsModal">
                     <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
                         <p class="text-sm">You need to confirm the terms before proceeding.</p>
                         <div class="mt-4 flex justify-center">
-                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close</button>
+                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close
+                            </button>
                         </div>
                     </div>
                 </div>

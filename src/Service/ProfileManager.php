@@ -11,18 +11,12 @@ use App\Repository\UserRepository;
 
 class ProfileManager
 {
-    private UserRadiusProfileRepository $userRadiusProfile;
-    private RadiusUserRepository $radiusUserRepository;
-    private UserRepository $userRepository;
-
     public function __construct(
-        UserRadiusProfileRepository $userRadiusProfile,
-        RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository
+        private readonly UserRadiusProfileRepository $userRadiusProfile,
+        private readonly RadiusUserRepository $radiusUserRepository,
+        private readonly UserRepository $userRepository,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository
     ) {
-        $this->userRadiusProfile = $userRadiusProfile;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userRepository = $userRepository;
     }
 
     private function updateProfiles(User $user, callable $updateCallback): void
@@ -36,19 +30,26 @@ class ProfileManager
         }
     }
 
-    public function disableProfiles(User $user, ?bool $skipDisableAccount = null): bool
+    public function disableProfiles(User $user, string $revokedReason, ?bool $skipDisableAccount = null): bool
     {
         if (!$skipDisableAccount && $user->isDisabled()) {
             return false;
         }
+
         $hasActiveProfiles = false;
-        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles) {
-            if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE) {
+
+        // Pass $revokedReason into the closure
+        $this->updateProfiles($user, function ($profile) use (&$hasActiveProfiles, $revokedReason) {
+            if ($profile->getStatus() !== UserRadiusProfileStatus::ACTIVE->value) {
                 return false;
             }
 
-            $hasActiveProfiles = true; // Active profile was found
-            $profile->setStatus(UserRadiusProfileStatus::REVOKED);
+            $hasActiveProfiles = true; // Mark that there are active profiles to be revoked
+
+            // Set status to REVOKED
+            $profile->setStatus(UserRadiusProfileStatus::REVOKED->value);
+            $profile->setRevokedReason($revokedReason);
+
             $radiusUser = $this->radiusUserRepository->findOneBy(['username' => $profile->getRadiusUser()]);
             if ($radiusUser) {
                 $this->radiusUserRepository->remove($radiusUser);
@@ -73,7 +74,7 @@ class ProfileManager
         }
 
         $this->updateProfiles($user, function ($profile) {
-            if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE) {
+            if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE->value) {
                 return false;
             }
 
@@ -86,7 +87,7 @@ class ProfileManager
                 $radiusUser->setValue($profile->getRadiusToken());
                 $this->radiusUserRepository->save($radiusUser);
             }
-            $profile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $profile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $this->userRadiusProfile->save($profile);
 
             return true;
@@ -94,5 +95,13 @@ class ProfileManager
         $user->setDisabled(false);
         $this->userRepository->save($user, true);
         $this->radiusUserRepository->flush();
+    }
+
+    public function getActiveProfilesByUser(User $user): array
+    {
+        return $this->userRadiusProfileRepository->findBy([
+            'user' => $user,
+            'status' => UserRadiusProfileStatus::ACTIVE->value,
+        ]);
     }
 }

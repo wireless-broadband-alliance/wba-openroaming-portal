@@ -106,6 +106,7 @@ use Doctrine\ORM\Mapping as ORM;
                                                         'CONTACT_EMAIL' => ['type' => 'string'],
                                                         'TOS' => ['type' => 'string'],
                                                         'PRIVACY_POLICY' => ['type' => 'string'],
+                                                        'TWO_FACTOR_AUTH_STATUS' => ['type' => 'string'],
                                                     ],
                                                 ],
                                                 'auth' => [
@@ -155,6 +156,7 @@ use Doctrine\ORM\Mapping as ORM;
                                             'CONTACT_EMAIL' => 'support@example.com',
                                             'TOS' => 'LINK',
                                             'PRIVACY_POLICY' => 'LINK',
+                                            'TWO_FACTOR_AUTH_STATUS' => 'NOT_ENFORCED'
                                         ],
                                         'auth' => [
                                             'AUTH_METHOD_SAML_ENABLED' => true,

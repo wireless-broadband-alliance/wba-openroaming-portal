@@ -40,7 +40,7 @@ These are some of the most important tools used on the development of this proje
 ### Prerequisites:
 
 - Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
-- Knowledge about Linux OS (required to setup the project)
+- Knowledge about Linux OS (required to set up the project)
 - Radius DB and a stack IDP prepared to use the portal
 - Docker (required for running the application)
 - Docker compose (responsible for managing multiple containers)
@@ -53,7 +53,6 @@ There are two options to retrieve the project:
 1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains
    only the required components to run the OpenRoaming Provisioning Portal,
    including `.env.sample`, `docker-compose.yml`, and other necessary files.
-
 
 2. **Clone the Repository**: If the user is familiar with Git and want to access the complete source code, can clone the
    repository using the following command:
@@ -96,7 +95,6 @@ All the present items can be customizable:
 - **Terms and Policies**
 - **Radius Configuration**
 - **Authentication Methods**
-- **LDAP Synchronization**
 - **User Engagement**
 - **SMS Configuration**
 
@@ -130,11 +128,79 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-Follow this link for more information on API documentation: [Api Guide](APIGUI.md)
+Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
 # ⚙️ Installation Guide
 
-Follow this link for more information on installing this project: [Installation Guide](INSTALATION.md).
+Follow this link for more information on installing this
+project: [Installation Guide](docs/INSTALATION.md).
+
+## 🛑 Upgrade Stop: Important Instructions for Future Updates
+
+Certain upgrades may require additional steps or preparation to ensure a smooth and successful transition. These steps
+are vital to maintaining the integrity of your system and avoiding issues caused by breaking changes. Always adhere to
+the instructions provided for each version you are upgrading to.
+
+> **Important**: Failure to follow the required upgrade steps may result in incomplete migrations, unexpected behaviors,
+> or portal downtime.
+
+### General Upgrade Path Guidelines
+
+1. **Review the Changelog**  
+   Before starting any upgrade process, check & read the relevant release notes and on [CHANGELOG.MD](CHANGELOG.md).
+   These file outline new features, breaking changes, deprecations, and mandatory steps.
+   > **Tip**: The changelog is your most comprehensive source to discover mandatory pre-upgrade steps or new commands
+   introduced.
+
+2. **Upgrade to Required Intermediate Versions**  
+   If you are using an older version, verify your system's eligibility for a direct upgrade. Some updates require your
+   system to be upgraded to a specific intermediate version beforehand (e.g., `<intermediate_version>`). Skipping this
+   step can break the upgrade path and result in data loss or corruption.
+
+3. **Run Any Pre-Upgrade Commands**  
+   Certain versions may introduce commands that must be executed before migrating to the new version. These commands
+   can target schema changes, data migrations, or cleanup tasks that are mandatory for a successful upgrade.  
+   Example command for version `<intermediate_version>`:
+   ```bash
+   <command_placeholder>
+   ```  
+   > **Note**: Commands removed or deprecated in the target version must be executed on the intermediate version to
+   avoid migration failures or data inconsistencies.
+
+4. **Backup Your System**  
+   Always create a full backup of your system, including the database, configuration files, and user data, before
+   initiating an upgrade. This precaution ensures that you can roll back in case of unforeseen issues.
+
+5. **Proceed to the Target Version Upgrade**  
+   After completing any required intermediate upgrades or commands, you can safely upgrade to the target version (e.g.,
+   `<target_version>`). Ensure that all prior steps have been executed to avoid disruptions.
+
+---
+
+### Example: Upgrade to Version 1.7
+
+If you are planning to upgrade to **version 1.7**, follow these specific steps:
+
+1. **Upgrade to Version 1.6**  
+   If your current version is **1.5** or lower, you **must** first upgrade your system to version **1.6**. This step is
+   mandatory due to compatibility issues caused by changes in the application’s data model.
+
+2. **Run the Allocate Providers Command**  
+   After upgrading to version **1.6**, execute the following command in your terminal:
+   ```bash
+   php bin/console reset:allocate-providers
+   ```  
+   This command ensures that all deprecated fields (`googleId`, `saml_identifier`, and Allocate Providers) are handled
+   properly before proceeding.
+   > **Important**: This command was discontinued and removed in version **1.7**, so it must be executed in version *
+   *1.6** before proceeding.
+
+3. **Create a Full Backup**  
+   Prior to upgrading to version **1.7**, create a complete backup of your system, including your database,
+   configuration files, and user data, in case a rollback is needed.
+
+4. **Proceed to Version 1.7**  
+   After completing the above steps, proceed with upgrading your system to version **1.7**.
 
 # Portal Overview & Baseline Operation
 
@@ -161,7 +227,7 @@ When this mode is activated, **it's not required** to verify the user account se
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
 
-Follow this link for a portal user interface overview: [Portal Guide](PORTALGUI.md).
+Follow this link for a portal user interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ## 🔧 Environment Variables
 
@@ -244,6 +310,11 @@ link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile
 And for any **production deployment**, please follow the
 link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
 
+### 🌍 GeoLite GUI Documentation
+
+For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
+the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
+
 ### 🕷️ API Platform
 
 The following configurations are required for the API of the project.
@@ -293,73 +364,85 @@ The Same uuid may result in conflicts between different portals, resulting in pr
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
 certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
-9. `PLATFORM_MODE`: Live || Demo.
-   When demo, only "demo login" is displayed, and SAML and other login
+1. `PLATFORM_MODE`: Live || Demo.
+   When in Demo, only "demo login" is displayed, and SAML and other login
    methods are disabled regardless of other settings. A demo warning will also be displayed.
-10. `USER_VERIFICATION`: ON || OFF.
-    When it\'s ON it activates the email verification system.
-    This system requires all
-    the users to verify its own account before they download any profile.
-11. `TURNSTILE_CHECKER`: ON || OFF.
-    When it\'s ON, it activates the turnstile verification system.
-    This system requires all
-    the users to check and verify is session before creating an account.
-    To prevent bots.
+2. `USER_VERIFICATION`: ON || OFF.
+   When it\'s ON it activates the email verification system.
+   This system requires all
+   the users to verify its own account before they download any profile.
+3. `TURNSTILE_CHECKER`: ON || OFF.
+   When it\'s ON, it activates the turnstile verification system.
+   This system requires all
+   the users to check and verify is session before creating an account.
+   To prevent bots.
+4. `API_STATUS`: Defines whether the API is enabled or disabled.
 
-12. `PAGE_TITLE`: The title displayed on the webpage.
-13. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
-14. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
-15. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-16. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-17. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-18. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-19. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
-    with a google account login
-20. `CONTACT_EMAIL`: The email address for contact inquiries.
+5. `PAGE_TITLE`: The title displayed on the webpage.
+6. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
+7. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
+8. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+9. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+10. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+11. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+12. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
+    with a Google account login.
+13. `VALID_DOMAINS_MICROSOFT_LOGIN`: Defines the valid domains to authenticate with Microsoft Azure, when it's empty, he
+    lets anyone
+    with a Microsoft account login.
+14. `CONTACT_EMAIL`: The email address for contact inquiries.
 
-21. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-22. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
-23. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
-24. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
-25. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-26. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-27. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
-28. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
-29. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
-30. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
-31. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
-32. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-33. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
-34. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
-35. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
+15. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
+16. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
+17. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
+18. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
+19. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
+20. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+21. `AUTH_METHOD_MICROSOFT_LOGIN_ENABLED`: Enable or disable Google authentication method.
+22. `AUTH_METHOD_MICROSOFT_LOGIN_LABEL`: The label for Google authentication button on the login page.
+23. `AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+24. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
+25. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
+26. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
+27. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
+28. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
+29. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
+30. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
+31. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
+32. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
 
-36. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-37. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-38. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-39. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-40. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-41. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
-    The placeholder `@ID` is replaced with
-    the user's ID.
+33. `TWO_FACTOR_AUTH_STATUS`: The status of two-factor authentication when users log in to the platform.
+34. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two factor application
+35. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two factor application
+36. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
 
-42. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-43. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-44. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-45. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-46. `SMS_USERNAME`: Budget SMS Username.
-47. `SMS_USER_ID`: Budget SMS User ID.
-48. `SMS_HANDLE`: Budget SMS Handle hash.
-49. `SMS_FROM`: Entity sending the SMS for the users.
-50. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+37. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+38. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+39. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+40. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+41. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+42. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+    The placeholder `@ID` is replaced with the user's ID.
 
-51. `TOS_LINK`: Terms and Conditions URL
-52. `PRIVACY_POLICY_LINK`: Privacy and Policy URL
-53. `USER_DELETE_TIME`: Time in hours to delete the unverified user
-54. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when profile is about to expire
-55. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login
-56. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login
-57. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login
-58. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login
+43. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+44. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+45. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+46. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+47. `SMS_USERNAME`: Budget SMS Username.
+48. `SMS_USER_ID`: Budget SMS User ID.
+49. `SMS_HANDLE`: Budget SMS Handle hash.
+50. `SMS_FROM`: Entity sending the SMS for the users.
+51. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+
+52. `TOS_LINK`: Terms and Conditions URL.
+53. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+54. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+55. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+56. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+57. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+58. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+59. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+60. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

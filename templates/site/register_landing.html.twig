@@ -7,23 +7,23 @@
 {% block second_col %}
     {# Form Column #}
 
-    {# Toasts  #}
+    {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
         {% endfor %}
 
-        {# Flash warning message  #}
+        {# Flash warning message #}
         {% for message in app.session.flashbag.get('warning') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
     </div>
 
-    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Create your account</p>
         <p class="text-lg">This will enable you to access and download a profile onto your device.</p>
         <p class="text-lg">Once you download your profile you can connect automatically to OpenRoaming Wi-Fi networks
@@ -34,17 +34,17 @@
 
     {# Email #}
     <div class="relative mt-[32px]">
-        {{ form_label(registrationForm.email, null, { 'label_attr': {'class': 'form-label'} }) }}
+        {{ form_label(registrationForm.email, null, {label_attr: {class: 'form-label'}}) }}
         {{ form_widget(registrationForm.email, {
-            'attr': {
-                'class': 'form-widget',
-                'placeholder': 'Enter your email'
-            }
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your email',
+            },
         }) }}
     </div>
 
     {# Turnstile Checker #}
-    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
         <div class="ml-3 mt-5">
             {{ form_widget(registrationForm.security) }}
         </div>
@@ -57,7 +57,7 @@
         <button type="submit" class="btn-primary">
             Create Account
         </button>
-        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::DEMO') %}
+        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_landing') }}" class="btn-secondary">
                 Choose Another
             </a>

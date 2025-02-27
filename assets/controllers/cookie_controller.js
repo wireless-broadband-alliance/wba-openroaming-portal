@@ -1,11 +1,9 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["banner", "modalCookie", "consentForm"];
 
     connect() {
-        console.log("CookieController connected");
-
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
             rememberMe: false,
@@ -24,8 +22,6 @@ export default class extends Controller {
         if (hasAcceptedCookies || hasSavedPreferences) {
             this.hideBanner();
         }
-
-        console.log("Current cookie preferences: ", this.cookieScopes);
     }
 
     showBanner() {
@@ -52,8 +48,6 @@ export default class extends Controller {
     }
 
     rejectCookies() {
-        console.log("Rejecting cookies, removing existing cookies.");
-
         this.clearAllCookies();
 
         this.closeModal();

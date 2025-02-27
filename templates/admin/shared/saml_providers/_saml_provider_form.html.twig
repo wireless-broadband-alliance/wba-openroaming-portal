@@ -1,0 +1,150 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin Page WBA{% endblock %}
+
+{% block container %}
+    {# Form Title (Dynamic for "Add" or "Edit") #}
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">
+        {% if samlProvider.name is defined and samlProvider.name %}
+            {{ samlProvider.name }}
+        {% else %}
+            Add New Saml Provider
+        {% endif %}
+    </h1>
+
+    {{ form_start(formSamlProvider) }}
+    {{ form_errors(formSamlProvider) }}
+    <div class="p-6 mx-auto bg-white rounded-lg">
+        {# Provider Name #}
+        <div class="relative">
+            {{ form_label(formSamlProvider.name, 'Provider Name', {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(formSamlProvider.name, {attr: {class: 'form-widget'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(formSamlProvider.name) }}
+            </div>
+        </div>
+
+        {# Two-Column Fields Section #}
+        <div class="my-7 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {# IDP Entity ID #}
+            <div class="relative">
+                {{ form_label(formSamlProvider.idpEntityId, 'IDP Entity ID', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(formSamlProvider.idpEntityId, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(formSamlProvider.idpEntityId) }}
+                </div>
+            </div>
+
+            {# IDP SSO URL #}
+            <div class="relative">
+                {{ form_label(formSamlProvider.idpSsoUrl, 'IDP SSO URL', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(formSamlProvider.idpSsoUrl, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(formSamlProvider.idpSsoUrl) }}
+                </div>
+            </div>
+
+            {# SP Entity ID #}
+            <div class="relative">
+                {{ form_label(formSamlProvider.spEntityId, 'SP Entity ID', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(formSamlProvider.spEntityId, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(formSamlProvider.spEntityId) }}
+                </div>
+            </div>
+
+            {# SP ACS URL #}
+            <div class="relative">
+                {{ form_label(formSamlProvider.spAcsUrl, 'SP ACS URL', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(formSamlProvider.spAcsUrl, {attr: {class: 'form-widget'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(formSamlProvider.spAcsUrl) }}
+                </div>
+            </div>
+        </div>
+
+        {# IDP X509 Certificate #}
+        <div class="relative">
+            {{ form_label(formSamlProvider.idpX509Cert, 'IDP X509 Certificate', {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(formSamlProvider.idpX509Cert, {attr: {class: 'form-widget-text-area'}}) }}
+            <div class="text-red-500 m-2">
+                {{ form_errors(formSamlProvider.idpX509Cert) }}
+            </div>
+        </div>
+    </div>
+
+    {# Use LDAP Checkbox Section #}
+    <div {{ stimulus_controller('widget') }}>
+        <div class="mt-8 space-x-4 relative flex flex-row">
+            <p class="font-bold">Do you want to enable LDAP ?</p>
+            <label class="inline-flex items-center cursor-pointer">
+                {{ form_widget(formSamlProvider.isLDAPActive, {attr: {class: 'sr-only peer', 'data-action': 'change->widget#toggle'}}) }}
+                <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                {{ form_errors(formSamlProvider.isLDAPActive) }}
+            </label>
+        </div>
+
+        {# Render the LDAP Configuration Section Conditionally #}
+        {% if formSamlProvider.isLDAPActive.vars.value %}
+            <div data-widget-target="modal" class="p-6 mt-8 mx-auto bg-white rounded-lg">
+                <div class="grid gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="relative">
+                            {{ form_label(formSamlProvider.ldapServer, 'Synchronization LDAP Server', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapServer, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-red-500 m-2">
+                                {{ form_errors(formSamlProvider.ldapServer) }}
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            {{ form_label(formSamlProvider.ldapSearchBaseDn, 'Search Base Distinguished Name', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapSearchBaseDn, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-red-500 m-2">
+                                {{ form_errors(formSamlProvider.ldapSearchBaseDn) }}
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            {{ form_label(formSamlProvider.ldapSearchFilter, 'LDAP Search Filter', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapSearchFilter, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-red-500 m-2">
+                                {{ form_errors(formSamlProvider.ldapSearchFilter) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="relative">
+                            {{ form_label(formSamlProvider.ldapBindUserDn, 'Bind Distinguished Name', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapBindUserDn, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-red-500 m-2">
+                                {{ form_errors(formSamlProvider.ldapBindUserDn) }}
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            {{ form_label(formSamlProvider.ldapBindUserPassword, 'Bind Distinguished Password', {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(formSamlProvider.ldapBindUserPassword, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-gray-500 text-sm mx-2 mt-2">
+                                Leaving this field empty while editing will retain the current password saved in the
+                                portal.
+                            </div>
+                            <div class="text-red-500 m-2">
+                                {{ form_errors(formSamlProvider.ldapBindUserPassword) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {# Submit Buttons (Add/Edit Logic) #}
+    <div class="flex flex-row justify-end md:w-full mt-6">
+        <button type="submit" class="btn-primary">
+            {{ app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' ? 'Apply Changes' : 'Submit Changes' }}
+        </button>
+    </div>
+    {{ form_end(formSamlProvider) }}
+{% endblock %}

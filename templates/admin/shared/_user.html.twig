@@ -1,5 +1,5 @@
 {# Table Content #}
-<tr class="bg-white text-xs whitespace-nowrap">
+<tr>
     {# UUID #}
     <td class="px-12 py-4 font-medium">
         {{ user.uuid is defined ? user.uuid : 'No information' }}
@@ -10,7 +10,7 @@
         {% if user.email is not null %}
             {{ user.email }}
         {% else %}
-            <span class="font-semibold  p-1 pill-error">No Information</span>
+            <span class="font-semibold p-1 pill-error">No Information</span>
         {% endif %}
     </td>
 
@@ -19,7 +19,11 @@
         <p class="text-left ml-1 p-1">
             {% if userExternalAuths[user.id] is not empty %}
                 {% for auth in userExternalAuths[user.id] %}
-                    {{ auth.provider }}
+                    {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                        {{ auth.provider }} - {{ auth.samlProvider.name }}
+                    {% else %}
+                        {{ auth.provider }}
+                    {% endif %}
                     {% if not loop.last %}, {% endif %}
                 {% endfor %}
             {% else %}
@@ -33,12 +37,12 @@
         <p class="font-semibold p-1">
             {% if user.isVerified is defined and user.isVerified == 0 %}
                 <span class="pill-error">
-					Not Verified
-				</span>
+                    Not Verified
+                </span>
             {% else %}
                 <span class="pill-success">
-					Verified
-				</span>
+                    Verified
+                </span>
             {% endif %}
         </p>
     </td>
@@ -48,12 +52,12 @@
         <p class="font-semibold p-1">
             {% if user.getBannedAt %}
                 <span class="pill-error">
-					{{ user.bannedat|date('d/m/Y H:i') }}
-				</span>
+                    {{ user.bannedat|date('d/m/Y H:i') }}
+                </span>
             {% else %}
                 <span class="pill-success">
-					Not Banned
-				</span>
+                    Not Banned
+                </span>
             {% endif %}
         </p>
     </td>
@@ -77,47 +81,43 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
                 <li>
-                    <a href="{{ path('admin_update', {id : user.id}) }}"
+                    <a href="{{ path('admin_user_edit', {id: user.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
-
                         Edit
                     </a>
                 </li>
-                {% if delete_users == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
                     <li {{ stimulus_controller('alert') }}>
-                        <form action="{{ path('admin_delete', {id: user.id}) }}"
+                        <form action="{{ path('admin_user_delete', {id: user.id}) }}"
                               method="post" {{ stimulus_target('alert', 'form') }}>
                             <input type="hidden" name="_method" value="DELETE">
 
                             <a href="javascript:void(0)" data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}"
                                     {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
-                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
                                 <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
                                 Delete
                             </a>
                         </form>
                     </li>
                 {% endif %}
-                <li {{ stimulus_controller('alert-revoke-profiles') }}>
+                <li {{ stimulus_controller('alert') }}>
                     <form method="POST"
-                          action="{{ path('admin_revoke_profiles', { 'id': user.id }) }}"
-                          data-alert-revoke-profiles-target="form">
+                          action="{{ path('admin_user_revoke_profiles', {id: user.id}) }}"
+                            {{ stimulus_target('alert', 'form') }}>
                         {{ form_start(formRevokeProfiles) }}
                         {{ form_errors(formRevokeProfiles) }}
-
-                        <input type="hidden" name="_method" value="DELETE">
-
+                        <input type="hidden" name="_method" value="REVOKE">
                         <a href="javascript:void(0)"
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
-                           data-action="alert-revoke-profiles#revoke_profiles"
-                           data-alert-revoke-profiles-target="button"
-                           data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML') %}{{ auth.providerId }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::GOOGLE_ACCOUNT') %}{{ user.uuid }}{% endif %}{% if auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT') %}{{ user.uuid }}{% endif %}{% endfor %}{% else %}{{ user.uuid }}{% endif %}"
+                                {{ stimulus_action('alert', 'revoke_profiles') }}
+                                {{ stimulus_target('alert', 'button') }}
+                           data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ user.uuid }}{% endif %}{% endfor %}{% endif %}"
                         >
                             <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
                             Revoke
                         </a>
-
                         {{ form_rest(formRevokeProfiles) }}
                         {{ form_end(formRevokeProfiles) }}
                     </form>

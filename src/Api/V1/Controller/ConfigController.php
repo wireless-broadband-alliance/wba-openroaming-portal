@@ -4,12 +4,12 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Enum\TextInputType;
+use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -17,15 +17,11 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class ConfigController extends AbstractController
 {
-    private SettingRepository $settingRepository;
-    private ParameterBagInterface $parameterBag;
-
     public function __construct(
-        SettingRepository $settingRepository,
-        ParameterBagInterface $parameterBag,
+        private readonly SettingRepository $settingRepository,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly SamlProviderRepository $samlProviderRepository
     ) {
-        $this->settingRepository = $settingRepository;
-        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -34,11 +30,11 @@ class ConfigController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(): JsonResponse
     {
         $settings = $this->getSettings();
 
-        return (new BaseResponse(200, $settings))->toResponse();
+        return new BaseResponse(200, $settings)->toResponse();
     }
 
     private function getSettings(): array
@@ -50,6 +46,7 @@ class ConfigController extends AbstractController
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
             'TOS' => $this->resolveTosValue(),
             'PRIVACY_POLICY' => $this->resolveTosValue(),
+            'TWO_FACTOR_AUTH_STATUS' => $this->getSettingValueRaw('TWO_FACTOR_AUTH_STATUS'),
         ];
 
         $data['auth'] = [
@@ -70,12 +67,7 @@ class ConfigController extends AbstractController
             'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
         ];
 
-        $data['saml'] = [
-            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
-        ];
+        $data['saml'] = $this->getActiveSamlProvider();
 
         return $data;
     }
@@ -96,10 +88,10 @@ class ConfigController extends AbstractController
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];
         $falseValues = ['OFF', 'FALSE', '0', 0, false];
-        if (in_array(strtoupper($value), $trueValues, true)) {
+        if (in_array(strtoupper((string)$value), $trueValues, true)) {
             return true;
         }
-        if (in_array(strtoupper($value), $falseValues, true)) {
+        if (in_array(strtoupper((string)$value), $falseValues, true)) {
             return false;
         }
         return (bool)$value;
@@ -112,20 +104,46 @@ class ConfigController extends AbstractController
         $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
         $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
 
-        if ($tosType === TextInputType::LINK) {
+        if ($tosType === TextInputType::LINK->value) {
             return $tosLink;
         }
-        if ($tosType === TextInputType::TEXT_EDITOR) {
+        if ($tosType === TextInputType::TEXT_EDITOR->value) {
             return $this->generateUrl('app_terms_conditions', [], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
-        if ($privacyPolicyType === TextInputType::LINK) {
+        if ($privacyPolicyType === TextInputType::LINK->value) {
             return $privacyPolicyLink;
         }
-        if ($privacyPolicyType === TextInputType::TEXT_EDITOR) {
+        if ($privacyPolicyType === TextInputType::TEXT_EDITOR->value) {
             return $this->generateUrl('app_privacy_policy', [], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         return '';
+    }
+
+    public function getActiveSamlProvider(): array
+    {
+        // Find active SAML provider
+        $activeSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true]);
+
+        // Handle the case where no active provider is defined
+        if (!$activeSamlProvider) {
+            return [
+                'message' => 'No active SAML provider is defined.',
+                'SAML_IDP_ENTITY_ID' => null,
+                'SAML_IDP_SSO_URL' => null,
+                'SAML_IDP_X509_CERT' => null,
+                'SAML_SP_ENTITY_ID' => null,
+            ];
+        }
+
+        // Return the required fields
+        return [
+            'SAML_PROVIDER_NAME' => $activeSamlProvider->getName(),
+            'SAML_IDP_ENTITY_ID' => $activeSamlProvider->getIdpEntityId(),
+            'SAML_IDP_SSO_URL' => $activeSamlProvider->getIdpSsoUrl(),
+            'SAML_IDP_X509_CERT' => $activeSamlProvider->getIdpX509Cert(),
+            'SAML_SP_ENTITY_ID' => $activeSamlProvider->getSpEntityId(),
+        ];
     }
 }

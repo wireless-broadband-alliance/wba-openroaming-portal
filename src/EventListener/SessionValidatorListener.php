@@ -10,17 +10,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-final class SessionValidatorListener
+class SessionValidatorListener
 {
-    private TokenStorageInterface $tokenStorage;
-    private RouterInterface $router;
-
     public function __construct(
-        TokenStorageInterface $tokenStorage,
-        RouterInterface $router
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly RouterInterface $router
     ) {
-        $this->tokenStorage = $tokenStorage;
-        $this->router = $router;
     }
 
     #[AsEventListener(event: KernelEvents::REQUEST)]

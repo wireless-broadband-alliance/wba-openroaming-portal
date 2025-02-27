@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="flex justify-center">
-                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
                         <img class="w-[170px] h-[58px] object-scale-down object-right my-4"
                              src="{{ data.customerLogoName.value }}" alt="Logo"/>
                     {% endif %}
@@ -350,7 +350,7 @@
         <span class="text-sm text-[#707070]">Manage Cookies</span>
         <button id="modalManageCookies" type="button" data-action="cookie#showModal"
                 class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-            <twig:ux:icon name="material-symbols:cookie"/>
+            <twig:ux:icon name="wba:cookie"/>
         </button>
     </div>
 </div>

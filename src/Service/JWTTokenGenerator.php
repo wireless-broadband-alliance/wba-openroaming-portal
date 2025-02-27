@@ -12,24 +12,17 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class JWTTokenGenerator
 {
-    private JWTTokenManagerInterface $jwtManager;
-    private JWTEncoderInterface $JWTEncoder;
-    private UserRepository $userRepository;
-
     public function __construct(
-        JWTTokenManagerInterface $jwtManager,
-        JWTEncoderInterface $JWTEncoder,
-        UserRepository $userRepository
+        private readonly JWTTokenManagerInterface $jwtManager,
+        private readonly JWTEncoderInterface $JWTEncoder,
+        private readonly UserRepository $userRepository
     ) {
-        $this->jwtManager = $jwtManager;
-        $this->JWTEncoder = $JWTEncoder;
-        $this->userRepository = $userRepository;
     }
 
     public function generateToken(UserInterface $user): string
     {
         if (!$user instanceof User) {
-            return (new BaseResponse(400, null, 'Expected an instance of App\Entity\User'))->toResponse();
+            return new BaseResponse(400, null, 'Expected an instance of App\Entity\User')->toResponse();
         }
 
         $customPayload = [
@@ -62,7 +55,7 @@ class JWTTokenGenerator
 
             $currentPasswordHash = $user->getPassword();
             return $currentPasswordHash === $tokenPassworHash;
-        } catch (JWTDecodeFailureException $e) {
+        } catch (JWTDecodeFailureException) {
             return false;
         }
     }

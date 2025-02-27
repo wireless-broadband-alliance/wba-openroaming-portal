@@ -6,22 +6,17 @@ use App\Enum\ProfileType;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Range;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class RadiusType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
-    {
-        $this->getSettings = $getSettings;
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -140,8 +135,8 @@ class RadiusType extends AbstractType
                     $formFieldOptions['data'] = $setting->getValue();
                     if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
                         $formFieldOptions['choices'] = [
-                            'WPA 2' => ProfileType::WPA2,
-                            'WPA 3' => ProfileType::WPA3,
+                            'WPA 2' => ProfileType::WPA2->value,
+                            'WPA 3' => ProfileType::WPA3->value,
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                         $formFieldOptions['required'] = true;

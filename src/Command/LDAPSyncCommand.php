@@ -2,8 +2,10 @@
 
 namespace App\Command;
 
+use App\Entity\SamlProvider;
 use App\Enum\UserProvider;
-use App\Repository\SettingRepository;
+use App\Enum\UserRadiusProfileRevokeReason;
+use App\Repository\SamlProviderRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\ProfileManager;
@@ -19,21 +21,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class LDAPSyncCommand extends Command
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private ProfileManager $profileManager;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        ProfileManager $profileManager,
-        UserExternalAuthRepository $userExternalAuthRepository
+        private readonly UserRepository $userRepository,
+        private readonly ProfileManager $profileManager,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly SamlProviderRepository $samlProviderRepository,
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->profileManager = $profileManager;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
         parent::__construct();
     }
 
@@ -44,24 +37,53 @@ class LDAPSyncCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        if ($this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue() === 'false') {
-            $io->writeln('LDAP sync is disabled');
-            return Command::SUCCESS;
+        $samlProvider = $this->samlProviderRepository->findOneBy([
+            'isActive' => true,
+            'isLDAPActive' => true,
+            'deletedAt' => null
+        ]);
+
+        if (!$samlProvider) {
+            $io->writeln(
+                '<error>No active SAML Provider is currently configured. ' .
+                ' Please ensure a SAML Provider is set up and associated with an active LDAP Credential.</error>'
+            );
+            return Command::FAILURE;
         }
+
+        // Check if the SAML Provider has valid LDAP configuration
+        if (
+            !$samlProvider->getLdapServer() ||
+            !$samlProvider->getLdapBindUserDn() ||
+            !$samlProvider->getLdapBindUserPassword()
+        ) {
+            $io->writeln(
+                sprintf(
+                    '<error>No valid LDAP configuration is associated with the active SAML Provider (%s).</error>',
+                    $samlProvider->getName()
+                )
+            );
+            return Command::FAILURE;
+        }
+
+
         $ldapEnabledUsers = $this->userRepository->findLDAPEnabledUsers();
         $io->writeln('Found ' . count($ldapEnabledUsers) . ' LDAP enabled users');
         foreach ($ldapEnabledUsers as $user) {
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
             foreach ($userExternalAuths as $externalAuth) {
-                if ($externalAuth->getProvider() === UserProvider::SAML) {
+                if ($externalAuth->getProvider() === UserProvider::SAML->value) {
                     $providerId = $externalAuth->getProviderId();
                     $io->writeln('Syncing ' . $providerId . ' with LDAP');
 
-                    $ldapUser = $this->fetchUserFromLDAP($providerId);
+                    $ldapUser = $this->fetchUserFromLDAP($providerId, $samlProvider);
                     if (is_null($ldapUser)) {
                         $io->writeln('User ' . $providerId . ' not found in LDAP, disabling');
-                        $this->disableProfiles($user);
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::LDAP_UNKNOWN_USER->value
+                        );
                         continue;
                     }
 
@@ -71,10 +93,16 @@ class LDAPSyncCommand extends Command
 
                     if ($userLocked) {
                         $io->writeln('User ' . $providerId . ' is locked in LDAP, disabling');
-                        $this->disableProfiles($user);
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::LDAP_USER_LOCKED->value
+                        );
                     } elseif ($passwordExpired || $ldapUser["pwdLastSet"][0] === "0") {
                         $io->writeln('User ' . $providerId . ' has an expired password in LDAP, disabling');
-                        $this->disableProfiles($user);
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::LDAP_USER_PASSWORD_EXPIRED->value
+                        );
                     } else {
                         $io->writeln('User ' . $providerId . ' is enabled in LDAP, enabling');
                         $this->enableProfiles($user);
@@ -86,22 +114,24 @@ class LDAPSyncCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function fetchUserFromLDAP(string $identifier)
+    private function fetchUserFromLDAP(string $identifier, SamlProvider $samlProvider)
     {
-        $ldapServer = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SERVER'])->getValue();
-        $ldapUsername = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_DN'])->getValue();
-        $ldapPassword = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_PASSWORD'])->getValue();
+        $ldapServer = $samlProvider->getLdapServer();
+        $ldapUsername = $samlProvider->getLdapBindUserDn();
+        $ldapPassword = $samlProvider->getLdapBindUserPassword();
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
-        ldap_bind($ldapConnection, $ldapUsername, $ldapPassword) or die("Could not bind to LDAP server.");
+        if (!ldap_bind($ldapConnection, $ldapUsername, $ldapPassword)) {
+            die("Could not bind to LDAP server.");
+        }
         $searchFilter = str_replace(
             "@ID",
             $identifier,
-            $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue()
+            $samlProvider->getLdapSearchFilter()
         );
-        $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
+        $searchBaseDN = $samlProvider->getLdapSearchBaseDn();
         $searchResult = ldap_search(
             $ldapConnection,
             $searchBaseDN,
@@ -116,11 +146,6 @@ class LDAPSyncCommand extends Command
         $attrs = ldap_get_attributes($ldapConnection, $entry);
         ldap_unbind($ldapConnection);
         return $attrs;
-    }
-
-    private function disableProfiles($user): void
-    {
-        $this->profileManager->disableProfiles($user);
     }
 
     private function enableProfiles($user): void

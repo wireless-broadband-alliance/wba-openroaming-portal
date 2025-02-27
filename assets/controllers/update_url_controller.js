@@ -1,4 +1,4 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["select"];
@@ -19,8 +19,6 @@ export default class extends Controller {
 
             // Navigate to the new URL
             window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
-        } else {
-            console.error("Invalid value. Only integers are allowed.");
         }
     }
 

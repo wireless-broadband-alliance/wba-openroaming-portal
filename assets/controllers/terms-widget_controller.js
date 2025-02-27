@@ -4,11 +4,11 @@ export default class extends Controller {
     static targets = ["agreeTerms", "confirmationModal", "button"];
 
     connect() {
-        console.log("TermsWidgetController connected");
+        const isEEAUser = parseInt(this.element.dataset.isEeaUser, 10);
 
         // Load the saved state of the terms checkbox from localStorage, if allowed by cookies
         const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
-        if (hasCookies) {
+        if (hasCookies || isEEAUser !== 1) {
             const savedTermsState = localStorage.getItem("termsAccepted");
             if (savedTermsState !== null) {
                 this.updateTermsCheckbox(JSON.parse(savedTermsState));
@@ -23,31 +23,27 @@ export default class extends Controller {
         event.preventDefault();
         // Show the modal if the terms checkbox is not checked
         if (!this.agreeTermsTarget.checked) {
-            console.log("Terms not accepted, showing modal.");
             this.confirmationModalTarget.classList.remove("hidden");
         } else {
-            console.log("Terms already accepted, proceeding with the action.");
-            const href = event.currentTarget.getAttribute("href"); // Get href of clicked link
-            window.location.href = href;
+            // Get href of clicked link
+            window.location.href = event.currentTarget.getAttribute("href");
         }
     }
 
     handleCheckboxChange() {
         const isChecked = this.agreeTermsTarget.checked;
-        console.log(`Checkbox changed, new state: ${isChecked}`);
 
         if (isChecked) {
-            console.log("Terms accepted, hiding modal.");
             this.confirmationModalTarget.classList.add("hidden");
-
             // Save the terms state only if cookies are allowed
             const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
-            if (hasCookies) {
-                console.log("Cookies are enabled, saving terms state.");
+            const isEEAUser = parseInt(this.element.dataset.isEeaUser, 10);
+            if (hasCookies || isEEAUser !== 1) {
                 this.saveTermsState(isChecked);
-            } else {
-                console.log("Cookies not enabled, terms state will not be saved.");
             }
+        } else {
+            // Remove the saved terms state from the localStorage if the user unchecks
+            localStorage.removeItem("termsAccepted");
         }
 
         // Enable/Disable submit buttons based on the checkbox state
@@ -55,7 +51,6 @@ export default class extends Controller {
     }
 
     saveTermsState(accepted) {
-        console.log(`Saving terms state: ${accepted}`);
         localStorage.setItem("termsAccepted", accepted);
     }
 
@@ -79,7 +74,6 @@ export default class extends Controller {
     }
 
     closeConfirmationModal() {
-        console.log("Close button clicked, hiding modal.");
         this.confirmationModalTarget.classList.add("hidden");
     }
 

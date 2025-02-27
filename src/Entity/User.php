@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -862,6 +863,206 @@ use Symfony\Component\Validator\Constraints as Assert;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
+            uriTemplate: '/v1/auth/microsoft',
+            controller: AuthController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Authenticated user details and JWT token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'example' => 'user-uuid-example',
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'example' => 'john_doe@example.com',
+                                                ],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'string',
+                                                    ],
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'John',
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Doe',
+                                                ],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'Microsoft Account',
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'microsoft_id_example',
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],
+                                                'token' => [
+                                                    'type' => 'string',
+                                                    'example' => 'jwt-token-example',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid JSON format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid JSON format',
+                                        ],
+                                    ],
+                                    'missing_authorization_code' => [
+                                        'summary' => 'Missing authorization code',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                    'email_not_allowed' => [
+                                        'summary' => 'Email not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'This code is not associated with a microsoft account!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Account unverified/banned',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    500 => [
+                        'description' => 'Server error due to internal issues or Microsoft API failure',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'An error occurred.',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'Authentication_failed' => [
+                                        'success' => false,
+                                        'message' => 'Authentication Failed.',
+                                    ],
+                                    'Server_related' => [
+                                        'success' => false,
+                                        'message' => 'An error occurred: Generic server related error.',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Authenticate a user via Microsoft',
+                description: 'This endpoint authenticates a user using their Microsoft account. 
+                A valid Microsoft OAuth authorization code is required. 
+                If the user is successfully authenticated, user details and a JWT token will be returned.',
+                requestBody: new RequestBody(
+                    description: 'Microsoft authorization code required for user authentication.
+                     The request should be sent as JSON with the authorization code included in the body.',
+                    content: new \ArrayObject([
+                        'application/json' => new \ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'code' => [
+                                        'type' => 'string',
+                                        'description' => 'The Microsoft OAuth authorization code',
+                                        'example' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
+                                    ],
+                                ],
+                                'required' => ['code'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_auth_microsoft',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new Post(
             uriTemplate: '/v1/auth/local/register',
             controller: RegistrationController::class,
             openapi: new Operation(
@@ -1498,9 +1699,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    public ?string $saml_identifier = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -1514,9 +1712,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $googleId = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
@@ -1545,12 +1740,118 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?bool $isDisabled = false;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $twoFAsecret = null;
+
+    #[ORM\Column(length: 255)]
+    private int $twoFAtype = 0;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $twoFAcode = null;
+
+    #[ORM\Column]
+    private bool $twoFAcodeIsActive = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $twoFAcodeGeneratedAt = null;
+
+    /**
+     * @var Collection<int, OTPcode>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: OTPcode::class, orphanRemoval: true)]
+    private Collection $oTPcodes;
+
+
 
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
         $this->event = new ArrayCollection();
+    }
+
+    public function getTwoFAcodeIsActive(): ?bool
+    {
+        return $this->twoFAcodeIsActive;
+    }
+
+    public function setTwoFAcodeIsActive(?bool $twoFAcodeIsActive): void
+    {
+        $this->twoFAcodeIsActive = $twoFAcodeIsActive;
+    }
+
+
+
+    public function getTwoFAsecret(): ?string
+    {
+        return $this->twoFAsecret;
+    }
+
+    public function setTwoFAsecret(?string $twoFAsecret): void
+    {
+        $this->twoFAsecret = $twoFAsecret;
+    }
+
+    public function getTwoFAtype(): int
+    {
+        return $this->twoFAtype;
+    }
+
+    public function setTwoFAtype(int $twoFAtype): void
+    {
+        $this->twoFAtype = $twoFAtype;
+    }
+
+    public function getTwoFAcode(): ?string
+    {
+        return $this->twoFAcode;
+    }
+
+    public function setTwoFAcode(?string $twoFAcode): void
+    {
+        $this->twoFAcode = $twoFAcode;
+    }
+
+    public function getTwoFAcodeGeneratedAt(): ?\DateTimeInterface
+    {
+        return $this->twoFAcodeGeneratedAt;
+    }
+
+    public function setTwoFAcodeGeneratedAt(?\DateTimeInterface $twoFAcodeGeneratedAt): void
+    {
+        $this->twoFAcodeGeneratedAt = $twoFAcodeGeneratedAt;
+    }
+
+    /**
+     * @return Collection<int, OTPcode>
+     */
+    public function getOTPcodes(): Collection
+    {
+        return $this->oTPcodes;
+    }
+
+    public function addOTPcode(OTPcode $oTPcode): static
+    {
+        if (!$this->oTPcodes->contains($oTPcode)) {
+            $this->oTPcodes->add($oTPcode);
+            $oTPcode->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOTPcode(OTPcode $oTPcode): static
+    {
+        // set the owning side to null (unless already changed)
+        if (
+            $this->oTPcodes->removeElement($oTPcode) &&
+            ($this->oTPcodes->removeElement($oTPcode) &&
+                ($this->oTPcodes->removeElement($oTPcode) &&
+                    ($this->oTPcodes->removeElement($oTPcode))))
+        ) {
+            $this->oTPcodes->removeElement($oTPcode);
+        }
+        return $this;
     }
 
     public function getId(): ?int
@@ -1614,10 +1915,11 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -1655,18 +1957,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getSamlIdentifier(): ?string
-    {
-        return $this->saml_identifier;
-    }
-
-    public function setSamlIdentifier(?string $saml_identifier): self
-    {
-        $this->saml_identifier = $saml_identifier;
 
         return $this;
     }
@@ -1727,11 +2017,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
     {
-        if ($this->userRadiusProfiles->removeElement($userRadiusProfile)) {
-            // set the owning side to null (unless already changed)
-            if ($userRadiusProfile->getUser() === $this) {
-                $userRadiusProfile->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->userRadiusProfiles->removeElement($userRadiusProfile) && $userRadiusProfile->getUser() === $this) {
+            $userRadiusProfile->setUser(null);
         }
 
         return $this;
@@ -1757,11 +2045,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): self
     {
-        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
-            // set the owning side to null (unless already changed)
-            if ($userExternalAuth->getUser() === $this) {
-                $userExternalAuth->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getUser() === $this) {
+            $userExternalAuth->setUser(null);
         }
 
         return $this;
@@ -1777,11 +2063,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->verificationCode = $verificationCode;
 
         return $this;
-    }
-
-    public function getGoogleId(): ?string
-    {
-        return $this->googleId;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface
@@ -1811,7 +2092,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\PrePersist]
     public function prePresist(): void
     {
-        if ($this->createdAt === null) {
+        if (!$this->createdAt instanceof \DateTimeInterface) {
             $this->createdAt = new \DateTimeImmutable();
         }
     }
@@ -1836,11 +2117,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeEvent(Event $event): static
     {
-        if ($this->event->removeElement($event)) {
-            // set the owning side to null (unless already changed)
-            if ($event->getUser() === $this) {
-                $event->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->event->removeElement($event) && $event->getUser() === $this) {
+            $event->setUser(null);
         }
 
         return $this;
@@ -1856,18 +2135,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         if (!$this->event->contains($notification)) {
             $this->event->add($notification);
             $notification->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNotification(Notification $notification): static
-    {
-        if ($this->event->removeElement($notification)) {
-            // set the owning side to null (unless already changed)
-            if ($notification->getUser() === $this) {
-                $notification->setUser(null);
-            }
         }
 
         return $this;
@@ -1928,12 +2195,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function toApiResponse(array $additionalData = []): array
     {
         $userExternalAuths = $this->getUserExternalAuths()->map(
-            function (UserExternalAuth $userExternalAuth) {
-                return [
-                    'provider' => $userExternalAuth->getProvider(),
-                    'provider_id' => $userExternalAuth->getProviderId(),
-                ];
-            }
+            fn(UserExternalAuth $userExternalAuth) => [
+                'provider' => $userExternalAuth->getProvider(),
+                'provider_id' => $userExternalAuth->getProviderId(),
+            ]
         )->toArray();
 
         $responseData = [

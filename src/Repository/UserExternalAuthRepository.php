@@ -45,10 +45,6 @@ class UserExternalAuthRepository extends ServiceEntityRepository
      * Fetch portal users counts based on the providerId within a date range.
      *
      * @method array getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate)
-     * @param string $provider
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
-     * @return array
      */
     public function getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate): array
     {
@@ -58,12 +54,12 @@ class UserExternalAuthRepository extends ServiceEntityRepository
             ->where('uea.provider = :provider')
             ->setParameter('provider', $provider);
 
-        if ($startDate) {
+        if ($startDate instanceof DateTime) {
             $qb->andWhere('u.createdAt >= :startDate')
                 ->setParameter('startDate', $startDate);
         }
 
-        if ($endDate) {
+        if ($endDate instanceof DateTime) {
             $qb->andWhere('u.createdAt <= :endDate')
                 ->setParameter('endDate', $endDate);
         }
@@ -72,17 +68,17 @@ class UserExternalAuthRepository extends ServiceEntityRepository
 
         // Initialize counts
         $counts = [
-            UserProvider::PHONE_NUMBER => 0,
-            UserProvider::EMAIL => 0,
+            UserProvider::PHONE_NUMBER->value => 0,
+            UserProvider::EMAIL->value => 0,
         ];
 
         // Count occurrences of each providerId
         foreach ($results as $result) {
             $providerId = $result['provider_id'];
-            if ($providerId === UserProvider::EMAIL) {
-                $counts[UserProvider::EMAIL]++;
-            } elseif ($providerId === UserProvider::PHONE_NUMBER) {
-                $counts[UserProvider::PHONE_NUMBER]++;
+            if ($providerId === UserProvider::EMAIL->value) {
+                $counts[UserProvider::EMAIL->value]++;
+            } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
+                $counts[UserProvider::PHONE_NUMBER->value]++;
             }
         }
 

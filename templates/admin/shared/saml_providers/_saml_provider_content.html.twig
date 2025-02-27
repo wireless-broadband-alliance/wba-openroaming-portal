@@ -1,0 +1,155 @@
+<tr class="{% if samlProvider.isActive and not samlProvider.deletedAt %} bg-green-100 border border-green-300 rounded-lg shadow-md{% endif %}">
+    {# Name #}
+    <td class="px-10 py-4 font-medium">
+        {% if samlProvider.isActive and not samlProvider.deletedAt %}
+            <span class="font-bold text-green-800">[Active]</span>
+        {% endif %}
+        {{ samlProvider.name }}
+    </td>
+
+    {# IDP Entity ID #}
+    <td class="px-4 py-4 font-medium">
+        <div class="relative overflow-hidden max-w-[200px] flex items-center">
+            <p class="urls-table" title="{{ samlProvider.idpEntityId }}">
+                {{ samlProvider.idpEntityId }}
+            </p>
+            <button data-id="{{ samlProvider.idpEntityId }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
+                <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
+            </button>
+        </div>
+    </td>
+
+    {# IDP SSO URL #}
+    <td class="px-4 py-4 font-medium">
+        <div class="relative overflow-hidden max-w-[200px] flex items-center">
+            <p class="urls-table" title="{{ samlProvider.idpSsoUrl }}">
+                {{ samlProvider.idpSsoUrl }}
+            </p>
+            <button data-id="{{ samlProvider.idpSsoUrl }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
+                <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
+            </button>
+        </div>
+    </td>
+
+    {# SP Entity ID #}
+    <td class="px-4 py-4 font-medium">
+        <div class="relative overflow-hidden max-w-[200px] flex items-center">
+            <p class="urls-table" title="{{ samlProvider.spEntityId }}">
+                {{ samlProvider.spEntityId }}
+            </p>
+            <button data-id="{{ samlProvider.spEntityId }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
+                <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
+            </button>
+        </div>
+    </td>
+
+    {# SP ACS URL #}
+    <td class="px-4 py-4 font-medium">
+        <div class="relative overflow-hidden max-w-[200px] flex items-center">
+            <p class="urls-table" title="{{ samlProvider.spAcsUrl }}">
+                {{ samlProvider.spAcsUrl }}
+            </p>
+            <button data-id="{{ samlProvider.spAcsUrl }}" {{ stimulus_action('copy_url', 'copy') }}
+                    class="relative ml-2">
+                <twig:ux:icon name="wba:copy-bold" class="w-5 h-5 md:w-4 md:h-4" fill="none"/>
+            </button>
+        </div>
+    </td>
+
+    {# Created At #}
+    <td class="py-4 font-medium text-start" title="{{ samlProvider.createdAt|date('d/m/Y H:i') }}">
+        {{ samlProvider.createdAt|date('d/m/Y') }}
+    </td>
+
+    {# Updated At #}
+    <td class="py-4 font-medium text-start" title="{{ samlProvider.updatedAt|date('d/m/Y H:i') }}">
+        {% if samlProvider.updatedAt == samlProvider.createdAt %}
+            <span class="pill-error">Never Updated</span>
+        {% else %}
+            {{ samlProvider.updatedAt|date('d/m/Y') }}
+        {% endif %}
+    </td>
+
+    {# Actions Dropdown #}
+    <td class="px-10 py-4 text-right align-middle" {{ stimulus_controller('nav-submenu') }}>
+        <button type="button"
+                class="cursor-pointer p-2 rounded-lg
+                        {% if samlProvider.isActive %}
+                            bg-green-200
+                        {% endif %}
+                        cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                {{ stimulus_target('nav-submenu', 'button') }}>
+            <twig:ux:icon name="wba:menu-dots" class="w-5 h-5"/>
+        </button>
+
+        {# Items List Dropdown #}
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                {{ stimulus_target('nav-submenu', 'container') }}>
+            <ul class="p-2 text-gray-700 gap-y-2">
+                <li {{ stimulus_controller('alert') }}>
+                    <a href="{{ path('admin_dashboard_saml_provider_edit', {id: samlProvider.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
+                        Edit
+                    </a>
+                </li>
+                <li {{ stimulus_controller('alert') }}>
+                    <form action="{{ path('admin_dashboard_saml_provider_revoke', {id: samlProvider.id}) }}"
+                            {{ stimulus_target('alert', 'form') }} method="POST">
+                        <input type="hidden" name="_method" value="REVOKE">
+                        <a href="javascript:void(0)"
+                           data-provider-id="{{ samlProvider.id }}"
+                           data-provider-name="{{ samlProvider.name }}"
+                                {{ stimulus_action('alert', 'revoke_saml') }}
+                                {{ stimulus_target('alert', 'button') }}
+                           class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
+                            <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
+                            Revoke Profiles
+                        </a>
+                    </form>
+                </li>
+                <li {{ stimulus_controller('alert') }}>
+                    <form action="{{ path('admin_dashboard_saml_provider_delete', {id: samlProvider.id}) }}"
+                            {{ stimulus_target('alert', 'form') }} method="POST">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <a href="javascript:void(0)"
+                           data-provider-id="{{ samlProvider.id }}"
+                           data-provider-name="{{ samlProvider.name }}"
+                                {{ stimulus_action('alert', 'delete_saml') }}
+                                {{ stimulus_target('alert', 'button') }}
+                           class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400">
+                            <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                            Delete
+                        </a>
+                    </form>
+                </li>
+                <li {{ stimulus_controller('alert') }}>
+                    {% if samlProvider.isActive %}
+                        <span class="flex flex-row items-center px-2 py-2 text-gray-500 cursor-default">
+                            <twig:ux:icon name="wba:check-circle" class="w-5 mr-3" fill="none"/>
+                            Provider Currently Activated
+                        </span>
+                    {% else %}
+                        <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
+                                {{ stimulus_target('alert', 'form') }} method="post">
+                            <input type="hidden" name="_method" value="ENABLE">
+                            <a href="javascript:void(0)"
+                               data-provider-id="{{ samlProvider.id }}"
+                               data-provider-name="{{ samlProvider.name }}"
+                                    {{ stimulus_action('alert', 'enable_saml') }}
+                                    {{ stimulus_target('alert', 'button') }}
+                               class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-lightGreen">
+                                <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
+                                Enable
+                            </a>
+                        </form>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>

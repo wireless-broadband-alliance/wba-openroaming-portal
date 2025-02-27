@@ -13,11 +13,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class TermsType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
-    {
-        $this->getSettings = $getSettings;
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

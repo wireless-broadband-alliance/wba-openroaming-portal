@@ -1,15 +1,24 @@
-{# Header - Title - left conner  #}
+{# Header - Title - left conner #}
 <div class="flex flex-row items-center -pl-2">
     {% if app.request.attributes.get('_route') == 'admin_page' %}
         <twig:ux:icon name="wba:user" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Users Management</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
         <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">Page Style</h1>
+        <h1 class="text-2xl font-semibold p-5">Landing Page Configuration</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_new' %}
+        <twig:ux:icon name="wba:layout-grid-add" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Add New Saml Provider</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider_edit' %}
+        <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Edit Saml Provider</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_saml_provider' %}
+        <twig:ux:icon name="wba:list" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Identity Provider - Saml</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
         <twig:ux:icon name="wba:cog" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Reset Password</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_update' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_user_update' %}
         <twig:ux:icon name="wba:user-circle" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Account Settings</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
@@ -17,10 +26,13 @@
         <h1 class="text-2xl font-semibold p-5">Terms and Policies</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
         <twig:ux:icon name="wba:file-space" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">Radius Configuration</h1>
+        <h1 class="text-2xl font-semibold p-5">Radius Profile Configuration</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
         <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Platform Status</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_two_fa' %}
+        <twig:ux:icon name="wba:2fa" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Two Factor Authenticator</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
         <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">LDAP Synchronization</h1>
@@ -77,7 +89,7 @@
             <ul class="py-2 text-sm space-y-1" aria-labelledby="adminActionsDropdownButton">
                 <li>
                     {# Account #}
-                    <a href="{{ path('admin_update', {id : app.user.id}) }}"
+                    <a href="{{ path('admin_user_edit', {id: app.user.id}) }}"
                        class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
                         <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2" fill="none"/>
                         Account

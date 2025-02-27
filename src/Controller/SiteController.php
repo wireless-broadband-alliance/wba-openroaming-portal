@@ -8,19 +8,22 @@ use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
+use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
-use App\Form\TOStype;
+use App\Form\TOSType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -30,14 +33,13 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeGenerator;
+use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -51,6 +53,8 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 /**
@@ -58,17 +62,6 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
  */
 class SiteController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ParameterBagInterface $parameterBag;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-    private EventRepository $eventRepository;
-    private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
-    private ProfileManager $profileManager;
-    private SendSMS $sendSMS;
-
     /**
      * SiteController constructor.
      *
@@ -79,47 +72,29 @@ class SiteController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeGenerator $verificationCodeGenerator Generates a new verification code of the user account
+     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
+     * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
-     * @param SendSMS $sendSMS
+     * @param SendSMS $sendSMS Call the function to send SMS using BudgetSms api
      */
     public function __construct(
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ParameterBagInterface $parameterBag,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        EventRepository $eventRepository,
-        EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
-        ProfileManager $profileManager,
-        SendSMS $sendSMS
+        private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
+        private readonly EventRepository $eventRepository,
+        private readonly EventActions $eventActions,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly ProfileManager $profileManager,
+        private readonly SendSMS $sendSMS,
     ) {
-        $this->userRepository = $userRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->parameterBag = $parameterBag;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
-        $this->eventRepository = $eventRepository;
-        $this->eventActions = $eventActions;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
-        $this->profileManager = $profileManager;
-        $this->sendSMS = $sendSMS;
     }
 
-    /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param UserAuthenticatorInterface $userAuthenticator
-     * @param PasswordAuthenticator $authenticator
-     * @param EntityManagerInterface $entityManager
-     * @param RequestStack $requestStack
-     * @return Response
-     */
     #[Route('/', name: 'app_landing')]
     public function landing(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
+        UserPasswordHasherInterface $userPasswordEncoder,
         UserAuthenticatorInterface $userAuthenticator,
         PasswordAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
@@ -129,18 +104,64 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-
+        $session = $request->getSession();
+        if (
+            $currentUser &&
+            (
+                $currentUser->getTwoFAType() !==
+                UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$session->has('2fa_verified'))
+        ) {
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::SMS->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::APP->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_app');
+            }
+        }
         // Check if the user is logged in and verification of the user
-        // And Check if the user dont have a forgot_password_request active
+        // And check if the user don't have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
-            $data["USER_VERIFICATION"]["value"] === EmailConfirmationStrategy::EMAIL &&
+            $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
             $this->getUser()
         ) {
             $verification = $currentUser->isVerified();
             // Check if the user is verified
             if (!$verification) {
                 return $this->redirectToRoute('app_email_code');
+            }
+            // Checks the 2FA status of the platform, if mandatory forces the user to configure it
+            if (
+                $currentUser->getUserExternalAuths() &&
+                ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
+                    TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                    UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::DISABLED->value))
+            ) {
+                return $this->redirectToRoute('app_enable2FA');
+            }
+            if (
+                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
+                ($currentUser->getTwoFAType() === null ||
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::DISABLED->value)
+            ) {
+                return $this->redirectToRoute('app_enable2FA');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
@@ -175,7 +196,7 @@ class SiteController extends AbstractController
                 $payload = $request->request->all();
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select Operating System!');
-                } elseif ($this->getUser() === null) {
+                } elseif (!$this->getUser() instanceof UserInterface) {
                     $user = new User();
                     $userAuths = new UserExternalAuth();
                     $form = $this->createForm(RegistrationFormType::class, $user);
@@ -184,24 +205,25 @@ class SiteController extends AbstractController
                         $user = $form->getData();
 
                         $user->setEmail($user->getEmail());
-                        $user->setCreatedAt(new \DateTime());
-                        $user->setPassword($userPasswordHasher->hashPassword($user, uniqid("", true)));
+                        $user->setCreatedAt(new DateTime());
+                        $user->setPassword($userPasswordEncoder->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                        $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                        $userAuths->setProviderId(UserProvider::EMAIL);
+                        $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                        $userAuths->setProviderId(UserProvider::EMAIL->value);
                         $userAuths->setUser($user);
                         $entityManager->persist($user);
                         $entityManager->persist($userAuths);
                         // Defines the Event to the table
                         $eventMetadata = [
-                            'platform' => PlatformMode::DEMO,
-                            'uuid' => $user->getUuid(),
                             'ip' => $request->getClientIp(),
-                            'registrationType' => UserProvider::EMAIL,
+                            'user_agent' => $request->headers->get('User-Agent'),
+                            'platform' => PlatformMode::DEMO->value,
+                            'uuid' => $user->getUuid(),
+                            'registrationType' => UserProvider::EMAIL->value,
                         ];
                         $this->eventActions->saveEvent(
                             $user,
-                            AnalyticalEventType::USER_CREATION,
+                            AnalyticalEventType::USER_CREATION->value,
                             new DateTime(),
                             $eventMetadata
                         );
@@ -213,10 +235,10 @@ class SiteController extends AbstractController
                         );
                     }
 
-                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_regenerate_email_code');
                     }
-                    if ($data["USER_VERIFICATION"]['value'] === EmailConfirmationStrategy::NO_EMAIL) {
+                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -233,16 +255,16 @@ class SiteController extends AbstractController
                         $payload['radio-os'] = $payload['detected-os'];
                     }
                 }
-                if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
-                    /*
+                if ($payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface) {
+                    /**
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
-                    */
-                    if ($payload['radio-os'] === OSTypes::MACOS) {
-                        $payload['radio-os'] = OSTypes::IOS;
+                     */
+                    if ($payload['radio-os'] === OSTypes::MACOS->value) {
+                        $payload['radio-os'] = OSTypes::IOS->value;
                     }
                     return $this->redirectToRoute(
-                        'profile_' . strtolower($payload['radio-os']),
+                        'profile_' . strtolower((string)$payload['radio-os']),
                         ['os' => $payload['radio-os']]
                     );
                 }
@@ -264,16 +286,18 @@ class SiteController extends AbstractController
                     $payload['radio-os'] = $payload['detected-os'];
                 }
             }
-            if ($this->getUser() !== null && $payload['radio-os'] !== 'none') {
-                /*
-                    * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
-                    * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
-                   */
-                if ($payload['radio-os'] === OSTypes::MACOS) {
-                    $payload['radio-os'] = OSTypes::IOS;
+            if (
+                $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
+            ) {
+                /**
+                 * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
+                 * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
+                 */
+                if ($payload['radio-os'] === OSTypes::MACOS->value) {
+                    $payload['radio-os'] = OSTypes::IOS->value;
                 }
                 return $this->redirectToRoute(
-                    'profile_' . strtolower($payload['radio-os']),
+                    'profile_' . strtolower((string)$payload['radio-os']),
                     ['os' => $payload['radio-os']]
                 );
             }
@@ -287,13 +311,13 @@ class SiteController extends AbstractController
         $data['os'] = [
             'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
             'items' => [
-                OSTypes::WINDOWS => ['alt' => 'Windows Logo'],
-                OSTypes::IOS => ['alt' => 'Apple Logo'],
-                OSTypes::ANDROID => ['alt' => 'Android Logo']
+                OSTypes::WINDOWS->value => ['alt' => 'Windows Logo'],
+                OSTypes::IOS->value => ['alt' => 'Apple Logo'],
+                OSTypes::ANDROID->value => ['alt' => 'Android Logo']
             ]
         ];
 
-        if ($data['os']['selected'] == OSTypes::NONE && $currentUser && $currentUser->isVerified()) {
+        if ($data['os']['selected'] === OSTypes::NONE->value && $currentUser && $currentUser->isVerified()) {
             $this->addFlash('error', 'Please select Operating System!');
         }
 
@@ -301,7 +325,7 @@ class SiteController extends AbstractController
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
-        $formTOS = $this->createForm(TOStype::class);
+        $formTOS = $this->createForm(TOSType::class);
 
         return $this->render('site/landing.html.twig', [
             'form' => $form->createView(),
@@ -311,7 +335,7 @@ class SiteController extends AbstractController
             'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
-            'user' => $currentUser
+            'user' => $currentUser,
         ]);
     }
 
@@ -326,10 +350,10 @@ class SiteController extends AbstractController
         $textEditorRepository = $em->getRepository(TextEditor::class);
         if (
             $tosFormat &&
-            $tosFormat->getValue() === TextInputType::TEXT_EDITOR
+            $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS])) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS])->getContent();
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])) {
+                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
             } else {
                 $content = '';
             }
@@ -340,10 +364,10 @@ class SiteController extends AbstractController
         }
         if (
             $tosFormat &&
-            $tosFormat->getValue() === TextInputType::LINK &&
+            $tosFormat->getValue() === TextInputType::LINK->value &&
             $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
         ) {
-                return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
+            return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
         }
         return $this->redirectToRoute('app_landing');
     }
@@ -359,10 +383,12 @@ class SiteController extends AbstractController
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
         if (
             $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR
+            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY])->getContent();
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value])) {
+                $content = $textEditorRepository->findOneBy(
+                    ['name' => TextEditorName::PRIVACY_POLICY->value]
+                )->getContent();
             } else {
                 $content = '';
             }
@@ -373,7 +399,7 @@ class SiteController extends AbstractController
         }
         if (
             $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::LINK &&
+            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
             $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
         ) {
             return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
@@ -403,19 +429,24 @@ class SiteController extends AbstractController
         $formRevokeProfiles->handleRequest($request);
 
         if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
-            $revokeProfiles = $this->profileManager->disableProfiles($user, true);
+            $revokeProfiles = $this->profileManager->disableProfiles(
+                $user,
+                UserRadiusProfileRevokeReason::USER_REVOKED_PROFILE->value,
+                true
+            );
             if (!$revokeProfiles) {
                 $this->addFlash('error', 'This account doesn\'t have profiles associated!');
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
-                'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_REVOKE_PROFILES,
+                AnalyticalEventType::USER_REVOKE_PROFILES->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -429,9 +460,10 @@ class SiteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
-                'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
                 'Old data' => [
                     'First Name' => $oldFirstName,
                     'Last Name' => $oldLastName,
@@ -443,7 +475,7 @@ class SiteController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -465,7 +497,7 @@ class SiteController extends AbstractController
             $typedPassword = $formPassword->get('password')->getData();
 
             // Compare the typed password with the hashed password from the database
-            if (!password_verify($typedPassword, $currentPasswordDB)) {
+            if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
                 $this->addFlash('error', 'Current password Invalid. Please try again.');
                 return $this->redirectToRoute('app_landing');
             }
@@ -485,13 +517,14 @@ class SiteController extends AbstractController
             $em->flush();
 
             $eventMetaData = [
-                'platform' => PlatformMode::LIVE,
-                'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD,
+                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD->value,
                 new DateTime(),
                 $eventMetaData
             );
@@ -516,7 +549,7 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($this->getUser()) {
+        if ($this->getUser() instanceof \Symfony\Component\Security\Core\User\UserInterface) {
             $this->addFlash('error', 'You can\'t access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
@@ -548,8 +581,8 @@ class SiteController extends AbstractController
                 // Check if the user has an external auth with PortalAccount and a valid email as providerId
                 foreach ($userExternalAuths as $auth) {
                     if (
-                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT &&
-                        $auth->getProviderId() === UserProvider::EMAIL
+                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                        $auth->getProviderId() === UserProvider::EMAIL->value
                     ) {
                         $hasValidPortalAccount = true;
                         break;
@@ -558,12 +591,13 @@ class SiteController extends AbstractController
                 if ($hasValidPortalAccount) {
                     $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                         $user,
-                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST
+                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
                     $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                    $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                    ) : [];
                     $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                         ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                         : null;
@@ -573,13 +607,13 @@ class SiteController extends AbstractController
                             $lastVerificationCodeTime->add($minInterval) < $currentTime)
                     ) {
                         // Save event with attempt count and current time
-                        if (!$latestEvent) {
+                        if (!$latestEvent instanceof Event) {
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST);
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
                             $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE,
+                                'platform' => PlatformMode::LIVE->value,
                                 'ip' => $request->getClientIp(),
                                 'uuid' => $user->getUuid(),
                             ];
@@ -658,7 +692,7 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($this->getUser()) {
+        if ($this->getUser() instanceof \Symfony\Component\Security\Core\User\UserInterface) {
             $this->addFlash('error', 'You can\'t access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
@@ -686,14 +720,15 @@ class SiteController extends AbstractController
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST
+                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value
                 );
                 // Retrieve the SMS resend interval from the settings
                 $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
-                $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                ) : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;
@@ -708,13 +743,13 @@ class SiteController extends AbstractController
                         $attempts = $verificationAttempts + 1;
 
                         // Save event with attempt count and current time
-                        if (!$latestEvent) {
+                        if (!$latestEvent instanceof Event) {
                             $latestEvent = new Event();
                             $latestEvent->setUser($user);
                             $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST);
+                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
                             $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE,
+                                'platform' => PlatformMode::LIVE->value,
                                 'ip' => $request->getClientIp(),
                                 'uuid' => $user->getUuid(),
                             ];
@@ -736,9 +771,9 @@ class SiteController extends AbstractController
                         $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        $recipient = "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
-                        // phpcs:enable
+                        $recipient = "+" .
+                            $user->getPhoneNumber()->getCountryCode() .
+                            $user->getPhoneNumber()->getNationalNumber();
                         // Send SMS
                         $message = "Your new random account password is: "
                             . $randomPassword
@@ -827,7 +862,7 @@ class SiteController extends AbstractController
             $typedPassword = $form->get('password')->getData();
 
             // Compare the typed password with the hashed password from the database
-            if (!password_verify($typedPassword, $currentPasswordDB)) {
+            if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
                 $this->addFlash('error', 'Current password Invalid. Please try again.');
                 return $this->redirectToRoute('app_landing');
             }
@@ -847,13 +882,14 @@ class SiteController extends AbstractController
             $entityManager->flush();
 
             $eventMetadata = [
-                'platform' => PlatformMode::LIVE,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $user->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED,
+                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -875,26 +911,26 @@ class SiteController extends AbstractController
      */
     private function detectDevice($userAgent)
     {
-        $os = OSTypes::NONE;
+        $os = OSTypes::NONE->value;
 
         // Windows
-        if (preg_match('/windows|win32/i', $userAgent)) {
-            $os = OSTypes::WINDOWS;
+        if (preg_match('/windows|win32/i', (string)$userAgent)) {
+            $os = OSTypes::WINDOWS->value;
         }
 
         // macOS
-        if (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            $os = OSTypes::MACOS;
+        if (preg_match('/macintosh|mac os x/i', (string)$userAgent)) {
+            $os = OSTypes::MACOS->value;
         }
 
         // iOS
-        if (preg_match('/iphone|ipod|ipad/i', $userAgent)) {
-            $os = OSTypes::IOS;
+        if (preg_match('/iphone|ipod|ipad/i', (string)$userAgent)) {
+            $os = OSTypes::IOS->value;
         }
 
         // Android
-        if (preg_match('/android/i', $userAgent)) {
-            $os = OSTypes::ANDROID;
+        if (preg_match('/android/i', (string)$userAgent)) {
+            $os = OSTypes::ANDROID->value;
         }
 
         // Linux
@@ -923,7 +959,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
 
-        return (new TemplatedEmail())
+        return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($email)
             ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
@@ -936,9 +972,6 @@ class SiteController extends AbstractController
     /**
      * Regenerate the verification code for the user and send a new email.
      *
-     * @param EventRepository $eventRepository
-     * @param MailerInterface $mailer
-     * @param Request $request
      * @return RedirectResponse A redirect response.
      * @throws TransportExceptionInterface
      * @throws \DateMalformedStringException
@@ -958,19 +991,17 @@ class SiteController extends AbstractController
         if (!$isVerified) {
             $latestEvent = $eventRepository->findLatestRequestAttemptEvent(
                 $currentUser,
-                AnalyticalEventType::USER_EMAIL_ATTEMPT
+                AnalyticalEventType::USER_EMAIL_ATTEMPT->value
             );
             $minInterval = new DateInterval('PT2M');
             $currentTime = new DateTime();
 
             // Check if enough time has passed since the last attempt
-            $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+            $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata() : [];
             $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                 ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                 : null;
-            $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
-                ? $latestEventMetadata['verificationAttempts']
-                : 0;
+            $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
 
             if (
                 !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
@@ -983,19 +1014,19 @@ class SiteController extends AbstractController
                 $mailer->send($email);
 
                 // Save event with attempt count and current time
-                if (!$latestEvent) {
+                if (!$latestEvent instanceof Event) {
                     $latestEvent = new Event();
                     $latestEvent->setUser($currentUser);
                     $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT);
+                    $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT->value);
                     $latestEventMetadata = [
-                        'platform' => PlatformMode::LIVE,
+                        'platform' => PlatformMode::LIVE->value,
                         'uuid' => $currentUser->getEmail(),
                         'ip' => $request->getClientIp(),
                     ];
                 }
 
-                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
                 $latestEventMetadata['verificationAttempts'] = $attempts;
                 $latestEvent->setEventMetadata($latestEventMetadata);
 
@@ -1032,7 +1063,7 @@ class SiteController extends AbstractController
         }
 
         if (!$currentUser->isVerified()) {
-            $formTOS = $this->createForm(TOStype::class);
+            $formTOS = $this->createForm(TOSType::class);
             // Render the template with the verification code
             return $this->render('site/landing.html.twig', [
                 'data' => $data,
@@ -1045,13 +1076,6 @@ class SiteController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-
-    /**
-     * @param RequestStack $requestStack
-     * @param UserRepository $userRepository
-     * @param Request $request
-     * @return Response
-     */
     #[Route('/email/check', name: 'app_check_email_code')]
     #[IsGranted('ROLE_USER')]
     public function verifyCode(
@@ -1084,13 +1108,14 @@ class SiteController extends AbstractController
             $userRepository->save($currentUser, true);
 
             $eventMetadata = [
-                'platform' => PlatformMode::LIVE,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::USER_VERIFICATION,
+                AnalyticalEventType::USER_VERIFICATION->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -1141,11 +1166,9 @@ class SiteController extends AbstractController
                 $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
 
                 // Check if $latestEvent to avoid null conflicts
-                if ($latestEvent) {
+                if ($latestEvent instanceof \App\Entity\Event) {
                     $latestEventMetadata = $latestEvent->getEventMetadata();
-                    $verificationAttempts = isset($latestEventMetadata['verificationAttempts'])
-                        ? $latestEventMetadata['verificationAttempts']
-                        : 0;
+                    $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
                     $attemptsLeft = 3 - $verificationAttempts;
 
                     $message = sprintf(
@@ -1182,14 +1205,5 @@ class SiteController extends AbstractController
 
         $referer = $request->headers->get('referer', $this->generateUrl('app_landing'));
         return $this->redirect($referer);
-    }
-
-    /**
-     * @param $user
-     * @return void
-     */
-    private function disableProfiles($user): void
-    {
-        $this->profileManager->disableProfiles($user);
     }
 }

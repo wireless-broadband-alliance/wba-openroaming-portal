@@ -1,0 +1,96 @@
+{# Auth Providers #}
+<div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+    {% if data.SAML_ENABLED.value %}
+        <div class="w-full">
+            <a href="{{ path('saml_login') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.SAML_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs mt-2 text-center">{{ data.SAML_DESCRIPTION.value }}</p>
+        </div>
+    {% endif %}
+
+    {% if data.GOOGLE_LOGIN_ENABLED.value %}
+        <div class="w-full">
+            <a href="{{ path('connect_google') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.GOOGLE_LOGIN_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs mt-2 text-center">{{ data.GOOGLE_LOGIN_DESCRIPTION.value }}</p>
+        </div>
+    {% endif %}
+
+    {% if data.MICROSOFT_LOGIN_ENABLED.value %}
+        <div class="w-full">
+            <a href="{{ path('connect_microsoft') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.MICROSOFT_LOGIN_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs mt-2 text-center">{{ data.MICROSOFT_LOGIN_DESCRIPTION.value }}</p>
+        </div>
+    {% endif %}
+</div>
+
+{# Portal Auth Methods #}
+<div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+    {% if data.EMAIL_REGISTER_ENABLED.value %}
+        <div class="w-full">
+            <a href="{{ path('app_register') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.REGISTER_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs mt-2 text-center">{{ data.REGISTER_DESCRIPTION.value }}</p>
+        </div>
+    {% endif %}
+
+    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+        <div class="w-full">
+            <a href="{{ path('app_register_sms') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs mt-2 text-center">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
+        </div>
+    {% endif %}
+</div>
+
+{# Portal Login #}
+{% if data.LOGIN_TRADITIONAL_ENABLED.value %}
+    <div class="w-full sm:space-y-4">
+        <a href="{{ path('app_login') }}"
+           class="terms-widget__link"
+           data-action="click->terms-widget#showModal">
+            <button {{ stimulus_target('terms-widget', 'button') }}
+                    type="button"
+                    class="w-full h-12 btn-secondary btn-disabled">
+                {{ data.LOGIN_TRADITIONAL_LABEL.value }}
+            </button>
+        </a>
+        <p class="text-xs mt-2 text-center">{{ data.LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+    </div>
+{% endif %}

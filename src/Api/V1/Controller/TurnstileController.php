@@ -4,7 +4,7 @@ namespace App\Api\V1\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class TurnstileController extends AbstractController
 {
@@ -13,11 +13,11 @@ class TurnstileController extends AbstractController
     {
         $filePath = $this->getParameter('kernel.project_dir') . '/public/resources/turnstile_android_html/index.html';
         if (!file_exists($filePath)) {
-            return new Response('HTML file not found.', 404);
+            return new Response('HTML file not found.', Response::HTTP_NOT_FOUND);
         }
         $html = file_get_contents($filePath);
 
         // Return the file content as an HTML response
-        return new Response($html, 200, ['Content-Type' => 'text/html']);
+        return new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
     }
 }

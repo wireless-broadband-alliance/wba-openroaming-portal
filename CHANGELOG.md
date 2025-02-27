@@ -1,6 +1,42 @@
 # Changelog
-
 ---
+
+# Release V1.7.0
+
+- Update PHP to 8.4
+- Add revoke reason everytime a profile is revoked
+- Turnstile API Fix: Refactored the Turnstile logic in the API to resolve an issue where the verification step was being prematurely interrupted
+- Rework **cookies integration only EEA users** (checks for current location of the user to show the cookies banner) -
+  Using
+  GeoLite2 from Maxmind
+- New docs for GEOLITEGUI and setup
+- New Setting for API Status (ON & OFF)
+- SideBar Admin UI changes
+- Two-Factor Authentication was added on users login
+- New settings page for 2fa
+- Microsoft Login Implementation - New authentication provider / New endpoint
+
+> **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.
+> If you have version 1.5 or lower with data in these fields, you will have to first switch to version 1.6,
+> run the Allocate Providers Command and then can you upgrade to version 1.7.
+
+- **Note**: The Allocate Providers Command has been discontinued and has therefore been removed
+
+```Bash
+php bin/console reset:allocate-providers
+```
+
+## Multiple Saml Providers Integration
+
+Integrated support for Multiple SAML Providers with management features accessible via the UI
+
+- **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
+  exist
+  associated accounts that have a saml provider. This command also associated a LDAPCredential if she exists.
+
+```bash
+php bin/console app:set-saml-provider
+```
 
 # Release V1.6.0
 
@@ -103,7 +139,7 @@ To use this command, run the following code in the root folder of the project:
 php bin/console reset:allocate-providers
 ```
 
-- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](INSTALATION.md), it's
+- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](docs/INSTALATION.md), it's
   required to back up the user data for legal purposes)
 - Forgot password for user's - landing page implementation (widget for user on the landing page after login)
 - CloudFlare TurnStile Implementation - Landing page

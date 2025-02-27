@@ -22,45 +22,24 @@ use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class ProfileController extends AbstractController
 {
-    private SettingRepository $settingRepository;
-    private EventActions $eventActions;
-    private TokenStorageInterface $tokenStorage;
-    private JWTTokenGenerator $JWTTokenGenerator;
-    private UserStatusChecker $userStatusChecker;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
-    private RadiusUserRepository $radiusUserRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ExpirationProfileService $expirationProfileService;
-    private RsaEncryptionService $rsaEncryptionService;
-
     public function __construct(
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
-        TokenStorageInterface $tokenStorage,
-        JWTTokenGenerator $JWTTokenGenerator,
-        UserStatusChecker $userStatusChecker,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
-        RadiusUserRepository $radiusUserRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ExpirationProfileService $expirationProfileService,
-        RsaEncryptionService $rsaEncryptionService
+        private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly JWTTokenGenerator $JWTTokenGenerator,
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
+        private readonly RadiusUserRepository $radiusUserRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ExpirationProfileService $expirationProfileService,
+        private readonly RsaEncryptionService $rsaEncryptionService
     ) {
-        $this->settingRepository = $settingRepository;
-        $this->eventActions = $eventActions;
-        $this->tokenStorage = $tokenStorage;
-        $this->JWTTokenGenerator = $JWTTokenGenerator;
-        $this->userStatusChecker = $userStatusChecker;
-        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
-        $this->radiusUserRepository = $radiusUserRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->expirationProfileService = $expirationProfileService;
-        $this->rsaEncryptionService = $rsaEncryptionService;
     }
 
     /**
@@ -71,13 +50,13 @@ class ProfileController extends AbstractController
     {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
         $token = $this->tokenStorage->getToken();
         if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
-            return (new BaseResponse(403, null, 'Unauthorized access!'))->toResponse();
+            return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
         /** @var User $currentUser */
@@ -86,30 +65,29 @@ class ProfileController extends AbstractController
         $jwtTokenString = $token->getCredentials();
 
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
-            return (new BaseResponse(401, null, 'JWT Token is invalid!'))->toResponse();
+            return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-        if ($statusCheckerResponse !== null) {
+        if ($statusCheckerResponse instanceof BaseResponse) {
             return $statusCheckerResponse->toResponse();
         }
 
+        $errors = [];
         // Check for missing fields and add them to the array errors
         if (empty($dataRequest['public_key'])) {
             $errors[] = 'public_key';
         }
-        if (!empty($errors)) {
-            return (
-            new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            )
             )->toResponse();
         }
 
         $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
-            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
@@ -126,7 +104,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service
@@ -155,9 +133,9 @@ class ProfileController extends AbstractController
 
         if (!$encryptionResult['success']) {
             return match ($encryptionResult['error']['code']) {
-                1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
-                1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
-                default => (new BaseResponse(500, null, 'Failed to encrypt the password.'))->toResponse(),
+                1001 => new BaseResponse(400, null, $encryptionResult['error']['message'])->toResponse(),
+                1002, 1003 => new BaseResponse(500, null, $encryptionResult['error']['message'])->toResponse(),
+                default => new BaseResponse(500, null, 'Failed to encrypt the password.')->toResponse(),
             };
         }
         $encryptedPassword = $encryptionResult['data'];
@@ -175,17 +153,18 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $currentUser->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::CONFIG_PROFILE_ANDROID,
+            AnalyticalEventType::CONFIG_PROFILE_ANDROID->value,
             new DateTime(),
             $eventMetadata
         );
 
-        return (new BaseResponse(200, $data))->toResponse();
+        return new BaseResponse(200, $data)->toResponse();
     }
 
     /**
@@ -196,13 +175,13 @@ class ProfileController extends AbstractController
     {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return (new BaseResponse(400, null, 'Invalid JSON format'))->toResponse(); // Invalid Json
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
         $token = $this->tokenStorage->getToken();
         if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
-            return (new BaseResponse(403, null, 'Unauthorized access!'))->toResponse();
+            return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
         /** @var User $currentUser */
@@ -211,30 +190,29 @@ class ProfileController extends AbstractController
         $jwtTokenString = $token->getCredentials();
 
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
-            return (new BaseResponse(401, null, 'JWT Token is invalid!'))->toResponse();
+            return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-        if ($statusCheckerResponse !== null) {
+        if ($statusCheckerResponse instanceof BaseResponse) {
             return $statusCheckerResponse->toResponse();
         }
 
+        $errors = [];
         // Check for missing fields and add them to the array errors
         if (empty($dataRequest['public_key'])) {
             $errors[] = 'public_key';
         }
-        if (!empty($errors)) {
-            return (
-            new BaseResponse(
+        if ($errors !== []) {
+            return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
-            )
             )->toResponse();
         }
 
         $radiusProfile = $this->userRadiusProfileRepository->findOneBy(
-            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
@@ -251,7 +229,7 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service
@@ -280,9 +258,9 @@ class ProfileController extends AbstractController
 
         if (!$encryptionResult['success']) {
             return match ($encryptionResult['error']['code']) {
-                1001 => (new BaseResponse(400, null, $encryptionResult['error']['message']))->toResponse(),
-                1002, 1003 => (new BaseResponse(500, null, $encryptionResult['error']['message']))->toResponse(),
-                default => (new BaseResponse(500, null, 'Failed to encrypt the password.'))->toResponse(),
+                1001 => new BaseResponse(400, null, $encryptionResult['error']['message'])->toResponse(),
+                1002, 1003 => new BaseResponse(500, null, $encryptionResult['error']['message'])->toResponse(),
+                default => new BaseResponse(500, null, 'Failed to encrypt the password.')->toResponse(),
             };
         }
         $encryptedPassword = $encryptionResult['data'];
@@ -306,17 +284,18 @@ class ProfileController extends AbstractController
 
         $eventMetadata = [
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $currentUser->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::CONFIG_PROFILE_IOS,
+            AnalyticalEventType::CONFIG_PROFILE_IOS->value,
             new DateTime(),
             $eventMetadata
         );
 
-        return (new BaseResponse(200, $data))->toResponse();
+        return new BaseResponse(200, $data)->toResponse();
     }
 
     private function getSettingValueRaw(string $settingName): string

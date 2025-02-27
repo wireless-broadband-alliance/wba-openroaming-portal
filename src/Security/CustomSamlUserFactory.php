@@ -6,58 +6,60 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
-use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\VerificationCodeEmailGenerator;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use function is_string;
 
 class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
-    private UserRepository $userRepository;
-    private EntityManagerInterface $entityManager;
-    private GetSettings $getSettings;
-    private SettingRepository $settingRepository;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
-
     /**
-     * @param class-string<UserInterface> $userClass
-     * @param array<string, mixed> $mapping
-     * @param UserRepository $userRepository
-     * @param EntityManagerInterface $entityManager
-     * @param GetSettings $getSettings
-     * @param SettingRepository $settingRepository
-     * @param UserRadiusProfileRepository $userRadiusProfileRepository
+     * Default attribute mapping.
      */
+    private readonly array $attribute_mapping;
+    private readonly SessionInterface $session;
+
     public function __construct(
-        private readonly string $userClass,
-        private readonly array $mapping,
-        UserRepository $userRepository,
-        EntityManagerInterface $entityManager,
-        GetSettings $getSettings,
-        SettingRepository $settingRepository,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
+        private readonly UserRepository $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly SamlProviderRepository $samlProviderRepository,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        RequestStack $requestStack,
     ) {
-        $this->userRepository = $userRepository;
-        $this->entityManager = $entityManager;
-        $this->getSettings = $getSettings;
-        $this->settingRepository = $settingRepository;
-        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
+        $this->session = $requestStack->getSession();
+        $this->attribute_mapping = [
+            'password' => 'notused',
+            'uuid' => '$samlUuid',
+            'email' => '$email',
+            'first_name' => '$givenName',
+            'last_name' => '$surname',
+            'isVerified' => 1,
+            'roles' => [],
+        ];
     }
 
     /**
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
@@ -65,8 +67,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($data['PLATFORM_MODE']['value'] === true) {
-            throw new RuntimeException("Get Away. 
-            It's impossible to use this authentication method in demo mode");
+            throw new RuntimeException(
+                "Get Away. 
+            It's impossible to use this authentication method in demo mode"
+            );
         }
 
         $uuid = $this->getAttributeValue($attributes, 'samlUuid');
@@ -77,16 +81,24 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 
         if ($existingUser) {
             if ($existingUser->isDisabled()) {
-                throw new \RuntimeException('User Disabled');
+                /** @phpstan-ignore-next-line */ // To avoid conflicts with RECTOR
+                $this->session->getFlashBag()->add(
+                    'error',
+                    'This account is disabled. Please contact support.'
+                );
+                $redirect = new RedirectResponse($this->urlGenerator->generate('app_landing'));
+                $redirect->send();
+                exit; // Stop further authentication execution
             }
             return $existingUser;
         }
 
-        $user = new $this->userClass($identifier);
-        $reflection = new ReflectionClass($this->userClass);
+        // Instead of userClass and mapping, use App\Entity\User directly
+        $user = new User();
+        $reflection = new ReflectionClass(User::class); // Hardcoded User entity
 
         /** @psalm-suppress MixedAssignment */
-        foreach ($this->mapping as $field => $attribute) {
+        foreach ($this->attribute_mapping as $field => $attribute) {
             $property = $reflection->getProperty($field);
             $value = null;
 
@@ -105,13 +117,35 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
-        /** @var User $user */
+        $activeProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
+        if (!$activeProvider) {
+            throw new RuntimeException('No active SAML provider found.');
+        }
+
+        $email = array_key_exists('urn:oid:1.2.840.113549.1.9.1', $attributes)
+            ? $attributes['urn:oid:1.2.840.113549.1.9.1'][0]
+            : null;
+
+        $firstName = array_key_exists('urn:oid:2.5.4.42', $attributes)
+            ? $attributes['urn:oid:2.5.4.42'][0]
+            : null;
+
+        $lastName = array_key_exists('urn:oid:2.5.4.4', $attributes)
+            ? $attributes['urn:oid:2.5.4.4'][0]
+            : null;
+
         $user->setDisabled(false);
+        $user->setEmail($email);
+        $user->setFirstName($firstName);
+        $user->setLastName($lastName);
+        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED);
+
         // Create a new UserExternalAuth entity
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
-            ->setProvider(UserProvider::SAML)
-            ->setProviderId($samlIdentifier);
+            ->setProvider(UserProvider::SAML->value)
+            ->setProviderId($samlIdentifier)
+            ->setSamlProvider($activeProvider);
 
         // Persist the external auth entity
         $this->entityManager->persist($user);

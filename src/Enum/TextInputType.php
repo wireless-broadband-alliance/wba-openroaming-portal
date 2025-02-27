@@ -2,8 +2,8 @@
 
 namespace App\Enum;
 
-enum TextInputType
+enum TextInputType: string
 {
-    public const LINK = 'LINK';
-    public const TEXT_EDITOR = 'TEXT_EDITOR';
+    case LINK = 'LINK';
+    case TEXT_EDITOR = 'TEXT_EDITOR';
 }

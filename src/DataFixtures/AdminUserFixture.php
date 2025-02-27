@@ -14,13 +14,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AdminUserFixture extends Fixture
 {
-    private EventActions $eventActions;
-
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHashed,
-        EventActions $eventActions
+        private readonly EventActions $eventActions
     ) {
-        $this->eventActions = $eventActions;
     }
 
     public function load(ObjectManager $manager): void
@@ -37,13 +34,13 @@ class AdminUserFixture extends Fixture
         // Create and set up the UserExternalAuth entity
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($admin);
-        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT);
-        $userExternalAuth->setProviderId(UserProvider::EMAIL);
+        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+        $userExternalAuth->setProviderId(UserProvider::EMAIL->value);
         $manager->persist($userExternalAuth);
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION, new DateTime(), []);
-        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION, new DateTime(), []);
+        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION->value, new DateTime(), []);
+        $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION->value, new DateTime(), []);
 
 
         $manager->flush();

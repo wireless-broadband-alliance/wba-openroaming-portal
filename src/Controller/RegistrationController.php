@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
@@ -16,7 +16,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeGenerator;
+use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -41,15 +41,6 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-    private SendSMS $sendSMS;
-    private TokenStorageInterface $tokenStorage;
-    private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
-    private RegistrationEmailGenerator $emailGenerator;
-
     /**
      * Registration constructor.
      *
@@ -59,37 +50,24 @@ class RegistrationController extends AbstractController
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeGenerator $verificationCodeGenerator
      * @param RegistrationEmailGenerator $emailGenerator Used to generate and send emails for the user
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        SendSMS $sendSMS,
-        TokenStorageInterface $tokenStorage,
-        EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
-        RegistrationEmailGenerator $emailGenerator,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
+        private readonly SendSMS $sendSMS,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly EventActions $eventActions,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly RegistrationEmailGenerator $emailGenerator,
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
-        $this->sendSMS = $sendSMS;
-        $this->tokenStorage = $tokenStorage;
-        $this->eventActions = $eventActions;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
-        $this->emailGenerator = $emailGenerator;
     }
 
-    /*
-    * Handle the email registration.
-    */
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param EntityManagerInterface $entityManager
-     * @return Response
+     * Handle the email registration.
+     */
+    /**
      * @throws RandomException
      * @throws TransportExceptionInterface
      * @throws Exception
@@ -128,7 +106,7 @@ class RegistrationController extends AbstractController
                     'warning',
                     'User with the same email already exists, please try to Login using the link below.'
                 );
-            } elseif ($data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL) {
+            } elseif ($data['USER_VERIFICATION']['value'] === OperationMode::ON->value) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -140,22 +118,23 @@ class RegistrationController extends AbstractController
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                $userAuths->setProviderId(UserProvider::EMAIL);
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
 
                 // Defines the Event to the table
                 $eventMetaData = [
-                    'platform' => PlatformMode::LIVE,
-                    'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
-                    'registrationType' => UserProvider::EMAIL,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'registrationType' => UserProvider::EMAIL->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_CREATION,
+                    AnalyticalEventType::USER_CREATION->value,
                     new DateTime(),
                     $eventMetaData
                 );
@@ -172,15 +151,10 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /*
-    * Handle the sms registration.
-    */
     /**
-     * @param Request $request
-     * @param UserPasswordHasherInterface $userPasswordHasher
-     * @param EntityManagerInterface $entityManager
-     * @param SessionInterface $session
-     * @return Response
+     * Handle the sms registration.
+     */
+    /**
      * @throws NonUniqueResultException
      * @throws RandomException
      * @throws ClientExceptionInterface
@@ -242,22 +216,23 @@ class RegistrationController extends AbstractController
 
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
                 $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT);
-                $userAuths->setProviderId(UserProvider::PHONE_NUMBER);
+                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::LIVE,
-                    'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
-                    'registrationType' => UserProvider::PHONE_NUMBER,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'registrationType' => UserProvider::PHONE_NUMBER->value,
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_CREATION,
+                    AnalyticalEventType::USER_CREATION->value,
                     new DateTime(),
                     $eventMetadata
                 );
@@ -294,15 +269,10 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    /*
+    /**
      * Handle the email link click to verify the user account.
      */
     /**
-     * @param RequestStack $requestStack
-     * @param UserRepository $userRepository
-     * @param TokenStorageInterface $tokenStorage
-     * @param EventDispatcherInterface $eventDispatcher
-     * @return Response
      * @throws NonUniqueResultException
      */
     #[Route('/login/link', name: 'app_confirm_account')]
@@ -338,13 +308,14 @@ class RegistrationController extends AbstractController
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'platform' => PlatformMode::LIVE,
-                    'uuid' => $user->getUuid(),
                     'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::USER_VERIFICATION,
+                    AnalyticalEventType::USER_VERIFICATION->value,
                     new DateTime(),
                     $eventMetadata
                 );
