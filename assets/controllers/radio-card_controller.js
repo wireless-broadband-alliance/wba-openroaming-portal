@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["on", "card", "input", "link", "linkInput", "textEditorInput"];
+    static targets = ["on", "card", "input", "link", "linkInput", "textEditorInput", "button"];
 
     connect() {
         super.connect();
@@ -29,6 +29,10 @@ export default class extends Controller {
             t.classList.remove("bg-white");
             t.classList.add("bg-disableCardsColor");
         }
+        for (let t of this.buttonTargets) {
+            t.classList.add("cursor-not-allowed");
+            t.disabled = true;
+        }
     }
 
     unblock() {
@@ -40,6 +44,10 @@ export default class extends Controller {
         for (let t of this.cardTargets) {
             t.classList.add("bg-white");
             t.classList.remove("bg-disableCardsColor");
+        }
+        for (let t of this.buttonTargets) {
+            t.classList.remove("cursor-not-allowed");
+            t.disabled = false;
         }
     }
 
