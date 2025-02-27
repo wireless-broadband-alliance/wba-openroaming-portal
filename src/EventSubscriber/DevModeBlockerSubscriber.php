@@ -14,6 +14,7 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
         '127.0.0.1',
         'localhost',
         'wifi-qa.tetrapi.pt',
+        'qa.openroamingconnect.org',
         //'*.domain.com',
     ];
 
