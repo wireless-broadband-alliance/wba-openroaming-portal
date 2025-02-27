@@ -9,7 +9,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class DevModeBlockerSubscriber implements EventSubscriberInterface
 {
-    private KernelInterface $kernel;
     private array $approvedDomains = [
         '127.0.0.1',
         'localhost',
@@ -18,9 +17,8 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
         //'*.domain.com',
     ];
 
-    public function __construct(KernelInterface $kernel)
+    public function __construct(private readonly KernelInterface $kernel)
     {
-        $this->kernel = $kernel;
     }
 
     public static function getSubscribedEvents(): array
