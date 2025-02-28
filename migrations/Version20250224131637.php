@@ -20,7 +20,7 @@ final class Version20250224131637 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE User ADD twoFAcodeIsActive TINYINT(1) DEFAULT NULL');
+        $this->addSql('ALTER TABLE User ADD twoFAcodeIsActive TINYINT(1) DEFAULT 0');
     }
 
     public function down(Schema $schema): void

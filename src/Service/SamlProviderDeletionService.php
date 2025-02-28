@@ -69,15 +69,15 @@ class SamlProviderDeletionService
         $samlProvider->setActive(false);
         $samlProvider->setIsLDAPActive(false);
         $samlProvider->setIdpEntityId((string)$samlProvider->getId());
-        $samlProvider->setIdpSsoUrl(null);
-        $samlProvider->setSpEntityId(null);
-        $samlProvider->setSpAcsUrl(null);
-        $samlProvider->setIdpX509Cert(null);
-        $samlProvider->setLdapServer(null);
-        $samlProvider->setLdapBindUserDn(null);
-        $samlProvider->setLdapBindUserPassword(null);
-        $samlProvider->setLdapSearchBaseDn(null);
-        $samlProvider->setLdapSearchFilter(null);
+        $samlProvider->setIdpSsoUrl((string)$samlProvider->getId());
+        $samlProvider->setSpEntityId((string)$samlProvider->getId());
+        $samlProvider->setSpAcsUrl((string)$samlProvider->getId());
+        $samlProvider->setIdpX509Cert((string)$samlProvider->getId());
+        $samlProvider->setLdapServer((string)$samlProvider->getId());
+        $samlProvider->setLdapBindUserDn((string)$samlProvider->getId());
+        $samlProvider->setLdapBindUserPassword((string)$samlProvider->getId());
+        $samlProvider->setLdapSearchBaseDn((string)$samlProvider->getId());
+        $samlProvider->setLdapSearchFilter((string)$samlProvider->getId());
         $samlProvider->setLdapUpdatedAt(new DateTime());
 
         $this->entityManager->persist($samlProvider);

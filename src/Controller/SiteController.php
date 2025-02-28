@@ -105,6 +105,10 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
+        $sessionAdmin = $session->get('session_admin');
+        if ($sessionAdmin) {
+            return $this->redirectToRoute('saml_logout');
+        }
         if (
             $currentUser &&
             (
