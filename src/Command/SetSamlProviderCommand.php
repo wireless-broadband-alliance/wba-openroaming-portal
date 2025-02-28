@@ -2,10 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
-use App\Repository\LdapCredentialRepository;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Service\SamlProviderValidator;
@@ -91,7 +89,7 @@ class SetSamlProviderCommand extends Command
             );
             return self::FAILURE;
         }
-        $checkIdpEntityId = $this->samlProviderValidator->validateJsonUrlSamlProvider($idpEntityId);
+        $checkIdpEntityId = $this->samlProviderValidator->validateSamlMetadata($idpEntityId);
         if ($checkIdpEntityId) {
             $output->writeln(
                 sprintf(
