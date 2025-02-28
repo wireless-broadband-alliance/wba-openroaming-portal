@@ -59,6 +59,7 @@ class SamlProviderValidator
 
     /**
      * @throws \JsonException
+     * This code it's not used, it's just here if it's required later
      */
     public function validateJsonUrlSamlProvider(string $url): ?string
     {
