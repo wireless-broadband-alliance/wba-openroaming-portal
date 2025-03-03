@@ -24,50 +24,49 @@ export default class extends Controller {
     }
 
     togglePlatformMode(event) {
-        // Get the selected platformMode value
-        const platformModeValue = this.platformModeTargets.find(input => input.checked)?.value;
+        // Get selected PLATFORM_MODE value
+        const platformMode = this.platformModeTargets.find(input => input.checked)?.value;
+        console.log("PLATFORM_MODE:", platformMode);
 
-        console.log("Selected Platform Mode:" + platformModeValue);
+        // Get selected USER_VERIFICATION value
+        const userVerification = this.userVerificationTargets.find(input => input.checked)?.value;
+        console.log("USER_VERIFICATION:", userVerification);
 
-        // Find the SVG icons for Demo and Live
-        const demoSvg = this.platformModeTargets.find(input => input.value === "Demo")
-            ?.closest('label')
-            .querySelector('.custom-radio');
-        const liveSvg = this.platformModeTargets.find(input => input.value === "Live")
-            ?.closest('label')
-            .querySelector('.custom-radio');
+        // Handle SVG visibility for PLATFORM_MODE
+        this.platformModeTargets.forEach(input => {
+            const parentElement = input.closest('label'); // Parent label
+            const svgElement = parentElement.querySelector('.custom-radio'); // SVG container
 
-        // Show/Hide the correct SVG for PLATFORM_MODE
-        if (platformModeValue === "Demo") {
-            if (demoSvg) demoSvg.classList.remove("hidden");
-            if (liveSvg) liveSvg.classList.add("hidden");
-        } else if (platformModeValue === "Live") {
-            if (liveSvg) liveSvg.classList.remove("hidden");
-            if (demoSvg) demoSvg.classList.add("hidden");
-        }
-
-        // Handle USER_VERIFICATION logic when PLATFORM_MODE is Live
-        if (platformModeValue === "Live") {
-            const userVerificationOff = this.userVerificationTargets.find(input => input.value === "OFF");
-            const userVerificationOn = this.userVerificationTargets.find(input => input.value === "ON");
-
-            if (userVerificationOff && userVerificationOff.checked) {
-                // Prevent UserVerification from being OFF
-                userVerificationOff.checked = false;
+            if (svgElement) {
+                if (input.checked) {
+                    svgElement.classList.remove('hidden'); // Show SVG for selected
+                } else {
+                    svgElement.classList.add('hidden'); // Hide SVG for non-selected
+                }
             }
-            if (userVerificationOn) {
-                // Ensure UserVerification is ON
-                userVerificationOn.checked = true;
+        });
 
-                // Find the corresponding SVGs for User Verification
-                const userVerificationOnSvg = userVerificationOn.closest('label')
-                    .querySelector('.custom-radio');
-                const userVerificationOffSvg = userVerificationOff.closest('label')
-                    .querySelector('.custom-radio');
-                // Show the ON SVG and hide the OFF SVG
-                if (userVerificationOnSvg) userVerificationOnSvg.classList.remove("hidden");
-                if (userVerificationOffSvg) userVerificationOffSvg.classList.add("hidden");
+        // Handle USER_VERIFICATION based on PLATFORM_MODE
+        this.userVerificationTargets.forEach(input => {
+            const parentElement = input.closest('label'); // Parent label
+            const svgElement = parentElement.querySelector('.custom-radio'); // SVG container
+
+            if (platformMode === 'Live') {
+                if (input.value === 'ON') {
+                    input.checked = true; // Force "ON" to be selected
+                    svgElement.classList.remove('hidden'); // Show "ON" SVG
+                } else {
+                    input.checked = false; // Prevent "OFF" from being selected
+                    svgElement.classList.add('hidden'); // Hide "OFF" SVG
+                }
+            } else if (platformMode === 'Demo') {
+                // Handle SVG visibility based on input selection for Demo
+                if (input.checked) {
+                    svgElement.classList.remove('hidden'); // Show selected SVG
+                } else {
+                    svgElement.classList.add('hidden'); // Hide non-selected SVG
+                }
             }
-        }
+        });
     }
 }
