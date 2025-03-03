@@ -51,8 +51,61 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
+            $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             // this "type" is obtained through the url
             if ($this->isGranted('ROLE_ADMIN') && $type === 'admin') {
+                if ($twoFAplatformStatus) {
+                    if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value ||
+                            !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        ) {
+                            $session = $request->getSession();
+                            $session->set('session_admin', true);
+                            return $this->redirectToRoute('admin_page');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_local_admin');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::APP->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_app_admin');
+                        }
+                        $session = $request->getSession();
+                        $session->set('session_admin', true);
+                        return $this->redirectToRoute('admin_page');
+                    }
+                    if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value ||
+                        $twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL->value
+                    ) {
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value ||
+                            !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        ) {
+                            return $this->redirectToRoute('app_enable2FA_admin');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_local_admin');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::APP->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_app_admin');
+                        }
+                        return $this->redirectToRoute('app_enable2FA_admin');
+                    }
+                }
                 $session = $request->getSession();
                 $session->set('session_admin', true);
                 return $this->redirectToRoute('admin_page');
@@ -62,7 +115,6 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('saml_logout');
             }
             // Get 2fa status on platform
-            $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             if ($twoFAplatformStatus) {
                 // Check 2fa status on platform, after that we need to check user status to decide what case we have
                 if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {

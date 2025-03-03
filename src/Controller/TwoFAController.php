@@ -48,6 +48,38 @@ class TwoFAController extends AbstractController
     ) {
     }
 
+    #[Route('/configure2FA', name: 'app_configure2FA')]
+    public function method2FA(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        if ($user) {
+            return $this->render('site/2FA_configuration.html.twig', [
+                'user' => $user,
+                'data' => $data,
+            ]);
+        }
+        $this->addFlash('error', 'You must be logged in to access this page');
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/configure2FA/admin', name: 'app_configure2FA_admin')]
+    public function method2FAAdmin(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        if ($user) {
+            return $this->render('admin/2FA_configuration.html.twig', [
+                'user' => $user,
+                'data' => $data,
+            ]);
+        }
+        $this->addFlash('error', 'You must be logged in to access this page');
+        return $this->redirectToRoute('app_landing');
+    }
+
     #[Route(path: '/enable2FA', name: 'app_enable2FA')]
     public function enable2FA(Request $request): Response
     {
@@ -107,6 +139,71 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_otpCodes');
         }
         return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route(path: '/enable2FA/admin', name: 'app_enable2FA_admin')]
+    public function enable2FAAdmin(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
+        }
+        // if the user already has a phone number in the bd, there is no need to type it again.
+        if ($user->getPhoneNumber() instanceof PhoneNumber) {
+            if ($user instanceof User) {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
+                $this->entityManager->persist($user);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $this->entityManager->flush();
+            } else {
+                $this->addFlash('error', 'You must be logged in to access this page');
+                return $this->redirectToRoute('app_landing');
+            }
+            if ($user->getOTPcodes() === null) {
+                return $this->redirectToRoute('app_otpCodes');
+            }
+            $session = $request->getSession();
+            $session->set('session_admin', true);
+            return $this->redirectToRoute('admin_page');
+        }
+        // if the user already has a email in the bd, there is no need to type it again.
+        if ($user->getEmail()) {
+            $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
+            $this->entityManager->persist($user);
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                new DateTime(),
+                $eventMetaData
+            );
+            $this->entityManager->flush();
+        } else {
+            $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
+        }
+        if ($user->getOTPcodes() === null) {
+            return $this->redirectToRoute('app_otpCodes');
+        }
+        $session = $request->getSession();
+        $session->set('session_admin', true);
+        return $this->redirectToRoute('admin_page');
     }
 
     #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]
@@ -195,6 +292,64 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    #[Route(path: '/verify2FAapp/Admin', name: 'app_verify2FA_app_admin')]
+    public function verify2FAAdmin(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $code = $form->get('code')->getData();
+            $user = $this->getUser();
+            if ($user instanceof User) {
+                // Get the secret code to communicate with app.
+                $secret = $user->gettwoFASecret();
+                // Check if the used code is one of the OTP codes
+                if ($this->twoFAService->validateOTPCodes($user, $code)) {
+                    $session->set('2fa_verified', true);
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::VERIFY_OTP_2FA->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+                    $session = $request->getSession();
+                    $session->set('session_admin', true);
+                    return $this->redirectToRoute('admin_page');
+                }
+                // Check if the code used is the one generated in the application.
+                if ($this->totpService->verifyTOTP($secret, $code)) {
+                    $session->set('2fa_verified', true);
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::VERIFY_APP_2FA->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+                    $session = $request->getSession();
+                    $session->set('session_admin', true);
+                    return $this->redirectToRoute('admin_page');
+                }
+                $this->addFlash('error', 'Invalid code');
+            }
+        }
+        return $this->render('site/verify2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+        ]);
+    }
+
     #[Route(path: '/verify2FA', name: 'app_verify2FA_local')]
     public function verify2FAlocal(Request $request): Response
     {
@@ -248,6 +403,63 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    #[Route(path: '/verify2FA/admin', name: 'app_verify2FA_local_admin')]
+    public function verify2FAlocalAdmin(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->twoFAService->generate2FACode($user);
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $formCode = $form->get('code')->getData();
+            // Check if the used code is one of the OTP codes
+            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $session->set('2fa_verified', true);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::VERIFY_OTP_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $session = $request->getSession();
+                $session->set('session_admin', true);
+                return $this->redirectToRoute('admin_page');
+            }
+            // Check if the code used is the one generated in the BD.
+            if ($this->twoFAService->validate2FACode($user, $formCode)) {
+                $session->set('2fa_verified', true);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::VERIFY_LOCAL_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $session = $request->getSession();
+                $session->set('session_admin', true);
+                return $this->redirectToRoute('admin_page');
+            }
+            $this->addFlash('error', 'Invalid code please try again or resend the code');
+        }
+        return $this->render('site/verify2FAlocal.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'user' => $user,
+        ]);
+    }
+
     #[Route(path: '/disable2FA', name: 'app_disable2FA', methods: ['POST'])]
     public function disable2FA(Request $request): RedirectResponse
     {
@@ -276,8 +488,33 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm', methods: ['POST'])]
+    #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm')]
     public function enable2FAappValidate(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($user) {
+            //Mark 2fa as Enable via app.
+            $user->setTwoFAType(UserTwoFactorAuthenticationStatus::APP->value);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::ENABLE_APP_2FA->value,
+                new DateTime(),
+                $eventMetaData
+            );
+        }
+        return $this->redirectToRoute('app_otpCodes');
+    }
+
+    #[Route(path: '/enable2FAapp/admin/validate', name: 'app_enable2FA_app_confirm_admin')]
+    public function enable2FAappValidateAdmin(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -322,7 +559,7 @@ class TwoFAController extends AbstractController
             );
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,
-                'codes' => $user->getOTPcodes()
+                'codes' => $user->getOTPcodes(),
             ]);
         }
         $this->addFlash('error', 'User not found');
