@@ -78,10 +78,10 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'You must be logged in to access this page');
                 return $this->redirectToRoute('app_landing');
             }
-            if ($user->getOTPcodes()) {
-                return $this->redirectToRoute('app_landing');
+            if ($user->getOTPcodes() === null) {
+                return $this->redirectToRoute('app_otpCodes');
             }
-            return $this->redirectToRoute('app_otpCodes');
+            return $this->redirectToRoute('app_landing');
         }
         // if the user already has a email in the bd, there is no need to type it again.
         if ($user->getEmail()) {
@@ -103,10 +103,10 @@ class TwoFAController extends AbstractController
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
         }
-        if ($user->getOTPcodes()) {
-            return $this->redirectToRoute('app_landing');
+        if ($user->getOTPcodes() === null) {
+            return $this->redirectToRoute('app_otpCodes');
         }
-        return $this->redirectToRoute('app_otpCodes');
+        return $this->redirectToRoute('app_landing');
     }
 
     #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]
