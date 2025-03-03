@@ -53,6 +53,10 @@
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
         {# Local users #}
         {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT')) %}
+            {% if (user.twoFAtype == null) %}
+                <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
+            {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
                 {# add this condition to remove btn to configure 2fa #}
             {% endif %}
@@ -64,6 +68,10 @@
             {% endif %}
             {# Local users #}
         {% else %}
+            {% if (user.twoFAtype == null) %}
+                <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
+            {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
                 <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
@@ -83,6 +91,10 @@
     {% endif %}
     {# When the app status is ENFORCED_FOR_ALL #}
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+        {% if (user.twoFAtype == null) %}
+            <a href="{{ path('app_enable2FA') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
+        {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
             {# add this condition to remove btn to configure 2fa #}
         {% endif %}

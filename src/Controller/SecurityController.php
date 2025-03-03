@@ -89,7 +89,7 @@ class SecurityController extends AbstractController
                             UserTwoFactorAuthenticationStatus::DISABLED->value ||
                             !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                         ) {
-                            return $this->redirectToRoute('app_enable2FA_admin');
+                            return $this->redirectToRoute('app_configure2FA_admin');
                         }
                         if (
                             $user->getTwoFAType() ===

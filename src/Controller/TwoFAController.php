@@ -110,9 +110,6 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'You must be logged in to access this page');
                 return $this->redirectToRoute('app_landing');
             }
-            if ($user->getOTPcodes() === null) {
-                return $this->redirectToRoute('app_otpCodes');
-            }
             return $this->redirectToRoute('app_landing');
         }
         // if the user already has a email in the bd, there is no need to type it again.
@@ -135,9 +132,7 @@ class TwoFAController extends AbstractController
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
         }
-        if ($user->getOTPcodes() === null) {
-            return $this->redirectToRoute('app_otpCodes');
-        }
+        //dd($user->getOTPcodes());
         return $this->redirectToRoute('app_landing');
     }
 
@@ -171,9 +166,6 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'You must be logged in to access this page');
                 return $this->redirectToRoute('app_landing');
             }
-            if ($user->getOTPcodes() === null) {
-                return $this->redirectToRoute('app_otpCodes');
-            }
             $session = $request->getSession();
             $session->set('session_admin', true);
             return $this->redirectToRoute('admin_page');
@@ -197,9 +189,6 @@ class TwoFAController extends AbstractController
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
-        }
-        if ($user->getOTPcodes() === null) {
-            return $this->redirectToRoute('app_otpCodes');
         }
         $session = $request->getSession();
         $session->set('session_admin', true);

@@ -157,7 +157,7 @@ class SiteController extends AbstractController
                         $currentUser->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value))
             ) {
-                return $this->redirectToRoute('app_enable2FA');
+                return $this->redirectToRoute('app_configure2FA');
             }
             if (
                 $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
@@ -165,7 +165,7 @@ class SiteController extends AbstractController
                     $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {
-                return $this->redirectToRoute('app_enable2FA');
+                return $this->redirectToRoute('app_configure2FA');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
