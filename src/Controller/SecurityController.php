@@ -103,7 +103,7 @@ class SecurityController extends AbstractController
                         ) {
                             return $this->redirectToRoute('app_verify2FA_app_admin');
                         }
-                        return $this->redirectToRoute('app_enable2FA_admin');
+                        return $this->redirectToRoute('app_configure2FA_admin');
                     }
                 }
                 $session = $request->getSession();
@@ -145,7 +145,7 @@ class SecurityController extends AbstractController
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
                         !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
-                        return $this->redirectToRoute('app_enable2FA');
+                        return $this->redirectToRoute('app_configure2FA');
                     }
                     if (
                         $user->getTwoFAType() ===
@@ -167,7 +167,7 @@ class SecurityController extends AbstractController
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
                         !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
-                        return $this->redirectToRoute('app_enable2FA');
+                        return $this->redirectToRoute('app_configure2FA');
                     }
                     if (
                         $user->getTwoFAType() ===
@@ -181,7 +181,7 @@ class SecurityController extends AbstractController
                     ) {
                         return $this->redirectToRoute('app_verify2FA_app');
                     }
-                    return $this->redirectToRoute('app_enable2FA');
+                    return $this->redirectToRoute('app_configure2FA');
                 }
                 return $this->redirectToRoute('app_landing');
             }
