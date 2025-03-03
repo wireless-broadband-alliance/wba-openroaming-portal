@@ -78,6 +78,9 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'You must be logged in to access this page');
                 return $this->redirectToRoute('app_landing');
             }
+            if ($user->getOTPcodes()) {
+                return $this->redirectToRoute('app_landing');
+            }
             return $this->redirectToRoute('app_otpCodes');
         }
         // if the user already has a email in the bd, there is no need to type it again.
@@ -98,6 +101,9 @@ class TwoFAController extends AbstractController
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
+            return $this->redirectToRoute('app_landing');
+        }
+        if ($user->getOTPcodes()) {
             return $this->redirectToRoute('app_landing');
         }
         return $this->redirectToRoute('app_otpCodes');

@@ -157,12 +157,13 @@ class TwoFAService
 
     private function sendCode(User $user, string $code): void
     {
+
         $messageType = $user->getTwoFAtype();
-        if ($messageType === UserTwoFactorAuthenticationStatus::SMS) {
+        if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value) {
             $message = "Your Two Factor Authentication Code is " . $code;
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
-        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL) {
+        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value) {
             // Send email to the user with the verification code
             $email = new TemplatedEmail()
                 ->from(
@@ -172,7 +173,7 @@ class TwoFAService
                     )
                 )
                 ->to($user->getEmail())
-                ->subject('Your OpenRoaming Registration Details')
+                ->subject('Your OpenRoaming Two Factor Authentication code')
                 ->htmlTemplate('email/user_code.html.twig')
                 ->context([
                     'uuid' => $user->getEmail(),
