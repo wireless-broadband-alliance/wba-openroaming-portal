@@ -44,6 +44,7 @@
                                     <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}" id="onRadio"
                                            value="Demo"
                                            class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Demo' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'hide')|stimulus_action('radio-card', 'unblock') }}
+                                           data-radio-target="platformMode"
                                             {{ stimulus_target('radio-msg', 'on') }} {{ stimulus_target('radio-card', 'on') }}>
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.PLATFORM_MODE.vars.data == 'Demo' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
@@ -62,7 +63,9 @@
                                     Live
                                     <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}" id="offRadio"
                                            value="Live"
-                                           class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Live' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'display')|stimulus_action('radio-card', 'block') }} >
+                                           class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Live' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'display')|stimulus_action('radio-card', 'block') }}
+                                           data-radio-target="platformMode"
+                                    >
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.PLATFORM_MODE.vars.data == 'Live' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
@@ -85,7 +88,9 @@
                                     <input type="radio" name="{{ form.USER_VERIFICATION.vars.full_name }}"
                                            id="onRadioEmail"
                                            value="ON"
-                                           class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
+                                           class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'ON' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}
+                                           data-radio-target="userVerification"
+                                    >
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.USER_VERIFICATION.vars.data == 'ON' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
@@ -104,7 +109,9 @@
                                     <input type="radio" name="{{ form.USER_VERIFICATION.vars.full_name }}"
                                            id="offRadioEmail"
                                            value="OFF"
-                                           class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
+                                           class="radio-input hidden" {{ form.USER_VERIFICATION.vars.data == 'OFF' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}
+                                           data-radio-target="userVerification"
+                                    >
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.USER_VERIFICATION.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
