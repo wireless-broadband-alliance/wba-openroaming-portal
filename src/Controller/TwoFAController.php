@@ -549,21 +549,6 @@ class TwoFAController extends AbstractController
         }
         if ($user instanceof User) {
             $codes = $this->twoFAService->generateOTPcodes($user);
-            /*
-            // Generate OTP codes
-            $this->twoFAService->generateOTPcodes($user);
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::GENERATE_OTP_2FA->value,
-                new DateTime(),
-                $eventMetaData
-            );
-            */
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,
                 'codes' => $codes,
@@ -581,6 +566,17 @@ class TwoFAController extends AbstractController
         $codesJson = $request->query->get('codes');
         $codes = json_decode($codesJson, true);
         $this->twoFAService->saveCodes($codes, $user);
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
+            'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::GENERATE_OTP_2FA->value,
+            new DateTime(),
+            $eventMetaData
+        );
         return $this->redirectToRoute('app_landing');
     }
 }
