@@ -80,13 +80,12 @@ class AuthType extends AbstractType
                     new Range([
                         'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            'Please select a value between 1 (minimum, fixed value) and %d 
+                            (maximum, determined by the number of days left until the certificate expires on %s).',
                             $options['profileLimitDate'],
                             $options['humanReadableExpirationDate']
                         ),
-                        // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
@@ -155,13 +154,12 @@ class AuthType extends AbstractType
                     new Range([
                         'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            'Please select a value between 1 (minimum, fixed value) and %d 
+                            (maximum, determined by the number of days left until the certificate expires on %s).',
                             $options['profileLimitDate'],
                             $options['humanReadableExpirationDate']
                         ),
-                        // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
@@ -276,13 +274,12 @@ class AuthType extends AbstractType
                     new Range([
                         'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            'Please select a value between 1 (minimum, fixed value) and %d 
+                            (maximum, determined by the number of days left until the certificate expires on %s).',
                             $options['profileLimitDate'],
                             $options['humanReadableExpirationDate']
                         ),
-                        // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
@@ -384,13 +381,12 @@ class AuthType extends AbstractType
                     new Range([
                         'min' => 1,
                         'max' => $options['profileLimitDate'],
-                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d (maximum, determined by the number of days left until the certificate expires on %s).',
+                            'Please select a value between 1 (minimum, fixed value) and %d 
+                            (maximum, determined by the number of days left until the certificate expires on %s).',
                             $options['profileLimitDate'],
                             $options['humanReadableExpirationDate']
                         ),
-                        // phpcs:enable
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {

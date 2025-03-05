@@ -109,11 +109,11 @@ class StatusType extends AbstractType
                             'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                         ]),
                         new GreaterThanOrEqual([
-                            'value' => 1,
-                            'message' => 'This timer should never be less than 0.',
+                            'value' => 0,
+                            'message' => 'This timer should never be less than 0 for user auto-deletion.',
                         ]),
                         new NotBlank([
-                            'message' => 'Please make sure to set a timer',
+                            'message' => 'The timer value is required. Please provide a valid timer',
                         ]),
                     ],
                 ]);
@@ -126,7 +126,7 @@ class StatusType extends AbstractType
                     'constraints' => [
                         new GreaterThanOrEqual([
                             'value' => 1,
-                            'message' => 'This timer should never be less than 0.',
+                            'message' => 'This timer should never be less than 0 for user profile notification.',
                         ]),
                         new NotBlank([
                             'message' => 'Please make sure to set a timer',
