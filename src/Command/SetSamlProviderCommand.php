@@ -89,7 +89,7 @@ class SetSamlProviderCommand extends Command
             );
             return self::FAILURE;
         }
-        $checkIdpEntityId = $this->samlProviderValidator->validateSamlMetadata($idpEntityId);
+        $checkIdpEntityId = $this->samlProviderValidator->validateJsonUrlSamlProvider($idpEntityId);
         if ($checkIdpEntityId) {
             $output->writeln(
                 sprintf(
