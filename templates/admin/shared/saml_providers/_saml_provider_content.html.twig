@@ -135,12 +135,21 @@
                 </li>
                 <li {{ stimulus_controller('alert') }}>
                     {% if samlProvider.isActive %}
-                        <span class="flex flex-row items-center px-2 py-2 text-gray-500 cursor-default">
-                            <twig:ux:icon name="wba:check-circle" class="w-5 mr-3" fill="none"/>
-                            Provider Currently Activated
-                        </span>
+                        <form action="{{ path('admin_dashboard_saml_provider_toggle', {id: samlProvider.id, operation: 'disable'}) }}"
+                                {{ stimulus_target('alert', 'form') }} method="post">
+                            <input type="hidden" name="_method" value="DISABLE">
+                            <a href="javascript:void(0)"
+                               data-provider-id="{{ samlProvider.id }}"
+                               data-provider-name="{{ samlProvider.name }}"
+                                    {{ stimulus_action('alert', 'disable_saml') }}
+                                    {{ stimulus_target('alert', 'button') }}
+                               class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-500">
+                                <twig:ux:icon name="wba:sync" class="w-5 mr-3" fill="none"/>
+                                Disable
+                            </a>
+                        </form>
                     {% else %}
-                        <form action="{{ path('admin_dashboard_saml_provider_enable', {id: samlProvider.id}) }}"
+                        <form action="{{ path('admin_dashboard_saml_provider_toggle', {id: samlProvider.id, operation: 'enable'}) }}"
                                 {{ stimulus_target('alert', 'form') }} method="post">
                             <input type="hidden" name="_method" value="ENABLE">
                             <a href="javascript:void(0)"

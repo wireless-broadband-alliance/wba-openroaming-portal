@@ -32,7 +32,16 @@ export default class extends Controller {
     enable_saml() {
         const providerName = this.buttonTarget.getAttribute("data-provider-name");
         // Show warning message
-        if (confirm(`Are you sure you want to enable SAML for provider ID ${providerName}?`)) {
+        if (confirm(`Are you sure you want to enable SAML for provider ${providerName}?`)) {
+            // If confirmed, submit the form
+            this.formTarget.submit();
+        }
+    }
+
+    disable_saml() {
+        const providerName = this.buttonTarget.getAttribute("data-provider-name");
+        // Show warning message
+        if (confirm(`Are you sure you want to disable SAML for provider ${providerName}?`)) {
             // If confirmed, submit the form
             this.formTarget.submit();
         }

@@ -304,11 +304,14 @@ class SamlProviderController extends AbstractController
     }
 
 
-    #[Route('/dashboard/saml-provider/enable/{id}', name: 'admin_dashboard_saml_provider_enable', methods: ['POST'])]
+    #[Route('/dashboard/saml-provider/toggle/{id}/{operation}',
+        name: 'admin_dashboard_saml_provider_toggle',
+        methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function enableSamlProvider(
+    public function toggleSamlProvider(
         int $id,
-        Request $request,
+        string $operation, // 'enable' or 'disable'
+        Request $request
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -319,40 +322,43 @@ class SamlProviderController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
-        // Find and disable the currently active SAML Provider (if any)
-        $previousSamlProvider = $this->samlProviderRepository->findOneBy(['isActive' => true, 'deletedAt' => null]);
-        if ($previousSamlProvider) {
-            $previousSamlProvider->setActive(false);
-            $previousSamlProvider->setIsLdapActive(false);
-            $this->entityManager->persist($previousSamlProvider);
-        }
-        $samlProvider->setActive(true);
+        // Determine the action (enable or disable)
+        $isActive = $operation === 'enable';
+        $samlProvider->setActive($isActive)
+            ->setUpdatedAt(new DateTime());
         $this->entityManager->persist($samlProvider);
         $this->entityManager->flush();
 
         // Log the event metadata (tracking the change)
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
-            'samlProviderEnabled' => $samlProvider->getName(),
-            'previousSamlProvider' => $previousSamlProvider ? $previousSamlProvider->getName() : 'None',
+            'samlProviderStatus' => $isActive ? 'enabled' : 'disabled',
+            'samlProviderName' => $samlProvider->getName(),
             'ip' => $request->getClientIp(),
             'by' => $currentUser->getUuid(),
         ];
 
+        $eventType = $isActive
+            ? AnalyticalEventType::ADMIN_ENABLED_SAML_PROVIDER->value
+            : AnalyticalEventType::ADMIN_DISABLED_SAML_PROVIDER->value;
+
         $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::ADMIN_ENABLED_SAML_PROVIDER->value,
+            $eventType,
             new DateTime(),
             $eventMetaData
         );
 
+        // Add flash message
         $this->addFlash(
-            'success_admin',
+            $isActive ? 'success_admin' : 'error_admin',
             sprintf(
-                'SAML Provider "%s" is now enabled.',
-                $samlProvider->getName()
+                'SAML Provider "%s" is now %s.',
+                $samlProvider->getName(),
+                $isActive ? 'enabled' : 'disabled'
             )
         );
+
         return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
 
