@@ -29,7 +29,7 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): bool
     {
-        // Check if the request contains the SAMLResponse parameter
+        // Ensure the route is correct and the request method is POST with a valid SAMLResponse
         return $request->request->has('SAMLResponse');
     }
 
@@ -45,15 +45,16 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
             throw new AuthenticationException('Missing SAMLResponse in the request.');
         }
 
-        $samlProviderName = $request->get(
-            'saml_provider_name'
-        ); // TODO Get the samlProvider Name as a query parameter or on the request body.
-        if (!$samlProviderName) {
-            throw new AuthenticationException('SAML provider name is required.');
+        $samlProviderID = $request->query->get('saml_provider_id');
+        if (!$samlProviderID) {
+            throw new AuthenticationException('Missing "saml_provider_id" in the request.');
         }
 
-        $auth = $this->samlService->authSamlProviderByName($samlProviderName);
+        // Cast the value to an integer
+        $samlProviderID = (int)$samlProviderID;
+        $auth = $this->samlService->authSamlProviderById($samlProviderID);
         $auth->processResponse();
+
 
         if ($auth->getErrors()) {
             throw new AuthenticationException(implode(', ', $auth->getErrors()));

@@ -2,7 +2,7 @@
 <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
     {% if data.SAML_ENABLED.value %}
         <div class="w-full">
-            <a href="{{ path('saml_login') }}"
+            <a href="{{ path('saml_login', {saml_provider_id: 16}) }}"
                class="terms-widget__link"
                data-action="click->terms-widget#showModal">
                 <button {{ stimulus_target('terms-widget', 'button') }}

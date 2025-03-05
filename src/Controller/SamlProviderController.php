@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
