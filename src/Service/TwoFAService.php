@@ -102,7 +102,7 @@ class TwoFAService
         return $user->getTwoFAcode();
     }
 
-    public function generateOTPcodes(User $user): void
+    public function generateOTPcodes(User $user): array
     {
         // if the user already have code we need to remove that codes before generate new ones.
         if ($user->getOTPcodes()) {
@@ -110,21 +110,15 @@ class TwoFAService
                 $this->entityManager->remove($code);
             }
         }
+        $codes = [];
         $nCodes = 12; // Number of codes generated.
         $createdCodes = 0;
         while ($createdCodes < $nCodes) {
             $code = $this->generateMixedCode();
-            $otp = new OTPcode();
-            $otp->setUser($user);
-            $otp->setCode($code);
-            $otp->setActive(true);
-            $otp->setCreatedAt(new DateTime());
-            $user->addOTPcode($otp);
-            $this->entityManager->persist($otp);
+            $codes[] = $code;
             $createdCodes++;
         }
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        return $codes;
     }
 
     public function validateOTPCodes(User $user, string $formCode): bool
@@ -193,5 +187,19 @@ class TwoFAService
             return false;
         }
         return true;
+    }
+
+    public function saveCodes(mixed $codes, User $user): void
+    {
+        foreach ($codes as $code) {
+            $otp = new OTPcode();
+            $otp->setUser($user);
+            $otp->setCode($code);
+            $otp->setActive(true);
+            $otp->setCreatedAt(new DateTime());
+            $user->addOTPcode($otp);
+            $this->entityManager->persist($otp);
+        }
+        $this->entityManager->flush();
     }
 }

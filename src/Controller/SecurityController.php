@@ -155,6 +155,12 @@ class SecurityController extends AbstractController
                     }
                     if (
                         $user->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
+                    ) {
+                        return $this->redirectToRoute('app_verify2FA_local');
+                    }
+                    if (
+                        $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::APP->value
                     ) {
                         return $this->redirectToRoute('app_verify2FA_app');
@@ -165,7 +171,7 @@ class SecurityController extends AbstractController
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
                         return $this->redirectToRoute('app_configure2FA');
                     }
@@ -173,6 +179,13 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
+                        return $this->redirectToRoute('app_verify2FA_local');
+                    }
+                    if (
+                        $user->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
+                    ) {
+
                         return $this->redirectToRoute('app_verify2FA_local');
                     }
                     if (

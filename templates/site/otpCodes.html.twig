@@ -38,7 +38,7 @@
                      class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
                     <div class="grid grid-cols-4 gap-4">
                         {% for code in codes %}
-                            <div>{{ code.code }}</div>
+                            <div>{{ code }}</div>
                         {% endfor %}
                     </div>
                 </pre>
@@ -48,7 +48,7 @@
 
     {# Divider #}
     <div>
-        <a href="{{ path('app_landing') }}" class="mt-6 w-[180px] btn-primary">Done</a>
+        <a href="{{ path('app_otpCodes_save', {'codes': codes|json_encode}) }}" class="mt-6 w-[180px] btn-primary">Done</a>
     </div>
 
 {% endblock %}

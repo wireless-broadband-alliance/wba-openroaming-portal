@@ -132,7 +132,6 @@ class TwoFAController extends AbstractController
             $this->addFlash('error', 'You must be logged in to access this page');
             return $this->redirectToRoute('app_landing');
         }
-        //dd($user->getOTPcodes());
         return $this->redirectToRoute('app_landing');
     }
 
@@ -254,6 +253,9 @@ class TwoFAController extends AbstractController
                         new DateTime(),
                         $eventMetaData
                     );
+                    if (!$this->twoFAService->twoFAisActive($user)) {
+                        return $this->redirectToRoute('app_otpCodes');
+                    }
                     return $this->redirectToRoute('app_landing');
                 }
                 // Check if the code used is the one generated in the application.
@@ -270,6 +272,9 @@ class TwoFAController extends AbstractController
                         new DateTime(),
                         $eventMetaData
                     );
+                    if (!$this->twoFAService->twoFAisActive($user)) {
+                        return $this->redirectToRoute('app_otpCodes');
+                    }
                     return $this->redirectToRoute('app_landing');
                 }
                 $this->addFlash('error', 'Invalid code');
@@ -365,6 +370,9 @@ class TwoFAController extends AbstractController
                     new DateTime(),
                     $eventMetaData
                 );
+                if (!$this->twoFAService->twoFAisActive($user)) {
+                    return $this->redirectToRoute('app_otpCodes');
+                }
                 return $this->redirectToRoute('app_landing');
             }
             // Check if the code used is the one generated in the BD.
@@ -381,6 +389,9 @@ class TwoFAController extends AbstractController
                     new DateTime(),
                     $eventMetaData
                 );
+                if (!$this->twoFAService->twoFAisActive($user)) {
+                    return $this->redirectToRoute('app_otpCodes');
+                }
                 return $this->redirectToRoute('app_landing');
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
@@ -499,7 +510,7 @@ class TwoFAController extends AbstractController
                 $eventMetaData
             );
         }
-        return $this->redirectToRoute('app_otpCodes');
+        return $this->redirectToRoute('app_verify2FA_app');
     }
 
     #[Route(path: '/enable2FAapp/admin/validate', name: 'app_enable2FA_app_confirm_admin')]
@@ -524,15 +535,21 @@ class TwoFAController extends AbstractController
                 $eventMetaData
             );
         }
-        return $this->redirectToRoute('app_otpCodes');
+        return $this->redirectToRoute('app_verify2FA_local_admin');
     }
 
     #[Route(path: '/enable2FA/codes', name: 'app_otpCodes')]
     public function twoFAcodes(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $user */
         $user = $this->getUser();
+        if ($this->twoFAService->twoFAisActive($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
         if ($user instanceof User) {
+            $codes = $this->twoFAService->generateOTPcodes($user);
+            /*
             // Generate OTP codes
             $this->twoFAService->generateOTPcodes($user);
             $eventMetaData = [
@@ -546,12 +563,24 @@ class TwoFAController extends AbstractController
                 new DateTime(),
                 $eventMetaData
             );
+            */
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,
-                'codes' => $user->getOTPcodes(),
+                'codes' => $codes,
             ]);
         }
         $this->addFlash('error', 'User not found');
         return $this->redirectToRoute('app_otpCodes');
+    }
+
+    #[Route(path: '/enable2FA/codes/save', name: 'app_otpCodes_save')]
+    public function saveCodes (Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $codesJson = $request->query->get('codes');
+        $codes = json_decode($codesJson, true);
+        $this->twoFAService->saveCodes($codes, $user);
+        return $this->redirectToRoute('app_landing');
     }
 }
