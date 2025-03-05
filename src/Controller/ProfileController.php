@@ -18,6 +18,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\GetSettings;
+use App\Service\TwoFAService;
 use App\Utils\CacheUtils;
 use DateTime;
 use DateTimeInterface;
@@ -45,6 +46,7 @@ class ProfileController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
+        private readonly TwoFAService $twoFAService,
     ) {
         $this->settings = $this->getSettings($settingRepository);
     }
@@ -70,6 +72,12 @@ class ProfileController extends AbstractController
 
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
+        }
+        $session = $request->getSession();
+        if ($this->twoFAService->twoFAisActive($user)) {
+            if (!$session->has('2fa_verified')) {
+                return $this->redirectToRoute('app_landing');
+            }
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
@@ -152,6 +160,13 @@ class ProfileController extends AbstractController
 
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
+        }
+
+        $session = $request->getSession();
+        if ($this->twoFAService->twoFAisActive($user)) {
+            if (!$session->has('2fa_verified')) {
+                return $this->redirectToRoute('app_landing');
+            }
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
@@ -285,6 +300,13 @@ class ProfileController extends AbstractController
 
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
+        }
+
+        $session = $request->getSession();
+        if ($this->twoFAService->twoFAisActive($user)) {
+            if (!$session->has('2fa_verified')) {
+                return $this->redirectToRoute('app_landing');
+            }
         }
 
         $radiususer = $this->createOrUpdateRadiusUser(

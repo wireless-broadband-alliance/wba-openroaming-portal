@@ -183,4 +183,15 @@ class TwoFAService
             $this->mailer->send($email);
         }
     }
+
+    public function twoFAisActive(User $user): bool
+    {
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                return false;
+        }
+        if ($user->getOTPcodes()->isEmpty()) {
+            return false;
+        }
+        return true;
+    }
 }
