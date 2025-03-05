@@ -304,9 +304,11 @@ class SamlProviderController extends AbstractController
     }
 
 
-    #[Route('/dashboard/saml-provider/toggle/{id}/{operation}',
+    #[Route(
+        '/dashboard/saml-provider/toggle/{id}/{operation}',
         name: 'admin_dashboard_saml_provider_toggle',
-        methods: ['POST'])]
+        methods: ['POST']
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function toggleSamlProvider(
         int $id,
