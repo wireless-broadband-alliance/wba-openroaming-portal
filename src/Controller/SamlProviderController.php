@@ -122,17 +122,6 @@ class SamlProviderController extends AbstractController
         $formSamlProvider->handleRequest($request);
 
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
-            // Find and disable the currently active SAML Provider (if any)
-            $previousSamlProvider = $this->samlProviderRepository->findOneBy([
-                'isActive' => true,
-                'deletedAt' => null,
-            ]);
-            if ($previousSamlProvider) {
-                $previousSamlProvider->setActive(false);
-                $previousSamlProvider->setIsLdapActive(false);
-                $this->entityManager->persist($previousSamlProvider);
-            }
-
             $samlProvider->setActive(true)
                 ->setCreatedAt(new DateTime())
                 ->setUpdatedAt(new DateTime());
@@ -215,33 +204,8 @@ class SamlProviderController extends AbstractController
         $formSamlProvider->handleRequest($request);
 
         if ($formSamlProvider->isSubmitted() && $formSamlProvider->isValid()) {
-            if (!$samlProvider->isActive() && $samlProvider->getIsLDAPActive()) {
-                $this->addFlash('error_admin', 'LDAP cannot be active if the provider is disabled.');
-                return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
-                    'id' => $samlProvider->getId(),
-                ]);
-            }
-
             // Check if isLDAPActive has changed
             if ($samlProvider->getIsLDAPActive() !== $originalIsLdapActive) {
-                if ($samlProvider->getIsLDAPActive()) {
-                    // Ensure no other Active SAML Provider with LDAP is enabled
-                    $existingActiveProvider = $this->samlProviderRepository->findOneBy([
-                        'isActive' => true,
-                        'isLDAPActive' => true,
-                    ]);
-
-                    // If an active SAML provider with LDAP is found, prevent enabling LDAP
-                    if ($existingActiveProvider && $existingActiveProvider !== $samlProvider) {
-                        $this->addFlash(
-                            'error_admin',
-                            'You cannot enable LDAP if another SAML Provider with LDAP is already enabled.'
-                        );
-                        return $this->redirectToRoute('admin_dashboard_saml_provider_edit', [
-                            'id' => $samlProvider->getId(),
-                        ]);
-                    }
-                }
                 $samlProvider->setLdapUpdatedAt(new DateTime());
                 $this->entityManager->persist($samlProvider);
 
