@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Service\SamlActiveProviderService;
+use App\Service\SamlProviderResolverService;
 use Exception;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\ValidationError;
@@ -21,7 +21,7 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
     use TargetPathTrait;
 
     public function __construct(
-        private readonly SamlActiveProviderService $samlService,
+        private readonly SamlProviderResolverService $samlService,
         private readonly CustomSamlUserFactory $userFactory,
         private readonly UrlGeneratorInterface $urlGenerator
     ) {
@@ -45,7 +45,14 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
             throw new AuthenticationException('Missing SAMLResponse in the request.');
         }
 
-        $auth = $this->samlService->getActiveSamlProvider();
+        $samlProviderName = $request->get(
+            'saml_provider_name'
+        ); // TODO Get the samlProvider Name as a query parameter or on the request body.
+        if (!$samlProviderName) {
+            throw new AuthenticationException('SAML provider name is required.');
+        }
+
+        $auth = $this->samlService->authSamlProviderByName($samlProviderName);
         $auth->processResponse();
 
         if ($auth->getErrors()) {
