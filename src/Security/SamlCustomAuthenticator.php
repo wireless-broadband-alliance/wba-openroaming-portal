@@ -50,7 +50,6 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
         $samlResponseData = $this->samlService->decodeSamlResponse($samlResponse);
         $idpEntityId = $samlResponseData['idp_entity_id'];
         $idpCertificate = $samlResponseData['certificate'];
-        // Fetch the SamlProvider using the repository
         $fetchedSamlProvider = $this->samlProviderRepository->findOneBy([
             'idpEntityId' => $idpEntityId,
             'idpX509Cert' => $idpCertificate,

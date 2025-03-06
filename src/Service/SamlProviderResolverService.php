@@ -104,6 +104,7 @@ class SamlProviderResolverService
 
     public function decodeSamlResponse(string $samlResponse): array
     {
+        // Decode the SamlResponse for data validation with the DB
         try {
             // Step 1: Decode the Base64-encoded SAMLResponse
             $decodedSamlResponse = base64_decode($samlResponse, true);
