@@ -26,7 +26,7 @@
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Two Factor Authentication Codes</p>
         <p class="text-lg"> Please save these codes for use in case you lose your device. </p>
-        <div data-controller="clipboard">
+        <div data-controller="clipboard print">
             <div class="mt-5 border border-gray-300 rounded-md">
                 <div class="flex space-x-2">
                     <button
@@ -38,20 +38,21 @@
                        class="btn-secondary text-xs px-2 py-1">
                         Download
                     </a>
-                    <button onclick="window.print()" class="btn-secondary text-xs px-2 py-1">
+                    <button data-action="print#print" class="btn-secondary text-xs px-2 py-1">
                         Print
                     </button>
                 </div>
 
-                <pre id="code-to-copy"
+                <div id="codesBox"
                      data-clipboard-target="code"
+                     data-print-target="codesBox"
                      class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left mt-4">
                     <div class="grid grid-cols-4 gap-4">
                         {% for code in codes %}
                             <div>{{ code }}</div>
                         {% endfor %}
                     </div>
-                </pre>
+                </div>
             </div>
         </div>
     </div>
