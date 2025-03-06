@@ -657,6 +657,8 @@ class SettingsController extends AbstractController
                 'TWO_FACTOR_AUTH_APP_LABEL',
                 'TWO_FACTOR_AUTH_APP_ISSUER',
                 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME',
+                'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
+                'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'
             ];
 
             foreach ($settingsToHandle as $settingName) {
