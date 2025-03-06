@@ -212,6 +212,8 @@ class SetSamlProviderCommand extends Command
             $samlProvider->setSpEntityId($spEntityId);
             $samlProvider->setSpAcsUrl($spAcsUrl);
             $samlProvider->setActive(true);
+            $samlProvider->setBtnLabel('Login with ' . $name);
+            $samlProvider->setBtnDescription('Authenticate with your ' . $name . ' account');
             $samlProvider->setIsLDAPActive(false);
             $samlProvider->setCreatedAt(new DateTime());
             $samlProvider->setUpdatedAt(new DateTime());

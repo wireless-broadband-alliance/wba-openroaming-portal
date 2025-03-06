@@ -73,6 +73,12 @@ class SamlProvider
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $ldapUpdatedAt = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $btnLabel = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $btnDescription = null;
+
     public function __construct()
     {
         $this->userExternalAuths = new ArrayCollection();
@@ -313,6 +319,30 @@ class SamlProvider
     public function setLdapUpdatedAt(?\DateTimeInterface $ldapUpdatedAt): static
     {
         $this->ldapUpdatedAt = $ldapUpdatedAt;
+
+        return $this;
+    }
+
+    public function getBtnLabel(): ?string
+    {
+        return $this->btnLabel;
+    }
+
+    public function setBtnLabel(?string $btnLabel): static
+    {
+        $this->btnLabel = $btnLabel;
+
+        return $this;
+    }
+
+    public function getBtnDescription(): ?string
+    {
+        return $this->btnDescription;
+    }
+
+    public function setBtnDescription(?string $btnDescription): static
+    {
+        $this->btnDescription = $btnDescription;
 
         return $this;
     }

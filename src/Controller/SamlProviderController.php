@@ -291,6 +291,12 @@ class SamlProviderController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/saml-provider/edit/btns/{id}', name: 'admin_dashboard_saml_provider_edit_style')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function editAuthBtns(int $id): never
+    {
+        dd($id);
+    }
 
     #[Route(
         '/dashboard/saml-provider/toggle/{id}/{operation}',

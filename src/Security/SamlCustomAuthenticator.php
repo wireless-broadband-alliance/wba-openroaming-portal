@@ -42,19 +42,18 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
      */
     public function authenticate(Request $request): SelfValidatingPassport
     {
-        // Step 1: Fetch the SAML Response from the request
         $samlResponse = $request->request->get('SAMLResponse');
         if (!$samlResponse) {
             throw new AuthenticationException('Missing SAMLResponse in the request.');
         }
 
-        // Step 2: Retrieve the SAML provider passed via the URL or request
-        $samlProviderId = $request->query->get('samlProvider');
+        $samlProviderId = $request->query->get('saml_provider_id');
         if (!$samlProviderId) {
             throw new AuthenticationException('No SAML provider specified.');
         }
 
         $auth = $this->samlProviderResolverService->authSamlProviderById($samlResponse);
+        dd($auth);
         $auth->processResponse();
 
         if ($auth->getErrors()) {
