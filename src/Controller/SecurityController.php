@@ -81,7 +81,8 @@ class SecurityController extends AbstractController
                         $session->set('session_admin', true);
                         return $this->redirectToRoute('admin_page');
                     }
-                    if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value ||
+                    if (
+                        $twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value ||
                         $twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL->value
                     ) {
                         if (
@@ -191,7 +192,6 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::EMAIL->value
                     ) {
-
                         return $this->redirectToRoute('app_verify2FA_local');
                     }
                     if (

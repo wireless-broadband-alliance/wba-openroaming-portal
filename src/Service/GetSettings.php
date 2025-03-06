@@ -153,7 +153,9 @@ class GetSettings
         ];
 
         $data['TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'])->getValue(),
+            'value' => $settingRepository->findOneBy([
+                'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'
+            ])->getValue(),
             'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'),
         ];
 

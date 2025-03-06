@@ -559,7 +559,7 @@ class TwoFAController extends AbstractController
     }
 
     #[Route(path: '/enable2FA/codes/save', name: 'app_otpCodes_save')]
-    public function saveCodes (Request $request): Response
+    public function saveCodes(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
