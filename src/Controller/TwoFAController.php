@@ -605,7 +605,8 @@ class TwoFAController extends AbstractController
             $attemptsleft = $nrAttempts - count($attempts);
             $this->addFlash(
                 'success',
-                'The code was resent successfully. You have '. $attemptsleft .' attempts.');
+                'The code was resent successfully. You have ' . $attemptsleft . ' attempts.'
+            );
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
             $now = new DateTime();
@@ -622,15 +623,17 @@ class TwoFAController extends AbstractController
             $interval_minutes += $interval->i;
             $this->addFlash(
                 'error',
-                'You have exceeded the number of attempts, wait '.
-                $interval_minutes . ' minutes to request a code again');
+                'You have exceeded the number of attempts, wait ' .
+                $interval_minutes . ' minutes to request a code again'
+            );
         }
         $lastPage = $request->headers->get('referer', '/');
         return $this->redirect($lastPage);
     }
 
     #[Route(path: '/generate2FACode', name: 'app_2FA_generate_code')]
-    public function generateCode(Request $request): Response {
+    public function generateCode(Request $request): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $this->twoFAService->generate2FACode($user);
@@ -638,7 +641,8 @@ class TwoFAController extends AbstractController
     }
 
     #[Route(path: '/generate2FACode/admin', name: 'app_2FA_generate_code_admin')]
-    public function generateCodeAdmin(Request $request): Response {
+    public function generateCodeAdmin(Request $request): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $this->twoFAService->generate2FACode($user);

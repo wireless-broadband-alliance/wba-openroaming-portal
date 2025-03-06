@@ -110,7 +110,8 @@ class TwoFAService
         return $user->getTwoFAcode();
     }
 
-    public function resendCode(User $user) {
+    public function resendCode(User $user)
+    {
         $code = $this->twoFACode($user);
         $this->sendCode($user, $code);
     }
