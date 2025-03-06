@@ -197,10 +197,7 @@ class TwoFAService
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
                 return false;
         }
-        if ($user->getOTPcodes()->isEmpty()) {
-            return false;
-        }
-        return true;
+        return !$user->getOTPcodes()->isEmpty();
     }
 
     public function saveCodes(mixed $codes, User $user): void

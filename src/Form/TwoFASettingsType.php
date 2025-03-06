@@ -122,7 +122,7 @@ class TwoFASettingsType extends AbstractType
                     ],
                     'invalid_message' => 'Please enter a valid number.',
                 ]);
-            }elseif ($settingName === 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS') {
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS') {
                 $builder->add('TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', IntegerType::class, [
                     'data' => (int)$settingValue,
                     'attr' => [

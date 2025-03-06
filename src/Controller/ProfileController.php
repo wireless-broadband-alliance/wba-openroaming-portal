@@ -74,10 +74,8 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
-        if ($this->twoFAService->twoFAisActive($user)) {
-            if (!$session->has('2fa_verified')) {
-                return $this->redirectToRoute('app_landing');
-            }
+        if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
@@ -163,10 +161,8 @@ class ProfileController extends AbstractController
         }
 
         $session = $request->getSession();
-        if ($this->twoFAService->twoFAisActive($user)) {
-            if (!$session->has('2fa_verified')) {
-                return $this->redirectToRoute('app_landing');
-            }
+        if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
         }
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
@@ -303,10 +299,8 @@ class ProfileController extends AbstractController
         }
 
         $session = $request->getSession();
-        if ($this->twoFAService->twoFAisActive($user)) {
-            if (!$session->has('2fa_verified')) {
-                return $this->redirectToRoute('app_landing');
-            }
+        if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
         }
 
         $radiususer = $this->createOrUpdateRadiusUser(
