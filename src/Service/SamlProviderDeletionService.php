@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\DeletedSamlProviderData;
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -17,7 +16,7 @@ class SamlProviderDeletionService
     public function __construct(
         private readonly EventActions $eventActions,
         private readonly EntityManagerInterface $entityManager,
-        private readonly PgpEncryptionService $encryptionService,
+        private readonly PgpEncryptionService $encryptionService
     ) {
     }
 

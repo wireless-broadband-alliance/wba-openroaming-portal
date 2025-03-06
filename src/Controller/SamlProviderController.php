@@ -14,6 +14,7 @@ use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\AuthSamlMethodCheckerService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -46,6 +47,7 @@ class SamlProviderController extends AbstractController
         private readonly UserDeletionService $userDeletionService,
         private readonly SamlProviderDeletionService $samlProviderDeletionService,
         private readonly SamlProviderResolverService $samlProviderResolverService,
+        private readonly AuthSamlMethodCheckerService $authSamlMethodCheckerService,
     ) {
     }
 
@@ -325,6 +327,8 @@ class SamlProviderController extends AbstractController
             ->setUpdatedAt(new DateTime());
         $this->entityManager->persist($samlProvider);
         $this->entityManager->flush();
+        // Enable or disable `AUTH_METHOD_SAML_ENABLED` based on active providers.
+        $this->authSamlMethodCheckerService->checkAndUpdateAuthMethodStatus();
 
         // Log the event metadata (tracking the change)
         $eventMetaData = [
@@ -416,6 +420,9 @@ class SamlProviderController extends AbstractController
             $request,
             $currentUser,
         );
+
+        // Enable or disable `AUTH_METHOD_SAML_ENABLED` based on active providers.
+        $this->authSamlMethodCheckerService->checkAndUpdateAuthMethodStatus();
         // Handle the failure response in case of missing PGP details
         if (!$deleteSamlProviderResult['success']) {
             $this->addFlash('error_admin', $deleteSamlProviderResult['message']);
