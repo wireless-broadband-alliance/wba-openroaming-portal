@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- saved from url=(0020)/api -->
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -6,23 +7,23 @@
 
     <title>OpenRoaming Portal API - API Platform</title>
 
-    <link rel="stylesheet" href="index_files00.css">
-    <link rel="stylesheet" href="index_files00.css">
-    <link rel="stylesheet" href="index_fileswagger-ui.css">
-    <link rel="stylesheet" href="index_filestyle.css">
+    <link rel="stylesheet" href="./index_files/400.css">
+    <link rel="stylesheet" href="./index_files/700.css">
+    <link rel="stylesheet" href="./index_files/swagger-ui.css">
+    <link rel="stylesheet" href="./index_files/style.css">
     <script src="lock-fixer.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-            setTimeout(function() {
+        $(document).ready(function () {
+            setTimeout(function () {
                 $('.scheme-container').remove();
                 $('button.authorization__btn[aria-label="authorization button unlocked"]').replaceWith(`
-      <button class="authorization__btn" aria-label="authorization button locked">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20" height="20" aria-hidden="true" focusable="false">
-          <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path>
-        </svg>
-      </button>
-    `);
+          <button class="authorization__btn" aria-label="authorization button locked">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="locked" width="20" height="20" aria-hidden="true" focusable="false">
+              <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"></path>
+            </svg>
+          </button>
+        `);
             }, 1500);
         });
     </script>
@@ -1617,7 +1618,7 @@
                                 }
                             },
                             "400": {
-                                "description": "Bad Request due to missing SAML response",
+                                "description": "Bad Request due to missing or invalid SAML response",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -1632,14 +1633,28 @@
                                                     "description": "Error message explaining why the request failed",
                                                     "example": "SAML Response not found"
                                                 }
+                                            }
+                                        },
+                                        "examples": {
+                                            "saml_response_not_found": {
+                                                "summary": "SAML Response not found",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "SAML Response not found"
+                                                }
                                             },
-                                            "examples": {
-                                                "saml_response_not_found": {
-                                                    "summary": "SAML Response not found",
-                                                    "value": {
-                                                        "success": false,
-                                                        "error": "SAML Response not found"
-                                                    }
+                                            "saml_response_invalid": {
+                                                "summary": "SAML Provider Name invalid or missing ",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid or missing SAML Provider name"
+                                                }
+                                            },
+                                            "saml_provider_id_invalid": {
+                                                "summary": "SAML Provider ID does not match the fetched provider.",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "SAML Provider ID does not match the fetched provider."
                                                 }
                                             }
                                         }
@@ -1765,10 +1780,16 @@
                                                 "type": "string",
                                                 "description": "Base64-encoded SAML response included in the form data",
                                                 "example": "base64-encoded-saml-assertion"
+                                            },
+                                            "SAMLProviderID": {
+                                                "type": "string",
+                                                "description": "The unique identifier of the SAML provider associated with the SAMLResponse",
+                                                "example": "12345"
                                             }
                                         },
                                         "required": [
-                                            "SAMLResponse"
+                                            "SAMLResponse",
+                                            "SAMLProviderID"
                                         ]
                                     }
                                 }
@@ -2580,6 +2601,174 @@
                             }
                         }
                     },
+                    "Notification": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "user": {
+                                "type": "string",
+                                "format": "iri-reference",
+                                "example": "https://example.com/"
+                            },
+                            "lastNotification": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "type": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "Notification.jsonld": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "@context": {
+                                "readOnly": true,
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "@vocab": {
+                                                "type": "string"
+                                            },
+                                            "hydra": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "http://www.w3.org/ns/hydra/core#"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "@vocab",
+                                            "hydra"
+                                        ],
+                                        "additionalProperties": true
+                                    }
+                                ]
+                            },
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "user": {
+                                "type": "string",
+                                "format": "iri-reference",
+                                "example": "https://example.com/"
+                            },
+                            "lastNotification": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "type": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "OTPcode": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "user": {
+                                "type": "string",
+                                "format": "iri-reference",
+                                "example": "https://example.com/"
+                            },
+                            "code": {
+                                "type": "string"
+                            },
+                            "active": {
+                                "type": "boolean"
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    },
+                    "OTPcode.jsonld": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "@context": {
+                                "readOnly": true,
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "@vocab": {
+                                                "type": "string"
+                                            },
+                                            "hydra": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "http://www.w3.org/ns/hydra/core#"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "@vocab",
+                                            "hydra"
+                                        ],
+                                        "additionalProperties": true
+                                    }
+                                ]
+                            },
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "user": {
+                                "type": "string",
+                                "format": "iri-reference",
+                                "example": "https://example.com/"
+                            },
+                            "code": {
+                                "type": "string"
+                            },
+                            "active": {
+                                "type": "boolean"
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    },
                     "PhoneNumber": {
                         "type": "object",
                         "description": "",
@@ -2801,6 +2990,241 @@
                             }
                         }
                     },
+                    "SamlProvider": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "idpEntityId": {
+                                "type": "string"
+                            },
+                            "idpSsoUrl": {
+                                "type": "string"
+                            },
+                            "idpX509Cert": {
+                                "type": "string"
+                            },
+                            "spEntityId": {
+                                "type": "string"
+                            },
+                            "spAcsUrl": {
+                                "type": "string"
+                            },
+                            "isActive": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
+                            "userExternalAuths": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/UserExternalAuth"
+                                }
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "updatedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "deletedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "isLDAPActive": {
+                                "type": "boolean"
+                            },
+                            "ldapServer": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapBindUserDn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapBindUserPassword": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapSearchBaseDn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapSearchFilter": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapUpdatedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "active": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "SamlProvider.jsonld": {
+                        "type": "object",
+                        "description": "",
+                        "deprecated": false,
+                        "properties": {
+                            "@context": {
+                                "readOnly": true,
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "@vocab": {
+                                                "type": "string"
+                                            },
+                                            "hydra": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "http://www.w3.org/ns/hydra/core#"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "@vocab",
+                                            "hydra"
+                                        ],
+                                        "additionalProperties": true
+                                    }
+                                ]
+                            },
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "idpEntityId": {
+                                "type": "string"
+                            },
+                            "idpSsoUrl": {
+                                "type": "string"
+                            },
+                            "idpX509Cert": {
+                                "type": "string"
+                            },
+                            "spEntityId": {
+                                "type": "string"
+                            },
+                            "spAcsUrl": {
+                                "type": "string"
+                            },
+                            "isActive": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            },
+                            "userExternalAuths": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/UserExternalAuth.jsonld"
+                                }
+                            },
+                            "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "updatedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "deletedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "isLDAPActive": {
+                                "type": "boolean"
+                            },
+                            "ldapServer": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapBindUserDn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapBindUserPassword": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapSearchBaseDn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapSearchFilter": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "ldapUpdatedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "active": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
                     "Setting": {
                         "type": "object",
                         "description": "Returns public values from the Setting entity",
@@ -2931,12 +3355,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -2967,13 +3385,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -2989,6 +3400,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification"
                                 }
                             },
                             "deletedAt": {
@@ -3028,6 +3445,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3039,12 +3487,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -3110,12 +3552,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -3146,13 +3582,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -3168,6 +3597,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification"
                                 }
                             },
                             "deletedAt": {
@@ -3207,6 +3642,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3218,12 +3684,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -3289,12 +3749,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -3325,13 +3779,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -3347,6 +3794,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification"
                                 }
                             },
                             "deletedAt": {
@@ -3386,6 +3839,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3397,12 +3881,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -3503,12 +3981,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -3539,13 +4011,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -3561,6 +4026,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event.jsonld"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification.jsonld"
                                 }
                             },
                             "deletedAt": {
@@ -3600,6 +4071,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode.jsonld"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3611,12 +4113,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -3682,12 +4178,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -3718,13 +4208,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -3740,6 +4223,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification"
                                 }
                             },
                             "deletedAt": {
@@ -3779,6 +4268,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -3790,12 +4310,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -3896,12 +4410,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -3932,13 +4440,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -3954,6 +4455,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event.jsonld"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification.jsonld"
                                 }
                             },
                             "deletedAt": {
@@ -3993,6 +4500,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode.jsonld"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -4004,12 +4542,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -4110,12 +4642,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -4146,13 +4672,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -4168,6 +4687,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event.jsonld"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification.jsonld"
                                 }
                             },
                             "deletedAt": {
@@ -4207,6 +4732,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode.jsonld"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -4218,12 +4774,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -4297,12 +4847,6 @@
                             "isVerified": {
                                 "type": "boolean"
                             },
-                            "saml_identifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "first_name": {
                                 "type": [
                                     "string",
@@ -4333,13 +4877,6 @@
                                     "null"
                                 ]
                             },
-                            "googleId": {
-                                "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
                             "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -4355,6 +4892,12 @@
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Event.jsonld"
+                                }
+                            },
+                            "notification": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Notification.jsonld"
                                 }
                             },
                             "deletedAt": {
@@ -4394,6 +4937,37 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "twoFAsecret": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAtype": {
+                                "type": "integer"
+                            },
+                            "twoFAcode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "twoFAcodeIsActive": {
+                                "type": "boolean"
+                            },
+                            "twoFAcodeGeneratedAt": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "oTPcodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/OTPcode.jsonld"
+                                }
+                            },
                             "userIdentifier": {
                                 "readOnly": true,
                                 "description": "A visual identifier that represents this user.",
@@ -4405,12 +4979,6 @@
                             "verified": {
                                 "readOnly": true,
                                 "type": "boolean"
-                            },
-                            "samlIdentifier": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
                             },
                             "samlAttributes": {
                                 "writeOnly": true,
@@ -4461,6 +5029,16 @@
                             },
                             "provider_id": {
                                 "type": "string"
+                            },
+                            "samlProvider": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SamlProvider"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
                             },
                             "providerId": {
                                 "type": "string"
@@ -4522,6 +5100,16 @@
                             "provider_id": {
                                 "type": "string"
                             },
+                            "samlProvider": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SamlProvider.jsonld"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
                             "providerId": {
                                 "type": "string"
                             }
@@ -4561,6 +5149,12 @@
                             "status": {
                                 "type": "integer"
                             },
+                            "revoked_reason": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
                             "radiusToken": {
                                 "type": "string"
                             },
@@ -4580,6 +5174,12 @@
                                     "null"
                                 ],
                                 "format": "date-time"
+                            },
+                            "revokedReason": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     },
@@ -4652,6 +5252,12 @@
                             "status": {
                                 "type": "integer"
                             },
+                            "revoked_reason": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
                             "radiusToken": {
                                 "type": "string"
                             },
@@ -4671,6 +5277,12 @@
                                     "null"
                                 ],
                                 "format": "date-time"
+                            },
+                            "revokedReason": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }
@@ -4707,7 +5319,7 @@
             "clientId": "",
             "clientSecret": "",
             "pkce": false,
-            "redirectUrl": "http:///bundles/apiplatform/swagger-ui/oauth2-redirect.html"
+            "redirectUrl": "/bundles/apiplatform/swagger-ui/oauth2-redirect.html"
         },
         "extraConfiguration": {
             "persistAuthorization": true
@@ -4751,11 +5363,11 @@
 </svg>
 
 <header>
-    <a id="logo" href="https://api-platform.com/"><img src="index_filesogo-header.svg" alt="API Platform"></a>
+    <a id="logo" href="https://api-platform.com/"><img src="./index_files/logo-header.svg" alt="API Platform"></a>
 </header>
 
-<div class="web calm"><img src="index_fileseb.png"></div>
-<div class="webby calm"><img src="index_filesebby.png"></div>
+<div class="web calm"><img src="./index_files/web.png"></div>
+<div class="webby calm"><img src="./index_files/webby.png"></div>
 
 <div id="swagger-ui" class="api-platform">
     <section class="swagger-ui swagger-container">
@@ -4887,7 +5499,7 @@
         </div>
         <div class="swagger-ui">
             <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="svg-assets">
                     <defs>
                         <symbol viewBox="0 0 20 20" id="unlocked">
                             <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path>
@@ -4960,7 +5572,7 @@
                                                                                 id="operations-tag-Profile_Configuration"
                                                                                 data-tag="Profile Configuration"
                                                                                 data-is-open="true"><a class="nostyle"
-                                                                                                       href="http:///api#/Profile%20Configuration"><span>Profile Configuration</span></a><small></small><button
+                                                                                                       href="/api#/Profile%20Configuration"><span>Profile Configuration</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -4973,8 +5585,7 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/config/profile/android"><a
-                                class="nostyle"
-                                href="http:///api#/Profile%20Configuration/api_config_profile_android"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/android</span></a></span><div
+                                class="nostyle" href="/api#/Profile%20Configuration/api_config_profile_android"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/android</span></a></span><div
                                 class="opblock-summary-description">Get Android profile configuration</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -4998,8 +5609,7 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/config/profile/ios"><a
-                                class="nostyle"
-                                href="http:///api#/Profile%20Configuration/api_config_profile_ios"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/ios</span></a></span><div
+                                class="nostyle" href="/api#/Profile%20Configuration/api_config_profile_ios"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/ios</span></a></span><div
                                 class="opblock-summary-description">Get iOS profile configuration</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5019,7 +5629,7 @@
                                 class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
                                                                         id="operations-tag-Setting" data-tag="Setting"
                                                                         data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/Setting"><span>Setting</span></a><small></small><button
+                                                                                               href="/api#/Setting"><span>Setting</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5031,7 +5641,7 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/config"><a
-                                class="nostyle" href="http:///api#/Setting/app_config_settings"><span>/api<wbr>/v1<wbr>/config</span></a></span><div
+                                class="nostyle" href="/api#/Setting/app_config_settings"><span>/api<wbr>/v1<wbr>/config</span></a></span><div
                                 class="opblock-summary-description">Get configuration settings</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5045,8 +5655,7 @@
                                 class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
                                                                         id="operations-tag-Turnstile"
                                                                         data-tag="Turnstile" data-is-open="true"><a
-                                class="nostyle"
-                                href="http:///api#/Turnstile"><span>Turnstile</span></a><small></small><button
+                                class="nostyle" href="/api#/Turnstile"><span>Turnstile</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5058,7 +5667,7 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/turnstile/android"><a
-                                class="nostyle" href="http:///api#/Turnstile/api_turnstile_html_android"><span>/api<wbr>/v1<wbr>/turnstile<wbr>/android</span></a></span><div
+                                class="nostyle" href="/api#/Turnstile/api_turnstile_html_android"><span>/api<wbr>/v1<wbr>/turnstile<wbr>/android</span></a></span><div
                                 class="opblock-summary-description">Return the HTML required for Turnstile configuration on an Android App</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5074,7 +5683,7 @@
                                 class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
                                                                         id="operations-tag-User" data-tag="User"
                                                                         data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/User"><span>User</span></a><small></small><button
+                                                                                               href="/api#/User"><span>User</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5086,7 +5695,7 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/user"><a
-                                class="nostyle" href="http:///api#/User/api_get_current_user"><span>/api<wbr>/v1<wbr>/user</span></a></span><div
+                                class="nostyle" href="/api#/User/api_get_current_user"><span>/api<wbr>/v1<wbr>/user</span></a></span><div
                                 class="opblock-summary-description">Retrieve current authenticated user</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5104,8 +5713,7 @@
                                 class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
                                                                         id="operations-tag-User_Auth"
                                                                         data-tag="User Auth" data-is-open="true"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth"><span>User Auth</span></a><small></small><button
+                                class="nostyle" href="/api#/User%20Auth"><span>User Auth</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5117,7 +5725,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/google"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_google"><span>/api<wbr>/v1<wbr>/auth<wbr>/google</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth/api_auth_google"><span>/api<wbr>/v1<wbr>/auth<wbr>/google</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user via Google</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5136,7 +5744,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/local"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_local"><span>/api<wbr>/v1<wbr>/auth<wbr>/local</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth/api_auth_local"><span>/api<wbr>/v1<wbr>/auth<wbr>/local</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user locally</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5155,7 +5763,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/microsoft"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_microsoft"><span>/api<wbr>/v1<wbr>/auth<wbr>/microsoft</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth/api_auth_microsoft"><span>/api<wbr>/v1<wbr>/auth<wbr>/microsoft</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user via Microsoft</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5174,7 +5782,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/saml"><a
-                                class="nostyle" href="http:///api#/User%20Auth/api_auth_saml"><span>/api<wbr>/v1<wbr>/auth<wbr>/saml</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth/api_auth_saml"><span>/api<wbr>/v1<wbr>/auth<wbr>/saml</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user via SAML</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5191,7 +5799,7 @@
                                                                         id="operations-tag-User_Auth_Register"
                                                                         data-tag="User Auth Register"
                                                                         data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/User%20Auth%20Register"><span>User Auth Register</span></a><small></small><button
+                                                                                               href="/api#/User%20Auth%20Register"><span>User Auth Register</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5203,8 +5811,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/local/register"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Register/api_auth_local_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/register</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth%20Register/api_auth_local_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/register</span></a></span><div
                                 class="opblock-summary-description">Register a new user via local authentication</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5223,8 +5830,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/sms/register"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Register/api_auth_sms_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/register</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth%20Register/api_auth_sms_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/register</span></a></span><div
                                 class="opblock-summary-description">Register a new user via SMS authentication</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5241,7 +5847,7 @@
                                                                         id="operations-tag-User_Auth_Reset"
                                                                         data-tag="User Auth Reset"
                                                                         data-is-open="true"><a class="nostyle"
-                                                                                               href="http:///api#/User%20Auth%20Reset"><span>User Auth Reset</span></a><small></small><button
+                                                                                               href="/api#/User%20Auth%20Reset"><span>User Auth Reset</span></a><small></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5253,8 +5859,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/local/reset"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Reset/api_auth_local_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/reset</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth%20Reset/api_auth_local_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/reset</span></a></span><div
                                 class="opblock-summary-description">Trigger a password reset for a local auth account</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5273,8 +5878,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/sms/reset"><a
-                                class="nostyle"
-                                href="http:///api#/User%20Auth%20Reset/api_auth_sms_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/reset</span></a></span><div
+                                class="nostyle" href="/api#/User%20Auth%20Reset/api_auth_sms_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/reset</span></a></span><div
                                 class="opblock-summary-description">Trigger a password reset for an SMS auth account</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5381,6 +5985,78 @@
                                     <div class="json-schema-2020-12-head">
                                         <button type="button" class="json-schema-2020-12-accordion">
                                             <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">Notification</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">Notification.jsonld</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">OTPcode</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">OTPcode.jsonld</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
                                                 <div class="json-schema-2020-12__title">PhoneNumber</div>
                                             </div>
                                             <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
@@ -5437,6 +6113,42 @@
                                             <div class="json-schema-2020-12-accordion__children">
                                                 <div class="json-schema-2020-12__title">Profile.Configuration.jsonld
                                                 </div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">SamlProvider</div>
+                                            </div>
+                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24"><path
+                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
+                                        </button>
+                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
+                                            all
+                                        </button>
+                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
+                                    </div>
+                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
+                                </article>
+                                <article data-json-schema-level="0" class="json-schema-2020-12">
+                                    <div class="json-schema-2020-12-head">
+                                        <button type="button" class="json-schema-2020-12-accordion">
+                                            <div class="json-schema-2020-12-accordion__children">
+                                                <div class="json-schema-2020-12__title">SamlProvider.jsonld</div>
                                             </div>
                                             <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -5754,21 +6466,21 @@
     <div class="information-container wrapper">
         <div class="info">
             Available formats:
-            <a href="http:///api/index.jsonld">jsonld</a>
-            <a href="http:///api/index.json">json</a>
-            <a href="http:///api/index.yaml">yaml</a>
-            <a href="http:///api/index.html">html</a>
+            <a href="/api/index.jsonld">jsonld</a>
+            <a href="/api/index.json">json</a>
+            <a href="/api/index.yaml">yaml</a>
+            <a href="/api/index.html">html</a>
             <br>
             Other API docs:
-            <a href="http:///api/docs?ui=re_doc">ReDoc</a> <a class="graphiql-link">GraphiQL</a></div>
+            <a href="/api/docs?ui=re_doc">ReDoc</a> <a class="graphiql-link">GraphiQL</a></div>
     </div>
 </div>
 
-<script src="index_fileswagger-ui-bundle.js"></script>
-<script src="index_fileswagger-ui-standalone-preset.js"></script>
-<script src="index_filesnit-swagger-ui.js"></script>
-<script src="index_filesnit-common-ui.js" defer=""></script>
-
+<script src="./index_files/swagger-ui-bundle.js"></script>
+<script src="./index_files/swagger-ui-standalone-preset.js"></script>
+<script src="./index_files/init-swagger-ui.js"></script>
+<script src="./index_files/init-common-ui.js" defer=""></script>
+</div>
 <style nonce="">    .sf-toolbarreset {
     --sf-toolbar-font-family-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --sf-toolbar-font-family-monospace: "Ubuntu Mono", "JetBrains Mono", ui-monospace, "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -6786,7 +7498,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                     if (0 === url.indexOf('')) {
                         path = url.slice(0);
                     }
-                } else if (0 === url.indexOf('http\u003A\/\/')) {
+                } else if (0 === url.indexOf('http\u003A\/\/127.0.0.1')) {
                     path = url.slice(16);
                 }
                 if (!path.match(new RegExp("^\/((index|app(_[\\w]+)?)\\.php\/)?_wdt"))) {
@@ -6916,7 +7628,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                     });
                 }
                 newToken = (newToken || token);
-                this.load('sfwdt' + token, 'http\u003A\/\/\/_wdt\/xxxxxx'.replace(/xxxxxx/, newToken), function (xhr, el) {                            /* Do nothing in the edge case where the toolbar has already been replaced with a new one */
+                this.load('sfwdt' + token, 'http\u003A\/\/127.0.0.1\/_wdt\/xxxxxx'.replace(/xxxxxx/, newToken), function (xhr, el) {                            /* Do nothing in the edge case where the toolbar has already been replaced with a new one */
                     if (!document.getElementById('sfToolbarMainContent-' + newToken)) {
                         return;
                     }                            /* Evaluate in global scope scripts embedded inside the toolbar */
@@ -6979,7 +7691,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                 }, function (xhr) {
                     if (xhr.status !== 0 && !options.stop) {
                         var sfwdt = that.getSfwdt(token);
-                        sfwdt.innerHTML = '\                                <div class="sf-toolbarreset notranslate">\                                    <div class="sf-toolbar-icon"><svg width="26" height="28" xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 26 28" enable-background="new 0 0 26 28" xml:space="preserve"><path fill="#FFFFFF" d="M13 0C5.8 0 0 5.8 0 13c0 7.2 5.8 13 13 13c7.2 0 13-5.8 13-13C26 5.8 20.2 0 13 0z M20 7.5 c-0.6 0-1-0.3-1-0.9c0-0.2 0-0.4 0.2-0.6c0.1-0.3 0.2-0.3 0.2-0.4c0-0.3-0.5-0.4-0.7-0.4c-2 0.1-2.5 2.7-2.9 4.8l-0.2 1.1 c1.1 0.2 1.9 0 2.4-0.3c0.6-0.4-0.2-0.8-0.1-1.3C18 9.2 18.4 9 18.7 8.9c0.5 0 0.8 0.5 0.8 1c0 0.8-1.1 2-3.3 1.9 c-0.3 0-0.5 0-0.7-0.1L15 14.1c-0.4 1.7-0.9 4.1-2.6 6.2c-1.5 1.8-3.1 2.1-3.8 2.1c-1.3 0-2.1-0.6-2.2-1.6c0-0.9 0.8-1.4 1.3-1.4 c0.7 0 1.2 0.5 1.2 1.1c0 0.5-0.2 0.6-0.4 0.7c-0.1 0.1-0.3 0.2-0.3 0.4c0 0.1 0.1 0.3 0.4 0.3c0.5 0 0.9-0.3 1.2-0.5 c1.3-1 1.7-2.9 2.4-6.2l0.1-0.8c0.2-1.1 0.5-2.3 0.8-3.5c-0.9-0.7-1.4-1.5-2.6-1.8c-0.8-0.2-1.3 0-1.7 0.4C8.4 10 8.6 10.7 9 11.1 l0.7 0.7c0.8 0.9 1.3 1.7 1.1 2.7c-0.3 1.6-2.1 2.8-4.3 2.1c-1.9-0.6-2.2-1.9-2-2.7c0.2-0.6 0.7-0.8 1.2-0.6 c0.5 0.2 0.7 0.8 0.6 1.3c0 0.1 0 0.1-0.1 0.3C6 15 5.9 15.2 5.9 15.3c-0.1 0.4 0.4 0.7 0.8 0.8c0.8 0.3 1.7-0.2 1.9-0.9 c0.2-0.6-0.2-1.1-0.4-1.2l-0.8-0.9c-0.4-0.4-1.2-1.5-0.8-2.8c0.2-0.5 0.5-1 0.9-1.4c1-0.7 2-0.8 3-0.6c1.3 0.4 1.9 1.2 2.8 1.9 c0.5-1.3 1.1-2.6 2-3.8c0.9-1 2-1.7 3.3-1.8C20 4.8 21 5.4 21 6.3C21 6.7 20.8 7.5 20 7.5z"/></svg></div>\                                    An error occurred while loading the web debug toolbar. <a href="http\u003A\/\/\/_profiler\/' + newToken + '">Open the web profiler.</a>\                                </div>\                            ';
+                        sfwdt.innerHTML = '\                                <div class="sf-toolbarreset notranslate">\                                    <div class="sf-toolbar-icon"><svg width="26" height="28" xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 26 28" enable-background="new 0 0 26 28" xml:space="preserve"><path fill="#FFFFFF" d="M13 0C5.8 0 0 5.8 0 13c0 7.2 5.8 13 13 13c7.2 0 13-5.8 13-13C26 5.8 20.2 0 13 0z M20 7.5 c-0.6 0-1-0.3-1-0.9c0-0.2 0-0.4 0.2-0.6c0.1-0.3 0.2-0.3 0.2-0.4c0-0.3-0.5-0.4-0.7-0.4c-2 0.1-2.5 2.7-2.9 4.8l-0.2 1.1 c1.1 0.2 1.9 0 2.4-0.3c0.6-0.4-0.2-0.8-0.1-1.3C18 9.2 18.4 9 18.7 8.9c0.5 0 0.8 0.5 0.8 1c0 0.8-1.1 2-3.3 1.9 c-0.3 0-0.5 0-0.7-0.1L15 14.1c-0.4 1.7-0.9 4.1-2.6 6.2c-1.5 1.8-3.1 2.1-3.8 2.1c-1.3 0-2.1-0.6-2.2-1.6c0-0.9 0.8-1.4 1.3-1.4 c0.7 0 1.2 0.5 1.2 1.1c0 0.5-0.2 0.6-0.4 0.7c-0.1 0.1-0.3 0.2-0.3 0.4c0 0.1 0.1 0.3 0.4 0.3c0.5 0 0.9-0.3 1.2-0.5 c1.3-1 1.7-2.9 2.4-6.2l0.1-0.8c0.2-1.1 0.5-2.3 0.8-3.5c-0.9-0.7-1.4-1.5-2.6-1.8c-0.8-0.2-1.3 0-1.7 0.4C8.4 10 8.6 10.7 9 11.1 l0.7 0.7c0.8 0.9 1.3 1.7 1.1 2.7c-0.3 1.6-2.1 2.8-4.3 2.1c-1.9-0.6-2.2-1.9-2-2.7c0.2-0.6 0.7-0.8 1.2-0.6 c0.5 0.2 0.7 0.8 0.6 1.3c0 0.1 0 0.1-0.1 0.3C6 15 5.9 15.2 5.9 15.3c-0.1 0.4 0.4 0.7 0.8 0.8c0.8 0.3 1.7-0.2 1.9-0.9 c0.2-0.6-0.2-1.1-0.4-1.2l-0.8-0.9c-0.4-0.4-1.2-1.5-0.8-2.8c0.2-0.5 0.5-1 0.9-1.4c1-0.7 2-0.8 3-0.6c1.3 0.4 1.9 1.2 2.8 1.9 c0.5-1.3 1.1-2.6 2-3.8c0.9-1 2-1.7 3.3-1.8C20 4.8 21 5.4 21 6.3C21 6.7 20.8 7.5 20 7.5z"/></svg></div>\                                    An error occurred while loading the web debug toolbar. <a href="http\u003A\/\/127.0.0.1\/_profiler\/' + newToken + '">Open the web profiler.</a>\                                </div>\                            ';
                         sfwdt.setAttribute('class', 'sf-toolbar sf-error-toolbar');
                     }
                 }, options);
@@ -6997,7 +7709,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('0a7d5d');/*]]>*/</script>
+Sfjs.loadToolbar('61009e');/*]]>*/</script>
 
 
 </body>

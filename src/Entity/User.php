@@ -528,12 +528,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                     'saml_provider_id_invalid' => [
                                         // phpcs:disable Generic.Files.LineLength.TooLong
-                                        'summary' => 'The provided SAML Provider ID does not match the fetched provider.',
+                                        'summary' => 'SAML Provider ID does not match the fetched provider.',
                                         // phpcs:enable
                                         'value' => [
                                             'success' => false,
                                             // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'The provided SAML Provider ID does not match the fetched provider.',
+                                            'error' => 'SAML Provider ID does not match the fetched provider.',
                                             // phpcs:enable
                                         ],
                                     ],
