@@ -12,7 +12,6 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
-use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -495,7 +494,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     400 => [
-                        'description' => 'Bad Request due to missing SAML response',
+                        'description' => 'Bad Request due to missing or invalid SAML response',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -511,13 +510,31 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'example' => 'SAML Response not found',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'saml_response_not_found' => [
-                                            'summary' => 'SAML Response not found',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'SAML Response not found',
-                                            ],
+                                ],
+                                'examples' => [
+                                    'saml_response_not_found' => [
+                                        'summary' => 'SAML Response not found',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'SAML Response not found',
+                                        ],
+                                    ],
+                                    'saml_response_invalid' => [
+                                        'summary' => 'SAML Provider Name invalid or missing ',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid or missing SAML Provider name',
+                                        ],
+                                    ],
+                                    'saml_provider_id_invalid' => [
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'summary' => 'The provided SAML Provider ID does not match the fetched provider.',
+                                        // phpcs:enable
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'The provided SAML Provider ID does not match the fetched provider.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -649,8 +666,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'Base64-encoded SAML response included in the form data',
                                         'example' => 'base64-encoded-saml-assertion',
                                     ],
+                                    'SAMLProviderID' => [
+                                        'type' => 'string',
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'description' => 'The unique identifier of the SAML provider associated with the SAMLResponse',
+                                        // phpcs:enable
+                                        'example' => '12345',
+                                    ],
                                 ],
-                                'required' => ['SAMLResponse'],
+                                'required' => ['SAMLResponse', 'SAMLProviderID'],
                             ],
                         ]),
                     ]),
@@ -1762,7 +1786,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private Collection $oTPcodes;
 
 
-
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
@@ -1779,7 +1802,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     {
         $this->twoFAcodeIsActive = $twoFAcodeIsActive;
     }
-
 
 
     public function getTwoFAsecret(): ?string

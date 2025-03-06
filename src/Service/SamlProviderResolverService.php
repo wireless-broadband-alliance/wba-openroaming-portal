@@ -3,10 +3,10 @@
 namespace App\Service;
 
 use App\Repository\SamlProviderRepository;
-use DOMDocument;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class SamlProviderResolverService
@@ -14,7 +14,8 @@ class SamlProviderResolverService
     private ?Auth $samlAuth = null;
 
     public function __construct(
-        private readonly SamlProviderRepository $repository
+        private readonly SamlProviderRepository $repository,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -63,10 +64,9 @@ class SamlProviderResolverService
     /**
      * @throws Error
      */
-    public function authSamlProviderById(int $samlProviderId): Auth
+    public function authSamlProviderById(int $samlProviderId, ?bool $isSAMLApi = false): Auth
     {
         if (!$this->samlAuth instanceof Auth) {
-            // Fetch active provider by ID
             $samlProvider = $this->repository->findOneBy([
                 'id' => $samlProviderId,
                 'deletedAt' => null,
@@ -84,11 +84,14 @@ class SamlProviderResolverService
                 );
             }
 
-            // Generate settings dynamically
+            // Generate settings dynamically depending on if it's a response to the landing page of the api
+            $request = $this->requestStack->getCurrentRequest();
+            $host = $request->getSchemeAndHttpHost();
+            $acsUrl = $isSAMLApi ? $host . '/saml/acs' : $samlProvider->getSpAcsUrl();
             $settings = [
                 'sp' => [
                     'entityId' => $samlProvider->getSpEntityId(),
-                    'assertionConsumerService' => ['url' => $samlProvider->getSpAcsUrl()],
+                    'assertionConsumerService' => ['url' => $acsUrl],
                 ],
                 'idp' => [
                     'entityId' => $samlProvider->getIdpEntityId(),
@@ -106,26 +109,26 @@ class SamlProviderResolverService
     {
         // Decode the SamlResponse for data validation with the DB
         try {
-            // Step 1: Decode the Base64-encoded SAMLResponse
+            // Decode the Base64-encoded SAMLResponse
             $decodedSamlResponse = base64_decode($samlResponse, true);
 
             if ($decodedSamlResponse === false) {
                 throw new AuthenticationException('Failed to decode SAMLResponse.');
             }
 
-            // Step 2: Load the response as an XML document
+            // Load the response as an XML document
             $dom = new \DOMDocument();
             $dom->preserveWhiteSpace = false;
             $dom->loadXML($decodedSamlResponse);
 
-            // Step 3: Extract the "Issuer" field (idp_entity_id)
+            // Extract the "Issuer" field (idp_entity_id)
             $issuerNode = $dom->getElementsByTagName('Issuer')->item(0);
             if (!$issuerNode) {
                 throw new AuthenticationException('Issuer (idp_entity_id) not found in the SAMLResponse.');
             }
             $idpEntityId = $issuerNode->textContent;
 
-            // Step 4: Extract the certificate
+            // Extract the certificate
             $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
             if (!$certificateNode) {
                 throw new AuthenticationException('Certificate not found in the SAMLResponse.');

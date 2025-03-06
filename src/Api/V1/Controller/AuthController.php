@@ -9,10 +9,12 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
+use App\Repository\SamlProviderRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
+use App\Service\SamlProviderResolverService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,6 +44,8 @@ class AuthController extends AbstractController
         private readonly MicrosoftController $microsoftController,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly EventActions $eventActions,
+        private readonly SamlProviderResolverService $samlProviderResolver,
+        private readonly SamlProviderRepository $samlProviderRepository,
     ) {
     }
 
@@ -130,7 +134,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
-    public function authSaml(Request $request, Auth $samlAuth): JsonResponse
+    public function authSaml(Request $request, Auth $auth): JsonResponse
     {
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
@@ -138,92 +142,114 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'SAML Response not found')->toResponse(); // Bad Request
         }
 
+        // Get SAML Response
+        $samlProviderId = $request->request->get('SAMLProviderID');
+        if (!$samlProviderId) {
+            return new BaseResponse(400, null, 'Invalid or missing SAML Provider')->toResponse(); // Bad Request
+        }
+
         try {
-            // Load and validate the SAML response
-            $samlAuth->processResponse();
-
-            // Handle errors from the SAML process
-            if ($samlAuth->getErrors()) {
-                return new BaseResponse(
-                    401,
-                    null,
-                    'Invalid SAML Assertion',
-                )->toResponse(); // Unauthorized
-            }
-
-            // Ensure the authentication was successful
-            if (!$samlAuth->isAuthenticated()) {
-                return new BaseResponse(
-                    401,
-                    null,
-                    'Authentication Failed'
-                )->toResponse(); // Unauthorized
-            }
-
-            $sAMAccountName = $samlAuth->getNameId();
-            $attributes = $samlAuth->getAttributes();
-
-            // Extract necessary attributes
-            $uuid = $attributes['samlUuid'][0] ?? null;
-            $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
-            $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;
-            $lastName = $attributes['urn:oid:2.5.4.4'][0] ?? null;
-
-            // Retrieve or create user based on SAML attributes
-            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
-
-            if (!$user instanceof User) {
-                // User does not exist, create a new user
-                $user = new User();
-                $user->setEmail($email);
-                $user->setFirstName($firstName);
-                $user->setLastName($lastName);
-                $user->setPassword('notused');
-                $user->setUuid($uuid);
-                $user->setIsVerified(true);
-                $user->setRoles([]);
-
-                // Persist the new user
-                $this->entityManager->persist($user);
-
-                // Create and persist the UserExternalAuth entity
-                $userAuth = new UserExternalAuth();
-                $userAuth->setUser($user)
-                    ->setProvider(UserProvider::SAML->value)
-                    ->setProviderId($sAMAccountName);
-
-                $this->entityManager->persist($userAuth);
-                $this->entityManager->flush();
-            }
-
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
-
-            // Generate JWT token for the user
-            $token = $this->tokenGenerator->generateToken($user);
-
-            // Use the toApiResponse method to generate the response
-            $responseData = $user->toApiResponse([
-                'token' => $token,
+            $samlResponseData = $this->samlProviderResolver->decodeSamlResponse($samlResponseBase64);
+            $idpEntityId = $samlResponseData['idp_entity_id'];
+            $idpCertificate = $samlResponseData['certificate'];
+            $fetchedSamlProvider = $this->samlProviderRepository->findOneBy([
+                'idpEntityId' => $idpEntityId,
+                'idpX509Cert' => $idpCertificate,
             ]);
 
-            // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-            ];
+            if ($fetchedSamlProvider && $fetchedSamlProvider->getId() === (int)$samlProviderId) {
+                // Load and validate the SAML response
+                $auth->processResponse();
+                // Handle errors from the SAML process
+                if ($auth->getErrors()) {
+                    return new BaseResponse(
+                        401,
+                        null,
+                        'Invalid SAML Assertion',
+                    )->toResponse(); // Unauthorized
+                }
 
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::AUTH_SAML_API->value,
-                new DateTime(),
-                $eventMetadata
-            );
+                // Ensure the authentication was successful
+                if (!$auth->isAuthenticated()) {
+                    return new BaseResponse(
+                        401,
+                        null,
+                        'Authentication Failed'
+                    )->toResponse(); // Unauthorized
+                }
 
-            return new BaseResponse(200, $responseData)->toResponse(); // Success
+                $sAMAccountName = $auth->getNameId();
+                $attributes = $auth->getAttributes();
+
+                // Extract necessary attributes
+                $uuid = $attributes['samlUuid'][0] ?? null;
+                $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
+                $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;
+                $lastName = $attributes['urn:oid:2.5.4.4'][0] ?? null;
+
+                // Retrieve or create user based on SAML attributes
+                $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+
+                if (!$user instanceof User) {
+                    // User does not exist, create a new user
+                    $user = new User();
+                    $user->setEmail($email);
+                    $user->setFirstName($firstName);
+                    $user->setLastName($lastName);
+                    $user->setPassword('notused');
+                    $user->setUuid($uuid);
+                    $user->setIsVerified(true);
+                    $user->setRoles([]);
+
+                    // Persist the new user
+                    $this->entityManager->persist($user);
+
+                    // Create and persist the UserExternalAuth entity
+                    $userAuth = new UserExternalAuth();
+                    $userAuth->setUser($user)
+                        ->setProvider(UserProvider::SAML->value)
+                        ->setProviderId($sAMAccountName);
+
+                    $this->entityManager->persist($userAuth);
+                    $this->entityManager->flush();
+                }
+
+                $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+                if ($statusCheckerResponse instanceof BaseResponse) {
+                    return $statusCheckerResponse->toResponse();
+                }
+
+                // Generate JWT token for the user
+                $token = $this->tokenGenerator->generateToken($user);
+
+                // Use the toApiResponse method to generate the response
+                $responseData = $user->toApiResponse([
+                    'token' => $token,
+                ]);
+
+                // Defines the Event to the table
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                ];
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::AUTH_SAML_API->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                return new BaseResponse(200, $responseData)->toResponse(); // Success
+            }
+
+            // IDs do not match or SamlProvider does not exist
+            return new BaseResponse(
+                400,
+                null,
+                'The provided SAML Provider ID does not match the fetched provider.'
+            )->toResponse();
         } catch (Exception) {
             return new BaseResponse(
                 500,
