@@ -22,11 +22,11 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
     use TargetPathTrait;
 
     public function __construct(
-        private readonly SamlProviderResolverService $samlService,
         private readonly CustomSamlUserFactory $userFactory,
         private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly SamlProviderResolverService $samlProviderResolverService,
         private readonly SamlProviderRepository $samlProviderRepository,
+        private readonly SamlProviderResolverService $samlService,
+        private readonly SamlProviderResolverService $samlProviderResolverService,
     ) {
     }
 
@@ -42,30 +42,19 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
      */
     public function authenticate(Request $request): SelfValidatingPassport
     {
+        // Step 1: Fetch the SAML Response from the request
         $samlResponse = $request->request->get('SAMLResponse');
         if (!$samlResponse) {
             throw new AuthenticationException('Missing SAMLResponse in the request.');
         }
 
-        $samlResponseData = $this->samlService->decodeSamlResponse($samlResponse);
-        $idpEntityId = $samlResponseData['idp_entity_id'];
-        $idpCertificate = $samlResponseData['certificate'];
-        $fetchedSamlProvider = $this->samlProviderRepository->findOneBy([
-            'idpEntityId' => $idpEntityId,
-            'idpX509Cert' => $idpCertificate,
-        ]);
-        // Handle the case where no SamlProvider is found
-        if (!$fetchedSamlProvider) {
-            throw new AuthenticationException(
-                sprintf(
-                    'No matching SAML Provider found for IDP Entity ID "%s" and Certificate.',
-                    $idpEntityId
-                )
-            );
+        // Step 2: Retrieve the SAML provider passed via the URL or request
+        $samlProviderId = $request->query->get('samlProvider');
+        if (!$samlProviderId) {
+            throw new AuthenticationException('No SAML provider specified.');
         }
 
-        // Cast the value to an integer
-        $auth = $this->samlService->authSamlProviderById($fetchedSamlProvider->getId());
+        $auth = $this->samlProviderResolverService->authSamlProviderById($samlResponse);
         $auth->processResponse();
 
         if ($auth->getErrors()) {

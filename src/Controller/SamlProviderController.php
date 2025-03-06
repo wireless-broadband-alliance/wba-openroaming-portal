@@ -18,11 +18,14 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SamlProviderDeletionService;
+use App\Service\SamlProviderResolverService;
 use App\Service\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use OneLogin\Saml2\Error;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -42,7 +45,26 @@ class SamlProviderController extends AbstractController
         private readonly ProfileManager $profileManager,
         private readonly UserDeletionService $userDeletionService,
         private readonly SamlProviderDeletionService $samlProviderDeletionService,
+        private readonly SamlProviderResolverService $samlProviderResolverService,
     ) {
+    }
+
+    /**
+     * @throws Error
+     */
+    #[Route('/saml', name: 'app_saml_login')]
+    public function getStuff(Request $request): RedirectResponse
+    {
+        $samlProviderId = $request->get('saml_provider_id');
+        if (!$samlProviderId) {
+            throw $this->createNotFoundException('Missing SAML provider identifier.');
+        }
+        $samlProvider = $this->samlProviderResolverService->authSamlProviderById($samlProviderId);
+        $url = $this->generateUrl('saml_login', [
+            'samlProvider' => $samlProvider,
+        ]);
+
+        return new RedirectResponse($url);
     }
 
     /**
@@ -103,7 +125,7 @@ class SamlProviderController extends AbstractController
             'allProvidersCount' => $totalProviders,
             'activeProviderCount' => $activeProvidersCount,
             'inactiveProvidersCount' => $inactiveProvidersCount,
-            'totalPages' => $totalPages
+            'totalPages' => $totalPages,
         ]);
     }
 
@@ -165,6 +187,7 @@ class SamlProviderController extends AbstractController
 
             // Show a success flash message and redirect
             $this->addFlash('success_admin', 'SAML Provider added successfully.');
+
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
@@ -191,6 +214,7 @@ class SamlProviderController extends AbstractController
         $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
@@ -255,6 +279,7 @@ class SamlProviderController extends AbstractController
                 'success_admin',
                 sprintf('"%s" has been updated successfully.', $samlProvider->getName())
             );
+
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
@@ -284,6 +309,7 @@ class SamlProviderController extends AbstractController
         $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
@@ -342,13 +368,14 @@ class SamlProviderController extends AbstractController
         $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
         $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
             'provider' => UserProvider::SAML->value,
-            'samlProvider' => $samlProvider
+            'samlProvider' => $samlProvider,
         ]);
 
         foreach ($userExternalAuth as $userExternalAuths) {
@@ -372,6 +399,7 @@ class SamlProviderController extends AbstractController
                 // Handle the failure response in case of missing PGP details
                 if (!$deleteUserResult['success']) {
                     $this->addFlash('error_admin', $deleteUserResult['message']);
+
                     return $this->redirectToRoute('admin_page');
                 }
             }
@@ -385,6 +413,7 @@ class SamlProviderController extends AbstractController
         // Handle the failure response in case of missing PGP details
         if (!$deleteSamlProviderResult['success']) {
             $this->addFlash('error_admin', $deleteSamlProviderResult['message']);
+
             return $this->redirectToRoute('admin_page');
         }
 
@@ -392,6 +421,7 @@ class SamlProviderController extends AbstractController
             'success_admin',
             sprintf('User with the UUID "%s" deleted successfully.', $getSamlProviderName)
         );
+
         return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
 
@@ -410,13 +440,14 @@ class SamlProviderController extends AbstractController
         $samlProvider = $this->samlProviderRepository->find($id);
         if (!$samlProvider) {
             $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+
             return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
         $getSamlProviderName = $samlProvider->getName();
         $userExternalAuth = $this->userExternalAuthRepository->findBy([
             'provider' => UserProvider::SAML->value,
-            'samlProvider' => $samlProvider
+            'samlProvider' => $samlProvider,
         ]);
 
         foreach ($userExternalAuth as $userExternalAuths) {
@@ -470,6 +501,7 @@ class SamlProviderController extends AbstractController
                 $getSamlProviderName
             )
         );
+
         return $this->redirectToRoute('admin_dashboard_saml_provider');
     }
 }
