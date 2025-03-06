@@ -3,9 +3,11 @@
 namespace App\Service;
 
 use App\Repository\SamlProviderRepository;
+use DOMDocument;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use RuntimeException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class SamlProviderResolverService
 {
@@ -98,5 +100,46 @@ class SamlProviderResolverService
             $this->samlAuth = new Auth($settings);
         }
         return $this->samlAuth;
+    }
+
+    public function decodeSamlResponse(string $samlResponse): array
+    {
+        try {
+            // Step 1: Decode the Base64-encoded SAMLResponse
+            $decodedSamlResponse = base64_decode($samlResponse, true);
+
+            if ($decodedSamlResponse === false) {
+                throw new AuthenticationException('Failed to decode SAMLResponse.');
+            }
+
+            // Step 2: Load the response as an XML document
+            $dom = new \DOMDocument();
+            $dom->preserveWhiteSpace = false;
+            $dom->loadXML($decodedSamlResponse);
+
+            // Step 3: Extract the "Issuer" field (idp_entity_id)
+            $issuerNode = $dom->getElementsByTagName('Issuer')->item(0);
+            if (!$issuerNode) {
+                throw new AuthenticationException('Issuer (idp_entity_id) not found in the SAMLResponse.');
+            }
+            $idpEntityId = $issuerNode->textContent;
+
+            // Step 4: Extract the certificate
+            $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
+            if (!$certificateNode) {
+                throw new AuthenticationException('Certificate not found in the SAMLResponse.');
+            }
+            $certificate = $certificateNode->textContent;
+
+            // Return both the IdP Entity ID and the Certificate
+            return [
+                'idp_entity_id' => $idpEntityId,
+                'certificate' => $certificate,
+            ];
+        } catch (\Exception $e) {
+            throw new AuthenticationException(
+                'An error occurred while processing the SAMLResponse: ' . $e->getMessage()
+            );
+        }
     }
 }
