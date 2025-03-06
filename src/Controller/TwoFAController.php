@@ -25,6 +25,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 use function Symfony\Component\Clock\now;
@@ -642,5 +643,25 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
         $this->twoFAService->generate2FACode($user);
         return $this->redirectToRoute('app_verify2FA_local_admin');
+    }
+
+    #[Route(path: '/downloadCodes', name: 'app_download_codes')]
+    public function downloadCodes(Request $request): Response
+    {
+        $codesJson = $request->query->get('codes');
+        $codes = json_decode($codesJson, true);
+        // create a content of the file
+        $fileContent = implode("\n", $codes);
+
+        // response for file download
+        $response = new StreamedResponse(function () use ($fileContent) {
+            echo $fileContent;
+        });
+
+        // headers for download
+        $response->headers->set('Content-Type', 'text/plain');
+        $response->headers->set('Content-Disposition', 'attachment;filename="codes.txt"');
+
+        return $response;
     }
 }

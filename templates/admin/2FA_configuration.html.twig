@@ -34,7 +34,7 @@
             <a href="{{ path('app_verify2FA_app_admin') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication with App</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <a href="{{ path('app_enable2FA_admin') }}" class="mt-6 w-[220px] btn-primary">With Your Authentication Method</a>
+            <a href="{{ path('app_enable2FA_admin') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
             <a href="{{ path('app_verify2FA_app_admin') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication with App</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
@@ -54,6 +54,10 @@
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
             {# add this condition to remove btn to configure 2fa #}
         {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+            <a href="{{ path('app_enable2FA_admin') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_verify2FA_app_admin') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication with App</a>
+        {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
             <a href="{{ path('app_verify2FA_app_admin') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication with App</a>
         {% endif %}
@@ -65,6 +69,10 @@
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
             {# add this condition to remove btn to configure 2fa #}
+        {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+            <a href="{{ path('app_enable2FA_admin') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_verify2FA_app_admin') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication with App</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
             <a href="{{ path('app_verify2FA_app_admin') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication with App</a>

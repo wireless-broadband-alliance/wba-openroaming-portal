@@ -27,15 +27,25 @@
         <p class="font-bold text-xl">Two Factor Authentication Codes</p>
         <p class="text-lg"> Please save these codes for use in case you lose your device. </p>
         <div data-controller="clipboard">
-            <div class="relative mt-5 border border-gray-300 rounded-md">
-                <button
-                        data-action="clipboard#copyToClipboard"
-                        class="absolute top-2 right-2 btn-primary text-xs px-2 py-1">
-                    Copy
-                </button>
+            <div class="mt-5 border border-gray-300 rounded-md">
+                <div class="flex space-x-2">
+                    <button
+                            data-action="clipboard#copyToClipboard"
+                            class="btn-secondary text-xs px-2 py-1">
+                        Copy
+                    </button>
+                    <a href="{{ path('app_download_codes', {'codes': codes|json_encode}) }}"
+                       class="btn-secondary text-xs px-2 py-1">
+                        Download
+                    </a>
+                    <button onclick="window.print()" class="btn-secondary text-xs px-2 py-1">
+                        Print
+                    </button>
+                </div>
+
                 <pre id="code-to-copy"
                      data-clipboard-target="code"
-                     class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
+                     class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left mt-4">
                     <div class="grid grid-cols-4 gap-4">
                         {% for code in codes %}
                             <div>{{ code }}</div>
@@ -48,7 +58,7 @@
 
     {# Divider #}
     <div>
-        <a href="{{ path('app_otpCodes_save', {codes|json_encode}) }}" class="mt-6 w-[180px] btn-primary">Done</a>
+        <a href="{{ path('app_otpCodes_save', {'codes': codes|json_encode}) }}" class="mt-6 w-[180px] btn-primary">Done</a>
     </div>
 
 {% endblock %}
