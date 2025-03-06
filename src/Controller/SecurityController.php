@@ -87,13 +87,19 @@ class SecurityController extends AbstractController
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                            !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                            $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                         ) {
                             return $this->redirectToRoute('app_configure2FA_admin');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_local_admin');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::EMAIL->value
                         ) {
                             return $this->redirectToRoute('app_verify2FA_local_admin');
                         }

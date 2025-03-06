@@ -61,6 +61,24 @@ class EventRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find the latest 'TWO_FA_CODE_SENDED' event for the given user.
+     *
+     * @throws NonUniqueResultException
+     */
+    public function findLatest2FAcodeAttemptEvent(User $user): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', AnalyticalEventType::TWO_FA_CODE_SENDED->value)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
      * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *
      * @param $eventLog // from ENUM AnalyticalEventType

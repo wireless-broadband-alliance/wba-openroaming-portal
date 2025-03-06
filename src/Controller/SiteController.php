@@ -109,32 +109,6 @@ class SiteController extends AbstractController
         if ($sessionAdmin) {
             return $this->redirectToRoute('saml_logout');
         }
-        if (
-            $currentUser &&
-            (
-                $currentUser->getTwoFAType() !==
-                UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified'))
-        ) {
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::SMS->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_local');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_local');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::APP->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_app');
-            }
-        }
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
         if (
@@ -179,7 +153,32 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('saml_logout');
             }
         }
-
+        if (
+            $currentUser &&
+            (
+                $currentUser->getTwoFAType() !==
+                UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$session->has('2fa_verified'))
+        ) {
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::SMS->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_local');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::APP->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_app');
+            }
+        }
         // Check if the current user has a provider
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
         $externalAuthsData = [];

@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Entity\OTPcode;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\PlatformMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -11,6 +13,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
@@ -32,6 +35,7 @@ class TwoFAService
         private readonly MailerInterface $mailer,
         private readonly ParameterBagInterface $parameterBag,
         private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
     ) {
     }
@@ -176,6 +180,16 @@ class TwoFAService
 
             $this->mailer->send($email);
         }
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
+            'uuid' => $user->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_SENDED->value,
+            new DateTime(),
+            $eventMetaData
+        );
     }
 
     public function twoFAisActive(User $user): bool
