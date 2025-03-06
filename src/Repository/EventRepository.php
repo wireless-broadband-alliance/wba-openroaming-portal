@@ -65,7 +65,7 @@ class EventRepository extends ServiceEntityRepository
      *
      * @throws NonUniqueResultException
      */
-    public function findLatest2FAcodeAttemptEvent(User $user): ?Event
+    public function findLatest2FACodeAttemptEvent(User $user): ?Event
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')
@@ -76,6 +76,26 @@ class EventRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * Find the $maxResults number of 'TWO_FA_CODE_SENDED' events for the given user.
+     *
+     * @throws NonUniqueResultException
+     */
+    public function find2FACodeAttemptEvent(User $user, int $maxResults, \DateTime $time): ?array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->andWhere('e.event_datetime >= :datetime')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', AnalyticalEventType::TWO_FA_CODE_SENDED->value)
+            ->setParameter('datetime', $time)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults($maxResults)
+            ->getQuery()
+            ->getResult();
     }
 
     /**

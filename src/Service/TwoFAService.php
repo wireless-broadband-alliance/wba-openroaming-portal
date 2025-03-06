@@ -7,15 +7,17 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+
+use function Symfony\Component\Clock\now;
 
 class TwoFAService
 {
@@ -25,6 +27,7 @@ class TwoFAService
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param MailerInterface $mailer Called for send emails
      */
@@ -37,6 +40,7 @@ class TwoFAService
         private readonly SettingRepository $settingRepository,
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
+        private readonly EventRepository $eventRepository,
     ) {
     }
     public function validate2FACode(User $user, string $formCode): bool
@@ -104,6 +108,11 @@ class TwoFAService
             return $code;
         }
         return $user->getTwoFAcode();
+    }
+
+    public function resendCode(User $user) {
+        $code = $this->twoFACode($user);
+        $this->sendCode($user, $code);
     }
 
     public function generateOTPcodes(User $user): array
@@ -212,5 +221,16 @@ class TwoFAService
             $this->entityManager->persist($otp);
         }
         $this->entityManager->flush();
+    }
+
+    public function canResendCode(User $user): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+        return count($attempts) < $nrAttempts;
     }
 }

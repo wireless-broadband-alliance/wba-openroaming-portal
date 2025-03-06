@@ -8,6 +8,7 @@ use App\Enum\PlatformMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFAcode;
 use App\Form\TwoFactorPhoneNumber;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -16,6 +17,7 @@ use App\Service\TOTPService;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use libphonenumber\PhoneNumber;
@@ -24,6 +26,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+
+use function Symfony\Component\Clock\now;
 
 class TwoFAController extends AbstractController
 {
@@ -34,6 +38,7 @@ class TwoFAController extends AbstractController
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param TOTPService $totpService The service for communicate with two factor authentication applications
      * @param EntityManagerInterface $entityManager The service for manage all entities
+     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param TwoFAService $twoFAService Generates a new codes and configure 2FA
      *  of the user account
      */
@@ -45,6 +50,7 @@ class TwoFAController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
         private readonly TwoFAService $twoFAService,
+        private readonly EventRepository $eventRepository,
     ) {
     }
 
@@ -351,7 +357,6 @@ class TwoFAController extends AbstractController
         $form = $this->createForm(TwoFAcode::class);
         /** @var User $user */
         $user = $this->getUser();
-        $this->twoFAService->generate2FACode($user);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -578,5 +583,64 @@ class TwoFAController extends AbstractController
             $eventMetaData
         );
         return $this->redirectToRoute('app_landing');
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route(path: '/verify2FA/resend', name: 'app_2FA_local_resend_code')]
+    public function resendCode(Request $request): RedirectResponse
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
+        /** @var User $user */
+        $user = $this->getUser();
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+        if ($this->twoFAService->canResendCode($user)) {
+            $this->twoFAService->resendCode($user);
+            $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+            $attemptsleft = $nrAttempts - count($attempts);
+            $this->addFlash(
+                'success',
+                'The code was resent successfully. You have '. $attemptsleft .' attempts.');
+        } else {
+            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
+            $now = new DateTime();
+            if ($lastEvent) {
+                $lastAttemptTime = $lastEvent->getEventDatetime();
+            } else {
+                $lastAttemptTime = $timeToResetAttempts;
+            }
+            $limitTime = $lastAttemptTime;
+            $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
+            $interval = date_diff($now, $limitTime);
+            $interval_minutes = $interval->days * 1440;
+            $interval_minutes += $interval->h * 60;
+            $interval_minutes += $interval->i;
+            $this->addFlash(
+                'error',
+                'You have exceeded the number of attempts, wait '.
+                $interval_minutes . ' minutes to request a code again');
+        }
+        $lastPage = $request->headers->get('referer', '/');
+        return $this->redirect($lastPage);
+    }
+
+    #[Route(path: '/generate2FACode', name: 'app_2FA_generate_code')]
+    public function generateCode(Request $request): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->twoFAService->generate2FACode($user);
+        return $this->redirectToRoute('app_verify2FA_local');
+    }
+
+    #[Route(path: '/generate2FACode/admin', name: 'app_2FA_generate_code_admin')]
+    public function generateCodeAdmin(Request $request): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->twoFAService->generate2FACode($user);
+        return $this->redirectToRoute('app_verify2FA_local_admin');
     }
 }

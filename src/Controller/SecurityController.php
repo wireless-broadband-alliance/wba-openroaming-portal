@@ -69,7 +69,13 @@ class SecurityController extends AbstractController
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::SMS->value
                         ) {
-                            return $this->redirectToRoute('app_verify2FA_local_admin');
+                            return $this->redirectToRoute('app_2FA_generate_code_admin');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::EMAIL->value
+                        ) {
+                            return $this->redirectToRoute('app_2FA_generate_code_admin');
                         }
                         if (
                             $user->getTwoFAType() ===
@@ -96,13 +102,13 @@ class SecurityController extends AbstractController
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::SMS->value
                         ) {
-                            return $this->redirectToRoute('app_verify2FA_local_admin');
+                            return $this->redirectToRoute('app_2FA_generate_code_admin');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::EMAIL->value
                         ) {
-                            return $this->redirectToRoute('app_verify2FA_local_admin');
+                            return $this->redirectToRoute('app_2FA_generate_code_admin');
                         }
                         if (
                             $user->getTwoFAType() ===
@@ -136,7 +142,13 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
+                    }
+                    if (
+                        $user->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
+                    ) {
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
@@ -158,13 +170,13 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::EMAIL->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
@@ -172,7 +184,7 @@ class SecurityController extends AbstractController
                     ) {
                         return $this->redirectToRoute('app_verify2FA_app');
                     }
-                    return $this->redirectToRoute('app_verify2FA_local');
+                    return $this->redirectToRoute('app_landing');
                 }
                 if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_ALL->value) {
                     if (
@@ -186,13 +198,13 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::EMAIL->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
