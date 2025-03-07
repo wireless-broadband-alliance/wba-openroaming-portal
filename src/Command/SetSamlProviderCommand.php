@@ -2,10 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\LdapCredential;
 use App\Entity\SamlProvider;
 use App\Entity\UserExternalAuth;
-use App\Repository\LdapCredentialRepository;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Service\SamlProviderValidator;
@@ -91,7 +89,7 @@ class SetSamlProviderCommand extends Command
             );
             return self::FAILURE;
         }
-        $checkIdpEntityId = $this->samlProviderValidator->validateJsonUrlSamlProvider($idpEntityId);
+        $checkIdpEntityId = $this->samlProviderValidator->validateSamlMetadata($idpEntityId);
         if ($checkIdpEntityId) {
             $output->writeln(
                 sprintf(
@@ -202,6 +200,7 @@ class SetSamlProviderCommand extends Command
             if ($activeProvider) {
                 $activeProvider->setActive(false);
                 $this->entityManager->persist($activeProvider);
+                $this->entityManager->flush();
             }
 
             // Create and persist the new provider
@@ -221,15 +220,11 @@ class SetSamlProviderCommand extends Command
             $this->entityManager->flush();
 
             // Reassign UserExternalAuth entities associated with the old provider to the new provider
-            if ($activeProvider) {
-                $userExternalAuths = $this->entityManager->getRepository(UserExternalAuth::class)
-                    ->findBy(['samlProvider' => $activeProvider]); // Find all users linked to the old provider
-
-                foreach ($userExternalAuths as $userExternalAuth) {
-                    $userExternalAuth->setSamlProvider($samlProvider);
-                    $this->entityManager->persist($userExternalAuth);
-                }
-
+            $userExternalAuths = $this->entityManager->getRepository(UserExternalAuth::class)
+                ->findBy(['samlProvider' => $activeProvider]); // Find all users linked to the old provider
+            foreach ($userExternalAuths as $userExternalAuth) {
+                $userExternalAuth->setSamlProvider($samlProvider);
+                $this->entityManager->persist($userExternalAuth);
                 $this->entityManager->flush();
             }
 
