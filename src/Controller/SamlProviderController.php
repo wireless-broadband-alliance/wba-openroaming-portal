@@ -348,12 +348,23 @@ class SamlProviderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dd('form is valid nice');
-            // TODO
-            /*
-             * Check for extra stuff on the SettingController.php & AuthType.php
-             * Make events logic
-             */
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::ADMIN_EDITED_SAML_PROVIDER_EXTRA_OPTIONS->value,
+                new DateTime(),
+                $eventMetadata
+            );
+            $this->addFlash(
+                'success_admin',
+                'The extra options for the SAML Provider have been successfully updated.'
+            );
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
         }
 
         return $this->render('admin/shared/saml_providers/_saml_provider_form_extra_options.html.twig', [
