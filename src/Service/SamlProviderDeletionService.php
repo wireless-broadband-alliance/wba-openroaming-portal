@@ -46,6 +46,9 @@ class SamlProviderDeletionService
             'ldapSearchBaseDn' => $samlProvider->getLdapSearchBaseDn(),
             'ldapSearchFilter' => $samlProvider->getLdapSearchFilter(),
             'ldapUpdatedAt' => $samlProvider->getLdapUpdatedAt()?->format('Y-m-d H:i:s'),
+            'btnLabel' => $samlProvider->getBtnLabel(),
+            'btnDescription' => $samlProvider->getBtnDescription(),
+            'profileLimitDate' => $samlProvider->getProfileLimitDate(),
         ];
 
         // Prepare JSON data for encryption
@@ -78,6 +81,9 @@ class SamlProviderDeletionService
         $samlProvider->setLdapSearchBaseDn((string)$samlProvider->getId());
         $samlProvider->setLdapSearchFilter((string)$samlProvider->getId());
         $samlProvider->setLdapUpdatedAt(new DateTime());
+        $samlProvider->setBtnLabel((string)$samlProvider->getId());
+        $samlProvider->setBtnDescription((string)$samlProvider->getId());
+        $samlProvider->setProfileLimitDate(0);
 
         $this->entityManager->persist($samlProvider);
 
