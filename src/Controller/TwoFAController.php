@@ -379,49 +379,41 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if ($user) {
-            //Mark 2fa as Enable via app.
-            $user->setTwoFAType(UserTwoFactorAuthenticationStatus::APP->value);
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::ENABLE_APP_2FA->value,
-                new DateTime(),
-                $eventMetaData
-            );
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $code = $form->get('code')->getData();
+            if ($user instanceof User) {
+                // Get the secret code to communicate with app.
+                $secret = $user->gettwoFASecret();
+                // Check if the code used is the one generated in the application.
+                if ($this->totpService->verifyTOTP($secret, $code)) {
+                    $session->set('2fa_verified', true);
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::ENABLE_APP_2FA->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::APP->value);
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+                    return $this->redirectToRoute('app_otpCodes');
+                }
+                $this->addFlash('error', 'Invalid code');
+            }
         }
-        return $this->redirectToRoute('app_verify2FA_app');
-    }
-
-    #[Route(path: '/enable2FAapp/admin/validate', name: 'app_enable2FA_app_confirm_admin')]
-    public function enable2FAappValidateAdmin(Request $request): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        if ($user) {
-            //Mark 2fa as Enable via app.
-            $user->setTwoFAType(UserTwoFactorAuthenticationStatus::APP->value);
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::ENABLE_APP_2FA->value,
-                new DateTime(),
-                $eventMetaData
-            );
-        }
-        return $this->redirectToRoute('app_verify2FA_local_admin');
+        return $this->render('site/verify2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+        ]);
     }
 
     #[Route(path: '/2FAFirstSetup/codes', name: 'app_otpCodes')]
@@ -430,7 +422,11 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
         $user = $this->getUser();
+        $session = $request->getSession();
         if ($this->twoFAService->twoFAisActive($user)) {
+            if ($session->has('session_admin')) {
+                return $this->redirectToRoute('admin_page');
+            }
             return $this->redirectToRoute('app_landing');
         }
         if ($user instanceof User) {
@@ -441,6 +437,9 @@ class TwoFAController extends AbstractController
             ]);
         }
         $this->addFlash('error', 'User not found');
+        if ($session->has('session_admin')) {
+            return $this->redirectToRoute('admin_page');
+        }
         return $this->redirectToRoute('app_landing');
     }
 

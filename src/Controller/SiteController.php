@@ -155,6 +155,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('saml_logout');
             }
         }
+
         if (
             $currentUser &&
             (

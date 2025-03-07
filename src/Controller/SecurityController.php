@@ -54,6 +54,8 @@ class SecurityController extends AbstractController
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             // this "type" is obtained through the url
             if ($this->isGranted('ROLE_ADMIN') && $type === 'admin') {
+                $session = $request->getSession();
+                $session->set('session_admin', true);
                 if ($twoFAplatformStatus) {
                     if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
                         if (
