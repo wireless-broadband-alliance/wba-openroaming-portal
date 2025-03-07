@@ -57,6 +57,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
+use function PHPUnit\Framework\isEmpty;
+
 /**
  * @method getParameterBag()
  */
@@ -164,13 +166,13 @@ class SiteController extends AbstractController
                 $currentUser->getTwoFAType() ===
                 UserTwoFactorAuthenticationStatus::SMS->value
             ) {
-                return $this->redirectToRoute('app_verify2FA_local');
+                return $this->redirectToRoute('app_2FA_generate_code');
             }
             if (
                 $currentUser->getTwoFAType() ===
                 UserTwoFactorAuthenticationStatus::EMAIL->value
             ) {
-                return $this->redirectToRoute('app_verify2FA_local');
+                return $this->redirectToRoute('app_2FA_generate_code');
             }
             if (
                 $currentUser->getTwoFAType() ===
@@ -178,6 +180,10 @@ class SiteController extends AbstractController
             ) {
                 return $this->redirectToRoute('app_verify2FA_app');
             }
+        }
+        // check if the user have otpCodes
+        if ($currentUser && $currentUser->getOTPcodes()->isEmpty()) {
+            return $this->redirectToRoute('app_otpCodes');
         }
         // Check if the current user has a provider
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);

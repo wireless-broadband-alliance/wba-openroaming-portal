@@ -80,33 +80,10 @@ class TwoFAService
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $codeDate = $user->getTwoFACodeGeneratedAt();
-        // If the user don't have an older code return a new one
-        if (!$codeDate instanceof \DateTimeInterface) {
-            // Generate code
-            $code = $this->twoFACode($user);
-            // Send code
-            $this->sendCode($user, $code);
-            return $code;
-        }
-        $codeIsActive = $user->getTwoFACodeIsActive();
-        if (!$codeIsActive) {
-            // Generate code
-            $code = $this->twoFACode($user);
-            // Send code
-            $this->sendCode($user, $code);
-            return $code;
-        }
-        $now = new DateTime();
-        $diff = $now->getTimestamp() - $codeDate->getTimestamp();
-        // Only create a new code if the oldest one was expired
-        $timeToExpireCode = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
-        if ($diff >= $timeToExpireCode) {
-            // Generate code
-            $code = $this->twoFACode($user);
-            // Send code
-            $this->sendCode($user, $code);
-            return $code;
-        }
+        // Generate code
+        $code = $this->twoFACode($user);
+        // Send code
+        $this->sendCode($user, $code);
         return $user->getTwoFAcode();
     }
 
@@ -167,11 +144,11 @@ class TwoFAService
     {
 
         $messageType = $user->getTwoFAtype();
-        if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value) {
+        if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             $message = "Your Two Factor Authentication Code is " . $code;
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
-        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value) {
+        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             // Send email to the user with the verification code
             $email = new TemplatedEmail()
                 ->from(
