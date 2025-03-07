@@ -72,19 +72,20 @@ class TwoFAController extends AbstractController
     }
 
     #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]
-    public function enable2FAapp(): Response
+    public function enable2FAapp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
         $user = $this->getUser();
         $secret = $this->totpService->generateSecret();
+        $session = $request->getSession();
         if ($user instanceof User) {
             $user->setTwoFAsecret($secret);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
-            if (!$this->twoFAService->twoFAisActive($user)) {
+            if ($session->has('session_admin')) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -134,7 +135,7 @@ class TwoFAController extends AbstractController
                         new DateTime(),
                         $eventMetaData
                     );
-                    if (!$this->twoFAService->twoFAisActive($user)) {
+                    if ($session->has('session_admin')) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -153,7 +154,7 @@ class TwoFAController extends AbstractController
                         new DateTime(),
                         $eventMetaData
                     );
-                    if (!$this->twoFAService->twoFAisActive($user)) {
+                    if ($session->has('session_admin')) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -192,7 +193,7 @@ class TwoFAController extends AbstractController
                     new DateTime(),
                     $eventMetaData
                 );
-                if (!$this->twoFAService->twoFAisActive($user)) {
+                if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -211,7 +212,7 @@ class TwoFAController extends AbstractController
                     new DateTime(),
                     $eventMetaData
                 );
-                if (!$this->twoFAService->twoFAisActive($user)) {
+                if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -231,32 +232,139 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if ($user) {
-            // Mark 2fa as disabled.
-            $user->setTwoFAType(UserTwoFactorAuthenticationStatus::DISABLED->value);
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::DISABLE_2FA->value,
-                new DateTime(),
-                $eventMetaData
-            );
-        } else {
-            $this->addFlash('error', 'You must be logged in to access this page');
-            if (!$this->twoFAService->twoFAisActive($user)) {
-                return $this->redirectToRoute('admin_page');
+            if (
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                $this->twoFAService->generate2FACode($user);
+                return $this->redirectToRoute('app_disable2FA_local');
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+                return $this->redirectToRoute('app_disable2FA_APP');
             }
             return $this->redirectToRoute('app_landing');
         }
-        if (!$this->twoFAService->twoFAisActive($user)) {
-            return $this->redirectToRoute('admin_page');
-        }
         return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route(path: '/disable2FA/local', name: 'app_disable2FA_local')]
+    public function disable2FALocal(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        /** @var User $user */
+        $user = $this->getUser();
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $formCode = $form->get('code')->getData();
+            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                if ($session->has('session_admin')) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
+            }
+            // Check if the code used is the one generated in the BD.
+            if ($this->twoFAService->validate2FACode($user, $formCode)) {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                if ($session->has('session_admin')) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
+            }
+        }
+        return $this->render('site/disable2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'user' => $user,
+        ]);
+    }
+
+    #[Route(path: '/disable2FA/app', name: 'app_disable2FA_app')]
+    public function disable2FAApp(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        /** @var User $user */
+        $user = $this->getUser();
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $formCode = $form->get('code')->getData();
+            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                if ($session->has('session_admin')) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
+            }
+            // Get the secret code to communicate with app.
+            $secret = $user->gettwoFASecret();
+            // Check if the code used is the one generated in the application.
+            if ($this->totpService->verifyTOTP($secret, $formCode)) {
+                $session->set('2fa_verified', true);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::VERIFY_APP_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                if ($session->has('session_admin')) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
+            }
+        }
+        return $this->render('site/disable2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'user' => $user,
+        ]);
     }
 
     #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm')]
@@ -469,7 +577,7 @@ class TwoFAController extends AbstractController
                         $this->entityManager->flush();
                     } else {
                         $this->addFlash('error', 'You must be logged in to access this page');
-                        if (!$this->twoFAService->twoFAisActive($user)) {
+                        if ($session->has('session_admin')) {
                             return $this->redirectToRoute('admin_page');
                         }
                         return $this->redirectToRoute('app_landing');
@@ -493,7 +601,7 @@ class TwoFAController extends AbstractController
                     $this->entityManager->flush();
                 } else {
                     $this->addFlash('error', 'You must be logged in to access this page');
-                    if (!$this->twoFAService->twoFAisActive($user)) {
+                    if ($session->has('session_admin')) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
