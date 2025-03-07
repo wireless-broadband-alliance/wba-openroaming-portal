@@ -5,13 +5,15 @@ namespace App\Service;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use Exception;
 
 class ExpirationProfileService
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
-        private readonly CertificateService $certificateService
+        private readonly CertificateService $certificateService,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository
     ) {
     }
 
@@ -47,7 +49,15 @@ class ExpirationProfileService
                 break;
 
             case UserProvider::SAML->value:
-                $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_SAML', $defaultExpireDays);
+                $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['provider_id' => $providerId]);
+                if (!$userExternalAuth) {
+                    throw new \RuntimeException('UserExternalAuth not found with the current user');
+                }
+                $samlProvider = $userExternalAuth->getSamlProvider();
+                if (!$samlProvider) {
+                    throw new \RuntimeException('SamlProvider not found with the current user');
+                }
+                $expireDays = $samlProvider->getProfileLimitDate();
                 break;
 
             case UserProvider::PORTAL_ACCOUNT->value:
