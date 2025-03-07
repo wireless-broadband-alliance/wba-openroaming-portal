@@ -214,6 +214,8 @@ class SetSamlProviderCommand extends Command
             $samlProvider->setActive(true);
             $samlProvider->setBtnLabel('Login with ' . $name);
             $samlProvider->setBtnDescription('Authenticate with your ' . $name . ' account');
+            // 5 was the default profile_limit_Date on the migrations/fixtures
+            $samlProvider->setProfileLimitDate(5);
             $samlProvider->setIsLDAPActive(false);
             $samlProvider->setCreatedAt(new DateTime());
             $samlProvider->setUpdatedAt(new DateTime());

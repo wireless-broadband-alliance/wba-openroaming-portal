@@ -79,6 +79,9 @@ class SamlProvider
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $btnDescription = null;
 
+    #[ORM\Column]
+    private ?int $profileLimitDate = null;
+
     public function __construct()
     {
         $this->userExternalAuths = new ArrayCollection();
@@ -343,6 +346,18 @@ class SamlProvider
     public function setBtnDescription(?string $btnDescription): static
     {
         $this->btnDescription = $btnDescription;
+
+        return $this;
+    }
+
+    public function getProfileLimitDate(): ?int
+    {
+        return $this->profileLimitDate;
+    }
+
+    public function setProfileLimitDate(int $profileLimitDate): static
+    {
+        $this->profileLimitDate = $profileLimitDate;
 
         return $this;
     }
