@@ -218,11 +218,17 @@ class AuthType extends AbstractType
                     new NotBlank([
                         'message' => 'Please select an option',
                     ]),
-                    new Range([
-                        'min' => 5,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => 'This field must be between {{ min }} and {{ max }}.'
-                    ])
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
+                        }
+                    }),
                 ],
             ],
             // Email Registration
