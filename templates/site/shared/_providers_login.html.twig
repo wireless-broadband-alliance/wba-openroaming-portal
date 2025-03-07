@@ -3,7 +3,7 @@
     {% if data.SAML_ENABLED.value %}
         {% for samlProvider in activeSamlProviders %}
             <div class="w-full mb-6">
-                <a href="{{ path('app_saml_login', {saml_provider_id: samlProvider.id}) }}"
+                <a href="{{ path('app_saml_login', {samlProviderId: samlProvider.id}) }}"
                    class="terms-widget__link"
                    data-action="click->terms-widget#showModal">
                     <button {{ stimulus_target('terms-widget', 'button') }}

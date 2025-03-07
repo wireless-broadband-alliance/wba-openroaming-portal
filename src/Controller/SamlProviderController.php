@@ -21,7 +21,6 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SamlProviderDeletionService;
-use App\Service\SamlProviderResolverService;
 use App\Service\UserDeletionService;
 use DateTime;
 use DateTimeZone;
@@ -49,7 +48,6 @@ class SamlProviderController extends AbstractController
         private readonly ProfileManager $profileManager,
         private readonly UserDeletionService $userDeletionService,
         private readonly SamlProviderDeletionService $samlProviderDeletionService,
-        private readonly SamlProviderResolverService $samlProviderResolverService,
         private readonly AuthSamlMethodCheckerService $authSamlMethodCheckerService,
         private readonly CertificateService $certificateService,
     ) {
@@ -58,16 +56,19 @@ class SamlProviderController extends AbstractController
     /**
      * @throws Error
      */
-    #[Route('/saml', name: 'app_saml_login')]
-    public function getStuff(Request $request): RedirectResponse
+    #[Route('/saml/{samlProviderId}', name: 'app_saml_login', requirements: ['samlProviderId' => '\d+'])]
+    public function samlLogin(int $samlProviderId, Request $request): RedirectResponse
     {
-        $samlProviderId = $request->get('saml_provider_id');
-        if (!$samlProviderId) {
-            throw $this->createNotFoundException('Missing SAML provider identifier.');
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $samlProviderId]);
+        if (!$samlProvider) {
+            throw $this->createNotFoundException('Missing SAML provider.');
         }
-        $samlProvider = $this->samlProviderResolverService->authSamlProviderById($samlProviderId);
+
+        // Save samlProviderId in the session
+        $request->getSession()->set('samlProviderId', $samlProviderId);
+
         $url = $this->generateUrl('saml_login', [
-            'samlProvider' => $samlProvider,
+            'samlProviderId' => $samlProvider->getId(),
         ]);
 
         return new RedirectResponse($url);

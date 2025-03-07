@@ -47,13 +47,25 @@ class SamlCustomAuthenticator extends AbstractAuthenticator
             throw new AuthenticationException('Missing SAMLResponse in the request.');
         }
 
-        $samlProviderId = $request->query->get('saml_provider_id');
+        $samlProviderId = $request->getSession()->get('samlProviderId');
+        dd($samlProviderId); // why is this null?
+        /*
+         * Tried the following:
+         * - Passing directly to customAuthenticator via REQUEST
+         * - Passing directly to customAuthenticator via SESSION
+         * - Dedicated controller for "saml/{samlProviderId}" redirecting to customAuthenticator path "saml/login"
+         * In the controller, attempted:
+         *   - Returning the request
+         *   - Returning the session
+         * Multiple attempts made to retrieve samlProviderID: 7
+         * Please, if you know how to solve this issue, I'd appreciate it.
+         * I'm desperate ;-;
+         */
         if (!$samlProviderId) {
             throw new AuthenticationException('No SAML provider specified.');
         }
 
         $auth = $this->samlProviderResolverService->authSamlProviderById($samlResponse);
-        dd($auth);
         $auth->processResponse();
 
         if ($auth->getErrors()) {
