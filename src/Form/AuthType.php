@@ -36,70 +36,6 @@ class AuthType extends AbstractType
                     ],
                 ]
             ],
-            'AUTH_METHOD_SAML_LABEL' => [
-                'type' => TextType::class,
-                'options' => [
-                    'constraints' => [
-                        new Length([
-                            'min' => 3,
-                            'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
-                        ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
-                                if ($authMethodSamlEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when SAML is enabled.')
-                                        ->addViolation();
-                                }
-                            },
-                        ]),
-                    ],
-                ],
-            ],
-            'AUTH_METHOD_SAML_DESCRIPTION' => [
-                'type' => TextType::class,
-                'options' => [
-                    'required' => false,
-                    'constraints' => [
-                        new Length([
-                            'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
-                        ]),
-                    ],
-                ],
-            ],
-            'PROFILE_LIMIT_DATE_SAML' => [
-                'type' => IntegerType::class,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please select an option.',
-                    ]),
-                    new Range([
-                        'min' => 1,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d 
-                            (maximum, determined by the number of days left until the certificate expires on %s).',
-                            $options['profileLimitDate'],
-                            $options['humanReadableExpirationDate']
-                        ),
-                    ]),
-                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
-                        if ($options['profileLimitDate'] < 1) {
-                            // Format the message with the human-readable expiration date
-                            $context->buildViolation(
-                                sprintf(
-                                    'The certificate has expired on (%s), please renew your certificate.',
-                                    $options['humanReadableExpirationDate']
-                                )
-                            )->addViolation();
-                        }
-                    }),
-                ],
-            ],
             // Google
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
@@ -117,8 +53,8 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
-                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                                if ($authMethodGoogleEnabled === "true" && empty($value)) {
                                     $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
                                         ->addViolation();
                                 }
@@ -188,8 +124,17 @@ class AuthType extends AbstractType
                             'minMessage' => 'The label must be at least {{ limit }} characters long.',
                             'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
                         ]),
-                        new NotBlank([
-                            'message' => 'This field cannot be empty'
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodMicrosoftEnabled = $form->get(
+                                    'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
+                                )->getData();
+                                if ($authMethodMicrosoftEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when Microsoft is enabled.')
+                                        ->addViolation();
+                                }
+                            },
                         ]),
                     ],
                 ],
@@ -248,8 +193,8 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
-                                if ($authMethodSamlEnabled === "true" && empty($value)) {
+                                $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
+                                if ($authMethodRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
                                         'This field cannot be empty when EMAIL REGISTER is enabled.'
                                     )->addViolation();
@@ -317,10 +262,13 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
-                                if ($authMethodSamlEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when SMS REGISTER is enabled.')
-                                        ->addViolation();
+                                $authMethodLoginTraditionalEnabled = $form->get(
+                                    'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                                )->getData();
+                                if ($authMethodLoginTraditionalEnabled === "true" && empty($value)) {
+                                    $context->buildViolation(
+                                        'This field cannot be empty when Login Traditional is enabled.'
+                                    )->addViolation();
                                 }
                             },
                         ]),
@@ -356,10 +304,12 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
-                                if ($authMethodSamlEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when LOGIN METHOD is enabled.')
-                                        ->addViolation();
+                                $authMethodSMSRegisterEnabled = $form->get('AUTH_METHOD_SMS_REGISTER_ENABLED')->getData(
+                                );
+                                if ($authMethodSMSRegisterEnabled === "true" && empty($value)) {
+                                    $context->buildViolation(
+                                        'This field cannot be empty when SMS Register is enabled.'
+                                    )->addViolation();
                                 }
                             },
                         ]),

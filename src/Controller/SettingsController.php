@@ -740,9 +740,6 @@ class SettingsController extends AbstractController
 
             $settingsToUpdate = [
                 'AUTH_METHOD_SAML_ENABLED',
-                'AUTH_METHOD_SAML_LABEL',
-                'AUTH_METHOD_SAML_DESCRIPTION',
-                'PROFILE_LIMIT_DATE_SAML',
 
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',

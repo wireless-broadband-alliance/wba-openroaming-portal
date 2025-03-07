@@ -157,16 +157,6 @@ class GetSettings
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
         ];
 
-        $data['SAML_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SAML_LABEL'),
-        ];
-
-        $data['SAML_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SAML_DESCRIPTION'),
-        ];
-
         $data['GOOGLE_LOGIN_ENABLED'] = [
             'value' => $settingRepository->findOneBy([
                     'name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'
@@ -323,11 +313,6 @@ class GetSettings
             'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
         ];
 
-        $data['PROFILE_LIMIT_DATE_SAML'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SAML'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SAML'),
-        ];
-
         $data['PROFILE_LIMIT_DATE_GOOGLE'] = [
             'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE'])->getValue(),
             'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_GOOGLE'),
@@ -396,8 +381,6 @@ class GetSettings
             'CONTACT_EMAIL' => 'The email address for contact inquiries',
 
             'AUTH_METHOD_SAML_ENABLED' => 'Enable or disable SAML authentication method',
-            'AUTH_METHOD_SAML_LABEL' => 'The label for SAML authentication on the login page',
-            'AUTH_METHOD_SAML_DESCRIPTION' => 'The description for SAML authentication on the login page',
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => 'Enable or disable Google authentication method',
             'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => 'The label for Google authentication button on the login page',
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => 'The description for Google authentication on the login page',
@@ -450,7 +433,6 @@ class GetSettings
             'TIME_INTERVAL_NOTIFICATION' =>
                 'The notification interval (in days) to alert a user before their profile expires',
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
-            'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
             'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',
             'PROFILE_LIMIT_DATE_MICROSOFT' => 'Time in days to disable profiles for users with Microsoft login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',

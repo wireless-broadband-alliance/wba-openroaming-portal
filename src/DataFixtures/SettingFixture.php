@@ -49,8 +49,6 @@ class SettingFixture extends Fixture
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming@wballiance.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
@@ -91,7 +89,6 @@ class SettingFixture extends Fixture
             ['name' => 'USER_DELETE_TIME', 'value' => '5'],
             ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
             ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
