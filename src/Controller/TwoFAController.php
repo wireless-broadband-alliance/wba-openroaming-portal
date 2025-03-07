@@ -554,7 +554,7 @@ class TwoFAController extends AbstractController
     }
 
     #[route(path: '/2FAFirstSetup/local', name: 'app_2FA_firstSetup_local')]
-    public function FirstSetupLocal(Request $request): RedirectResponse
+    public function firstSetupLocal(Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -563,7 +563,7 @@ class TwoFAController extends AbstractController
     }
 
     #[route(path: '/2FAFirstSetup/local/admin', name: 'app_2FA_firstSetup_local_admin')]
-    public function FirstSetupLocalAdmin(Request $request): RedirectResponse
+    public function firstSetupLocalAdmin(Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -704,5 +704,4 @@ class TwoFAController extends AbstractController
             'user' => $user,
         ]);
     }
-
 }
