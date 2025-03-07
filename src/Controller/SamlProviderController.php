@@ -9,12 +9,14 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
+use App\Form\SamlProviderExtraOptionsType;
 use App\Form\SamlProviderType;
 use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthSamlMethodCheckerService;
+use App\Service\CertificateService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -22,6 +24,7 @@ use App\Service\SamlProviderDeletionService;
 use App\Service\SamlProviderResolverService;
 use App\Service\UserDeletionService;
 use DateTime;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use OneLogin\Saml2\Error;
@@ -48,6 +51,7 @@ class SamlProviderController extends AbstractController
         private readonly SamlProviderDeletionService $samlProviderDeletionService,
         private readonly SamlProviderResolverService $samlProviderResolverService,
         private readonly AuthSamlMethodCheckerService $authSamlMethodCheckerService,
+        private readonly CertificateService $certificateService,
     ) {
     }
 
@@ -293,11 +297,73 @@ class SamlProviderController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/saml-provider/edit/btns/{id}', name: 'admin_dashboard_saml_provider_edit_style')]
+    #[Route(
+        '/dashboard/saml-provider/edit/extra-options/{id}',
+        name: 'admin_dashboard_saml_provider_edit_extra_options'
+    )]
     #[IsGranted('ROLE_ADMIN')]
-    public function editAuthBtns(int $id): never
+    public function editSAMLExtraOptions(int $id, Request $request): Response
     {
-        dd($id);
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Find the SAML Provider by ID
+        $samlProvider = $this->samlProviderRepository->findOneBy(['id' => $id]);
+        if (!$samlProvider) {
+            $this->addFlash('error_admin', 'This SAML Provider doesn\'t exist!');
+            return $this->redirectToRoute('admin_dashboard_saml_provider');
+        }
+
+        $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
+        $certificateLimitDate = strtotime(
+            (string)$this->certificateService->getCertificateExpirationDate($certificatePath)
+        );
+        $realTime = time();
+        $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
+        $profileLimitDate = ((int)$timeLeft);
+        if ($profileLimitDate < 0) {
+            $profileLimitDate = 0;
+        }
+
+        $defaultTimeZone = date_default_timezone_get();
+        $dateTime = new DateTime()
+            ->setTimestamp($certificateLimitDate)
+            ->setTimezone(new DateTimeZone($defaultTimeZone));
+
+        // Convert to human-readable format
+        $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
+        // TODO
+        /*
+         * make a form for these fields
+         * - btnLabel
+         * - btnDescription
+         * - handle the old PROFILE_LIMIT_DATE
+         */
+        $form = $this->createForm(SamlProviderExtraOptionsType::class, $samlProvider, [
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            dd('form is valid nice');
+            // TODO
+            /*
+             * Check for extra stuff on the SettingController.php & AuthType.php
+             * Make events logic
+             */
+        }
+
+        return $this->render('admin/shared/saml_providers/_saml_provider_form_extra_options.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data,
+            'current_user' => $currentUser,
+            'samlProvider' => $samlProvider,
+            'profileLimitDate' => $profileLimitDate,
+            'humanReadableExpirationDate' => $humanReadableExpirationDate
+        ]);
     }
 
     #[Route(

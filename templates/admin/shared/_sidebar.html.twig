@@ -32,8 +32,9 @@
         ] %}
         {% set identityProviderRoutes = [
             'admin_dashboard_saml_provider',
-            'admin_dashboard_saml_provider_edit',
             'admin_dashboard_saml_provider_new',
+            'admin_dashboard_saml_provider_edit',
+            'admin_dashboard_saml_provider_edit_extra_options',
         ] %}
 
         {# User - Button #}
@@ -150,7 +151,7 @@
                         <div class="pl-2 ml-2 bg-lightGray rounded-md duration-300 {{ (app.request.attributes.get('_route') in identityProviderRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
                             <ul>
                                 <li>
-                                    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') in ['admin_dashboard_saml_provider', 'admin_dashboard_saml_provider_edit', 'admin_dashboard_saml_provider_new'] %}selected{% endif %}"
+                                    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') in identityProviderRoutes %}selected{% endif %}"
                                        href="{{ path('admin_dashboard_saml_provider') }}">
                                         <twig:ux:icon name="wba:dot" class="w-4 mr-4" fill="none"/>
                                         SAML
