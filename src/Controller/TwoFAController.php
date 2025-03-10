@@ -80,6 +80,12 @@ class TwoFAController extends AbstractController
         $secret = $this->totpService->generateSecret();
         $session = $request->getSession();
         if ($user instanceof User) {
+            if (
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_2FA_generate_code_swap_method');
+            }
             $user->setTwoFAsecret($secret);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
@@ -543,6 +549,9 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+            return $this->redirectToRoute('app_swap2FA_disable_app');
+        }
         $this->twoFAService->generate2FACode($user);
         return $this->redirectToRoute('app_2FA_first_verification_local');
     }
@@ -613,6 +622,129 @@ class TwoFAController extends AbstractController
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
         return $this->render('site/verify2FAlocal.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'user' => $user,
+        ]);
+    }
+
+    #[route(path: '/2FASwapMethod/disableLocal', name: 'app_swap2FA_disable_Local')]
+    public function swapMethod2FADisableLocal(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        /** @var User $user */
+        $user = $this->getUser();
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $formCode = $form->get('code')->getData();
+            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                return $this->redirectToRoute('app_enable2FA_app');
+            }
+            // Check if the code used is the one generated in the BD.
+            if ($this->twoFAService->validate2FACode($user, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                return $this->redirectToRoute('app_enable2FA_app');
+            }
+        }
+        return $this->render('site/disable2FA.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'user' => $user,
+        ]);
+    }
+
+    #[Route(path: '/generate2FACode/swapMethod', name: 'app_2FA_generate_code_swap_method')]
+    public function generateCodeSwapMethod(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->twoFAService->generate2FACode($user);
+        return $this->redirectToRoute('app_swap2FA_disable_Local');
+    }
+
+    #[route(path: '/2FASwapMethod/disableApp', name: 'app_swap2FA_disable_app')]
+    public function swapMethod2FADisableApp(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFAcode::class);
+        /** @var User $user */
+        $user = $this->getUser();
+        $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $formCode = $form->get('code')->getData();
+            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                return $this->redirectToRoute('app_2FA_firstSetup_local');
+            }
+            // Get the secret code to communicate with app.
+            $secret = $user->gettwoFASecret();
+            // Check if the code used is the one generated in the application.
+            if ($this->totpService->verifyTOTP($secret, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::VERIFY_APP_2FA->value,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                return $this->redirectToRoute('app_2FA_firstSetup_local');
+            }
+        }
+        return $this->render('site/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
