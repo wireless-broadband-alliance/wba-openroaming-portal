@@ -187,8 +187,7 @@ class SiteController extends AbstractController
             $currentUser &&
             $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
             $currentUser->getOTPcodes()->isEmpty()
-        )
-        {
+        ) {
             return $this->redirectToRoute('app_otpCodes');
         }
 

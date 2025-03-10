@@ -622,5 +622,4 @@ class TwoFAController extends AbstractController
             'user' => $user,
         ]);
     }
-
 }
