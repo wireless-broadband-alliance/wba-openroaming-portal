@@ -259,6 +259,7 @@ class TwoFAController extends AbstractController
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
                 $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -280,6 +281,7 @@ class TwoFAController extends AbstractController
             }
             // Check if the code used is the one generated in the BD.
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
                 $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -319,6 +321,7 @@ class TwoFAController extends AbstractController
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
+                $this->twoFAService->removeOTPcodes($user);
                 $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -342,7 +345,10 @@ class TwoFAController extends AbstractController
             $secret = $user->gettwoFASecret();
             // Check if the code used is the one generated in the application.
             if ($this->totpService->verifyTOTP($secret, $formCode)) {
-                $session->set('2fa_verified', true);
+                $this->twoFAService->removeOTPcodes($user);
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),

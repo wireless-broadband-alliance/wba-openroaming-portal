@@ -211,4 +211,14 @@ class TwoFAService
         $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
         return count($attempts) < $nrAttempts;
     }
+
+    public function removeOTPcodes(User $user): void
+    {
+        $codes = $user->getOTPcodes();
+        foreach ($codes as $code) {
+            $user->removeOTPcode($code);
+            $this->entityManager->persist($user);
+        }
+        $this->entityManager->flush();
+    }
 }
