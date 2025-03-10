@@ -521,7 +521,6 @@ class TwoFAController extends AbstractController
         $form = $this->createForm(TwoFAcode::class);
         /** @var User $user */
         $user = $this->getUser();
-        $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -558,7 +557,6 @@ class TwoFAController extends AbstractController
         $form = $this->createForm(TwoFAcode::class);
         /** @var User $user */
         $user = $this->getUser();
-        $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();

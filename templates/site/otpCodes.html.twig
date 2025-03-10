@@ -34,7 +34,7 @@
                             class="btn-secondary text-xs px-2 py-1">
                         Copy
                     </button>
-                    <a href="{{ path('app_download_codes', {'codes': codes|json_encode}) }}"
+                    <a href="{{ path('app_download_codes', {codes: codes|json_encode}) }}"
                        class="btn-secondary text-xs px-2 py-1">
                         Download
                     </a>
@@ -59,7 +59,7 @@
 
     {# Divider #}
     <div>
-        <a href="{{ path('app_otpCodes_save', {'codes': codes|json_encode}) }}" class="mt-6 w-[180px] btn-primary">Done</a>
+        <a href="{{ path('app_otpCodes_save', {codes: codes|json_encode}) }}" class="mt-6 w-[180px] btn-primary">Done</a>
     </div>
 
 {% endblock %}
