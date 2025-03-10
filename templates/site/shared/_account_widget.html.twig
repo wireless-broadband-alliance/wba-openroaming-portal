@@ -96,12 +96,44 @@
 
     {# divider #}
     <div class="divider my-8"></div>
-    <div>
-        <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
-        <a href="{{ path('app_configure2FA') }}" class="mt-6 w-[180px] btn-primary">Configure Two Factor Authentication </a>
-    </div>
-    {# divider #}
-    <div class="divider my-8"></div>
+    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+        <div>
+            <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+            <a href="{{ path('app_configure2FA') }}" class="mt-6 w-[180px] btn-primary">Configure Two Factor Authentication </a>
+        </div>
+        {# divider #}
+        <div class="divider my-8"></div>
+    {% endif %}
+    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT')) %}
+            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <div>
+                    <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+                    <a href="{{ path('app_configure2FA') }}" class="mt-6 w-[180px] btn-primary">Configure Two Factor Authentication </a>
+                </div>
+                {# divider #}
+                <div class="divider my-8"></div>
+            {% endif %}
+        {% else %}
+            <div>
+                <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+                <a href="{{ path('app_configure2FA') }}" class="mt-6 w-[180px] btn-primary">Configure Two Factor Authentication </a>
+            </div>
+            {# divider #}
+            <div class="divider my-8"></div>
+        {% endif %}
+    {% endif %}
+    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+            <div>
+                <h1 class="text-lg mb-8 mt-10">Two Factor Authentication</h1>
+                <a href="{{ path('app_configure2FA') }}" class="mt-6 w-[180px] btn-primary">Configure Two Factor Authentication </a>
+            </div>
+            {# divider #}
+            <div class="divider my-8"></div>
+        {% endif %}
+    {% endif %}
+
 
     <div {{ stimulus_controller('alert') }}>
         <form method="POST"
