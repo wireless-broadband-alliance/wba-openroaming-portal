@@ -183,9 +183,15 @@ class SiteController extends AbstractController
             }
         }
         // check if the user have otpCodes
-        if ($currentUser && $currentUser->getOTPcodes()->isEmpty()) {
+        if (
+            $currentUser &&
+            $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+            $currentUser->getOTPcodes()->isEmpty()
+        )
+        {
             return $this->redirectToRoute('app_otpCodes');
         }
+
         // Check if the current user has a provider
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
         $externalAuthsData = [];

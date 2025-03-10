@@ -91,6 +91,7 @@ class SamlProviderController extends AbstractController
         $totalPages = ceil($totalProviders / $perPage);
 
         return $this->render('admin/saml_provider.html.twig', [
+            'user' => $this->getUser(),
             'data' => $data,
             'samlProviders' => $samlProviders,
             'current_user' => $this->getUser(),
@@ -182,6 +183,7 @@ class SamlProviderController extends AbstractController
 
         // Render the form if not submitted or invalid
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
+            'user' => $this->getUser(),
             'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
             'current_user' => $currentUser,
@@ -296,6 +298,7 @@ class SamlProviderController extends AbstractController
         }
 
         return $this->render('admin/shared/saml_providers/_saml_provider_form.html.twig', [
+            'user' => $currentUser,
             'formSamlProvider' => $formSamlProvider->createView(),
             'data' => $data,
             'current_user' => $currentUser,

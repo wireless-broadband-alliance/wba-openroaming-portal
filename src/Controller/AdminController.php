@@ -99,7 +99,10 @@ class AdminController extends AbstractController
         // Create form views
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
 
+        /** @var User $user */
+        $user = $this->getUser();
         return $this->render('admin/index.html.twig', [
+            'user' => $user,
             'users' => $users,
             'userExternalAuths' => $userExternalAuths,
             'currentPage' => $page,
@@ -286,6 +289,7 @@ class AdminController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,

@@ -95,14 +95,29 @@
                         Account
                     </a>
                 </li>
-                <li>
-                    {# 2FA #}
-                    <a href="{{ path('app_configure2FA') }}"
-                       class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-                        <twig:ux:icon name="wba:2fa" class="w-7 pr-2 mr-2" fill="none"/>
-                        Configure 2FA
-                    </a>
-                </li>
+                {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+                    <li>
+                        {# 2FA #}
+                        <a href="{{ path('app_configure2FA') }}"
+                           class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
+                            <twig:ux:icon name="wba:2fa" class="w-7 pr-2 mr-2" fill="none"/>
+                            Configure 2FA
+                        </a>
+                    </li>
+                {% endif %}
+                {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) or
+                    (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+                    {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                        <li>
+                            {# 2FA #}
+                            <a href="{{ path('app_configure2FA') }}"
+                               class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
+                                <twig:ux:icon name="wba:2fa" class="w-7 pr-2 mr-2" fill="none"/>
+                                Configure 2FA
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endif %}
                 <li>
                     {# Logout #}
                     <a href="{{ path('saml_logout') }}"
