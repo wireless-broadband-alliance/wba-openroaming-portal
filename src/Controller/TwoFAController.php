@@ -223,16 +223,10 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
-            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->disable2FA($user);
-                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
-                if ($session->has('session_admin')) {
-                    return $this->redirectToRoute('admin_page');
-                }
-                return $this->redirectToRoute('app_landing');
-            }
-            // Check if the code used is the one generated in the BD.
-            if ($this->twoFAService->validate2FACode($user, $formCode)) {
+            // Check if the code used is valid
+            if ($this->twoFAService->validateOTPCodes($user, $formCode) ||
+                $this->twoFAService->validate2FACode($user, $formCode)
+            ) {
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 if ($session->has('session_admin')) {
@@ -259,18 +253,12 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
-            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->disable2FA($user);
-                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
-                if ($session->has('session_admin')) {
-                    return $this->redirectToRoute('admin_page');
-                }
-                return $this->redirectToRoute('app_landing');
-            }
             // Get the secret code to communicate with app.
             $secret = $user->gettwoFASecret();
-            // Check if the code used is the one generated in the application.
-            if ($this->totpService->verifyTOTP($secret, $formCode)) {
+            // Check if the code used is valid
+            if ($this->twoFAService->validateOTPCodes($user, $formCode) ||
+                $this->totpService->verifyTOTP($secret, $formCode)
+            ) {
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 if ($session->has('session_admin')) {
@@ -506,13 +494,10 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
-            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->disable2FA($user);
-                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
-                return $this->redirectToRoute('app_enable2FA_app');
-            }
-            // Check if the code used is the one generated in the BD.
-            if ($this->twoFAService->validate2FACode($user, $formCode)) {
+            // Check if the code used is valid
+            if ($this->twoFAService->validateOTPCodes($user, $formCode) ||
+                $this->twoFAService->validate2FACode($user, $formCode)
+            ) {
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 return $this->redirectToRoute('app_enable2FA_app');
@@ -545,15 +530,12 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
-            if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->disable2FA($user);
-                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
-                return $this->redirectToRoute('app_2FA_firstSetup_local');
-            }
             // Get the secret code to communicate with app.
             $secret = $user->gettwoFASecret();
-            // Check if the code used is the one generated in the application.
-            if ($this->totpService->verifyTOTP($secret, $formCode)) {
+            // Check if the code used is valid
+            if ($this->twoFAService->validateOTPCodes($user, $formCode) ||
+                $this->totpService->verifyTOTP($secret, $formCode)
+            ) {
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 return $this->redirectToRoute('app_2FA_firstSetup_local');
