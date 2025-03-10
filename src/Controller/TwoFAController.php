@@ -49,7 +49,6 @@ class TwoFAController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly TOTPService $totpService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly EventActions $eventActions,
         private readonly TwoFAService $twoFAService,
         private readonly EventRepository $eventRepository,
     ) {
@@ -130,17 +129,7 @@ class TwoFAController extends AbstractController
                 // Check if the used code is one of the OTP codes
                 if ($this->twoFAService->validateOTPCodes($user, $code)) {
                     $session->set('2fa_verified', true);
-                    $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $user->getUuid(),
-                        'ip' => $request->getClientIp(),
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::VERIFY_OTP_2FA->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
+                    $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::VERIFY_OTP_2FA->value);
                     if ($session->has('session_admin')) {
                         return $this->redirectToRoute('admin_page');
                     }
@@ -149,17 +138,7 @@ class TwoFAController extends AbstractController
                 // Check if the code used is the one generated in the application.
                 if ($this->totpService->verifyTOTP($secret, $code)) {
                     $session->set('2fa_verified', true);
-                    $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $user->getUuid(),
-                        'ip' => $request->getClientIp(),
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::VERIFY_APP_2FA->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
+                    $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::VERIFY_APP_2FA->value);
                     if ($session->has('session_admin')) {
                         return $this->redirectToRoute('admin_page');
                     }
@@ -188,17 +167,7 @@ class TwoFAController extends AbstractController
             // Check if the used code is one of the OTP codes
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
                 $session->set('2fa_verified', true);
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::VERIFY_OTP_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::VERIFY_OTP_2FA->value);
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -207,17 +176,7 @@ class TwoFAController extends AbstractController
             // Check if the code used is the one generated in the BD.
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
                 $session->set('2fa_verified', true);
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::VERIFY_LOCAL_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::VERIFY_LOCAL_2FA->value);
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -265,21 +224,8 @@ class TwoFAController extends AbstractController
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::DISABLE_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -287,21 +233,8 @@ class TwoFAController extends AbstractController
             }
             // Check if the code used is the one generated in the BD.
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::DISABLE_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -327,21 +260,8 @@ class TwoFAController extends AbstractController
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::DISABLE_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -351,21 +271,8 @@ class TwoFAController extends AbstractController
             $secret = $user->gettwoFASecret();
             // Check if the code used is the one generated in the application.
             if ($this->totpService->verifyTOTP($secret, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::VERIFY_APP_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -396,17 +303,7 @@ class TwoFAController extends AbstractController
                 // Check if the code used is the one generated in the application.
                 if ($this->totpService->verifyTOTP($secret, $code)) {
                     $session->set('2fa_verified', true);
-                    $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $user->getUuid(),
-                        'ip' => $request->getClientIp(),
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::ENABLE_APP_2FA->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
+                    $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::ENABLE_APP_2FA->value);
                     $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::APP->value);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
@@ -457,17 +354,7 @@ class TwoFAController extends AbstractController
         $codesJson = $request->query->get('codes');
         $codes = json_decode($codesJson, true);
         $this->twoFAService->saveCodes($codes, $user);
-        $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
-        ];
-        $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::GENERATE_OTP_2FA->value,
-            new DateTime(),
-            $eventMetaData
-        );
+        $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::GENERATE_OTP_2FA->value);
         if ($session->has('session_admin')) {
             return $this->redirectToRoute('admin_page');
         }
@@ -574,17 +461,7 @@ class TwoFAController extends AbstractController
                     if ($user instanceof User) {
                         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
                         $this->entityManager->persist($user);
-                        $eventMetaData = [
-                            'platform' => PlatformMode::LIVE->value,
-                            'uuid' => $user->getUuid(),
-                            'ip' => $request->getClientIp(),
-                        ];
-                        $this->eventActions->saveEvent(
-                            $user,
-                            AnalyticalEventType::ENABLE_LOCAL_2FA->value,
-                            new DateTime(),
-                            $eventMetaData
-                        );
+                        $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::ENABLE_LOCAL_2FA->value);
                         $this->entityManager->flush();
                     } else {
                         $this->addFlash('error', 'You must be logged in to access this page');
@@ -598,17 +475,7 @@ class TwoFAController extends AbstractController
                 if ($user->getEmail()) {
                     $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
                     $this->entityManager->persist($user);
-                    $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $user->getUuid(),
-                        'ip' => $request->getClientIp(),
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::ENABLE_LOCAL_2FA->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
+                    $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::ENABLE_LOCAL_2FA->value);
                     $this->entityManager->flush();
                 } else {
                     $this->addFlash('error', 'You must be logged in to access this page');
@@ -640,40 +507,14 @@ class TwoFAController extends AbstractController
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::DISABLE_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 return $this->redirectToRoute('app_enable2FA_app');
             }
             // Check if the code used is the one generated in the BD.
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::DISABLE_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 return $this->redirectToRoute('app_enable2FA_app');
             }
         }
@@ -705,42 +546,16 @@ class TwoFAController extends AbstractController
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::DISABLE_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 return $this->redirectToRoute('app_2FA_firstSetup_local');
             }
             // Get the secret code to communicate with app.
             $secret = $user->gettwoFASecret();
             // Check if the code used is the one generated in the application.
             if ($this->totpService->verifyTOTP($secret, $formCode)) {
-                $this->twoFAService->removeOTPcodes($user);
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::VERIFY_APP_2FA->value,
-                    new DateTime(),
-                    $eventMetaData
-                );
+                $this->twoFAService->disable2FA($user);
+                $this->twoFAService->event2FA($request->getClientIp(), $user, AnalyticalEventType::DISABLE_2FA->value);
                 return $this->redirectToRoute('app_2FA_firstSetup_local');
             }
         }

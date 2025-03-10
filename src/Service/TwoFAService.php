@@ -219,4 +219,27 @@ class TwoFAService
         }
         $this->entityManager->flush();
     }
+
+    public function disable2FA(User $user): void
+    {
+        $this->removeOTPcodes($user);
+        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+    }
+
+    public function event2FA(string $ip, User $user, string $eventType): void
+    {
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
+            'uuid' => $user->getUuid(),
+            'ip' => $ip,
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            $eventType,
+            new DateTime(),
+            $eventMetaData
+        );
+    }
 }
