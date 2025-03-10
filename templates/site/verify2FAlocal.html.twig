@@ -27,8 +27,10 @@
         <p class="font-bold text-xl">Two Factor Authentication Code</p>
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
             <p class="text-lg"> Please enter the code sent to your email</p>
-        {% else %}
+        {% elseif %}
             <p class="text-lg"> Please enter the code sent to your phone number</p>
+        {% else %}
+            <p class="text-lg"> Please enter the code sent to your authentication method</p>
         {% endif %}
 
     </div>
@@ -49,6 +51,7 @@
             {{ form_end(form) }}
 
             <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
+            <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
         </div>
     </div>
 
