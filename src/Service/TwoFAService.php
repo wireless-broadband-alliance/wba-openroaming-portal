@@ -78,8 +78,6 @@ class TwoFAService
 
     public function generate2FACode(User $user)
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $codeDate = $user->getTwoFACodeGeneratedAt();
         // Generate code
         $code = $this->twoFACode($user);
         // Send code

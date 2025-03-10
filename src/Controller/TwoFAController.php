@@ -492,11 +492,7 @@ class TwoFAController extends AbstractController
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
             $now = new DateTime();
-            if ($lastEvent) {
-                $lastAttemptTime = $lastEvent->getEventDatetime();
-            } else {
-                $lastAttemptTime = $timeToResetAttempts;
-            }
+            $lastAttemptTime = $lastEvent instanceof \App\Entity\Event ? $lastEvent->getEventDatetime() : $timeToResetAttempts;
             $limitTime = $lastAttemptTime;
             $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
             $interval = date_diff($now, $limitTime);
@@ -531,7 +527,7 @@ class TwoFAController extends AbstractController
         $fileContent = implode("\n", $codes);
 
         // response for file download
-        $response = new StreamedResponse(function () use ($fileContent) {
+        $response = new StreamedResponse(function () use ($fileContent): void {
             echo $fileContent;
         });
 
