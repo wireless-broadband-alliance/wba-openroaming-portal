@@ -48,7 +48,7 @@
     {# When the app status is ENFORCED_FOR_LOCAL #}
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
         {# Local users #}
-        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT')) %}
+        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
                 <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
