@@ -720,7 +720,7 @@ class SettingsController extends AbstractController
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime((string)$certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
-        $timeLeft = round(($certificateLimitDate - $realTime) / (8640)) - 1;
+        $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $profileLimitDate = ((int)$timeLeft);
         if ($profileLimitDate < 0) {
             $profileLimitDate = 0;
