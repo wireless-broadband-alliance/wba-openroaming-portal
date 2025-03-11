@@ -65,7 +65,7 @@ class ResetCapportSettingsCommand extends Command
 
                 $setting = $settingsRepository->findOneBy(['name' => $name]);
 
-                if ($setting) {
+                if ($setting !== null) {
                     // Update the already existing value
                     $setting->setValue($value);
                 } else {

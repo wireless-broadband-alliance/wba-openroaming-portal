@@ -22,35 +22,35 @@ class SamlProviderValidator
         $existingProviderByName = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
             'name' => $name,
         ]);
-        if ($existingProviderByName) {
+        if ($existingProviderByName !== null) {
             return 'name';
         }
 
         $existingProviderByIdpEntityId = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
             'idpEntityId' => $idpEntityId,
         ]);
-        if ($existingProviderByIdpEntityId) {
+        if ($existingProviderByIdpEntityId !== null) {
             return 'IDP Entity ID';
         }
 
         $existingProviderByIdpSsoUrl = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
             'idpSsoUrl' => $idpSsoUrl,
         ]);
-        if ($existingProviderByIdpSsoUrl) {
+        if ($existingProviderByIdpSsoUrl !== null) {
             return 'IDP SSO URL';
         }
 
         $existingProviderBySpEntityId = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
             'spEntityId' => $spEntityId,
         ]);
-        if ($existingProviderBySpEntityId) {
+        if ($existingProviderBySpEntityId !== null) {
             return 'SP Entity ID';
         }
 
         $existingProviderBySpAcsUrl = $this->entityManager->getRepository(SamlProvider::class)->findOneBy([
             'spAcsUrl' => $spAcsUrl,
         ]);
-        if ($existingProviderBySpAcsUrl) {
+        if ($existingProviderBySpAcsUrl !== null) {
             return 'SP ACS URL';
         }
 

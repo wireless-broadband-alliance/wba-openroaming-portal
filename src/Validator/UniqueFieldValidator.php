@@ -24,7 +24,7 @@ class UniqueFieldValidator extends ConstraintValidator
         $repository = $this->entityManager->getRepository(SamlProvider::class);
         $existingEntity = $repository->findOneBy([$constraint->field => $value]);
 
-        if ($existingEntity) {
+        if ($existingEntity !== null) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $value)
                 ->addViolation();
