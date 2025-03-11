@@ -315,14 +315,14 @@ class SettingsController extends AbstractController
 
         $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
         $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
-        if (!$tosTextEditor) {
+        if ($tosTextEditor === null) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
             $this->entityManager->persist($tosTextEditor);
         }
         $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
-        if (!$privacyPolicyTextEditor) {
+        if ($privacyPolicyTextEditor === null) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
@@ -371,32 +371,32 @@ class SettingsController extends AbstractController
 
 
             $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
-            if ($tosSetting) {
+            if ($tosSetting !== null) {
                 $tosSetting->setValue($tos);
                 $this->entityManager->persist($tosSetting);
             }
 
             $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
-            if ($privacyPolicySetting) {
+            if ($privacyPolicySetting !== null) {
                 $privacyPolicySetting->setValue($privacyPolicy);
                 $this->entityManager->persist($privacyPolicySetting);
             }
 
             $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
-            if ($tosLinkSetting) {
+            if ($tosLinkSetting !== null) {
                 $tosLinkSetting->setValue($tosLink);
                 $this->entityManager->persist($tosLinkSetting);
             }
 
             $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
-            if ($privacyPolicyLinkSetting) {
+            if ($privacyPolicyLinkSetting !== null) {
                 $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
                 $this->entityManager->persist($privacyPolicyLinkSetting);
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
                 $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
-                if ($tosEditorSetting) {
+                if ($tosEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
                 }
@@ -407,7 +407,7 @@ class SettingsController extends AbstractController
                 $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
                     'name' => TextEditorName::PRIVACY_POLICY->value
                 ]);
-                if ($privacyPolicyEditorSetting) {
+                if ($privacyPolicyEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
                 }
@@ -503,7 +503,7 @@ class SettingsController extends AbstractController
                     }
 
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                    if ($setting) {
+                    if ($setting !== null) {
                         $setting->setValue($value);
                         $this->entityManager->persist($setting);
                     }
@@ -567,36 +567,36 @@ class SettingsController extends AbstractController
             $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED->value;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
-            if ($platformModeSetting) {
+            if ($platformModeSetting !== null) {
                 $platformModeSetting->setValue($platformMode);
                 $this->entityManager->persist($platformModeSetting);
             }
 
             $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'USER_VERIFICATION']);
-            if ($emailVerificationSetting) {
+            if ($emailVerificationSetting !== null) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $this->entityManager->persist($emailVerificationSetting);
             }
 
             $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
-            if ($turnstileCheckerSetting) {
+            if ($turnstileCheckerSetting !== null) {
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $this->entityManager->persist($turnstileCheckerSetting);
             }
 
             $apiStatusSetting = $settingsRepository->findOneBy(['name' => 'API_STATUS']);
-            if ($apiStatusSetting) {
+            if ($apiStatusSetting !== null) {
                 $apiStatusSetting->setValue($apiStatus);
                 $this->entityManager->persist($apiStatusSetting);
             }
 
             $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
-            if ($userDeleteTimeSetting) {
+            if ($userDeleteTimeSetting !== null) {
                 $userDeleteTimeSetting->setValue($userDeleteTime);
                 $this->entityManager->persist($userDeleteTimeSetting);
             }
             $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
-            if ($twoFactorAuthStatusSetting) {
+            if ($twoFactorAuthStatusSetting !== null) {
                 $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
                 $this->entityManager->persist($twoFactorAuthStatusSetting);
             }
@@ -662,7 +662,7 @@ class SettingsController extends AbstractController
             foreach ($settingsToHandle as $settingName) {
                 $settingValue = $submittedData[$settingName] ?? '';
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     // Update existing setting
                     $setting->setValue($settingValue);
                 }
@@ -786,7 +786,7 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
@@ -860,7 +860,7 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
@@ -931,7 +931,7 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }

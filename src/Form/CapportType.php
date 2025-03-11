@@ -30,6 +30,7 @@ class CapportType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                        'requireTld' => true,
                     ]),
                 ],
             ],
@@ -39,6 +40,7 @@ class CapportType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                        'requireTld' => true,
                     ]),
                 ],
             ],

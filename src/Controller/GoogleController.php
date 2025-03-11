@@ -15,6 +15,7 @@ use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use RuntimeException;
@@ -78,6 +79,7 @@ class GoogleController extends AbstractController
     /**
      * @throws IdentityProviderException
      * @throws Exception
+     * @throws GuzzleException
      */
     #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
@@ -140,7 +142,7 @@ class GoogleController extends AbstractController
         $validDomainsSetting = $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN']);
 
         // Throw an exception if the setting is not found
-        if (!$validDomainsSetting) {
+        if ($validDomainsSetting === null) {
             throw new RuntimeException('VALID_DOMAINS_GOOGLE_LOGIN not found in the database.');
         }
 
@@ -177,7 +179,7 @@ class GoogleController extends AbstractController
             'provider_id' => $googleUserId
         ]);
 
-        if ($userExternalAuth) {
+        if ($userExternalAuth !== null) {
             // If a user with the given Google user ID exists, return the associated user
             return $userExternalAuth->getUser();
         }
@@ -185,12 +187,12 @@ class GoogleController extends AbstractController
         // Check if a user with the given email exists
         $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
-        if ($userWithEmail) {
+        if ($userWithEmail !== null) {
             $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
                 'user' => $userWithEmail
             ]);
 
-            if (!$existingUserAuth) {
+            if ($existingUserAuth === null) {
                 $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
                 return null;
             }

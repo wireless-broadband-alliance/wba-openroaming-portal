@@ -21,7 +21,7 @@ class AuthSamlMethodCheckerService
     public function checkAndUpdateAuthMethodStatus(): void
     {
         $activeSamlProviders = $this->samlProviderRepository->findBy(['isActive' => true, 'deletedAt' => null]);
-        if (!$activeSamlProviders) {
+        if ($activeSamlProviders === []) {
             $authMethodSetting = $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED']);
             if ($authMethodSetting && $authMethodSetting->getValue() === 'true') {
                 $authMethodSetting->setValue('false');

@@ -27,5 +27,5 @@ return [
     Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle::class => ['all' => true],
     Misd\PhoneNumberBundle\MisdPhoneNumberBundle::class => ['all' => true],
     EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle::class => ['all' => true],
-    Eckinox\TinymceBundle\TinymceBundle::class => ['all' => true],
+    EmilePerron\TinymceBundle\TinymceBundle::class => ['all' => true],
 ];
