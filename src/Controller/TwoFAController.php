@@ -322,7 +322,7 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        return $this->render('site/verify2FA.html.twig', [
+        return $this->render('site/validate2FAapp.html.twig', [
             'data' => $data,
             'form' => $form,
         ]);
@@ -507,7 +507,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
-        return $this->render('site/verify2FAlocal.html.twig', [
+        return $this->render('site/validate2FAlocal.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
