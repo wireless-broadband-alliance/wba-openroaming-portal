@@ -28,7 +28,7 @@
         <p class="text-lg"> To validate the use of two factor authentication please enter your app code</p>
     </div>
     {{ form_start(form) }}
-    <div class="relative mt-10">
+    <div class="relative mt-10 mb-6">
 
         {{ form_widget(form.code, {
             attr: {
@@ -38,15 +38,11 @@
 
     </div>
 
-    {# Divider #}
-    <div class="my-[25px] divider"></div>
-
-    {{ form_row(form.submit, {
-        attr: {
-            class: 'w-[160px] btn btn-primary',
-        }}) }}
-    {{ form_end(form) }}
-
-    <a href="{{ path('app_configure2FA') }}" class="w-[160px] btn-logout">Back to configuration</a>
-
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+        <a class="btn-primary">
+        {{ form_row(form.submit) }}
+        {{ form_end(form) }}
+        </a>
+        <a href="{{ path('app_configure2FA') }}" class="text-center btn-logout">Back to configuration</a>
+    </div>
 {% endblock %}
