@@ -96,6 +96,7 @@ class SamlProviderType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value "{{ value }}" is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                        'requireTld' => true,
                     ]),
                 ],
             ])
@@ -131,6 +132,7 @@ class SamlProviderType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value "{{ value }}" is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                        'requireTld' => true,
                     ]),
                     new Assert\Callback(function ($value, $context): void {
                         // Ensure 'spAcsUrl' is unique

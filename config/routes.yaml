@@ -14,7 +14,7 @@ app_login:
 api_v1:
     prefix: /api/v1
     resource: '../src/Api/V1/Controller/'
-    type: annotation
+    type: attribute
 
 api_get_current_user:
     path: /api/v1/user

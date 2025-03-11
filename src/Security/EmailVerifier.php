@@ -10,12 +10,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
-class EmailVerifier
+readonly class EmailVerifier
 {
     public function __construct(
-        private readonly VerifyEmailHelperInterface $verifyEmailHelper,
-        private readonly MailerInterface $mailer,
-        private readonly EntityManagerInterface $entityManager
+        private VerifyEmailHelperInterface $verifyEmailHelper,
+        private MailerInterface $mailer,
+        private EntityManagerInterface $entityManager
     ) {
     }
 
