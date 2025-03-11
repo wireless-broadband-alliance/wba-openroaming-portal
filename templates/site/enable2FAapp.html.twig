@@ -28,7 +28,7 @@
         <p class="text-lg"> Please scan this QR code in your application </p>
     </div>
 
-    <div class="text-center my-5">
+    <div class="flex justify-center my-5">
         <img src="data:image/png;base64,{{ qrCodeImage }}" alt="QR Code for 2FA configuration" />
     </div>
 
@@ -36,7 +36,14 @@
         <p class="text-lg"> Or manually enter the code into the application  </p>
         <p class="text-sm"> {{ secret }} </p>
     </div>
+    <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
+        <a href="{{ path('app_enable2FA_app_confirm') }}" class="btn-primary">Done</a>
+        <a href="{{ path('app_configure2FA') }}" class="text-center btn-logout">Back to configuration</a>
+    </div>
 
-    <a href="{{ path('app_enable2FA_app_confirm') }}" class="mt-6 w-[180px] btn-primary">Done</a>
+    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+        You are currently authenticated as
+        {{ app.user.uuid }}
+    </p>
 
 {% endblock %}
