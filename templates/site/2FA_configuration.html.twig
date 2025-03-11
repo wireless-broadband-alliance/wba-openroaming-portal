@@ -25,29 +25,30 @@
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Two Factor Authentication</p>
-        <p class="text-lg"> Please select an option to configure two factor authentication </p>
+        <p class="text-lg mb-6"> Please select an option to configure two factor authentication </p>
     </div>
 
+    <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:grid-cols-2 md:my-2 my-3">
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-            <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-            <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-            <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+            <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-            <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+            <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
     {% endif %}
     {# When the app status is ENFORCED_FOR_LOCAL #}
@@ -55,64 +56,172 @@
         {# Local users #}
         {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-                <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+                <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+                <a href="{{ path('saml_logout') }}" class="btn-logout">Logout</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
             {# External users #}
         {% else %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+                <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+                <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-                <a href="{{ path('app_disable2FA') }}" class="mt-6 w-[180px] btn-logout">Disable</a>
-                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+                <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+                <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+                <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
             {% endif %}
         {% endif %}
     {% endif %}
     {# When the app status is ENFORCED_FOR_ALL #}
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-            <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+            <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+            <a href="{{ path('saml_logout') }}" class="btn-logout">Logout</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-            <a href="{{ path('app_2FA_firstSetup_local') }}" class="mt-6 w-[220px] btn-primary">Your Authentication Method</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Your Authentication Method</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-            <a href="{{ path('app_enable2FA_app') }}" class="mt-6 w-[240px] btn-primary">Two Factor Authentication App</a>
-            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Back to dashboard</a>
+            <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">Two Factor Authentication App</a>
+            <a href="{{ path('app_landing') }}" class="btn-logout">Back to dashboard</a>
         {% endif %}
     {% endif %}
+    </div>
+
+    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two factor authentication configured with the App
+            </p>
+        {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two factor authentication configured with your authentication method
+            </p>
+        {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two factor authentication configured with your authentication method
+            </p>
+        {% endif %}
+    {% endif %}
+    {# When the app status is ENFORCED_FOR_LOCAL #}
+    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+        {# Local users #}
+        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    Two factor authentication is mandatory for your account. You can't proceed without him
+                </p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two factor authentication configured with the App
+                </p>
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    Two factor authentication is mandatory for your account. You can't proceed without him
+                </p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two factor authentication configured with your authentication method
+                </p>
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    Two factor authentication is mandatory for your account. You can't proceed without him
+                </p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two factor authentication configured with your authentication method
+                </p>
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    Two factor authentication is mandatory for your account. You can't proceed without him
+                </p>
+            {% endif %}
+            {# External users #}
+        {% else %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two factor authentication configured with the App
+                </p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two factor authentication configured with your authentication method
+                </p>
+            {% endif %}
+            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two factor authentication configured with your authentication method
+                </p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {# When the app status is ENFORCED_FOR_ALL #}
+    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                Two factor authentication is mandatory for your account. You can't proceed without him
+            </p>
+        {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two factor authentication configured with the App
+            </p>
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                Two factor authentication is mandatory for your account. You can't proceed without him
+            </p>
+        {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two factor authentication configured with your authentication method
+            </p>
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                Two factor authentication is mandatory for your account. You can't proceed without him
+            </p>
+        {% endif %}
+        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two factor authentication configured with your authentication method
+            </p>
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                Two factor authentication is mandatory for your account. You can't proceed without him
+            </p>
+        {% endif %}
+    {% endif %}
+
+    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+        You are currently authenticated as
+        {{ app.user.uuid }}
+    </p>
 {% endblock %}
