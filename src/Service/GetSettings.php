@@ -35,7 +35,7 @@ class GetSettings
         ];
 
         foreach ($settingRepository->findAll() as $setting) {
-            if (in_array($setting, $specialSettings)) {
+            if (in_array($setting, $specialSettings, true)) {
                 continue;
             }
 
@@ -77,6 +77,16 @@ class GetSettings
         $data['SAML_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
+        ];
+
+        $data['SAML_LABEL'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_SAML_LABEL'),
+        ];
+
+        $data['SAML_DESCRIPTION'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue(),
+            'description' => $this->getSettingDescription('AUTH_METHOD_SAML_DESCRIPTION'),
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
@@ -207,6 +217,8 @@ class GetSettings
             'CONTACT_EMAIL' => 'The email address for contact inquiries',
 
             'AUTH_METHOD_SAML_ENABLED' => 'Enable or disable SAML authentication method',
+            'AUTH_METHOD_SAML_LABEL' => 'The label for SAML authentication button on the login page',
+            'AUTH_METHOD_SAML_DESCRIPTION' => 'The description for SAML authentication on the login page',
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => 'Enable or disable Google authentication method',
             'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => 'The label for Google authentication button on the login page',
             'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => 'The description for Google authentication on the login page',

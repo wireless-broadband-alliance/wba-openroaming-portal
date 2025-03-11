@@ -23,13 +23,11 @@ final class Version20250227180624 extends AbstractMigration
         $this->addSql('UPDATE User SET twoFAcodeIsActive = 0 WHERE twoFAcodeIsActive IS NULL');
         $this->addSql('UPDATE User SET twoFAtype = 0 WHERE twoFAtype = NULL');
         $this->addSql('ALTER TABLE User CHANGE twoFAtype twoFAtype INT DEFAULT 0 NOT NULL, CHANGE twoFAcodeIsActive twoFAcodeIsActive TINYINT(1) DEFAULT 0 NOT NULL');
-        $this->addSql('ALTER TABLE SamlProvider CHANGE idpEntityId idpEntityId VARCHAR(255) NOT NULL, CHANGE idpSsoUrl idpSsoUrl VARCHAR(255) NOT NULL, CHANGE idpX509Cert idpX509Cert LONGTEXT NOT NULL, CHANGE spEntityId spEntityId VARCHAR(255) NOT NULL, CHANGE spAcsUrl spAcsUrl VARCHAR(255) NOT NULL, ADD isLDAPActive TINYINT(1) DEFAULT 0 NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE SamlProvider CHANGE idpEntityId idpEntityId VARCHAR(255) DEFAULT NULL, CHANGE idpSsoUrl idpSsoUrl VARCHAR(255) DEFAULT NULL, CHANGE idpX509Cert idpX509Cert LONGTEXT DEFAULT NULL, CHANGE spEntityId spEntityId VARCHAR(255) DEFAULT NULL, CHANGE spAcsUrl spAcsUrl VARCHAR(255) DEFAULT NULL, ADD isLDAPActive TINYINT(1) DEFAULT 0 NOT NULL');
         $this->addSql('ALTER TABLE User CHANGE twoFAtype twoFAtype VARCHAR(255) DEFAULT \'0\', CHANGE twoFAcodeIsActive twoFAcodeIsActive TINYINT(1) DEFAULT NULL');
         $this->addSql('UPDATE User SET twoFAcodeIsActive = NULL WHERE twoFAcodeIsActive = 0');
         $this->addSql('UPDATE User SET twoFAtype = NULL WHERE twoFAtype = 0');

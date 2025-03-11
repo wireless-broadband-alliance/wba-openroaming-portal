@@ -133,6 +133,12 @@ use Doctrine\ORM\Mapping as ORM;
                                                         'GOOGLE_CLIENT_ID' => ['type' => 'string'],
                                                     ],
                                                 ],
+                                                'microsoft' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'MICROSOFT_CLIENT_ID' => ['type' => 'string'],
+                                                    ],
+                                                ],
                                                 'saml' => [
                                                     'type' => 'object',
                                                     'properties' => [
@@ -170,6 +176,9 @@ use Doctrine\ORM\Mapping as ORM;
                                         ],
                                         'google' => [
                                             'GOOGLE_CLIENT_ID' => 'example_google_client_id',
+                                        ],
+                                        'microsoft' => [
+                                            'MICROSOFT_CLIENT_ID' => 'example_microsoft_client_id',
                                         ],
                                         'saml' => [
                                             'SAML_IDP_ENTITY_ID' => 'https://example.com/saml/metadata',

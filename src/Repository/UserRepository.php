@@ -148,9 +148,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         // Exclude deleted users
         $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
 
-        // Join with UserExternalAuth to access SAMLProvider
         $qb->leftJoin('u.userExternalAuths', 'ua');
-        $qb->leftJoin('ua.samlProvider', 'sp');
 
         // Apply the search term, if provided
         if ($searchTerm) {

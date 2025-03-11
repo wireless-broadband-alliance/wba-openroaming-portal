@@ -355,7 +355,6 @@ class RegistrationController extends AbstractController
 
     /**
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws ServerExceptionInterface
@@ -379,7 +378,7 @@ class RegistrationController extends AbstractController
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse();
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse();
         }
 
         // Check for missing fields and add them to the array errors
@@ -495,7 +494,6 @@ class RegistrationController extends AbstractController
 
     /**
      * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
      * @throws RandomException
      * @throws RedirectionExceptionInterface

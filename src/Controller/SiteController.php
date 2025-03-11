@@ -25,7 +25,6 @@ use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
 use App\Repository\EventRepository;
-use App\Repository\SamlProviderRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -89,7 +88,6 @@ class SiteController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly SendSMS $sendSMS,
-        private readonly SamlProviderRepository $samlProviderRepository,
     ) {
     }
 
@@ -327,8 +325,6 @@ class SiteController extends AbstractController
             $this->addFlash('error', 'Please select Operating System!');
         }
 
-        $activeSamlProviders = $this->samlProviderRepository->findBy(['isActive' => true, 'deletedAt' => null]);
-
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
         $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
         $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
@@ -344,7 +340,6 @@ class SiteController extends AbstractController
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
-            'activeSamlProviders' => $activeSamlProviders,
         ]);
     }
 

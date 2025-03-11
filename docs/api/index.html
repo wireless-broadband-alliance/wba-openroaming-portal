@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0020)/api -->
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -555,6 +554,14 @@
                                                                 }
                                                             }
                                                         },
+                                                        "microsoft": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "MICROSOFT_CLIENT_ID": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
                                                         "saml": {
                                                             "type": "object",
                                                             "properties": {
@@ -600,6 +607,9 @@
                                                 },
                                                 "google": {
                                                     "GOOGLE_CLIENT_ID": "example_google_client_id"
+                                                },
+                                                "microsoft": {
+                                                    "MICROSOFT_CLIENT_ID": "example_microsoft_client_id"
                                                 },
                                                 "saml": {
                                                     "SAML_IDP_ENTITY_ID": "https://example.com/saml/metadata",
@@ -1635,26 +1645,12 @@
                                                 }
                                             }
                                         },
-                                        "examples": {
+                                        "example": {
                                             "saml_response_not_found": {
                                                 "summary": "SAML Response not found",
                                                 "value": {
                                                     "success": false,
                                                     "error": "SAML Response not found"
-                                                }
-                                            },
-                                            "saml_response_invalid": {
-                                                "summary": "SAML Provider Name invalid or missing ",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "Invalid or missing SAML Provider name"
-                                                }
-                                            },
-                                            "saml_provider_id_invalid": {
-                                                "summary": "SAML Provider ID does not match the fetched provider.",
-                                                "value": {
-                                                    "success": false,
-                                                    "error": "SAML Provider ID does not match the fetched provider."
                                                 }
                                             }
                                         }
@@ -1699,7 +1695,7 @@
                                 }
                             },
                             "403": {
-                                "description": "Account unverified/banned",
+                                "description": "Access Forbidden - The request was made but the server denies permission.",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -1711,24 +1707,38 @@
                                                 },
                                                 "error": {
                                                     "type": "string",
-                                                    "example": "Unauthorized - You do not have permission to access this resource.",
-                                                    "description": "Details of the authentication failure"
+                                                    "description": "Details about why access was forbidden.",
+                                                    "example": "Unauthorized - You do not have permission to access this resource."
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "invalid_saml_response_idp_entity": {
+                                                "summary": "Invalid IDP Entity",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "The provided IDP Entity is invalid or does not match the expected configuration."
                                                 }
                                             },
-                                            "examples": {
-                                                "invalid_verification": {
-                                                    "summary": "User account is not verified",
-                                                    "value": {
-                                                        "success": false,
-                                                        "error": "User account is not verified!"
-                                                    }
-                                                },
-                                                "banned_account": {
-                                                    "summary": "User account is banned",
-                                                    "value": {
-                                                        "success": false,
-                                                        "error": "User account is banned from the system!"
-                                                    }
+                                            "invalid_saml_response_certificate": {
+                                                "summary": "Invalid Certificate",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "The provided certificate is invalid or does not match the expected configuration."
+                                                }
+                                            },
+                                            "invalid_verification": {
+                                                "summary": "User account is not verified",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "User account is not verified!"
+                                                }
+                                            },
+                                            "banned_account": {
+                                                "summary": "User account is banned",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "User account is banned from the system!"
                                                 }
                                             }
                                         }
@@ -1780,16 +1790,10 @@
                                                 "type": "string",
                                                 "description": "Base64-encoded SAML response included in the form data",
                                                 "example": "base64-encoded-saml-assertion"
-                                            },
-                                            "SAMLProviderID": {
-                                                "type": "string",
-                                                "description": "The unique identifier of the SAML provider associated with the SAMLResponse",
-                                                "example": "12345"
                                             }
                                         },
                                         "required": [
-                                            "SAMLResponse",
-                                            "SAMLProviderID"
+                                            "SAMLResponse"
                                         ]
                                     }
                                 }
@@ -2987,241 +2991,6 @@
                                     "string",
                                     "null"
                                 ]
-                            }
-                        }
-                    },
-                    "SamlProvider": {
-                        "type": "object",
-                        "description": "",
-                        "deprecated": false,
-                        "properties": {
-                            "id": {
-                                "readOnly": true,
-                                "type": "integer"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "idpEntityId": {
-                                "type": "string"
-                            },
-                            "idpSsoUrl": {
-                                "type": "string"
-                            },
-                            "idpX509Cert": {
-                                "type": "string"
-                            },
-                            "spEntityId": {
-                                "type": "string"
-                            },
-                            "spAcsUrl": {
-                                "type": "string"
-                            },
-                            "isActive": {
-                                "readOnly": true,
-                                "type": "boolean"
-                            },
-                            "userExternalAuths": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/UserExternalAuth"
-                                }
-                            },
-                            "createdAt": {
-                                "type": "string",
-                                "format": "date-time"
-                            },
-                            "updatedAt": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "deletedAt": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "isLDAPActive": {
-                                "type": "boolean"
-                            },
-                            "ldapServer": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapBindUserDn": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapBindUserPassword": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapSearchBaseDn": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapSearchFilter": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapUpdatedAt": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "active": {
-                                "type": "boolean"
-                            }
-                        }
-                    },
-                    "SamlProvider.jsonld": {
-                        "type": "object",
-                        "description": "",
-                        "deprecated": false,
-                        "properties": {
-                            "@context": {
-                                "readOnly": true,
-                                "oneOf": [
-                                    {
-                                        "type": "string"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "@vocab": {
-                                                "type": "string"
-                                            },
-                                            "hydra": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "http://www.w3.org/ns/hydra/core#"
-                                                ]
-                                            }
-                                        },
-                                        "required": [
-                                            "@vocab",
-                                            "hydra"
-                                        ],
-                                        "additionalProperties": true
-                                    }
-                                ]
-                            },
-                            "@id": {
-                                "readOnly": true,
-                                "type": "string"
-                            },
-                            "@type": {
-                                "readOnly": true,
-                                "type": "string"
-                            },
-                            "id": {
-                                "readOnly": true,
-                                "type": "integer"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "idpEntityId": {
-                                "type": "string"
-                            },
-                            "idpSsoUrl": {
-                                "type": "string"
-                            },
-                            "idpX509Cert": {
-                                "type": "string"
-                            },
-                            "spEntityId": {
-                                "type": "string"
-                            },
-                            "spAcsUrl": {
-                                "type": "string"
-                            },
-                            "isActive": {
-                                "readOnly": true,
-                                "type": "boolean"
-                            },
-                            "userExternalAuths": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/UserExternalAuth.jsonld"
-                                }
-                            },
-                            "createdAt": {
-                                "type": "string",
-                                "format": "date-time"
-                            },
-                            "updatedAt": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "deletedAt": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "isLDAPActive": {
-                                "type": "boolean"
-                            },
-                            "ldapServer": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapBindUserDn": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapBindUserPassword": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapSearchBaseDn": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapSearchFilter": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "ldapUpdatedAt": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "active": {
-                                "type": "boolean"
                             }
                         }
                     },
@@ -5030,16 +4799,6 @@
                             "provider_id": {
                                 "type": "string"
                             },
-                            "samlProvider": {
-                                "anyOf": [
-                                    {
-                                        "$ref": "#/components/schemas/SamlProvider"
-                                    },
-                                    {
-                                        "type": "null"
-                                    }
-                                ]
-                            },
                             "providerId": {
                                 "type": "string"
                             }
@@ -5099,16 +4858,6 @@
                             },
                             "provider_id": {
                                 "type": "string"
-                            },
-                            "samlProvider": {
-                                "anyOf": [
-                                    {
-                                        "$ref": "#/components/schemas/SamlProvider.jsonld"
-                                    },
-                                    {
-                                        "type": "null"
-                                    }
-                                ]
                             },
                             "providerId": {
                                 "type": "string"
@@ -5306,9 +5055,39 @@
                     "bearerAuth": []
                 }
             ],
-            "tags": [],
+            "tags": [
+                {
+                    "name": "Turnstile",
+                    "description": "The Setting entity returns configuration options for the application. \n    Each setting consists of a name and an optional value, \n    which can be used to store and return configuration parameters required for the API."
+                },
+                {
+                    "name": "Setting",
+                    "description": "The Setting entity returns configuration options for the application. \n    Each setting consists of a name and an optional value, \n    which can be used to store and return configuration parameters required for the API."
+                },
+                {
+                    "name": "Profile Configuration",
+                    "description": "The Setting entity returns configuration options for the application. \n    Each setting consists of a name and an optional value, \n    which can be used to store and return configuration parameters required for the API."
+                },
+                {
+                    "name": "User",
+                    "description": "The User entity returns values related to a user."
+                },
+                {
+                    "name": "User Auth",
+                    "description": "The User entity returns values related to a user."
+                },
+                {
+                    "name": "User Auth Register",
+                    "description": "The User entity returns values related to a user."
+                },
+                {
+                    "name": "User Auth Reset",
+                    "description": "The User entity returns values related to a user."
+                }
+            ],
             "webhooks": {}
         },
+        "persistAuthorization": false,
         "oauth": {
             "enabled": false,
             "type": "oauth2",
@@ -5319,7 +5098,7 @@
             "clientId": "",
             "clientSecret": "",
             "pkce": false,
-            "redirectUrl": "/bundles/apiplatform/swagger-ui/oauth2-redirect.html"
+            "redirectUrl": "http:///bundles/apiplatform/swagger-ui/oauth2-redirect.html"
         },
         "extraConfiguration": {
             "persistAuthorization": true
@@ -5568,11 +5347,74 @@
                 <div></div>
                 <div class="wrapper">
                     <section class="block col-12 block-desktop col-12-desktop">
-                        <div><span><div class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                                id="operations-tag-Profile_Configuration"
-                                                                                data-tag="Profile Configuration"
+                        <div><span><div class="opblock-tag-section is-open"><h3 class="opblock-tag"
+                                                                                id="operations-tag-Turnstile"
+                                                                                data-tag="Turnstile"
                                                                                 data-is-open="true"><a class="nostyle"
-                                                                                                       href="/api#/Profile%20Configuration"><span>Profile Configuration</span></a><small></small><button
+                                                                                                       href="http:///api#/Turnstile"><span>Turnstile</span></a><small><div
+                                class="renderedMarkdown"><p>The Setting entity returns configuration options for the application.
+Each setting consists of a name and an optional value,
+which can be used to store and return configuration parameters required for the API.</p></div></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-get" id="operations-Turnstile-api_turnstile_html_android"><div
+                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
+                                                                                    class="opblock-summary-control"><span
+                                class="opblock-summary-method">GET</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/turnstile/android"><a
+                                class="nostyle" href="http:///api#/Turnstile/api_turnstile_html_android"><span>/api<wbr>/v1<wbr>/turnstile<wbr>/android</span></a></span><div
+                                class="opblock-summary-description">Return the HTML required for Turnstile configuration on an Android App</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="get ​/api​/v1​/turnstile​/android" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag" id="operations-tag-Setting"
+                                                                        data-tag="Setting" data-is-open="true"><a
+                                class="nostyle" href="http:///api#/Setting"><span>Setting</span></a><small><div
+                                class="renderedMarkdown"><p>The Setting entity returns configuration options for the application.
+Each setting consists of a name and an optional value,
+which can be used to store and return configuration parameters required for the API.</p></div></small><button
+                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
+                                height="20" aria-hidden="true" focusable="false"><path
+                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
+                                class="no-margin"> <div class="operation-tag-content"><span><div
+                                class="opblock opblock-get" id="operations-Setting-app_config_settings"><div
+                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
+                                                                                    class="opblock-summary-control"><span
+                                class="opblock-summary-method">GET</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/config"><a
+                                class="nostyle" href="http:///api#/Setting/app_config_settings"><span>/api<wbr>/v1<wbr>/config</span></a></span><div
+                                class="opblock-summary-description">Get configuration settings</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="get ​/api​/v1​/config" class="opblock-control-arrow" aria-expanded="false"
+                                tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
+                                                   width="20" height="20" aria-hidden="true" focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag"
+                                                                        id="operations-tag-Profile_Configuration"
+                                                                        data-tag="Profile Configuration"
+                                                                        data-is-open="true"><a class="nostyle"
+                                                                                               href="http:///api#/Profile%20Configuration"><span>Profile Configuration</span></a><small><div
+                                class="renderedMarkdown"><p>The Setting entity returns configuration options for the application.
+Each setting consists of a name and an optional value,
+which can be used to store and return configuration parameters required for the API.</p></div></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5585,7 +5427,8 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/config/profile/android"><a
-                                class="nostyle" href="/api#/Profile%20Configuration/api_config_profile_android"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/android</span></a></span><div
+                                class="nostyle"
+                                href="http:///api#/Profile%20Configuration/api_config_profile_android"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/android</span></a></span><div
                                 class="opblock-summary-description">Get Android profile configuration</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5609,7 +5452,8 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/config/profile/ios"><a
-                                class="nostyle" href="/api#/Profile%20Configuration/api_config_profile_ios"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/ios</span></a></span><div
+                                class="nostyle"
+                                href="http:///api#/Profile%20Configuration/api_config_profile_ios"><span>/api<wbr>/v1<wbr>/config<wbr>/profile<wbr>/ios</span></a></span><div
                                 class="opblock-summary-description">Get iOS profile configuration</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5626,64 +5470,10 @@
                                                                          height="20" aria-hidden="true"
                                                                          focusable="false"><path
                                 d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                        id="operations-tag-Setting" data-tag="Setting"
-                                                                        data-is-open="true"><a class="nostyle"
-                                                                                               href="/api#/Setting"><span>Setting</span></a><small></small><button
-                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
-                                class="no-margin"> <div class="operation-tag-content"><span><div
-                                class="opblock opblock-get" id="operations-Setting-app_config_settings"><div
-                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
-                                                                                    class="opblock-summary-control"><span
-                                class="opblock-summary-method">GET</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/config"><a
-                                class="nostyle" href="/api#/Setting/app_config_settings"><span>/api<wbr>/v1<wbr>/config</span></a></span><div
-                                class="opblock-summary-description">Get configuration settings</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                aria-label="get ​/api​/v1​/config" class="opblock-control-arrow" aria-expanded="false"
-                                tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
-                                                   width="20" height="20" aria-hidden="true" focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                        id="operations-tag-Turnstile"
-                                                                        data-tag="Turnstile" data-is-open="true"><a
-                                class="nostyle" href="/api#/Turnstile"><span>Turnstile</span></a><small></small><button
-                                aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
-                                height="20" aria-hidden="true" focusable="false"><path
-                                d="M 17.418 14.908 C 17.69 15.176 18.127 15.176 18.397 14.908 C 18.667 14.64 18.668 14.207 18.397 13.939 L 10.489 6.109 C 10.219 5.841 9.782 5.841 9.51 6.109 L 1.602 13.939 C 1.332 14.207 1.332 14.64 1.602 14.908 C 1.873 15.176 2.311 15.176 2.581 14.908 L 10 7.767 L 17.418 14.908 Z"></path></svg></button></h3><div
-                                class="no-margin"> <div class="operation-tag-content"><span><div
-                                class="opblock opblock-get" id="operations-Turnstile-api_turnstile_html_android"><div
-                                class="opblock-summary opblock-summary-get"><button aria-expanded="false"
-                                                                                    class="opblock-summary-control"><span
-                                class="opblock-summary-method">GET</span><div
-                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
-                                                                                       data-path="/api/v1/turnstile/android"><a
-                                class="nostyle" href="/api#/Turnstile/api_turnstile_html_android"><span>/api<wbr>/v1<wbr>/turnstile<wbr>/android</span></a></span><div
-                                class="opblock-summary-description">Return the HTML required for Turnstile configuration on an Android App</div></div></button><div
-                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
-                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
-                                fill="#ffffff" fill-rule="evenodd"
-                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
-                                aria-label="get ​/api​/v1​/turnstile​/android" class="opblock-control-arrow"
-                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                         viewBox="0 0 20 20" class="arrow" width="20"
-                                                                         height="20" aria-hidden="true"
-                                                                         focusable="false"><path
-                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
-                                                                        id="operations-tag-User" data-tag="User"
-                                                                        data-is-open="true"><a class="nostyle"
-                                                                                               href="/api#/User"><span>User</span></a><small></small><button
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag" id="operations-tag-User"
+                                                                        data-tag="User" data-is-open="true"><a
+                                class="nostyle" href="http:///api#/User"><span>User</span></a><small><div
+                                class="renderedMarkdown"><p>The User entity returns values related to a user.</p></div></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5695,7 +5485,7 @@
                                 class="opblock-summary-method">GET</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/user"><a
-                                class="nostyle" href="/api#/User/api_get_current_user"><span>/api<wbr>/v1<wbr>/user</span></a></span><div
+                                class="nostyle" href="http:///api#/User/api_get_current_user"><span>/api<wbr>/v1<wbr>/user</span></a></span><div
                                 class="opblock-summary-description">Retrieve current authenticated user</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5710,10 +5500,11 @@
                                 tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow"
                                                    width="20" height="20" aria-hidden="true" focusable="false"><path
                                 d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag"
                                                                         id="operations-tag-User_Auth"
                                                                         data-tag="User Auth" data-is-open="true"><a
-                                class="nostyle" href="/api#/User%20Auth"><span>User Auth</span></a><small></small><button
+                                class="nostyle" href="http:///api#/User%20Auth"><span>User Auth</span></a><small><div
+                                class="renderedMarkdown"><p>The User entity returns values related to a user.</p></div></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5725,7 +5516,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/google"><a
-                                class="nostyle" href="/api#/User%20Auth/api_auth_google"><span>/api<wbr>/v1<wbr>/auth<wbr>/google</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_google"><span>/api<wbr>/v1<wbr>/auth<wbr>/google</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user via Google</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5744,7 +5535,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/local"><a
-                                class="nostyle" href="/api#/User%20Auth/api_auth_local"><span>/api<wbr>/v1<wbr>/auth<wbr>/local</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_local"><span>/api<wbr>/v1<wbr>/auth<wbr>/local</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user locally</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5763,7 +5554,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/microsoft"><a
-                                class="nostyle" href="/api#/User%20Auth/api_auth_microsoft"><span>/api<wbr>/v1<wbr>/auth<wbr>/microsoft</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_microsoft"><span>/api<wbr>/v1<wbr>/auth<wbr>/microsoft</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user via Microsoft</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5782,7 +5573,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/saml"><a
-                                class="nostyle" href="/api#/User%20Auth/api_auth_saml"><span>/api<wbr>/v1<wbr>/auth<wbr>/saml</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth/api_auth_saml"><span>/api<wbr>/v1<wbr>/auth<wbr>/saml</span></a></span><div
                                 class="opblock-summary-description">Authenticate a user via SAML</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5795,11 +5586,12 @@
                                                                          height="20" aria-hidden="true"
                                                                          focusable="false"><path
                                 d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag"
                                                                         id="operations-tag-User_Auth_Register"
                                                                         data-tag="User Auth Register"
                                                                         data-is-open="true"><a class="nostyle"
-                                                                                               href="/api#/User%20Auth%20Register"><span>User Auth Register</span></a><small></small><button
+                                                                                               href="http:///api#/User%20Auth%20Register"><span>User Auth Register</span></a><small><div
+                                class="renderedMarkdown"><p>The User entity returns values related to a user.</p></div></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5811,7 +5603,8 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/local/register"><a
-                                class="nostyle" href="/api#/User%20Auth%20Register/api_auth_local_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/register</span></a></span><div
+                                class="nostyle"
+                                href="http:///api#/User%20Auth%20Register/api_auth_local_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/register</span></a></span><div
                                 class="opblock-summary-description">Register a new user via local authentication</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5830,7 +5623,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/sms/register"><a
-                                class="nostyle" href="/api#/User%20Auth%20Register/api_auth_sms_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/register</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth%20Register/api_auth_sms_register"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/register</span></a></span><div
                                 class="opblock-summary-description">Register a new user via SMS authentication</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5843,11 +5636,12 @@
                                                                          height="20" aria-hidden="true"
                                                                          focusable="false"><path
                                 d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span></div> </div></div></span><span><div
-                                class="opblock-tag-section is-open"><h3 class="opblock-tag no-desc"
+                                class="opblock-tag-section is-open"><h3 class="opblock-tag"
                                                                         id="operations-tag-User_Auth_Reset"
                                                                         data-tag="User Auth Reset"
                                                                         data-is-open="true"><a class="nostyle"
-                                                                                               href="/api#/User%20Auth%20Reset"><span>User Auth Reset</span></a><small></small><button
+                                                                                               href="http:///api#/User%20Auth%20Reset"><span>User Auth Reset</span></a><small><div
+                                class="renderedMarkdown"><p>The User entity returns values related to a user.</p></div></small><button
                                 aria-expanded="true" class="expand-operation" title="Collapse operation"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="arrow" width="20"
                                 height="20" aria-hidden="true" focusable="false"><path
@@ -5859,7 +5653,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/local/reset"><a
-                                class="nostyle" href="/api#/User%20Auth%20Reset/api_auth_local_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/reset</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth%20Reset/api_auth_local_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/local<wbr>/reset</span></a></span><div
                                 class="opblock-summary-description">Trigger a password reset for a local auth account</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -5878,7 +5672,7 @@
                                 class="opblock-summary-method">POST</span><div
                                 class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
                                                                                        data-path="/api/v1/auth/sms/reset"><a
-                                class="nostyle" href="/api#/User%20Auth%20Reset/api_auth_sms_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/reset</span></a></span><div
+                                class="nostyle" href="http:///api#/User%20Auth%20Reset/api_auth_sms_reset"><span>/api<wbr>/v1<wbr>/auth<wbr>/sms<wbr>/reset</span></a></span><div
                                 class="opblock-summary-description">Trigger a password reset for an SMS auth account</div></div></button><div
                                 class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
@@ -6113,42 +5907,6 @@
                                             <div class="json-schema-2020-12-accordion__children">
                                                 <div class="json-schema-2020-12__title">Profile.Configuration.jsonld
                                                 </div>
-                                            </div>
-                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
-                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24"><path
-                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
-                                        </button>
-                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
-                                            all
-                                        </button>
-                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
-                                    </div>
-                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
-                                </article>
-                                <article data-json-schema-level="0" class="json-schema-2020-12">
-                                    <div class="json-schema-2020-12-head">
-                                        <button type="button" class="json-schema-2020-12-accordion">
-                                            <div class="json-schema-2020-12-accordion__children">
-                                                <div class="json-schema-2020-12__title">SamlProvider</div>
-                                            </div>
-                                            <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
-                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24"><path
-                                                    d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></span>
-                                        </button>
-                                        <button type="button" class="json-schema-2020-12-expand-deep-button">Expand
-                                            all
-                                        </button>
-                                        <strong class="json-schema-2020-12__attribute json-schema-2020-12__attribute--primary">object</strong>
-                                    </div>
-                                    <div class="json-schema-2020-12-body json-schema-2020-12-body--collapsed"></div>
-                                </article>
-                                <article data-json-schema-level="0" class="json-schema-2020-12">
-                                    <div class="json-schema-2020-12-head">
-                                        <button type="button" class="json-schema-2020-12-accordion">
-                                            <div class="json-schema-2020-12-accordion__children">
-                                                <div class="json-schema-2020-12__title">SamlProvider.jsonld</div>
                                             </div>
                                             <span class="json-schema-2020-12-accordion__icon json-schema-2020-12-accordion__icon--collapsed"><svg
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -6466,13 +6224,13 @@
     <div class="information-container wrapper">
         <div class="info">
             Available formats:
-            <a href="/api/index.jsonld">jsonld</a>
-            <a href="/api/index.json">json</a>
-            <a href="/api/index.yaml">yaml</a>
-            <a href="/api/index.html">html</a>
+            <a href="http:///api/index.jsonld">jsonld</a>
+            <a href="http:///api/index.json">json</a>
+            <a href="http:///api/index.yaml">yaml</a>
+            <a href="http:///api/index.html">html</a>
             <br>
             Other API docs:
-            <a href="/api/docs?ui=re_doc">ReDoc</a> <a class="graphiql-link">GraphiQL</a></div>
+            <a href="http:///api/docs?ui=re_doc">ReDoc</a> <a class="graphiql-link">GraphiQL</a></div>
     </div>
 </div>
 
@@ -6481,727 +6239,7 @@
 <script src="./index_files/init-swagger-ui.js"></script>
 <script src="./index_files/init-common-ui.js" defer=""></script>
 </div>
-<style nonce="">    .sf-toolbarreset {
-    --sf-toolbar-font-family-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --sf-toolbar-font-family-monospace: "Ubuntu Mono", "JetBrains Mono", ui-monospace, "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sf-toolbar-white: #fff;
-    --sf-toolbar-black: #000;
-    --sf-toolbar-gray-50: #fafafa;
-    --sf-toolbar-gray-100: #f5f5f5;
-    --sf-toolbar-gray-200: #e5e5e5;
-    --sf-toolbar-gray-300: #d4d4d4;
-    --sf-toolbar-gray-400: #a3a3a3;
-    --sf-toolbar-gray-500: #737373;
-    --sf-toolbar-gray-600: #525252;
-    --sf-toolbar-gray-700: #404040;
-    --sf-toolbar-gray-800: #262626;
-    --sf-toolbar-gray-900: #171717;
-    --sf-toolbar-red-50: #FEFBFC;
-    --sf-toolbar-red-100: #FCE9ED;
-    --sf-toolbar-red-200: #F5B8C5;
-    --sf-toolbar-red-300: #EF869C;
-    --sf-toolbar-red-400: #E85574;
-    --sf-toolbar-red-500: #E1244B;
-    --sf-toolbar-red-600: #B41939;
-    --sf-toolbar-red-700: #83122A;
-    --sf-toolbar-red-800: #510B1A;
-    --sf-toolbar-red-900: #20040A;
-    --sf-toolbar-yellow-50: #fef7e1;
-    --sf-toolbar-yellow-100: #fef2cd;
-    --sf-toolbar-yellow-200: #fde496;
-    --sf-toolbar-yellow-300: #fcd55f;
-    --sf-toolbar-yellow-400: #fbc728;
-    --sf-toolbar-yellow-500: #e6af05;
-    --sf-toolbar-yellow-600: #af8503;
-    --sf-toolbar-yellow-700: #785b02;
-    --sf-toolbar-yellow-800: #413101;
-    --sf-toolbar-yellow-900: #0a0800;
-    --sf-toolbar-green-50: #eff5f5;
-    --sf-toolbar-green-100: #deeaea;
-    --sf-toolbar-green-200: #bbd5d5;
-    --sf-toolbar-green-300: #99bfbf;
-    --sf-toolbar-green-400: #76a9a9;
-    --sf-toolbar-green-500: #598e8e;
-    --sf-toolbar-green-600: #436c6c;
-    --sf-toolbar-green-700: #2e4949;
-    --sf-toolbar-green-800: #182727;
-    --sf-toolbar-green-900: #030404;
-}
-
-.sf-minitoolbar {
-    --sf-toolbar-gray-800: #262626;
-    background-color: var(--sf-toolbar-gray-800);
-    border-top-left-radius: 4px;
-    bottom: 0;
-    box-sizing: border-box;
-    display: none;
-    height: 36px;
-    padding: 6px;
-    position: fixed;
-    right: 0;
-    z-index: 99999;
-}
-
-.sf-minitoolbar button {
-    background-color: transparent;
-    padding: 0;
-    border: none;
-}
-
-.sf-minitoolbar svg, .sf-minitoolbar img {
-    --sf-toolbar-gray-200: #e5e5e5;
-    color: var(--sf-toolbar-gray-200);
-    max-height: 24px;
-    max-width: 24px;
-    display: inline;
-}
-
-.sf-toolbar-clearer {
-    clear: both;
-    height: 36px;
-}
-
-.sf-display-none {
-    display: none;
-}
-
-.sf-toolbarreset *:not(svg rect) {
-    box-sizing: content-box;
-    vertical-align: baseline;
-    letter-spacing: normal;
-    width: auto;
-}
-
-.sf-toolbarreset {
-    background-color: var(--sf-toolbar-gray-800);
-    bottom: 0;
-    box-shadow: inset 0 1px 0 var(--sf-toolbar-black), 0 -1px 0 rgba(0, 0, 0, 0.5);
-    color: var(--sf-toolbar-gray-200);
-    font: 11px var(--sf-toolbar-font-family-system);
-    left: 0;
-    margin: 0;
-    padding: 0 36px 0 0;
-    position: fixed;
-    right: 0;
-    text-align: left;
-    text-transform: none;
-    z-index: 99999;
-    direction: ltr; /* neutralize the aliasing defined by external CSS styles */
-    -webkit-font-smoothing: subpixel-antialiased;
-    -moz-osx-font-smoothing: auto;
-}
-
-.sf-toolbarreset abbr {
-    border: dashed var(--sf-toolbar-gray-500);
-    border-width: 0 0 1px;
-}
-
-.sf-toolbarreset svg, .sf-toolbarreset img {
-    height: 20px;
-    width: 20px;
-    display: inline-block;
-}
-
-.sf-toolbarreset .sf-cancel-button {
-    color: var(--sf-toolbar-gray-700);
-}
-
-.sf-toolbarreset .hide-button {
-    background: var(--sf-toolbar-gray-800);
-    color: var(--sf-toolbar-gray-300);
-    display: block;
-    position: absolute;
-    top: 2px;
-    right: 0;
-    width: 36px;
-    height: 34px;
-    cursor: pointer;
-    text-align: center;
-    border: none;
-    margin: 0;
-    padding: 0;
-}
-
-.sf-toolbarreset .hide-button:hover {
-    background: var(--sf-toolbar-gray-700);
-}
-
-.sf-toolbarreset .hide-button svg {
-    max-height: 18px;
-    margin-top: 1px;
-}
-
-.sf-toolbar-block {
-    cursor: default;
-    display: block;
-    float: left;
-    height: 36px;
-    margin-right: 0;
-    position: relative;
-    white-space: nowrap;
-    max-width: 15%;
-}
-
-.sf-toolbar-block > a, .sf-toolbar-block > a:hover {
-    display: block;
-    text-decoration: none;
-    background-color: transparent;
-    color: inherit;
-}
-
-.sf-toolbar-block span {
-    display: inline-block;
-}
-
-.sf-toolbar-block .sf-toolbar-value {
-    color: var(--sf-toolbar-gray-100);
-    font-size: 13px;
-    line-height: 36px;
-    padding: 0;
-}
-
-.sf-toolbar-block .sf-toolbar-label, .sf-toolbar-block .sf-toolbar-class-separator {
-    color: var(--sf-toolbar-gray-400);
-    font-size: 12px;
-    margin-left: 2px;
-}
-
-.sf-toolbar-block .sf-toolbar-info {
-    border-collapse: collapse;
-    display: table;
-    z-index: 100000;
-}
-
-.sf-toolbar-block hr {
-    border-top: 1px solid var(--sf-toolbar-gray-500);
-    margin: 4px 0;
-    padding-top: 4px;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece { /* this 'border-bottom' trick is needed because 'margin-bottom' doesn't work for table rows */
-    border-bottom: solid transparent 3px;
-    display: table-row;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece-additional, .sf-toolbar-block .sf-toolbar-info-piece-additional-detail {
-    display: none;
-}
-
-.sf-toolbar-block .sf-toolbar-info-group {
-    margin-bottom: 4px;
-    padding-bottom: 2px;
-    border-bottom: 1px solid #333333;
-}
-
-.sf-toolbar-block .sf-toolbar-info-group:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece .sf-toolbar-status {
-    border-radius: 4px;
-    padding: 2px 5px;
-    margin-bottom: 0;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece .sf-toolbar-status + .sf-toolbar-status {
-    margin-left: 4px;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece:last-child {
-    margin-bottom: 0;
-}
-
-div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a {
-    color: #99CDD8;
-    text-decoration: underline;
-}
-
-div.sf-toolbar .sf-toolbar-block a:hover {
-    text-decoration: none;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece b {
-    color: var(--sf-toolbar-gray-400);
-    display: table-cell;
-    font-size: 11px;
-    padding: 4px 8px 4px 0;
-}
-
-.sf-toolbar-block:not(.sf-toolbar-block-dump) .sf-toolbar-info-piece span {
-    color: var(--sf-toolbar-gray-100);
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece span {
-    font-size: 12px;
-}
-
-div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece.sf-toolbar-info-php-ext a {
-    text-decoration: none;
-}
-
-.sf-toolbar-block .sf-toolbar-info {
-    background-color: var(--sf-toolbar-gray-700);
-    border-radius: 4px;
-    border-bottom-left-radius: 0;
-    bottom: 36px;
-    color: var(--sf-toolbar-gray-100);
-    display: none;
-    padding: 9px 0;
-    position: absolute;
-}
-
-.sf-toolbar-block.sf-toolbar-block-right .sf-toolbar-info {
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 0;
-}
-
-.sf-toolbar-block .sf-toolbar-info:empty {
-    visibility: hidden;
-}
-
-.sf-toolbar-block .sf-toolbar-status {
-    display: inline-block;
-    color: var(--sf-toolbar-white);
-    background-color: var(--sf-toolbar-gray-600);
-    padding: 3px 6px;
-    margin: 0 4px;
-    min-width: 15px;
-    min-height: 13px;
-    text-align: center;
-}
-
-.sf-toolbar-block .sf-toolbar-status.sf-toolbar-status-green, .sf-toolbar-block .sf-toolbar-info .sf-toolbar-status.sf-toolbar-status-green {
-    background-color: #059669;
-    color: var(--white);
-}
-
-.sf-toolbar-block .sf-toolbar-status.sf-toolbar-status-red, .sf-toolbar-block .sf-toolbar-info .sf-toolbar-status.sf-toolbar-status-red {
-    background-color: var(--sf-toolbar-red-500);
-    color: var(--sf-toolbar-red-50);
-}
-
-.sf-toolbar-block .sf-toolbar-status.sf-toolbar-status-yellow, .sf-toolbar-block .sf-toolbar-info .sf-toolbar-status.sf-toolbar-status-yellow {
-    background-color: var(--sf-toolbar-yellow-300);
-    color: var(--sf-toolbar-yellow-800);
-}
-
-.sf-toolbar-block.sf-toolbar-status-green::before, .sf-toolbar-block.sf-toolbar-status-red::before, .sf-toolbar-block.sf-toolbar-status-yellow::before {
-    background: var(--sf-toolbar-yellow-400);
-    border-radius: 6px;
-    content: '';
-    position: absolute;
-    bottom: 1px;
-    left: 0;
-    width: 98%;
-    height: 3px;
-    z-index: 10005;
-}
-
-.sf-toolbar-block.sf-toolbar-status-red::before {
-    background: var(--sf-toolbar-red-400);
-}
-
-.sf-toolbar-block.sf-toolbar-status-green::before {
-    background: var(--sf-toolbar-green-400);
-}
-
-.sf-toolbar-block-request.sf-toolbar-block.sf-toolbar-status-green::before, .sf-toolbar-block-request.sf-toolbar-block.sf-toolbar-status-red::before, .sf-toolbar-block-request.sf-toolbar-block.sf-toolbar-status-yellow::before {
-    display: none;
-}
-
-.sf-toolbar-block-request .sf-toolbar-status {
-    border-radius: 6px;
-    color: #fff;
-    display: inline-block;
-    flex-shrink: 0;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 4px 8px;
-}
-
-.sf-toolbar-block-request .sf-toolbar-info-piece a {
-    background-color: transparent;
-    text-decoration: none;
-}
-
-.sf-toolbar-block-request .sf-toolbar-info-piece a:hover {
-    text-decoration: underline;
-}
-
-.sf-toolbar-block-request .sf-toolbar-redirection-status {
-    font-weight: normal;
-    padding: 2px 4px;
-    line-height: 18px;
-}
-
-.sf-toolbar-block.sf-toolbar-block-request .sf-toolbar-redirection-status.sf-toolbar-status-yellow {
-    background-color: var(--sf-toolbar-yellow-300);
-    border-radius: 4px;
-    color: var(--sf-toolbar-yellow-800);
-    padding: 1px 4px;
-}
-
-.sf-toolbar-block.sf-toolbar-block-request .sf-toolbar-info-piece .sf-toolbar-redirection-method {
-    background: transparent;
-    color: var(--sf-toolbar-gray-300);
-    border: 1px solid var(--sf-toolbar-gray-400);
-    padding: 1px 4px;
-}
-
-.sf-toolbar-block-request .sf-toolbar-info-piece span.sf-toolbar-redirection-method {
-    font-size: 12px;
-    height: 17px;
-    line-height: 17px;
-    margin-right: 5px;
-}
-
-.sf-toolbar-block-request .sf-toolbar-request-icon svg {
-    stroke-width: 3px;
-}
-
-.sf-toolbar-block-ajax .sf-toolbar-icon {
-    cursor: pointer;
-}
-
-.sf-toolbar-status-green .sf-toolbar-label, .sf-toolbar-status-yellow .sf-toolbar-label, .sf-toolbar-status-red .sf-toolbar-label {
-    color: var(--sf-toolbar-white);
-}
-
-.sf-toolbar-block-config svg path, .sf-toolbar-block-config svg .sf-svg-path {
-    fill: var(--sf-toolbar-white);
-}
-
-.sf-toolbar-block .sf-toolbar-icon {
-    color: var(--sf-toolbar-gray-300);
-    align-items: center;
-    display: flex;
-    height: 36px;
-    padding: 0 7px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sf-toolbar-block:hover .sf-toolbar-icon {
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    box-shadow: 1px 0 0 var(--sf-toolbar-black), inset 0 -1px 0 var(--sf-toolbar-black);
-}
-
-.sf-toolbar-block.sf-toolbar-block-right:hover .sf-toolbar-icon {
-    box-shadow: -1px 0 0 var(--sf-toolbar-black), inset 0 -1px 0 var(--sf-toolbar-black);
-}
-
-.sf-toolbar-block-request .sf-toolbar-icon {
-    padding-left: 0;
-    padding-right: 0;
-}
-
-.sf-toolbar-block .sf-toolbar-icon img, .sf-toolbar-block .sf-toolbar-icon svg {
-    border-width: 0;
-}
-
-.sf-toolbar-block .sf-toolbar-icon img + span, .sf-toolbar-block .sf-toolbar-icon svg + span {
-    margin-left: 4px;
-}
-
-.sf-toolbar-block-config .sf-toolbar-icon .sf-toolbar-value, .sf-toolbar-block.sf-toolbar-block-sf-cli .sf-toolbar-value {
-    margin-left: 5px;
-}
-
-.sf-toolbar-block-config .sf-toolbar-icon .sf-toolbar-label, .sf-toolbar-block.sf-toolbar-block-sf-cli .sf-toolbar-label {
-    margin-left: 0;
-}
-
-.sf-toolbar-block:hover, .sf-toolbar-block.hover {
-    position: relative;
-}
-
-.sf-toolbar-block:hover .sf-toolbar-icon, .sf-toolbar-block.hover .sf-toolbar-icon {
-    background-color: var(--sf-toolbar-gray-700);
-    position: relative;
-    z-index: 10002;
-}
-
-.sf-toolbar-block-ajax.hover .sf-toolbar-info {
-    z-index: 10001;
-}
-
-.sf-toolbar-block:hover .sf-toolbar-info, .sf-toolbar-block.hover .sf-toolbar-info {
-    display: block;
-    padding: 10px;
-    max-width: 525px;
-    max-height: 480px;
-    word-wrap: break-word;
-    overflow: hidden;
-    overflow-y: auto;
-}
-
-.sf-toolbar-info-piece b.sf-toolbar-ajax-info {
-    color: var(--sf-toolbar-gray-100);
-}
-
-.sf-toolbar-ajax-requests {
-    border: 1px solid var(--sf-toolbar-gray-500);
-    font-variant: tabular-nums;
-    margin: 5px 0 0;
-    width: 100%;
-}
-
-.sf-toolbar-ajax-requests td {
-    background-color: var(--sf-toolbar-gray-700);
-    border: 1px solid var(--sf-toolbar-gray-500);
-    color: var(--sf-toolbar-gray-100);
-    font-size: 12px;
-    padding: 4px;
-    vertical-align: middle;
-}
-
-.sf-toolbar-ajax-requests thead {
-    border: 0;
-}
-
-.sf-toolbar-ajax-requests th {
-    background-color: var(--sf-toolbar-gray-800);
-    border: 1px solid var(--sf-toolbar-gray-500);
-    color: var(--sf-toolbar-gray-200);
-    font-size: 11px;
-    padding: 4px;
-}
-
-.sf-ajax-request-url {
-    max-width: 250px;
-    line-height: 9px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sf-toolbar-ajax-requests .sf-ajax-request-url a {
-    text-decoration: none;
-}
-
-.sf-toolbar-ajax-requests .sf-ajax-request-url a:hover {
-    text-decoration: underline;
-}
-
-.sf-ajax-request-duration {
-    text-align: right;
-}
-
-.sf-toolbar-block .sf-toolbar-info-piece .sf-toolbar-ajax-requests .sf-toolbar-status {
-    font-size: 11px;
-    padding: 1px 3px;
-}
-
-.sf-ajax-request-loading {
-    animation: sf-blink .5s ease-in-out infinite;
-}
-
-@keyframes sf-blink {
-    0% {
-        background: var(--sf-toolbar-gray-800);
-    }
-    50% {
-        background: var(--sf-toolbar-gray-700);
-    }
-    100% {
-        background: var(--sf-toolbar-gray-800);
-    }
-}
-
-.sf-toolbar-block.sf-toolbar-block-dump .sf-toolbar-info {
-    max-width: none;
-    width: 100%;
-    position: fixed;
-    box-sizing: border-box;
-    left: 0;
-}
-
-.sf-toolbar-block-dump pre.sf-dump {
-    background-color: var(--sf-toolbar-gray-800);
-    border-color: var(--sf-toolbar-gray-500);
-    border-radius: 0;
-    margin: 6px 0 12px 0;
-}
-
-.sf-toolbar-block-dump pre.sf-dump:last-child {
-    margin-bottom: 0;
-}
-
-.sf-toolbar-block-dump pre.sf-dump .sf-dump-search-wrapper {
-    margin-bottom: 5px;
-}
-
-.sf-toolbar-block-dump pre.sf-dump span.sf-dump-search-count {
-    color: #333;
-    font-size: 12px;
-}
-
-.sf-toolbar-block-dump .sf-toolbar-info-piece {
-    display: block;
-}
-
-.sf-toolbar-block-dump .sf-toolbar-info-piece .sf-toolbar-file-line {
-    color: var(--sf-toolbar-gray-400);
-    margin-left: 4px;
-}
-
-.sf-toolbar-block-dump .sf-toolbar-info img {
-    display: none;
-}
-
-.sf-toolbar-block-serializer .detailed-metrics {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 15px;
-    margin-top: 15px;
-}
-
-/* Responsive Design */
-.sf-toolbar-icon .sf-toolbar-label, .sf-toolbar-icon .sf-toolbar-value {
-    display: none;
-}
-
-.sf-toolbar-block-config .sf-toolbar-icon .sf-toolbar-label, .sf-cli .sf-toolbar-icon .sf-toolbar-label {
-    display: inline-block;
-}
-
-/* Legacy Design - these styles are maintained to make old panels look   a bit better on the new toolbar */
-.sf-toolbar-block .sf-toolbar-info-piece-additional-detail {
-    color: var(--sf-toolbar-gray-400);
-    font-size: 12px;
-}
-
-.sf-toolbar-status-green .sf-toolbar-info-piece-additional-detail, .sf-toolbar-status-yellow .sf-toolbar-info-piece-additional-detail, .sf-toolbar-status-red .sf-toolbar-info-piece-additional-detail {
-    color: var(--sf-toolbar-white);
-}
-
-@media (min-width: 768px) {
-    .sf-toolbar-icon .sf-toolbar-label, .sf-toolbar-icon .sf-toolbar-value {
-        display: inline;
-    }
-
-    .sf-toolbar-block-time .sf-toolbar-icon svg, .sf-toolbar-block-memory .sf-toolbar-icon svg {
-        display: none;
-    }
-
-    .sf-toolbar-block-time .sf-toolbar-icon svg + span, .sf-toolbar-block-memory .sf-toolbar-icon svg + span {
-        margin-left: 0;
-    }
-
-    .sf-toolbar-block .sf-toolbar-icon {
-        padding: 0 10px;
-    }
-
-    .sf-toolbar-block-time .sf-toolbar-icon {
-        padding-right: 5px;
-    }
-
-    .sf-toolbar-block-memory .sf-toolbar-icon {
-        padding-left: 5px;
-    }
-
-    .sf-toolbar-block-request .sf-toolbar-icon {
-        display: flex;
-        align-items: center;
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    .sf-toolbar-block-request .sf-toolbar-label {
-        margin-left: 4px;
-        margin-right: 1px;
-    }
-
-    .sf-toolbar-block-request .sf-toolbar-status + .sf-toolbar-request-icon {
-        display: inline-flex;
-        margin-left: 5px;
-    }
-
-    .sf-toolbar-block-request .sf-toolbar-icon .sf-toolbar-request-icon + .sf-toolbar-label {
-        margin-left: 0;
-    }
-
-    .sf-toolbar-block-request .sf-toolbar-label + .sf-toolbar-value {
-        margin-right: 5px;
-    }
-
-    .sf-toolbar-block-request:hover .sf-toolbar-info {
-        max-width: none;
-    }
-
-    .sf-toolbar-block .sf-toolbar-info-piece b {
-        font-size: 12px;
-    }
-
-    .sf-toolbar-block .sf-toolbar-info-piece span {
-        font-size: 13px;
-    }
-
-    .sf-toolbar-block-right {
-        float: right;
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .sf-toolbarreset .sf-toolbar-block.sf-toolbar-block-right:not(.sf-toolbar-block-sf-cli) .sf-toolbar-info {
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 0;
-    }
-}
-
-@media (min-width: 1024px) {
-    .sf-toolbar-block .sf-toolbar-info-piece-additional, .sf-toolbar-block .sf-toolbar-info-piece-additional-detail {
-        display: inline;
-    }
-
-    .sf-toolbar-block .sf-toolbar-info-piece-additional:empty, .sf-toolbar-block .sf-toolbar-info-piece-additional-detail:empty {
-        display: none;
-    }
-}
-
-/***** Error Toolbar *****/
-.sf-error-toolbar .sf-toolbarreset {
-    background: var(--sf-toolbar-gray-800);
-    color: var(--sf-toolbar-gray-100);
-    font: 13px/36px var(--sf-toolbar-font-family-system);
-    height: 36px;
-    padding: 0 15px;
-    text-align: left;
-}
-
-.sf-error-toolbar .sf-toolbarreset svg {
-    height: auto;
-}
-
-.sf-error-toolbar .sf-toolbarreset a {
-    color: #99cdd8;
-    margin-left: 5px;
-    text-decoration: underline;
-}
-
-.sf-error-toolbar .sf-toolbarreset a:hover {
-    text-decoration: none;
-}
-
-.sf-error-toolbar .sf-toolbarreset .sf-toolbar-icon {
-    float: left;
-    padding: 5px 0;
-    margin-right: 10px;
-}
-
-.sf-full-stack {
-    left: 0px;
-    font-size: 12px;
-}
-
-/***** Media query print: Do not print the Toolbar. *****/
-@media print {
-    .sf-toolbar {
-        display: none !important;
-    }
-}</style>
+<link rel="stylesheet" nonce="" href="./index_files/styles">
 <script nonce="">/*<![CDATA[*/
 if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
     Sfjs = (function () {
@@ -7250,6 +6288,9 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
             };
         }
         var request = function (url, onSuccess, onError, payload, options, tries) {
+            url = new URL(url);
+            url.searchParams.set('XDEBUG_IGNORE', '1');
+            url = url.toString();
             var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             options = options || {};
             options.retry = options.retry || false;
@@ -7498,7 +6539,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                     if (0 === url.indexOf('')) {
                         path = url.slice(0);
                     }
-                } else if (0 === url.indexOf('http\u003A\/\/127.0.0.1')) {
+                } else if (0 === url.indexOf('http\u003A\/\/')) {
                     path = url.slice(16);
                 }
                 if (!path.match(new RegExp("^\/((index|app(_[\\w]+)?)\\.php\/)?_wdt"))) {
@@ -7628,7 +6669,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                     });
                 }
                 newToken = (newToken || token);
-                this.load('sfwdt' + token, 'http\u003A\/\/127.0.0.1\/_wdt\/xxxxxx'.replace(/xxxxxx/, newToken), function (xhr, el) {                            /* Do nothing in the edge case where the toolbar has already been replaced with a new one */
+                this.load('sfwdt' + token, 'http\u003A\/\/\/_wdt\/xxxxxx'.replace(/xxxxxx/, newToken), function (xhr, el) {                            /* Do nothing in the edge case where the toolbar has already been replaced with a new one */
                     if (!document.getElementById('sfToolbarMainContent-' + newToken)) {
                         return;
                     }                            /* Evaluate in global scope scripts embedded inside the toolbar */
@@ -7691,7 +6732,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                 }, function (xhr) {
                     if (xhr.status !== 0 && !options.stop) {
                         var sfwdt = that.getSfwdt(token);
-                        sfwdt.innerHTML = '\                                <div class="sf-toolbarreset notranslate">\                                    <div class="sf-toolbar-icon"><svg width="26" height="28" xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 26 28" enable-background="new 0 0 26 28" xml:space="preserve"><path fill="#FFFFFF" d="M13 0C5.8 0 0 5.8 0 13c0 7.2 5.8 13 13 13c7.2 0 13-5.8 13-13C26 5.8 20.2 0 13 0z M20 7.5 c-0.6 0-1-0.3-1-0.9c0-0.2 0-0.4 0.2-0.6c0.1-0.3 0.2-0.3 0.2-0.4c0-0.3-0.5-0.4-0.7-0.4c-2 0.1-2.5 2.7-2.9 4.8l-0.2 1.1 c1.1 0.2 1.9 0 2.4-0.3c0.6-0.4-0.2-0.8-0.1-1.3C18 9.2 18.4 9 18.7 8.9c0.5 0 0.8 0.5 0.8 1c0 0.8-1.1 2-3.3 1.9 c-0.3 0-0.5 0-0.7-0.1L15 14.1c-0.4 1.7-0.9 4.1-2.6 6.2c-1.5 1.8-3.1 2.1-3.8 2.1c-1.3 0-2.1-0.6-2.2-1.6c0-0.9 0.8-1.4 1.3-1.4 c0.7 0 1.2 0.5 1.2 1.1c0 0.5-0.2 0.6-0.4 0.7c-0.1 0.1-0.3 0.2-0.3 0.4c0 0.1 0.1 0.3 0.4 0.3c0.5 0 0.9-0.3 1.2-0.5 c1.3-1 1.7-2.9 2.4-6.2l0.1-0.8c0.2-1.1 0.5-2.3 0.8-3.5c-0.9-0.7-1.4-1.5-2.6-1.8c-0.8-0.2-1.3 0-1.7 0.4C8.4 10 8.6 10.7 9 11.1 l0.7 0.7c0.8 0.9 1.3 1.7 1.1 2.7c-0.3 1.6-2.1 2.8-4.3 2.1c-1.9-0.6-2.2-1.9-2-2.7c0.2-0.6 0.7-0.8 1.2-0.6 c0.5 0.2 0.7 0.8 0.6 1.3c0 0.1 0 0.1-0.1 0.3C6 15 5.9 15.2 5.9 15.3c-0.1 0.4 0.4 0.7 0.8 0.8c0.8 0.3 1.7-0.2 1.9-0.9 c0.2-0.6-0.2-1.1-0.4-1.2l-0.8-0.9c-0.4-0.4-1.2-1.5-0.8-2.8c0.2-0.5 0.5-1 0.9-1.4c1-0.7 2-0.8 3-0.6c1.3 0.4 1.9 1.2 2.8 1.9 c0.5-1.3 1.1-2.6 2-3.8c0.9-1 2-1.7 3.3-1.8C20 4.8 21 5.4 21 6.3C21 6.7 20.8 7.5 20 7.5z"/></svg></div>\                                    An error occurred while loading the web debug toolbar. <a href="http\u003A\/\/127.0.0.1\/_profiler\/' + newToken + '">Open the web profiler.</a>\                                </div>\                            ';
+                        sfwdt.innerHTML = '\                                <div class="sf-toolbarreset notranslate">\                                    <div class="sf-toolbar-icon"><svg width="26" height="28" xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 26 28" enable-background="new 0 0 26 28" xml:space="preserve"><path fill="#FFFFFF" d="M13 0C5.8 0 0 5.8 0 13c0 7.2 5.8 13 13 13c7.2 0 13-5.8 13-13C26 5.8 20.2 0 13 0z M20 7.5 c-0.6 0-1-0.3-1-0.9c0-0.2 0-0.4 0.2-0.6c0.1-0.3 0.2-0.3 0.2-0.4c0-0.3-0.5-0.4-0.7-0.4c-2 0.1-2.5 2.7-2.9 4.8l-0.2 1.1 c1.1 0.2 1.9 0 2.4-0.3c0.6-0.4-0.2-0.8-0.1-1.3C18 9.2 18.4 9 18.7 8.9c0.5 0 0.8 0.5 0.8 1c0 0.8-1.1 2-3.3 1.9 c-0.3 0-0.5 0-0.7-0.1L15 14.1c-0.4 1.7-0.9 4.1-2.6 6.2c-1.5 1.8-3.1 2.1-3.8 2.1c-1.3 0-2.1-0.6-2.2-1.6c0-0.9 0.8-1.4 1.3-1.4 c0.7 0 1.2 0.5 1.2 1.1c0 0.5-0.2 0.6-0.4 0.7c-0.1 0.1-0.3 0.2-0.3 0.4c0 0.1 0.1 0.3 0.4 0.3c0.5 0 0.9-0.3 1.2-0.5 c1.3-1 1.7-2.9 2.4-6.2l0.1-0.8c0.2-1.1 0.5-2.3 0.8-3.5c-0.9-0.7-1.4-1.5-2.6-1.8c-0.8-0.2-1.3 0-1.7 0.4C8.4 10 8.6 10.7 9 11.1 l0.7 0.7c0.8 0.9 1.3 1.7 1.1 2.7c-0.3 1.6-2.1 2.8-4.3 2.1c-1.9-0.6-2.2-1.9-2-2.7c0.2-0.6 0.7-0.8 1.2-0.6 c0.5 0.2 0.7 0.8 0.6 1.3c0 0.1 0 0.1-0.1 0.3C6 15 5.9 15.2 5.9 15.3c-0.1 0.4 0.4 0.7 0.8 0.8c0.8 0.3 1.7-0.2 1.9-0.9 c0.2-0.6-0.2-1.1-0.4-1.2l-0.8-0.9c-0.4-0.4-1.2-1.5-0.8-2.8c0.2-0.5 0.5-1 0.9-1.4c1-0.7 2-0.8 3-0.6c1.3 0.4 1.9 1.2 2.8 1.9 c0.5-1.3 1.1-2.6 2-3.8c0.9-1 2-1.7 3.3-1.8C20 4.8 21 5.4 21 6.3C21 6.7 20.8 7.5 20 7.5z"/></svg></div>\                                    An error occurred while loading the web debug toolbar. <a href="http\u003A\/\/\/_profiler\/' + newToken + '">Open the web profiler.</a>\                                </div>\                            ';
                         sfwdt.setAttribute('class', 'sf-toolbar sf-error-toolbar');
                     }
                 }, options);
@@ -7709,7 +6750,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('61009e');/*]]>*/</script>
+Sfjs.loadToolbar('f97c7d');/*]]>*/</script>
 
 
 </body>

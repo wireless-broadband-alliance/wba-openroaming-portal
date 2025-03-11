@@ -29,12 +29,6 @@ class AuthType extends AbstractType
             // SAML
             'AUTH_METHOD_SAML_ENABLED' => [
                 'type' => ChoiceType::class,
-                'options' => [
-                    'constraints' => [
-                        new SamlEnabled(),
-                        // Custom Validator -> Check if there's any active provider to enable this Auth
-                    ],
-                ]
             ],
             // Google
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [

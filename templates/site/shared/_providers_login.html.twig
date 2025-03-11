@@ -1,22 +1,20 @@
 {# Auth Providers #}
 <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
     {% if data.SAML_ENABLED.value %}
-        {% for samlProvider in activeSamlProviders %}
-            <div class="w-full mb-6">
-                <a href="{{ path('app_saml_login', {samlProviderId: samlProvider.id}) }}"
-                   class="terms-widget__link"
-                   data-action="click->terms-widget#showModal">
-                    <button {{ stimulus_target('terms-widget', 'button') }}
-                            type="button"
-                            class="w-full btn-primary btn-disabled">
-                        {{ samlProvider.btnLabel }}
-                    </button>
-                </a>
-                <p class="text-xs mt-3 text-center text-gray-600">
-                    {{ samlProvider.btnDescription }}
-                </p>
-            </div>
-        {% endfor %}
+        <div class="w-full mb-6">
+            <a href="{{ path('saml_login') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.SAML_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs mt-3 text-center text-gray-600">
+                {{ data.SAML_DESCRIPTION.value }}
+            </p>
+        </div>
     {% endif %}
 
     {% if data.GOOGLE_LOGIN_ENABLED.value %}

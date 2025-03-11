@@ -137,6 +137,7 @@ class AdminController extends AbstractController
                     'settingTerms',
                     'settingRadius',
                     'settingStatus',
+                    'settingLDAP',
                     'settingCAPPORT',
                     'settingAUTH',
                     'settingTwoFA',

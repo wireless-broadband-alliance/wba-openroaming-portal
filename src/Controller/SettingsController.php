@@ -12,6 +12,7 @@ use App\Enum\TextEditorName;
 use App\Enum\TwoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
+use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\SMSType;
 use App\Form\StatusType;
@@ -153,6 +154,35 @@ class SettingsController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
+            }
+
+
+            if ($type === 'settingLDAP') {
+                $command = 'php bin/console reset:ldapSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
             if ($type === 'settingStatus') {
@@ -438,6 +468,80 @@ class SettingsController extends AbstractController
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
+        ]);
+    }
+
+
+    #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsLDAP(
+        Request $request,
+        EntityManagerInterface $em,
+        GetSettings $getSettings
+    ): Response {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(LDAPType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'SYNC_LDAP_ENABLED',
+                'SYNC_LDAP_SERVER',
+                'SYNC_LDAP_BIND_USER_DN',
+                'SYNC_LDAP_BIND_USER_PASSWORD',
+                'SYNC_LDAP_SEARCH_BASE_DN',
+                'SYNC_LDAP_SEARCH_FILTER',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting !== null) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+
+            $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_LDAP');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'form' => $form->createView()
         ]);
     }
 

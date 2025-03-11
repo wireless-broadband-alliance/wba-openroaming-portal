@@ -83,6 +83,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
+            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
@@ -110,6 +112,13 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
 
+            ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
+            ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
+            ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
+            ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
+            ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
+            ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
+
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
             ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
             ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => ' https://openroaming.org/'],
@@ -124,6 +133,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
             ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];

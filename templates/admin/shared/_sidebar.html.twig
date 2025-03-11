@@ -23,18 +23,12 @@
         ] %}
         {% set userAuthenticationRoutes = [
             'admin_dashboard_settings_auth', 'admin_dashboard_settings_radius',
-            'admin_dashboard_saml_provider', 'admin_dashboard_settings_LDAP',
-            'admin_dashboard_settings_sms', 'admin_dashboard_settings_two_fa',
+            'admin_dashboard_settings_LDAP', 'admin_dashboard_settings_sms',
+            'admin_dashboard_settings_two_fa',
         ] %}
         {% set portalStatisticsRoutes = [
             'admin_dashboard_statistics',
             'admin_dashboard_statistics_freeradius',
-        ] %}
-        {% set identityProviderRoutes = [
-            'admin_dashboard_saml_provider',
-            'admin_dashboard_saml_provider_new',
-            'admin_dashboard_saml_provider_edit',
-            'admin_dashboard_saml_provider_edit_extra_options',
         ] %}
 
         {# User - Button #}
@@ -101,7 +95,7 @@
         {# User Authentication Settings - Submenu #}
         <div class="relative" {{ stimulus_controller('nav-submenu') }}>
             <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-                {% if app.request.attributes.get('_route') in userAuthenticationRoutes or app.request.attributes.get('_route') in identityProviderRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
+                {% if app.request.attributes.get('_route') in userAuthenticationRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <twig:ux:icon name="wba:cog" class="w-5 mr-2" fill="none"/>
                     User Authentication
@@ -112,7 +106,7 @@
                               fill="none" data-nav-submenu-target="icon"/>
             </button>
 
-            <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in userAuthenticationRoutes or app.request.attributes.get('_route') in identityProviderRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
+            <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in userAuthenticationRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
                 <ul class="mx-2">
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}selected{% endif %}"
@@ -129,37 +123,19 @@
                         </a>
                     </li>
                     <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_LDAP') }}">
+                            <twig:ux:icon name="wba:sync" class="w-5 mr-4" fill="none"/>
+                            LDAP Synchronization
+                        </a>
+                    </li>
+                    <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_radius') }}">
                             <twig:ux:icon name="wba:file-space" class="w-5 mr-4" fill="none"/>
                             Radius Profile Configuration
                         </a>
                     </li>
-                    {# Identity Provider - Submenu #}
-                    <div class="relative" {{ stimulus_controller('nav-submenu') }}>
-                        <button type="button" class="w-full duration-300 rounded p-2 m-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-                    {% if app.request.attributes.get('_route') in identityProviderRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
-                            <div class="flex items-center space-x-2">
-                                <twig:ux:icon name="wba:list" class="w-5 mr-4" fill="none"/>
-                                Identity Provider
-                            </div>
-
-                            <twig:ux:icon name="wba:right"
-                                          class="w-4 transition ease-in {{ (app.request.attributes.get('_route') in identityProviderRoutes) ? 'rotate-90' : '' }}"
-                                          fill="none" data-nav-submenu-target="icon"/>
-                        </button>
-                        <div class="pl-2 ml-2 bg-lightGray rounded-md duration-300 {{ (app.request.attributes.get('_route') in identityProviderRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
-                            <ul>
-                                <li>
-                                    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') in identityProviderRoutes %}selected{% endif %}"
-                                       href="{{ path('admin_dashboard_saml_provider') }}">
-                                        <twig:ux:icon name="wba:dot" class="w-4 mr-4" fill="none"/>
-                                        SAML
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_sms') }}">

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e7af002929455ff695b7235b1386e538",
+    "content-hash": "14d7671f72113c68dc64264a88010841",
     "packages": [
         {
             "name": "api-platform/core",
@@ -14113,7 +14113,8 @@
         "ext-memcached": "*",
         "ext-openssl": "*",
         "ext-simplexml": "*",
-        "composer": "*"
+        "composer": "*",
+        "ext-dom": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
