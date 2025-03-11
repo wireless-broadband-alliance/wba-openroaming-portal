@@ -24,7 +24,7 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two Factor Authentication with app validation</p>
+        <p class="font-bold text-xl">Two Factor Authentication with authentication method validation</p>
         <p class="text-lg"> To validate the use of two factor authentication please enter the code sent for your authentication method</p>
     </div>
     {{ form_start(form) }}
@@ -47,5 +47,6 @@
         }}) }}
     {{ form_end(form) }}
 
-    <a href="{{ path('app_configure2FA') }}" class="w-[160px] btn-logout">Back to configuration</a>
+    <a href="{{ path('app_configure2FA') }}" class="w-[160px] text-center btn-logout">Back to configuration</a>
+    <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
 {% endblock %}
