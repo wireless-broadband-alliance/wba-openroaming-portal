@@ -15,6 +15,7 @@ use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use RuntimeException;
@@ -78,6 +79,7 @@ class GoogleController extends AbstractController
     /**
      * @throws IdentityProviderException
      * @throws Exception
+     * @throws GuzzleException
      */
     #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse

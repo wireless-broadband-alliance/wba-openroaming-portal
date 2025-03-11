@@ -129,19 +129,21 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         // Regenerate the verification code for the admin to reset settings
 
-        if (in_array(
-            $type,
-            [
-                'settingCustom',
-                'settingTerms',
-                'settingRadius',
-                'settingStatus',
-                'settingCAPPORT',
-                'settingAUTH',
-                'settingTwoFA',
-                'settingSMS'
-            ]
-        )) {
+        if (
+            in_array(
+                $type,
+                [
+                    'settingCustom',
+                    'settingTerms',
+                    'settingRadius',
+                    'settingStatus',
+                    'settingCAPPORT',
+                    'settingAUTH',
+                    'settingTwoFA',
+                    'settingSMS'
+                ]
+            )
+        ) {
             $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
@@ -150,7 +152,6 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('admin_page');
     }
-
 
     /**
      * Handles the Page Style on the dashboard
