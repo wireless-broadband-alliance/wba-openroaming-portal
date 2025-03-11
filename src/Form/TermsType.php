@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Service\GetSettings;
-use Eckinox\TinymceBundle\Form\Type\TinymceType;
+use EmilePerron\TinymceBundle\Form\Type\TinymceType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -13,9 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class TermsType extends AbstractType
 {
-    public function __construct(
-        private readonly GetSettings $getSettings
-    ) {
+    public function __construct(private readonly GetSettings $getSettings)
+    {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -43,6 +42,7 @@ class TermsType extends AbstractType
                         new Assert\Url([
                             'message' => 'The value {{ value }} is not a valid URL.',
                             'protocols' => ['http', 'https'],
+                            'requireTld' => true,
                         ]),
                     ],
                 ];

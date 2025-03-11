@@ -4,13 +4,13 @@ namespace App\Api\V1;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class BaseResponse
+readonly class BaseResponse
 {
     public function __construct(
-        private readonly int $statusCode,
-        private readonly mixed $data = null,
-        private readonly ?string $error = null,
-        private readonly mixed $headers = []
+        private int $statusCode,
+        private mixed $data = null,
+        private ?string $error = null,
+        private mixed $headers = []
     ) {
     }
 
