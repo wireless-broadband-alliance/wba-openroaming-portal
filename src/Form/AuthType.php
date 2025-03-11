@@ -30,6 +30,70 @@ class AuthType extends AbstractType
             'AUTH_METHOD_SAML_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
+            'AUTH_METHOD_SAML_LABEL' => [
+                'type' => TextType::class,
+                'options' => [
+                    'constraints' => [
+                        new Length([
+                            'min' => 3,
+                            'max' => 50,
+                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
+                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                        ]),
+                        new Callback([
+                            'callback' => function ($value, ExecutionContextInterface $context): void {
+                                $form = $context->getRoot();
+                                $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                                if ($authMethodGoogleEnabled === "true" && empty($value)) {
+                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                        ->addViolation();
+                                }
+                            },
+                        ]),
+                    ],
+                ],
+            ],
+            'AUTH_METHOD_SAML_DESCRIPTION' => [
+                'type' => TextType::class,
+                'options' => [
+                    'required' => false,
+                    'constraints' => [
+                        new Length([
+                            'max' => 100,
+                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                        ]),
+                    ],
+                ],
+            ],
+            'PROFILE_LIMIT_DATE_SAML' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please select an option.',
+                    ]),
+                    new Range([
+                        'min' => 1,
+                        'max' => $options['profileLimitDate'],
+                        'notInRangeMessage' => sprintf(
+                            'Please select a value between 1 (minimum, fixed value) and %d 
+                            (maximum, determined by the number of days left until the certificate expires on %s).',
+                            $options['profileLimitDate'],
+                            $options['humanReadableExpirationDate']
+                        ),
+                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        if ($options['profileLimitDate'] < 1) {
+                            // Format the message with the human-readable expiration date
+                            $context->buildViolation(
+                                sprintf(
+                                    'The certificate has expired on (%s), please renew your certificate.',
+                                    $options['humanReadableExpirationDate']
+                                )
+                            )->addViolation();
+                        }
+                    }),
+                ],
+            ],
             // Google
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,

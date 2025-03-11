@@ -17,9 +17,9 @@
     {# User Provider #}
     <td class="px-4 py-4">
         <p class="text-left ml-1 p-1">
-            {% if userExternalAuths[user.id] is not empty %}
-                {% for auth in userExternalAuths[user.id] %}
-                        {{ auth.provider }}
+            {% if user.userExternalAuths is not empty %}
+                {% for auth in user.userExternalAuths %}
+                    {{ auth.provider }}
                     {% if not loop.last %}, {% endif %}
                 {% endfor %}
             {% else %}

@@ -32,7 +32,6 @@ class AdminController extends AbstractController
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly UserRepository $userRepository,
-        private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
@@ -64,13 +63,6 @@ class AdminController extends AbstractController
         // Use the updated searchWithFilter method to handle both filter and search term
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
-        // Fetch UserExternalAuth entities for the paginated users
-        $userExternalAuths = [];
-        foreach ($users as $user) {
-            $auths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            $userExternalAuths[$user->getId()] = $auths;
-        }
-
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
 
@@ -94,7 +86,6 @@ class AdminController extends AbstractController
 
         return $this->render('admin/index.html.twig', [
             'users' => $users,
-            'userExternalAuths' => $userExternalAuths,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'searchTerm' => $searchTerm,
