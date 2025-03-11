@@ -27,22 +27,7 @@
         <p class="font-bold text-xl">Two Factor Authentication Codes</p>
         <p class="text-lg"> Please save these codes for use in case you lose your device. </p>
         <div data-controller="clipboard print">
-            <div class="mt-5 border border-gray-300 rounded-md">
-                <div class="flex space-x-2">
-                    <button
-                            data-action="clipboard#copyToClipboard"
-                            class="btn-secondary text-xs px-2 py-1">
-                        Copy
-                    </button>
-                    <a href="{{ path('app_download_codes', {codes: codes|json_encode}) }}"
-                       class="btn-secondary text-xs px-2 py-1">
-                        Download
-                    </a>
-                    <button data-action="print#print" class="btn-secondary text-xs px-2 py-1">
-                        Print
-                    </button>
-                </div>
-
+            <div class="mt-5 rounded-md">
                 <div id="codesBox"
                      data-clipboard-target="code"
                      data-print-target="codesBox"
@@ -53,6 +38,20 @@
                         {% endfor %}
                     </div>
                 </div>
+                <div class="grid grid-cols-3 space-x-4">
+                    <button
+                            data-action="clipboard#copyToClipboard"
+                            class="btn-secondary">
+                        Copy
+                    </button>
+                    <a href="{{ path('app_download_codes', {codes: codes|json_encode}) }}"
+                       class="btn-secondary ">
+                        Download
+                    </a>
+                    <button data-action="print#print" class="btn-secondary">
+                        Print
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -61,5 +60,10 @@
     <div>
         <a href="{{ path('app_otpCodes_save', {codes: codes|json_encode}) }}" class="mt-6 w-[180px] btn-primary">Done</a>
     </div>
+
+    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+        You are currently authenticated as
+        {{ app.user.uuid }}
+    </p>
 
 {% endblock %}
