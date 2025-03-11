@@ -12,9 +12,9 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
-use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
+use ArrayObject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -388,7 +388,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.',
                 requestBody: new RequestBody(
                     description: 'User credentials and CAPTCHA validation token',
-                    content: new \ArrayObject([
+                    content: new ArrayObject([
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
@@ -495,7 +495,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     400 => [
-                        'description' => 'Bad Request due to missing SAML response',
+                        'description' => 'Bad Request due to missing or invalid SAML response',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -511,13 +511,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'example' => 'SAML Response not found',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'saml_response_not_found' => [
-                                            'summary' => 'SAML Response not found',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'SAML Response not found',
-                                            ],
+                                ],
+                                'example' => [
+                                    'saml_response_not_found' => [
+                                        'summary' => 'SAML Response not found',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'SAML Response not found',
                                         ],
                                     ],
                                 ],
@@ -562,7 +562,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     403 => [
-                        'description' => 'Account unverified/banned',
+                        'description' => 'Access Forbidden - The request was made but the server denies permission.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -574,26 +574,44 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
+                                            'description' => 'Details about why access was forbidden.',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
                                             // phpcs:enable
-                                            'description' => 'Details of the authentication failure',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'invalid_verification' => [
-                                            'summary' => 'User account is not verified',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'User account is not verified!',
-                                            ],
+                                ],
+                                'examples' => [
+                                    'invalid_saml_response_idp_entity' => [
+                                        'summary' => 'Invalid IDP Entity',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'The provided IDP Entity is invalid or does not match the expected configuration.',
+                                            // phpcs:enabl
                                         ],
-                                        'banned_account' => [
-                                            'summary' => 'User account is banned',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'User account is banned from the system!',
-                                            ],
+                                    ],
+                                    'invalid_saml_response_certificate' => [
+                                        'summary' => 'Invalid Certificate',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'The provided certificate is invalid or does not match the expected configuration.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
                                         ],
                                     ],
                                 ],
@@ -639,8 +657,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                     description: 'SAML response required for user authentication. 
                     The request should be sent as `multipart/form-data` with the SAML response included
                      as a form field (not a file).',
-                    content: new \ArrayObject([
-                        'multipart/form-data' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'multipart/form-data' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -839,8 +857,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 requestBody: new RequestBody(
                     description: 'Google authorization code required for user authentication.
                      The request should be sent as JSON with the authorization code included in the body.',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1039,8 +1057,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 requestBody: new RequestBody(
                     description: 'Microsoft authorization code required for user authentication.
                      The request should be sent as JSON with the authorization code included in the body.',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1161,8 +1179,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 requestBody: new RequestBody(
                     description: 'User registration data and CAPTCHA validation token. 
                     The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1339,8 +1357,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 validates the request with a CAPTCHA token.',
                 requestBody: new RequestBody(
                     description: 'User registration data with SMS and CAPTCHA validation token',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1486,8 +1504,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                  then proceeds with the password reset if the conditions are met.',
                 requestBody: new RequestBody(
                     description: 'Password reset request data, including CAPTCHA validation token and user email',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1638,8 +1656,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 enforces the time interval between requests and limits the number of attempts allowed.',
                 requestBody: new RequestBody(
                     description: 'Password reset request data including CAPTCHA token and user phone number',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1762,7 +1780,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private Collection $oTPcodes;
 
 
-
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
@@ -1779,7 +1796,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     {
         $this->twoFAcodeIsActive = $twoFAcodeIsActive;
     }
-
 
 
     public function getTwoFAsecret(): ?string

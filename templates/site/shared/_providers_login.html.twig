@@ -1,7 +1,7 @@
 {# Auth Providers #}
 <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
     {% if data.SAML_ENABLED.value %}
-        <div class="w-full">
+        <div class="w-full mb-6">
             <a href="{{ path('saml_login') }}"
                class="terms-widget__link"
                data-action="click->terms-widget#showModal">
@@ -11,7 +11,9 @@
                     {{ data.SAML_LABEL.value }}
                 </button>
             </a>
-            <p class="text-xs mt-2 text-center">{{ data.SAML_DESCRIPTION.value }}</p>
+            <p class="text-xs mt-3 text-center text-gray-600">
+                {{ data.SAML_DESCRIPTION.value }}
+            </p>
         </div>
     {% endif %}
 

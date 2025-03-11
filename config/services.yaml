@@ -13,6 +13,7 @@ parameters:
   app.turnstile_key: '%env(TURNSTILE_KEY)%'
   app.turnstile_secret: '%env(TURNSTILE_SECRET)%'
   app.google_client_id: '%env(GOOGLE_CLIENT_ID)%'
+  app.microsoft_client_id: '%env(MICROSOFT_CLIENT_ID)%'
   app.sentry_dsn: '%env(SENTRY_DSN)%'
   app.saml_idp_entity_id: '%env(SAML_IDP_ENTITY_ID)%'
   app.saml_idp_sso_url: '%env(SAML_IDP_SSO_URL)%'
@@ -48,3 +49,16 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    saml_user_factory:
+        class: App\Security\CustomSamlUserFactory
+        arguments:
+            $userRepository: '@App\Repository\UserRepository'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $getSettings: '@App\Service\GetSettings'
+            $settingRepository: '@App\Repository\SettingRepository'
+            $requestStack: '@request_stack'
+        tags:
+            - { name: 'nbgrp_oneloginsaml.user_factory' }
+
+    Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory: '@saml_user_factory'
+

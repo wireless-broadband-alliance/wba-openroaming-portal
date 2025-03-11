@@ -77,8 +77,9 @@
 		"thenetworg/oauth2-azure": "^2.2",
 		"twig/extra-bundle": "^2.12|^3.0",
 		"twig/twig": "^2.12|^3.0",
-		"vincentlanglet/twig-cs-fixer": "^3.5"
-	},
+		"vincentlanglet/twig-cs-fixer": "^3.5",
+    "ext-dom": "*"
+  },
 	"config": {
 		"allow-plugins": {
 			"php-http/discovery": true,

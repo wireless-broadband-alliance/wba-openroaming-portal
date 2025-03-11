@@ -393,7 +393,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 14. `CONTACT_EMAIL`: The email address for contact inquiries.
 
 15. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-16. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
+16. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication button on the login page.
 17. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
 18. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
 19. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.

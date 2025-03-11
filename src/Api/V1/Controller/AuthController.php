@@ -13,6 +13,7 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
+use App\Service\SamlResolverService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,6 +39,7 @@ class AuthController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly GoogleController $googleController,
         private readonly MicrosoftController $microsoftController,
+        private readonly SamlResolverService $samlResolverService,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly EventActions $eventActions,
     ) {
@@ -131,7 +133,29 @@ class AuthController extends AbstractController
         // Get SAML Response
         $samlResponseBase64 = $request->request->get('SAMLResponse');
         if (!$samlResponseBase64) {
-            return new BaseResponse(400, null, 'SAML Response not found')->toResponse(); // Bad Request
+            return new BaseResponse(400, null, 'SAML Response not found')->toResponse();
+        }
+
+        $samlResponseData = $this->samlResolverService->decodeSamlResponse($samlResponseBase64);
+        $idpEntityId = $samlResponseData['idp_entity_id'];
+        $idpCertificate = $samlResponseData['certificate'];
+
+        // Compare entity IDs
+        if ($this->getParameter('app.saml_idp_entity_id') !== $idpEntityId) {
+            return new BaseResponse(
+                403,
+                null,
+                'The configured IDP Entity ID does not match the expected value. Access denied.'
+            )->toResponse();
+        }
+
+        // Compare certificates
+        if ($this->getParameter('app.saml_idp_x509_cert') !== $idpCertificate) {
+            return new BaseResponse(
+                403,
+                null,
+                'The configured certificate does not match the expected value. Access denied.'
+            )->toResponse();
         }
 
         try {
@@ -143,7 +167,7 @@ class AuthController extends AbstractController
                 return new BaseResponse(
                     401,
                     null,
-                    'Invalid SAML Assertion',
+                    'Unable to validate SAML assertion',
                 )->toResponse(); // Unauthorized
             }
 
@@ -168,7 +192,7 @@ class AuthController extends AbstractController
             // Retrieve or create user based on SAML attributes
             $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
-            if (!$user instanceof User) {
+            if (!$user) {
                 // User does not exist, create a new user
                 $user = new User();
                 $user->setEmail($email);
@@ -208,7 +232,6 @@ class AuthController extends AbstractController
             // Defines the Event to the table
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
             ];
 
