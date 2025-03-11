@@ -38,15 +38,16 @@
 
     </div>
 
-    {# Divider #}
-    <div class="my-[25px] divider"></div>
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+        {{ form_row(form.submit) }}
+        {{ form_end(form) }}
+        <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+        <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+    </div>
 
-    {{ form_row(form.submit, {
-        attr: {
-            class: 'w-[160px] btn btn-primary',
-        }}) }}
-    {{ form_end(form) }}
-
-    <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+        You are currently authenticated as
+        {{ app.user.uuid }}
+    </p>
 
 {% endblock %}

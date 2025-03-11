@@ -47,4 +47,9 @@
         <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
         <a href="{{ path('app_configure2FA') }}" class="text-center btn-logout">Back to configuration</a>
     </div>
+
+    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+        You are currently authenticated as
+        {{ app.user.uuid }}
+    </p>
 {% endblock %}
