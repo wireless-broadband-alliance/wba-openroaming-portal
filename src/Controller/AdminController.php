@@ -15,8 +15,6 @@ use App\Service\GetSettings;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -56,15 +54,10 @@ class AdminController extends AbstractController
         #[MapQueryParameter] string $order = 'desc',
         #[MapQueryParameter] ?int $count = 7
     ): Response {
-        if (!is_int($count) || $count <= 0) {
-            return $this->redirectToRoute('admin_page');
-        }
-
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $searchTerm = $request->query->get('u');
-        $perPage = $count;
 
         $filter = $request->query->get('filter', 'all'); // Default filter
 
@@ -81,11 +74,11 @@ class AdminController extends AbstractController
         // Perform pagination manually
         $totalUsers = count($users); // Get the total number of users
 
-        $totalPages = ceil($totalUsers / $perPage); // Calculate the total number of pages
+        $totalPages = ceil($totalUsers / $count); // Calculate the total number of pages
 
-        $offset = ($page - 1) * $perPage; // Calculate the offset for slicing the users
+        $offset = ($page - 1) * $count; // Calculate the offset for slicing the users
 
-        $users = array_slice($users, $offset, $perPage); // Fetch the users for the current page
+        $users = array_slice($users, $offset, $count); // Fetch the users for the current page
 
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
@@ -104,7 +97,6 @@ class AdminController extends AbstractController
             'userExternalAuths' => $userExternalAuths,
             'currentPage' => $page,
             'totalPages' => $totalPages,
-            'perPage' => $perPage,
             'searchTerm' => $searchTerm,
             'data' => $data,
             'allUsersCount' => $allUsersCount,
@@ -137,65 +129,29 @@ class AdminController extends AbstractController
         $currentUser = $this->getUser();
         // Regenerate the verification code for the admin to reset settings
 
-        if ($type === 'settingCustom') {
+        if (
+            in_array(
+                $type,
+                [
+                    'settingCustom',
+                    'settingTerms',
+                    'settingRadius',
+                    'settingStatus',
+                    'settingCAPPORT',
+                    'settingAUTH',
+                    'settingTwoFA',
+                    'settingSMS'
+                ]
+            )
+        ) {
             $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
             $this->mailer->send($email);
             $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCustom']);
-        }
-
-        if ($type === 'settingTerms') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTerms']);
-        }
-
-        if ($type === 'settingRadius') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingRadius']);
-        }
-
-        if ($type === 'settingStatus') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingStatus']);
-        }
-
-        if ($type === 'settingCAPPORT') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingCAPPORT']);
-        }
-
-        if ($type === 'settingAUTH') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingAUTH']);
-        }
-
-        if ($type === 'settingTwoFA') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingTwoAF']);
-        }
-
-        if ($type === 'settingSMS') {
-            $email = $this->verificationCodeGenerator->createEmailAdmin($currentUser->getEmail(), $currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
-            return $this->redirectToRoute('admin_confirm_reset', ['type' => 'settingSMS']);
+            return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
         }
 
         return $this->redirectToRoute('admin_page');
     }
-
 
     /**
      * Handles the Page Style on the dashboard

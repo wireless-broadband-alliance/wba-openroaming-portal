@@ -356,7 +356,7 @@ class SiteController extends AbstractController
             $tosFormat &&
             $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]) !== null) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
             } else {
                 $content = '';
@@ -389,7 +389,7 @@ class SiteController extends AbstractController
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value])) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]) !== null) {
                 $content = $textEditorRepository->findOneBy(
                     ['name' => TextEditorName::PRIVACY_POLICY->value]
                 )->getContent();
