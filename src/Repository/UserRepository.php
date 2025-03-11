@@ -158,7 +158,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                     'u.email LIKE :searchTerm',
                     'u.first_name LIKE :searchTerm',
                     'u.last_name LIKE :searchTerm',
-                    'sp.name LIKE :searchTerm' // Search using the provider name
                 )
             )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }

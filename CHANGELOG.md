@@ -26,18 +26,6 @@
 php bin/console reset:allocate-providers
 ```
 
-## Multiple Saml Providers Integration
-
-Integrated support for Multiple SAML Providers with management features accessible via the UI
-
-- **Set Default Saml Provider Command**: `app:set-saml-provider`. It ensures the default SAML provider is set, only if
-  exist
-  associated accounts that have a saml provider. This command also associated a LDAPCredential if she exists.
-
-```bash
-php bin/console app:set-saml-provider
-```
-
 # Release V1.6.0
 
 - Fix bug on the date filtering on both statistics pages
