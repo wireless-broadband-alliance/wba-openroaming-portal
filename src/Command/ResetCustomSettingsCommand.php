@@ -54,9 +54,8 @@ class ResetCustomSettingsCommand extends Command
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
                 'name' => 'WELCOME_DESCRIPTION',
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                // phpcs:enable
+                'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your ' .
+                    'device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
             ],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label is used to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],

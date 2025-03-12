@@ -425,9 +425,8 @@ class RegistrationController extends AbstractController
         $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
             return new BaseResponse(200, [
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
-                // phpcs:enable
+                'message' => 'SMS User Account Registered Successfully.' .
+                    ' A verification code has been sent to your phone.'
             ])->toResponse(); // False success for RGPD policies
         }
 
