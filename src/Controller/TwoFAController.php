@@ -470,7 +470,37 @@ class TwoFAController extends AbstractController
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
             return $this->redirectToRoute('app_swap2FA_disable_app');
         }
-        $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
+        /** @var User $user */
+        $user = $this->getUser();
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+        if ($this->twoFAService->canValidationCode($user)) {
+            $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
+            $this->addFlash(
+                'success',
+                'The code was resent successfully.'
+            );
+            return $this->redirectToRoute('app_2FA_first_verification_local');
+        }
+        $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
+        $now = new DateTime();
+        $lastAttemptTime = $lastEvent instanceof Event ?
+            $lastEvent->getEventDatetime() : $timeToResetAttempts;
+        $limitTime = $lastAttemptTime;
+        $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
+        $interval = date_diff($now, $limitTime);
+        $interval_minutes = $interval->days * 1440;
+        $interval_minutes += $interval->h * 60;
+        $interval_minutes += $interval->i;
+        $this->addFlash(
+            'error',
+            'Your code has already been sent, please check your authentication method or wait ' .
+            $interval_minutes . ' minutes to request a code again'
+        );
+
         return $this->redirectToRoute('app_2FA_first_verification_local');
     }
 

@@ -260,4 +260,16 @@ class TwoFAService
             $eventMetaData
         );
     }
+
+    public function canValidationCode(User $user)
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+        return count($attempts) === 0;
+
+    }
 }
