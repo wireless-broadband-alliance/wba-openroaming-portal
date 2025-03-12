@@ -57,8 +57,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
-use function PHPUnit\Framework\isEmpty;
-
 /**
  * @method getParameterBag()
  */

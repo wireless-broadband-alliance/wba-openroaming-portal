@@ -2,16 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\PlatformMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFAcode;
-use App\Form\TwoFactorPhoneNumber;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
 use App\Service\TwoFAService;
@@ -28,8 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-use function Symfony\Component\Clock\now;
-
 class TwoFAController extends AbstractController
 {
     /**
@@ -37,7 +33,7 @@ class TwoFAController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
-     * @param TOTPService $totpService The service for communicate with two factor authentication applications
+     * @param TOTPService $totpService The service for communicate with two-factor authentication applications
      * @param EntityManagerInterface $entityManager The service for manage all entities
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param TwoFAService $twoFAService Generates a new codes and configure 2FA
@@ -342,7 +338,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         if ($user instanceof User) {
-            $codes = $this->twoFAService->generateOTPcodes($user);
+            $codes = $this->twoFAService->generateOTPCodes($user);
             return $this->render('site/otpCodes.html.twig', [
                 'data' => $data,
                 'codes' => $codes,
@@ -387,15 +383,15 @@ class TwoFAController extends AbstractController
         if ($this->twoFAService->canResendCode($user)) {
             $this->twoFAService->resendCode($user);
             $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
-            $attemptsleft = $nrAttempts - count($attempts);
+            $attemptsLeft = $nrAttempts - count($attempts);
             $this->addFlash(
                 'success',
-                'The code was resent successfully. You have ' . $attemptsleft . ' attempts.'
+                'The code was resent successfully. You have ' . $attemptsLeft . ' attempts.'
             );
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
             $now = new DateTime();
-            $lastAttemptTime = $lastEvent instanceof \App\Entity\Event ?
+            $lastAttemptTime = $lastEvent instanceof Event ?
                 $lastEvent->getEventDatetime() : $timeToResetAttempts;
             $limitTime = $lastAttemptTime;
             $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
@@ -414,7 +410,7 @@ class TwoFAController extends AbstractController
     }
 
     #[Route(path: '/generate2FACode', name: 'app_2FA_generate_code')]
-    public function generateCode(Request $request): Response
+    public function generateCode(): Response
     {
         /** @var User $user */
         $user = $this->getUser();

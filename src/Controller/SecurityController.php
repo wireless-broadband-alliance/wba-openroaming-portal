@@ -51,6 +51,7 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
+            // TODO CHANGE settingRepository to use $data instead
             $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
             // this "type" is obtained through the url
             if ($this->isGranted('ROLE_ADMIN') && $type === 'admin') {

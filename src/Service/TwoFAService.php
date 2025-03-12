@@ -12,12 +12,15 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-
-use function Symfony\Component\Clock\now;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class TwoFAService
 {
@@ -64,7 +67,10 @@ class TwoFAService
         return false;
     }
 
-    public function twoFACode(User $user): int
+    /**
+     * @throws RandomException
+     */
+    private function twoFACode(User $user): int
     {
         // Generate a random verification code with 7 digits
         $verificationCode = random_int(1000000, 9999999);
@@ -76,7 +82,10 @@ class TwoFAService
         return $verificationCode;
     }
 
-    public function generate2FACode(User $user)
+    /**
+     * @throws RandomException
+     */
+    public function generate2FACode(User $user): ?string
     {
         // Generate code
         $code = $this->twoFACode($user);
@@ -85,15 +94,18 @@ class TwoFAService
         return $user->getTwoFAcode();
     }
 
-    public function resendCode(User $user)
+    /**
+     * @throws RandomException
+     */
+    public function resendCode(User $user): void
     {
         $code = $this->twoFACode($user);
         $this->sendCode($user, $code);
     }
 
-    public function generateOTPcodes(User $user): array
+    public function generateOTPCodes(User $user): array
     {
-        // if the user already have code we need to remove that codes before generate new ones.
+        // If the user already have code we need to remove that codes before generate new ones.
         if ($user->getOTPcodes()) {
             foreach ($user->getOTPcodes() as $code) {
                 $this->entityManager->remove($code);
@@ -113,8 +125,8 @@ class TwoFAService
     public function validateOTPCodes(User $user, string $formCode): bool
     {
         // Get the OTP codes from user
-        $twoFAcodes = $user->getOTPcodes();
-        foreach ($twoFAcodes as $code) {
+        $twoFACodes = $user->getOTPcodes();
+        foreach ($twoFACodes as $code) {
             // Verify if the code exists and if this code is valid
             if ($code->getCode() === $formCode && $code->isActive()) {
                 // As we can only use the code once, we have to deactivate it after it is used.
@@ -127,15 +139,18 @@ class TwoFAService
         return false;
     }
 
-    private function generateMixedCode(int $length = 8): string
+    /**
+     * @throws RandomException
+     */
+    private function generateMixedCode(): string
     {
         // Generate random alphanumeric codes
-        $bytes = random_bytes($length / 2);
+        $bytes = random_bytes(8 / 2);
         $hexCode = bin2hex($bytes);
 
         $alphanumericCode = str_replace(['a', 'b', 'c', 'd', 'e', 'f'], ['X', 'Y', 'Z', 'P', 'Q', 'R'], $hexCode);
 
-        return strtoupper(substr($alphanumericCode, 0, $length));
+        return strtoupper(substr($alphanumericCode, 0, 8));
     }
 
     private function sendCode(User $user, string $code): void
@@ -210,7 +225,7 @@ class TwoFAService
         return count($attempts) < $nrAttempts;
     }
 
-    public function removeOTPcodes(User $user): void
+    private function removeOTPCodes(User $user): void
     {
         $codes = $user->getOTPcodes();
         foreach ($codes as $code) {
@@ -222,7 +237,7 @@ class TwoFAService
 
     public function disable2FA(User $user): void
     {
-        $this->removeOTPcodes($user);
+        $this->removeOTPCodes($user);
         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
