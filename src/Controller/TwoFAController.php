@@ -201,7 +201,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
-        return $this->render('site/twoFAAuthentication/verify/verify2FAPortal.html.twig', [
+        return $this->render('site/twoFAAuthentication/verify/verify2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -338,7 +338,7 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        return $this->render('site/twoFAAuthentication/validate/validate2FAApp.html.twig', [
+        return $this->render('site/twoFAAuthentication/validate/validate2FA.html.twig', [
             'data' => $data,
             'form' => $form,
         ]);
@@ -566,7 +566,7 @@ class TwoFAController extends AbstractController
                 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code'
             );
         }
-        return $this->render('site/twoFAAuthentication/validate/validate2FAPortal.html.twig', [
+        return $this->render('site/twoFAAuthentication/validate/validate2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
