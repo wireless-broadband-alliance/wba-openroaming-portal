@@ -564,7 +564,7 @@ class TwoFAController extends AbstractController
                 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code'
             );
         }
-        return $this->render('validate2FAPortal.html.twig', [
+        return $this->render('site/twoFAAuthentication/validate/validate2FAPortal.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
