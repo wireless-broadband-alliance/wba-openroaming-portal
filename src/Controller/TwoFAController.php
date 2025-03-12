@@ -51,7 +51,7 @@ class TwoFAController extends AbstractController
     }
 
     #[Route('/configure2FA', name: 'app_configure2FA')]
-    public function method2FA(Request $request): Response
+    public function method2FA(): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -247,7 +247,8 @@ class TwoFAController extends AbstractController
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA(
                     $request->getClientIp(),
-                    $user, AnalyticalEventType::DISABLE_2FA->value,
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
                 if ($session->has('session_admin')) {
@@ -284,7 +285,8 @@ class TwoFAController extends AbstractController
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA(
                     $request->getClientIp(),
-                    $user, AnalyticalEventType::DISABLE_2FA->value,
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
                 if ($session->has('session_admin')) {
@@ -375,7 +377,8 @@ class TwoFAController extends AbstractController
         $this->twoFAService->saveCodes($codes, $user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
-            $user, AnalyticalEventType::GENERATE_OTP_2FA->value,
+            $user,
+            AnalyticalEventType::GENERATE_OTP_2FA->value,
             $request->headers->get('User-Agent')
         );
         if ($session->has('session_admin')) {
@@ -547,7 +550,8 @@ class TwoFAController extends AbstractController
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA(
                     $request->getClientIp(),
-                    $user, AnalyticalEventType::DISABLE_2FA->value,
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
                 return $this->redirectToRoute('app_enable2FA_app');
@@ -589,7 +593,8 @@ class TwoFAController extends AbstractController
                 $this->twoFAService->disable2FA($user);
                 $this->twoFAService->event2FA(
                     $request->getClientIp(),
-                    $user, AnalyticalEventType::DISABLE_2FA->value,
+                    $user,
+                    AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
                 return $this->redirectToRoute('app_2FA_firstSetup_local');

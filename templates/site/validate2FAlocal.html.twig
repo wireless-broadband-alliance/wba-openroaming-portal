@@ -24,8 +24,9 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two Factor Authentication with authentication method validation</p>
-        <p class="text-lg"> To validate the use of two factor authentication please enter the code sent for your authentication method</p>
+        <p class="font-bold text-xl">Two-Factor Authentication - Method Validation</p>
+        <p class="text-lg">To validate the use of two-factor authentication please enter the code sent for your selected
+            method.</p>
     </div>
     {{ form_start(form) }}
     <div class="relative mt-10 mb-6">
@@ -38,14 +39,14 @@
 
     </div>
 
-    {# Divider #}
+    {# Action Buttons #}
     <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
         <a class="btn-primary">
-        {{ form_row(form.submit) }}
-        {{ form_end(form) }}
+            {{ form_row(form.submit) }}
+            {{ form_end(form) }}
         </a>
         <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
-        <a href="{{ path('app_configure2FA') }}" class="text-center btn-logout">Back to configuration</a>
+        <a href="{{ path('app_configure2FA') }}" class="text-center btn-secondary">Go Back</a>
     </div>
 
     <p class="text-[#212529] text-opacity-40 text-sm mt-5">
