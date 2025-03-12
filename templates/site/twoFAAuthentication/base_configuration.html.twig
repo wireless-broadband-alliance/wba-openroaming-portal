@@ -28,7 +28,8 @@
         <p class="text-lg mb-6">Please select an option to configure your experience.</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:grid-cols-2 md:my-2 my-3 space-y-4 md:space-y-0">
+    <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:grid-cols-2 md:my-2 my-3 space-y-4 sm:space-y-0">
+        {# When the app status is NOT_ENFORCED #}
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Portal</a>
@@ -52,13 +53,11 @@
             {# Local users #}
             {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Two Factor Authentication
-                        Portal</a>
+                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Portal</a>
                     <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">External Application</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Two Factor Authentication
-                        Portal</a>
+                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Portal</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
                     <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">External Application</a>
@@ -66,16 +65,14 @@
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
                     <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">External Application</a>
                 {% endif %}
-                {# External users #}
             {% else %}
+                {# External Users #}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Two Factor Authentication
-                        Portal</a>
+                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Portal</a>
                     <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">External Application</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Two Factor Authentication
-                        Portal</a>
+                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Portal</a>
                     <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}

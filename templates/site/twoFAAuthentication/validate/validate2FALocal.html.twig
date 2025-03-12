@@ -1,4 +1,4 @@
-{% extends '/site/base.html.twig' %}
+{% extends 'site/base.html.twig' %}
 
 {% block title %}
     {{ data.title.value }}
@@ -27,6 +27,7 @@
         <p class="text-lg">To validate the use of two-factor authentication please enter the code sent for your selected
             method.</p>
     </div>
+
     {{ form_start(form) }}
     <div class="relative mt-10 mb-6">
         {{ form_widget(form.code, {
@@ -37,13 +38,13 @@
     </div>
 
     {# Action Buttons #}
-    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 md:space-y-0">
-        <a class="btn-primary">
-            {{ form_row(form.submit) }}
-            {{ form_end(form) }}
-        </a>
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
+        <button class="btn-primary"
+                type="submit">Submit
+        </button>
         <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary">Resend code</a>
     </div>
+    {{ form_end(form) }}
 
     {# Divider #}
     {{ include('/site/shared/_return_action.html.twig') }}
