@@ -32,26 +32,27 @@
                      data-clipboard-target="code"
                      data-print-target="codesBox"
                      class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left mt-4">
+                    <div class="flex justify-end space-x-4">
+                        <button title="Copy"
+                                data-action="clipboard#copyToClipboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg>
+                        </button>
+                        <a title="Download"
+                           href="{{ path('app_download_codes', {codes: codes|json_encode}) }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16"><g fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></g></svg>
+                        </a>
+                        <button title="Print"
+                                data-action="print#print">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16"><g fill="currentColor"><path d="M2.5 8a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1"/></g></svg>
+                        </button>
+                    </div>
                     <div class="grid grid-cols-4 gap-4">
                         {% for code in codes %}
                             <div>{{ code }}</div>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="grid grid-cols-3 space-x-4">
-                    <button
-                            data-action="clipboard#copyToClipboard"
-                            class="btn-secondary">
-                        Copy
-                    </button>
-                    <a href="{{ path('app_download_codes', {codes: codes|json_encode}) }}"
-                       class="btn-secondary ">
-                        Download
-                    </a>
-                    <button data-action="print#print" class="btn-secondary">
-                        Print
-                    </button>
-                </div>
+
             </div>
         </div>
     </div>
