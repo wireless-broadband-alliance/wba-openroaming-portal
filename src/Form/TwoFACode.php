@@ -18,6 +18,9 @@ class TwoFACode extends AbstractType
                         'message' => 'You should enter a code.',
                     ]),
                 ],
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
             ]);
     }
 }
