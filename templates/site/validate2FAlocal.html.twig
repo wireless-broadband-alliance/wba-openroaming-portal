@@ -6,7 +6,6 @@
 
 {% block second_col %}
     {# Form Column #}
-
     {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
@@ -30,27 +29,22 @@
     </div>
     {{ form_start(form) }}
     <div class="relative mt-10 mb-6">
-
         {{ form_widget(form.code, {
             attr: {
                 class: 'form-widget',
                 placeholder: 'Enter your Code',
             }}) }}
-
     </div>
 
     {# Action Buttons #}
-    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 md:space-y-0">
         <a class="btn-primary">
             {{ form_row(form.submit) }}
             {{ form_end(form) }}
         </a>
-        <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
-        <a href="{{ path('app_configure2FA') }}" class="text-center btn-secondary">Go Back</a>
+        <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary">Resend code</a>
     </div>
 
-    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-        You are currently authenticated as
-        {{ app.user.uuid }}
-    </p>
+    {# Divider #}
+    {{ include('/site/shared/_return_action.html.twig') }}
 {% endblock %}

@@ -57,7 +57,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         if ($user) {
-            return $this->render('site/2FA_configuration.html.twig', [
+            return $this->render('site/twoFAAuthentication/base_configuration.html.twig', [
                 'user' => $user,
                 'data' => $data,
             ]);
@@ -217,7 +217,11 @@ class TwoFAController extends AbstractController
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
             ) {
-                $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
+                $this->twoFAService->generate2FACode(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent')
+                );
                 return $this->redirectToRoute('app_disable2FA_local');
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {

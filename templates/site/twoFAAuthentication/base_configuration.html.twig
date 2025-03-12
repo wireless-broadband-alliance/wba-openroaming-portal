@@ -1,4 +1,4 @@
-{% extends '/site/base.html.twig' %}
+{% extends 'site/base.html.twig' %}
 
 {% block title %}
     {{ data.title.value }}
@@ -55,7 +55,6 @@
                     <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Two Factor Authentication
                         Portal</a>
                     <a href="{{ path('app_enable2FA_app') }}" class="btn-primary">External Application</a>
-                    <a href="{{ path('saml_logout') }}" class="btn-logout">Logout</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
                     <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Two Factor Authentication
@@ -135,18 +134,18 @@
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two factor authentication configured with the App
+                    You already have two-factor authentication configured with the App.
                 </p>
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    Two factor authentication is mandatory for your account. You can't proceed without him
+                    Two-factor authentication is mandatory for your account. You can't proceed without him
                 </p>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two factor authentication configured with Two-Factor Authentication Portal
+                    You already have two-factor authentication configured with Two-Factor Authentication Portal
                 </p>
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    Two factor authentication is mandatory for your account. You can't proceed without him
+                    Two-factor authentication is mandatory for your account. You can't proceed without it
                 </p>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
@@ -209,12 +208,5 @@
         {% endif %}
     {% endif %}
     {# Divider #}
-    <div class="my-[25px] divider"></div>
-    <div class="space-y-2">
-        <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-            You are currently authenticated as
-            {{ app.user.uuid }}
-        </p>
-        <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
-    </div>
+    {{ include('/site/shared/_return_action.html.twig') }}
 {% endblock %}
