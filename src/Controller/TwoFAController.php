@@ -106,6 +106,7 @@ class TwoFAController extends AbstractController
             'provisioningUri' => $provisioningUri,
             'secret' => $formattedSecret,
             'data' => $data,
+            'user' => $user,
         ]);
     }
 
@@ -337,7 +338,7 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        return $this->render('site/twoFAAuthentication/validate/validate2FAapp.html.twig', [
+        return $this->render('site/twoFAAuthentication/validate/validate2FAApp.html.twig', [
             'data' => $data,
             'form' => $form,
         ]);

@@ -1,4 +1,4 @@
-{% extends '/templates/site/base.html.twig' %}
+{% extends 'site/base.html.twig' %}
 
 {% block title %}
     {{ data.title.value }}
@@ -24,16 +24,16 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two Factor Authentication App</p>
+        <p class="font-bold text-xl">Two-Factor Authentication App</p>
         <p class="text-lg"> Please scan this QR code in your application </p>
     </div>
 
     <div class="flex justify-center my-5">
-        <img src="data:image/png;base64,{{ qrCodeImage }}" alt="QR Code for 2FA configuration" />
+        <img src="data:image/png;base64,{{ qrCodeImage }}" alt="QR Code for 2FA configuration"/>
     </div>
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="text-lg"> Or manually enter the code into the application  </p>
+        <p class="text-lg"> Or manually enter the code into the application</p>
         <div data-controller="clipboard">
             <div class="mt-5 rounded-md">
                 <div id="codesBox"
@@ -42,9 +42,9 @@
                     <div class="flex justify-end">
                         <button
                                 data-action="clipboard#copyToClipboard">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/></svg>
+                            <twig:ux:icon class="w-4" name="wba:copy"/>
                         </button>
-                </div>
+                    </div>
                     <p class="text-sm"> {{ secret }} </p>
                 </div>
 
@@ -52,14 +52,10 @@
         </div>
 
     </div>
+
     <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
         <a href="{{ path('app_enable2FA_app_confirm') }}" class="btn-primary">Done</a>
-        <a href="{{ path('app_configure2FA') }}" class="text-center btn-logout">Back to configuration</a>
     </div>
 
-    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-        You are currently authenticated as
-        {{ app.user.uuid }}
-    </p>
-
+    {{ include('site/shared/returnActions/_return_action.html.twig') }}
 {% endblock %}

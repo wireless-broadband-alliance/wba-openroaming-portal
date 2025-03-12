@@ -104,42 +104,33 @@
     </div>
 
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
+        {% if (user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured with the App.
-            </p>
-        {% endif %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured with the portal.
-            </p>
-        {% endif %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured with portal.
+                You already have two-factor authentication configured for this account.
             </p>
         {% endif %}
     {% endif %}
+
     {# When the app status is ENFORCED_FOR_LOCAL #}
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
         {# Local users #}
         {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You can't proceed without him
+                    Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
                 </p>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured with the App.
+                    You already have two-factor authentication configured for this account.
                 </p>
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You can't proceed without him
+                    Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
                 </p>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured with Two-Factor Authentication Portal
+                    You already have two-factor authentication configured for this account.
                 </p>
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
                     Two-factor authentication is mandatory for your account. You can't proceed without it
@@ -147,60 +138,48 @@
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured with the portal.
+                    You already have two-factor authentication configured for this account.
                 </p>
                 <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You can't proceed without him
+                    two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
                 </p>
             {% endif %}
             {# External users #}
         {% else %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured with the App.
-                </p>
-            {% endif %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured with the portal.
-                </p>
-            {% endif %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured with the portal.
-                </p>
-            {% endif %}
+            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                You already have two-factor authentication configured for this account.
+            </p>
         {% endif %}
     {% endif %}
     {# When the app status is ENFORCED_FOR_ALL #}
     {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You can't proceed without him
+                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
             </p>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::APP').value) %}
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured with the App
+                You already have two-factor authentication configured for this account.
             </p>
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You can't proceed without him
+                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
             </p>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured with the portal.
+                You already have two-factor authentication configured for this account.
             </p>
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You can't proceed without him
+                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
             </p>
         {% endif %}
         {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured with the portal.
+                You already have two-factor authentication configured for this account.
             </p>
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You can't proceed without him
+                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
             </p>
         {% endif %}
     {% endif %}
