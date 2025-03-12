@@ -15,10 +15,10 @@ use App\Service\TOTPService;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use libphonenumber\PhoneNumber;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,7 +66,7 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route(path: '/enable2FAapp', name: 'app_enable2FA_app')]
+    #[Route('/enable2FAapp', name: 'app_enable2FA_app')]
     public function enable2FAapp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -109,7 +109,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/verify2FAapp', name: 'app_verify2FA_app')]
+    #[Route('/verify2FAapp', name: 'app_verify2FA_app')]
     public function verify2FA(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -159,7 +159,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/verify2FA', name: 'app_verify2FA_local')]
+    #[Route('/verify2FA', name: 'app_verify2FA_local')]
     public function verify2FAlocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -207,7 +207,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/disable2FA', name: 'app_disable2FA')]
+    #[Route('/disable2FA', name: 'app_disable2FA')]
     public function disable2FA(Request $request): RedirectResponse
     {
         /** @var User $user */
@@ -232,7 +232,7 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route(path: '/disable2FA/local', name: 'app_disable2FA_local')]
+    #[Route('/disable2FA/local', name: 'app_disable2FA_local')]
     public function disable2FALocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -268,7 +268,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/disable2FA/app', name: 'app_disable2FA_app')]
+    #[Route('/disable2FA/app', name: 'app_disable2FA_app')]
     public function disable2FAApp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -306,8 +306,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/enable2FAapp/validate', name: 'app_enable2FA_app_confirm')]
-    public function enable2FAappValidate(Request $request): Response
+    #[Route('/enable2FAApp/validate', name: 'app_enable2FA_app_confirm')]
+    public function enable2FAAppValidate(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -343,8 +343,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/2FAFirstSetup/codes', name: 'app_otpCodes')]
-    public function twoFAcodes(Request $request): Response
+    #[Route('/2FAFirstSetup/codes', name: 'app_otpCodes')]
+    public function twoFACodes(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
@@ -370,14 +370,17 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route(path: '/2FAFirstSetup/codes/save', name: 'app_otpCodes_save')]
+    /**
+     * @throws \JsonException
+     */
+    #[Route('/2FAFirstSetup/codes/save', name: 'app_otpCodes_save')]
     public function saveCodes(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
         $codesJson = $request->query->get('codes');
-        $codes = json_decode($codesJson, true);
+        $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
         $this->twoFAService->saveCodes($codes, $user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
@@ -391,10 +394,7 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    #[Route(path: '/verify2FA/resend', name: 'app_2FA_local_resend_code')]
+    #[Route('/verify2FA/resend', name: 'app_2FA_local_resend_code')]
     public function resendCode(Request $request): RedirectResponse
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -433,7 +433,10 @@ class TwoFAController extends AbstractController
         return $this->redirect($lastPage);
     }
 
-    #[Route(path: '/generate2FACode', name: 'app_2FA_generate_code')]
+    /**
+     * @throws RandomException
+     */
+    #[Route('/generate2FACode', name: 'app_2FA_generate_code')]
     public function generateCode(Request $request): Response
     {
         /** @var User $user */
@@ -442,11 +445,14 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_verify2FA_local');
     }
 
-    #[Route(path: '/downloadCodes', name: 'app_download_codes')]
+    /**
+     * @throws \JsonException
+     */
+    #[Route('/downloadCodes', name: 'app_download_codes')]
     public function downloadCodes(Request $request): Response
     {
         $codesJson = $request->query->get('codes');
-        $codes = json_decode($codesJson, true);
+        $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
         // create a content of the file
         $fileContent = implode("\n", $codes);
 
@@ -462,8 +468,12 @@ class TwoFAController extends AbstractController
         return $response;
     }
 
-    #[route(path: '/2FAFirstSetup/local', name: 'app_2FA_firstSetup_local')]
-    public function firstSetupLocal(Request $request): RedirectResponse
+    /**
+     * @throws \DateMalformedStringException
+     * @throws RandomException
+     */
+    #[Route('/2FAFirstSetup/portal', name: 'app_2FA_firstSetup_local')]
+    public function firstSetupPortal(Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -472,39 +482,31 @@ class TwoFAController extends AbstractController
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
-        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         /** @var User $user */
         $user = $this->getUser();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canValidationCode($user)) {
-            $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
+            $this->twoFAService->generate2FACode(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent')
+            );
             $this->addFlash(
                 'success',
                 'The code was sent successfully.'
             );
             return $this->redirectToRoute('app_2FA_first_verification_local');
         }
-        $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
-        $now = new DateTime();
-        $lastAttemptTime = $lastEvent instanceof Event ?
-            $lastEvent->getEventDatetime() : $timeToResetAttempts;
-        $limitTime = $lastAttemptTime;
-        $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
-        $interval = date_diff($now, $limitTime);
-        $interval_minutes = $interval->days * 1440;
-        $interval_minutes += $interval->h * 60;
-        $interval_minutes += $interval->i;
         $this->addFlash(
             'error',
-            'Your code has already been sent, please check your authentication method or wait ' .
-            $interval_minutes . ' minutes to request a code again'
+            'Your code has already been sent to you previously.'
         );
 
         return $this->redirectToRoute('app_2FA_first_verification_local');
     }
 
-    #[route(path: '/2FAFirstSetup/verification', name: 'app_2FA_first_verification_local')]
+    #[Route('/2FAFirstSetup/verification', name: 'app_2FA_first_verification_local')]
     public function firstVerificationLocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -512,7 +514,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             // Check if the code used is the one generated in the BD.
@@ -557,7 +559,10 @@ class TwoFAController extends AbstractController
                 }
                 return $this->redirectToRoute('app_otpCodes');
             }
-            $this->addFlash('error', 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code');
+            $this->addFlash(
+                'error',
+                'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code'
+            );
         }
         return $this->render('site/twoFAAuthentication/validate/validate2FALocal.html.twig', [
             'data' => $data,
@@ -566,7 +571,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[route(path: '/2FASwapMethod/disableLocal', name: 'app_swap2FA_disable_Local')]
+    #[Route('/2FASwapMethod/disableLocal', name: 'app_swap2FA_disable_Local')]
     public function swapMethod2FADisableLocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -598,7 +603,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/generate2FACode/swapMethod', name: 'app_2FA_generate_code_swap_method')]
+    #[Route('/generate2FACode/swapMethod', name: 'app_2FA_generate_code_swap_method')]
     public function generateCodeSwapMethod(Request $request): Response
     {
         /** @var User $user */
@@ -607,7 +612,7 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_swap2FA_disable_Local');
     }
 
-    #[route(path: '/2FASwapMethod/disableApp', name: 'app_swap2FA_disable_app')]
+    #[Route('/2FASwapMethod/disableApp', name: 'app_swap2FA_disable_app')]
     public function swapMethod2FADisableApp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);

@@ -24,8 +24,7 @@
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Two-Factor Authentication - Method Validation</p>
-        <p class="text-lg">To validate the use of two-factor authentication please enter the code sent for your selected
-            method.</p>
+        <p class="text-lg">To validate the use of two-factor authentication please enter the code sent to you.</p>
     </div>
 
     {{ form_start(form) }}

@@ -17,12 +17,8 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class TwoFAService
+readonly class TwoFAService
 {
     /**
      * Registration constructor.
@@ -35,22 +31,23 @@ class TwoFAService
      * @param MailerInterface $mailer Called for send emails
      */
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly UserRepository $userRepository,
-        private readonly SendSMS $sendSMS,
-        private readonly MailerInterface $mailer,
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly SettingRepository $settingRepository,
-        private readonly EventActions $eventActions,
-        private readonly GetSettings $getSettings,
-        private readonly EventRepository $eventRepository,
+        private EntityManagerInterface $entityManager,
+        private UserRepository $userRepository,
+        private SendSMS $sendSMS,
+        private MailerInterface $mailer,
+        private ParameterBagInterface $parameterBag,
+        private SettingRepository $settingRepository,
+        private EventActions $eventActions,
+        private GetSettings $getSettings,
+        private EventRepository $eventRepository,
     ) {
     }
+
     public function validate2FACode(User $user, string $formCode): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $codeDate = $user->getTwoFACodeGeneratedAt();
-        // if the user don't have code in the BD return false
+        // If the user doesn't have code in the BD return false
         if (!$codeDate instanceof \DateTimeInterface) {
             return false;
         }
@@ -155,7 +152,6 @@ class TwoFAService
 
     private function sendCode(User $user, string $code, string $ip, string $userAgent): void
     {
-
         $messageType = $user->getTwoFAtype();
         if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             $message = "Your Two Factor Authentication Code is " . $code;
@@ -197,7 +193,7 @@ class TwoFAService
     public function twoFAisActive(User $user): bool
     {
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
-                return false;
+            return false;
         }
         return !$user->getOTPcodes()->isEmpty();
     }
@@ -270,6 +266,5 @@ class TwoFAService
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
         return count($attempts) === 0;
-
     }
 }
