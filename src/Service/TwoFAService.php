@@ -85,22 +85,22 @@ class TwoFAService
     /**
      * @throws RandomException
      */
-    public function generate2FACode(User $user): ?string
+    public function generate2FACode(User $user, string $ip, string $userAgent): ?string
     {
         // Generate code
         $code = $this->twoFACode($user);
         // Send code
-        $this->sendCode($user, $code);
+        $this->sendCode($user, $code, $ip, $userAgent);
         return $user->getTwoFAcode();
     }
 
     /**
      * @throws RandomException
      */
-    public function resendCode(User $user): void
+    public function resendCode(User $user, string $ip, string $userAgent): void
     {
         $code = $this->twoFACode($user);
-        $this->sendCode($user, $code);
+        $this->sendCode($user, $code, $ip, $userAgent);
     }
 
     public function generateOTPCodes(User $user): array
@@ -153,7 +153,7 @@ class TwoFAService
         return strtoupper(substr($alphanumericCode, 0, 8));
     }
 
-    private function sendCode(User $user, string $code): void
+    private function sendCode(User $user, string $code, string $ip, string $userAgent): void
     {
 
         $messageType = $user->getTwoFAtype();
@@ -182,7 +182,9 @@ class TwoFAService
         }
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
+            'user_agent' => $userAgent,
             'uuid' => $user->getUuid(),
+            'ip' => $ip,
         ];
         $this->eventActions->saveEvent(
             $user,
@@ -243,10 +245,11 @@ class TwoFAService
         $this->entityManager->flush();
     }
 
-    public function event2FA(string $ip, User $user, string $eventType): void
+    public function event2FA(string $ip, User $user, string $eventType, string $userAgent): void
     {
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
+            'user_agent' => $userAgent,
             'uuid' => $user->getUuid(),
             'ip' => $ip,
         ];
