@@ -109,7 +109,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/verify2FAapp', name: 'app_verify2FA_app')]
+    #[Route('/verify2FAApp', name: 'app_verify2FA_app')]
     public function verify2FA(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -159,8 +159,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/verify2FA', name: 'app_verify2FA_local')]
-    public function verify2FAlocal(Request $request): Response
+    #[Route('/verify2FA', name: 'app_verify2FA_portal')]
+    public function verify2FAPortal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
@@ -200,7 +200,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
-        return $this->render('site/verify2FAlocal.html.twig', [
+        return $this->render('site/twoFAAuthentication/verify/verify2FAPortal.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -442,7 +442,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
-        return $this->redirectToRoute('app_verify2FA_local');
+        return $this->redirectToRoute('app_verify2FA_portal');
     }
 
     /**
@@ -564,7 +564,7 @@ class TwoFAController extends AbstractController
                 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code'
             );
         }
-        return $this->render('site/twoFAAuthentication/validate/validate2FALocal.html.twig', [
+        return $this->render('validate2FAPortal.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,

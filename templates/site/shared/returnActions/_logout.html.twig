@@ -1,0 +1,7 @@
+{# Divider #}
+<div class="my-[25px] divider"></div>
+<p class="text-[#212529] text-opacity-40 text-sm my-5">
+    You are currently authenticated as
+    {{ app.user.uuid }}
+</p>
+<a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>

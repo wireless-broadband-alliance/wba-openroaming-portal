@@ -1,4 +1,4 @@
-{% extends '/site/base.html.twig' %}
+{% extends 'site/base.html.twig' %}
 
 {% block title %}
     {{ data.title.value }}
@@ -50,12 +50,7 @@
             </button>
         </a>
         <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
-        <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
     </div>
     {{ form_end(form) }}
-    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-        You are currently authenticated as
-        {{ app.user.uuid }}
-    </p>
-
+    {{ include('site/shared/returnActions/_logout.html.twig') }}
 {% endblock %}
