@@ -12,7 +12,6 @@ use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
 use LogicException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,14 +50,13 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
-            // TODO CHANGE settingRepository to use $data instead
-            $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+            $twoFAPlatformStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
             // this "type" is obtained through the url
-            if ($this->isGranted('ROLE_ADMIN') && $type === 'admin') {
+            if ($type === 'admin' && $this->isGranted('ROLE_ADMIN')) {
                 $session = $request->getSession();
                 $session->set('session_admin', true);
-                if ($twoFAplatformStatus) {
-                    if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
+                if ($twoFAPlatformStatus) {
+                    if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::DISABLED->value ||
@@ -91,8 +89,8 @@ class SecurityController extends AbstractController
                         return $this->redirectToRoute('admin_page');
                     }
                     if (
-                        $twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value ||
-                        $twoFAplatformStatus->getValue() === twoFAType::ENFORCED_FOR_ALL->value
+                        $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
+                        $twoFAPlatformStatus === twoFAType::ENFORCED_FOR_ALL->value
                     ) {
                         if (
                             $user->getTwoFAType() ===
@@ -131,9 +129,9 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('saml_logout');
             }
             // Get 2fa status on platform
-            if ($twoFAplatformStatus) {
+            if ($twoFAPlatformStatus) {
                 // Check 2fa status on platform, after that we need to check user status to decide what case we have
-                if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
+                if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
@@ -161,7 +159,7 @@ class SecurityController extends AbstractController
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+                if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
@@ -189,7 +187,7 @@ class SecurityController extends AbstractController
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_ALL->value) {
+                if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
