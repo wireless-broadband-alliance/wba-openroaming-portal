@@ -120,7 +120,6 @@
             <p class="font-lg">This portal if for testing purposes only and should not be used in production
                 environments. Users created on this portal might be revoked at anytime without notice.</p>
         </div>
-
     {% else %}
         {% if app.user %}
             {% if app.user.isVerified %}
@@ -141,7 +140,6 @@
                 <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
 
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
-
                     <p class="text-[#212529] text-opacity-40 text-sm">
                         You are currently authenticated as
                         {% if userExternalAuths[user.id] is defined %}
