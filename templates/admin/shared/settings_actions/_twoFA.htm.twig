@@ -5,7 +5,7 @@
     <div class="grid gap-4 lg:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {% for setting in formTwoFA %}
             {# Display only the 2FA settings #}
-            {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS', 'TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER', 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'] %}
+            {% if setting.vars.name in ['TWO_FACTOR_AUTH_STATUS', 'TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER', 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      name="statusCards"
                      id="{{ setting.vars.name }}" {{ stimulus_controller('radio card three-options_radio') }}>
@@ -13,10 +13,12 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
-                                TWO_FACTOR_AUTH_STATUS: 'Two factor authentication Status',
-                                TWO_FACTOR_AUTH_APP_LABEL: 'Two factor authentication App Label',
-                                TWO_FACTOR_AUTH_APP_ISSUER: 'Two factor authentication App Issuer',
-                                TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME: 'Two factor authentication Expiration Time (secs)',
+                                TWO_FACTOR_AUTH_STATUS: 'Status',
+                                TWO_FACTOR_AUTH_APP_LABEL: 'App Label',
+                                TWO_FACTOR_AUTH_APP_ISSUER: 'App Issuer',
+                                TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME: 'Expiration Time (secs)',
+                                TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE: 'Resend attempts count',
+                                TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS: 'Time to reset attempts (min)',
                             }
                                 [setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
@@ -102,7 +104,7 @@
                             </label>
                         </div>
                     {% endif %}
-                    {% if setting.vars.name in ['TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER', 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'] %}
+                    {% if setting.vars.name in ['TWO_FACTOR_AUTH_APP_LABEL', 'TWO_FACTOR_AUTH_APP_ISSUER', 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'] %}
                         <div class="mt-5">
                             {{ form_widget(setting, {attr: {class: 'form-widget'}}) }}
                         </div>

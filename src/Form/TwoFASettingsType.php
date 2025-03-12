@@ -105,6 +105,40 @@ class TwoFASettingsType extends AbstractType
                     ],
                     'invalid_message' => 'Please enter a valid number.',
                 ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE') {
+                $builder->add('TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', IntegerType::class, [
+                    'data' => (int)$settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'This field cannot be blank.',
+                        ]),
+                        new Range([
+                            'min' => 1,
+                            'minMessage' => 'This value cannot be less than {{ limit }} attempt.',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please enter a valid number.',
+                ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS') {
+                $builder->add('TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', IntegerType::class, [
+                    'data' => (int)$settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'This field cannot be blank.',
+                        ]),
+                        new Range([
+                            'min' => 5,
+                            'minMessage' => 'This value cannot be less than {{ limit }} minutes.',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please enter a valid number.',
+                ]);
             }
         }
     }

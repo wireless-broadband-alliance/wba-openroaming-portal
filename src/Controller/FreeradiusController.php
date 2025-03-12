@@ -173,6 +173,7 @@ class FreeradiusController extends AbstractController
         $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $perPage);
 
         return $this->render('admin/freeradius_statistics.html.twig', [
+            'user' => $user,
             'data' => $data,
             'current_user' => $user,
             'currentPage' => $page,

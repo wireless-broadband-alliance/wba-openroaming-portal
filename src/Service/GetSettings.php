@@ -74,6 +74,18 @@ class GetSettings
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
+        $data['TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'] = [
+            'value' => $settingRepository->findOneBy([
+                'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'
+            ])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'),
+        ];
+
+        $data['TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'])->getValue(),
+            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'),
+        ];
+
         $data['SAML_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
@@ -202,6 +214,10 @@ class GetSettings
             'TWO_FACTOR_AUTH_APP_LABEL' => 'Platform identifier in two factor application',
             'TWO_FACTOR_AUTH_APP_ISSUER' => 'Issuer identifier in two factor application',
             'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME' => 'Local two-factor authentication code expiration time',
+            'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE' => 'Number of attempts to request resending of the two 
+            factor authentication code',
+            'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS' => 'Time in minutes to reset attempts to send two factor
+             authentication code',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',

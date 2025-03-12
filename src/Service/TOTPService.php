@@ -26,8 +26,8 @@ class TOTPService
         // Create an identifier code to communicate with the app
         $totp = TOTP::create($secret);
         // Identifier labels in the communication
-        $totp->setLabel($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_LABEL']));
-        $totp->setIssuer($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_ISSUER']));
+        $totp->setLabel($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_LABEL'])->getValue());
+        $totp->setIssuer($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_ISSUER'])->getValue());
 
         return $totp->getProvisioningUri(); // URI for QR Code
     }

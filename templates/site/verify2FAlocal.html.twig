@@ -27,30 +27,34 @@
         <p class="font-bold text-xl">Two Factor Authentication Code</p>
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
             <p class="text-lg"> Please enter the code sent to your email</p>
-        {% else %}
+        {% elseif user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value %}
             <p class="text-lg"> Please enter the code sent to your phone number</p>
+        {% else %}
+            <p class="text-lg"> Please enter the code sent to your authentication method</p>
         {% endif %}
 
     </div>
     {{ form_start(form) }}
-    <div class="relative mt-10">
+    <div class="relative mt-10 mb-6">
 
         {{ form_widget(form.code, {
             attr: {
                 class: 'form-widget',
                 placeholder: 'Enter your Code',
             }}) }}
-
+    </div>
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+        <a class="btn-primary">
+        {{ form_row(form.submit) }}
+        {{ form_end(form) }}
+        </a>
+        <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary"> Resend code</a>
+        <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
     </div>
 
-    <p class="text-lg mt-5"> Click  <a href="{{ path('app_verify2FA_local') }}" class="text-green-500 underline" >here</a> to resend code</p>
+    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+        You are currently authenticated as
+        {{ app.user.uuid }}
+    </p>
 
-    {# Divider #}
-    <div class="my-[25px] divider"></div>
-
-    {{ form_row(form.submit, {
-        attr: {
-            class: 'w-[160px] btn btn-primary',
-        }}) }}
-    {{ form_end(form) }}
 {% endblock %}

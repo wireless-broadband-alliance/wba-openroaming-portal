@@ -463,6 +463,7 @@ class SettingsController extends AbstractController
 
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -631,6 +632,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -725,6 +727,7 @@ class SettingsController extends AbstractController
 
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -761,6 +764,8 @@ class SettingsController extends AbstractController
                 'TWO_FACTOR_AUTH_APP_LABEL',
                 'TWO_FACTOR_AUTH_APP_ISSUER',
                 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME',
+                'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
+                'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'
             ];
 
             foreach ($settingsToHandle as $settingName) {
@@ -792,6 +797,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -916,6 +922,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -987,6 +994,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -1058,6 +1066,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -1078,6 +1087,9 @@ class SettingsController extends AbstractController
     public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1122,6 +1134,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/statistics.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
