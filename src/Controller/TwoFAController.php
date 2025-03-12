@@ -6,7 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Form\TwoFAcode;
+use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -113,9 +113,9 @@ class TwoFAController extends AbstractController
     public function verify2FA(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
             $user = $this->getUser();
@@ -163,7 +163,7 @@ class TwoFAController extends AbstractController
     public function verify2FAlocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
@@ -236,7 +236,7 @@ class TwoFAController extends AbstractController
     public function disable2FALocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
@@ -272,7 +272,7 @@ class TwoFAController extends AbstractController
     public function disable2FAApp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
@@ -312,7 +312,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -478,11 +478,11 @@ class TwoFAController extends AbstractController
     public function firstVerificationLocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
             // Check if the code used is the one generated in the BD.
@@ -529,7 +529,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
-        return $this->render('site/validate2FAlocal.html.twig', [
+        return $this->render('site/twoFAAuthentication/validate/validate2FALocal.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -540,7 +540,7 @@ class TwoFAController extends AbstractController
     public function swapMethod2FADisableLocal(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
@@ -581,7 +581,7 @@ class TwoFAController extends AbstractController
     public function swapMethod2FADisableApp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFAcode::class);
+        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
