@@ -4,5 +4,21 @@
         You are currently authenticated as
         {{ app.user.uuid }}
     </p>
-    <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
+    {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+            <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
+        {% endif %}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+            {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+                <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Logout</a>
+            {% else %}
+                <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
+            {% endif %}
+        {% endif %}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
+            <a href="{{ path('app_landing') }}" class="w-[160px] btn-logout">Logout</a>
+        {% endif %}
+    {% else %}
+        <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
+    {% endif %}
 </div>
