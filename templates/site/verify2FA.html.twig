@@ -39,12 +39,12 @@
     </div>
 
     <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
-        {{ form_row(form.submit) }}
-        {{ form_end(form) }}
-        <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+        <button class="btn-primary"
+                type="submit">Submit
+        </button>
         <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
     </div>
-
+    {{ form_end(form) }}
     <p class="text-[#212529] text-opacity-40 text-sm mt-5">
         You are currently authenticated as
         {{ app.user.uuid }}
