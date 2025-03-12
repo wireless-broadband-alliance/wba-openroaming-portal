@@ -186,7 +186,7 @@ class TwoFAService
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::TWO_FA_CODE_SENDED->value,
+            AnalyticalEventType::TWO_FA_CODE_SENT->value,
             new DateTime(),
             $eventMetaData
         );

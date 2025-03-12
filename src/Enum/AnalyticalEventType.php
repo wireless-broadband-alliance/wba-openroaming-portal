@@ -60,5 +60,5 @@ enum AnalyticalEventType: string
     case VERIFY_LOCAL_2FA = 'VERIFY_LOCAL_2FA';
     case VERIFY_OTP_2FA = 'VERIFY_OTP_2FA';
     case GENERATE_OTP_2FA = 'GENERATE_OTP_2FA';
-    case TWO_FA_CODE_SENDED = 'TWO_FA_CODE_SENDED';
+    case TWO_FA_CODE_SENT = 'TWO_FA_CODE_SENT';
 }
