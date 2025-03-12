@@ -208,6 +208,10 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     * @throws RandomException
+     */
     #[Route('/disable2FA', name: 'app_disable2FA')]
     public function disable2FA(Request $request): RedirectResponse
     {
@@ -218,10 +222,27 @@ class TwoFAController extends AbstractController
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
             ) {
-                $this->twoFAService->generate2FACode(
-                    $user,
-                    $request->getClientIp(),
-                    $request->headers->get('User-Agent')
+                $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+                $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+                /** @var User $user */
+                $user = $this->getUser();
+                $limitTime = new DateTime();
+                $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+                if ($this->twoFAService->canValidationCode($user)) {
+                    $this->twoFAService->generate2FACode(
+                        $user,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent')
+                    );
+                    $this->addFlash(
+                        'success',
+                        'The code was sent successfully.'
+                    );
+                    return $this->redirectToRoute('app_disable2FA_local');
+                }
+                $this->addFlash(
+                    'error',
+                    'Your code has already been sent to you previously.'
                 );
                 return $this->redirectToRoute('app_disable2FA_local');
             }
