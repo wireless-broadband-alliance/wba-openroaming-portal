@@ -415,34 +415,38 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 34. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two factor application
 35. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two factor application
 36. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
+37. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two
+    factor authentication code
+38. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two factor
+    authentication code
 
-37. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-38. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-39. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-40. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-41. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-42. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+39. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+40. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+41. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+42. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+43. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+44. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
     The placeholder `@ID` is replaced with the user's ID.
 
-43. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-44. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-45. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-46. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-47. `SMS_USERNAME`: Budget SMS Username.
-48. `SMS_USER_ID`: Budget SMS User ID.
-49. `SMS_HANDLE`: Budget SMS Handle hash.
-50. `SMS_FROM`: Entity sending the SMS for the users.
-51. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+45. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+46. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+47. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+48. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+49. `SMS_USERNAME`: Budget SMS Username.
+50. `SMS_USER_ID`: Budget SMS User ID.
+51. `SMS_HANDLE`: Budget SMS Handle hash.
+52. `SMS_FROM`: Entity sending the SMS for the users.
+53. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-52. `TOS_LINK`: Terms and Conditions URL.
-53. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-54. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-55. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-56. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-57. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-58. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-59. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-60. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+54. `TOS_LINK`: Terms and Conditions URL.
+55. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+56. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+57. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+58. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+59. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+60. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+61. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+62. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

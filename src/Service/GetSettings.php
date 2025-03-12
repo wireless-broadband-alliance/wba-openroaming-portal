@@ -74,18 +74,6 @@ class GetSettings
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
-        $data['TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'] = [
-            'value' => $settingRepository->findOneBy([
-                'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'
-            ])->getValue(),
-            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE'),
-        ];
-
-        $data['TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'])->getValue(),
-            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'),
-        ];
-
         $data['SAML_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
