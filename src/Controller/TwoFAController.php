@@ -101,7 +101,7 @@ class TwoFAController extends AbstractController
         $qrCodeResult = $writer->write($qrCode);
         $qrCodeImage = base64_encode($qrCodeResult->getString());
 
-        return $this->render('site/twoFAAuthentication/enable/enable2FAapp.html.twig', [
+        return $this->render('site/twoFAAuthentication/actions/enable2FAapp.html.twig', [
             'qrCodeImage' => $qrCodeImage,
             'provisioningUri' => $provisioningUri,
             'secret' => $formattedSecret,
@@ -261,7 +261,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
         }
-        return $this->render('site/twoFAAuthentication/disable/disable2FA.html.twig', [
+        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -299,7 +299,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
         }
-        return $this->render('site/twoFAAuthentication/disable/disable2FA.html.twig', [
+        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -596,7 +596,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_enable2FA_app');
             }
         }
-        return $this->render('site/twoFAAuthentication/disable/disable2FA.html.twig', [
+        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -639,7 +639,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_2FA_firstSetup_local');
             }
         }
-        return $this->render('site/twoFAAuthentication/disable/disable2FA.html.twig', [
+        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
