@@ -362,6 +362,7 @@ class TwoFAController extends AbstractController
             return $this->render('site/twoFAAuthentication/otpCodes.html.twig', [
                 'data' => $data,
                 'codes' => $codes,
+                'user' => $user,
             ]);
         }
         $this->addFlash('error', 'User not found');
