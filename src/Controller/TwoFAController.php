@@ -225,7 +225,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_disable2FA_local');
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
-                return $this->redirectToRoute('app_disable2FA_APP');
+                return $this->redirectToRoute('app_disable2FA_app');
             }
             return $this->redirectToRoute('app_landing');
         }
@@ -481,7 +481,7 @@ class TwoFAController extends AbstractController
             $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
             $this->addFlash(
                 'success',
-                'The code was resent successfully.'
+                'The code was sent successfully.'
             );
             return $this->redirectToRoute('app_2FA_first_verification_local');
         }
@@ -557,7 +557,7 @@ class TwoFAController extends AbstractController
                 }
                 return $this->redirectToRoute('app_otpCodes');
             }
-            $this->addFlash('error', 'Invalid code please try again or resend the code');
+            $this->addFlash('error', 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code');
         }
         return $this->render('site/twoFAAuthentication/validate/validate2FALocal.html.twig', [
             'data' => $data,
