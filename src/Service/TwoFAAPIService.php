@@ -96,7 +96,7 @@ readonly class TwoFAAPIService
 
             return [
                 'success' => false,
-                'missing_status_value' => true,
+                'missing_2fa_setting' => true,
                 'message' => 'Unhandled Two-Factor Authentication status for the local endpoint.',
             ];
         }
@@ -133,7 +133,7 @@ readonly class TwoFAAPIService
         // Fallback for unexpected cases
         return [
             'success' => false,
-            'missing_status_value' => true,
+            'missing_2fa_setting' => true,
             'message' => 'Unhandled Two-Factor Authentication status in the enforcement logic.',
         ];
     }
