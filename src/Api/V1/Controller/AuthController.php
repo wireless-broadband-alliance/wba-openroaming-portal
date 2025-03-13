@@ -104,21 +104,11 @@ class AuthController extends AbstractController
         }
 
 
-        dd(
-            $this->twoFAAPIService->twoFAEnforcementChecker(
-                $user,
-                $request->attributes->get('_route')
-                /*
-                * Ask for the current user from the $user
-                * Ask for the current endpoint
-                * - If its:
-                * - Local
-                * - Google
-                * - Microsoft
-                * - SAML
-                * */
-            )
+        $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+            $user,
+            $request->attributes->get('_route')
         );
+        dd($twoFAEnforcementResult);
         // TODO actions depending on the result of the success and the type of the user
 
 
@@ -241,23 +231,6 @@ class AuthController extends AbstractController
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
-
-            dd(
-                $this->twoFAAPIService->twoFAEnforcementChecker(
-                    $user,
-                    $request->attributes->get('_route')
-                    /*
-                    * Ask for the current user from the $user
-                    * Ask for the current endpoint
-                    * - If its:
-                    * - Local
-                    * - Google
-                    * - Microsoft
-                    * - SAML
-                    * */
-                )
-            );
-            // TODO actions depending on the result of the success and the type of the user
 
             // Generate JWT token for the user
             $token = $this->tokenGenerator->generateToken($user);
