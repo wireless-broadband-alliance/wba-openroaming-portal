@@ -135,8 +135,8 @@ class AuthController extends AbstractController
                         $twoFAEnforcementResult['message']
                     )->toResponse();
                 }
-            }
-            if ($this->twoFAService->validate2FACode($user, $data['twoFACode']) === true) {
+            } else {
+                if ($this->twoFAService->validate2FACode($user, $data['twoFACode']) === true) {
                     /*
                      * Render the correct logic and keep the flow of the endpoint
                      */
