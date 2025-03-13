@@ -30,7 +30,6 @@
             <div class="mt-5 rounded-md">
                 <div id="codesBox"
                      data-clipboard-target="code"
-                     data-print-target="codesBox"
                      class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
                     <div class="flex justify-start space-x-4 mb-4">
                         <button title="Copy"
@@ -46,7 +45,9 @@
                             <twig:ux:icon class="w-4" name="wba:printer" />
                         </button>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
+                    <div id="codesBox"
+                         data-print-target="codesBox"
+                         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
                         {% for code in codes %}
                             <div class="p-2 border rounded-lg text-center">{{ code }}</div>
                         {% endfor %}
