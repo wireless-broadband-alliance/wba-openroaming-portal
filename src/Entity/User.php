@@ -340,21 +340,21 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 ],
                                 'examples' => [
                                     '2fa_not_configured' => [
-                                        'summary' => '2FA not configured',
+                                        'summary' => '2FA Not Configured',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
                                         ],
                                     ],
                                     '2fa_enforced_failed' => [
-                                        'summary' => '2FA enforced failed',
+                                        'summary' => '2FA Enforced Failed',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
                                         ],
                                     ],
                                     '2fa_configuration_failed' => [
-                                        'summary' => '2FA configuration failed',
+                                        'summary' => '2FA Configuration Failed',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
@@ -587,6 +587,29 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'error' => 'Authentication Failed',
                                             ],
                                         ],
+                                        'examples' => [
+                                            '2fa_not_configured' => [
+                                                'summary' => '2FA Not Configured',
+                                                'value' => [
+                                                    'success' => false,
+                                                    'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                                ],
+                                            ],
+                                            '2fa_enforced_failed' => [
+                                                'summary' => '2FA Enforced Failed',
+                                                'value' => [
+                                                    'success' => false,
+                                                    'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                                ],
+                                            ],
+                                            '2fa_configuration_failed' => [
+                                                'summary' => '2FA Configuration Failed',
+                                                'value' => [
+                                                    'success' => false,
+                                                    'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                                ],
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
@@ -817,6 +840,47 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA Not Configured',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                        ],
+                                    ],
+                                    '2fa_enforced_failed' => [
+                                        'summary' => '2FA Enforced Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                        ],
+                                    ],
+                                    '2fa_configuration_failed' => [
+                                        'summary' => '2FA Configuration Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     403 => [
                         'description' => 'Account unverified/banned',
                         'content' => [
@@ -1011,6 +1075,47 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'This code is not associated with a microsoft account!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA Not Configured',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                        ],
+                                    ],
+                                    '2fa_enforced_failed' => [
+                                        'summary' => '2FA Enforced Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                        ],
+                                    ],
+                                    '2fa_configuration_failed' => [
+                                        'summary' => '2FA Configuration Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                         ],
                                     ],
                                 ],
