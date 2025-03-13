@@ -103,14 +103,6 @@ readonly class TwoFAAPIService
 
         // Handle external providers like Google, Microsoft, SAML
         if ($twoFAValue === TwoFAType::ENFORCED_FOR_LOCAL->value) {
-            if ($user2FACurrentState['isActive'] === true) {
-                return [
-                    'success' => false,
-                    'message' => 'Two-Factor Authentication is active and configured for LOCAL, but accessed '
-                        . 'from an external endpoint as: ' . $user2FACurrentState['type'] . '.',
-                ];
-            }
-
             // If 2FA is not active, allow flow to continue
             return [
                 'success' => true,
@@ -132,7 +124,9 @@ readonly class TwoFAAPIService
 
             return [
                 'success' => false,
-                'message' => 'Two-Factor Authentication is ENFORCED_FOR_ALL but is not active for the user.',
+                'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit '
+                    . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
+                '2FAType' => $twoFAValue,
             ];
         }
 
@@ -187,7 +181,7 @@ readonly class TwoFAAPIService
 
         // User does not have any 2FA configured
         return [
-            'message' => 'User does not have Two-Factor Authentication  configured.',
+            'message' => 'User does not have Two-Factor Authentication configured.',
             'isActive' => false,
         ];
     }
