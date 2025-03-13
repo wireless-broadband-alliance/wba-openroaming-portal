@@ -50,6 +50,7 @@ readonly class TwoFAAPIService
             // If 2FA is not active, allow flow to continue
             return [
                 'success' => true,
+                '2FAType' => $twoFAValue
             ];
         }
 
@@ -63,13 +64,14 @@ readonly class TwoFAAPIService
                             'Two-Factor Authentication is active and ENFORCED_FOR_LOCAL as: %s.',
                             $user2FACurrentState['type']
                         ),
+                        '2FAType' => $twoFAValue
                     ];
                 }
 
                 // If user does not have 2FA active, return an enforcement error
                 return [
                     'success' => false,
-                    'message' => 'Two-Factor Authentication is ENFORCED FOR PORTAL account only.',
+                    'message' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
                 ];
             }
 
@@ -81,6 +83,7 @@ readonly class TwoFAAPIService
                             'Two-Factor Authentication is active and ENFORCED_FOR_ALL as: %s.',
                             $user2FACurrentState['type']
                         ),
+                        '2FAType' => $twoFAValue
                     ];
                 }
 
@@ -93,6 +96,7 @@ readonly class TwoFAAPIService
 
             return [
                 'success' => false,
+                'missing_status_value' => true,
                 'message' => 'Unhandled Two-Factor Authentication status for the local endpoint.',
             ];
         }
@@ -107,10 +111,10 @@ readonly class TwoFAAPIService
                 ];
             }
 
+            // If 2FA is not active, allow flow to continue
             return [
-                'success' => false,
-                'message' => 'Two-Factor Authentication is ENFORCED_FOR_LOCAL but accessed 
-                through an external endpoint.',
+                'success' => true,
+                '2FAType' => $twoFAValue
             ];
         }
 
@@ -122,6 +126,7 @@ readonly class TwoFAAPIService
                         'Two-Factor Authentication is active and configured as: %s.',
                         $user2FACurrentState['type']
                     ),
+                    '2FAType' => $twoFAValue
                 ];
             }
 
@@ -134,6 +139,7 @@ readonly class TwoFAAPIService
         // Fallback for unexpected cases
         return [
             'success' => false,
+            'missing_status_value' => true,
             'message' => 'Unhandled Two-Factor Authentication status in the enforcement logic.',
         ];
     }

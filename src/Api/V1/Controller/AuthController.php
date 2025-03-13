@@ -119,7 +119,7 @@ class AuthController extends AbstractController
                 * */
             )
         );
-        // TODO if the 2fa is active and returns true get the $user->
+        // TODO actions depending on the result of the success and the type of the user
 
 
         // Generate JWT Token
@@ -241,6 +241,23 @@ class AuthController extends AbstractController
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
             }
+
+            dd(
+                $this->twoFAAPIService->twoFAEnforcementChecker(
+                    $user,
+                    $request->attributes->get('_route')
+                    /*
+                    * Ask for the current user from the $user
+                    * Ask for the current endpoint
+                    * - If its:
+                    * - Local
+                    * - Google
+                    * - Microsoft
+                    * - SAML
+                    * */
+                )
+            );
+            // TODO actions depending on the result of the success and the type of the user
 
             // Generate JWT token for the user
             $token = $this->tokenGenerator->generateToken($user);
