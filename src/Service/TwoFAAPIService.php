@@ -88,8 +88,8 @@ readonly class TwoFAAPIService
                 // If user does not have 2FA active, return an enforcement error
                 return [
                     'success' => false,
-                    'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit '
-                        . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
+                    'message' => 'Two-Factor Authentication it\'s required for authentication on the portal.' .
+                        'Please visit' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
                     '2FAType' => $twoFAValue,
                 ];
             }
