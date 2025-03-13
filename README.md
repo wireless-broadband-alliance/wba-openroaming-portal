@@ -279,6 +279,16 @@ https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
+### Microsoft Authenticator Credentials
+
+These credentials can be found on the Microsoft Identity Platform
+by creating a new client_id & secret on the **Identity > Applications > App registrations.**.
+Follow this link for more instructions for how to get does items:
+https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-web-api-aspnet-sign-in?tabs=aspnet-workforce
+
+- `MICROSOFT_CLIENT_ID`
+- `MICROSOFT_CLIENT_SECRET`
+
 ### 🔒 SAML Specific Settings
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
