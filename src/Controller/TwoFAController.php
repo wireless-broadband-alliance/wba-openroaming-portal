@@ -69,11 +69,35 @@ class TwoFAController extends AbstractController
     #[Route('/enable2FAapp', name: 'app_enable2FA_app')]
     public function enable2FAapp(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
         $user = $this->getUser();
-        $secret = $this->totpService->generateSecret();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            // Get the introduced code
+            $code = $form->get('code')->getData();
+            if ($user instanceof User) {
+                // Get the secret code to communicate with app.
+                $secret = $user->gettwoFASecret();
+                // Check if the code used is the one generated in the application.
+                if ($this->totpService->verifyTOTP($secret, $code)) {
+                    $session->set('2fa_verified', true);
+                    $this->twoFAService->event2FA(
+                        $request->getClientIp(),
+                        $user,
+                        AnalyticalEventType::ENABLE_APP_2FA->value,
+                        $request->headers->get('User-Agent')
+                    );
+                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::APP->value);
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+                    return $this->redirectToRoute('app_otpCodes');
+                }
+                $this->addFlash('error', 'Invalid code');
+            }
+        }
+        $secret = $this->totpService->generateSecret();
         if ($user instanceof User) {
             if (
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
@@ -91,7 +115,6 @@ class TwoFAController extends AbstractController
             }
             return $this->redirectToRoute('app_landing');
         }
-
         $formattedSecret = implode(' ', str_split($secret, 10));
 
         $provisioningUri = $this->totpService->generateTOTP($secret);
@@ -107,6 +130,7 @@ class TwoFAController extends AbstractController
             'secret' => $formattedSecret,
             'data' => $data,
             'user' => $user,
+            'form' => $form,
         ]);
     }
 
@@ -359,9 +383,39 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        return $this->render('site/twoFAAuthentication/validate/validate2FA.html.twig', [
+        $secret = $this->totpService->generateSecret();
+        if ($user instanceof User) {
+            if (
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_2FA_generate_code_swap_method');
+            }
+            $user->setTwoFAsecret($secret);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        } else {
+            $this->addFlash('error', 'You must be logged in to access this page');
+            if ($session->has('session_admin')) {
+                return $this->redirectToRoute('admin_page');
+            }
+            return $this->redirectToRoute('app_landing');
+        }
+        $formattedSecret = implode(' ', str_split($secret, 10));
+
+        $provisioningUri = $this->totpService->generateTOTP($secret);
+        // Generate the qr code to activate 2fa through the app.
+        $qrCode = new QrCode($provisioningUri);
+        $writer = new PngWriter();
+        $qrCodeResult = $writer->write($qrCode);
+        $qrCodeImage = base64_encode($qrCodeResult->getString());
+
+        return $this->render('site/twoFAAuthentication/actions/enable2FAapp.html.twig', [
+            'qrCodeImage' => $qrCodeImage,
+            'provisioningUri' => $provisioningUri,
+            'secret' => $formattedSecret,
             'data' => $data,
-            'form' => $form,
+            'user' => $user,
         ]);
     }
 
