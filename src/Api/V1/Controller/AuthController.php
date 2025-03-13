@@ -126,7 +126,8 @@ class AuthController extends AbstractController
             if (!isset($data['twoFACode'])) {
                 return new BaseResponse(
                     400,
-                    null, 'Missing Two-Factor Authentication code'
+                    null,
+                    'Missing Two-Factor Authentication code'
                 )->toResponse(); # Bad Request Response
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
@@ -147,7 +148,8 @@ class AuthController extends AbstractController
                 // Validation for 2FACode -> EMAIL/SMS
                 !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
                 // Validation for OTPCodes -> 12 codes
-                !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])) {
+                !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
+            ) {
                 // Return error response only if both validations fail
                 return new BaseResponse(
                     401,
@@ -319,7 +321,8 @@ class AuthController extends AbstractController
                     // Validation for 2FACode -> EMAIL/SMS
                     !$this->twoFAService->validate2FACode($user, $twoFACode) &&
                     // Validation for OTPCodes -> 12 codes
-                    !$this->twoFAService->validateOTPCodes($user, $twoFACode)) {
+                    !$this->twoFAService->validateOTPCodes($user, $twoFACode)
+                ) {
                     // Return error response only if both validations fail
                     return new BaseResponse(
                         401,
