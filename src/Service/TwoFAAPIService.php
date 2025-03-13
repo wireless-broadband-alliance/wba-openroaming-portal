@@ -109,7 +109,8 @@ readonly class TwoFAAPIService
 
             return [
                 'success' => false,
-                'message' => 'Two-Factor Authentication is ENFORCED_FOR_LOCAL but accessed through an external endpoint.',
+                'message' => 'Two-Factor Authentication is ENFORCED_FOR_LOCAL but accessed 
+                through an external endpoint.',
             ];
         }
 
