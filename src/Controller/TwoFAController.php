@@ -372,6 +372,12 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
+        if (
+            $user &&
+            !$user->getOTPcodes()->isEmpty()
+        ) {
+            return $this->redirectToRoute('app_landing');
+        }
         if ($this->twoFAService->twoFAisActive($user)) {
             if ($session->has('session_admin')) {
                 return $this->redirectToRoute('admin_page');
