@@ -39,10 +39,8 @@ readonly class TwoFAAPIService
                 // If 2FA is active, return details and disallow flow
                 return [
                     'success' => false,
-                    'message' => sprintf(
-                        'Two-Factor Authentication is active and configured as: %s.',
-                        $user2FACurrentState['type']
-                    ),
+                    'message' => 'Two-Factor Authentication is active for this account.' .
+                        ' Please ensure you provide the correct authentication code.',
                     'details' => $user2FACurrentState,
                 ];
             }

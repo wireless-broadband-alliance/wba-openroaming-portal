@@ -9,16 +9,20 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\SamlResolverService;
+use App\Service\TOTPService;
 use App\Service\TwoFAAPIService;
+use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use JsonException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use OneLogin\Saml2\Auth;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,6 +48,8 @@ class AuthController extends AbstractController
         private readonly UserStatusChecker $userStatusChecker,
         private readonly EventActions $eventActions,
         private readonly TwoFAAPIService $twoFAAPIService,
+        private readonly TwoFAService $twoFAService,
+        private readonly TOTPService $TOTPService
     ) {
     }
 
@@ -58,7 +64,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
@@ -108,8 +114,43 @@ class AuthController extends AbstractController
             $user,
             $request->attributes->get('_route')
         );
+
+        // TODO actions depending on the $twoFAEnforcementResult of the success the content returned by the result
+        if ($twoFAEnforcementResult['success'] === false) {
+            if (!isset($data['twoFACode'])) {
+                return new BaseResponse(
+                    400,
+                    null, 'Missing Two-Factor Authentication code'
+                )->toResponse(); # Bad Request Response
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+                if (
+                    !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                    !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $data['twoFACode'])
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+            if ($this->twoFAService->validate2FACode($user, $data['twoFACode']) === true) {
+                    /*
+                     * Render the correct logic and keep the flow of the endpoint
+                     */
+                } else {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+        }
         dd($twoFAEnforcementResult);
-        // TODO actions depending on the result of the success and the type of the user
 
 
         // Generate JWT Token
@@ -268,7 +309,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
@@ -323,7 +364,7 @@ class AuthController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
