@@ -114,17 +114,15 @@ class AuthController extends AbstractController
             $request->attributes->get('_route')
         );
 
-        if ($twoFAEnforcementResult['success'] === false &&
-            $twoFAEnforcementResult['missing_2fa_setting'] === true) {
-            // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-            return new BaseResponse(
-                400,
-                null,
-                $twoFAEnforcementResult['message']
-            )->toResponse();
-        }
-
         if ($twoFAEnforcementResult['success'] === false) {
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
             if (!isset($data['twoFACode'])) {
                 return new BaseResponse(
                     400,
@@ -285,17 +283,16 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false &&
-                $twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                return new BaseResponse(
-                    400,
-                    null,
-                    $twoFAEnforcementResult['message']
-                )->toResponse();
-            }
-
             if ($twoFAEnforcementResult['success'] === false) {
+                if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                    // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                    return new BaseResponse(
+                        400,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+
                 $twoFACode = $request->request->get('twoFACode');
                 if (!$twoFACode) {
                     return new BaseResponse(
