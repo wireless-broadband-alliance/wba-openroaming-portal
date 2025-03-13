@@ -2,16 +2,12 @@
 <div class="my-[25px] divider"></div>
 <p class="text-[#212529] text-opacity-40 text-sm my-5">
     You are currently authenticated as
-    {% if userExternalAuths[user.id] is defined %}
-        {% for auth in userExternalAuths[user.id] %}
-            {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
-                {{ auth.providerId }}
-            {% else %}
-                {{ app.user.uuid }}
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        {{ app.user.uuid }}
-    {% endif %}
+    {% for auth in user.userExternalAuths %}
+        {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+            {{ auth.providerId }}
+        {% else %}
+            {{ app.user.uuid }}
+        {% endif %}
+    {% endfor %}
 </p>
 <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>

@@ -2,7 +2,13 @@
 <div class="space-y-2">
     <p class="text-[#212529] text-opacity-40 text-sm mt-5">
         You are currently authenticated as
-        {{ app.user.uuid }}
+        {% for auth in user.userExternalAuths %}
+            {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                {{ auth.providerId }}
+            {% else %}
+                {{ app.user.uuid }}
+            {% endif %}
+        {% endfor %}
     </p>
     {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
