@@ -135,23 +135,16 @@ class AuthController extends AbstractController
                         $twoFAEnforcementResult['message']
                     )->toResponse();
                 }
-            } else {
-                if ($this->twoFAService->validate2FACode($user, $data['twoFACode']) === true) {
-                    /*
-                     * Render the correct logic and keep the flow of the endpoint
-                     */
-                } else {
-                    // Return error response only if both validations fail
-                    return new BaseResponse(
-                        401,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
-                }
+            } elseif (!$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
+                !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])) {
+                // Return error response only if both validations fail
+                return new BaseResponse(
+                    401,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
             }
         }
-        dd($twoFAEnforcementResult);
-
 
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
