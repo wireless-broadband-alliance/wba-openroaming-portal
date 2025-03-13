@@ -343,7 +343,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => '2FA Not Configured',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
                                         ],
                                     ],
                                     '2fa_enforced_failed' => [
@@ -357,8 +359,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => '2FA Configuration Failed',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                                        ],
+                                            // phpcs:enable
+                                            ],
                                     ],
                                 ],
                             ],
@@ -592,22 +596,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'summary' => '2FA Not Configured',
                                                 'value' => [
                                                     'success' => false,
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
                                                     'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                                    // phpcs:enable
                                                 ],
                                             ],
                                             '2fa_enforced_failed' => [
                                                 'summary' => '2FA Enforced Failed',
                                                 'value' => [
                                                     'success' => false,
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
                                                     'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                                    // phpcs:enable
                                                 ],
                                             ],
                                             '2fa_configuration_failed' => [
                                                 'summary' => '2FA Configuration Failed',
                                                 'value' => [
                                                     'success' => false,
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
                                                     'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                                                ],
+                                                    // phpcs:enable
+                                                    ],
                                             ],
                                         ],
                                     ],
@@ -860,7 +870,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => '2FA Not Configured',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
                                         ],
                                     ],
                                     '2fa_enforced_failed' => [
@@ -874,8 +886,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => '2FA Configuration Failed',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                                        ],
+                                            // phpcs:enable
+                                            ],
                                     ],
                                 ],
                             ],
@@ -1101,7 +1115,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => '2FA Not Configured',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
                                         ],
                                     ],
                                     '2fa_enforced_failed' => [
@@ -1115,8 +1131,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => '2FA Configuration Failed',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                                        ],
+                                            // phpcs:enable
+                                            ],
                                     ],
                                 ],
                             ],
