@@ -42,6 +42,9 @@ improve user authentication and management processes, with integrated CAPTCHA va
 - **Google Authentication**
     - Authenticates a user using their Google account ID.
 
+- **Microsoft Authentication**
+    - Authenticates a user using their Microsoft Azure account ID.
+
 ## User Auth Register
 
 - **Local Registration**
