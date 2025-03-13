@@ -306,7 +306,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'missing_2fa_setting' => [
-                                        'summary' => 'Missing setting',
+                                        'summary' => 'Missing 2FA setting',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
