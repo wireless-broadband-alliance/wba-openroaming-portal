@@ -979,6 +979,8 @@ class SiteController extends AbstractController
             ->htmlTemplate('email/user_code.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
+                'uuid' => $currentUser->getEmail(),
+                'is2FATemplate' => false,
             ]);
     }
 

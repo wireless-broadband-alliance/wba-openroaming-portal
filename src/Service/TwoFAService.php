@@ -153,6 +153,8 @@ readonly class TwoFAService
     private function sendCode(User $user, string $code, string $ip, string $userAgent): void
     {
         $messageType = $user->getTwoFAtype();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             $message = "Your Two Factor Authentication Code is " . $code;
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
@@ -172,6 +174,8 @@ readonly class TwoFAService
                 ->context([
                     'uuid' => $user->getEmail(),
                     'verificationCode' => $code,
+                    'is2FATemplate' => true,
+                    'secondsLeft' => $secondsLeft,
                 ]);
 
             $this->mailer->send($email);
