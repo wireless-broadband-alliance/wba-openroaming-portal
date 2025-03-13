@@ -305,6 +305,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Missing required fields: uuid, password or turnstile_token',
                                         ],
                                     ],
+                                    'missing_2fa_setting' => [
+                                        'summary' => 'Missing setting',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
+                                        ],
+                                    ],
                                     'invalid_json' => [
                                         'summary' => 'Invalid json format',
                                         'value' => [
@@ -330,9 +337,28 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Invalid credentials provided'
                                         ],
                                     ],
-                                    'example' => [
-                                        'success' => false,
-                                        'error' => 'Invalid credentials',
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA not configured',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                        ],
+                                    ],
+                                    '2fa_enforced_failed' => [
+                                        'summary' => '2FA enforced failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                        ],
+                                    ],
+                                    '2fa_configuration_failed' => [
+                                        'summary' => '2FA configuration failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                        ],
                                     ],
                                 ],
                             ],
