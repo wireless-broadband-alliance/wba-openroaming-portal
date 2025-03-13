@@ -74,9 +74,6 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
-        if ($session->has('2fa_verified')) {
-            return $this->redirectToRoute('app_landing');
-        }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
@@ -146,7 +143,7 @@ class TwoFAController extends AbstractController
         if ($session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
         }
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
             $user = $this->getUser();
@@ -539,9 +536,6 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
-        if ($session->has('2fa_verified')) {
-            return $this->redirectToRoute('app_landing');
-        }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
