@@ -74,6 +74,9 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
+        if ($session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
+        }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
@@ -140,6 +143,9 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
+        if ($session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
+        }
         if ($form->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
@@ -192,6 +198,9 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
+        if ($session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
+        }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -348,73 +357,6 @@ class TwoFAController extends AbstractController
         return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
-            'user' => $user,
-        ]);
-    }
-
-    #[Route('/enable2FAApp/validate', name: 'app_enable2FA_app_confirm')]
-    public function enable2FAAppValidate(Request $request): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
-        $session = $request->getSession();
-        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
-            // Get the introduced code
-            $code = $form->get('code')->getData();
-            if ($user instanceof User) {
-                // Get the secret code to communicate with app.
-                $secret = $user->gettwoFASecret();
-                // Check if the code used is the one generated in the application.
-                if ($this->totpService->verifyTOTP($secret, $code)) {
-                    $session->set('2fa_verified', true);
-                    $this->twoFAService->event2FA(
-                        $request->getClientIp(),
-                        $user,
-                        AnalyticalEventType::ENABLE_APP_2FA->value,
-                        $request->headers->get('User-Agent')
-                    );
-                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::APP->value);
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
-                    return $this->redirectToRoute('app_otpCodes');
-                }
-                $this->addFlash('error', 'Invalid code');
-            }
-        }
-        $secret = $this->totpService->generateSecret();
-        if ($user instanceof User) {
-            if (
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return $this->redirectToRoute('app_2FA_generate_code_swap_method');
-            }
-            $user->setTwoFAsecret($secret);
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-        } else {
-            $this->addFlash('error', 'You must be logged in to access this page');
-            if ($session->has('session_admin')) {
-                return $this->redirectToRoute('admin_page');
-            }
-            return $this->redirectToRoute('app_landing');
-        }
-        $formattedSecret = implode(' ', str_split($secret, 10));
-
-        $provisioningUri = $this->totpService->generateTOTP($secret);
-        // Generate the qr code to activate 2fa through the app.
-        $qrCode = new QrCode($provisioningUri);
-        $writer = new PngWriter();
-        $qrCodeResult = $writer->write($qrCode);
-        $qrCodeImage = base64_encode($qrCodeResult->getString());
-
-        return $this->render('site/twoFAAuthentication/actions/enable2FAapp.html.twig', [
-            'qrCodeImage' => $qrCodeImage,
-            'provisioningUri' => $provisioningUri,
-            'secret' => $formattedSecret,
-            'data' => $data,
             'user' => $user,
         ]);
     }
@@ -597,6 +539,9 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
+        if ($session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
+        }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
