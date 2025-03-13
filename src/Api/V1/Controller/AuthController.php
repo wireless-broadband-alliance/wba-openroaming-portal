@@ -14,6 +14,7 @@ use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\SamlResolverService;
+use App\Service\TwoFAAPIService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,6 +43,7 @@ class AuthController extends AbstractController
         private readonly SamlResolverService $samlResolverService,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly EventActions $eventActions,
+        private readonly TwoFAAPIService $twoFAAPIService,
     ) {
     }
 
@@ -100,6 +102,25 @@ class AuthController extends AbstractController
         if ($statusCheckerResponse instanceof BaseResponse) {
             return $statusCheckerResponse->toResponse();
         }
+
+
+        dd(
+            $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+                /*
+                * Ask for the current user from the $user
+                * Ask for the current endpoint
+                * - If its:
+                * - Local
+                * - Google
+                * - Microsoft
+                * - SAML
+                * */
+            )
+        );
+        // TODO if the 2fa is active and returns true get the $user->
+
 
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
