@@ -434,8 +434,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => 'Code for 2FA validation',
+                                        'example' => '02YZR88R'
+                                    ],
                                 ],
-                                'required' => ['uuid', 'password', 'turnstile_token'],
+                                'required' => ['uuid', 'password', 'turnstile_token', 'twoFACode'],
                             ],
                         ],
                     ]),
