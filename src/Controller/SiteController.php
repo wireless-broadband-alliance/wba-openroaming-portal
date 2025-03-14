@@ -177,7 +177,7 @@ class SiteController extends AbstractController
                 $currentUser->getTwoFAType() ===
                 UserTwoFactorAuthenticationStatus::TOTP->value
             ) {
-                return $this->redirectToRoute('app_verify2FA_app');
+                return $this->redirectToRoute('app_verify2FA_TOTP');
             }
         }
         // check if the user have otpCodes

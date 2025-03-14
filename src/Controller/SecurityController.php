@@ -82,7 +82,7 @@ class SecurityController extends AbstractController
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::TOTP->value
                         ) {
-                            return $this->redirectToRoute('app_verify2FA_app');
+                            return $this->redirectToRoute('app_verify2FA_TOTP');
                         }
                         $session = $request->getSession();
                         $session->set('session_admin', true);
@@ -115,7 +115,7 @@ class SecurityController extends AbstractController
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::TOTP->value
                         ) {
-                            return $this->redirectToRoute('app_verify2FA_app');
+                            return $this->redirectToRoute('app_verify2FA_TOTP');
                         }
                         return $this->redirectToRoute('app_configure2FA');
                     }
@@ -155,7 +155,7 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::TOTP->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_app');
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
@@ -183,7 +183,7 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::TOTP->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_app');
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
@@ -211,7 +211,7 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::TOTP->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_app');
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
                     }
                     return $this->redirectToRoute('app_configure2FA');
                 }

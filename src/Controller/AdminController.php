@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
 use App\Repository\SettingRepository;
-use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
