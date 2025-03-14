@@ -1001,6 +1001,50 @@
                                     }
                                 }
                             },
+                            "401": {
+                                "description": "Invalid credentials.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Invalid credentials.",
+                                                    "description": "Invalid credentials provided"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "2fa_not_configured": {
+                                                "summary": "2FA Not Configured",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
+                                                }
+                                            },
+                                            "2fa_enforced_failed": {
+                                                "summary": "2FA Enforced Failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
+                                                }
+                                            },
+                                            "2fa_configuration_failed": {
+                                                "summary": "2FA Configuration Failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                             "403": {
                                 "description": "Account unverified/banned",
                                 "content": {
@@ -1070,7 +1114,7 @@
                             }
                         },
                         "summary": "Authenticate a user via Google",
-                        "description": "This endpoint authenticates a user using their Google account. \n                A valid Google OAuth authorization code is required. \n                If the user is successfully authenticated, user details and a JWT token will be returned.",
+                        "description": "This endpoint authenticates a user using their Google account. \n                A valid Google OAuth authorization code is required. \n                If the user is successfully authenticated, user details and a JWT token will be returned.\n                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked \n                based on the TWO_FACTOR_AUTH_STATUS setting.",
                         "parameters": [],
                         "requestBody": {
                             "description": "Google authorization code required for user authentication.\n                     The request should be sent as JSON with the authorization code included in the body.",
@@ -1083,10 +1127,16 @@
                                                 "type": "string",
                                                 "description": "The Google OAuth authorization code",
                                                 "example": "4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR"
+                                            },
+                                            "twoFACode": {
+                                                "type": "string",
+                                                "description": "6-7 digits code (2fa authentication or recovery codes)",
+                                                "example": "02YZR88R"
                                             }
                                         },
                                         "required": [
-                                            "code"
+                                            "code",
+                                            "twoFACode"
                                         ]
                                     }
                                 }
@@ -1212,6 +1262,13 @@
                                                     "error": "Missing required fields: uuid, password or turnstile_token"
                                                 }
                                             },
+                                            "missing_2fa_setting": {
+                                                "summary": "Missing 2FA setting",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Missing required configuration setting: TWO_FACTOR_AUTH_STATUS"
+                                                }
+                                            },
                                             "invalid_json": {
                                                 "summary": "Invalid json format",
                                                 "value": {
@@ -1239,10 +1296,29 @@
                                                     "example": "Invalid credentials.",
                                                     "description": "Invalid credentials provided"
                                                 }
+                                            }
+                                        },
+                                        "examples": {
+                                            "2fa_not_configured": {
+                                                "summary": "2FA Not Configured",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
+                                                }
                                             },
-                                            "example": {
-                                                "success": false,
-                                                "error": "Invalid credentials"
+                                            "2fa_enforced_failed": {
+                                                "summary": "2FA Enforced Failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
+                                                }
+                                            },
+                                            "2fa_configuration_failed": {
+                                                "summary": "2FA Configuration Failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
+                                                }
                                             }
                                         }
                                     }
@@ -1294,7 +1370,7 @@
                             }
                         },
                         "summary": "Authenticate a user locally",
-                        "description": "This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.",
+                        "description": "This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.\n                Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked \n                based on the TWO_FACTOR_AUTH_STATUS setting.",
                         "parameters": [],
                         "requestBody": {
                             "description": "User credentials and CAPTCHA validation token",
@@ -1317,12 +1393,18 @@
                                                 "type": "string",
                                                 "description": "CAPTCHA validation token",
                                                 "example": "valid_test_token"
+                                            },
+                                            "twoFACode": {
+                                                "type": "string",
+                                                "description": "Code for 2FA validation",
+                                                "example": "02YZR88R"
                                             }
                                         },
                                         "required": [
                                             "uuid",
                                             "password",
-                                            "turnstile_token"
+                                            "turnstile_token",
+                                            "twoFACode"
                                         ]
                                     }
                                 }
@@ -1449,6 +1531,50 @@
                                     }
                                 }
                             },
+                            "401": {
+                                "description": "Invalid credentials.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Invalid credentials.",
+                                                    "description": "Invalid credentials provided"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "2fa_not_configured": {
+                                                "summary": "2FA Not Configured",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
+                                                }
+                                            },
+                                            "2fa_enforced_failed": {
+                                                "summary": "2FA Enforced Failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
+                                                }
+                                            },
+                                            "2fa_configuration_failed": {
+                                                "summary": "2FA Configuration Failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                             "403": {
                                 "description": "Account unverified/banned",
                                 "content": {
@@ -1518,7 +1644,7 @@
                             }
                         },
                         "summary": "Authenticate a user via Microsoft",
-                        "description": "This endpoint authenticates a user using their Microsoft account. \n                A valid Microsoft OAuth authorization code is required. \n                If the user is successfully authenticated, user details and a JWT token will be returned.",
+                        "description": "This endpoint authenticates a user using their Microsoft account. \n                A valid Microsoft OAuth authorization code is required. \n                If the user is successfully authenticated, user details and a JWT token will be returned.\n                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked \n                based on the TWO_FACTOR_AUTH_STATUS setting.",
                         "parameters": [],
                         "requestBody": {
                             "description": "Microsoft authorization code required for user authentication.\n                     The request should be sent as JSON with the authorization code included in the body.",
@@ -1531,10 +1657,16 @@
                                                 "type": "string",
                                                 "description": "The Microsoft OAuth authorization code",
                                                 "example": "0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo"
+                                            },
+                                            "twoFACode": {
+                                                "type": "string",
+                                                "description": "6-7 digits code (2fa authentication or recovery codes)",
+                                                "example": "02YZR88R"
                                             }
                                         },
                                         "required": [
-                                            "code"
+                                            "code",
+                                            "twoFACode"
                                         ]
                                     }
                                 }
@@ -1688,6 +1820,29 @@
                                                         "success": false,
                                                         "error": "Authentication Failed"
                                                     }
+                                                },
+                                                "examples": {
+                                                    "2fa_not_configured": {
+                                                        "summary": "2FA Not Configured",
+                                                        "value": {
+                                                            "success": false,
+                                                            "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
+                                                        }
+                                                    },
+                                                    "2fa_enforced_failed": {
+                                                        "summary": "2FA Enforced Failed",
+                                                        "value": {
+                                                            "success": false,
+                                                            "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
+                                                        }
+                                                    },
+                                                    "2fa_configuration_failed": {
+                                                        "summary": "2FA Configuration Failed",
+                                                        "value": {
+                                                            "success": false,
+                                                            "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -1777,7 +1932,7 @@
                             }
                         },
                         "summary": "Authenticate a user via SAML",
-                        "description": "This endpoint authenticates a user using their SAML response. \n                If the user is not found in the database, a new user will be created based on the SAML assertion. \n                The response includes user details along with a JWT token if authentication is successful.",
+                        "description": "This endpoint authenticates a user using their SAML response. \n                If the user is not found in the database, a new user will be created based on the SAML assertion. \n                The response includes user details along with a JWT token if authentication is successful.\n                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked \n                based on the TWO_FACTOR_AUTH_STATUS setting.",
                         "parameters": [],
                         "requestBody": {
                             "description": "SAML response required for user authentication. \n                    The request should be sent as `multipart/form-data` with the SAML response included\n                     as a form field (not a file).",
@@ -1790,10 +1945,16 @@
                                                 "type": "string",
                                                 "description": "Base64-encoded SAML response included in the form data",
                                                 "example": "base64-encoded-saml-assertion"
+                                            },
+                                            "twoFACode": {
+                                                "type": "string",
+                                                "description": "6-7 digits code (2fa authentication or recovery codes)",
+                                                "example": "02YZR88R"
                                             }
                                         },
                                         "required": [
-                                            "SAMLResponse"
+                                            "SAMLResponse",
+                                            "twoFACode"
                                         ]
                                     }
                                 }
@@ -6238,7 +6399,7 @@ which can be used to store and return configuration parameters required for the 
 <script src="./index_files/swagger-ui-standalone-preset.js"></script>
 <script src="./index_files/init-swagger-ui.js"></script>
 <script src="./index_files/init-common-ui.js" defer=""></script>
-</div>
+
 <link rel="stylesheet" nonce="" href="./index_files/styles">
 <script nonce="">/*<![CDATA[*/
 if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
@@ -6750,7 +6911,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
         };
     })();
 }
-Sfjs.loadToolbar('f97c7d');/*]]>*/</script>
+Sfjs.loadToolbar('15b485');/*]]>*/</script>
 
 
 </body>
