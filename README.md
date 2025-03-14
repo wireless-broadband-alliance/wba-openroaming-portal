@@ -92,9 +92,11 @@ All the present items can be customizable:
 ### Settings Management
 
 - **Platform Status**
+- **Landing Page Configuration**
 - **Terms and Policies**
 - **Radius Configuration**
 - **Authentication Methods**
+- **Two Factor Authenticator**
 - **User Engagement**
 - **SMS Configuration**
 
@@ -134,6 +136,10 @@ Follow this link for more information on API documentation: [Api Guide](docs/API
 
 Follow this link for more information on installing this
 project: [Installation Guide](docs/INSTALATION.md).
+
+# 🔑 Admin Page Access Page
+
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ## 🛑 Upgrade Stop: Important Instructions for Future Updates
 
