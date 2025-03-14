@@ -140,13 +140,13 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
+        $user = $this->getUser();
         if ($session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
         }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
-            $user = $this->getUser();
             if ($user instanceof User) {
                 // Get the secret code to communicate with app.
                 $secret = $user->gettwoFASecret();
@@ -184,6 +184,7 @@ class TwoFAController extends AbstractController
         return $this->render('site/twoFAAuthentication/verify/verify2FA.html.twig', [
             'data' => $data,
             'form' => $form,
+            'user' => $user,
         ]);
     }
 
