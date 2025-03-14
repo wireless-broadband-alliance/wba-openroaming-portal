@@ -64,13 +64,13 @@ class AdminController extends AbstractController
         $users = $userRepository->searchWithFilter($filter, $searchTerm);
 
         // Perform pagination manually
-        $totalUsers = count($users); // Get the total number of users
+        $totalUsers = count($users);
 
-        $totalPages = ceil($totalUsers / $count); // Calculate the total number of pages
+        $totalPages = ceil($totalUsers / $count);
 
-        $offset = ($page - 1) * $count; // Calculate the offset for slicing the users
+        $offset = ($page - 1) * $count;
 
-        $users = array_slice($users, $offset, $count); // Fetch the users for the current page
+        $users = array_slice($users, $offset, $count);
 
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
