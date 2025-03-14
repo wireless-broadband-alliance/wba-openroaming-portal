@@ -130,7 +130,7 @@ class AuthController extends AbstractController
                     'Missing Two-Factor Authentication code'
                 )->toResponse(); # Bad Request Response
             }
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                 if (
                     // Validation for OTPCodes -> 12 codes
                     !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
@@ -303,7 +303,7 @@ class AuthController extends AbstractController
                         'Missing Two-Factor Authentication code'
                     )->toResponse();
                 }
-                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (
                         // Validation for OTPCodes -> 12 codes
                         !$this->twoFAService->validateOTPCodes($user, $twoFACode) &&
@@ -412,7 +412,7 @@ class AuthController extends AbstractController
                         'Missing Two-Factor Authentication code'
                     )->toResponse(); # Bad Request Response
                 }
-                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (
                         // Validation for OTPCodes -> 12 codes
                         !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
@@ -521,7 +521,7 @@ class AuthController extends AbstractController
                         'Missing Two-Factor Authentication code'
                     )->toResponse(); # Bad Request Response
                 }
-                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (
                         // Validation for OTPCodes -> 12 codes
                         !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&

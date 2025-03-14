@@ -175,7 +175,7 @@ class SiteController extends AbstractController
             }
             if (
                 $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::APP->value
+                UserTwoFactorAuthenticationStatus::TOTP->value
             ) {
                 return $this->redirectToRoute('app_verify2FA_app');
             }

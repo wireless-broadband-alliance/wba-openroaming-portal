@@ -80,7 +80,7 @@ class SecurityController extends AbstractController
                         }
                         if (
                             $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::APP->value
+                            UserTwoFactorAuthenticationStatus::TOTP->value
                         ) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
@@ -113,7 +113,7 @@ class SecurityController extends AbstractController
                         }
                         if (
                             $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::APP->value
+                            UserTwoFactorAuthenticationStatus::TOTP->value
                         ) {
                             return $this->redirectToRoute('app_verify2FA_app');
                         }
@@ -153,7 +153,7 @@ class SecurityController extends AbstractController
                     }
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::APP->value
+                        UserTwoFactorAuthenticationStatus::TOTP->value
                     ) {
                         return $this->redirectToRoute('app_verify2FA_app');
                     }
@@ -181,7 +181,7 @@ class SecurityController extends AbstractController
                     }
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::APP->value
+                        UserTwoFactorAuthenticationStatus::TOTP->value
                     ) {
                         return $this->redirectToRoute('app_verify2FA_app');
                     }
@@ -209,7 +209,7 @@ class SecurityController extends AbstractController
                     }
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::APP->value
+                        UserTwoFactorAuthenticationStatus::TOTP->value
                     ) {
                         return $this->redirectToRoute('app_verify2FA_app');
                     }

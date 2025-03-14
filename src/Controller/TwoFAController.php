@@ -66,8 +66,8 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/enable2FAapp', name: 'app_enable2FA_app')]
-    public function enable2FAapp(Request $request): Response
+    #[Route('/enable2FA/TOTP', name: 'app_enable2FA_TOTP')]
+    public function enable2FATOTP(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -86,10 +86,10 @@ class TwoFAController extends AbstractController
                     $this->twoFAService->event2FA(
                         $request->getClientIp(),
                         $user,
-                        AnalyticalEventType::ENABLE_APP_2FA->value,
+                        AnalyticalEventType::ENABLE_TOTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::APP->value);
+                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
                     return $this->redirectToRoute('app_otpCodes');
@@ -124,7 +124,7 @@ class TwoFAController extends AbstractController
         $qrCodeResult = $writer->write($qrCode);
         $qrCodeImage = base64_encode($qrCodeResult->getString());
 
-        return $this->render('site/twoFAAuthentication/actions/enable2FAapp.html.twig', [
+        return $this->render('site/twoFAAuthentication/actions/enable2faTOTP.html.twig', [
             'qrCodeImage' => $qrCodeImage,
             'provisioningUri' => $provisioningUri,
             'secret' => $formattedSecret,
@@ -134,7 +134,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/verify2FAApp', name: 'app_verify2FA_app')]
+    #[Route('/verify2FA/TOTP', name: 'app_verify2FA_TOTP')]
     public function verify2FA(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -170,7 +170,7 @@ class TwoFAController extends AbstractController
                     $this->twoFAService->event2FA(
                         $request->getClientIp(),
                         $user,
-                        AnalyticalEventType::VERIFY_APP_2FA->value,
+                        AnalyticalEventType::VERIFY_TOTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
                     if ($session->has('session_admin')) {
@@ -276,8 +276,8 @@ class TwoFAController extends AbstractController
                 );
                 return $this->redirectToRoute('app_disable2FA_local');
             }
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
-                return $this->redirectToRoute('app_disable2FA_app');
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                return $this->redirectToRoute('app_disable2FA_TOTP');
             }
             return $this->redirectToRoute('app_landing');
         }
@@ -320,7 +320,7 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/disable2FA/app', name: 'app_disable2FA_app')]
+    #[Route('/disable2FA/TOTP', name: 'app_disable2FA_TOTP')]
     public function disable2FAApp(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -499,8 +499,8 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
-            return $this->redirectToRoute('app_swap2FA_disable_app');
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+            return $this->redirectToRoute('app_swap2FA_disable_TOTP');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
@@ -615,7 +615,7 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
-                return $this->redirectToRoute('app_enable2FA_app');
+                return $this->redirectToRoute('app_enable2FA_TOTP');
             }
         }
         return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
@@ -634,8 +634,8 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_swap2FA_disable_Local');
     }
 
-    #[Route('/2FASwapMethod/disableApp', name: 'app_swap2FA_disable_app')]
-    public function swapMethod2FADisableApp(Request $request): Response
+    #[Route('/2FASwapMethod/disable/TOTP', name: 'app_swap2FA_disable_TOTP')]
+    public function swapMethod2FADisableTOTP(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);

@@ -143,9 +143,9 @@ readonly class TwoFAAPIService
         // Check if the user's 2FA is active
         if ($this->twoFAService->twoFAisActive($user)) {
             // Handle different user 2FA types
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::APP->value) {
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                 return [
-                    'type' => UserTwoFactorAuthenticationStatus::APP->value,
+                    'type' => UserTwoFactorAuthenticationStatus::TOTP->value,
                     'isActive' => true,
                     'secret' => $user->getTwoFASecret(),
                     'otpCodes' => $user->getOTPcodes()
