@@ -9,7 +9,6 @@ export default class extends Controller {
     }
 
     toggle(event) {
-        // Check the state of the checkbox (useLDAP - Admin Page SamlProvider add/edit)
         const isChecked = event.currentTarget.checked;
 
         if (isChecked) {

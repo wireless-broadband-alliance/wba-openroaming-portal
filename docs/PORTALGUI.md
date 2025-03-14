@@ -80,14 +80,18 @@ Say goodbye to manual login problems and enjoy a seamless, secure, and personali
 The OpenRoaming Provisioning Portal also has an easy and intuitive admin interface, allowing administrators to easily
 administer and customize the platform.
 The admin dashboard includes a number of features and tools that help simplify
-the Wi-Fi provisioning process and guarantee that it runs smoothly. Here's an overview of the admin dashboard and its
+the Wi-Fi provisioning process and guarantee that it runs smoothly. Here's an overview of the admin dashboard/login and its
 primary features:
 
 ### 1. Admin Login
 
-The admin dashboard is only accessible after a secure login, accessible via https://<portalurl>/login/admin
+![Admin_Login](../assets/wba_screenshots/admin_page_login.png)
+
+The admin dashboard is only accessible after a secure login, accessible via **https://<portal_url>/login/admin**.
+
 To access the dashboard, administrators must provide their
-credentials **(default is: admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and private
+credentials **(default is: admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and
+private
 entry point to control the platform.
 
 ### 2. Admin Page

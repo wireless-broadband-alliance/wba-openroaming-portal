@@ -7,11 +7,11 @@ use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use Exception;
 
-class ExpirationProfileService
+readonly class ExpirationProfileService
 {
     public function __construct(
-        private readonly SettingRepository $settingRepository,
-        private readonly CertificateService $certificateService
+        private SettingRepository $settingRepository,
+        private CertificateService $certificateService,
     ) {
     }
 

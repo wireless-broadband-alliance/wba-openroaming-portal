@@ -12,6 +12,7 @@ use App\Enum\TextEditorName;
 use App\Enum\TwoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
+use App\Form\LDAPType;
 use App\Form\RadiusType;
 use App\Form\SMSType;
 use App\Form\StatusType;
@@ -153,6 +154,35 @@ class SettingsController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
+            }
+
+
+            if ($type === 'settingLDAP') {
+                $command = 'php bin/console reset:ldapSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
             if ($type === 'settingStatus') {
@@ -315,14 +345,14 @@ class SettingsController extends AbstractController
 
         $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
         $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
-        if (!$tosTextEditor) {
+        if ($tosTextEditor === null) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
             $this->entityManager->persist($tosTextEditor);
         }
         $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
-        if (!$privacyPolicyTextEditor) {
+        if ($privacyPolicyTextEditor === null) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
@@ -371,32 +401,32 @@ class SettingsController extends AbstractController
 
 
             $tosSetting = $settingsRepository->findOneBy(['name' => 'TOS']);
-            if ($tosSetting) {
+            if ($tosSetting !== null) {
                 $tosSetting->setValue($tos);
                 $this->entityManager->persist($tosSetting);
             }
 
             $privacyPolicySetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
-            if ($privacyPolicySetting) {
+            if ($privacyPolicySetting !== null) {
                 $privacyPolicySetting->setValue($privacyPolicy);
                 $this->entityManager->persist($privacyPolicySetting);
             }
 
             $tosLinkSetting = $settingsRepository->findOneBy(['name' => 'TOS_LINK']);
-            if ($tosLinkSetting) {
+            if ($tosLinkSetting !== null) {
                 $tosLinkSetting->setValue($tosLink);
                 $this->entityManager->persist($tosLinkSetting);
             }
 
             $privacyPolicyLinkSetting = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK']);
-            if ($privacyPolicyLinkSetting) {
+            if ($privacyPolicyLinkSetting !== null) {
                 $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
                 $this->entityManager->persist($privacyPolicyLinkSetting);
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
                 $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
-                if ($tosEditorSetting) {
+                if ($tosEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
                 }
@@ -407,7 +437,7 @@ class SettingsController extends AbstractController
                 $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
                     'name' => TextEditorName::PRIVACY_POLICY->value
                 ]);
-                if ($privacyPolicyEditorSetting) {
+                if ($privacyPolicyEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
                 }
@@ -433,11 +463,86 @@ class SettingsController extends AbstractController
 
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
+        ]);
+    }
+
+
+    #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsLDAP(
+        Request $request,
+        EntityManagerInterface $em,
+        GetSettings $getSettings
+    ): Response {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        $settingsRepository = $em->getRepository(Setting::class);
+        $settings = $settingsRepository->findAll();
+
+        $form = $this->createForm(LDAPType::class, null, [
+            'settings' => $settings,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            $settingsToUpdate = [
+                'SYNC_LDAP_ENABLED',
+                'SYNC_LDAP_SERVER',
+                'SYNC_LDAP_BIND_USER_DN',
+                'SYNC_LDAP_BIND_USER_PASSWORD',
+                'SYNC_LDAP_SEARCH_BASE_DN',
+                'SYNC_LDAP_SEARCH_FILTER',
+            ];
+
+            foreach ($settingsToUpdate as $settingName) {
+                $value = $submittedData[$settingName] ?? null;
+
+                // Check if any submitted data is empty
+                if ($value === null) {
+                    $value = "";
+                }
+
+                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                if ($setting !== null) {
+                    $setting->setValue($value);
+                    $em->persist($setting);
+                }
+            }
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+
+            $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
+            return $this->redirectToRoute('admin_dashboard_settings_LDAP');
+        }
+
+        return $this->render('admin/settings_actions.html.twig', [
+            'data' => $data,
+            'settings' => $settings,
+            'getSettings' => $getSettings,
+            'form' => $form->createView()
         ]);
     }
 
@@ -503,7 +608,7 @@ class SettingsController extends AbstractController
                     }
 
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                    if ($setting) {
+                    if ($setting !== null) {
                         $setting->setValue($value);
                         $this->entityManager->persist($setting);
                     }
@@ -527,6 +632,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -567,36 +673,36 @@ class SettingsController extends AbstractController
             $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED->value;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
-            if ($platformModeSetting) {
+            if ($platformModeSetting !== null) {
                 $platformModeSetting->setValue($platformMode);
                 $this->entityManager->persist($platformModeSetting);
             }
 
             $emailVerificationSetting = $settingsRepository->findOneBy(['name' => 'USER_VERIFICATION']);
-            if ($emailVerificationSetting) {
+            if ($emailVerificationSetting !== null) {
                 $emailVerificationSetting->setValue($emailVerification);
                 $this->entityManager->persist($emailVerificationSetting);
             }
 
             $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
-            if ($turnstileCheckerSetting) {
+            if ($turnstileCheckerSetting !== null) {
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $this->entityManager->persist($turnstileCheckerSetting);
             }
 
             $apiStatusSetting = $settingsRepository->findOneBy(['name' => 'API_STATUS']);
-            if ($apiStatusSetting) {
+            if ($apiStatusSetting !== null) {
                 $apiStatusSetting->setValue($apiStatus);
                 $this->entityManager->persist($apiStatusSetting);
             }
 
             $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => 'USER_DELETE_TIME']);
-            if ($userDeleteTimeSetting) {
+            if ($userDeleteTimeSetting !== null) {
                 $userDeleteTimeSetting->setValue($userDeleteTime);
                 $this->entityManager->persist($userDeleteTimeSetting);
             }
             $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
-            if ($twoFactorAuthStatusSetting) {
+            if ($twoFactorAuthStatusSetting !== null) {
                 $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
                 $this->entityManager->persist($twoFactorAuthStatusSetting);
             }
@@ -621,6 +727,7 @@ class SettingsController extends AbstractController
 
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -657,12 +764,14 @@ class SettingsController extends AbstractController
                 'TWO_FACTOR_AUTH_APP_LABEL',
                 'TWO_FACTOR_AUTH_APP_ISSUER',
                 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME',
+                'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
+                'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS'
             ];
 
             foreach ($settingsToHandle as $settingName) {
                 $settingValue = $submittedData[$settingName] ?? '';
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     // Update existing setting
                     $setting->setValue($settingValue);
                 }
@@ -688,6 +797,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -714,7 +824,7 @@ class SettingsController extends AbstractController
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime((string)$certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
-        $timeLeft = round(($certificateLimitDate - $realTime) / (8640)) - 1;
+        $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $profileLimitDate = ((int)$timeLeft);
         if ($profileLimitDate < 0) {
             $profileLimitDate = 0;
@@ -740,9 +850,6 @@ class SettingsController extends AbstractController
 
             $settingsToUpdate = [
                 'AUTH_METHOD_SAML_ENABLED',
-                'AUTH_METHOD_SAML_LABEL',
-                'AUTH_METHOD_SAML_DESCRIPTION',
-                'PROFILE_LIMIT_DATE_SAML',
 
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
@@ -789,7 +896,7 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
@@ -815,6 +922,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -863,7 +971,7 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
@@ -886,6 +994,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -934,7 +1043,7 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting) {
+                if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
@@ -957,6 +1066,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/settings_actions.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -977,6 +1087,9 @@ class SettingsController extends AbstractController
     public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->request->get('startDate');
@@ -1021,6 +1134,7 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('admin/statistics.html.twig', [
+            'user' => $currentUser,
             'data' => $data,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),

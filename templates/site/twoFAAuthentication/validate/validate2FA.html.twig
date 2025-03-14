@@ -1,0 +1,50 @@
+{% extends 'site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Form Column #}
+    {# Toasts #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {% for message in app.session.flashbag.get('success') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
+        {% endfor %}
+
+        {# Flash error message #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Two-Factor Authentication - Method Validation</p>
+        <p class="text-lg">To validate the use of two-factor authentication please enter the code sent to you.</p>
+    </div>
+
+    {{ form_start(form) }}
+    <div class="relative mt-10 mb-6">
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your Code',
+            }}) }}
+    </div>
+
+    {# Action Buttons #}
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
+        <button class="btn-primary"
+                type="submit">Submit
+        </button>
+        <a href="{{ path('app_2FA_local_resend_code') }}" class="btn-secondary">Resend code</a>
+    </div>
+    {{ form_end(form) }}
+
+    {# Divider #}
+    {{ include('/site/shared/returnActions/_return_action.html.twig') }}
+{% endblock %}

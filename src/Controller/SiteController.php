@@ -15,8 +15,8 @@ use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
-use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Enum\UserRadiusProfileRevokeReason;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\AccountUserUpdateLandingType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -109,32 +109,6 @@ class SiteController extends AbstractController
         if ($sessionAdmin) {
             return $this->redirectToRoute('saml_logout');
         }
-        if (
-            $currentUser &&
-            (
-                $currentUser->getTwoFAType() !==
-                UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified'))
-        ) {
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::SMS->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_local');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_local');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::APP->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_app');
-            }
-        }
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
         if (
@@ -157,7 +131,7 @@ class SiteController extends AbstractController
                         $currentUser->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value))
             ) {
-                return $this->redirectToRoute('app_enable2FA');
+                return $this->redirectToRoute('app_configure2FA');
             }
             if (
                 $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
@@ -165,7 +139,7 @@ class SiteController extends AbstractController
                     $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {
-                return $this->redirectToRoute('app_enable2FA');
+                return $this->redirectToRoute('app_configure2FA');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
             if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
@@ -178,6 +152,41 @@ class SiteController extends AbstractController
             if ($currentUser->getDeletedAt()) {
                 return $this->redirectToRoute('saml_logout');
             }
+        }
+
+        if (
+            $currentUser &&
+            (
+                $currentUser->getTwoFAType() !==
+                UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$session->has('2fa_verified'))
+        ) {
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::SMS->value
+            ) {
+                return $this->redirectToRoute('app_2FA_generate_code');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return $this->redirectToRoute('app_2FA_generate_code');
+            }
+            if (
+                $currentUser->getTwoFAType() ===
+                UserTwoFactorAuthenticationStatus::TOTP->value
+            ) {
+                return $this->redirectToRoute('app_verify2FA_TOTP');
+            }
+        }
+        // check if the user have otpCodes
+        if (
+            $currentUser &&
+            $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+            $currentUser->getOTPcodes()->isEmpty()
+        ) {
+            return $this->redirectToRoute('app_otpCodes');
         }
 
         // Check if the current user has a provider
@@ -356,7 +365,7 @@ class SiteController extends AbstractController
             $tosFormat &&
             $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]) !== null) {
                 $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
             } else {
                 $content = '';
@@ -389,7 +398,7 @@ class SiteController extends AbstractController
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value])) {
+            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]) !== null) {
                 $content = $textEditorRepository->findOneBy(
                     ['name' => TextEditorName::PRIVACY_POLICY->value]
                 )->getContent();
@@ -970,6 +979,8 @@ class SiteController extends AbstractController
             ->htmlTemplate('email/user_code.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
+                'uuid' => $currentUser->getEmail(),
+                'is2FATemplate' => false,
             ]);
     }
 

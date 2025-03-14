@@ -355,7 +355,6 @@ class RegistrationController extends AbstractController
 
     /**
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws ServerExceptionInterface
@@ -379,7 +378,7 @@ class RegistrationController extends AbstractController
         }
 
         if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return (new BaseResponse(400, null, 'CAPTCHA validation failed!'))->toResponse();
+            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse();
         }
 
         // Check for missing fields and add them to the array errors
@@ -426,9 +425,8 @@ class RegistrationController extends AbstractController
         $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
             return new BaseResponse(200, [
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'message' => 'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
-                // phpcs:enable
+                'message' => 'SMS User Account Registered Successfully.' .
+                    ' A verification code has been sent to your phone.'
             ])->toResponse(); // False success for RGPD policies
         }
 
@@ -495,7 +493,6 @@ class RegistrationController extends AbstractController
 
     /**
      * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
      * @throws RandomException
      * @throws RedirectionExceptionInterface

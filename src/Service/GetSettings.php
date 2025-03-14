@@ -11,110 +11,39 @@ class GetSettings
     {
         $data = [];
 
-        $data['RADIUS_REALM_NAME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue(),
-            'description' => $this->getSettingDescription('RADIUS_REALM_NAME'),
+        $specialSettings = [
+            'TURNSTILE_CHECKER',
+            'USER_VERIFICATION',
+            'PLATFORM_MODE',
+            'AUTH_METHOD_SAML_ENABLED',
+            'AUTH_METHOD_SAML_LABEL',
+            'AUTH_METHOD_SAML_DESCRIPTION',
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
+            'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+            'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED',
+            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+            'AUTH_METHOD_REGISTER_ENABLED',
+            'AUTH_METHOD_REGISTER_LABEL',
+            'AUTH_METHOD_REGISTER_DESCRIPTION',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+            'AUTH_METHOD_SMS_REGISTER_ENABLED',
+            'CAPPORT_ENABLED',
         ];
 
-        $data['DISPLAY_NAME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
-            'description' => $this->getSettingDescription('DISPLAY_NAME'),
-        ];
+        foreach ($settingRepository->findAll() as $setting) {
+            if (in_array($setting, $specialSettings, true)) {
+                continue;
+            }
 
-        $data['PAYLOAD_IDENTIFIER'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PAYLOAD_IDENTIFIER'])->getValue(),
-            'description' => $this->getSettingDescription('PAYLOAD_IDENTIFIER'),
-        ];
-
-        $data['OPERATOR_NAME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'OPERATOR_NAME'])->getValue(),
-            'description' => $this->getSettingDescription('OPERATOR_NAME'),
-        ];
-
-        $data['DOMAIN_NAME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
-            'description' => $this->getSettingDescription('DOMAIN_NAME'),
-        ];
-
-        $data['RADIUS_TLS_NAME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
-            'description' => $this->getSettingDescription('RADIUS_TLS_NAME'),
-        ];
-
-        $data['NAI_REALM'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'NAI_REALM'])->getValue(),
-            'description' => $this->getSettingDescription('NAI_REALM'),
-        ];
-
-        $data['RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'])->getValue(),
-            'description' => $this->getSettingDescription('RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'),
-        ];
-
-        $data['VALID_DOMAINS_GOOGLE_LOGIN'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN'])->getValue(),
-            'description' => $this->getSettingDescription('VALID_DOMAINS_GOOGLE_LOGIN'),
-        ];
-
-        $data['VALID_DOMAINS_MICROSOFT_LOGIN'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN'])->getValue(),
-            'description' => $this->getSettingDescription('VALID_DOMAINS_MICROSOFT_LOGIN'),
-        ];
-
-        $data['title'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
-            'description' => $this->getSettingDescription('PAGE_TITLE'),
-        ];
-
-        $data['CUSTOMER_LOGO_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO_ENABLED'])->getValue(),
-            'description' => $this->getSettingDescription('CUSTOMER_LOGO_ENABLED'),
-        ];
-
-        $data['customerLogoName'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue(),
-            'description' => $this->getSettingDescription('CUSTOMER_LOGO'),
-        ];
-
-        $data['openroamingLogoName'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'OPENROAMING_LOGO'])->getValue(),
-            'description' => $this->getSettingDescription('OPENROAMING_LOGO'),
-        ];
-
-        $data['wallpaperImageName'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'WALLPAPER_IMAGE'])->getValue(),
-            'description' => $this->getSettingDescription('WALLPAPER_IMAGE'),
-        ];
-
-        $data['welcomeText'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'WELCOME_TEXT'])->getValue(),
-            'description' => $this->getSettingDescription('WELCOME_TEXT'),
-        ];
-
-        $data['welcomeDescription'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'WELCOME_DESCRIPTION'])->getValue(),
-            'description' => $this->getSettingDescription('WELCOME_DESCRIPTION'),
-        ];
-
-        $data['contactEmail'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue(),
-            'description' => $this->getSettingDescription('CONTACT_EMAIL'),
-        ];
-
-        $data['ADDITIONAL_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'ADDITIONAL_LABEL'])->getValue(),
-            'description' => $this->getSettingDescription('ADDITIONAL_LABEL'),
-        ];
-
-        $data['PLATFORM_MODE'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
-            'description' => $this->getSettingDescription('PLATFORM_MODE'),
-        ];
-
-        $data['API_STATUS'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'API_STATUS'])->getValue(),
-            'description' => $this->getSettingDescription('API_STATUS'),
-        ];
+            $data[$this->mapSetting($setting->getName())] = [
+                'value' => $setting->getValue(),
+                'description' => $this->getSettingDescription($setting->getName()),
+            ];
+        }
 
         $turnstile_checker = $settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
         if ($turnstile_checker !== null) {
@@ -132,24 +61,17 @@ class GetSettings
             ];
         }
 
-        $data['TWO_FACTOR_AUTH_STATUS'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS'])->getValue(),
-            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_STATUS'),
+        $data['code'] = [
+            'value' =>
+                ($user = $userRepository->findOneBy(['verificationCode' => null]))
+                    ? $user->getVerificationCode()
+                    : null,
+            'description' => $this->getSettingDescription('code'),
         ];
 
-        $data['TWO_FACTOR_AUTH_APP_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_LABEL'])->getValue(),
-            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_APP_LABEL'),
-        ];
-
-        $data['TWO_FACTOR_AUTH_APP_ISSUER'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_ISSUER'])->getValue(),
-            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_APP_ISSUER'),
-        ];
-
-        $data['TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'])->getValue(),
-            'description' => $this->getSettingDescription('TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME'),
+        $data['PLATFORM_MODE'] = [
+            'value' => $settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
+            'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
         $data['SAML_ENABLED'] = [
@@ -242,110 +164,9 @@ class GetSettings
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
-        $data['AUTH_METHOD_SMS_REGISTER_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_LABEL'),
-        ];
-
-        $data['AUTH_METHOD_SMS_REGISTER_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION'])->getValue(),
-            'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_DESCRIPTION'),
-        ];
-
-        $data['TOS_LINK'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue(),
-            'description' => $this->getSettingDescription('TOS_LINK'),
-        ];
-
-        $data['PRIVACY_POLICY_LINK'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue(),
-            'description' => $this->getSettingDescription('PRIVACY_POLICY_LINK'),
-        ];
-
-        $data['code'] = [
-            'value' => ($user = $userRepository->findOneBy(['verificationCode' => null])) ? $user->getVerificationCode(
-            ) : null,
-            'description' => $this->getSettingDescription('code'),
-        ];
-
-        $data['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILES_ENCRYPTION_TYPE_IOS_ONLY'),
-        ];
-
         $data['CAPPORT_ENABLED'] = [
             'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('CAPPORT_ENABLED'),
-        ];
-
-        $data['CAPPORT_PORTAL_URL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_PORTAL_URL'])->getValue(),
-            'description' => $this->getSettingDescription('CAPPORT_PORTAL_URL'),
-        ];
-
-        $data['CAPPORT_VENUE_INFO_URL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_VENUE_INFO_URL'])->getValue(),
-            'description' => $this->getSettingDescription('CAPPORT_VENUE_INFO_URL'),
-        ];
-
-        $data['SMS_USERNAME'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'SMS_USERNAME'])->getValue(),
-            'description' => $this->getSettingDescription('SMS_USERNAME'),
-        ];
-
-        $data['SMS_USER_ID'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'SMS_USER_ID'])->getValue(),
-            'description' => $this->getSettingDescription('SMS_USER_ID'),
-        ];
-
-        $data['SMS_HANDLE'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'SMS_HANDLE'])->getValue(),
-            'description' => $this->getSettingDescription('SMS_HANDLE'),
-        ];
-
-        $data['SMS_FROM'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'SMS_FROM'])->getValue(),
-            'description' => $this->getSettingDescription('SMS_FROM'),
-        ];
-
-        $data['SMS_TIMER_RESEND'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'SMS_TIMER_RESEND'])->getValue(),
-            'description' => $this->getSettingDescription('SMS_TIMER_RESEND'),
-        ];
-
-        $data['TIME_INTERVAL_NOTIFICATION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION'])->getValue(),
-            'description' => $this->getSettingDescription('TIME_INTERVAL_NOTIFICATION'),
-        ];
-
-        $data['DEFAULT_REGION_PHONE_INPUTS'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS'])->getValue(),
-            'description' => $this->getSettingDescription('DEFAULT_REGION_PHONE_INPUTS'),
-        ];
-
-        $data['PROFILE_LIMIT_DATE_SAML'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SAML'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SAML'),
-        ];
-
-        $data['PROFILE_LIMIT_DATE_GOOGLE'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_GOOGLE'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_GOOGLE'),
-        ];
-
-        $data['PROFILE_LIMIT_DATE_MICROSOFT'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_MICROSOFT'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_MICROSOFT'),
-        ];
-
-        $data['PROFILE_LIMIT_DATE_EMAIL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_EMAIL'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_EMAIL'),
-        ];
-
-        $data['PROFILE_LIMIT_DATE_SMS'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PROFILE_LIMIT_DATE_SMS'])->getValue(),
-            'description' => $this->getSettingDescription('PROFILE_LIMIT_DATE_SMS'),
         ];
 
         return $data;
@@ -381,6 +202,10 @@ class GetSettings
             'TWO_FACTOR_AUTH_APP_LABEL' => 'Platform identifier in two factor application',
             'TWO_FACTOR_AUTH_APP_ISSUER' => 'Issuer identifier in two factor application',
             'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME' => 'Local two-factor authentication code expiration time',
+            'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE' => 'Number of attempts to request resending of the two 
+            factor authentication code',
+            'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS' => 'Time in minutes to reset attempts to send two factor
+             authentication code',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',
@@ -396,7 +221,7 @@ class GetSettings
             'CONTACT_EMAIL' => 'The email address for contact inquiries',
 
             'AUTH_METHOD_SAML_ENABLED' => 'Enable or disable SAML authentication method',
-            'AUTH_METHOD_SAML_LABEL' => 'The label for SAML authentication on the login page',
+            'AUTH_METHOD_SAML_LABEL' => 'The label for SAML authentication button on the login page',
             'AUTH_METHOD_SAML_DESCRIPTION' => 'The description for SAML authentication on the login page',
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => 'Enable or disable Google authentication method',
             'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => 'The label for Google authentication button on the login page',
@@ -450,7 +275,6 @@ class GetSettings
             'TIME_INTERVAL_NOTIFICATION' =>
                 'The notification interval (in days) to alert a user before their profile expires',
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
-            'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for SAML users with login',
             'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',
             'PROFILE_LIMIT_DATE_MICROSOFT' => 'Time in days to disable profiles for users with Microsoft login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
@@ -458,5 +282,19 @@ class GetSettings
         ];
 
         return $descriptions[$settingName] ?? '';
+    }
+
+    private function mapSetting($settingName): string
+    {
+        return match ($settingName) {
+            'PAGE_TITLE' => 'title',
+            'CUSTOMER_LOGO' => 'customerLogoName',
+            'OPENROAMING_LOGO' => 'openroamingLogoName',
+            'WALLPAPER_IMAGE' => 'wallpaperImageName',
+            'WELCOME_TEXT' => 'welcomeText',
+            'WELCOME_DESCRIPTION' => 'welcomeDescription',
+            'CONTACT_EMAIL' => 'contactEmail',
+            default => $settingName,
+        };
     }
 }

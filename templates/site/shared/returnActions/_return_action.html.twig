@@ -1,0 +1,14 @@
+<div class="my-[25px] divider"></div>
+<div class="space-y-2">
+    <p class="text-[#212529] text-opacity-40 text-sm my-5">
+        You are currently authenticated as
+        {% for auth in user.userExternalAuths %}
+            {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                {{ auth.providerId }}
+            {% else %}
+                {{ app.user.uuid }}
+            {% endif %}
+        {% endfor %}
+    </p>
+    <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
+</div>

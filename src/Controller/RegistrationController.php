@@ -117,7 +117,6 @@ class RegistrationController extends AbstractController
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
                 $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
-                $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
@@ -141,7 +140,10 @@ class RegistrationController extends AbstractController
 
                 $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
-                $this->addFlash('success', 'We have sent an email with your account password and verification code');
+                $this->addFlash(
+                    'success',
+                    'We have sent an email with your account password and verification code'
+                );
             }
         }
 

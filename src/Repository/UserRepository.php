@@ -148,9 +148,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         // Exclude deleted users
         $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
 
-        // Join with UserExternalAuth to access SAMLProvider
         $qb->leftJoin('u.userExternalAuths', 'ua');
-        $qb->leftJoin('ua.samlProvider', 'sp');
 
         // Apply the search term, if provided
         if ($searchTerm) {
@@ -160,7 +158,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                     'u.email LIKE :searchTerm',
                     'u.first_name LIKE :searchTerm',
                     'u.last_name LIKE :searchTerm',
-                    'sp.name LIKE :searchTerm' // Search using the provider name
                 )
             )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }

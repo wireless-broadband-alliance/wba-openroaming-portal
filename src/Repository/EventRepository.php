@@ -61,6 +61,44 @@ class EventRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find the latest 'TWO_FA_CODE_SENDED' event for the given user.
+     *
+     * @throws NonUniqueResultException
+     */
+    public function findLatest2FACodeAttemptEvent(User $user): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', AnalyticalEventType::TWO_FA_CODE_SENT->value)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Find the $maxResults number of 'TWO_FA_CODE_SENDED' events for the given user.
+     *
+     * @throws NonUniqueResultException
+     */
+    public function find2FACodeAttemptEvent(User $user, int $maxResults, \DateTime $time): ?array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->andWhere('e.event_datetime >= :datetime')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', AnalyticalEventType::TWO_FA_CODE_SENT->value)
+            ->setParameter('datetime', $time)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults($maxResults)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *
      * @param $eventLog // from ENUM AnalyticalEventType

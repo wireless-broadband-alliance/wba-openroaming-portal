@@ -23,10 +23,6 @@ class UserExternalAuth
     #[ORM\Column(length: 255)]
     private ?string $provider_id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userExternalAuths')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?SamlProvider $samlProvider = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -64,18 +60,6 @@ class UserExternalAuth
     public function setProviderId(string $provider_id): self
     {
         $this->provider_id = $provider_id;
-
-        return $this;
-    }
-
-    public function getSamlProvider(): ?SamlProvider
-    {
-        return $this->samlProvider;
-    }
-
-    public function setSamlProvider(?SamlProvider $samlProvider): static
-    {
-        $this->samlProvider = $samlProvider;
 
         return $this;
     }

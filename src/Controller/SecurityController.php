@@ -12,7 +12,6 @@ use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
 use LogicException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,8 +50,76 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
+            $twoFAPlatformStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
             // this "type" is obtained through the url
-            if ($this->isGranted('ROLE_ADMIN') && $type === 'admin') {
+            if ($type === 'admin' && $this->isGranted('ROLE_ADMIN')) {
+                $session = $request->getSession();
+                $session->set('session_admin', true);
+                if ($twoFAPlatformStatus) {
+                    if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value ||
+                            !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        ) {
+                            $session = $request->getSession();
+                            $session->set('session_admin', true);
+                            return $this->redirectToRoute('admin_page');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
+                            return $this->redirectToRoute('app_2FA_generate_code');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::EMAIL->value
+                        ) {
+                            return $this->redirectToRoute('app_2FA_generate_code');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::TOTP->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_TOTP');
+                        }
+                        $session = $request->getSession();
+                        $session->set('session_admin', true);
+                        return $this->redirectToRoute('admin_page');
+                    }
+                    if (
+                        $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
+                        $twoFAPlatformStatus === twoFAType::ENFORCED_FOR_ALL->value
+                    ) {
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value ||
+                            $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        ) {
+                            return $this->redirectToRoute('app_configure2FA');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::SMS->value
+                        ) {
+                            return $this->redirectToRoute('app_2FA_generate_code');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::EMAIL->value
+                        ) {
+                            return $this->redirectToRoute('app_2FA_generate_code');
+                        }
+                        if (
+                            $user->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::TOTP->value
+                        ) {
+                            return $this->redirectToRoute('app_verify2FA_TOTP');
+                        }
+                        return $this->redirectToRoute('app_configure2FA');
+                    }
+                }
                 $session = $request->getSession();
                 $session->set('session_admin', true);
                 return $this->redirectToRoute('admin_page');
@@ -62,10 +129,9 @@ class SecurityController extends AbstractController
                 return $this->redirectToRoute('saml_logout');
             }
             // Get 2fa status on platform
-            $twoFAplatformStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
-            if ($twoFAplatformStatus) {
+            if ($twoFAPlatformStatus) {
                 // Check 2fa status on platform, after that we need to check user status to decide what case we have
-                if ($twoFAplatformStatus->getValue() === TwoFAType::NOT_ENFORCED->value) {
+                if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
@@ -77,59 +143,77 @@ class SecurityController extends AbstractController
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::APP->value
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_app');
+                        return $this->redirectToRoute('app_2FA_generate_code');
+                    }
+                    if (
+                        $user->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::TOTP->value
+                    ) {
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+                if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
                         !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
-                        return $this->redirectToRoute('app_enable2FA');
+                        return $this->redirectToRoute('app_configure2FA');
                     }
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::APP->value
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_app');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
-                    return $this->redirectToRoute('app_verify2FA_local');
+                    if (
+                        $user->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::TOTP->value
+                    ) {
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
+                    }
+                    return $this->redirectToRoute('app_landing');
                 }
-                if ($twoFAplatformStatus->getValue() === TwoFAType::ENFORCED_FOR_ALL->value) {
+                if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                     ) {
-                        return $this->redirectToRoute('app_enable2FA');
+                        return $this->redirectToRoute('app_configure2FA');
                     }
                     if (
                         $user->getTwoFAType() ===
                         UserTwoFactorAuthenticationStatus::SMS->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_local');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::APP->value
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
                     ) {
-                        return $this->redirectToRoute('app_verify2FA_app');
+                        return $this->redirectToRoute('app_2FA_generate_code');
                     }
-                    return $this->redirectToRoute('app_enable2FA');
+                    if (
+                        $user->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::TOTP->value
+                    ) {
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
+                    }
+                    return $this->redirectToRoute('app_configure2FA');
                 }
                 return $this->redirectToRoute('app_landing');
             }

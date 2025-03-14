@@ -32,6 +32,8 @@ class SettingFixture extends Fixture
             ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
             ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
             ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
+            ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', 'value' => '3'],
+            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', 'value' => '1'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
             ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
@@ -41,16 +43,15 @@ class SettingFixture extends Fixture
             ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
                 'name' => 'WELCOME_DESCRIPTION',
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                // phpcs:enable
+                'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your ' .
+                    'device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
             ],
             ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label is used to add extra content if necessary'],
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming@wballiance.com'],
 
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
+            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
@@ -79,6 +80,13 @@ class SettingFixture extends Fixture
             ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
             ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
 
+            ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
+            ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
+            ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
+            ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
+            ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
+            ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
+
             ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
             ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
             ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => 'https://openroaming.org/'],
@@ -91,9 +99,9 @@ class SettingFixture extends Fixture
             ['name' => 'USER_DELETE_TIME', 'value' => '5'],
             ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
             ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];

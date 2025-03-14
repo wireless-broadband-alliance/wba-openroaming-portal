@@ -20,7 +20,7 @@
         {% endif %}
 
         {% if message != '' %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+            <div class="toast-warning">{{ message }}</div>
         {% endif %}
     </div>
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
