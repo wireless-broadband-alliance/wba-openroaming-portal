@@ -308,6 +308,10 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
+                $this->addFlash(
+                    'success',
+                    'Two factor authentication successfully disabled'
+                );
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
                 }
@@ -345,6 +349,10 @@ class TwoFAController extends AbstractController
                     $user,
                     AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
+                );
+                $this->addFlash(
+                    'success',
+                    'Two factor authentication successfully disabled'
                 );
                 if ($session->has('session_admin')) {
                     return $this->redirectToRoute('admin_page');
