@@ -51,7 +51,7 @@ class TwoFAController extends AbstractController
     }
 
     #[Route('/configure2FA', name: 'app_configure2FA')]
-    public function method2FA(): Response
+    public function configure2FA(): Response
     {
         /** @var User $user */
         $user = $this->getUser();
