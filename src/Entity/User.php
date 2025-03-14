@@ -362,7 +362,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                             // phpcs:enable
-                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
@@ -415,7 +415,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                 ],
                 summary: 'Authenticate a user locally',
-                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.',
+                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.
+                Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'User credentials and CAPTCHA validation token',
                     content: new ArrayObject([
@@ -617,7 +619,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     // phpcs:disable Generic.Files.LineLength.TooLong
                                                     'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                                     // phpcs:enable
-                                                    ],
+                                                ],
                                             ],
                                         ],
                                     ],
@@ -716,7 +718,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                 summary: 'Authenticate a user via SAML',
                 description: 'This endpoint authenticates a user using their SAML response. 
                 If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful.',
+                The response includes user details along with a JWT token if authentication is successful.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'SAML response required for user authentication. 
                     The request should be sent as `multipart/form-data` with the SAML response included
@@ -731,8 +735,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'Base64-encoded SAML response included in the form data',
                                         'example' => 'base64-encoded-saml-assertion',
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => '6-7 digits code (2fa authentication or recovery codes)',
+                                        'example' => '02YZR88R',
+                                    ],
                                 ],
-                                'required' => ['SAMLResponse'],
+                                'required' => ['SAMLResponse', 'twoFACode'],
                             ],
                         ]),
                     ]),
@@ -889,7 +898,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                             // phpcs:enable
-                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
@@ -962,7 +971,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                 summary: 'Authenticate a user via Google',
                 description: 'This endpoint authenticates a user using their Google account. 
                 A valid Google OAuth authorization code is required. 
-                If the user is successfully authenticated, user details and a JWT token will be returned.',
+                If the user is successfully authenticated, user details and a JWT token will be returned.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'Google authorization code required for user authentication.
                      The request should be sent as JSON with the authorization code included in the body.',
@@ -976,8 +987,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'The Google OAuth authorization code',
                                         'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => '6-7 digits code (2fa authentication or recovery codes)',
+                                        'example' => '02YZR88R',
+                                    ],
                                 ],
-                                'required' => ['code'],
+                                'required' => ['code', 'twoFACode'],
                             ],
                         ]),
                     ]),
@@ -1134,7 +1150,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                             // phpcs:enable
-                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
@@ -1207,7 +1223,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                 summary: 'Authenticate a user via Microsoft',
                 description: 'This endpoint authenticates a user using their Microsoft account. 
                 A valid Microsoft OAuth authorization code is required. 
-                If the user is successfully authenticated, user details and a JWT token will be returned.',
+                If the user is successfully authenticated, user details and a JWT token will be returned.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'Microsoft authorization code required for user authentication.
                      The request should be sent as JSON with the authorization code included in the body.',
@@ -1221,8 +1239,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'The Microsoft OAuth authorization code',
                                         'example' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => '6-7 digits code (2fa authentication or recovery codes)',
+                                        'example' => '02YZR88R',
+                                    ],
                                 ],
-                                'required' => ['code'],
+                                'required' => ['code', 'twoFACode'],
                             ],
                         ]),
                     ]),
