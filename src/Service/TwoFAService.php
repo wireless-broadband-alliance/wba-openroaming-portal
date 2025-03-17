@@ -82,22 +82,22 @@ readonly class TwoFAService
     /**
      * @throws RandomException
      */
-    public function generate2FACode(User $user, string $ip, string $userAgent): ?string
+    public function generate2FACode(User $user, string $ip, string $userAgent, string $eventType): ?string
     {
         // Generate code
         $code = $this->twoFACode($user);
         // Send code
-        $this->sendCode($user, $code, $ip, $userAgent);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
         return $user->getTwoFAcode();
     }
 
     /**
      * @throws RandomException
      */
-    public function resendCode(User $user, string $ip, string $userAgent): void
+    public function resendCode(User $user, string $ip, string $userAgent, string $eventType): void
     {
         $code = $this->twoFACode($user);
-        $this->sendCode($user, $code, $ip, $userAgent);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
     }
 
     public function generateOTPCodes(User $user): array
@@ -150,7 +150,7 @@ readonly class TwoFAService
         return strtoupper(substr($alphanumericCode, 0, 8));
     }
 
-    private function sendCode(User $user, string $code, string $ip, string $userAgent): void
+    private function sendCode(User $user, string $code, string $ip, string $userAgent, string $eventType): void
     {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -188,7 +188,7 @@ readonly class TwoFAService
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::TWO_FA_CODE_SENT->value,
+            $eventType,
             new DateTime(),
             $eventMetaData
         );
@@ -223,7 +223,7 @@ readonly class TwoFAService
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, AnalyticalEventType::TWO_FA_CODE_RESEND->value);
         return count($attempts) < $nrAttempts;
     }
 
@@ -261,14 +261,14 @@ readonly class TwoFAService
         );
     }
 
-    public function canValidationCode(User $user)
+    public function canValidationCode(User $user, string $eventType): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
         return count($attempts) === 0;
     }
 }

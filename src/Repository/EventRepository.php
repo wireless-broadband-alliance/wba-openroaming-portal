@@ -65,13 +65,13 @@ class EventRepository extends ServiceEntityRepository
      *
      * @throws NonUniqueResultException
      */
-    public function findLatest2FACodeAttemptEvent(User $user): ?Event
+    public function findLatest2FACodeAttemptEvent(User $user, string $eventType): ?Event
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')
             ->andWhere('e.event_name = :event_name')
             ->setParameter('user', $user)
-            ->setParameter('event_name', AnalyticalEventType::TWO_FA_CODE_SENT->value)
+            ->setParameter('event_name', $eventType)
             ->orderBy('e.event_datetime', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
@@ -83,14 +83,14 @@ class EventRepository extends ServiceEntityRepository
      *
      * @throws NonUniqueResultException
      */
-    public function find2FACodeAttemptEvent(User $user, int $maxResults, \DateTime $time): ?array
+    public function find2FACodeAttemptEvent(User $user, int $maxResults, \DateTime $time, string $eventType): ?array
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')
             ->andWhere('e.event_name = :event_name')
             ->andWhere('e.event_datetime >= :datetime')
             ->setParameter('user', $user)
-            ->setParameter('event_name', AnalyticalEventType::TWO_FA_CODE_SENT->value)
+            ->setParameter('event_name', $eventType)
             ->setParameter('datetime', $time)
             ->orderBy('e.event_datetime', 'DESC')
             ->setMaxResults($maxResults)

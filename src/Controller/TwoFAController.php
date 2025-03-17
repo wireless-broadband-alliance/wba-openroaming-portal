@@ -264,11 +264,12 @@ class TwoFAController extends AbstractController
                 $user = $this->getUser();
                 $limitTime = new DateTime();
                 $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-                if ($this->twoFAService->canValidationCode($user)) {
+                if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
                     $this->twoFAService->generate2FACode(
                         $user,
                         $request->getClientIp(),
-                        $request->headers->get('User-Agent')
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::TWO_FA_CODE_DISABLE->value
                     );
                     $this->addFlash(
                         'success',
@@ -443,6 +444,10 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     * @throws RandomException
+     */
     #[Route('/verify2FA/resend', name: 'app_2FA_local_resend_code')]
     public function resendCode(Request $request): RedirectResponse
     {
@@ -454,15 +459,15 @@ class TwoFAController extends AbstractController
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canResendCode($user)) {
-            $this->twoFAService->resendCode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
-            $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+            $this->twoFAService->resendCode($user, $request->getClientIp(), $request->headers->get('User-Agent'), AnalyticalEventType::TWO_FA_CODE_RESEND->value);
+            $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, AnalyticalEventType::TWO_FA_CODE_RESEND->value);
             $attemptsLeft = $nrAttempts - count($attempts);
             $this->addFlash(
                 'success',
                 'The code was resent successfully. You have ' . $attemptsLeft . ' attempts.'
             );
         } else {
-            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user);
+            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user, AnalyticalEventType::TWO_FA_CODE_RESEND->value);
             $now = new DateTime();
             $lastAttemptTime = $lastEvent instanceof Event ?
                 $lastEvent->getEventDatetime() : $timeToResetAttempts;
@@ -490,7 +495,7 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
+        $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'), AnalyticalEventType::TWO_FA_CODE_VERIFY->value);
         return $this->redirectToRoute('app_verify2FA_portal');
     }
 
@@ -542,11 +547,12 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        if ($this->twoFAService->canValidationCode($user)) {
+        if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value)) {
             $this->twoFAService->generate2FACode(
                 $user,
                 $request->getClientIp(),
-                $request->headers->get('User-Agent')
+                $request->headers->get('User-Agent'),
+                AnalyticalEventType::TWO_FA_CODE_ENABLE->value
             );
             $this->addFlash(
                 'success',
@@ -666,7 +672,7 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'));
+        $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'), AnalyticalEventType::TWO_FA_CODE_DISABLE->value);
         return $this->redirectToRoute('app_swap2FA_disable_Local');
     }
 
