@@ -61,27 +61,30 @@ class SecurityController extends AbstractController
                     if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
                         if (
                             $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                            !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                            UserTwoFactorAuthenticationStatus::DISABLED->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('admin_page');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::SMS->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_2FA_generate_code');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::EMAIL->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_2FA_generate_code');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::TOTP->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_verify2FA_TOTP');
                         }
                         return $this->redirectToRoute('admin_page');
@@ -95,24 +98,28 @@ class SecurityController extends AbstractController
                             UserTwoFactorAuthenticationStatus::DISABLED->value ||
                             $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_configure2FA');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::SMS->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_2FA_generate_code');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::EMAIL->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_2FA_generate_code');
                         }
                         if (
                             $user->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::TOTP->value
                         ) {
+                            $session->set('session_admin', true);
                             return $this->redirectToRoute('app_verify2FA_TOTP');
                         }
                         return $this->redirectToRoute('app_configure2FA');

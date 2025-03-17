@@ -211,7 +211,8 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::VERIFY_OTP_2FA->value,
                     $request->headers->get('User-Agent')
                 );
-                if ($session->has('session_admin')) {
+                $session_admin = $session->get('session_admin');
+                if ($session_admin) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -225,7 +226,8 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::VERIFY_LOCAL_2FA->value,
                     $request->headers->get('User-Agent')
                 );
-                if ($session->has('session_admin')) {
+                $session_admin = $session->get('session_admin');
+                if ($session_admin) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
