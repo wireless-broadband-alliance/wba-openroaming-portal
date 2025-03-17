@@ -48,13 +48,15 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginFormType::class, $user_sigin);
         $form->handleRequest($request);
         $user = $this->getUser();
+        $session = $request->getSession();
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
             $twoFAPlatformStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
             // this "type" is obtained through the url
             if ($type === 'admin' && $this->isGranted('ROLE_ADMIN')) {
-                $session = $request->getSession();
-                $session->set('session_admin', true);
+                if ($session->get('session_admin') === false) {
+                    return $this->redirectToRoute('saml_logout');
+                }
                 if ($twoFAPlatformStatus) {
                     if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
                         if (
@@ -62,8 +64,6 @@ class SecurityController extends AbstractController
                             UserTwoFactorAuthenticationStatus::DISABLED->value ||
                             !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
                         ) {
-                            $session = $request->getSession();
-                            $session->set('session_admin', true);
                             return $this->redirectToRoute('admin_page');
                         }
                         if (
@@ -84,8 +84,6 @@ class SecurityController extends AbstractController
                         ) {
                             return $this->redirectToRoute('app_verify2FA_TOTP');
                         }
-                        $session = $request->getSession();
-                        $session->set('session_admin', true);
                         return $this->redirectToRoute('admin_page');
                     }
                     if (
@@ -120,10 +118,9 @@ class SecurityController extends AbstractController
                         return $this->redirectToRoute('app_configure2FA');
                     }
                 }
-                $session = $request->getSession();
-                $session->set('session_admin', true);
                 return $this->redirectToRoute('admin_page');
             }
+            $session->set('session_admin', false);
             $platformMode = $data['PLATFORM_MODE']['value'];
             if ($platformMode === PlatformMode::DEMO->value) {
                 return $this->redirectToRoute('saml_logout');
