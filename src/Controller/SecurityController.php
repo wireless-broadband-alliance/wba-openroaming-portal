@@ -138,8 +138,7 @@ class SecurityController extends AbstractController
                 if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        UserTwoFactorAuthenticationStatus::DISABLED->value
                     ) {
                         return $this->redirectToRoute('app_landing');
                     }
@@ -166,8 +165,7 @@ class SecurityController extends AbstractController
                 if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        !$user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        UserTwoFactorAuthenticationStatus::DISABLED->value
                     ) {
                         return $this->redirectToRoute('app_configure2FA');
                     }
@@ -194,8 +192,7 @@ class SecurityController extends AbstractController
                 if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
                     if (
                         $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                        $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
+                        UserTwoFactorAuthenticationStatus::DISABLED->value
                     ) {
                         return $this->redirectToRoute('app_configure2FA');
                     }
