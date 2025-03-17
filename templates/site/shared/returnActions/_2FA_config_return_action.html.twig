@@ -3,10 +3,10 @@
     {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
             <a
-                    {% if app.session.has('session_admin') %}
-                        href="{{ app.request.headers.get('referer') ?: path('admin_page') }}"
+                    {% if app.session.get('session_admin') %}
+                        href="{{ path('admin_page') }}"
                     {% else %}
-                        href="{{ app.request.headers.get('referer') ?: path('app_landing') }}"
+                        href="{{ path('app_landing') }}"
                     {% endif %}
                     class="w-[160px] btn-secondary">Go Back</a>
         {% endif %}
@@ -15,20 +15,20 @@
                 <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
             {% else %}
                 <a
-                        {% if app.session.has('session_admin') %}
-                            href="{{ app.request.headers.get('referer') ?: path('admin_page') }}"
+                        {% if app.session.get('session_admin') %}
+                            href="{{  path('admin_page') }}"
                         {% else %}
-                            href="{{ app.request.headers.get('referer') ?: path('app_landing') }}"
+                            href="{{  path('app_landing') }}"
                         {% endif %}
                         class="w-[160px] btn-secondary">Go Back</a>
             {% endif %}
         {% endif %}
     {% else %}
         <a
-                {% if app.session.has('session_admin') %}
-                    href="{{ app.request.headers.get('referer') ?: path('admin_page') }}"
+                {% if app.session.get('session_admin') %}
+                    href="{{ path('admin_page') }}"
                 {% else %}
-                    href="{{ app.request.headers.get('referer') ?: path('app_landing') }}"
+                    href="{{ path('app_landing') }}"
                 {% endif %}
                 class="w-[160px] btn-secondary">Go Back</a>
     {% endif %}
