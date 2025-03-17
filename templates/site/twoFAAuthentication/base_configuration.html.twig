@@ -26,9 +26,9 @@
         {% endfor %}
         {% if mandatoryTwoFA %}
             {% if twoFAEnabled %}
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                <div class="toast-success">
                     You already have two-factor authentication configured for this account.
-                </p>
+                </div>
             {% else %}
                 <div class="toast-warning">
                     Two-factor authentication is mandatory for account security on the portal.
@@ -218,15 +218,6 @@
             {% endif %}
         {% endif %}
     </div>
-
-    {# Status 2FA Messages #}
-    {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
-        {% if twoFAEnabled %}
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured for this account.
-            </p>
-        {% endif %}
-    {% endif %}
 
     {# Divider #}
     {{ include('/site/shared/returnActions/_2FA_config_return_action.html.twig') }}

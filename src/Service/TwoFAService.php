@@ -223,7 +223,12 @@ readonly class TwoFAService
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, AnalyticalEventType::TWO_FA_CODE_RESEND->value);
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            $nrAttempts,
+            $limitTime,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
         return count($attempts) < $nrAttempts;
     }
 

@@ -204,7 +204,11 @@ class AdminController extends AbstractController
                     if ($file) { // submits the new file to the respective path
                         $originalFilename = pathinfo((string)$file->getClientOriginalName(), PATHINFO_FILENAME);
                         // Use a unique id for the uploaded file to avoid overwriting
-                        $newFilename = $originalFilename . '-' . uniqid() . '.' . $file->guessExtension();
+                        $newFilename = $originalFilename .
+                            '-' .
+                            uniqid('', true) .
+                            '.' .
+                            $file->guessExtension();
 
                         // Set the destination directory based on the setting name
                         $destinationDirectory = $this->getParameter('kernel.project_dir')
