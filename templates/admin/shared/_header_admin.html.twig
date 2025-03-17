@@ -1,6 +1,6 @@
 {# Header - Title - left conner #}
 <div class="flex flex-row items-center -pl-2">
-    {% if app.request.attributes.get('_route') == 'admin_page' %}
+    {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_user_edit' %}
         <twig:ux:icon name="wba:user" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Users Management</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
