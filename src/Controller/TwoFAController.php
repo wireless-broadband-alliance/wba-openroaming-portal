@@ -410,7 +410,15 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
-        $codesJson = $request->query->get('codes');
+        $codes = $request->query->get('codes');
+        // Check if the codes was ben sent
+        if (!$codes) {
+            $data = json_decode($codes, true);
+            $codes = $data["codes"] ?? null;
+
+        }
+        // decrypt the data sent
+        $codesJson = urldecode($codes);
         $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
         $this->twoFAService->saveCodes($codes, $user);
         $this->twoFAService->event2FA(
@@ -482,7 +490,15 @@ class TwoFAController extends AbstractController
     #[Route('/downloadCodes', name: 'app_download_codes')]
     public function downloadCodes(Request $request): Response
     {
-        $codesJson = $request->query->get('codes');
+        $codes = $request->query->get('codes');
+        // Check if the codes was ben sent
+        if (!$codes) {
+            $data = json_decode($codes, true);
+            $codes = $data["codes"] ?? null;
+
+        }
+        // decrypt the data sent
+        $codesJson = urldecode($codes);
         $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
         // create a content of the file
         $fileContent = implode("\n", $codes);
