@@ -705,8 +705,13 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
+                $this->addFlash(
+                    'success',
+                    'Two factor authentication successfully disabled'
+                );
                 return $this->redirectToRoute('app_enable2FA_TOTP');
             }
+            $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
         return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
@@ -766,8 +771,13 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::DISABLE_2FA->value,
                     $request->headers->get('User-Agent')
                 );
+                $this->addFlash(
+                    'success',
+                    'Two factor authentication successfully disabled'
+                );
                 return $this->redirectToRoute('app_2FA_firstSetup_local');
             }
+            $this->addFlash('error', 'Invalid code');
         }
         return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
