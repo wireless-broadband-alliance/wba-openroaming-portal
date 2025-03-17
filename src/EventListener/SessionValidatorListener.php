@@ -10,11 +10,11 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class SessionValidatorListener
+readonly class SessionValidatorListener
 {
     public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
-        private readonly RouterInterface $router
+        private TokenStorageInterface $tokenStorage,
+        private RouterInterface $router
     ) {
     }
 
@@ -37,8 +37,9 @@ class SessionValidatorListener
 
         $user = $token->getUser();
         $sessionAdmin = $session->get('session_admin');
-        // Restrict access to /dashboard if the user doesn't have 'session_admin' in their session
-        if ($user && !$sessionAdmin && str_starts_with($path, '/dashboard')) {
+
+        // Restrict access to /dashboard if the user has 'session_admin' set to "true" in their session
+        if ($user && $sessionAdmin === false && str_starts_with($path, '/dashboard')) {
             throw new AccessDeniedHttpException('Access denied.');
         }
     }
