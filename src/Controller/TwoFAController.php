@@ -110,7 +110,8 @@ class TwoFAController extends AbstractController
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
-            if ($session->has('session_admin')) {
+            $session_admin = $session->get('session_admin');
+            if ($session_admin) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -159,7 +160,8 @@ class TwoFAController extends AbstractController
                         AnalyticalEventType::VERIFY_OTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    if ($session->has('session_admin')) {
+                    $session_admin = $session->get('session_admin');
+                    if ($session_admin) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -173,7 +175,8 @@ class TwoFAController extends AbstractController
                         AnalyticalEventType::VERIFY_TOTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    if ($session->has('session_admin')) {
+                    $session_admin = $session->get('session_admin');
+                    if ($session_admin) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -314,7 +317,8 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                if ($session->has('session_admin')) {
+                $session_admin = $session->get('session_admin');
+                if ($session_admin) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -356,7 +360,8 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                if ($session->has('session_admin')) {
+                $session_admin = $session->get('session_admin');
+                if ($session_admin) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -383,7 +388,8 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         if ($this->twoFAService->twoFAisActive($user)) {
-            if ($session->has('session_admin')) {
+            $session_admin = $session->get('session_admin');
+            if ($session_admin) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -397,7 +403,8 @@ class TwoFAController extends AbstractController
             ]);
         }
         $this->addFlash('error', 'User not found');
-        if ($session->has('session_admin')) {
+        $session_admin = $session->get('session_admin');
+        if ($session_admin) {
             return $this->redirectToRoute('admin_page');
         }
         return $this->redirectToRoute('app_landing');
@@ -429,7 +436,8 @@ class TwoFAController extends AbstractController
             AnalyticalEventType::GENERATE_OTP_2FA->value,
             $request->headers->get('User-Agent')
         );
-        if ($session->has('session_admin')) {
+        $session_admin = $session->get('session_admin');
+        if ($session_admin) {
             return $this->redirectToRoute('admin_page');
         }
         return $this->redirectToRoute('app_landing');
@@ -582,7 +590,8 @@ class TwoFAController extends AbstractController
                         $this->entityManager->flush();
                     } else {
                         $this->addFlash('error', 'You must be logged in to access this page');
-                        if ($session->has('session_admin')) {
+                        $session_admin = $session->get('session_admin');
+                        if ($session_admin) {
                             return $this->redirectToRoute('admin_page');
                         }
                         return $this->redirectToRoute('app_landing');
@@ -601,7 +610,8 @@ class TwoFAController extends AbstractController
                     $this->entityManager->flush();
                 } else {
                     $this->addFlash('error', 'You must be logged in to access this page');
-                    if ($session->has('session_admin')) {
+                    $session_admin = $session->get('session_admin');
+                    if ($session_admin) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
