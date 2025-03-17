@@ -427,7 +427,7 @@ class TwoFAController extends AbstractController
         }
 
         // Decrypt the data sent
-        $codesJson = urldecode($codes);
+        $codesJson = urldecode((string)$codes);
         $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
         $this->twoFAService->saveCodes($codes, $user);
         $this->twoFAService->event2FA(
@@ -503,12 +503,11 @@ class TwoFAController extends AbstractController
         $codes = $request->query->get('codes');
         // Check if the codes was ben sent
         if (!$codes) {
-            $data = json_decode($codes, true);
+            $data = json_decode($codes, true, 512, JSON_THROW_ON_ERROR);
             $codes = $data["codes"] ?? null;
-
         }
         // decrypt the data sent
-        $codesJson = urldecode($codes);
+        $codesJson = urldecode((string)$codes);
         $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
         // create a content of the file
         $fileContent = implode("\n", $codes);
