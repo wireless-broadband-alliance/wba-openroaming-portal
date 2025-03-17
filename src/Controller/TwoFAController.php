@@ -465,6 +465,7 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
+        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         /** @var User $user */
         $user = $this->getUser();
         $limitTime = new DateTime();
@@ -493,19 +494,37 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::TWO_FA_CODE_RESEND->value
             );
             $now = new DateTime();
-            $lastAttemptTime = $lastEvent instanceof Event ?
-                $lastEvent->getEventDatetime() : $timeToResetAttempts;
-            $limitTime = $lastAttemptTime;
-            $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
-            $interval = date_diff($now, $limitTime);
-            $interval_minutes = $interval->days * 1440;
-            $interval_minutes += $interval->h * 60;
-            $interval_minutes += $interval->i;
-            $this->addFlash(
-                'error',
-                'You have exceeded the number of attempts, wait ' .
-                $interval_minutes . ' minutes to request a code again'
-            );
+            if (!$this->twoFAService->canResendCode($user)) {
+                $lastAttemptTime = $lastEvent instanceof Event ?
+                    $lastEvent->getEventDatetime() : $timeToResetAttempts;
+                $limitTime = $lastAttemptTime;
+                $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
+                $interval = date_diff($now, $limitTime);
+                $interval_minutes = $interval->days * 1440;
+                $interval_minutes += $interval->h * 60;
+                $interval_minutes += $interval->i;
+                $this->addFlash(
+                    'error',
+                    'You have exceeded the number of attempts, wait ' .
+                    $interval_minutes . ' minutes to request a code again'
+                );
+            } else {
+                $lastAttemptTime = $lastEvent instanceof Event ?
+                    $lastEvent->getEventDatetime() : $timeIntervalToResendCode;
+                $limitTime = $lastAttemptTime;
+                $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
+                $interval = date_diff($now, $limitTime);
+                $interval_seconds = $interval->days * 1440;
+                $interval_seconds += $interval->h * 60;
+                $interval_seconds += $interval->i;
+                $interval_seconds += $interval->s;
+                $this->addFlash(
+                    'error',
+                    'You must wait ' .
+                    $interval_seconds . ' seconds before you can resend code'
+                );
+            }
+
         }
         $lastPage = $request->headers->get('referer', '/');
         return $this->redirect($lastPage);
