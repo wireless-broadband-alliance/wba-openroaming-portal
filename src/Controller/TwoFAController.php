@@ -672,8 +672,26 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $this->twoFAService->generate2FACode($user, $request->getClientIp(), $request->headers->get('User-Agent'), AnalyticalEventType::TWO_FA_CODE_DISABLE->value);
+
+        if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
+            $this->twoFAService->generate2FACode(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+            );
+            $this->addFlash(
+                'success',
+                'The code was sent successfully.'
+            );
+            return $this->redirectToRoute('app_swap2FA_disable_Local');
+        }
+        $this->addFlash(
+            'error',
+            'Your code has already been sent to you previously.'
+        );
         return $this->redirectToRoute('app_swap2FA_disable_Local');
+
     }
 
     #[Route('/2FASwapMethod/disable/TOTP', name: 'app_swap2FA_disable_TOTP')]
