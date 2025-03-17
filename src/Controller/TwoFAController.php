@@ -374,7 +374,6 @@ class TwoFAController extends AbstractController
             'form' => $form,
             'user' => $user,
             'swap' => false
-
         ]);
     }
 
