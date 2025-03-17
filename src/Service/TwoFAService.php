@@ -232,6 +232,21 @@ readonly class TwoFAService
         return count($attempts) < $nrAttempts;
     }
 
+    public function timeIntervalToResendCode(User $user): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            1,
+            $limitTime,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
+        return count($attempts) < 1;
+    }
+
     private function removeOTPCodes(User $user): void
     {
         $codes = $user->getOTPcodes();

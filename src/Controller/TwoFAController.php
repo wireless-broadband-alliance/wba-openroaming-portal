@@ -460,7 +460,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        if ($this->twoFAService->canResendCode($user)) {
+        if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
             $this->twoFAService->resendCode(
                 $user,
                 $request->getClientIp(),
