@@ -206,6 +206,7 @@ class GetSettings
             factor authentication code',
             'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS' => 'Time in minutes to reset attempts to send two factor
              authentication code',
+            'TWO_FACTOR_AUTH_RESEND_INTERVAL' => 'Time interval in seconds to request a new authentication code',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
             'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',

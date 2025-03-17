@@ -139,6 +139,23 @@ class TwoFASettingsType extends AbstractType
                     ],
                     'invalid_message' => 'Please enter a valid number.',
                 ]);
+            } elseif ($settingName === 'TWO_FACTOR_AUTH_RESEND_INTERVAL') {
+                $builder->add('TWO_FACTOR_AUTH_RESEND_INTERVAL', IntegerType::class, [
+                    'data' => (int)$settingValue,
+                    'attr' => [
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'This field cannot be blank.',
+                        ]),
+                        new Range([
+                            'min' => 30,
+                            'minMessage' => 'This value cannot be less than {{ limit }} seconds.',
+                        ]),
+                    ],
+                    'invalid_message' => 'Please enter a valid number.',
+                ]);
             }
         }
     }
