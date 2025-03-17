@@ -90,20 +90,6 @@
                     </a>
                 </li>
                 <li>
-                    {# 2FA #}
-                    <a href="{{ path('app_configure2FA') }}"
-                       class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-                        <twig:ux:icon name="wba:2fa" class="w-7 pr-2 mr-2" fill="none"/>
-                        Configure 2FA
-                    </a>
-                    {# Disable 2FA #}
-                    <a href="{{ path('app_disable2FA') }}"
-                       class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-                        <twig:ux:icon name="wba:2fa" class="w-7 pr-2 mr-2" fill="none"/>
-                        Disable 2FA
-                    </a>
-                </li>
-                <li>
                     {# Logout #}
                     <a href="{{ path('saml_logout') }}"
                        class="flex items-center space-x-2 px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded"
