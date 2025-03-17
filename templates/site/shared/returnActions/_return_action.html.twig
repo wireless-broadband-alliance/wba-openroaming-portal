@@ -10,6 +10,5 @@
             {% endif %}
         {% endfor %}
     </p>
-    <a href="{{ app.request.headers.get('referer') ?: path('app_landing') }}" class="w-[160px] btn-secondary">Go
-        Back</a>
+    <button class="btn-secondary" onClick="window.history.back();">Go back</button>
 </div>
