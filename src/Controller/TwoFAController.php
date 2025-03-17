@@ -524,7 +524,6 @@ class TwoFAController extends AbstractController
                     $interval_seconds . ' seconds before you can resend code'
                 );
             }
-
         }
         $lastPage = $request->headers->get('referer', '/');
         return $this->redirect($lastPage);
