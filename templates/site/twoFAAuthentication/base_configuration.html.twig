@@ -1,5 +1,12 @@
 {% extends 'site/base.html.twig' %}
-
+{% set twoFAEnabled = (user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+{% set mandatoryTwoFA = (
+    data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value or
+    (
+    data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value and
+    user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value
+    )
+    ) %}
 {% block title %}
     {{ data.title.value }}
 {% endblock %}
@@ -17,6 +24,18 @@
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
+        {% if mandatoryTwoFA %}
+            {% if twoFAEnabled %}
+                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
+                    You already have two-factor authentication configured for this account.
+                </p>
+            {% else %}
+                <div class="toast-warning">
+                    Two-factor authentication is mandatory for account security on the portal.
+                    You cannot proceed without enabling it. Please activate it immediately to continue.
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
@@ -41,7 +60,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                    </div></div>
+                    </div>
+                </div>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                 {% if user.email is not null or user.phoneNumber is not null %}
@@ -56,7 +76,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                    </div></div>
+                    </div>
+                </div>
                 <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
@@ -67,12 +88,14 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                     <div class="p-3 text-center">
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                </div></div>
+                    </div>
+                </div>
                 <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
             {% endif %}
         {% endif %}
@@ -87,7 +110,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                     <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Email/SMS</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
@@ -100,7 +124,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
                     <div class="flex flex-col">
@@ -109,7 +134,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                 {% endif %}
             {% else %}
                 {# External Users #}
@@ -123,7 +149,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                     {% if user.email is not null or user.phoneNumber is not null %}
@@ -138,7 +165,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                     <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
@@ -148,7 +176,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                        </div></div>
+                        </div>
+                    </div>
                     <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
                 {% endif %}
             {% endif %}
@@ -165,7 +194,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                    </div></div>
+                    </div>
+                </div>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                 {% if user.email is not null or user.phoneNumber is not null %}
@@ -179,7 +209,8 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                    </div></div>
+                    </div>
+                </div>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
                 <div class="flex flex-col">
@@ -188,90 +219,21 @@
                     <span class="text-[#212529] text-opacity-40 text-sm p-3">
                         Ex.: Microsoft Authenticator, Google Authenticator, etc.
                     </span>
-                    </div></div>
+                    </div>
+                </div>
             {% endif %}
         {% endif %}
     </div>
 
-    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
-        {% if (user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+    {# Status 2FA Messages #}
+    {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
+        {% if twoFAEnabled %}
             <p class="text-[#212529] text-opacity-40 text-sm mt-5">
                 You already have two-factor authentication configured for this account.
             </p>
         {% endif %}
     {% endif %}
-    {# When the app status is ENFORCED_FOR_LOCAL #}
-    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
-        {# Local users #}
-        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <p class="text-[#212529] font-bold text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-                </p>
-            {% endif %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
-                <p class="text-[#212529] font-bold text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-                </p>
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured for this account.
-                </p>
-            {% endif %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <p class="text-[#212529] font-bold text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-                </p>
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured for this account.
-                </p>
-            {% endif %}
-            {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <p class="text-[#212529] font-bold text-sm mt-5">
-                    Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-                </p>
-                <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                    You already have two-factor authentication configured for this account.
-                </p>
-            {% endif %}
-            {# External users #}
-        {% else %}
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured for this account.
-            </p>
-        {% endif %}
-    {% endif %}
-    {# When the app status is ENFORCED_FOR_ALL #}
-    {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <p class="text-[#212529] font-bold text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-            </p>
-        {% endif %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
-            <p class="text-[#212529] font-bold text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-            </p>
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured for this account.
-            </p>
-        {% endif %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-            <p class="text-[#212529] font-bold text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-            </p>
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured for this account.
-            </p>
-        {% endif %}
-        {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-            <p class="text-[#212529] font-bold text-sm mt-5">
-                Two-factor authentication is mandatory for your account. You cannot proceed without enabling it.
-            </p>
-            <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-                You already have two-factor authentication configured for this account.
-            </p>
-        {% endif %}
-    {% endif %}
+
     {# Divider #}
     {{ include('/site/shared/returnActions/_2FA_config_return_action.html.twig') }}
 {% endblock %}
