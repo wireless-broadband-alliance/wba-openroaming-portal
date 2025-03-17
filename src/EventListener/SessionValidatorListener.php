@@ -38,12 +38,14 @@ readonly class SessionValidatorListener
         $user = $token->getUser();
         $sessionAdmin = $session->get('session_admin');
 
-        // Restrict access to /dashboard if the user is not an admin (ROLE_ADMIN) and does not have 'session_admin' set to true
-        if ($user && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
+        // Restrict access to /dashboard if the user is not an admin and does not have 'session_admin' set to true
+        if (
+            $user && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
                 'ROLE_ADMIN',
                 $user->getRoles(),
                 true
-            )) {
+            )
+        ) {
             throw new AccessDeniedHttpException('Access denied.');
         }
     }
