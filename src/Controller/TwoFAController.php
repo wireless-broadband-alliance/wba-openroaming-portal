@@ -329,6 +329,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'swap' => false
         ]);
     }
 
@@ -372,6 +373,8 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'swap' => false
+
         ]);
     }
 
@@ -664,6 +667,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'swap' => true
         ]);
     }
 
@@ -725,6 +729,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'swap' => true
         ]);
     }
 }
