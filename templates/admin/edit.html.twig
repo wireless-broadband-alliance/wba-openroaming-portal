@@ -133,20 +133,22 @@
     </div>
 
     {# Content - Two-Factor Options - Only for Admins #}
-    <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
-    <div class="p-6 mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 bg-white justify-start w-1/2 gap-6">
-        <a href="{{ path('app_configure2FA') }}" class="btn-secondary">Configure Two-Factor Authentication</a>
-        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
-            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
-            {% endif %}
-        {% endif %}
-        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
-            {% if not (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+    {% if app.user and user.id == app.user.id %}
+        <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+        <div class="p-6 mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 bg-white justify-start w-1/2 gap-6">
+            <a href="{{ path('app_configure2FA') }}" class="btn-secondary">Configure Two-Factor Authentication</a>
+            {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
                 {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                     <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
                 {% endif %}
             {% endif %}
-        {% endif %}
-    </div>
+            {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+                {% if not (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+                    {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                        <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}
