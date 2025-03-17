@@ -10,5 +10,6 @@
             {% endif %}
         {% endfor %}
     </p>
-    <a href="{{ path('app_landing') }}" class="w-[160px] btn-secondary">Go Back</a>
+    <a href="{{ app.request.headers.get('referer') ?: path('app_landing') }}" class="w-[160px] btn-secondary">Go
+        Back</a>
 </div>

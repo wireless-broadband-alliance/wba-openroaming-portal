@@ -1,48 +1,35 @@
 <div class="my-[25px] divider"></div>
 <div class="space-y-2">
-    <p class="text-[#212529] text-opacity-40 text-sm mt-5">
-        You are currently authenticated as
-        {% for auth in user.userExternalAuths %}
-            {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
-                {{ auth.providerId }}
-            {% else %}
-                {{ app.user.uuid }}
-            {% endif %}
-        {% endfor %}
-    </p>
     {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
             <a
-            {% if app.session.has('session_admin') %}
-                href="{{ path('admin_page') }}"
-            {% else %}
-                href="{{ path('app_landing') }}"
-            {% endif %}
-            class="w-[160px] btn-secondary">Go Back</a>
+                    {% if app.session.has('session_admin') %}
+                        href="{{ app.request.headers.get('referer') ?: path('admin_page') }}"
+                    {% else %}
+                        href="{{ app.request.headers.get('referer') ?: path('app_landing') }}"
+                    {% endif %}
+                    class="w-[160px] btn-secondary">Go Back</a>
         {% endif %}
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
             {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
                 <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
             {% else %}
                 <a
-                {% if app.session.has('session_admin') %}
-                    href="{{ path('admin_page') }}"
-                {% else %}
-                    href="{{ path('app_landing') }}"
-                {% endif %}
-                class="w-[160px] btn-secondary">Go Back</a>
+                        {% if app.session.has('session_admin') %}
+                            href="{{ app.request.headers.get('referer') ?: path('admin_page') }}"
+                        {% else %}
+                            href="{{ app.request.headers.get('referer') ?: path('app_landing') }}"
+                        {% endif %}
+                        class="w-[160px] btn-secondary">Go Back</a>
             {% endif %}
-        {% endif %}
-        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
-            <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
         {% endif %}
     {% else %}
         <a
-        {% if app.session.has('session_admin') %}
-             href="{{ path('admin_page') }}"
-        {% else %}
-            href="{{ path('app_landing') }}"
-        {% endif %}
-        class="w-[160px] btn-secondary">Go Back</a>
+                {% if app.session.has('session_admin') %}
+                    href="{{ app.request.headers.get('referer') ?: path('admin_page') }}"
+                {% else %}
+                    href="{{ app.request.headers.get('referer') ?: path('app_landing') }}"
+                {% endif %}
+                class="w-[160px] btn-secondary">Go Back</a>
     {% endif %}
 </div>
