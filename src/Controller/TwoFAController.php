@@ -253,6 +253,7 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        $session = $request->getSession();
         if ($user) {
             if (
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
@@ -285,6 +286,14 @@ class TwoFAController extends AbstractController
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                 return $this->redirectToRoute('app_disable2FA_TOTP');
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                $sessionAdmin = $session->get('session_admin');
+                $this->addFlash('error', 'two factor authentication is already disabled');
+                if ($sessionAdmin) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
             }
             return $this->redirectToRoute('app_landing');
         }
