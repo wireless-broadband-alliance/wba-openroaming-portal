@@ -18,7 +18,6 @@ readonly class SessionValidatorListener
     public function __construct(
         private TokenStorageInterface $tokenStorage,
         private RouterInterface $router,
-        private SettingRepository $settingRepository,
         private UserRepository $userRepository,
     ) {
     }
@@ -41,16 +40,19 @@ readonly class SessionValidatorListener
         }
 
         $user = $token->getUser();
-        if (str_starts_with($path, '/dashboard') && $user) {
+        if ($user && str_starts_with($path, '/dashboard')) {
             $userAdmin = $this->userRepository->find($user->getId());
             if (!$userAdmin) {
                 throw new AccessDeniedHttpException('Access denied.');
             }
-            if ($userAdmin->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
-                if (!$session->has('2fa_verified')) {
-                    $url = $this->router->generate('app_landing');
-                    $event->setResponse(new RedirectResponse($url));
-                }
+            if (
+                ($userAdmin->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
+                && !$session->has(
+                    '2fa_verified'
+                )
+            ) {
+                $url = $this->router->generate('app_landing');
+                $event->setResponse(new RedirectResponse($url));
             }
         }
 
