@@ -853,7 +853,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1073,7 +1073,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1103,7 +1103,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1163,7 +1163,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
