@@ -537,11 +537,22 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $this->twoFAService->generate2FACode(
-            $user,
-            $request->getClientIp(),
-            $request->headers->get('User-Agent'),
-            AnalyticalEventType::TWO_FA_CODE_VERIFY->value
+        if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_VERIFY->value)) {
+            $this->twoFAService->generate2FACode(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                AnalyticalEventType::TWO_FA_CODE_VERIFY->value
+            );
+            $this->addFlash(
+                'success',
+                'The code was sent successfully.'
+            );
+            return $this->redirectToRoute('app_verify2FA_portal');
+        }
+        $this->addFlash(
+            'error',
+            'Your code has already been sent to you previously.'
         );
         return $this->redirectToRoute('app_verify2FA_portal');
     }

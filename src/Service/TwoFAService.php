@@ -289,6 +289,6 @@ readonly class TwoFAService
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
-        return count($attempts) === 0;
+        return count($attempts) < $nrAttempts;
     }
 }
