@@ -696,10 +696,17 @@ class TwoFAController extends AbstractController
     #[Route('/2FASwapMethod/disableLocal', name: 'app_swap2FA_disable_Local')]
     public function swapMethod2FADisableLocal(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            $this->addFlash(
+                'error',
+                'This account already has two factor authentication disabled.'
+            );
+            return $this->redirectToRoute('app_configure2FA');
+        }
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -760,10 +767,17 @@ class TwoFAController extends AbstractController
     #[Route('/2FASwapMethod/disable/TOTP', name: 'app_swap2FA_disable_TOTP')]
     public function swapMethod2FADisableTOTP(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            $this->addFlash(
+                'error',
+                'This account already has two factor authentication disabled.'
+            );
+            return $this->redirectToRoute('app_configure2FA');
+        }
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
