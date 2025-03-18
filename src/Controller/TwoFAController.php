@@ -46,7 +46,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -63,7 +63,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -193,7 +193,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -251,7 +251,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
@@ -304,7 +304,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -350,7 +350,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
@@ -398,7 +398,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -438,7 +438,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
@@ -476,7 +476,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -550,7 +550,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_VERIFY->value)) {
@@ -609,7 +609,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
@@ -646,7 +646,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
@@ -717,7 +717,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
@@ -766,7 +766,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -796,7 +796,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
