@@ -2,6 +2,9 @@
 
 namespace App\EventListener;
 
+use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -14,7 +17,9 @@ readonly class SessionValidatorListener
 {
     public function __construct(
         private TokenStorageInterface $tokenStorage,
-        private RouterInterface $router
+        private RouterInterface $router,
+        private SettingRepository $settingRepository,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -36,6 +41,19 @@ readonly class SessionValidatorListener
         }
 
         $user = $token->getUser();
+        if (str_starts_with($path, '/dashboard') && $user) {
+            $userAdmin = $this->userRepository->find($user->getId());
+            if (!$userAdmin) {
+                throw new AccessDeniedHttpException('Access denied.');
+            }
+            if ($userAdmin->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                if (!$session->has('2fa_verified')) {
+                    $url = $this->router->generate('app_landing');
+                    $event->setResponse(new RedirectResponse($url));
+                }
+            }
+        }
+
         $sessionAdmin = $session->get('session_admin');
 
         // Restrict access to /dashboard if the user is not an admin and does not have 'session_admin' set to true
