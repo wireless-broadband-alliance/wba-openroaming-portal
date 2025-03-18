@@ -25,20 +25,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class TwoFAController extends AbstractController
 {
-    /**
-     * SiteController constructor.
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings $getSettings The instance of GetSettings class.
-     * @param TOTPService $totpService The service for communicate with two-factor authentication applications
-     * @param EntityManagerInterface $entityManager The service for manage all entities
-     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
-     * @param TwoFAService $twoFAService Generates a new codes and configure 2FA
-     *  of the user account
-     */
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
@@ -55,15 +45,16 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        if ($user) {
-            return $this->render('site/twoFAAuthentication/base_configuration.html.twig', [
-                'user' => $user,
-                'data' => $data,
-            ]);
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
         }
-        $this->addFlash('error', 'You must be logged in to access this page');
-        return $this->redirectToRoute('app_landing');
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        return $this->render('site/twoFAAuthentication/base_configuration.html.twig', [
+            'user' => $user,
+            'data' => $data,
+        ]);
     }
 
     #[Route('/enable2FA/TOTP', name: 'app_enable2FA_TOTP')]
@@ -71,6 +62,10 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
@@ -138,13 +133,14 @@ class TwoFAController extends AbstractController
     #[Route('/verify2FA/TOTP', name: 'app_verify2FA_TOTP')]
     public function verify2FA(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
-        $session = $request->getSession();
+        /** @var User $user */
         $user = $this->getUser();
+        $session = $request->getSession();
         if ($session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
         }
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
@@ -194,10 +190,15 @@ class TwoFAController extends AbstractController
     #[Route('/verify2FA', name: 'app_verify2FA_portal')]
     public function verify2FAPortal(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
         if ($session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
@@ -244,69 +245,70 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    /**
-     * @throws \DateMalformedStringException
-     * @throws RandomException
-     */
-    #[Route('/disable2FA', name: 'app_disable2FA')]
+    #[Route('/disable2FA', name: 'app_disable2FA', methods: ['POST'])]
     public function disable2FA(Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         $session = $request->getSession();
-        if ($user) {
-            if (
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-                $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
-                /** @var User $user */
-                $user = $this->getUser();
-                $limitTime = new DateTime();
-                $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-                if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
-                    $this->twoFAService->generate2FACode(
-                        $user,
-                        $request->getClientIp(),
-                        $request->headers->get('User-Agent'),
-                        AnalyticalEventType::TWO_FA_CODE_DISABLE->value
-                    );
-                    $this->addFlash(
-                        'success',
-                        'The code was sent successfully.'
-                    );
-                    return $this->redirectToRoute('app_disable2FA_local');
-                }
+
+        if (
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
+        ) {
+            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+            $limitTime = new DateTime();
+            $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+            if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
+                $this->twoFAService->generate2FACode(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+                );
                 $this->addFlash(
-                    'error',
-                    'Your code has already been sent to you previously.'
+                    'success',
+                    'The code was sent successfully.'
                 );
                 return $this->redirectToRoute('app_disable2FA_local');
             }
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-                return $this->redirectToRoute('app_disable2FA_TOTP');
-            }
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
-                $sessionAdmin = $session->get('session_admin');
-                $this->addFlash('error', 'two factor authentication is already disabled');
-                if ($sessionAdmin) {
-                    return $this->redirectToRoute('admin_page');
-                }
-                return $this->redirectToRoute('app_landing');
+            $this->addFlash(
+                'error',
+                'Your code has already been sent to you previously.'
+            );
+            return $this->redirectToRoute('app_disable2FA_local');
+        }
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+            return $this->redirectToRoute('app_disable2FA_TOTP');
+        }
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            $sessionAdmin = $session->get('session_admin');
+            $this->addFlash('error', 'Two-Factor authentication is already disabled');
+            if ($sessionAdmin) {
+                return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
         }
+
         return $this->redirectToRoute('app_landing');
     }
 
     #[Route('/disable2FA/local', name: 'app_disable2FA_local')]
     public function disable2FALocal(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -345,11 +347,15 @@ class TwoFAController extends AbstractController
     #[Route('/disable2FA/TOTP', name: 'app_disable2FA_TOTP')]
     public function disable2FAApp(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         $session = $request->getSession();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -389,14 +395,15 @@ class TwoFAController extends AbstractController
     #[Route('/2FAFirstSetup/codes', name: 'app_otpCodes')]
     public function twoFACodes(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $session = $request->getSession();
-        if (
-            $user &&
-            !$user->getOTPcodes()->isEmpty()
-        ) {
+        if (!$user->getOTPcodes()->isEmpty()) {
             return $this->redirectToRoute('app_landing');
         }
         if ($this->twoFAService->twoFAisActive($user)) {
@@ -430,6 +437,10 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         $session = $request->getSession();
         $codes = $request->query->get('codes');
         // Check if the codes was ben sent
@@ -462,12 +473,16 @@ class TwoFAController extends AbstractController
     #[Route('/verify2FA/resend', name: 'app_2FA_local_resend_code')]
     public function resendCode(Request $request): RedirectResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
-        /** @var User $user */
-        $user = $this->getUser();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
@@ -529,14 +544,15 @@ class TwoFAController extends AbstractController
         return $this->redirect($lastPage);
     }
 
-    /**
-     * @throws RandomException
-     */
     #[Route('/generate2FACode', name: 'app_2FA_generate_code')]
     public function generateCode(Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_VERIFY->value)) {
             $this->twoFAService->generate2FACode(
                 $user,
@@ -587,22 +603,20 @@ class TwoFAController extends AbstractController
         return $response;
     }
 
-    /**
-     * @throws \DateMalformedStringException
-     * @throws RandomException
-     */
     #[Route('/2FAFirstSetup/portal', name: 'app_2FA_firstSetup_local')]
     public function firstSetupPortal(Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
             return $this->redirectToRoute('app_swap2FA_disable_TOTP');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
-        /** @var User $user */
-        $user = $this->getUser();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value)) {
@@ -629,11 +643,15 @@ class TwoFAController extends AbstractController
     #[Route('/2FAFirstSetup/verification', name: 'app_2FA_first_verification_local')]
     public function firstVerificationLocal(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $form = $this->createForm(TwoFACode::class);
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         $session = $request->getSession();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -698,6 +716,10 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
             $this->addFlash(
                 'error',
@@ -743,6 +765,10 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
 
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
             $this->twoFAService->generate2FACode(
@@ -769,6 +795,10 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            return $this->redirectToRoute('app_landing');
+        }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
             $this->addFlash(
                 'error',
