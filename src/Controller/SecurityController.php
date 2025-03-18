@@ -132,6 +132,11 @@ class SecurityController extends AbstractController
             if ($platformMode === PlatformMode::DEMO->value) {
                 return $this->redirectToRoute('saml_logout');
             }
+            $verification = $user->isVerified();
+            // Check if the user is verified
+            if (!$verification) {
+                return $this->redirectToRoute('app_email_code');
+            }
             // Get 2fa status on platform
             if ($twoFAPlatformStatus) {
                 // Check 2fa status on platform, after that we need to check user status to decide what case we have
