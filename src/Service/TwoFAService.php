@@ -94,7 +94,7 @@ readonly class TwoFAService
      */
     public function generateOTPCodes(User $user): array
     {
-        // If the user already have code removes it before generates new ones.
+        // If the user already has codes, they must be removed before generating new ones.
         if ($user->getOTPcodes()) {
             foreach ($user->getOTPcodes() as $code) {
                 $this->entityManager->remove($code);

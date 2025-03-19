@@ -1,12 +1,5 @@
 {% extends 'site/base.html.twig' %}
 {% set twoFAEnabled = (user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-{% set mandatoryTwoFA = (
-    data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value or
-    (
-    data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value and
-    user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value
-    )
-    ) %}
 {% block title %}
     {{ data.title.value }}
 {% endblock %}
@@ -24,17 +17,15 @@
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
-        {% if mandatoryTwoFA %}
-            {% if twoFAEnabled %}
-                <div class="toast-success">
-                    You already have two-factor authentication configured for this account.
-                </div>
-            {% else %}
-                <div class="toast-warning">
-                    Two-factor authentication is mandatory for account security on the portal.
-                    You cannot proceed without enabling it. Please activate it immediately to continue.
-                </div>
-            {% endif %}
+        {% if twoFAEnabled %}
+            <div class="toast-success">
+                You already have two-factor authentication configured for this account.
+            </div>
+        {% else %}
+            <div class="toast-warning">
+                Two-factor authentication is mandatory for account security on the portal.
+                You cannot proceed without enabling it. Please activate it immediately to continue.
+            </div>
         {% endif %}
     </div>
 

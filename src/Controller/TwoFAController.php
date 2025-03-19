@@ -438,12 +438,12 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
         $codes = $request->query->get('codes');
-        // Check if the codes was ben sent
+        // Check if the codes was been sent
         if (!$codes) {
             $data = json_decode($codes, true, 512, JSON_THROW_ON_ERROR);
             $codes = $data["codes"] ?? null;
@@ -580,7 +580,7 @@ class TwoFAController extends AbstractController
     public function downloadCodes(Request $request): Response
     {
         $codes = $request->query->get('codes');
-        // Check if the codes was ben sent
+        // Check if the codes was been sent
         if (!$codes) {
             $data = json_decode($codes, true, 512, JSON_THROW_ON_ERROR);
             $codes = $data["codes"] ?? null;
@@ -766,7 +766,7 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
