@@ -48,14 +48,7 @@
                 {% if user.phoneNumber is not null%}
                     <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">SMS</a>
                 {% endif %}
-                <div class="flex flex-col">
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                    <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                    </div>
-                </div>
+                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                 {% if user.email is not null%}
@@ -66,26 +59,10 @@
                 {% endif %}
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <div class="flex flex-col">
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                    <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                    </div>
-                </div>
+                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <div class="flex flex-col">
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
-                </div>
+                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
         {% endif %}
         {# When the app status is ENFORCED_FOR_LOCAL #}
@@ -93,14 +70,7 @@
             {# Local users #}
             {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
+                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
                     {% if user.email is not null%}
                         <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">Email</a>
                     {% endif %}
@@ -117,24 +87,10 @@
                     {% endif %}
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
+                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
+                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
             {% else %}
                 {# External Users #}
@@ -145,14 +101,7 @@
                     {% if user.phoneNumber is not null%}
                         <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">SMS</a>
                     {% endif %}
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
+                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                     {% if user.email is not null%}
@@ -163,24 +112,10 @@
                     {% endif %}
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
+                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                    <div class="flex flex-col">
-                        <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                        <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                        </div>
-                    </div>
+                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
             {% endif %}
         {% endif %}
@@ -193,14 +128,7 @@
                 {% if user.phoneNumber is not null%}
                     <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">SMS</a>
                 {% endif %}
-                <div class="flex flex-col">
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                    <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                    </div>
-                </div>
+                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                 {% if user.email is not null%}
@@ -211,24 +139,10 @@
                 {% endif %}
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <div class="flex flex-col">
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                    <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                    </div>
-                </div>
+                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <div class="flex flex-col">
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
-                    <div class="p-3 text-center">
-                    <span class="text-[#212529] text-opacity-40 text-sm p-3">
-                        Ex.: Microsoft Authenticator, Google Authenticator, etc.
-                    </span>
-                    </div>
-                </div>
+                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
         {% endif %}
     </div>
