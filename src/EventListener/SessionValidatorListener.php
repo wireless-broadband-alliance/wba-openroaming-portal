@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\User;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -38,7 +39,7 @@ readonly class SessionValidatorListener
             }
             return;
         }
-
+        /** @var User $user */
         $user = $token->getUser();
         if ($user && str_starts_with($path, '/dashboard')) {
             $userAdmin = $this->userRepository->find($user->getId());
