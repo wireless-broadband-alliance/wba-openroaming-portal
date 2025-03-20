@@ -48,7 +48,7 @@ class UserStatusChecker
         return null;
     }
 
-    public function portalAccountType(User $user)
+    public function portalAccountType(User $user): false|string
     {
         $userExternalAuths = $user->getUserExternalAuths();
 
