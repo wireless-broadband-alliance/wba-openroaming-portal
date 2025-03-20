@@ -130,7 +130,7 @@ class TwoFAController extends AbstractController
                 403,
                 null,
                 'The Two-Factor Authentication (2FA) configuration is incomplete.' .
-                ' Please set up 2FA for this account using either email or SMS.'
+                ' Please set up 2FA using either email or SMS.'
             )->toResponse();
         }
 
@@ -153,7 +153,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'You need to wait %d seconds before resending the code.',
+                    'You need to wait %d seconds before asking for a new code.',
                     $timeToResendIntervalValue
                 )
             )->toResponse();
@@ -185,7 +185,7 @@ class TwoFAController extends AbstractController
                 null,
                 sprintf(
                     'Too many validation attempts.' .
-                    'You have exceeded the limit of %d attempts. Please wait %d hour(s) before trying again.',
+                    'You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
                     $nrAttemptsValue,
                     ceil($timeToResetAttemptsValue / 60) // Converted minutes to hours
                 )

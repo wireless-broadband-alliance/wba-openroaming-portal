@@ -219,7 +219,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'message' => [
                                                     'type' => 'string',
                                                     'example' => 'Two-Factor authentication code successfully sent.' .
-                                                        ' You have 18 attempts remaining to request a new one.',
+                                                        ' You have X attempts remaining to request a new one.',
                                                 ],
                                             ],
                                         ],
@@ -265,7 +265,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'summary' => 'Missing 2FA setting',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_json' => [
@@ -273,6 +275,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'miss_typed_uuid' => [
+                                        'summary' => 'Invalid Account Uuid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
                                         ],
                                     ],
                                 ],
@@ -295,13 +304,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    '2fa_not_configured' => [
-                                        'summary' => '2FA Not Configured',
+                                    'miss_typed_password' => [
+                                        'summary' => 'Invalid Password',
                                         'value' => [
                                             'success' => false,
-                                            // phpcs:disable Generic.Files.LineLength.TooLong
-                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
-                                            // phpcs:enable
+                                            'error' => 'Invalid credentials'
                                         ],
                                     ],
                                 ],
@@ -309,7 +316,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     403 => [
-                        'description' => 'Account unverified/banned',
+                        'description' => 'Account Type',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -340,6 +347,30 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'User account is banned from the system!',
                                         ],
                                     ],
+                                    'invalid_account_type' => [
+                                        'summary' => 'User account invalid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid account type.' .
+                                                ' Please only use email/phone number accounts from the portal',
+                                        ],
+                                    ],
+                                    'invalid_2fa_configuration' => [
+                                        'summary' => 'Invalid 2FA configuration',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid Two-Factor Authentication configuration Please ensure' .
+                                                'that 2FA is set up using either email or SMS for this account',
+                                        ],
+                                    ],
+                                    'invalid_2fa_uncompleted_configuration' => [
+                                        'summary' => 'The Two-Factor Authentication configuration is incompleted.',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'The Two-Factor Authentication (2FA) configuration is' .
+                                                ' incomplete. Please set up 2FA using either email or SMS',
+                                        ],
+                                    ],
                                     'password_reset_request_active' => [
                                         'summary' => 'Forgot password request active',
                                         'value' => [
@@ -353,10 +384,53 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    429 => [
+                        'description' => 'Too many requests.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Too many requests.',
+                                            'description' => 'Too many requests provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'waiting_interval_between_requests' => [
+                                        'summary' => 'Interval of waiting between requests',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'You need to wait %d seconds before asking for a new code.'
+                                        ],
+                                    ],
+                                    'limit_of_request_exceeded' => [
+                                        'summary' => 'Limit of request exceeded',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Too many attempts. You have exceeded the limit of %d' .
+                                                ' attempts. Please wait %d minutes before trying again.',
+                                        ],
+                                    ],
+                                    'validation_attempts' => [
+                                        'summary' => 'Validation attempts exceeded',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Too many validation attempts. You have exceeded the' .
+                                                ' limit of %d attempts. Please wait %d minute(s) before trying again.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 summary: 'Two Factor Authentication request Status',
-                description: 'This endpoint provides an endpoint to check Two Factor Authentication activation status 
-                and ensure that users adhere to request limits before receiving a new authentication code.',
+                description: 'This endpoint provides Two-Factor Authentication code only for portal accounts. 
+                To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
                 requestBody: new RequestBody(
                     description: 'User Two Factor Authentication request status',
                     content: new ArrayObject([
@@ -499,7 +573,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'missing_2fa_setting' => [
-                                        'summary' => 'Missing 2FA setting',
+                                        'summary' => 'Missing 2FA settings',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
