@@ -5,6 +5,8 @@ namespace App\Api\V1\Controller;
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
@@ -93,7 +95,6 @@ class TwoFAController extends AbstractController
         }
 
         $portalAccountType = $this->userStatusChecker->portalAccountType($user);
-
         if ($portalAccountType === 'false') {
             return new BaseResponse(
                 403,
@@ -102,6 +103,89 @@ class TwoFAController extends AbstractController
             )->toResponse();
         }
 
+        if (
+            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::EMAIL->value &&
+            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::SMS->value
+        ) {
+            return new BaseResponse(
+                403,
+                null,
+                'Invalid Two-Factor Authentication configuration.'.
+                ' Please ensure that 2FA is set up using either email or SMS for this account.'
+            )->toResponse();
+        }
+
+        if ($user->getOTPcodes()->isEmpty()
+        ) {
+            return new BaseResponse(
+                403,
+                null,
+                'The Two-Factor Authentication (2FA) configuration is incomplete.'.
+                ' Please set up 2FA for this account using either email or SMS.'
+            )->toResponse();
+        }
+
+        // Fetch and validate settings with fallback defaults
+        $timeToResendIntervalValue = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']);
+        $timeToResendIntervalValue = $timeToResendIntervalValue ? (int)$timeToResendIntervalValue->getValue() : 30;
+
+        $nrAttemptsValue = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE']
+        );
+        $nrAttemptsValue = $nrAttemptsValue ? (int)$nrAttemptsValue->getValue() : 3;
+
+        $timeToResetAttemptsValue = $this->settingRepository->findOneBy(
+            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+        );
+        $timeToResetAttemptsValue = $timeToResetAttemptsValue ? (int)$timeToResetAttemptsValue->getValue() : 60;
+
+        // 1. Validate waiting interval before resending
+        $timeInterval = $this->twoFAService->timeIntervalToResendCode($user);
+        if ($timeInterval === false) {
+            return new BaseResponse(
+                429,
+                null,
+                sprintf(
+                    'You need to wait %d seconds before resending the code.',
+                    $timeToResendIntervalValue
+                )
+            )->toResponse();
+        }
+
+        // 2. Validate resend attempts - Resend attempts restriction
+        $canResendCode = $this->twoFAService->canResendCode($user);
+        if ($canResendCode === false) {
+            return new BaseResponse(
+                429,
+                null,
+                sprintf(
+                    'Too many attempts.'.
+                    ' You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
+                    $nrAttemptsValue,
+                    $timeToResetAttemptsValue
+                )
+            )->toResponse();
+        }
+
+        // 3. Validate code validation restrictions - Attempt validation restriction
+        $canValidationCode = $this->twoFAService->canValidationCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
+        if ($canValidationCode === false) {
+            return new BaseResponse(
+                429,
+                null,
+                sprintf(
+                    'Too many validation attempts.'.
+                    'You have exceeded the limit of %d attempts. Please wait %d hour(s) before trying again.',
+                    $nrAttemptsValue,
+                    ceil($timeToResetAttemptsValue / 60) // Converted minutes to hours
+                )
+            )->toResponse();
+        }
+
+        dd('success 2fa code will be send');
+        // TODO: Add main 2fa success logic here
         // Defines the Event to the table
         $eventMetadata = [
             'ip' => $request->getClientIp(),
@@ -114,66 +198,15 @@ class TwoFAController extends AbstractController
             $eventMetadata
         );
 
-        $nrAttemptsSetting = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE']
-        ); // 3 attempts
-        $timeToResetAttemptsSetting = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
-        ); // 1 hour
-        $timeToResendIntervalSetting = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
-        ); // 30 secs
+        // Show the number to attempts the user has left
+//        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+//            $user,
+//            $nrAttempts,
+//            $limitTime,
+//            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+//        );
+//        $attemptsLeft = $nrAttempts - count($attempts);
 
-        // Extracting values from settings
-        $nrAttempts = $nrAttemptsSetting ? (int)$nrAttemptsSetting->getValue() : null;
-        $timeToResetAttempts = $timeToResetAttemptsSetting ? (int)$timeToResetAttemptsSetting->getValue() : null;
-        $timeToResendInterval = $timeToResendIntervalSetting ? (int)$timeToResendIntervalSetting->getValue() : null;
-
-        // Validate resend attempts
-        $canResendCode = $this->twoFAService->canResendCode($user);
-        if ($canResendCode === false) {
-            return new BaseResponse(
-                429,
-                null,
-                sprintf(
-                    'Too many attempts.'.
-                    ' You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
-                    $nrAttempts,
-                    $timeToResetAttempts
-                )
-            )->toResponse();
-        }
-
-        // Validate waiting interval before resending
-        $timeInterval = $this->twoFAService->timeIntervalToResendCode($user);
-        if ($timeInterval === false) {
-            return new BaseResponse(
-                429,
-                null,
-                sprintf(
-                    'You need to wait %d seconds before resending the code.',
-                    $timeToResendInterval
-                )
-            )->toResponse();
-        }
-
-        // Validate code validation restrictions
-        $canValidationCode = $this->twoFAService->canValidationCode(
-            $user,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
-        );
-        if ($canValidationCode === false) {
-            return new BaseResponse(
-                429,
-                null,
-                sprintf(
-                    'You need to wait %d seconds before validating the code again.',
-                    $timeToResendInterval
-                )
-            )->toResponse();
-        }
-
-        // TODO: Add main 2fa success logic here
 
         $correct2FACode = 2;
         $responseData = $correct2FACode;
