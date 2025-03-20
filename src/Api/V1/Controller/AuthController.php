@@ -8,8 +8,10 @@ use App\Controller\MicrosoftController;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
@@ -49,7 +51,8 @@ class AuthController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly TwoFAAPIService $twoFAAPIService,
         private readonly TwoFAService $twoFAService,
-        private readonly TOTPService $TOTPService
+        private readonly TOTPService $TOTPService,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -68,12 +71,18 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        if (!isset($data['turnstile_token'])) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if (!$turnstileSetting) {
+            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
 
-        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+        if ($turnstileSetting === OperationMode::ON->value) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
+            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
         }
 
         $errors = [];
