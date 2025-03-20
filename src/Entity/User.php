@@ -354,12 +354,11 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-                summary: '2FA Authentications request Status',
-                description: 'This endpoint allows the portal to verify whether a user has 2FA enabled and if they 
-                are eligible to request a new verification code. It provides endpoints to check 2FA activation status 
-                and ensure users follow de request limits before receiving a new authentication code ',
+                summary: 'Two Factor Authentication request Status',
+                description: 'This endpoint provides an endpoint to check Two Factor Authentication activation status 
+                and ensure that users adhere to request limits before receiving a new authentication code.',
                 requestBody: new RequestBody(
-                    description: 'User 2FA request status',
+                    description: 'User Two Factor Authentication request status',
                     content: new ArrayObject([
                         'application/json' => [
                             'schema' => [
