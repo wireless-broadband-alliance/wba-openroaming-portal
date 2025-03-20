@@ -223,7 +223,11 @@ class TwoFAController extends AbstractController
         );
 
         $attemptsLeft = $nrAttemptsValue - count($attempts);
-        $message = 'You have ' . $attemptsLeft . ' attempt' . ($attemptsLeft === 1 ? '' : 's') . ' left.';
+        $message = 'Two-Factor authentication code successfully sent. You have ' .
+            $attemptsLeft .
+            ' attempt' .
+            ($attemptsLeft === 1 ? '' : 's') .
+            ' remaining to request a new one.';
 
         // Prepare the response with just the message
         $responseData = [

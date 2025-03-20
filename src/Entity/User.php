@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
+use App\Api\V1\Controller\TwoFAController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use ArrayObject;
@@ -198,6 +199,204 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: "is_granted('ROLE_USER')",
             securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
             name: 'api_get_current_user',
+        ),
+        new Post(
+            uriTemplate: '/api/v1/twoFA/request',
+            controller: TwoFAController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Requested two-factor authentication token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Two-Factor authentication code successfully sent.' .
+                                                        ' You have 18 attempts remaining to request a new one.',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'CAPTCHA validation failed',
+                                        ],
+                                    ],
+                                    'missing_fields' => [
+                                        'summary' => 'Missing fields',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required fields: uuid, password or turnstile_token',
+                                        ],
+                                    ],
+                                    'missing_2fa_setting' => [
+                                        'summary' => 'Missing 2FA setting',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA Not Configured',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Account unverified/banned',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                    'password_reset_request_active' => [
+                                        'summary' => 'Forgot password request active',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Authenticate a user locally',
+                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.
+                Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
+                requestBody: new RequestBody(
+                    description: 'User credentials and CAPTCHA validation token',
+                    content: new ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'description' => 'Unique identifier of the user',
+                                        'example' => 'user-uuid-example'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'description' => 'Password of the user',
+                                        'example' => 'user-password-example'
+                                    ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => 'Code for 2FA validation',
+                                        'example' => '02YZR88R'
+                                    ],
+                                ],
+                                'required' => ['uuid', 'password', 'turnstile_token', 'twoFACode'],
+                            ],
+                        ],
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_twoFA_request',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
             uriTemplate: '/v1/auth/local',
