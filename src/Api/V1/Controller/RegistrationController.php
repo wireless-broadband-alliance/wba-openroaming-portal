@@ -531,7 +531,7 @@ class RegistrationController extends AbstractController
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
-
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         if ($turnstileSetting === OperationMode::ON->value) {
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
