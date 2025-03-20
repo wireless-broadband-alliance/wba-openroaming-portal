@@ -11,15 +11,16 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutSuccessListener implements EventSubscriberInterface
+readonly class LogoutSuccessListener implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly EventActions $eventActions,
+        private GetSettings $getSettings,
+        private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private EventActions $eventActions,
     ) {
     }
 
@@ -40,6 +41,10 @@ class LogoutSuccessListener implements EventSubscriberInterface
         $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
 
         if ($user instanceof User) {
+            // Remove the 'session_backup' cookie
+            $response = $event->getResponse() ?? new Response();
+            $response->headers->clearCookie('session_backup');
+
             // Defines the Event to the table
             $eventMetadata = [
                 'platform' => $platformMode,

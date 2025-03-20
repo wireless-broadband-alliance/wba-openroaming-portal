@@ -11,25 +11,20 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 readonly class TwoFAService
 {
-    /**
-     * Registration constructor.
-     *
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings $getSettings The instance of GetSettings class.
-     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
-     * @param SendSMS $sendSMS Calls the sendSMS service
-     * @param MailerInterface $mailer Called for send emails
-     */
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserRepository $userRepository,
@@ -48,7 +43,7 @@ readonly class TwoFAService
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user doesn't have code in the BD return false
-        if (!$codeDate instanceof \DateTimeInterface) {
+        if (!$codeDate instanceof DateTimeInterface) {
             return false;
         }
         $now = new DateTime();
@@ -79,30 +74,27 @@ readonly class TwoFAService
         return $verificationCode;
     }
 
-    /**
-     * @throws RandomException
-     */
-    public function generate2FACode(User $user, string $ip, string $userAgent): ?string
+    public function generate2FACode(User $user, string $ip, string $userAgent, string $eventType): ?string
     {
         // Generate code
         $code = $this->twoFACode($user);
         // Send code
-        $this->sendCode($user, $code, $ip, $userAgent);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
         return $user->getTwoFAcode();
+    }
+
+    public function resendCode(User $user, string $ip, string $userAgent, string $eventType): void
+    {
+        $code = $this->twoFACode($user);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
     }
 
     /**
      * @throws RandomException
      */
-    public function resendCode(User $user, string $ip, string $userAgent): void
-    {
-        $code = $this->twoFACode($user);
-        $this->sendCode($user, $code, $ip, $userAgent);
-    }
-
     public function generateOTPCodes(User $user): array
     {
-        // If the user already have code we need to remove that codes before generate new ones.
+        // If the user already has codes, they must be removed before generating new ones.
         if ($user->getOTPcodes()) {
             foreach ($user->getOTPcodes() as $code) {
                 $this->entityManager->remove($code);
@@ -121,7 +113,6 @@ readonly class TwoFAService
 
     public function validateOTPCodes(User $user, string $formCode): bool
     {
-        // Get the OTP codes from user
         $twoFACodes = $user->getOTPcodes();
         foreach ($twoFACodes as $code) {
             // Verify if the code exists and if this code is valid
@@ -150,7 +141,14 @@ readonly class TwoFAService
         return strtoupper(substr($alphanumericCode, 0, 8));
     }
 
-    private function sendCode(User $user, string $code, string $ip, string $userAgent): void
+    /**
+     * @throws TransportExceptionInterface
+     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    private function sendCode(User $user, string $code, string $ip, string $userAgent, string $eventType): void
     {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -188,7 +186,7 @@ readonly class TwoFAService
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::TWO_FA_CODE_SENT->value,
+            $eventType,
             new DateTime(),
             $eventMetaData
         );
@@ -223,8 +221,28 @@ readonly class TwoFAService
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            $nrAttempts,
+            $limitTime,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
         return count($attempts) < $nrAttempts;
+    }
+
+    public function timeIntervalToResendCode(User $user): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            1,
+            $limitTime,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
+        return count($attempts) < 1;
     }
 
     private function removeOTPCodes(User $user): void
@@ -261,14 +279,14 @@ readonly class TwoFAService
         );
     }
 
-    public function canValidationCode(User $user)
+    public function canValidationCode(User $user, string $eventType): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime);
-        return count($attempts) === 0;
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
+        return count($attempts) < $nrAttempts;
     }
 }

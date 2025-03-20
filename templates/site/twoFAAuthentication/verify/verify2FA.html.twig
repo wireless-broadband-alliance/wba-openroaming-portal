@@ -25,7 +25,39 @@
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Two-Factor Authentication - Verification</p>
-        <p class="text-lg">To verify your account please enter the code sent to you.</p>
+
+        {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
+            {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                <p class="text-lg">
+                    Two-factor authentication is currently <strong>disabled</strong> for your account. Enabling it
+                    provides an extra layer of security to help protect your account from unauthorized access.
+                </p>
+            {% else %}
+                <p class="text-lg">
+                    Two-factor authentication is currently <strong>enabled</strong> for your account. This helps secure
+                    your account and protect it from unauthorized access.
+                </p>
+            {% endif %}
+            <p class="text-md">
+                Please, if you are on this page enter the code sent to you to proceed with enabling 2FA.
+            </p>
+        {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value %}
+            <p class="text-lg">
+                Two-factor authentication is required for certain account types to ensure compliance with security
+                policies. Please enter the code sent to you to verify and enable 2FA for your account.
+            </p>
+        {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value %}
+            <p class="text-lg">
+                Two-factor authentication is mandatory for all accounts. This added security measure helps prevent
+                unauthorized access to sensitive information. Please enter the code sent to you to complete the
+                verification process and secure your account.
+            </p>
+        {% else %}
+            <p class="text-lg">
+                Two-factor authentication helps protect your account by adding a layer of security. Follow the
+                instructions provided to complete the process.
+            </p>
+        {% endif %}
     </div>
     {{ form_start(form) }}
     <div class="relative mt-10">

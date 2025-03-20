@@ -94,12 +94,24 @@
         </form>
     </div>
 
-    {# divider #}
+    {# Divider #}
     <div class="divider my-8"></div>
-    <div>
-        <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
-        <a href="{{ path('app_configure2FA') }}" class="mt-6 w-[340px] btn-secondary">Configure Two-Factor
+    <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
+    <div class="grid grid-cols-2 space-x-2">
+        <a href="{{ path('app_configure2FA') }}" class="btn-secondary">Configure Two-Factor
             Authentication</a>
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
+            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+            {% endif %}
+        {% endif %}
+        {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) %}
+            {% if not (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+                {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                    <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
     </div>
     {# divider #}
     <div class="divider my-8"></div>

@@ -2,6 +2,10 @@
 
 namespace App\EventListener;
 
+use App\Entity\User;
+use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -10,11 +14,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class SessionValidatorListener
+readonly class SessionValidatorListener
 {
     public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
-        private readonly RouterInterface $router
+        private TokenStorageInterface $tokenStorage,
+        private RouterInterface $router,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -34,11 +39,34 @@ class SessionValidatorListener
             }
             return;
         }
-
+        /** @var User $user */
         $user = $token->getUser();
+        if ($user && str_starts_with($path, '/dashboard')) {
+            $userAdmin = $this->userRepository->find($user->getId());
+            if (!$userAdmin) {
+                throw new AccessDeniedHttpException('Access denied.');
+            }
+            if (
+                ($userAdmin->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
+                && !$session->has(
+                    '2fa_verified'
+                )
+            ) {
+                $url = $this->router->generate('app_landing');
+                $event->setResponse(new RedirectResponse($url));
+            }
+        }
+
         $sessionAdmin = $session->get('session_admin');
-        // Restrict access to /dashboard if the user doesn't have 'session_admin' in their session
-        if ($user && !$sessionAdmin && str_starts_with($path, '/dashboard')) {
+
+        // Restrict access to /dashboard if the user is not an admin and does not have 'session_admin' set to true
+        if (
+            $user && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
+                'ROLE_ADMIN',
+                $user->getRoles(),
+                true
+            )
+        ) {
             throw new AccessDeniedHttpException('Access denied.');
         }
     }

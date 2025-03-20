@@ -559,13 +559,13 @@ class SiteController extends AbstractController
         EntityManagerInterface $entityManager,
         MailerInterface $mailer
     ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        if ($this->getUser() instanceof \Symfony\Component\Security\Core\User\UserInterface) {
+        if ($this->getUser() instanceof UserInterface) {
             $this->addFlash('error', 'You can\'t access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -705,7 +705,7 @@ class SiteController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($this->getUser() instanceof \Symfony\Component\Security\Core\User\UserInterface) {
+        if ($this->getUser() instanceof UserInterface) {
             $this->addFlash('error', 'You can\'t access this page logged in. ');
             return $this->redirectToRoute('app_landing');
         }
@@ -853,7 +853,7 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1073,7 +1073,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1103,7 +1103,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1163,7 +1163,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You must be logged in to access this page.');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 

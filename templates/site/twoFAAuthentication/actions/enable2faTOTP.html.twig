@@ -24,10 +24,59 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two-Factor Authentication App</p>
-        <p class="text-lg"> Please scan this QR code in your application </p>
-    </div>
+        <p class="font-bold text-xl">Two-Factor Authentication Setup</p>
+        <p class="text-lg">
+            Before proceeding, please install one of the following Two-Factor Authentication apps on your device:
+        </p>
 
+        {# Card Layout for Applications #}
+        <div class="grid grid-cols-1 gap-6 mt-6">
+            {# Google Authenticator #}
+            <div class="flex items-center p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition">
+                <twig:ux:icon name="wba:google-authenticator" class="w-10 h-10 md:w-12 md:h-12 inline-block mr-4 text-red-500" />
+                <div>
+                    <p class="font-medium text-lg">Google Authenticator</p>
+                    <p>
+                        Available on
+                        <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+                           target="_blank" class="text-blue-500 underline"
+                           rel="noopener noreferrer nofollow">Google Play</a> and
+                        <a href="https://apps.apple.com/app/google-authenticator/id388497605"
+                           target="_blank" class="text-blue-500 underline"
+                           rel="noopener noreferrer nofollow">App Store</a>.
+                    </p>
+                </div>
+            </div>
+
+            {# Microsoft Authenticator #}
+            <div class="flex items-center p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition">
+                <twig:ux:icon name="wba:microsoft-auth" class="w-10 h-10 md:w-12 md:h-12 inline-block mr-4" />
+                <div>
+                    <p class="font-medium text-lg">Microsoft Authenticator</p>
+                    <p>
+                        Available on
+                        <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator"
+                           target="_blank" class="text-blue-500 underline"
+                           rel="noopener noreferrer nofollow">Google Play</a> and
+                        <a href="https://apps.apple.com/app/microsoft-authenticator/id983156458"
+                           target="_blank" class="text-blue-500 underline"
+                           rel="noopener noreferrer nofollow">App Store</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="mt-5">
+            {# Steps to Enable 2FA #}
+            <p class="text-lg">To enable Two-Factor Authentication, follow these steps:</p>
+            <ol class="pl-5 list-decimal text-lg mt-2">
+                <li>Install one of the applications listed above on your mobile device.</li>
+                <li>Open the application and choose the option to add a new account.</li>
+                <li>Scan the QR code below using the app or manually enter the key provided in the app if needed.</li>
+                <li>Once the app is configured, use the app-generated code whenever prompted while logging in.</li>
+            </ol>
+        </div>
+    {# QR Code Section #}
     <div class="flex justify-center my-5">
         <img src="data:image/png;base64,{{ qrCodeImage }}" alt="QR Code for 2FA configuration"/>
     </div>
