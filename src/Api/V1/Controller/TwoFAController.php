@@ -117,7 +117,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 403,
                 null,
-                'Invalid Two-Factor Authentication configuration.'.
+                'Invalid Two-Factor Authentication configuration.' .
                 ' Please ensure that 2FA is set up using either email or SMS for this account.'
             )->toResponse();
         }
@@ -129,7 +129,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 403,
                 null,
-                'The Two-Factor Authentication (2FA) configuration is incomplete.'.
+                'The Two-Factor Authentication (2FA) configuration is incomplete.' .
                 ' Please set up 2FA for this account using either email or SMS.'
             )->toResponse();
         }
@@ -166,7 +166,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'Too many attempts.'.
+                    'Too many attempts.' .
                     ' You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
                     $nrAttemptsValue,
                     $timeToResetAttemptsValue
@@ -184,7 +184,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'Too many validation attempts.'.
+                    'Too many validation attempts.' .
                     'You have exceeded the limit of %d attempts. Please wait %d hour(s) before trying again.',
                     $nrAttemptsValue,
                     ceil($timeToResetAttemptsValue / 60) // Converted minutes to hours
