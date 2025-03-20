@@ -354,10 +354,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                 ],
-                summary: 'Authenticate a user locally',
-                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.
-                Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked 
-                based on the TWO_FACTOR_AUTH_STATUS setting.',
+                summary: '2FA Authentications request Status',
+                description: 'This endpoint allows the portal to verify whether a user has 2FA enabled and if they 
+                are eligible to request a new verification code. It provides endpoints to check 2FA activation status 
+                and ensure users follow de request limits before receiving a new authentication code ',
                 requestBody: new RequestBody(
                     description: 'User credentials and CAPTCHA validation token',
                     content: new ArrayObject([
@@ -380,13 +380,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
-                                    'twoFACode' => [
-                                        'type' => 'string',
-                                        'description' => 'Code for 2FA validation',
-                                        'example' => '02YZR88R'
-                                    ],
                                 ],
-                                'required' => ['uuid', 'password', 'turnstile_token', 'twoFACode'],
+                                'required' => ['uuid', 'password', 'turnstile_token'],
                             ],
                         ],
                     ]),
