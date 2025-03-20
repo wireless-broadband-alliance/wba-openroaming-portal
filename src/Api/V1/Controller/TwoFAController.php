@@ -26,7 +26,6 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class TwoFAController extends AbstractController
 {
-
     public function __construct(
         private readonly CaptchaValidator $captchaValidator,
         private readonly UserRepository $userRepository,
@@ -52,8 +51,13 @@ class TwoFAController extends AbstractController
         } catch (JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
-        $turnstile = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
-        if ($turnstile === OperationMode::ON) {
+
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if (!$turnstileSetting) {
+            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
+        }
+
+        if ($turnstileSetting === OperationMode::ON->value) {
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
             }
@@ -111,7 +115,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 403,
                 null,
-                'Invalid Two-Factor Authentication configuration.'.
+                'Invalid Two-Factor Authentication configuration.' .
                 ' Please ensure that 2FA is set up using either email or SMS for this account.'
             )->toResponse();
         }
@@ -123,7 +127,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 403,
                 null,
-                'The Two-Factor Authentication (2FA) configuration is incomplete.'.
+                'The Two-Factor Authentication (2FA) configuration is incomplete.' .
                 ' Please set up 2FA for this account using either email or SMS.'
             )->toResponse();
         }
@@ -132,8 +136,9 @@ class TwoFAController extends AbstractController
         $timeToResendIntervalValue = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']);
         $timeToResendIntervalValue = $timeToResendIntervalValue ? (int)$timeToResendIntervalValue->getValue() : 30;
 
-        $nrAttemptsValue = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE']
-        );
+        $nrAttemptsValue = $this->settingRepository->findOneBy([
+                'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
+            ]);
         $nrAttemptsValue = $nrAttemptsValue ? (int)$nrAttemptsValue->getValue() : 3;
 
         $timeToResetAttemptsValue = $this->settingRepository->findOneBy(
@@ -161,7 +166,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'Too many attempts.'.
+                    'Too many attempts.' .
                     ' You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
                     $nrAttemptsValue,
                     $timeToResetAttemptsValue
@@ -179,7 +184,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'Too many validation attempts.'.
+                    'Too many validation attempts.' .
                     'You have exceeded the limit of %d attempts. Please wait %d hour(s) before trying again.',
                     $nrAttemptsValue,
                     ceil($timeToResetAttemptsValue / 60) // Converted minutes to hours
