@@ -30,7 +30,7 @@
         </p>
 
         {# Card Layout for Applications #}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div class="grid grid-cols-1 gap-6 mt-6">
             {# Google Authenticator #}
             <div class="flex items-center p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition">
                 <twig:ux:icon name="wba:google-authenticator" class="w-10 h-10 md:w-12 md:h-12 inline-block mr-4 text-red-500" />
@@ -64,17 +64,20 @@
                     </p>
                 </div>
             </div>
+        </div>
 
-        {# Steps to Enable 2FA #}
-        <p class="text-lg mt-5">To enable Two-Factor Authentication, follow these steps:</p>
-        <ol class="pl-5 list-decimal text-lg mt-2">
-            <li>Install one of the applications listed above on your mobile device.</li>
-            <li>Open the application and choose the option to add a new account.</li>
-            <li>Scan the QR code below using the app or manually enter the key provided in the app if needed.</li>
-            <li>Once the app is configured, use the app-generated code whenever prompted while logging in.</li>
-        </ol>
-    </div>
 
+        </div>
+        <div class="mt-5">
+            {# Steps to Enable 2FA #}
+            <p class="text-lg">To enable Two-Factor Authentication, follow these steps:</p>
+            <ol class="pl-5 list-decimal text-lg mt-2">
+                <li>Install one of the applications listed above on your mobile device.</li>
+                <li>Open the application and choose the option to add a new account.</li>
+                <li>Scan the QR code below using the app or manually enter the key provided in the app if needed.</li>
+                <li>Once the app is configured, use the app-generated code whenever prompted while logging in.</li>
+            </ol>
+        </div>
     {# QR Code Section #}
     <div class="flex justify-center my-5">
         <img src="data:image/png;base64,{{ qrCodeImage }}" alt="QR Code for 2FA configuration"/>
