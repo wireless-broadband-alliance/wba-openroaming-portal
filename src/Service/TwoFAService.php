@@ -83,7 +83,7 @@ readonly class TwoFAService
         return $user->getTwoFAcode();
     }
 
-    public function resendCode(User $user, string $ip, string $userAgent, string $eventType): void
+    public function resendCode(User $user, ?string $ip, ?string $userAgent, string $eventType): void
     {
         $code = $this->twoFACode($user);
         $this->sendCode($user, $code, $ip, $userAgent, $eventType);
@@ -148,7 +148,7 @@ readonly class TwoFAService
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      */
-    private function sendCode(User $user, string $code, string $ip, string $userAgent, string $eventType): void
+    private function sendCode(User $user, string $code, ?string $ip, ?string $userAgent, string $eventType): void
     {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -179,9 +179,9 @@ readonly class TwoFAService
         }
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent,
+            'user_agent' => $userAgent ?? null,
             'uuid' => $user->getUuid(),
-            'ip' => $ip,
+            'ip' => $ip ?? null,
         ];
         $this->eventActions->saveEvent(
             $user,
