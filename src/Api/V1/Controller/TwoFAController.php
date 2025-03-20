@@ -5,6 +5,7 @@ namespace App\Api\V1\Controller;
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -52,13 +53,14 @@ class TwoFAController extends AbstractController
         } catch (JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
-
-        if (!isset($data['turnstile_token'])) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
-        }
-
-        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+        $turnstile = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if ($turnstile === OperationMode::ON) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
+            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
         }
 
         $errors = [];
