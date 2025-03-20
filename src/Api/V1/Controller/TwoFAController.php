@@ -115,7 +115,9 @@ class TwoFAController extends AbstractController
             )->toResponse();
         }
 
-        if ($user->getOTPcodes()->isEmpty()
+        if (
+            $user->getOTPcodes()->isEmpty() &&
+            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value
         ) {
             return new BaseResponse(
                 403,
