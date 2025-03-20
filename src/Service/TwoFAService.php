@@ -153,10 +153,6 @@ readonly class TwoFAService
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
-        if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
-            $message = "Your Two Factor Authentication Code is " . $code;
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
-        }
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             // Send email to the user with the verification code
             $email = new TemplatedEmail()
@@ -177,6 +173,9 @@ readonly class TwoFAService
                 ]);
 
             $this->mailer->send($email);
+        } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
+            $message = "Your Two Factor Authentication Code is " . $code;
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
