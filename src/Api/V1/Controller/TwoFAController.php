@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
@@ -34,6 +35,7 @@ class TwoFAController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly EventActions $eventActions,
         private readonly SettingRepository $settingRepository,
+        private readonly EventRepository $eventRepository,
     ) {
     }
 
@@ -115,7 +117,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 403,
                 null,
-                'Invalid Two-Factor Authentication configuration.' .
+                'Invalid Two-Factor Authentication configuration.'.
                 ' Please ensure that 2FA is set up using either email or SMS for this account.'
             )->toResponse();
         }
@@ -127,7 +129,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 403,
                 null,
-                'The Two-Factor Authentication (2FA) configuration is incomplete.' .
+                'The Two-Factor Authentication (2FA) configuration is incomplete.'.
                 ' Please set up 2FA for this account using either email or SMS.'
             )->toResponse();
         }
@@ -135,12 +137,10 @@ class TwoFAController extends AbstractController
         // Fetch and validate settings with fallback defaults
         $timeToResendIntervalValue = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']);
         $timeToResendIntervalValue = $timeToResendIntervalValue ? (int)$timeToResendIntervalValue->getValue() : 30;
-
         $nrAttemptsValue = $this->settingRepository->findOneBy([
-                'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
-            ]);
+            'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
+        ]);
         $nrAttemptsValue = $nrAttemptsValue ? (int)$nrAttemptsValue->getValue() : 3;
-
         $timeToResetAttemptsValue = $this->settingRepository->findOneBy(
             ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
         );
@@ -166,7 +166,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'Too many attempts.' .
+                    'Too many attempts.'.
                     ' You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
                     $nrAttemptsValue,
                     $timeToResetAttemptsValue
@@ -184,7 +184,7 @@ class TwoFAController extends AbstractController
                 429,
                 null,
                 sprintf(
-                    'Too many validation attempts.' .
+                    'Too many validation attempts.'.
                     'You have exceeded the limit of %d attempts. Please wait %d hour(s) before trying again.',
                     $nrAttemptsValue,
                     ceil($timeToResetAttemptsValue / 60) // Converted minutes to hours
@@ -192,8 +192,14 @@ class TwoFAController extends AbstractController
             )->toResponse();
         }
 
-        dd('success 2fa code will be send');
-        // TODO: Add main 2fa success logic here
+        // Send the 2fa code to the user
+        $this->twoFAService->resendCode(
+            $user,
+            null,
+            null,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
+
         // Defines the Event to the table
         $eventMetadata = [
             'ip' => $request->getClientIp(),
@@ -206,18 +212,23 @@ class TwoFAController extends AbstractController
             $eventMetadata
         );
 
-        // Show the number to attempts the user has left
-//        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
-//            $user,
-//            $nrAttempts,
-//            $limitTime,
-//            AnalyticalEventType::TWO_FA_CODE_RESEND->value
-//        );
-//        $attemptsLeft = $nrAttempts - count($attempts);
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttemptsValue . ' minutes');
+        // Retrieve the 2FA attempts from the repository
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            $nrAttemptsValue,
+            $limitTime,
+            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+        );
 
+        $attemptsLeft = $nrAttemptsValue - count($attempts);
+        $message = 'You have ' . $attemptsLeft . ' attempt' . ($attemptsLeft === 1 ? '' : 's') . ' left.';
 
-        $correct2FACode = 2;
-        $responseData = $correct2FACode;
+        // Prepare the response with just the message
+        $responseData = [
+            'message' => $message,
+        ];
 
         // Return success response using BaseResponse
         return new BaseResponse(200, $responseData)->toResponse(); # Success Response
