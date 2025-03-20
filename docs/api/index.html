@@ -1263,7 +1263,7 @@
                                                 }
                                             },
                                             "missing_2fa_setting": {
-                                                "summary": "Missing 2FA setting",
+                                                "summary": "Missing 2FA settings",
                                                 "value": {
                                                     "success": false,
                                                     "error": "Missing required configuration setting: TWO_FACTOR_AUTH_STATUS"
@@ -1955,6 +1955,276 @@
                                         "required": [
                                             "SAMLResponse",
                                             "twoFACode"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": true
+                        },
+                        "deprecated": false,
+                        "security": []
+                    }
+                },
+                "/api/v1/twoFA/request": {
+                    "post": {
+                        "operationId": "api_twoFA_request",
+                        "tags": [
+                            "User Auth"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Requested two-factor authentication token",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Two-Factor authentication code successfully sent. You have X attempts remaining to request a new one."
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "400": {
+                                "description": "Invalid request data",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "description": "Error message explaining why the request failed",
+                                                    "example": "Missing required fields or invalid data"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "captcha_failed": {
+                                                "summary": "CAPTCHA validation failed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "CAPTCHA validation failed"
+                                                }
+                                            },
+                                            "missing_fields": {
+                                                "summary": "Missing fields",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Missing required fields: uuid, password or turnstile_token"
+                                                }
+                                            },
+                                            "missing_2fa_setting": {
+                                                "summary": "Missing 2FA setting",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"
+                                                }
+                                            },
+                                            "invalid_json": {
+                                                "summary": "Invalid json format",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid json format"
+                                                }
+                                            },
+                                            "miss_typed_uuid": {
+                                                "summary": "Invalid Account Uuid",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid credentials"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "401": {
+                                "description": "Invalid credentials.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Invalid credentials.",
+                                                    "description": "Invalid credentials provided"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "miss_typed_password": {
+                                                "summary": "Invalid Password",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid credentials"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "403": {
+                                "description": "Account Type",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Unauthorized - You do not have permission to access this resource.",
+                                                    "description": "Details of the authentication failure"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "invalid_verification": {
+                                                "summary": "User account is not verified",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "User account is not verified!"
+                                                }
+                                            },
+                                            "banned_account": {
+                                                "summary": "User account is banned",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "User account is banned from the system!"
+                                                }
+                                            },
+                                            "invalid_account_type": {
+                                                "summary": "User account invalid",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid account type. Please only use email/phone number accounts from the portal"
+                                                }
+                                            },
+                                            "invalid_2fa_configuration": {
+                                                "summary": "Invalid 2FA configuration",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid Two-Factor Authentication configuration Please ensurethat 2FA is set up using either email or SMS for this account"
+                                                }
+                                            },
+                                            "invalid_2fa_uncompleted_configuration": {
+                                                "summary": "The Two-Factor Authentication configuration is incompleted.",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS"
+                                                }
+                                            },
+                                            "password_reset_request_active": {
+                                                "summary": "Forgot password request active",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "429": {
+                                "description": "Too many requests.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "Too many requests.",
+                                                    "description": "Too many requests provided"
+                                                }
+                                            }
+                                        },
+                                        "examples": {
+                                            "waiting_interval_between_requests": {
+                                                "summary": "Interval of waiting between requests",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "You need to wait %d seconds before asking for a new code."
+                                                }
+                                            },
+                                            "limit_of_request_exceeded": {
+                                                "summary": "Limit of request exceeded",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again."
+                                                }
+                                            },
+                                            "validation_attempts": {
+                                                "summary": "Validation attempts exceeded",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Two Factor Authentication request Status",
+                        "description": "This endpoint provides Two-Factor Authentication code only for portal accounts. \n                To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.",
+                        "parameters": [],
+                        "requestBody": {
+                            "description": "User Two Factor Authentication request status",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "uuid": {
+                                                "type": "string",
+                                                "description": "Unique identifier of the user",
+                                                "example": "user-uuid-example"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "description": "Password of the user",
+                                                "example": "user-password-example"
+                                            },
+                                            "turnstile_token": {
+                                                "type": "string",
+                                                "description": "CAPTCHA validation token",
+                                                "example": "valid_test_token"
+                                            }
+                                        },
+                                        "required": [
+                                            "uuid",
+                                            "password",
+                                            "turnstile_token"
                                         ]
                                     }
                                 }
@@ -5265,6 +5535,132 @@
             "persistAuthorization": true
         }
     }</script>
+    <style id="jam-iframe-override">
+        iframe[src^='chrome-extension://iohjgamcilhbgmhbnllfolmkmmekfmci']#jam-iframe {
+            top: 0 !important;
+            left: 0 !important;
+            position: fixed !important;
+
+            /**
+     * NOTE: If this is not applied, the iframe's background won't be able
+     * to blend with the host page's if the page assumes color-scheme:dark,
+     * and will assume a solid white background.
+     */
+            color-scheme: light !important;
+            transition: opacity 0.3s ease-in-out !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border: 0;
+
+            /**
+     * These values are toggled by the [data-visible] attribute.
+     */
+            z-index: -1 !important;
+            display: none !important;
+            pointer-events: none !important;
+        }
+
+        iframe[src^='chrome-extension://iohjgamcilhbgmhbnllfolmkmmekfmci']#jam-iframe[data-visible] {
+            /*
+     * NOTE: Even though z-index's maximum value is 2147483647, that limitation is not
+     * specified in the spec, which means that it's not guaranteed to be enforced or work
+     * in all browsers. For instance, in Chrome, the iframe was being overlayed by an element
+     * whose z-index was set to 2147483648, suggesting that the maximum value is not being
+     * enforced.
+     */
+            z-index: 2147483648 !important;
+            display: block !important;
+            pointer-events: auto !important;
+        }
+    </style>
+    <style id="_goober"> @keyframes go2264125279 {
+                             from {
+                                 transform: scale(0) rotate(45deg);
+                                 opacity: 0;
+                             }
+                             to {
+                                 transform: scale(1) rotate(45deg);
+                                 opacity: 1;
+                             }
+                         }
+
+    @keyframes go3020080000 {
+        from {
+            transform: scale(0);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes go463499852 {
+        from {
+            transform: scale(0) rotate(90deg);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1) rotate(90deg);
+            opacity: 1;
+        }
+    }
+
+    @keyframes go1268368563 {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes go1310225428 {
+        from {
+            transform: scale(0) rotate(45deg);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1) rotate(45deg);
+            opacity: 1;
+        }
+    }
+
+    @keyframes go651618207 {
+        0% {
+            height: 0;
+            width: 0;
+            opacity: 0;
+        }
+        40% {
+            height: 0;
+            width: 6px;
+            opacity: 1;
+        }
+        100% {
+            opacity: 1;
+            height: 10px;
+        }
+    }
+
+    @keyframes go901347462 {
+        from {
+            transform: scale(0.6);
+            opacity: 0.4;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .go4109123758 {
+        z-index: 9999;
+    }
+
+    .go4109123758 > * {
+        pointer-events: auto;
+    }</style>
 </head>
 
 <body>
@@ -5742,6 +6138,25 @@ which can be used to store and return configuration parameters required for the 
                                 fill="#ffffff" fill-rule="evenodd"
                                 d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
                                 aria-label="post ​/api​/v1​/auth​/saml" class="opblock-control-arrow"
+                                aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
+                                                                         viewBox="0 0 20 20" class="arrow" width="20"
+                                                                         height="20" aria-hidden="true"
+                                                                         focusable="false"><path
+                                d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"></path></svg></button></div><noscript></noscript></div></span><span><div
+                                class="opblock opblock-post" id="operations-User_Auth-api_twoFA_request"><div
+                                class="opblock-summary opblock-summary-post"><button aria-expanded="false"
+                                                                                     class="opblock-summary-control"><span
+                                class="opblock-summary-method">POST</span><div
+                                class="opblock-summary-path-description-wrapper"><span class="opblock-summary-path"
+                                                                                       data-path="/api/v1/twoFA/request"><a
+                                class="nostyle" href="http:///api#/User%20Auth/api_twoFA_request"><span>/api<wbr>/v1<wbr>/twoFA<wbr>/request</span></a></span><div
+                                class="opblock-summary-description">Two Factor Authentication request Status</div></div></button><div
+                                class="view-line-link copy-to-clipboard" title="Copy to clipboard"><svg
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 16" width="15" height="16"
+                                aria-hidden="true" focusable="false"><g transform="translate(2, -1)"><path
+                                fill="#ffffff" fill-rule="evenodd"
+                                d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></g></svg></div><button
+                                aria-label="post ​/api​/v1​/twoFA​/request" class="opblock-control-arrow"
                                 aria-expanded="false" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg"
                                                                          viewBox="0 0 20 20" class="arrow" width="20"
                                                                          height="20" aria-hidden="true"
