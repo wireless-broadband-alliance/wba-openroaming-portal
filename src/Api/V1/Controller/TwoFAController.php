@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
@@ -118,8 +117,8 @@ class TwoFAController extends AbstractController
         }
 
         if (
-            $user->getOTPcodes()->isEmpty() &&
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value
+            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+            $user->getOTPcodes()->isEmpty()
         ) {
             return new BaseResponse(
                 403,
