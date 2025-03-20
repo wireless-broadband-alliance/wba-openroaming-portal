@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use DateTimeInterface;
 
@@ -45,5 +46,24 @@ class UserStatusChecker
         }
 
         return null;
+    }
+
+    public function portalAccountType(User $user): string
+    {
+        $userExternalAuths = $user->getUserExternalAuths();
+
+        foreach ($userExternalAuths as $userExternalAuth) {
+            if ($userExternalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
+                if ($userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
+                    return UserProvider::EMAIL->value;
+                }
+
+                if ($userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
+                    return UserProvider::PHONE_NUMBER->value;
+                }
+            }
+        }
+
+        return false;
     }
 }
