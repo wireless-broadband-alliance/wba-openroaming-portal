@@ -359,7 +359,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 are eligible to request a new verification code. It provides endpoints to check 2FA activation status 
                 and ensure users follow de request limits before receiving a new authentication code ',
                 requestBody: new RequestBody(
-                    description: 'User credentials and CAPTCHA validation token',
+                    description: 'User 2FA request status',
                     content: new ArrayObject([
                         'application/json' => [
                             'schema' => [
