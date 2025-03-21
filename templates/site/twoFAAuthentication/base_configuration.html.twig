@@ -1,5 +1,8 @@
 {% extends 'site/base.html.twig' %}
 {% set twoFAEnabled = (user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+{% set is2FAEnforced = (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) or
+    ((data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) and
+    user.userExternalAuths|filter(auth => auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value)|length > 0) %}
 {% block title %}
     {{ data.title.value }}
 {% endblock %}
@@ -21,7 +24,8 @@
             <div class="toast-success">
                 You already have two-factor authentication configured for this account.
             </div>
-        {% else %}
+        {% endif %}
+        {% if is2FAEnforced %}
             <div class="toast-warning">
                 Two-factor authentication is mandatory for account security on the portal.
                 You cannot proceed without enabling it. Please activate it immediately to continue.
