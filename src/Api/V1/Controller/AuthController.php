@@ -105,7 +105,7 @@ class AuthController extends AbstractController
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user instanceof User) {
-            return new BaseResponse(400, null, 'Invalid credentials')->toResponse();
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
             // Bad Request Response
         }
 

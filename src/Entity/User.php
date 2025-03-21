@@ -304,6 +304,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
+                                    'missing_user_account' => [
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
                                     'miss_typed_password' => [
                                         'summary' => 'Invalid Password',
                                         'value' => [
@@ -629,6 +636,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                    'missing_user_account' => [
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
                                         ],
                                     ],
                                 ],
