@@ -12,8 +12,18 @@
 - New docs for GEOLITEGUI and setup
 - New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
-- Two-Factor Authentication was added on users login
-- New settings page for 2fa
+- Two-Factor Authentication Implementation
+  - New endpoint for 2FA request codes
+  - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
+  - New settings page **/dashboard/settings/twoFA**
+  - New implementation on landing page depending on the enforcement level
+    - NOT_ENFORCED
+    - ENFORCED_FOR_LOCAL
+    - ENFORCED_FOR_ALL
+  - New Two-factor authentication selection 
+    - Email
+    - SMS
+    - TOTP (Google Authenticator && Microsoft Authenticator)
 - Microsoft Login Implementation - New authentication provider / New endpoint
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.

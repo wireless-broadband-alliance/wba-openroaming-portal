@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
+use App\Api\V1\Controller\TwoFAController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use ArrayObject;
@@ -200,6 +201,279 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_get_current_user',
         ),
         new Post(
+            uriTemplate: '/api/v1/twoFA/request',
+            controller: TwoFAController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Requested two-factor authentication token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Two-Factor authentication code successfully sent.' .
+                                                        ' You have X attempts remaining to request a new one.',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'CAPTCHA validation failed',
+                                        ],
+                                    ],
+                                    'missing_fields' => [
+                                        'summary' => 'Missing fields',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required fields: uuid, password or turnstile_token',
+                                        ],
+                                    ],
+                                    'missing_2fa_setting' => [
+                                        'summary' => 'Missing 2FA setting',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'miss_typed_uuid' => [
+                                        'summary' => 'Invalid Account Uuid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'missing_user_account' => [
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
+                                    'miss_typed_password' => [
+                                        'summary' => 'Invalid Password',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Account Type',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                    'invalid_account_type' => [
+                                        'summary' => 'User account invalid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid account type.' .
+                                                ' Please only use email/phone number accounts from the portal',
+                                        ],
+                                    ],
+                                    'invalid_2fa_configuration' => [
+                                        'summary' => 'Invalid 2FA configuration',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid Two-Factor Authentication configuration Please ensure' .
+                                                'that 2FA is set up using either email or SMS for this account',
+                                        ],
+                                    ],
+                                    'invalid_2fa_uncompleted_configuration' => [
+                                        'summary' => 'The Two-Factor Authentication configuration is incompleted.',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'The Two-Factor Authentication (2FA) configuration is' .
+                                                ' incomplete. Please set up 2FA using either email or SMS',
+                                        ],
+                                    ],
+                                    'password_reset_request_active' => [
+                                        'summary' => 'Forgot password request active',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    429 => [
+                        'description' => 'Too many requests.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Too many requests.',
+                                            'description' => 'Too many requests provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'waiting_interval_between_requests' => [
+                                        'summary' => 'Interval of waiting between requests',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'You need to wait %d seconds before asking for a new code.'
+                                        ],
+                                    ],
+                                    'limit_of_request_exceeded' => [
+                                        'summary' => 'Limit of request exceeded',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Too many attempts. You have exceeded the limit of %d' .
+                                                ' attempts. Please wait %d minutes before trying again.',
+                                        ],
+                                    ],
+                                    'validation_attempts' => [
+                                        'summary' => 'Validation attempts exceeded',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Too many validation attempts. You have exceeded the' .
+                                                ' limit of %d attempts. Please wait %d minute(s) before trying again.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Two Factor Authentication request Status',
+                description: 'This endpoint provides Two-Factor Authentication code only for portal accounts. 
+                To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
+                requestBody: new RequestBody(
+                    description: 'User Two Factor Authentication request status',
+                    content: new ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'description' => 'Unique identifier of the user',
+                                        'example' => 'user-uuid-example'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'description' => 'Password of the user',
+                                        'example' => 'user-password-example'
+                                    ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['uuid', 'password', 'turnstile_token'],
+                            ],
+                        ],
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_twoFA_request',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new Post(
             uriTemplate: '/v1/auth/local',
             controller: AuthController::class,
             openapi: new Operation(
@@ -306,7 +580,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                     'missing_2fa_setting' => [
-                                        'summary' => 'Missing 2FA setting',
+                                        'summary' => 'Missing 2FA settings',
                                         'value' => [
                                             'success' => false,
                                             'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
@@ -362,6 +636,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                    'missing_user_account' => [
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
                                         ],
                                     ],
                                 ],

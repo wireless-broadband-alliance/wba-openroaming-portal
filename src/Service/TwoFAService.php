@@ -83,7 +83,7 @@ readonly class TwoFAService
         return $user->getTwoFAcode();
     }
 
-    public function resendCode(User $user, string $ip, string $userAgent, string $eventType): void
+    public function resendCode(User $user, ?string $ip, ?string $userAgent, string $eventType): void
     {
         $code = $this->twoFACode($user);
         $this->sendCode($user, $code, $ip, $userAgent, $eventType);
@@ -148,15 +148,11 @@ readonly class TwoFAService
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      */
-    private function sendCode(User $user, string $code, string $ip, string $userAgent, string $eventType): void
+    private function sendCode(User $user, string $code, ?string $ip, ?string $userAgent, string $eventType): void
     {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
-        if ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
-            $message = "Your Two Factor Authentication Code is " . $code;
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
-        }
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             // Send email to the user with the verification code
             $email = new TemplatedEmail()
@@ -177,12 +173,15 @@ readonly class TwoFAService
                 ]);
 
             $this->mailer->send($email);
+        } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
+            $message = "Your Two Factor Authentication Code is " . $code;
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent,
+            'user_agent' => $userAgent ?? null,
             'uuid' => $user->getUuid(),
-            'ip' => $ip,
+            'ip' => $ip ?? null,
         ];
         $this->eventActions->saveEvent(
             $user,

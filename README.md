@@ -431,8 +431,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 34. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two factor application
 35. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two factor application
 36. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
-37. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two
-    factor authentication code
+37. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two-factor
+    authentication code
 38. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two-factor
     authentication code
 39. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new two-factor authentication code

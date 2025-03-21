@@ -33,7 +33,7 @@ class SettingFixture extends Fixture
             ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
             ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
             ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', 'value' => '3'],
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', 'value' => '1'],
+            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', 'value' => '60'],
             ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL', 'value' => '30'],
 
             ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],

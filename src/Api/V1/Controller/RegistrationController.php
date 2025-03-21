@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
@@ -86,12 +87,18 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
-        if (!isset($data['turnstile_token'])) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if (!$turnstileSetting) {
+            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
 
-        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
+        if ($turnstileSetting === OperationMode::ON->value) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
+            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
         }
 
         $errors = [];
@@ -202,12 +209,18 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        if (!isset($data['turnstile_token'])) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if (!$turnstileSetting) {
+            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
 
-        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
+        if ($turnstileSetting === OperationMode::ON->value) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
+            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
         }
 
         $emailConstraint = new Assert\Email();
@@ -373,14 +386,19 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        if (!isset($data['turnstile_token'])) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse();
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if (!$turnstileSetting) {
+            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
 
-        if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse();
+        if ($turnstileSetting === OperationMode::ON->value) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
+            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
         }
-
         // Check for missing fields and add them to the array errors
         $errors = [];
         if (empty($data['phone_number'])) {
@@ -509,12 +527,18 @@ class RegistrationController extends AbstractController
         } catch (\JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
-        if (!isset($dataRequest['turnstile_token'])) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        if (!$turnstileSetting) {
+            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
-
-        if (!$this->captchaValidator->validate($dataRequest['turnstile_token'], $request->getClientIp())) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed!')->toResponse(); // Bad Request Response
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        if ($turnstileSetting === OperationMode::ON->value) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
+            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
+                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            }
         }
 
         $errors = [];
