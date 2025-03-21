@@ -59,9 +59,34 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'items' => [
                                                         'type' => 'object',
                                                         'properties' => [
-                                                            'provider' => ['type' => 'string'],
-                                                            'provider_id' => ['type' => 'string'],
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'enum' => [
+                                                                    'SAML Account',
+                                                                    'Google Account',
+                                                                    'Microsoft Account',
+                                                                    'Portal Account',
+                                                                ],
+                                                                'example' => 'Google Account',
+                                                                // phpcs:disable Generic.Files.LineLength.TooLong
+                                                                'description' => 'The authentication provider for the user. Possible values: SAML Account, Google Account, Microsoft Account, Portal Account. If the provider is "Portal Account", the provider_id must be "Email" or "Phone Number".',
+                                                                // phpcs:enable
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'enum' => [
+                                                                    'Email',
+                                                                    'Phone Number',
+                                                                ],
+                                                                'example' => 'Email',
+                                                                // phpcs:disable Generic.Files.LineLength.TooLong
+                                                                'description' => 'The unique identifier for the external authentication provider linked to the user. For "Google Account", this is an OAuth token. For "Portal Account", this must be either "Email" or "Phone Number".',
+                                                                // phpcs:enable
+                                                            ],
                                                         ],
+                                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                                        'description' => "An array containing external authentication methods associated with the user. Each item specifies the provider and the unique provider ID. Special behavior: For Portal Account, the provider_id is restricted to the values 'Email' or 'Phone Number'.",
+                                                        // phpcs:enable
                                                     ],
                                                 ],
                                                 'phone_number' => ['type' => 'string', 'nullable' => true],
