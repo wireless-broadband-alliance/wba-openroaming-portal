@@ -504,17 +504,50 @@ class UsersManagementController extends AbstractController
 
     #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function disable2FA($id): RedirectResponse
+    public function disabledBy2FA(Request $request, $id): RedirectResponse
     {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash('error_admin', 'The user does not exist.');
             return $this->redirectToRoute('admin_page');
         }
 
+        // Disable current associated Profile
+        $this->profileManager->disableProfiles(
+            $user,
+            UserRadiusProfileRevokeReason::TWO_FA_DISABLED_BY->value,
+            true
+        );
+
+        // Change user 2fa status
         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        $eventMetaData = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => PlatformMode::LIVE->value,
+            '2faDisabledBy' => $user->getUuid(),
+            'by' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DISABLED_2FA_BY->value,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        $this->addFlash(
+            'success_admin',
+            sprintf(
+                'Two-Factor Authentication for with UUID "%s" has been successfully disabled.',
+                $user->getUuid()
+            )
+        );
         return $this->redirectToRoute('admin_page');
     }
 }
