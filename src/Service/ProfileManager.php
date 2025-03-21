@@ -9,13 +9,13 @@ use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 
-class ProfileManager
+readonly class ProfileManager
 {
     public function __construct(
-        private readonly UserRadiusProfileRepository $userRadiusProfile,
-        private readonly RadiusUserRepository $radiusUserRepository,
-        private readonly UserRepository $userRepository,
-        private readonly UserRadiusProfileRepository $userRadiusProfileRepository
+        private UserRadiusProfileRepository $userRadiusProfile,
+        private RadiusUserRepository $radiusUserRepository,
+        private UserRepository $userRepository,
+        private UserRadiusProfileRepository $userRadiusProfileRepository
     ) {
     }
 
