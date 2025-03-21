@@ -9,6 +9,7 @@ use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
@@ -498,5 +499,19 @@ class UsersManagementController extends AbstractController
             'data' => $data,
             'type' => $type
         ]);
+    }
+
+    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function disable2FA($id) {
+        if (!$user = $this->userRepository->find($id)) {
+            // Get the 'id' parameter from the route URL
+            $this->addFlash('error_admin', 'The user does not exist.');
+            return $this->redirectToRoute('admin_page');
+        }
+        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        return $this->redirectToRoute('admin_page');
     }
 }

@@ -63,6 +63,21 @@
         {{ user.createdat|date('d/m/Y H:i') }}
     </td>
 
+    <td class="px-6 py-4 font-medium">
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+            Disabled
+        {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
+            Email
+        {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value %}
+            SMS
+        {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value %}
+            TOTP
+        {% endif %}
+    </td>
+
     {# Actions Buttons #}
     <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
         {# Items Button Dropdown #}
