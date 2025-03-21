@@ -258,6 +258,9 @@ readonly class TwoFAService
     {
         $this->removeOTPCodes($user);
         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+        $user->setTwoFAsecret(null);
+        $user->setTwoFAcode(null);
+        $user->setTwoFAcodeGeneratedAt(null);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

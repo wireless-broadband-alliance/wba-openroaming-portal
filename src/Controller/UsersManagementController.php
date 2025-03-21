@@ -21,6 +21,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
+use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
 use DateInterval;
 use DateTime;
@@ -54,6 +55,7 @@ class UsersManagementController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
+        private readonly TwoFAService $twoFAService
     ) {
     }
 
@@ -503,7 +505,7 @@ class UsersManagementController extends AbstractController
 
     #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function disable2FA($id) {
+    public function disable2FA($id, Request $request) {
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash('error_admin', 'The user does not exist.');
@@ -512,6 +514,16 @@ class UsersManagementController extends AbstractController
         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+        $this->twoFAService->event2FA(
+            $request->getClientIp(),
+            $user,
+            AnalyticalEventType::DISABLE_2FA->value,
+            $request->headers->get('User-Agent')
+        );
+        $this->addFlash(
+            'success',
+            'Two factor authentication successfully disabled'
+        );
         return $this->redirectToRoute('admin_page');
     }
 }

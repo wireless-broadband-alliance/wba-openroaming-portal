@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use libphonenumber\PhoneNumber;
+use OTPHP\TOTP;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -92,7 +93,12 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        $secret = $this->totpService->generateSecret();
+        if (!$user->getTwoFAsecret()) {
+            $secret = $this->totpService->generateSecret();
+        } else {
+            $secret = $user->getTwoFAsecret();
+        }
+
         if ($user instanceof User) {
             if (
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
