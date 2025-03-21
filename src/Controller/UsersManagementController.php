@@ -30,6 +30,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -501,14 +502,16 @@ class UsersManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
+    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function disable2FA($id) {
+    public function disable2FA($id): RedirectResponse
+    {
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash('error_admin', 'The user does not exist.');
             return $this->redirectToRoute('admin_page');
         }
+
         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
