@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -10,11 +11,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
-class VerificationCodeEmailGenerator
+readonly class VerificationCodeEmailGenerator
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly ParameterBagInterface $parameterBag,
+        private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private ParameterBagInterface $parameterBag,
     ) {
     }
 
@@ -39,12 +41,10 @@ class VerificationCodeEmailGenerator
     /**
      * Create an email message with the verification code.
      *
-     * @param string $email The recipient's email address.
      * @return Email The email with the code.
      * @throws Exception
      */
-    public function createEmailAdmin(
-        string $email,
+    public function createEmailAdminPage(
         User $user,
     ): Email {
         // Get the values from the services.yaml file using $parameterBag on the __construct
@@ -55,12 +55,41 @@ class VerificationCodeEmailGenerator
 
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
-            ->to($email)
+            ->to($user->getEmail())
             ->subject('Your Settings Reset Details')
             ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
                 'resetPassword' => false
+            ]);
+    }
+
+    /**
+     * Create an email message with the verification code.
+     *
+     * @return Email The email with the code.
+     * @throws Exception
+     */
+    public function createEmailLanding(User $user): Email
+    {
+        // Get the values from the services.yaml file using $parameterBag on the __construct
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        // If the verification code is not provided, generate a new one
+        $verificationCode = $this->generateVerificationCode($user);
+        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+
+        return new TemplatedEmail()
+            ->from(new Address($emailSender, $nameSender))
+            ->to($user->getEmail())
+            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
+            ->htmlTemplate('email/user_code.html.twig')
+            ->context([
+                'verificationCode' => $verificationCode,
+                'uuid' => $user->getEmail(),
+                'emailTitle' => $emailTitle,
+                'is2FATemplate' => false,
             ]);
     }
 }

@@ -9,6 +9,7 @@ use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
@@ -20,6 +21,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
+use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
 use DateInterval;
 use DateTime;
@@ -29,6 +31,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -53,6 +56,7 @@ class UsersManagementController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
+        private readonly TwoFAService $twoFAService
     ) {
     }
 
@@ -391,6 +395,7 @@ class UsersManagementController extends AbstractController
             $em->flush();
 
             if ($user->getEmail() && $userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
+                $supportTeam = $data['title']['value'];
                 // Send email
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
@@ -399,7 +404,7 @@ class UsersManagementController extends AbstractController
                     ->html(
                         $this->renderView(
                             'email/user_password.html.twig',
-                            ['password' => $newPassword, 'isNewUser' => false]
+                            ['password' => $newPassword, 'isNewUser' => false, 'supportTeam' => $supportTeam]
                         )
                     );
                 $mailer->send($email);
@@ -498,5 +503,40 @@ class UsersManagementController extends AbstractController
             'data' => $data,
             'type' => $type
         ]);
+    }
+
+    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function disabledBy2FA(Request $request, $id): RedirectResponse
+    {
+
+        if (!$user = $this->userRepository->find($id)) {
+            // Get the 'id' parameter from the route URL
+            $this->addFlash('error_admin', 'The user does not exist.');
+            return $this->redirectToRoute('admin_page');
+        }
+
+        // Disable current associated Profile
+        $this->profileManager->disableProfiles(
+            $user,
+            UserRadiusProfileRevokeReason::TWO_FA_DISABLED_BY->value,
+            true
+        );
+
+        // Change user 2fa status
+        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        $this->twoFAService->event2FA(
+            $request->getClientIp(),
+            $user,
+            AnalyticalEventType::DISABLE_2FA->value,
+            $request->headers->get('User-Agent')
+        );
+        $this->addFlash(
+            'success',
+            'Two factor authentication successfully disabled'
+        );
+        return $this->redirectToRoute('admin_page');
     }
 }

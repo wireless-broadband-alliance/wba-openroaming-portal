@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use libphonenumber\PhoneNumber;
+use OTPHP\TOTP;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -92,7 +93,7 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        $secret = $this->totpService->generateSecret();
+        $secret = $user->getTwoFAsecret() ?: $this->totpService->generateSecret();
         if ($user instanceof User) {
             if (
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
@@ -403,7 +404,7 @@ class TwoFAController extends AbstractController
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $session = $request->getSession();
-        if (!$user->getOTPcodes()->isEmpty()) {
+        if ($this->twoFAService->hasValidOTPCodes($user)) {
             return $this->redirectToRoute('app_landing');
         }
         if ($this->twoFAService->twoFAisActive($user)) {
@@ -414,10 +415,10 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         if ($user instanceof User) {
-            $codes = $this->twoFAService->generateOTPCodes($user);
+            $this->twoFAService->generateOTPCodes($user);
             return $this->render('site/twoFAAuthentication/otpCodes.html.twig', [
                 'data' => $data,
-                'codes' => $codes,
+                'codes' => $user->getOTPcodes(),
                 'user' => $user,
             ]);
         }
@@ -442,17 +443,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
-        $codes = $request->query->get('codes');
-        // Check if the codes was been sent
-        if (!$codes) {
-            $data = json_decode($codes, true, 512, JSON_THROW_ON_ERROR);
-            $codes = $data["codes"] ?? null;
-        }
-
-        // Decrypt the data sent
-        $codesJson = urldecode((string)$codes);
-        $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
-        $this->twoFAService->saveCodes($codes, $user);
+        $this->twoFAService->saveCodes($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
@@ -579,15 +570,13 @@ class TwoFAController extends AbstractController
     #[Route('/downloadCodes', name: 'app_download_codes')]
     public function downloadCodes(Request $request): Response
     {
-        $codes = $request->query->get('codes');
-        // Check if the codes was been sent
-        if (!$codes) {
-            $data = json_decode($codes, true, 512, JSON_THROW_ON_ERROR);
-            $codes = $data["codes"] ?? null;
+        /** @var User $user */
+        $user = $this->getUser();
+        $codes = [];
+        foreach ($user->getOTPcodes() as $code) {
+            $codes[] = $code->getCode();
         }
-        // decrypt the data sent
-        $codesJson = urldecode((string)$codes);
-        $codes = json_decode($codesJson, true, 512, JSON_THROW_ON_ERROR);
+
         // create a content of the file
         $fileContent = implode("\n", $codes);
 

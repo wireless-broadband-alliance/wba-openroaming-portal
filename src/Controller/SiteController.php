@@ -33,6 +33,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
+use App\Service\TwoFAService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
@@ -47,6 +48,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -88,6 +90,7 @@ class SiteController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly SendSMS $sendSMS,
+        private readonly TwoFAService $twoFAService
     ) {
     }
 
@@ -106,9 +109,10 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $session = $request->getSession();
         $sessionAdmin = $session->get('session_admin');
-        if ($sessionAdmin) {
-            return $this->redirectToRoute('saml_logout');
+        if ($sessionAdmin === true) {
+            throw new AccessDeniedHttpException('Access denied.');
         }
+
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
         if (
@@ -184,7 +188,7 @@ class SiteController extends AbstractController
         if (
             $currentUser &&
             $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
-            $currentUser->getOTPcodes()->isEmpty()
+            !$this->twoFAService->hasValidOTPCodes($currentUser)
         ) {
             return $this->redirectToRoute('app_otpCodes');
         }
@@ -609,7 +613,7 @@ class SiteController extends AbstractController
                     $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
                     ) : [];
                     $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                         ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
@@ -632,7 +636,8 @@ class SiteController extends AbstractController
                             ];
                         }
 
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEventMetadata['lastVerificationCodeTime'] =
+                            $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
@@ -645,7 +650,7 @@ class SiteController extends AbstractController
                         $entityManager->persist($user);
                         $entityManager->flush();
 
-                        $email = (new TemplatedEmail())
+                        $email = new TemplatedEmail()
                             ->from(
                                 new Address(
                                     $this->parameterBag->get('app.email_address'),
@@ -653,12 +658,13 @@ class SiteController extends AbstractController
                                 )
                             )
                             ->to($user->getEmail())
-                            ->subject('Your Openroaming - Password Request')
+                            ->subject('Your OpenRoaming - Password Request')
                             ->htmlTemplate('email/user_forgot_password_request.html.twig')
                             ->context([
                                 'password' => $randomPassword,
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
+                                'emailTitle' => $data['title']['value'],
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getVerificationCode(),
                             ]);
@@ -920,9 +926,8 @@ class SiteController extends AbstractController
 
     /**
      * @param $userAgent
-     * @return string
      */
-    private function detectDevice($userAgent)
+    private function detectDevice($userAgent): string
     {
         $os = OSTypes::NONE->value;
 
@@ -955,36 +960,6 @@ class SiteController extends AbstractController
     }
 
     /**
-     * Create an email message with the verification code.
-     *
-     * @param string $email The recipient's email address.
-     * @return Email The email with the code.
-     * @throws Exception
-     */
-    protected function createEmailCode(string $email): Email
-    {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        // If the verification code is not provided, generate a new one
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
-
-        return new TemplatedEmail()
-            ->from(new Address($emailSender, $nameSender))
-            ->to($email)
-            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->htmlTemplate('email/user_code.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-                'uuid' => $currentUser->getEmail(),
-                'is2FATemplate' => false,
-            ]);
-    }
-
-    /**
      * Regenerate the verification code for the user and send a new email.
      *
      * @return RedirectResponse A redirect response.
@@ -1012,7 +987,7 @@ class SiteController extends AbstractController
             $currentTime = new DateTime();
 
             // Check if enough time has passed since the last attempt
-            $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata() : [];
+            $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
             $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                 ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                 : null;
@@ -1025,7 +1000,7 @@ class SiteController extends AbstractController
                 // Increment the attempt count
                 $attempts = $verificationAttempts + 1;
 
-                $email = $this->createEmailCode($currentUser->getEmail());
+                $email = $this->verificationCodeGenerator->createEmailLanding($currentUser);
                 $mailer->send($email);
 
                 // Save event with attempt count and current time

@@ -3,28 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Template</title>
+    <title>{{ emailTitle }} - Code Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#080D4A]">
+<body class="bg-[#080D4A] font-sans text-gray-800">
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-[#7BBA29] text-white p-6 text-center">
+            <h1 class="text-2xl font-bold">
+                {% if is2FATemplate %}
+                    Two-Factor Authentication
+                {% else %}
+                    Verify Your Account
+                {% endif %}
+            </h1>
+        </div>
 
-    <div class="container mx-auto px-8 pb-8 pt-[50px]">
-        <div class="bg-white rounded-[18px] p-6 shadow-md">
+        <div class="p-6">
             {% if is2FATemplate %}
-            <h1 class="text-3xl font-bold">OpenRoaming Two Factor Authentication</h1>
-            <p class="mt-6 text-lg">Your two factor authentication code is: <span class="font-bold"> {{ verificationCode }} </span></p>
-            <p class="mt-2 text-lg">This code can only be used once and is valid for the next <span class="font-bold"> {{ secondsLeft }} </span> seconds.</p>
-            <p class="text-lg">Please keep this code confidential and do not share it with others.</p>
-            <p class="mt-6 text-lg">
-                Thank you,<br>
-                OpenRoaming Portal Support Team
-            </p>
+                <p class="text-lg mb-4">
+                    Your two-factor authentication code is:
+                </p>
+                <p class="text-center text-2xl font-bold text-[#0045ad] my-6">
+                    {{ verificationCode }}
+                </p>
+                <p class="text-lg mb-4">
+                    This code can only be used once and is valid for the next
+                    <span class="font-bold">{{ secondsLeft }}</span> seconds.
+                </p>
+                <p class="text-lg mb-4">
+                    Please keep this code confidential and do not share it with others.
+                </p>
             {% else %}
-            <p class="text-lg">Your authentication code is: <span class="font-bold"> {{ verificationCode }} </span></p>
-            <p class="text-lg">Please keep this code confidential and do not share it with others.</p>
+                <p class="text-lg mb-4">
+                    Your authentication code is:
+                </p>
+                <p class="text-center text-2xl font-bold text-[#0045ad] my-6">
+                    {{ verificationCode }}
+                </p>
+                <p class="text-lg mb-4">
+                    Please keep this code confidential and do not share it with others.
+                </p>
             {% endif %}
         </div>
-    </div>
 
+        <div class="bg-gray-100 text-center p-6">
+            <p class="text-sm text-gray-600">
+                Thank you,<br>
+                <strong>{{ emailTitle }} Team</strong>
+            </p>
+        </div>
+    </div>
+</div>
 </body>
 </html>

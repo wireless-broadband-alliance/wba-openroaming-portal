@@ -3,17 +3,19 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Repository\SettingRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
-class RegistrationEmailGenerator
+readonly class RegistrationEmailGenerator
 {
     public function __construct(
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly MailerInterface $mailer,
+        private ParameterBagInterface $parameterBag,
+        private MailerInterface $mailer,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -22,6 +24,8 @@ class RegistrationEmailGenerator
      */
     public function sendRegistrationEmail(User $user, $password): void
     {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
             ->from(
@@ -35,6 +39,7 @@ class RegistrationEmailGenerator
             ->htmlTemplate('email/user_password.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
+                'supportTeam' => $supportTeam,
                 'verificationCode' => $user->getVerificationCode(),
                 'isNewUser' => true,
                 // This variable informs if the user it's new our if it's just a password reset request
@@ -49,6 +54,9 @@ class RegistrationEmailGenerator
      */
     public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
             ->from(
@@ -62,6 +70,8 @@ class RegistrationEmailGenerator
             ->htmlTemplate('email/expiresProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
                 'timeLeft' => $timeLeft,
             ]);
         $this->mailer->send($email);
@@ -69,6 +79,9 @@ class RegistrationEmailGenerator
 
     public function sendNotifyExpiredProfile(User $user): void
     {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
             ->from(
@@ -82,6 +95,8 @@ class RegistrationEmailGenerator
             ->htmlTemplate('email/expiredProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
+                'contactEmail' => $contactEmail,
+                'supportTeam' => $supportTeam,
             ]);
 
         $this->mailer->send($email);

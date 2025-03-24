@@ -3,9 +3,11 @@
 namespace App\EventListener;
 
 use App\Entity\User;
+use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\GetSettings;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -20,6 +22,8 @@ readonly class SessionValidatorListener
         private TokenStorageInterface $tokenStorage,
         private RouterInterface $router,
         private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private GetSettings $getSettings
     ) {
     }
 
@@ -34,36 +38,47 @@ readonly class SessionValidatorListener
         $token = $this->tokenStorage->getToken();
         if (!$token || !$token->getUser()) {
             if (str_starts_with($path, '/dashboard')) {
-                $url = $this->router->generate('app_landing');
+                $url = $this->router->generate('app_login', ['type' => 'admin']);
                 $event->setResponse(new RedirectResponse($url));
             }
             return;
         }
-        /** @var User $user */
-        $user = $token->getUser();
-        if ($user && str_starts_with($path, '/dashboard')) {
-            $userAdmin = $this->userRepository->find($user->getId());
-            if (!$userAdmin) {
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var User $userToken */
+        $userToken = $token->getUser();
+        if ($userToken && str_starts_with($path, '/dashboard')) {
+            $user = $this->userRepository->find($userToken->getId());
+            if (!$user) {
                 throw new AccessDeniedHttpException('Access denied.');
             }
+            // Check if the 2fa process is completed
             if (
-                ($userAdmin->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
+                ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
                 && !$session->has(
                     '2fa_verified'
                 )
             ) {
-                $url = $this->router->generate('app_landing');
+                $url = $this->router->generate('app_login');
+                $event->setResponse(new RedirectResponse($url));
+            }
+            $setting2faStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
+            if (
+                $setting2faStatus !== TwoFAType::NOT_ENFORCED->value &&
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
+            ) {
+                $url = $this->router->generate('app_configure2FA');
                 $event->setResponse(new RedirectResponse($url));
             }
         }
 
         $sessionAdmin = $session->get('session_admin');
 
-        // Restrict access to /dashboard if the user is not an admin and does not have 'session_admin' set to true
+        // Check if the user authenticated is a valid admin account and if it has the valid access session token
         if (
-            $user && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
+            $userToken && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
                 'ROLE_ADMIN',
-                $user->getRoles(),
+                $userToken->getRoles(),
                 true
             )
         ) {
