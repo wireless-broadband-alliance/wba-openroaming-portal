@@ -47,6 +47,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -106,9 +107,10 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $session = $request->getSession();
         $sessionAdmin = $session->get('session_admin');
-        if ($sessionAdmin) {
-            return $this->redirectToRoute('saml_logout');
+        if ($sessionAdmin === true) {
+            throw new AccessDeniedHttpException('Access denied.');
         }
+
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
         if (
