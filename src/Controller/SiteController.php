@@ -926,7 +926,6 @@ class SiteController extends AbstractController
 
     /**
      * @param $userAgent
-     * @return string
      */
     private function detectDevice($userAgent): string
     {

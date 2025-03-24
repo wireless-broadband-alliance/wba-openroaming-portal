@@ -93,12 +93,7 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        if (!$user->getTwoFAsecret()) {
-            $secret = $this->totpService->generateSecret();
-        } else {
-            $secret = $user->getTwoFAsecret();
-        }
-
+        $secret = $user->getTwoFAsecret() ?: $this->totpService->generateSecret();
         if ($user instanceof User) {
             if (
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||

@@ -100,7 +100,6 @@ readonly class TwoFAService
                 $this->entityManager->remove($code);
             }
         }
-        $codes = [];
         $nCodes = 12; // Number of codes generated.
         $createdCodes = 0;
         while ($createdCodes < $nCodes) {

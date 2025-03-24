@@ -64,7 +64,7 @@ readonly class SessionValidatorListener
             }
             $setting2faStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
             if (
-                !($setting2faStatus === TwoFAType::NOT_ENFORCED->value) &&
+                $setting2faStatus !== TwoFAType::NOT_ENFORCED->value &&
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
             ) {
                 $url = $this->router->generate('app_configure2FA');
