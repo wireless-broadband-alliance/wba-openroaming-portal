@@ -1,12 +1,12 @@
 {# Table Content #}
 <tr>
     {# UUID #}
-    <td class="px-12 py-4 font-medium">
+    <td class="p-4 pl-8 font-medium">
         {{ user.uuid is defined ? user.uuid : 'No information' }}
     </td>
 
     {# Email #}
-    <td class="px-4 py-4 -ml-4">
+    <td class="p-4 -ml-4">
         {% if user.email is not null %}
             {{ user.email }}
         {% else %}
@@ -15,7 +15,7 @@
     </td>
 
     {# User Provider #}
-    <td class="px-4 py-4">
+    <td class="p-4">
         <p class="text-left ml-1 p-1">
             {% if user.userExternalAuths is not empty %}
                 {% for auth in user.userExternalAuths %}
@@ -29,7 +29,7 @@
     </td>
 
     {# User Verification #}
-    <td class="px-4 py-4 ">
+    <td class="p-4 ">
         <p class="font-semibold p-1">
             {% if user.isVerified is defined and user.isVerified == 0 %}
                 <span class="pill-error">
@@ -44,7 +44,7 @@
     </td>
 
     {# Banned At #}
-    <td class="px-4 py-4 text-left">
+    <td class="p-4 text-left">
         <p class="font-semibold p-1">
             {% if user.getBannedAt %}
                 <span class="pill-error">
