@@ -278,9 +278,14 @@ class TwoFAController extends AbstractController
                 );
                 return $this->redirectToRoute('app_disable2FA_local');
             }
+            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                $user,
+                AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+            );
             $this->addFlash(
                 'error',
-                'Your code has already been sent to you previously.'
+                'Your code has already been sent to you previously. Wait ' .
+                $interval_minutes . ' minutes to request a code again'
             );
             return $this->redirectToRoute('app_disable2FA_local');
         }
@@ -557,9 +562,14 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_verify2FA_portal');
         }
+        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_VERIFY->value
+        );
         $this->addFlash(
             'error',
-            'Your code has already been sent to you previously.'
+            'Your code has already been sent to you previously. Wait ' .
+            $interval_minutes . ' minutes to request a code again'
         );
         return $this->redirectToRoute('app_verify2FA_portal');
     }
@@ -624,9 +634,14 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_2FA_first_verification_local');
         }
+        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+        );
         $this->addFlash(
             'error',
-            'Your code has already been sent to you previously.'
+            'Your code has already been sent to you previously. Wait ' .
+            $interval_minutes . ' minutes to request a code again'
         );
 
         return $this->redirectToRoute('app_2FA_first_verification_local');
@@ -775,9 +790,14 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_swap2FA_disable_Local');
         }
+        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+        );
         $this->addFlash(
             'error',
-            'Your code has already been sent to you previously.'
+            'Your code has already been sent to you previously. Wait ' .
+            $interval_minutes . ' minutes to request a code again'
         );
         return $this->redirectToRoute('app_swap2FA_disable_Local');
     }
