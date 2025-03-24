@@ -509,8 +509,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function disabledBy2FA(Request $request, $id): RedirectResponse
     {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
 
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
