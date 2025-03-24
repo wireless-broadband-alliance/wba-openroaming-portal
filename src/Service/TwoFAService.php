@@ -92,7 +92,7 @@ readonly class TwoFAService
     /**
      * @throws RandomException
      */
-    public function generateOTPCodes(User $user): array
+    public function generateOTPCodes(User $user): void
     {
         // If the user already has codes, they must be removed before generating new ones.
         if ($user->getOTPcodes()) {
@@ -105,10 +105,17 @@ readonly class TwoFAService
         $createdCodes = 0;
         while ($createdCodes < $nCodes) {
             $code = $this->generateMixedCode();
-            $codes[] = $code;
+            $otpCode = new OTPcode();
+            $otpCode->setCode($code);
+            $otpCode->setUser($user);
+            $otpCode->setActive(false);
+            $otpCode->setCreatedAt(new DateTime());
+            $user->addOTPcode($otpCode);
+            $this->entityManager->persist($otpCode);
+            $this->entityManager->persist($user);
             $createdCodes++;
         }
-        return $codes;
+        $this->entityManager->flush();
     }
 
     public function validateOTPCodes(User $user, string $formCode): bool
@@ -198,19 +205,14 @@ readonly class TwoFAService
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
             return false;
         }
-        return !$user->getOTPcodes()->isEmpty();
+        return $this->hasValidOTPCodes($user);
     }
 
-    public function saveCodes(mixed $codes, User $user): void
+    public function saveCodes(User $user): void
     {
-        foreach ($codes as $code) {
-            $otp = new OTPcode();
-            $otp->setUser($user);
-            $otp->setCode($code);
-            $otp->setActive(true);
-            $otp->setCreatedAt(new DateTime());
-            $user->addOTPcode($otp);
-            $this->entityManager->persist($otp);
+        foreach ($user->getOTPcodes() as $code) {
+            $code->setActive(true);
+            $this->entityManager->persist($code);
         }
         $this->entityManager->flush();
     }
@@ -292,5 +294,16 @@ readonly class TwoFAService
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
         return count($attempts) < $nrAttempts;
+    }
+
+    public function hasValidOTPCodes(User $user): bool
+    {
+        $codes = $user->getOTPcodes();
+        foreach ($codes as $code) {
+            if ($code->isActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

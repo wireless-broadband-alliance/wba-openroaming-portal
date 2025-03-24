@@ -33,6 +33,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
+use App\Service\TwoFAService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
@@ -89,6 +90,7 @@ class SiteController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly SendSMS $sendSMS,
+        private readonly TwoFAService $twoFAService
     ) {
     }
 
@@ -186,7 +188,7 @@ class SiteController extends AbstractController
         if (
             $currentUser &&
             $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
-            $currentUser->getOTPcodes()->isEmpty()
+            !$this->twoFAService->hasValidOTPCodes($currentUser)
         ) {
             return $this->redirectToRoute('app_otpCodes');
         }

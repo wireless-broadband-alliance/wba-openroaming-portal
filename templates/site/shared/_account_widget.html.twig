@@ -99,7 +99,9 @@
     <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
     <div class="grid grid-cols-2 space-x-2">
         <a href="{{ path('app_configure2FA') }}" class="btn-secondary">Configure Two-Factor Authentication</a>
-        <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+            <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
+        {% endif %}
     </div>
 
     {# Divider #}
