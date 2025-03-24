@@ -395,6 +395,7 @@ class UsersManagementController extends AbstractController
             $em->flush();
 
             if ($user->getEmail() && $userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
+                $supportTeam = $data['title']['value'];
                 // Send email
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
@@ -403,7 +404,7 @@ class UsersManagementController extends AbstractController
                     ->html(
                         $this->renderView(
                             'email/user_password.html.twig',
-                            ['password' => $newPassword, 'isNewUser' => false]
+                            ['password' => $newPassword, 'isNewUser' => false, 'supportTeam' => $supportTeam]
                         )
                     );
                 $mailer->send($email);
