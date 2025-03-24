@@ -6,28 +6,41 @@
     <title>Your OpenRoaming Profile is about to expire</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#080D4A]">
-<div class="container mx-auto px-8 pb-8 pt-[50px]">
-    <div class="bg-white rounded-[18px] p-6 shadow-md">
-        <h1 class="text-3xl font-bold">Your OpenRoaming Profile is about to expire</h1>
-        <p class="mt-6 text-lg">
-            Your profile will expire in {{ timeLeft }} days. <br>
-            To renew your profile, please follow these simple
-            steps:
-        </p>
-        <ol class="mt-2 text-lg list-decimal list-inside">
-            <li>Click
-                <a class="font-bold text-[#7BBA29] underline"
-                   href="{{ absolute_url(path('app_landing')) }}">here</a>
-                to access OpenRoaming portal
-            </li>
-            <li>Login with your credentials</li>
-            <li>Inside the portal download new profile</li>
-        </ol>
-        <p class="mt-6 text-lg">
-            Thank you,<br>
-            OpenRoaming Portal Support Team
-        </p>
+<body class="bg-[#080D4A] font-sans text-gray-800">
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-[#7BBA29] text-white text-center p-6">
+            <h1 class="text-2xl font-bold">Your OpenRoaming Profile is About to Expire</h1>
+        </div>
+
+        <div class="p-6">
+            <p class="text-lg mb-4">
+                Your profile will expire in
+                <span class="font-bold text-[#0045ad]">{{ timeLeft }}</span> days.
+            </p>
+            <p class="text-lg mb-4">
+                To renew your profile, please follow these simple steps:
+            </p>
+            <ol class="mt-4 text-lg list-decimal list-inside space-y-3">
+                <li>
+                    Click <a class="font-bold text-[#7BBA29] underline" href="{{ absolute_url(path('app_landing')) }}">here</a>
+                    to access the OpenRoaming portal.
+                </li>
+                <li>Log in with your credentials.</li>
+                <li>Inside the portal, download a new profile.</li>
+            </ol>
+            <p class="mt-6 text-lg">
+                Thank you,<br>
+                <strong>{{ supportTeam }} Team</strong>
+            </p>
+        </div>
+
+        <div class="bg-gray-100 text-center p-6">
+            <p class="text-sm text-gray-600">
+                If you have any questions, feel free to contact our support team at
+                <a href="mailto:{{ contactEmail }}" class="text-[#0045ad] underline">{{ contactEmail }}</a>.
+            </p>
+        </div>
     </div>
 </div>
 </body>
