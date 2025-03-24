@@ -154,6 +154,7 @@ readonly class TwoFAService
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
+            $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             // Send email to the user with the verification code
             $email = new TemplatedEmail()
                 ->from(
@@ -167,6 +168,7 @@ readonly class TwoFAService
                 ->htmlTemplate('email/user_code.html.twig')
                 ->context([
                     'uuid' => $user->getEmail(),
+                    'emailTitle' => $emailTitle,
                     'verificationCode' => $code,
                     'is2FATemplate' => true,
                     'secondsLeft' => $secondsLeft,

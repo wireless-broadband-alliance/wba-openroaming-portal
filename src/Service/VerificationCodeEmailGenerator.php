@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -10,11 +11,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
-class VerificationCodeEmailGenerator
+readonly class VerificationCodeEmailGenerator
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly ParameterBagInterface $parameterBag,
+        private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private ParameterBagInterface $parameterBag,
     ) {
     }
 
@@ -77,6 +79,7 @@ class VerificationCodeEmailGenerator
         // If the verification code is not provided, generate a new one
         /** @var User $currentUser */
         $verificationCode = $this->generateVerificationCode($user);
+        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
 
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
@@ -86,6 +89,7 @@ class VerificationCodeEmailGenerator
             ->context([
                 'verificationCode' => $verificationCode,
                 'uuid' => $user->getEmail(),
+                'emailTitle' => $emailTitle,
                 'is2FATemplate' => false,
             ]);
     }
