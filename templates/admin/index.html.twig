@@ -126,16 +126,16 @@
                                 BannedAt
                             </th>
 
+                            <th scope="col" class="px-6 py-3">
+                                2FA status
+                            </th>
+
                             <th scope="col" class="flex items-center px-6 py-3">
                                 <h1 class="mr-2">CreatedAt</h1>
                                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                     {{ sharedSort.sortArrow('createdAt', activeSort, activeOrder) }}
                                 </a>
-                            </th>
-
-                            <th scope="col" class="px-6 py-3">
-                                2FA status
                             </th>
 
                             <th scope="col" class="px-6 py-3">
