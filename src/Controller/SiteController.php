@@ -48,11 +48,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -110,7 +108,7 @@ class SiteController extends AbstractController
         $session = $request->getSession();
         $sessionAdmin = $session->get('session_admin');
         if ($sessionAdmin === true) {
-            throw new AccessDeniedHttpException('Access denied.');
+            return $this->redirectToRoute('app_login', ['type' => 'admin']);
         }
 
         // Check if the user is logged in and verification of the user
@@ -613,8 +611,7 @@ class SiteController extends AbstractController
                     $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
-                    ) : [];
+                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                     $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                         ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                         : null;
