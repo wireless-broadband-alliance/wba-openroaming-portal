@@ -572,6 +572,9 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        if ($this->twoFAService->hasValidOTPCodes($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
         $codes = [];
         foreach ($user->getOTPcodes() as $code) {
             $codes[] = $code->getCode();
