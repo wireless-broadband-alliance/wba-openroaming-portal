@@ -924,7 +924,7 @@ class SiteController extends AbstractController
      * @param $userAgent
      * @return string
      */
-    private function detectDevice($userAgent)
+    private function detectDevice($userAgent): string
     {
         $os = OSTypes::NONE->value;
 
@@ -957,36 +957,6 @@ class SiteController extends AbstractController
     }
 
     /**
-     * Create an email message with the verification code.
-     *
-     * @param string $email The recipient's email address.
-     * @return Email The email with the code.
-     * @throws Exception
-     */
-    protected function createEmailCode(string $email): Email
-    {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        // If the verification code is not provided, generate a new one
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $verificationCode = $this->verificationCodeGenerator->generateVerificationCode($currentUser);
-
-        return new TemplatedEmail()
-            ->from(new Address($emailSender, $nameSender))
-            ->to($email)
-            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->htmlTemplate('email/user_code.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-                'uuid' => $currentUser->getEmail(),
-                'is2FATemplate' => false,
-            ]);
-    }
-
-    /**
      * Regenerate the verification code for the user and send a new email.
      *
      * @return RedirectResponse A redirect response.
@@ -1014,7 +984,7 @@ class SiteController extends AbstractController
             $currentTime = new DateTime();
 
             // Check if enough time has passed since the last attempt
-            $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata() : [];
+            $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
             $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                 ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                 : null;
@@ -1027,7 +997,7 @@ class SiteController extends AbstractController
                 // Increment the attempt count
                 $attempts = $verificationAttempts + 1;
 
-                $email = $this->createEmailCode($currentUser->getEmail());
+                $email = $this->verificationCodeGenerator->createEmailLanding($currentUser);
                 $mailer->send($email);
 
                 // Save event with attempt count and current time
