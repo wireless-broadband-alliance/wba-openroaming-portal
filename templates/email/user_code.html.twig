@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Template</title>
+    <title>{{ data.title.value }} - Code Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#080D4A]">
@@ -17,7 +17,7 @@
             <p class="text-lg">Please keep this code confidential and do not share it with others.</p>
             <p class="mt-6 text-lg">
                 Thank you,<br>
-                OpenRoaming Portal Support Team
+                {{ data.title.value }} Team
             </p>
             {% else %}
             <p class="text-lg">Your authentication code is: <span class="font-bold"> {{ verificationCode }} </span></p>
