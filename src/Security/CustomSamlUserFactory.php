@@ -114,16 +114,16 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             $property->setValue($user, $value);
         }
 
-        $email = array_key_exists('urn:oid:1.2.840.113549.1.9.1', $attributes)
-            ? $attributes['urn:oid:1.2.840.113549.1.9.1'][0]
+        $email = array_key_exists('email', $attributes)
+            ? $attributes['email'][0]
             : null;
 
-        $firstName = array_key_exists('urn:oid:2.5.4.42', $attributes)
-            ? $attributes['urn:oid:2.5.4.42'][0]
+        $firstName = array_key_exists('givenName', $attributes)
+            ? $attributes['givenName'][0]
             : null;
 
-        $lastName = array_key_exists('urn:oid:2.5.4.4', $attributes)
-            ? $attributes['urn:oid:2.5.4.4'][0]
+        $lastName = array_key_exists('surname', $attributes)
+            ? $attributes['surname'][0]
             : null;
 
         $user->setDisabled(false);
