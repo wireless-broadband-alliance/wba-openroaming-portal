@@ -470,7 +470,7 @@ class UsersManagementController extends AbstractController
                     );
                 }
             }
-            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
+            $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
             return $this->redirectToRoute('admin_page');
         }
 
