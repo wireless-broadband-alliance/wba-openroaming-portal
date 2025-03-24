@@ -131,26 +131,26 @@
         {{ form_end(formReset) }}
     </div>
 
-    {# Content - Two-Factor Options - Only for Admins #}
-    {% if app.user and user.id == app.user.id %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
-        <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 bg-white justify-start w-full lg:w-1/2 gap-6">
-            <a href="{{ path('app_configure2FA') }}" class="btn-secondary">Configure Two-Factor Authentication</a>
+    {# Content - Two-Factor Options - both for admin && user account #}
+    <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+    <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
+        {% if app.user and user.id == app.user.id %}
+            <a href="{{ path('app_configure2FA') }}"
+               class="btn-secondary text-center break-words sm:whitespace-nowrap">
+                Configure Two-Factor Authentication
+            </a>
             {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <a href="{{ path('app_disable2FA') }}" class="btn-logout">Disable</a>
             {% endif %}
-        </div>
-    {% else %}
-        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
-            <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 bg-white justify-start w-full lg:w-1/2 gap-6">
+        {% else %}
+            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <a
                         href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
                         class="btn-logout"
                         onclick="return confirm('Are you sure you to disable 2FA for this user?')">
                     Disable
                 </a>
-            </div>
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </div>
 {% endblock %}
