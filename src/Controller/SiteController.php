@@ -636,7 +636,8 @@ class SiteController extends AbstractController
                             ];
                         }
 
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
+                        $latestEventMetadata['lastVerificationCodeTime'] =
+                            $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
