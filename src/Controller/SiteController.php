@@ -611,7 +611,7 @@ class SiteController extends AbstractController
                     $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
                     ) : [];
                     $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                         ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
@@ -634,7 +634,7 @@ class SiteController extends AbstractController
                             ];
                         }
 
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTime::ATOM);
+                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
                         $user->setForgotPasswordRequest(true);
@@ -647,7 +647,7 @@ class SiteController extends AbstractController
                         $entityManager->persist($user);
                         $entityManager->flush();
 
-                        $email = (new TemplatedEmail())
+                        $email = new TemplatedEmail()
                             ->from(
                                 new Address(
                                     $this->parameterBag->get('app.email_address'),
@@ -655,12 +655,13 @@ class SiteController extends AbstractController
                                 )
                             )
                             ->to($user->getEmail())
-                            ->subject('Your Openroaming - Password Request')
+                            ->subject('Your OpenRoaming - Password Request')
                             ->htmlTemplate('email/user_forgot_password_request.html.twig')
                             ->context([
                                 'password' => $randomPassword,
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
+                                'emailTitle' => $data['title']['value'],
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getVerificationCode(),
                             ]);
