@@ -54,6 +54,9 @@ readonly class RegistrationEmailGenerator
      */
     public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
             ->from(
@@ -67,6 +70,8 @@ readonly class RegistrationEmailGenerator
             ->htmlTemplate('email/expiresProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
                 'timeLeft' => $timeLeft,
             ]);
         $this->mailer->send($email);
@@ -74,6 +79,9 @@ readonly class RegistrationEmailGenerator
 
     public function sendNotifyExpiredProfile(User $user): void
     {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
             ->from(
@@ -87,6 +95,8 @@ readonly class RegistrationEmailGenerator
             ->htmlTemplate('email/expiredProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
+                'contactEmail' => $contactEmail,
+                'supportTeam' => $supportTeam,
             ]);
 
         $this->mailer->send($email);
