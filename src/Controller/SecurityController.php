@@ -248,7 +248,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        if ($this->isGranted('ROLE_ADMIN')) {
+        if ($type === 'admin') {
             return $this->render('admin/login_admin_landing.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
