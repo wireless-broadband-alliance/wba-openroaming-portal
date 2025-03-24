@@ -505,7 +505,7 @@ class UsersManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin', methods: ['POST'])]
+    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
     #[IsGranted('ROLE_ADMIN')]
     public function disabledBy2FA(Request $request, $id): RedirectResponse
     {
@@ -534,9 +534,9 @@ class UsersManagementController extends AbstractController
             $request->headers->get('User-Agent')
         );
         $this->addFlash(
-            'success',
+            'success_admin',
             'Two factor authentication successfully disabled'
         );
-        return $this->redirectToRoute('admin_page');
+        return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
     }
 }
