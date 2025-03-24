@@ -6,19 +6,29 @@
     <title>Confirm your Password Reset</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#080D4A]">
-<div class="container mx-auto px-8 pb-8 pt-[50px]">
-    <div class="bg-white rounded-[18px] p-6 shadow-md">
-        {% if resetPassword %}
-            <h1 class="text-3xl font-bold">Admin Password Reset</h1>
-            <p class="mt-6 text-lg">This is a step to confirm your password reset.</p>
-        {% else %}
-            <h1 class="text-3xl font-bold">Admin Settings Reset</h1>
+<body class="bg-[#080D4A] font-sans text-gray-800">
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-[#7BBA29] text-white text-center p-6">
+            {% if resetPassword %}
+                <h1 class="text-2xl font-bold">Admin Password Reset</h1>
+            {% else %}
+                <h1 class="text-2xl font-bold">Admin Settings Reset</h1>
+            {% endif %}
+        </div>
 
-            <p class="mt-6 text-lg">This is a step to confirm the settings reset.</p>
-        {% endif %}
+        <div class="p-6">
+            {% if resetPassword %}
+                <p class="text-lg mb-4">This is a step to confirm your password reset.</p>
+            {% else %}
+                <p class="text-lg mb-4">This is a step to confirm the settings reset.</p>
+            {% endif %}
 
-        <p class="text-lg">Please use the follow code to confirm the action:<span class="font-bold">{{ verificationCode }}</span></p>
+            <p class="text-lg mb-4">
+                Please use the following code to confirm the action:
+                <span class="font-bold text-[#0045ad]">{{ verificationCode }}</span>
+            </p>
+        </div>
     </div>
 </div>
 </body>
