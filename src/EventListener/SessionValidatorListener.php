@@ -3,8 +3,11 @@
 namespace App\EventListener;
 
 use App\Entity\User;
+use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\GetSettings;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -19,6 +22,8 @@ readonly class SessionValidatorListener
         private TokenStorageInterface $tokenStorage,
         private RouterInterface $router,
         private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private GetSettings $getSettings
     ) {
     }
 
@@ -39,6 +44,7 @@ readonly class SessionValidatorListener
             return;
         }
 
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $userToken */
         $userToken = $token->getUser();
         if ($userToken && str_starts_with($path, '/dashboard')) {
@@ -54,6 +60,14 @@ readonly class SessionValidatorListener
                 )
             ) {
                 $url = $this->router->generate('app_login');
+                $event->setResponse(new RedirectResponse($url));
+            }
+            $setting2faStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
+            if (
+                !($setting2faStatus === TwoFAType::NOT_ENFORCED->value) &&
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
+            ) {
+                $url = $this->router->generate('app_configure2FA');
                 $event->setResponse(new RedirectResponse($url));
             }
         }
