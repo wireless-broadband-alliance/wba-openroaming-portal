@@ -1,8 +1,14 @@
 {% extends 'site/base.html.twig' %}
 {% set twoFAEnabled = (user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-{% set is2FAEnforced = (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) or
-    ((data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) and
-    user.userExternalAuths|filter(auth => auth.provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value)|length > 0) %}
+{% set is2FAEnforced = (
+    (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value) and
+    (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) and
+    (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value)
+    ) or (
+    (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) and
+    (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value)
+    ) %}
+
 {% block title %}
     {{ data.title.value }}
 {% endblock %}
