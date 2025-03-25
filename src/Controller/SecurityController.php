@@ -39,7 +39,7 @@ class SecurityController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/login', name: 'app_login')]
-    public function loginLanding(Request $request, AuthenticationUtils $authenticationUtils): Response
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -63,7 +63,7 @@ class SecurityController extends AbstractController
             }
 
             $session = $request->getSession();
-            $session->set('session_admin', true);
+            $session->set('session_admin', false);
             return $this->handleTwoFactorRedirection(
                 $user,
                 $twoFAPlatformStatus
