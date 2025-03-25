@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -482,6 +483,7 @@ class UsersManagementController extends AbstractController
                 'user' => $user,
                 'data' => $data,
                 'current_user' => $currentUser,
+                'context' => FirewallType::DASHBOARD->value,
             ]
         );
     }
@@ -537,6 +539,9 @@ class UsersManagementController extends AbstractController
             'success_admin',
             'Two factor authentication successfully disabled'
         );
-        return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+        return $this->redirectToRoute('admin_user_edit', [
+            'id' => $user->getId(),
+            'context' => FirewallType::DASHBOARD->value
+        ]);
     }
 }
