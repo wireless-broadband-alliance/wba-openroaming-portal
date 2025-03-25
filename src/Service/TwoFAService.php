@@ -299,7 +299,12 @@ readonly class TwoFAService
     public function hasValidOTPCodes(User $user): bool
     {
         $codes = $user->getOTPcodes();
-        return array_any((array)$codes, static fn($code) => $code->isActive());
+        foreach ($codes as $code) {
+            if ($code->isActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function timeLeftToResendCode(User $user, string $eventType): int
