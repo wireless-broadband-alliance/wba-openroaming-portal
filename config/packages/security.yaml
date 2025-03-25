@@ -36,8 +36,8 @@ security:
                 - App\Security\PasswordAuthenticator
 
             form_login:
-                login_path: app_login_admin
-                check_path: app_login_admin
+                login_path: app_dashboard_login
+                check_path: app_dashboard_login
                 enable_csrf: true
                 default_target_path: /dashboard
             logout:

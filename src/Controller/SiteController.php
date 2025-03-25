@@ -106,10 +106,6 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
-        $sessionAdmin = $session->get('session_admin');
-        if ($sessionAdmin === true) {
-            return $this->redirectToRoute('admin_page');
-        }
 
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active

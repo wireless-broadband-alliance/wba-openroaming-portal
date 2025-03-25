@@ -51,24 +51,6 @@ class SecurityController extends AbstractController
         $user_sigin = new User();
         $form = $this->createForm(LoginFormType::class, $user_sigin);
         $form->handleRequest($request);
-        $user = $this->getUser();
-
-        // Check if the user is already logged in and redirect them accordingly
-        if ($user instanceof User) {
-            $twoFAPlatformStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
-            $verification = $user->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
-                return $this->redirectToRoute('app_email_code');
-            }
-
-            $session = $request->getSession();
-            $session->set('session_admin', false);
-            return $this->handleTwoFactorRedirection(
-                $user,
-                $twoFAPlatformStatus
-            );
-        }
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -103,39 +85,23 @@ class SecurityController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route('/login/admin', name: 'app_login_admin')]
+    #[Route('/dashboard/login', name: 'app_dashboard_login')]
     public function loginAdmin(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $session = $request->getSession();
+            if ($session->get('session_admin', false) === true) {
+                return $this->redirectToRoute('admin_page');
+            }
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $user_sigin = new User();
         $form = $this->createForm(LoginFormType::class, $user_sigin);
         $form->handleRequest($request);
-        $user = $this->getUser();
-
-        // Check if the user is already logged in and redirect them accordingly
-        if ($user instanceof User) {
-            $verification = $user->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
-                return $this->redirectToRoute('app_email_code');
-            }
-
-            $twoFAPlatformStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
-            $session = $request->getSession();
-
-            // Check for admin role and call the function to handle 2FA redirection
-            if ($this->isGranted('ROLE_ADMIN')) {
-                $session->set('session_admin', true);
-                return $this->handleTwoFactorRedirection(
-                    $user,
-                    $twoFAPlatformStatus
-                );
-            }
-
-            $session->set('session_admin', false);
-            return $this->redirectToRoute('app_landing');
-        }
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -174,52 +140,5 @@ class SecurityController extends AbstractController
         throw new LogicException(
             'This method can be blank - it will be intercepted by the logout key on your firewall.'
         );
-    }
-
-
-    private function handleTwoFactorRedirection(
-        User $user,
-        string $twoFAPlatformStatus,
-    ): Response {
-        // Handle NOT_ENFORCED TwoFA status
-        if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
-            return $this->redirectBasedOnTwoFAType($user);
-        }
-
-        // Handle ENFORCED_FOR_LOCAL or ENFORCED_FOR_ALL statuses
-        if (
-            $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
-            $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value
-        ) {
-            if (
-                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
-            ) {
-                return $this->redirectToRoute('app_configure2FA');
-            }
-
-            return $this->redirectBasedOnTwoFAType($user);
-        }
-
-        // Fallback default redirection
-        return $this->redirectToRoute('app_landing');
-    }
-
-    private function redirectBasedOnTwoFAType(User $user): Response
-    {
-        return match ($user->getTwoFAType()) {
-            UserTwoFactorAuthenticationStatus::SMS->value,
-            UserTwoFactorAuthenticationStatus::EMAIL->value =>
-            $this->redirectToRoute(
-                'app_2FA_generate_code'
-            ),
-            UserTwoFactorAuthenticationStatus::TOTP->value =>
-            $this->redirectToRoute(
-                'app_verify2FA_TOTP'
-            ),
-
-            default => $this->redirectToRoute(
-                'app_landing'
-            ),
-        };
     }
 }

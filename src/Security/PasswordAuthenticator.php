@@ -3,7 +3,10 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\TwoFAType;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
+use App\Repository\SettingRepository;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +28,8 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly FormFactoryInterface $formFactory
+        private readonly FormFactoryInterface $formFactory,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -55,10 +59,32 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $user = $token->getUser();
+        $path = $request->getPathInfo();
 
-        if ($user instanceof User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-            // Redirect admins to the admin_page
-            return new RedirectResponse($this->urlGenerator->generate('admin_page'));
+        // Check if the request it's from the admin login route
+        if ($path === '/login/admin') {
+            $request->getSession()->set('session_admin', true);
+        } else {
+            $request->getSession()->set('session_admin', false);
+        }
+
+        // Check if the user is already logged in and redirect them accordingly
+        if ($user instanceof User) {
+            $twoFAPlatformStatus = $this->settingRepository->findOneBy([
+                'name' => 'TWO_FACTOR_AUTH_STATUS'
+            ])->getValue();
+
+            $verification = $user->isVerified();
+            // Check if the user is verified
+            if (!$verification) {
+                return new RedirectResponse($this->urlGenerator->generate('app_email_code'));
+            }
+
+            return $this->handleTwoFactorRedirection(
+                $request,
+                $user,
+                $twoFAPlatformStatus
+            );
         }
 
         // Handle other users
@@ -73,10 +99,62 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
     protected function getLoginUrl(Request $request): string
     {
         // Determine if the request is for the admin login
-        if (str_starts_with($request->getPathInfo(), '/login/admin')) {
-            return $this->urlGenerator->generate('app_login_admin');
+        if (str_starts_with($request->getPathInfo(), '/dashboard/admin')) {
+            return $this->urlGenerator->generate('app_dashboard_login');
         }
 
         return $this->urlGenerator->generate('app_login');
+    }
+
+    protected function handleTwoFactorRedirection(
+        Request $request,
+        User $user,
+        string $twoFAPlatformStatus,
+    ): Response {
+        // Handle NOT_ENFORCED TwoFA status
+        if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
+            return $this->redirectBasedOnTwoFAType($request, $user);
+        }
+
+        // Handle ENFORCED_FOR_LOCAL or ENFORCED_FOR_ALL statuses
+        if (
+            $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
+            $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value
+        ) {
+            if (
+                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
+            ) {
+                return new RedirectResponse($this->urlGenerator->generate('app_configure2FA'));
+            }
+
+            return $this->redirectBasedOnTwoFAType($request, $user);
+        }
+
+        // Fallback default redirection
+        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+    }
+
+    protected function redirectBasedOnTwoFAType(Request $request, User $user): Response
+    {
+        // Check if the user's 2FA type is SMS or EMAIL and redirect accordingly
+        if (
+            $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::SMS->value ||
+            $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::EMAIL->value
+        ) {
+            return new RedirectResponse($this->urlGenerator->generate('app_2FA_generate_code'));
+        }
+
+        // Check if the user's 2FA type is TOTP and redirect accordingly
+        if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+            return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP'));
+        }
+
+        // Handle the default case based on session_admin flag
+        if ($request->getSession()->get('session_admin', false) === true) {
+            return new RedirectResponse($this->urlGenerator->generate('admin_page'));
+        }
+
+        // Redirect to app_landing as a fallback
+        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 }
