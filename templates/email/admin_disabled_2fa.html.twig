@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ supportTeam }} - Two-Factor Authentication Disabled</title>
+</head>
+<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
+<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
+    <div style="max-width: 448px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; text-align: center;">
+            <h1 style="font-size: 1.5rem; font-weight: 700;">
+                Two-Factor Authentication Disabled
+            </h1>
+        </div>
+        <div style="padding: 1.5rem;">
+            <p style="font-size: 1rem; margin-bottom: 1rem; color: #4A5568;">
+                Hello {{ uuid }},
+            </p>
+            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-bottom: 1rem;">
+                We wanted to inform you that your Two-Factor Authentication (2FA) has been disabled by an administrator.
+            </p>
+            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-bottom: 1rem;">
+                If this action was unexpected or unauthorized, please contact our support team immediately for
+                assistance.
+            </p>
+            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-top: 2rem;">
+                For your safety, we recommend re-enabling Two-Factor Authentication at the earliest opportunity.
+            </p>
+            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-top: 1rem;">
+                Please access the following link to manage your Two-Factor Authentication settings:
+            </p>
+        </div>
+        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
+            <p style="font-size: 0.875rem; color: #718096;">
+                Support team:
+                <a href="mailto:{{ contactEmail }}"
+                   style="color: #0045AD; text-decoration: underline;">{{ contactEmail }}</a>
+            </p>
+            <p style="font-size: 0.875rem; color: #718096;">
+                Thank you,<br>
+                <strong>{{ supportTeam }} Team</strong>
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

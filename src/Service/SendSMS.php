@@ -76,7 +76,7 @@ class SendSMS
         return false;
     }
 
-    public function sendSmsReset($recipient, string $message): bool
+    public function sendSmsNoValidation($recipient, string $message): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $apiUrl = $this->parameterBag->get('app.budget_api_url');

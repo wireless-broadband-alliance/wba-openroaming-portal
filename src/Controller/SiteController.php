@@ -790,7 +790,7 @@ class SiteController extends AbstractController
                         $message = "Your new random account password is: "
                             . $randomPassword
                             . "%0A" . "Please make sure to login to complete the request";
-                        $this->sendSMS->sendSmsReset($recipient, $message);
+                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(

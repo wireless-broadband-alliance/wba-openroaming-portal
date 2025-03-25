@@ -10,6 +10,6 @@ class SanitizeHTML
     {
         $config = HTMLPurifier_Config::createDefault();
         $config->set('Cache.SerializerPath', sys_get_temp_dir());
-        return (new \HTMLPurifier($config))->purify($html);
+        return new \HTMLPurifier($config)->purify($html);
     }
 }
