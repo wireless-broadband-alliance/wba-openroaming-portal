@@ -8,10 +8,10 @@ use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use DateTimeInterface;
 
-class UserStatusChecker
+readonly class UserStatusChecker
 {
     public function __construct(
-        private readonly UserRepository $userRepository
+        private UserRepository $userRepository
     ) {
     }
 

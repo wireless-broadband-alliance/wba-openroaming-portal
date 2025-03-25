@@ -23,8 +23,6 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
-    public const LOGIN_ROUTE = 'app_login';
-
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly FormFactoryInterface $formFactory
@@ -33,8 +31,8 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $userSignin = new User();
-        $form = $this->formFactory->create(LoginFormType::class, $userSignin);
+        $userSigning = new User();
+        $form = $this->formFactory->create(LoginFormType::class, $userSigning);
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
@@ -56,23 +54,29 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // Check if there is a referer URL in the request headers
-        $refererUrl = $request->headers->get('referer');
+        $user = $token->getUser();
 
-        // If there is a referer URL, redirect the user back to that URL
-        if ($refererUrl) {
-            return new RedirectResponse($refererUrl);
+        if ($user instanceof User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            // Redirect admins to the admin_page
+            return new RedirectResponse($this->urlGenerator->generate('admin_page'));
         }
 
-        // If there is no referer URL, redirect the user to the home page
+        // Handle other users
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+            return new RedirectResponse($targetPath);
+        }
+
+        // Default redirection for non-admin users
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
-
     protected function getLoginUrl(Request $request): string
     {
-        $type = $request->get('type', 'user');
+        // Determine if the request is for the admin login
+        if (str_starts_with($request->getPathInfo(), '/login/admin')) {
+            return $this->urlGenerator->generate('app_login_admin');
+        }
 
-        return $this->urlGenerator->generate(self::LOGIN_ROUTE, ['type' => $type]);
+        return $this->urlGenerator->generate('app_login');
     }
 }

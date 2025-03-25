@@ -38,7 +38,7 @@ readonly class SessionValidatorListener
         $token = $this->tokenStorage->getToken();
         if (!$token || !$token->getUser()) {
             if (str_starts_with($path, '/dashboard')) {
-                $url = $this->router->generate('app_login', ['type' => 'admin']);
+                $url = $this->router->generate('app_login_admin');
                 $event->setResponse(new RedirectResponse($url));
             }
             return;
@@ -47,6 +47,18 @@ readonly class SessionValidatorListener
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $userToken */
         $userToken = $token->getUser();
+        $sessionAdmin = $session->get('session_admin');
+        // Check if the user authenticated is a valid admin account and if it has the valid access session token
+        if (
+            $userToken && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
+                'ROLE_ADMIN',
+                $userToken->getRoles(),
+                true
+            )
+        ) {
+            throw new AccessDeniedHttpException('Access denied.');
+        }
+
         if ($userToken && str_starts_with($path, '/dashboard')) {
             $user = $this->userRepository->find($userToken->getId());
             if (!$user) {
@@ -70,19 +82,6 @@ readonly class SessionValidatorListener
                 $url = $this->router->generate('app_configure2FA');
                 $event->setResponse(new RedirectResponse($url));
             }
-        }
-
-        $sessionAdmin = $session->get('session_admin');
-
-        // Check if the user authenticated is a valid admin account and if it has the valid access session token
-        if (
-            $userToken && $sessionAdmin === false && str_starts_with($path, '/dashboard') && in_array(
-                'ROLE_ADMIN',
-                $userToken->getRoles(),
-                true
-            )
-        ) {
-            throw new AccessDeniedHttpException('Access denied.');
         }
     }
 }

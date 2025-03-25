@@ -108,7 +108,7 @@ class SiteController extends AbstractController
         $session = $request->getSession();
         $sessionAdmin = $session->get('session_admin');
         if ($sessionAdmin === true) {
-            return $this->redirectToRoute('app_login', ['type' => 'admin']);
+            return $this->redirectToRoute('admin_page');
         }
 
         // Check if the user is logged in and verification of the user
