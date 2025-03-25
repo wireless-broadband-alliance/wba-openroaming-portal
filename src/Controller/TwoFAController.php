@@ -68,6 +68,7 @@ class TwoFAController extends AbstractController
         return $this->render('site/twoFAAuthentication/base_configuration.html.twig', [
             'user' => $user,
             'data' => $data,
+            'context' => $context
         ]);
     }
 

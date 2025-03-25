@@ -29,8 +29,13 @@
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
             <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
         {% else %}
-            <a href="{{ app.session.get('session_admin') ? path('admin_page') : path('app_landing') }}"
-               class="w-[160px] btn-secondary">Go Back</a>
+            <a
+            {% if context == constant('App\\Enum\\FirewallType::DASHBOARD').value %}
+                href="{{ path('admin_page') }}"
+            {% else %}
+                href="{{ path('app_landing') }}"
+            {% endif %}
+            class="w-[160px] btn-secondary">Go Back</a>
         {% endif %}
     {% endif %}
 </div>
