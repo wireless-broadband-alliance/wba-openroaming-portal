@@ -299,12 +299,7 @@ readonly class TwoFAService
     public function hasValidOTPCodes(User $user): bool
     {
         $codes = $user->getOTPcodes();
-        foreach ($codes as $code) {
-            if ($code->isActive()) {
-                return true;
-            }
-        }
-        return false;
+        return array_any((array)$codes, static fn($code) => $code->isActive());
     }
 
     public function timeLeftToResendCode(User $user, string $eventType): int
@@ -322,7 +317,6 @@ readonly class TwoFAService
         $interval = date_diff($now, $lastAttemptTime);
         $interval_minutes = $interval->days * 1440;
         $interval_minutes += $interval->h * 60;
-        $interval_minutes += $interval->i;
-        return $interval_minutes;
+        return $interval_minutes + $interval->i;
     }
 }
