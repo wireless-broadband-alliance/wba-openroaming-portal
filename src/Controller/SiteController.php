@@ -28,7 +28,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
-use App\Security\PasswordAuthenticator;
+use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -97,7 +97,7 @@ class SiteController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordEncoder,
         UserAuthenticatorInterface $userAuthenticator,
-        PasswordAuthenticator $authenticator,
+        LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
         RequestStack $requestStack
     ): Response {

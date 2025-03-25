@@ -33,7 +33,7 @@ security:
             lazy: true
             provider: admin_user_provider
             custom_authenticators:
-                - App\Security\PasswordAuthenticator
+                - App\Security\DashboardAuthenticator
 
             form_login:
                 login_path: app_dashboard_login
@@ -53,7 +53,7 @@ security:
             provider: user_provider
             # Integrate multiple custom authenticators here.
             custom_authenticators:
-                - App\Security\PasswordAuthenticator # Password-based authenticator
+                - App\Security\LandingAuthenticator # Password-based authenticator
 
             # Form login for password-based authentication.
             form_login:

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
@@ -22,7 +23,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class PasswordAuthenticator extends AbstractLoginFormAuthenticator
+class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
@@ -59,14 +60,6 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $user = $token->getUser();
-        $path = $request->getPathInfo();
-
-        // Check if the request it's from the admin login route
-        if ($path === '/dashboard/login') {
-            $request->getSession()->set('session_admin', true);
-        } else {
-            $request->getSession()->set('session_admin', false);
-        }
 
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
@@ -92,16 +85,11 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         // Default redirection for non-admin users
-        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+        return new RedirectResponse($this->urlGenerator->generate('admin_page'));
     }
 
     protected function getLoginUrl(Request $request): string
     {
-        // Determine if the request is for the admin login
-        if (str_starts_with($request->getPathInfo(), '/dashboard/admin')) {
-            return $this->urlGenerator->generate('app_dashboard_login');
-        }
-
         return $this->urlGenerator->generate('app_login');
     }
 
@@ -122,14 +110,16 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
             if (
                 $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
             ) {
-                return new RedirectResponse($this->urlGenerator->generate('app_configure2FA'));
+                return new RedirectResponse($this->urlGenerator->generate('app_configure2FA', [
+                    'context' => FirewallType::DASHBOARD->value,
+                ]));
             }
 
             return $this->redirectBasedOnTwoFAType($user);
         }
 
         // Fallback default redirection
-        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+        return new RedirectResponse($this->urlGenerator->generate('admin_page'));
     }
 
     protected function redirectBasedOnTwoFAType(User $user): Response
@@ -139,15 +129,19 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
             $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::SMS->value ||
             $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::EMAIL->value
         ) {
-            return new RedirectResponse($this->urlGenerator->generate('app_2FA_generate_code'));
+            return new RedirectResponse($this->urlGenerator->generate('app_2FA_generate_code', [
+                'context' => FirewallType::DASHBOARD->value,
+            ]));
         }
 
         // Check if the user's 2FA type is TOTP and redirect accordingly
         if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-            return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP'));
+            return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP', [
+                'context' => FirewallType::DASHBOARD->value,
+            ]));
         }
 
-        // Redirect to app_landing as a fallback
-        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+        // Redirect to admin_page as a fallback
+        return new RedirectResponse($this->urlGenerator->generate('admin_page'));
     }
 }
