@@ -399,7 +399,6 @@ class TwoFAController extends AbstractController
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
-        $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -455,7 +454,6 @@ class TwoFAController extends AbstractController
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $session = $request->getSession();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
@@ -568,7 +566,6 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $session = $request->getSession();
         $this->twoFAService->saveCodes($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
