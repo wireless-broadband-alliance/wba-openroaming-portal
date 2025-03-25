@@ -39,6 +39,8 @@ security:
                 login_path: app_dashboard_login
                 check_path: app_dashboard_login
                 enable_csrf: true
+                username_parameter: uuid
+                password_parameter: password
                 default_target_path: /dashboard
             logout:
                 path: saml_logout

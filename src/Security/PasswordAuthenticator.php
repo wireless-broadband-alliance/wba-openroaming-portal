@@ -62,7 +62,7 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
         $path = $request->getPathInfo();
 
         // Check if the request it's from the admin login route
-        if ($path === '/login/admin') {
+        if ($path === '/dashboard/login') {
             $request->getSession()->set('session_admin', true);
         } else {
             $request->getSession()->set('session_admin', false);
@@ -81,7 +81,6 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
             }
 
             return $this->handleTwoFactorRedirection(
-                $request,
                 $user,
                 $twoFAPlatformStatus
             );
@@ -107,13 +106,12 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
     }
 
     protected function handleTwoFactorRedirection(
-        Request $request,
         User $user,
         string $twoFAPlatformStatus,
     ): Response {
         // Handle NOT_ENFORCED TwoFA status
         if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
-            return $this->redirectBasedOnTwoFAType($request, $user);
+            return $this->redirectBasedOnTwoFAType($user);
         }
 
         // Handle ENFORCED_FOR_LOCAL or ENFORCED_FOR_ALL statuses
@@ -127,14 +125,14 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
                 return new RedirectResponse($this->urlGenerator->generate('app_configure2FA'));
             }
 
-            return $this->redirectBasedOnTwoFAType($request, $user);
+            return $this->redirectBasedOnTwoFAType($user);
         }
 
         // Fallback default redirection
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
-    protected function redirectBasedOnTwoFAType(Request $request, User $user): Response
+    protected function redirectBasedOnTwoFAType(User $user): Response
     {
         // Check if the user's 2FA type is SMS or EMAIL and redirect accordingly
         if (
@@ -147,11 +145,6 @@ class PasswordAuthenticator extends AbstractLoginFormAuthenticator
         // Check if the user's 2FA type is TOTP and redirect accordingly
         if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::TOTP->value) {
             return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP'));
-        }
-
-        // Handle the default case based on session_admin flag
-        if ($request->getSession()->get('session_admin', false) === true) {
-            return new RedirectResponse($this->urlGenerator->generate('admin_page'));
         }
 
         // Redirect to app_landing as a fallback

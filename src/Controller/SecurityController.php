@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\PlatformMode;
-use App\Enum\TwoFAType;
-use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -41,6 +39,11 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $platformMode = $data['PLATFORM_MODE']['value'];
@@ -86,15 +89,11 @@ class SecurityController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard/login', name: 'app_dashboard_login')]
-    public function loginAdmin(Request $request, AuthenticationUtils $authenticationUtils): Response
+    public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
         $user = $this->getUser();
         if ($user instanceof User) {
-            $session = $request->getSession();
-            if ($session->get('session_admin', false) === true) {
-                return $this->redirectToRoute('admin_page');
-            }
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('admin_page');
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
