@@ -479,8 +479,7 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                $session_admin = $session->get('session_admin');
-                if ($session_admin) {
+                if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -512,7 +511,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -537,8 +536,7 @@ class TwoFAController extends AbstractController
             ]);
         }
         $this->addFlash('error', 'User not found');
-        $session_admin = $session->get('session_admin');
-        if ($session_admin) {
+        if ($context === FirewallType::DASHBOARD->value) {
             return $this->redirectToRoute('admin_page');
         }
         return $this->redirectToRoute('app_landing');
@@ -565,7 +563,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -578,8 +576,7 @@ class TwoFAController extends AbstractController
             AnalyticalEventType::GENERATE_OTP_2FA->value,
             $request->headers->get('User-Agent')
         );
-        $session_admin = $session->get('session_admin');
-        if ($session_admin) {
+        if ($context === FirewallType::DASHBOARD->value) {
             return $this->redirectToRoute('admin_page');
         }
         return $this->redirectToRoute('app_landing');
@@ -607,7 +604,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -694,7 +691,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_verify2FA_portal', [
                 'context' => $context
@@ -751,7 +748,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -794,7 +791,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -829,7 +826,9 @@ class TwoFAController extends AbstractController
             $interval_minutes . ' minutes to request a code again'
         );
 
-        return $this->redirectToRoute('app_2FA_first_verification_local');
+        return $this->redirectToRoute('app_2FA_first_verification_local',[
+            'context' => $context
+        ]);
     }
 
     #[Route('/{context}/2FAFirstSetup/verification',
@@ -850,7 +849,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -877,8 +876,7 @@ class TwoFAController extends AbstractController
                         $this->entityManager->flush();
                     } else {
                         $this->addFlash('error', 'You must be logged in to access this page');
-                        $session_admin = $session->get('session_admin');
-                        if ($session_admin) {
+                        if ($context === FirewallType::DASHBOARD->value) {
                             return $this->redirectToRoute('admin_page');
                         }
                         return $this->redirectToRoute('app_landing');
@@ -897,8 +895,7 @@ class TwoFAController extends AbstractController
                     $this->entityManager->flush();
                 } else {
                     $this->addFlash('error', 'You must be logged in to access this page');
-                    $session_admin = $session->get('session_admin');
-                    if ($session_admin) {
+                    if ($context === FirewallType::DASHBOARD->value) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -914,6 +911,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'context' => $context
         ]);
     }
 
@@ -935,7 +933,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -976,7 +974,8 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
-            'swap' => true
+            'swap' => true,
+            'context' => $context
         ]);
     }
 
@@ -998,7 +997,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -1025,7 +1024,9 @@ class TwoFAController extends AbstractController
             'Your code has already been sent to you previously. Wait ' .
             $interval_minutes . ' minutes to request a code again'
         );
-        return $this->redirectToRoute('app_swap2FA_disable_Local');
+        return $this->redirectToRoute('app_swap2FA_disable_Local', [
+            'context' => $context
+        ]);
     }
 
     #[Route('/{context}/2FASwapMethod/disable/TOTP',
@@ -1046,7 +1047,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -1089,7 +1090,8 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
-            'swap' => true
+            'swap' => true,
+            'context' => $context
         ]);
     }
 }
