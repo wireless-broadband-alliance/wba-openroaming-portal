@@ -658,6 +658,7 @@ class SiteController extends AbstractController
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
                                 'emailTitle' => $data['title']['value'],
+                                'contactEmail' => $data['contactEmail']['value'],
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getVerificationCode(),
                             ]);
