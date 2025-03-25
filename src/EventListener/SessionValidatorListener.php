@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -43,10 +44,16 @@ readonly class SessionValidatorListener
 
         /** @var User $userToken */
         $userToken = $token->getUser();
-
+        $url = [
+            '/dashboard/login',
+            '/dashboard/verify2FA',
+            '/dashboard/verify2FA/TOTP',
+            '/dashboard/generate2FACode',
+            '/dashboard/verify2FA/resend'
+        ];
         if ($userToken && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
-            if ($path === '/dashboard/login') {
+            if () {
                 return;
             }
 
@@ -60,7 +67,20 @@ readonly class SessionValidatorListener
                 ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
                 && !$session->has('2fa_verified')
             ) {
-                $url = $this->router->generate('app_login');
+                if (
+                    $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
+                    $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
+                ) {
+                    $url = $this->router->generate('app_2FA_generate_code', [
+                        'context' => FirewallType::DASHBOARD->value,
+                    ]);
+                } elseif ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    $url = $this->router->generate('app_verify2FA_TOTP', [
+                        'context' => FirewallType::DASHBOARD->value,
+                    ]);
+                } else {
+                    $url = $this->router->generate('app_landing');
+                }
                 $event->setResponse(new RedirectResponse($url));
             }
 
