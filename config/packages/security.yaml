@@ -59,6 +59,8 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
+                username_parameter: uuid
+                password_parameter: password
                 enable_csrf: true
             saml:
                 identifier_attribute: sAMAccountName
