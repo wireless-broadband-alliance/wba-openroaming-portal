@@ -53,7 +53,7 @@ readonly class SessionValidatorListener
         ];
         if ($userToken && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
-            if () {
+            if (in_array($path, $url)) {
                 return;
             }
 
