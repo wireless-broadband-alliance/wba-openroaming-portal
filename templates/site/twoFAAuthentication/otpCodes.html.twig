@@ -37,7 +37,7 @@
                             <twig:ux:icon class="w-4" name="wba:copy" />
                         </button>
                         <a title="Download"
-                           href="{{ path('app_download_codes') }}">
+                           href="{{ path('app_download_codes', {context: context}) }}">
                             <twig:ux:icon class="w-4" name="wba:download" />
                         </a>
                         <button title="Print"
@@ -60,7 +60,7 @@
 
     {# Divider #}
     <div>
-        <a href="{{ path('app_otpCodes_save') }}"
+        <a href="{{ path('app_otpCodes_save', {context: context}) }}"
            class="mt-6 w-[180px] btn-primary">Done</a>
     </div>
 

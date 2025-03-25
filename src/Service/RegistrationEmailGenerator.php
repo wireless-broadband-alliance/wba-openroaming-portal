@@ -25,6 +25,7 @@ readonly class RegistrationEmailGenerator
     public function sendRegistrationEmail(User $user, $password): void
     {
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -40,6 +41,7 @@ readonly class RegistrationEmailGenerator
             ->context([
                 'uuid' => $user->getEmail(),
                 'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
                 'verificationCode' => $user->getVerificationCode(),
                 'isNewUser' => true,
                 // This variable informs if the user it's new our if it's just a password reset request

@@ -28,7 +28,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
-use App\Security\PasswordAuthenticator;
+use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -97,7 +97,7 @@ class SiteController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordEncoder,
         UserAuthenticatorInterface $userAuthenticator,
-        PasswordAuthenticator $authenticator,
+        LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
         RequestStack $requestStack
     ): Response {
@@ -658,6 +658,7 @@ class SiteController extends AbstractController
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
                                 'emailTitle' => $data['title']['value'],
+                                'contactEmail' => $data['contactEmail']['value'],
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getVerificationCode(),
                             ]);
@@ -790,7 +791,7 @@ class SiteController extends AbstractController
                         $message = "Your new random account password is: "
                             . $randomPassword
                             . "%0A" . "Please make sure to login to complete the request";
-                        $this->sendSMS->sendSmsReset($recipient, $message);
+                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(

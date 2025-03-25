@@ -53,7 +53,7 @@
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 {% if user.email is not null or user.phoneNumber is not null %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                    <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                         {% if user.email is not null %}
                             Email
                         {% endif %}
@@ -62,11 +62,11 @@
                         {% endif %}
                     </a>
                 {% endif %}
-                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                 {% if user.email is not null or user.phoneNumber is not null %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                    <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                         {% if user.email is not null %}
                             Email
                         {% endif %}
@@ -77,10 +77,10 @@
                 {% endif %}
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
         {% endif %}
         {# When the app status is ENFORCED_FOR_LOCAL #}
@@ -88,9 +88,9 @@
             {# Local users #}
             {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                    <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
                     {% if user.email is not null or user.phoneNumber is not null %}
-                        <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                        <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                             {% if user.email is not null %}
                                 Email
                             {% endif %}
@@ -102,7 +102,7 @@
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                     {% if user.email is not null or user.phoneNumber is not null %}
-                        <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                        <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                             {% if user.email is not null %}
                                 Email
                             {% endif %}
@@ -113,16 +113,16 @@
                     {% endif %}
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                    <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                    <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
             {% else %}
                 {# External Users #}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                     {% if user.email is not null or user.phoneNumber is not null %}
-                        <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                        <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                             {% if user.email is not null %}
                                 Email
                             {% endif %}
@@ -131,11 +131,11 @@
                             {% endif %}
                         </a>
                     {% endif %}
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                    <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                     {% if user.email is not null or user.phoneNumber is not null %}
-                        <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                        <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                             {% if user.email is not null %}
                                 Email
                             {% endif %}
@@ -146,10 +146,10 @@
                     {% endif %}
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                    <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
                 {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                    <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                    <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
                 {% endif %}
             {% endif %}
         {% endif %}
@@ -157,7 +157,7 @@
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 {% if user.email is not null or user.phoneNumber is not null %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                    <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                         {% if user.email is not null %}
                             Email
                         {% endif %}
@@ -166,11 +166,11 @@
                         {% endif %}
                     </a>
                 {% endif %}
-                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
                 {% if user.email is not null or user.phoneNumber is not null %}
-                    <a href="{{ path('app_2FA_firstSetup_local') }}" class="btn-primary">
+                    <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
                         {% if user.email is not null %}
                             Email
                         {% endif %}
@@ -181,10 +181,10 @@
                 {% endif %}
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value) %}
-                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value) %}
-                <a href="{{ path('app_enable2FA_TOTP') }}" class="btn-primary">Mobile App/TOTP</a>
+                <a href="{{ path('app_enable2FA_TOTP', {context: context}) }}" class="btn-primary">Mobile App/TOTP</a>
             {% endif %}
         {% endif %}
     </div>

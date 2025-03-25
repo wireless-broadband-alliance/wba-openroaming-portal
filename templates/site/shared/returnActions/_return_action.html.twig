@@ -12,7 +12,7 @@
     </p>
     {% if (app.request.attributes.get('_route') == 'app_enable2FA_TOTP') or
         (app.request.attributes.get('_route') == 'app_2FA_first_verification_local') %}
-        <a class="w-[160px] btn-secondary" href='{{ path('app_configure2FA') }}'>Go Back</a>
+        <a class="w-[160px] btn-secondary" href='{{ path('app_configure2FA', {context: context}) }}'>Go Back</a>
     {% else %}
         <button class="w-[160px] btn-secondary" onClick="window.history.back();">Go Back</button>
     {% endif %}

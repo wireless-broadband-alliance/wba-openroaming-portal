@@ -321,6 +321,10 @@ class RegistrationController extends AbstractController
                             'uuid' => $user->getUuid(),
                             'currentPassword' => $randomPassword,
                             'verificationCode' => $user->getVerificationCode(),
+                            'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
+                            'contactEmail' => $this->settingRepository->findOneBy(
+                                ['name' => 'CONTACT_EMAIL']
+                            )->getValue()
                         ]);
 
                     $mailer->send($email);

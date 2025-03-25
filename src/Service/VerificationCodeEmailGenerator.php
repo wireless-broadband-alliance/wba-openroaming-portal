@@ -92,4 +92,32 @@ readonly class VerificationCodeEmailGenerator
                 'is2FATemplate' => false,
             ]);
     }
+
+    /**
+     * Create an email message about 2fa disabled by the admin.
+     *
+     * @return Email The email with the code.
+     * @throws Exception
+     */
+    public function createEmail2FADisabledBy(User $user): Email
+    {
+        // Get the values from the services.yaml file using $parameterBag on the __construct
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        // If the verification code is not provided, generate a new one
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+
+        return new TemplatedEmail()
+            ->from(new Address($emailSender, $nameSender))
+            ->to($user->getEmail())
+            ->subject('Your OpenRoaming Two-Factor Authentication has been disabled')
+            ->htmlTemplate('email/admin_disabled_2fa.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail
+            ]);
+    }
 }
