@@ -28,17 +28,24 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        admin:
-            pattern: ^/dashboard/
+        dashboard:
+            pattern: ^/dashboard
+            lazy: true
             provider: admin_user_provider
+            custom_authenticators:
+                - App\Security\PasswordAuthenticator
+
             form_login:
-                login_path: app_login
-                check_path: app_login
+                login_path: app_dashboard_login
+                check_path: app_dashboard_login
                 enable_csrf: true
+                username_parameter: uuid
+                password_parameter: password
                 default_target_path: /dashboard
             logout:
                 path: saml_logout
-                target: /admin/login
+                target: /
+            entry_point: form_login
 
         landing:
             pattern: ^/
