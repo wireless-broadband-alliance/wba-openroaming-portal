@@ -135,8 +135,7 @@ class TwoFAController extends AbstractController
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
-            $session_admin = $session->get('session_admin');
-            if ($session_admin) {
+            if ($context === FirewallType::DASHBOARD->value) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -205,8 +204,7 @@ class TwoFAController extends AbstractController
                         AnalyticalEventType::VERIFY_OTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    $session_admin = $session->get('session_admin');
-                    if ($session_admin) {
+                    if ($context === FirewallType::DASHBOARD->value) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -220,8 +218,7 @@ class TwoFAController extends AbstractController
                         AnalyticalEventType::VERIFY_TOTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    $session_admin = $session->get('session_admin');
-                    if ($session_admin) {
+                    if ($context === FirewallType::DASHBOARD->value) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -325,7 +322,6 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $session = $request->getSession();
 
         if (
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
@@ -346,7 +342,9 @@ class TwoFAController extends AbstractController
                     'success',
                     'A confirmation code was sent to you successfully.'
                 );
-                return $this->redirectToRoute('app_disable2FA_local');
+                return $this->redirectToRoute('app_disable2FA_local',[
+                    'context' => $context
+                ]);
             }
             $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                 $user,
@@ -357,15 +355,18 @@ class TwoFAController extends AbstractController
                 'Your code has already been sent to you previously. Wait ' .
                 $interval_minutes . ' minutes to request a code again'
             );
-            return $this->redirectToRoute('app_disable2FA_local');
+            return $this->redirectToRoute('app_disable2FA_local',[
+                'context' => $context
+            ]);
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-            return $this->redirectToRoute('app_disable2FA_TOTP');
+            return $this->redirectToRoute('app_disable2FA_TOTP', [
+                'context' => $context
+            ]);
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
-            $sessionAdmin = $session->get('session_admin');
             $this->addFlash('error', 'Two-Factor authentication is already disabled');
-            if ($sessionAdmin) {
+            if ($context === FirewallType::DASHBOARD->value) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -418,8 +419,7 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                $session_admin = $session->get('session_admin');
-                if ($session_admin) {
+                if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');

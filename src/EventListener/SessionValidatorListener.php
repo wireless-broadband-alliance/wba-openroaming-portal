@@ -49,7 +49,9 @@ readonly class SessionValidatorListener
             '/dashboard/verify2FA',
             '/dashboard/verify2FA/TOTP',
             '/dashboard/generate2FACode',
-            '/dashboard/verify2FA/resend'
+            '/dashboard/verify2FA/resend',
+            '/dashboard/configure2FA',
+            '/dashboard/enable2FA/TOTP',
         ];
         if ($userToken && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
@@ -89,7 +91,7 @@ readonly class SessionValidatorListener
                 $setting2faStatus !== TwoFAType::NOT_ENFORCED->value &&
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
             ) {
-                $url = $this->router->generate('app_configure2FA');
+                $url = $this->router->generate('app_configure2FA', ['context' => FirewallType::DASHBOARD->value]);
                 $event->setResponse(new RedirectResponse($url));
             }
         }
