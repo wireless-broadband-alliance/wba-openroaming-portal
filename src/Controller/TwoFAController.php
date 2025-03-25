@@ -91,7 +91,7 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
             return $this->redirectToRoute('app_dashboard_login');
         }
@@ -117,7 +117,9 @@ class TwoFAController extends AbstractController
                     $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
-                    return $this->redirectToRoute('app_otpCodes');
+                    return $this->redirectToRoute('app_otpCodes', [
+                        'context' => $context
+                    ]);
                 }
                 $this->addFlash('error', 'Invalid code');
             }
@@ -128,7 +130,9 @@ class TwoFAController extends AbstractController
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
             ) {
-                return $this->redirectToRoute('app_2FA_generate_code_swap_method');
+                return $this->redirectToRoute('app_2FA_generate_code_swap_method', [
+                    'context' => $context
+                ]);
             }
             $user->setTwoFAsecret($secret);
             $this->entityManager->persist($user);
@@ -156,6 +160,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'user' => $user,
             'form' => $form,
+            'context' => $context
         ]);
     }
 
@@ -531,6 +536,7 @@ class TwoFAController extends AbstractController
                 'data' => $data,
                 'codes' => $user->getOTPcodes(),
                 'user' => $user,
+                'context' => $context
             ]);
         }
         $this->addFlash('error', 'User not found');
@@ -794,7 +800,9 @@ class TwoFAController extends AbstractController
         }
 
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-            return $this->redirectToRoute('app_swap2FA_disable_TOTP');
+            return $this->redirectToRoute('app_swap2FA_disable_TOTP', [
+                'context' => $context
+            ]);
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
@@ -811,7 +819,9 @@ class TwoFAController extends AbstractController
                 'success',
                 'A confirmation code was sent to you successfully.'
             );
-            return $this->redirectToRoute('app_2FA_first_verification_local');
+            return $this->redirectToRoute('app_2FA_first_verification_local' , [
+                'context' => $context
+            ]);
         }
         $interval_minutes = $this->twoFAService->timeLeftToResendCode(
             $user,
@@ -878,7 +888,9 @@ class TwoFAController extends AbstractController
                         }
                         return $this->redirectToRoute('app_landing');
                     }
-                    return $this->redirectToRoute('app_otpCodes');
+                    return $this->redirectToRoute('app_otpCodes', [
+                        'context' => $context
+                    ]);
                 }
                 if ($user->getEmail()) {
                     $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
@@ -897,7 +909,9 @@ class TwoFAController extends AbstractController
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                return $this->redirectToRoute('app_otpCodes');
+                return $this->redirectToRoute('app_otpCodes', [
+                    'context' => $context
+                ]);
             }
             $this->addFlash(
                 'error',
@@ -940,7 +954,9 @@ class TwoFAController extends AbstractController
                 'error',
                 'This account already has two factor authentication disabled.'
             );
-            return $this->redirectToRoute('app_configure2FA');
+            return $this->redirectToRoute('app_configure2FA', [
+                'context' => $context
+            ]);
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
@@ -963,7 +979,9 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                return $this->redirectToRoute('app_enable2FA_TOTP');
+                return $this->redirectToRoute('app_enable2FA_TOTP', [
+                    'context' => $context
+                ]);
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
@@ -1010,7 +1028,9 @@ class TwoFAController extends AbstractController
                 'success',
                 'A confirmation code was sent to you successfully.'
             );
-            return $this->redirectToRoute('app_swap2FA_disable_Local');
+            return $this->redirectToRoute('app_swap2FA_disable_Local', [
+                'context' => $context
+            ]);
         }
         $interval_minutes = $this->twoFAService->timeLeftToResendCode(
             $user,
@@ -1054,7 +1074,9 @@ class TwoFAController extends AbstractController
                 'error',
                 'This account already has two factor authentication disabled.'
             );
-            return $this->redirectToRoute('app_configure2FA');
+            return $this->redirectToRoute('app_configure2FA', [
+                'context' => $context
+            ]);
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
@@ -1079,7 +1101,9 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                return $this->redirectToRoute('app_2FA_firstSetup_local');
+                return $this->redirectToRoute('app_2FA_firstSetup_local', [
+                    'context' => $context
+                ]);
             }
             $this->addFlash('error', 'Invalid code');
         }
