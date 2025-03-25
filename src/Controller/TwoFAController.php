@@ -344,7 +344,7 @@ class TwoFAController extends AbstractController
                 );
                 $this->addFlash(
                     'success',
-                    'The code was sent successfully.'
+                    'A confirmation code was sent to you successfully.'
                 );
                 return $this->redirectToRoute('app_disable2FA_local');
             }
@@ -710,7 +710,7 @@ class TwoFAController extends AbstractController
             );
             $this->addFlash(
                 'success',
-                'The code was sent successfully.'
+                'A confirmation code was sent to you successfully.'
             );
             return $this->redirectToRoute('app_verify2FA_portal', [
                 'context' => $context
@@ -815,7 +815,7 @@ class TwoFAController extends AbstractController
             );
             $this->addFlash(
                 'success',
-                'The code was sent successfully.'
+                'A confirmation code was sent to you successfully.'
             );
             return $this->redirectToRoute('app_2FA_first_verification_local');
         }
@@ -1012,7 +1012,7 @@ class TwoFAController extends AbstractController
             );
             $this->addFlash(
                 'success',
-                'The code was sent successfully.'
+                'A confirmation code was sent to you successfully.'
             );
             return $this->redirectToRoute('app_swap2FA_disable_Local');
         }
