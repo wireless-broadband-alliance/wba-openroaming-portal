@@ -41,11 +41,13 @@ class TwoFAController extends AbstractController
     ) {
     }
 
-    #[Route('/{context}/configure2FA',
+    #[Route(
+        '/{context}/configure2FA',
         name: 'app_configure2FA',
         defaults: [
             'context' => FirewallType::LANDING->value
-        ])]
+        ]
+    )]
     public function configure2FA(string $context): Response
     {
         /** @var User $user */
@@ -72,11 +74,13 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/enable2FA/TOTP',
+    #[Route(
+        '/{context}/enable2FA/TOTP',
         name: 'app_enable2FA_TOTP',
         defaults: [
             'context' => FirewallType::LANDING->value
-        ])]
+        ]
+    )]
     public function enable2FATOTP(
         string $context,
         Request $request
@@ -164,7 +168,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/verify2FA/TOTP',
+    #[Route(
+        '/{context}/verify2FA/TOTP',
         name: 'app_verify2FA_TOTP',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -238,7 +243,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/verify2FA',
+    #[Route(
+        '/{context}/verify2FA',
         name: 'app_verify2FA_portal',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -306,7 +312,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/disable2FA',
+    #[Route(
+        '/{context}/disable2FA',
         name: 'app_disable2FA',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -347,7 +354,7 @@ class TwoFAController extends AbstractController
                     'success',
                     'A confirmation code was sent to you successfully.'
                 );
-                return $this->redirectToRoute('app_disable2FA_local',[
+                return $this->redirectToRoute('app_disable2FA_local', [
                     'context' => $context
                 ]);
             }
@@ -360,7 +367,7 @@ class TwoFAController extends AbstractController
                 'Your code has already been sent to you previously. Wait ' .
                 $interval_minutes . ' minutes to request a code again'
             );
-            return $this->redirectToRoute('app_disable2FA_local',[
+            return $this->redirectToRoute('app_disable2FA_local', [
                 'context' => $context
             ]);
         }
@@ -380,7 +387,8 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/{context}/disable2FA/local',
+    #[Route(
+        '/{context}/disable2FA/local',
         name: 'app_disable2FA_local',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -437,7 +445,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/disable2FA/TOTP',
+    #[Route(
+        '/{context}/disable2FA/TOTP',
         name: 'app_disable2FA_TOTP',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -496,7 +505,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/2FAFirstSetup/codes',
+    #[Route(
+        '/{context}/2FAFirstSetup/codes',
         name: 'app_otpCodes',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -549,7 +559,8 @@ class TwoFAController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('/{context}/2FAFirstSetup/codes/save',
+    #[Route(
+        '/{context}/2FAFirstSetup/codes/save',
         name: 'app_otpCodes_save',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -589,7 +600,8 @@ class TwoFAController extends AbstractController
      * @throws \DateMalformedStringException
      * @throws RandomException
      */
-    #[Route('/{context}/verify2FA/resend',
+    #[Route(
+        '/{context}/verify2FA/resend',
         name: 'app_2FA_local_resend_code',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -676,7 +688,8 @@ class TwoFAController extends AbstractController
         return $this->redirect($lastPage);
     }
 
-    #[Route('/{context}/generate2FACode',
+    #[Route(
+        '/{context}/generate2FACode',
         name: 'app_2FA_generate_code',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -733,7 +746,8 @@ class TwoFAController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('/{context}/downloadCodes',
+    #[Route(
+        '/{context}/downloadCodes',
         name: 'app_download_codes',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -776,7 +790,8 @@ class TwoFAController extends AbstractController
         return $response;
     }
 
-    #[Route('/{context}/2FAFirstSetup/portal',
+    #[Route(
+        '/{context}/2FAFirstSetup/portal',
         name: 'app_2FA_firstSetup_local',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -819,7 +834,7 @@ class TwoFAController extends AbstractController
                 'success',
                 'A confirmation code was sent to you successfully.'
             );
-            return $this->redirectToRoute('app_2FA_first_verification_local' , [
+            return $this->redirectToRoute('app_2FA_first_verification_local', [
                 'context' => $context
             ]);
         }
@@ -833,12 +848,13 @@ class TwoFAController extends AbstractController
             $interval_minutes . ' minutes to request a code again'
         );
 
-        return $this->redirectToRoute('app_2FA_first_verification_local',[
+        return $this->redirectToRoute('app_2FA_first_verification_local', [
             'context' => $context
         ]);
     }
 
-    #[Route('/{context}/2FAFirstSetup/verification',
+    #[Route(
+        '/{context}/2FAFirstSetup/verification',
         name: 'app_2FA_first_verification_local',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -926,7 +942,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/2FASwapMethod/disableLocal',
+    #[Route(
+        '/{context}/2FASwapMethod/disableLocal',
         name: 'app_swap2FA_disable_Local',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -994,7 +1011,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/generate2FACode/swapMethod',
+    #[Route(
+        '/{context}/generate2FACode/swapMethod',
         name: 'app_2FA_generate_code_swap_method',
         defaults: [
             'context' => FirewallType::LANDING->value
@@ -1046,7 +1064,8 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/{context}/2FASwapMethod/disable/TOTP',
+    #[Route(
+        '/{context}/2FASwapMethod/disable/TOTP',
         name: 'app_swap2FA_disable_TOTP',
         defaults: [
             'context' => FirewallType::LANDING->value
