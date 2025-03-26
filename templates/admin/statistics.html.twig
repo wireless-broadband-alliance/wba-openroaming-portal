@@ -21,17 +21,16 @@
         </form>
     </div>
 
-    {# TODO: Update JS to use stimulus instead of native JS (file: statistics_controller.js) #}
     {# Charts #}
     <div class="grid gap-8 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-        {# Devices #}
+        {# SMS & Email #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Devices</h1>
+            <h1 class="text-lg font-medium text-left">Portal with SMS or Email</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
                     data-chart-type="bar"
-                    data-chart-data="{{ devicesDataJson }}"></canvas>
+                    data-chart-data="{{ SMSEmailDataJson }}"></canvas>
         </div>
 
         {# Authentication #}
@@ -44,14 +43,14 @@
                     data-chart-data="{{ authenticationDataJson }}"></canvas>
         </div>
 
-        {# SMS & Email #}
+        {# Devices #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Portal with SMS or Email</h1>
+            <h1 class="text-lg font-medium text-left">Devices</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
                     data-chart-type="bar"
-                    data-chart-data="{{ SMSEmailDataJson }}"></canvas>
+                    data-chart-data="{{ devicesDataJson }}"></canvas>
         </div>
 
         {# Platform Status #}
@@ -73,6 +72,17 @@
                     data-statistics-target="chart"
                     data-chart-type="bar" {# Change horizontalBar to bar #}
                     data-chart-data="{{ usersVerifiedDataJson }}"
+                    data-index-axis="y"></canvas>
+        </div>
+
+        {# Users 2FA Configuration Status #}
+        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left">Users 2FA Configuration Status</h1>
+            <canvas class="max-w-full"
+                    data-controller="statistics"
+                    data-statistics-target="chart"
+                    data-chart-type="bar" {# Change horizontalBar to bar #}
+                    data-chart-data="{{ twoFADataJson }}"
                     data-index-axis="y"></canvas>
         </div>
     </div>
