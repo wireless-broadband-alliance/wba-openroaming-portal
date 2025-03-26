@@ -151,8 +151,9 @@ class UsersManagementController extends AbstractController
         $sheet->setCellValue('G1', 'Verification');
         $sheet->setCellValue('H1', 'Provider');
         $sheet->setCellValue('I1', 'ProviderId');
-        $sheet->setCellValue('J1', 'Banned At');
-        $sheet->setCellValue('K1', 'Created At');
+        $sheet->setCellValue('J1', '2FA status');
+        $sheet->setCellValue('K1', 'Banned At');
+        $sheet->setCellValue('L1', 'Created At');
 
         // Apply the data
         $row = 2;
@@ -206,14 +207,28 @@ class UsersManagementController extends AbstractController
             $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
             $sheet->setCellValue('I' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($providerID));
 
+            // Determine User 2FA status
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Disabled'));
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('TOTP'));
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value) {
+                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Email'));
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value) {
+                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('SMS'));
+            }
+
             // Check if the user is Banned
             $sheet->setCellValue(
-                'J' . $row,
+                'K' . $row,
                 $escapeSpreadSheetService->escapeSpreadsheetValue(
                     $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'
                 )
             );
-            $sheet->setCellValue('K' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getCreatedAt()));
+            $sheet->setCellValue('L' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
         }
