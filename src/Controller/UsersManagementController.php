@@ -149,9 +149,9 @@ class UsersManagementController extends AbstractController
         $sheet->setCellValue('E1', 'First Name');
         $sheet->setCellValue('F1', 'Last Name');
         $sheet->setCellValue('G1', 'Verification');
-        $sheet->setCellValue('H1', 'Provider');
-        $sheet->setCellValue('I1', 'ProviderId');
-        $sheet->setCellValue('J1', '2FA status');
+        $sheet->setCellValue('H1', '2FA status');
+        $sheet->setCellValue('I1', 'Provider');
+        $sheet->setCellValue('J1', 'ProviderId');
         $sheet->setCellValue('K1', 'Banned At');
         $sheet->setCellValue('L1', 'Created At');
 
@@ -201,25 +201,25 @@ class UsersManagementController extends AbstractController
             $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
             $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
 
-            $provider = $userExternalAuth !== null ? $userExternalAuth->getProvider() : 'No Provider';
-            $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($provider));
-
-            $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
-            $sheet->setCellValue('I' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($providerID));
-
             // Determine User 2FA status
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
-                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Disabled'));
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Disabled'));
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('TOTP'));
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('TOTP'));
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value) {
-                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Email'));
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Email'));
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value) {
-                $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('SMS'));
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('SMS'));
             }
+
+            $provider = $userExternalAuth !== null ? $userExternalAuth->getProvider() : 'No Provider';
+            $sheet->setCellValue('I' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($provider));
+
+            $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
+            $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($providerID));
 
             // Check if the user is Banned
             $sheet->setCellValue(
