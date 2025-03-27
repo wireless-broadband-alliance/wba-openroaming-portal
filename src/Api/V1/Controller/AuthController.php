@@ -395,6 +395,15 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
+            // Check if the email is valid
+            if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::GOOGLE_ACCOUNT->value)) {
+                return new BaseResponse(
+                    403,
+                    null,
+                    'Your email domain is not allowed to use this platform.'
+                )->toResponse();
+            }
+
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
@@ -504,6 +513,15 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
+            // Check if the email is valid
+            if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::MICROSOFT_ACCOUNT->value)) {
+                return new BaseResponse(
+                    403,
+                    null,
+                    'Your email domain is not allowed to use this platform.'
+                )->toResponse();
+            }
+
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
@@ -559,7 +577,7 @@ class AuthController extends AbstractController
                 }
             }
 
-            // Authenticate the user using custom Google authentication function already on the project
+            // Authenticate the user using custom Microsoft authentication function already on the project
             $this->microsoftController->authenticateUserMicrosoft($user);
 
             $token = $this->tokenGenerator->generateToken($user);
