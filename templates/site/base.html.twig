@@ -5,35 +5,41 @@
 {% endblock %}
 
 {% block body %}
-    <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
-        {# First Column #}
-        <div class="w-full lg:w-1/2 bg-center bg-no-repeat bg-cover bg-scroll"
+    <div class="flex flex-col xl:flex-row xl:h-screen">
+        {# Fixed First Section #}
+        <div class="w-full xl:w-1/2 h-screen bg-center bg-cover"
              style="background-image: url('/resources/images/background.png');">
-            <div class="w-full h-full p-8 lg:pl-[130px] lg:pr-[150px] lg:pt-[210px] bg-top bg-no-repeat bg-contain bg-scroll"
+            <div class="w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[210px] bg-center bg-cover"
                  style="background-image: url('{{ data.wallpaperImageName.value }}');">
                 <div class="h-full w-full flex flex-col">
-                    <img class="w-96" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
+                    <img class="w-96 max-w-full" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
 
-                    <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold">{{ data.welcomeText.value }}</h1>
+                    <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
+                        {{ data.welcomeText.value }}
+                    </h1>
 
-                    <p class="text-white text-2xl mt-[45px] leading-7">{{ data.welcomeDescription.value }}</p>
+                    <p class="text-white text-2xl mt-[45px] leading-7 break-words">
+                        {{ data.welcomeDescription.value }}
+                    </p>
 
-                    <p class="text-white text-lg mt-[55px] mb-6">Should you have any questions or require assistance,
-                        please contact us at
+                    <p class="text-white text-lg mt-[55px] mb-6 break-words">
+                        Should you have any questions or require assistance, please contact us at
                         <a href="mailto:{{ data.contactEmail.value }}"
-                           class="font-semibold underline text-primary">{{ data.contactEmail.value }}</a>
+                           class="font-semibold underline text-primary break-words">{{ data.contactEmail.value }}</a>
                     </p>
                 </div>
             </div>
         </div>
 
-        {# Form Column #}
-        <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[74px]" {{ stimulus_controller('visibility') }}>
+        {# Scrollable Second Section #}
+        <div class="w-full xl:w-1/2 xl:overflow-y-auto xl:h-screen p-8 xl:pl-[90px] xl:pr-[130px] xl:pt-[74px] overflow-hidden"
+                {{ stimulus_controller('visibility') }}>
             {% block second_col %}
             {% endblock %}
+
             {# Cookie Banner #}
             {% block cookie %}
-                <div class="grid grid-cols-1 gap-[5px]">
+                <div class="grid grid-cols-1 gap-[5px] break-words">
                     {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::IN_EEA').value %}
                         {{ include('site/shared/_cookie_banner.html.twig') }}
                     {% endif %}
