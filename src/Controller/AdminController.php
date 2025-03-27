@@ -139,7 +139,10 @@ class AdminController extends AbstractController
         ) {
             $email = $this->verificationCodeGenerator->createEmailAdminPage($currentUser);
             $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            $this->addFlash(
+                'success_admin',
+                'We have send to you a new code to: ' . $currentUser->getEmail()
+            );
             return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
         }
 
