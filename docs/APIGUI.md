@@ -45,6 +45,9 @@ improve user authentication and management processes, with integrated CAPTCHA va
 - **Microsoft Authentication**
     - Authenticates a user using their Microsoft Azure account ID.
 
+- **Two-Factor Authentication code request**
+    - Request a new 2FA code for only portal accounts with two-factor configured with email or SMS.
+
 ## User Auth Register
 
 - **Local Registration**
