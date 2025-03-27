@@ -145,9 +145,9 @@ readonly class VerificationCodeEmailGenerator
 
     public function timeLeftToResendCode(int $timeInterval, ?Event $event): null|int
     {
-        if ($event) {
+        if ($event instanceof Event) {
             $attemptTime = $event->getEventDatetime();
-            if ($attemptTime) {
+            if ($attemptTime instanceof \DateTimeInterface) {
                 $now = new DateTime();
                 $attemptTime->modify('+' . $timeInterval . ' seconds');
                 $interval = date_diff($now, $attemptTime);
@@ -160,7 +160,7 @@ readonly class VerificationCodeEmailGenerator
         } return null;
     }
 
-    public function canResendCode (User $user,int $timeInterval): bool
+    public function canResendCode(User $user, int $timeInterval): bool
     {
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeInterval . ' seconds');

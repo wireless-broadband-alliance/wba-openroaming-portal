@@ -139,7 +139,6 @@ class AdminController extends AbstractController
                 ]
             )
         ) {
-
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
@@ -164,7 +163,6 @@ class AdminController extends AbstractController
                 'You must wait ' . $timeLeft . ' seconds before requesting a new code. Please try again later.'
             );
             return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
-
         }
 
         return $this->redirectToRoute('admin_page');
