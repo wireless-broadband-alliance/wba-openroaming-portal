@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
@@ -250,7 +251,7 @@ class MicrosoftController extends AbstractController
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
             /** @phpstan-ignore-next-line */
-            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : 'main';
+            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : FirewallType::LANDING->value;
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
