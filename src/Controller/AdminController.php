@@ -60,7 +60,7 @@ class AdminController extends AbstractController
         $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm);
+        $users = $userRepository->searchWithFilter($filter, $searchTerm, $sort, $order);
 
         // Perform pagination manually
         $totalUsers = count($users);

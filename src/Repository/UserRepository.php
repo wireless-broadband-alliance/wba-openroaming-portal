@@ -130,7 +130,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      *
      * @return array A list of matched users, ordered by creation date in descending order.
      */
-    public function searchWithFilter(string $filter, ?string $searchTerm = null): array
+    public function searchWithFilter(string $filter, ?string $searchTerm = null, ?string $sort, ?string $order): array
     {
         $qb = $this->createQueryBuilder('u');
 
@@ -161,9 +161,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 )
             )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
-
+        if ($sort === 'uuid') {
+            $field = 'u.uuid';
+        } else {
+            $field = 'u.createdAt';
+        }
         // Order by creation date (newest first)
-        return $qb->orderBy('u.createdAt', 'DESC')
+        return $qb->orderBy($field, $order )
             ->getQuery()
             ->getResult();
     }
