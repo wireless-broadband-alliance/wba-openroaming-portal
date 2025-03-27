@@ -76,11 +76,11 @@ readonly class CaptchaValidator
                 'error' => 'CAPTCHA validation failed!',
             ];
         } catch (
-        TransportExceptionInterface|
-        ClientExceptionInterface|
-        RedirectionExceptionInterface|
-        ServerExceptionInterface|
-        DecodingExceptionInterface $e
+            TransportExceptionInterface |
+            ClientExceptionInterface |
+            RedirectionExceptionInterface |
+            ServerExceptionInterface |
+            DecodingExceptionInterface $e
         ) {
             // Log exception details for debugging
             $this->logger->error('Exception occurred during CAPTCHA validation.', [

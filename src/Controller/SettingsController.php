@@ -9,7 +9,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
-use App\Enum\TwoFAType;
 use App\Form\AuthType;
 use App\Form\CapportType;
 use App\Form\LDAPType;
@@ -701,7 +700,11 @@ class SettingsController extends AbstractController
                 $userDeleteTimeSetting->setValue($userDeleteTime);
                 $this->entityManager->persist($userDeleteTimeSetting);
             }
-            $timeIntervalNotificationsSetting = $settingsRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+
+            $timeIntervalNotificationsSetting = $settingsRepository->findOneBy([
+                'name' => 'TIME_INTERVAL_NOTIFICATION'
+            ]);
+
             if ($timeIntervalNotificationsSetting !== null) {
                 $timeIntervalNotificationsSetting->setValue($timeIntervalNotifications);
                 $this->entityManager->persist($timeIntervalNotificationsSetting);

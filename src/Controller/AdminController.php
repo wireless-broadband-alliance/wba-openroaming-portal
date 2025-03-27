@@ -46,7 +46,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(
         Request $request,
-        UserRepository $userRepository,
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] string $sort = 'createdAt',
         #[MapQueryParameter] string $order = 'desc',
@@ -60,7 +59,7 @@ class AdminController extends AbstractController
         $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm, $sort, $order);
+        $users = $this->userRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
 
         // Perform pagination manually
         $totalUsers = count($users);
@@ -72,9 +71,9 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $count);
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
-        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $userRepository->totalBannedUsers($searchTerm);
+        $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
+        $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $this->userRepository->totalBannedUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');

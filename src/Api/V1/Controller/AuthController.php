@@ -78,7 +78,8 @@ class AuthController extends AbstractController
 
         if ($turnstileSetting === OperationMode::ON->value) {
             if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400,
+                return new BaseResponse(
+                    400,
                     null,
                     'CAPTCHA validation failed'
                 )->toResponse(); # Bad Request Response
