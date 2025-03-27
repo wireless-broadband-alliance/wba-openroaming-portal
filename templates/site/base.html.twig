@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block body %}
-    <div class="h-screen flex flex-col lg:flex-row lg:flex-wrap">
-        {# First Column #}
-        <div class="w-full lg:w-1/2 bg-center bg-no-repeat bg-cover bg-scroll"
+    <div class="flex flex-col md:min-h-screen md:flex-row">
+        {# Fixed First Column #}
+        <div class="w-full md:w-1/2 lg:w-1/2 md:h-auto lg:h-screen bg-center bg-no-repeat bg-cover"
              style="background-image: url('/resources/images/background.png');">
-            <div class="w-full h-full p-8 lg:pl-[130px] lg:pr-[150px] lg:pt-[210px] bg-top bg-no-repeat bg-contain bg-scroll"
+            <div class="w-full h-full p-8 lg:pl-[130px] lg:pr-[150px] lg:pt-[210px] bg-top bg-no-repeat bg-contain"
                  style="background-image: url('{{ data.wallpaperImageName.value }}');">
                 <div class="h-full w-full flex flex-col">
                     <img class="w-96" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
@@ -18,8 +18,8 @@
 
                     <p class="text-white text-2xl mt-[45px] leading-7">{{ data.welcomeDescription.value }}</p>
 
-                    <p class="text-white text-lg mt-[55px] mb-6">Should you have any questions or require assistance,
-                        please contact us at
+                    <p class="text-white text-lg mt-[55px] mb-6">
+                        Should you have any questions or require assistance, please contact us at
                         <a href="mailto:{{ data.contactEmail.value }}"
                            class="font-semibold underline text-primary">{{ data.contactEmail.value }}</a>
                     </p>
@@ -27,8 +27,9 @@
             </div>
         </div>
 
-        {# Form Column #}
-        <div class="w-full lg:w-1/2 p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[74px]" {{ stimulus_controller('visibility') }}>
+        {# Scrollable Second Column #}
+        <div class="w-full md:w-1/2 lg:w-1/2 md:h-auto lg:h-screen overflow-y-auto p-8 lg:pl-[90px] lg:pr-[130px] lg:pt-[74px]"
+                {{ stimulus_controller('visibility') }}>
             {% block second_col %}
             {% endblock %}
             {# Cookie Banner #}
