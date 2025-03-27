@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -23,6 +24,7 @@ use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
+use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -56,7 +58,8 @@ class UsersManagementController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
-        private readonly TwoFAService $twoFAService
+        private readonly TwoFAService $twoFAService,
+        private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
     ) {
     }
 
@@ -146,10 +149,11 @@ class UsersManagementController extends AbstractController
         $sheet->setCellValue('E1', 'First Name');
         $sheet->setCellValue('F1', 'Last Name');
         $sheet->setCellValue('G1', 'Verification');
-        $sheet->setCellValue('H1', 'Provider');
-        $sheet->setCellValue('I1', 'ProviderId');
-        $sheet->setCellValue('J1', 'Banned At');
-        $sheet->setCellValue('K1', 'Created At');
+        $sheet->setCellValue('H1', '2FA status');
+        $sheet->setCellValue('I1', 'Provider');
+        $sheet->setCellValue('J1', 'ProviderId');
+        $sheet->setCellValue('K1', 'Banned At');
+        $sheet->setCellValue('L1', 'Created At');
 
         // Apply the data
         $row = 2;
@@ -197,20 +201,34 @@ class UsersManagementController extends AbstractController
             $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
             $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
 
+            // Determine User 2FA status
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Disabled'));
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('TOTP'));
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value) {
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('Email'));
+            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value) {
+                $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue('SMS'));
+            }
+
             $provider = $userExternalAuth !== null ? $userExternalAuth->getProvider() : 'No Provider';
-            $sheet->setCellValue('H' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($provider));
+            $sheet->setCellValue('I' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($provider));
 
             $providerID = $userExternalAuth !== null ? $userExternalAuth->getProviderId() : 'No ProviderId';
-            $sheet->setCellValue('I' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($providerID));
+            $sheet->setCellValue('J' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($providerID));
 
             // Check if the user is Banned
             $sheet->setCellValue(
-                'J' . $row,
+                'K' . $row,
                 $escapeSpreadSheetService->escapeSpreadsheetValue(
                     $user->getBannedAt() !== null ? $user->getBannedAt()->format('Y-m-d H:i:s') : 'Not Banned'
                 )
             );
-            $sheet->setCellValue('K' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getCreatedAt()));
+            $sheet->setCellValue('L' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getCreatedAt()));
 
             $row++;
         }
@@ -386,15 +404,14 @@ class UsersManagementController extends AbstractController
             }
 
             // Get the User Provider && ProviderId
-            $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
-            $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
+            $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $em->flush();
 
-            if ($user->getEmail() && $userExternalAuth->getProviderId() === UserProvider::EMAIL->value) {
+            if ($user->getEmail()) {
                 $supportTeam = $data['title']['value'];
                 // Send email
                 $email = new Email()
@@ -453,7 +470,7 @@ class UsersManagementController extends AbstractController
                     $attempts = $resetAttempts + 1;
 
                     $message = "Your new account password is: " . $newPassword . "%0A";
-                    $this->sendSMS->sendSmsReset($user->getPhoneNumber(), $message);
+                    $this->sendSMS->sendSmsNoValidation($user->getPhoneNumber(), $message);
 
                     $eventMetadata = [
                         'ip' => $request->getClientIp(),
@@ -470,7 +487,7 @@ class UsersManagementController extends AbstractController
                     );
                 }
             }
-            $this->addFlash('success_admin', sprintf('"%s" has is password updated.', $user->getUuid()));
+            $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
             return $this->redirectToRoute('admin_page');
         }
 
@@ -482,6 +499,7 @@ class UsersManagementController extends AbstractController
                 'user' => $user,
                 'data' => $data,
                 'current_user' => $currentUser,
+                'context' => FirewallType::DASHBOARD->value,
             ]
         );
     }
@@ -505,16 +523,23 @@ class UsersManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin', methods: ['POST'])]
+    /**
+     * @throws \Exception
+     */
+    #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function disabledBy2FA(Request $request, $id): RedirectResponse
-    {
-
+    public function disabledBy2FA(
+        Request $request,
+        $id,
+        MailerInterface $mailer
+    ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash('error_admin', 'The user does not exist.');
             return $this->redirectToRoute('admin_page');
         }
+        // Get the User Provider && ProviderId
+        $userExternalAuths = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         // Disable current associated Profile
         $this->profileManager->disableProfiles(
@@ -533,10 +558,23 @@ class UsersManagementController extends AbstractController
             AnalyticalEventType::DISABLE_2FA->value,
             $request->headers->get('User-Agent')
         );
+
+        if ($user->getEmail()) {
+            $mailer->send($this->verificationCodeEmailGenerator->createEmail2FADisabledBy($user));
+        } elseif (
+            $user->getPhoneNumber() &&
+            $userExternalAuths->getProviderId() === UserProvider::PHONE_NUMBER->value
+        ) {
+            $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
+            $this->sendSMS->sendSmsNoValidation($user->getPhoneNumber(), $message);
+        }
+
         $this->addFlash(
-            'success',
+            'success_admin',
             'Two factor authentication successfully disabled'
         );
-        return $this->redirectToRoute('admin_page');
+        return $this->redirectToRoute('admin_user_edit', [
+            'id' => $user->getId(),
+        ]);
     }
 }

@@ -28,7 +28,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
-use App\Security\PasswordAuthenticator;
+use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
@@ -48,11 +48,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -99,7 +97,7 @@ class SiteController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordEncoder,
         UserAuthenticatorInterface $userAuthenticator,
-        PasswordAuthenticator $authenticator,
+        LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
         RequestStack $requestStack
     ): Response {
@@ -108,10 +106,6 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
-        $sessionAdmin = $session->get('session_admin');
-        if ($sessionAdmin === true) {
-            throw new AccessDeniedHttpException('Access denied.');
-        }
 
         // Check if the user is logged in and verification of the user
         // And check if the user don't have a forgot_password_request active
@@ -613,8 +607,7 @@ class SiteController extends AbstractController
                     $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
-                    ) : [];
+                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                     $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                         ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                         : null;
@@ -665,6 +658,7 @@ class SiteController extends AbstractController
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
                                 'emailTitle' => $data['title']['value'],
+                                'contactEmail' => $data['contactEmail']['value'],
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getVerificationCode(),
                             ]);
@@ -797,7 +791,7 @@ class SiteController extends AbstractController
                         $message = "Your new random account password is: "
                             . $randomPassword
                             . "%0A" . "Please make sure to login to complete the request";
-                        $this->sendSMS->sendSmsReset($recipient, $message);
+                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = sprintf(

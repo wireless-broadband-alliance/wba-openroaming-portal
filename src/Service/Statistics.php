@@ -8,6 +8,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Enum\UserVerificationStatus;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
@@ -17,12 +18,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class Statistics
+readonly class Statistics
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private EntityManagerInterface $entityManager,
+        private RadiusAuthsRepository $radiusAuthsRepository,
+        private RadiusAccountingRepository $radiusAccountingRepository
     ) {
     }
 
@@ -71,6 +72,65 @@ class Statistics
             }
         }
         return new StatisticsGenerators()->generateDatasets($profileCounts);
+    }
+
+    /**
+     * Fetch data related to 2fa configured on the portal
+     */
+    /**
+     * @throws Exception
+     */
+    public function fetchChart2FA(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    {
+        $repository = $this->entityManager->getRepository(User::class);
+
+        // Fetch all users excluding admin
+        /* @phpstan-ignore-next-line */
+        $users = $repository->findExcludingAdmin();
+
+        $userCounts = [
+            UserTwoFactorAuthenticationStatus::DISABLED->value => 0,
+            UserTwoFactorAuthenticationStatus::TOTP->value => 0,
+            UserTwoFactorAuthenticationStatus::SMS->value => 0,
+            UserTwoFactorAuthenticationStatus::EMAIL->value => 0,
+        ];
+
+        // Loop through the users and categorize them based on the provider
+        foreach ($users as $user) {
+            $createdAt = $user->getCreatedAt();
+
+            if (
+                (!$startDate || $createdAt >= $startDate) &&
+                (!$endDate || $createdAt <= $endDate)
+            ) {
+                // Fetch the 2faType from each user and count it
+                $twoFAType = $user->getTwoFAtype();
+
+                if (isset($userCounts[$twoFAType])) {
+                    $userCounts[$twoFAType]++;
+                } else {
+                    // Optionally handle unknown twoFA types
+                    $userCounts[$twoFAType] = 1;
+                }
+            }
+        }
+
+        // Map 2FA type constants to human-readable labels
+        $twoFATypes = [
+            UserTwoFactorAuthenticationStatus::DISABLED->value => 'Disabled',
+            UserTwoFactorAuthenticationStatus::TOTP->value => 'TOTP',
+            UserTwoFactorAuthenticationStatus::SMS->value => 'SMS',
+            UserTwoFactorAuthenticationStatus::EMAIL->value => 'Email',
+        ];
+
+        // After the counting is complete
+        $finalUserCounts = [];
+        foreach ($userCounts as $type => $count) {
+            $label = $twoFATypes[$type] ?? 'Unknown';
+            $finalUserCounts[$label] = $count;
+        }
+
+        return new StatisticsGenerators()->generateDatasets($finalUserCounts);
     }
 
     /**

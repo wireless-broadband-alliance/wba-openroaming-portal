@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
@@ -18,7 +19,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use libphonenumber\PhoneNumber;
-use OTPHP\TOTP;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -41,32 +41,65 @@ class TwoFAController extends AbstractController
     ) {
     }
 
-    #[Route('/configure2FA', name: 'app_configure2FA')]
-    public function configure2FA(): Response
+    #[Route(
+        '/{context}/configure2FA',
+        name: 'app_configure2FA',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function configure2FA(string $context): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         return $this->render('site/twoFAAuthentication/base_configuration.html.twig', [
             'user' => $user,
             'data' => $data,
+            'context' => $context
         ]);
     }
 
-    #[Route('/enable2FA/TOTP', name: 'app_enable2FA_TOTP')]
-    public function enable2FATOTP(Request $request): Response
-    {
+    #[Route(
+        '/{context}/enable2FA/TOTP',
+        name: 'app_enable2FA_TOTP',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function enable2FATOTP(
+        string $context,
+        Request $request
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
@@ -88,7 +121,9 @@ class TwoFAController extends AbstractController
                     $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
-                    return $this->redirectToRoute('app_otpCodes');
+                    return $this->redirectToRoute('app_otpCodes', [
+                        'context' => $context
+                    ]);
                 }
                 $this->addFlash('error', 'Invalid code');
             }
@@ -99,15 +134,16 @@ class TwoFAController extends AbstractController
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
             ) {
-                return $this->redirectToRoute('app_2FA_generate_code_swap_method');
+                return $this->redirectToRoute('app_2FA_generate_code_swap_method', [
+                    'context' => $context
+                ]);
             }
             $user->setTwoFAsecret($secret);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         } else {
             $this->addFlash('error', 'You must be logged in to access this page');
-            $session_admin = $session->get('session_admin');
-            if ($session_admin) {
+            if ($context === FirewallType::DASHBOARD->value) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -128,15 +164,36 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'user' => $user,
             'form' => $form,
+            'context' => $context
         ]);
     }
 
-    #[Route('/verify2FA/TOTP', name: 'app_verify2FA_TOTP')]
-    public function verify2FA(Request $request): Response
+    #[Route(
+        '/{context}/verify2FA/TOTP',
+        name: 'app_verify2FA_TOTP',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function verify2FA(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $session = $request->getSession();
+
+        // If the user isn't logged in, redirect to the landing page
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can only access this page logged in.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
+        // Check if 2FA has already been verified
         if ($session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
         }
@@ -157,8 +214,7 @@ class TwoFAController extends AbstractController
                         AnalyticalEventType::VERIFY_OTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    $session_admin = $session->get('session_admin');
-                    if ($session_admin) {
+                    if ($context === FirewallType::DASHBOARD->value) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -172,8 +228,7 @@ class TwoFAController extends AbstractController
                         AnalyticalEventType::VERIFY_TOTP_2FA->value,
                         $request->headers->get('User-Agent')
                     );
-                    $session_admin = $session->get('session_admin');
-                    if ($session_admin) {
+                    if ($context === FirewallType::DASHBOARD->value) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
@@ -188,14 +243,26 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/verify2FA', name: 'app_verify2FA_portal')]
-    public function verify2FAPortal(Request $request): Response
+    #[Route(
+        '/{context}/verify2FA',
+        name: 'app_verify2FA_portal',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function verify2FAPortal(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         if (!$user instanceof UserInterface) {
             $this->addFlash('error', 'You can only access this page logged in. ');
             return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
         }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -216,8 +283,7 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::VERIFY_OTP_2FA->value,
                     $request->headers->get('User-Agent')
                 );
-                $session_admin = $session->get('session_admin');
-                if ($session_admin) {
+                if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -231,8 +297,7 @@ class TwoFAController extends AbstractController
                     AnalyticalEventType::VERIFY_LOCAL_2FA->value,
                     $request->headers->get('User-Agent')
                 );
-                $session_admin = $session->get('session_admin');
-                if ($session_admin) {
+                if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -243,19 +308,32 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'context' => $context
         ]);
     }
 
-    #[Route('/disable2FA', name: 'app_disable2FA')]
-    public function disable2FA(Request $request): RedirectResponse
+    #[Route(
+        '/{context}/disable2FA',
+        name: 'app_disable2FA',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function disable2FA(string $context, Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
-        $session = $request->getSession();
+        // Handle access restrictions based on the context
+        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
 
         if (
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
@@ -274,23 +352,33 @@ class TwoFAController extends AbstractController
                 );
                 $this->addFlash(
                     'success',
-                    'The code was sent successfully.'
+                    'A confirmation code was sent to you successfully.'
                 );
-                return $this->redirectToRoute('app_disable2FA_local');
+                return $this->redirectToRoute('app_disable2FA_local', [
+                    'context' => $context
+                ]);
             }
+            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                $user,
+                AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+            );
             $this->addFlash(
                 'error',
-                'Your code has already been sent to you previously.'
+                'Your code has already been sent to you previously. Wait ' .
+                $interval_minutes . ' minutes to request a code again'
             );
-            return $this->redirectToRoute('app_disable2FA_local');
+            return $this->redirectToRoute('app_disable2FA_local', [
+                'context' => $context
+            ]);
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-            return $this->redirectToRoute('app_disable2FA_TOTP');
+            return $this->redirectToRoute('app_disable2FA_TOTP', [
+                'context' => $context
+            ]);
         }
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
-            $sessionAdmin = $session->get('session_admin');
             $this->addFlash('error', 'Two-Factor authentication is already disabled');
-            if ($sessionAdmin) {
+            if ($context === FirewallType::DASHBOARD->value) {
                 return $this->redirectToRoute('admin_page');
             }
             return $this->redirectToRoute('app_landing');
@@ -299,18 +387,31 @@ class TwoFAController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/disable2FA/local', name: 'app_disable2FA_local')]
-    public function disable2FALocal(Request $request): Response
+    #[Route(
+        '/{context}/disable2FA/local',
+        name: 'app_disable2FA_local',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function disable2FALocal(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
-        $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $formCode = $form->get('code')->getData();
@@ -330,8 +431,7 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                $session_admin = $session->get('session_admin');
-                if ($session_admin) {
+                if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -345,16 +445,29 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/disable2FA/TOTP', name: 'app_disable2FA_TOTP')]
-    public function disable2FAApp(Request $request): Response
+    #[Route(
+        '/{context}/disable2FA/TOTP',
+        name: 'app_disable2FA_TOTP',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function disable2FAApp(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
-        $session = $request->getSession();
+
+        // Handle access restrictions based on the context
+        if ($context === 'dashboard' && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
@@ -378,8 +491,7 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                $session_admin = $session->get('session_admin');
-                if ($session_admin) {
+                if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
                 }
                 return $this->redirectToRoute('app_landing');
@@ -393,14 +505,28 @@ class TwoFAController extends AbstractController
         ]);
     }
 
-    #[Route('/2FAFirstSetup/codes', name: 'app_otpCodes')]
-    public function twoFACodes(Request $request): Response
+    #[Route(
+        '/{context}/2FAFirstSetup/codes',
+        name: 'app_otpCodes',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function twoFACodes(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $session = $request->getSession();
@@ -420,11 +546,11 @@ class TwoFAController extends AbstractController
                 'data' => $data,
                 'codes' => $user->getOTPcodes(),
                 'user' => $user,
+                'context' => $context
             ]);
         }
         $this->addFlash('error', 'User not found');
-        $session_admin = $session->get('session_admin');
-        if ($session_admin) {
+        if ($context === FirewallType::DASHBOARD->value) {
             return $this->redirectToRoute('admin_page');
         }
         return $this->redirectToRoute('app_landing');
@@ -433,16 +559,30 @@ class TwoFAController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[Route('/2FAFirstSetup/codes/save', name: 'app_otpCodes_save')]
-    public function saveCodes(Request $request): Response
+    #[Route(
+        '/{context}/2FAFirstSetup/codes/save',
+        name: 'app_otpCodes_save',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function saveCodes(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
             $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
-        $session = $request->getSession();
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         $this->twoFAService->saveCodes($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
@@ -450,8 +590,7 @@ class TwoFAController extends AbstractController
             AnalyticalEventType::GENERATE_OTP_2FA->value,
             $request->headers->get('User-Agent')
         );
-        $session_admin = $session->get('session_admin');
-        if ($session_admin) {
+        if ($context === FirewallType::DASHBOARD->value) {
             return $this->redirectToRoute('admin_page');
         }
         return $this->redirectToRoute('app_landing');
@@ -461,14 +600,28 @@ class TwoFAController extends AbstractController
      * @throws \DateMalformedStringException
      * @throws RandomException
      */
-    #[Route('/verify2FA/resend', name: 'app_2FA_local_resend_code')]
-    public function resendCode(Request $request): RedirectResponse
+    #[Route(
+        '/{context}/verify2FA/resend',
+        name: 'app_2FA_local_resend_code',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function resendCode(string $context, Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
@@ -535,15 +688,32 @@ class TwoFAController extends AbstractController
         return $this->redirect($lastPage);
     }
 
-    #[Route('/generate2FACode', name: 'app_2FA_generate_code')]
-    public function generateCode(Request $request): Response
+    #[Route(
+        '/{context}/generate2FACode',
+        name: 'app_2FA_generate_code',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function generateCode(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_verify2FA_portal', [
+                'context' => $context
+            ]);
+        }
+
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_VERIFY->value)) {
             $this->twoFAService->generate2FACode(
                 $user,
@@ -553,25 +723,53 @@ class TwoFAController extends AbstractController
             );
             $this->addFlash(
                 'success',
-                'The code was sent successfully.'
+                'A confirmation code was sent to you successfully.'
             );
-            return $this->redirectToRoute('app_verify2FA_portal');
+            return $this->redirectToRoute('app_verify2FA_portal', [
+                'context' => $context
+            ]);
         }
+        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_VERIFY->value
+        );
         $this->addFlash(
             'error',
-            'Your code has already been sent to you previously.'
+            'Your code has already been sent to you previously. Wait ' .
+            $interval_minutes . ' minutes to request a code again'
         );
-        return $this->redirectToRoute('app_verify2FA_portal');
+        return $this->redirectToRoute('app_verify2FA_portal', [
+            'context' => $context
+        ]);
     }
 
     /**
      * @throws \JsonException
      */
-    #[Route('/downloadCodes', name: 'app_download_codes')]
-    public function downloadCodes(Request $request): Response
+    #[Route(
+        '/{context}/downloadCodes',
+        name: 'app_download_codes',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function downloadCodes(string $context): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
+        if (!$user instanceof UserInterface) {
+            $this->addFlash('error', 'You can only access this page while logged in.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         $codes = [];
         foreach ($user->getOTPcodes() as $code) {
             $codes[] = $code->getCode();
@@ -592,17 +790,34 @@ class TwoFAController extends AbstractController
         return $response;
     }
 
-    #[Route('/2FAFirstSetup/portal', name: 'app_2FA_firstSetup_local')]
-    public function firstSetupPortal(Request $request): RedirectResponse
+    #[Route(
+        '/{context}/2FAFirstSetup/portal',
+        name: 'app_2FA_firstSetup_local',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function firstSetupPortal(string $context, Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-            return $this->redirectToRoute('app_swap2FA_disable_TOTP');
+            return $this->redirectToRoute('app_swap2FA_disable_TOTP', [
+                'context' => $context
+            ]);
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
@@ -617,27 +832,51 @@ class TwoFAController extends AbstractController
             );
             $this->addFlash(
                 'success',
-                'The code was sent successfully.'
+                'A confirmation code was sent to you successfully.'
             );
-            return $this->redirectToRoute('app_2FA_first_verification_local');
+            return $this->redirectToRoute('app_2FA_first_verification_local', [
+                'context' => $context
+            ]);
         }
+        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+        );
         $this->addFlash(
             'error',
-            'Your code has already been sent to you previously.'
+            'Your code has already been sent to you previously. Wait ' .
+            $interval_minutes . ' minutes to request a code again'
         );
 
-        return $this->redirectToRoute('app_2FA_first_verification_local');
+        return $this->redirectToRoute('app_2FA_first_verification_local', [
+            'context' => $context
+        ]);
     }
 
-    #[Route('/2FAFirstSetup/verification', name: 'app_2FA_first_verification_local')]
-    public function firstVerificationLocal(Request $request): Response
+    #[Route(
+        '/{context}/2FAFirstSetup/verification',
+        name: 'app_2FA_first_verification_local',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function firstVerificationLocal(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         $session = $request->getSession();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
@@ -660,13 +899,14 @@ class TwoFAController extends AbstractController
                         $this->entityManager->flush();
                     } else {
                         $this->addFlash('error', 'You must be logged in to access this page');
-                        $session_admin = $session->get('session_admin');
-                        if ($session_admin) {
+                        if ($context === FirewallType::DASHBOARD->value) {
                             return $this->redirectToRoute('admin_page');
                         }
                         return $this->redirectToRoute('app_landing');
                     }
-                    return $this->redirectToRoute('app_otpCodes');
+                    return $this->redirectToRoute('app_otpCodes', [
+                        'context' => $context
+                    ]);
                 }
                 if ($user->getEmail()) {
                     $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
@@ -680,13 +920,14 @@ class TwoFAController extends AbstractController
                     $this->entityManager->flush();
                 } else {
                     $this->addFlash('error', 'You must be logged in to access this page');
-                    $session_admin = $session->get('session_admin');
-                    if ($session_admin) {
+                    if ($context === FirewallType::DASHBOARD->value) {
                         return $this->redirectToRoute('admin_page');
                     }
                     return $this->redirectToRoute('app_landing');
                 }
-                return $this->redirectToRoute('app_otpCodes');
+                return $this->redirectToRoute('app_otpCodes', [
+                    'context' => $context
+                ]);
             }
             $this->addFlash(
                 'error',
@@ -697,24 +938,42 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'context' => $context
         ]);
     }
 
-    #[Route('/2FASwapMethod/disableLocal', name: 'app_swap2FA_disable_Local')]
-    public function swapMethod2FADisableLocal(Request $request): Response
+    #[Route(
+        '/{context}/2FASwapMethod/disableLocal',
+        name: 'app_swap2FA_disable_Local',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function swapMethod2FADisableLocal(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
             $this->addFlash(
                 'error',
                 'This account already has two factor authentication disabled.'
             );
-            return $this->redirectToRoute('app_configure2FA');
+            return $this->redirectToRoute('app_configure2FA', [
+                'context' => $context
+            ]);
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
@@ -737,7 +996,9 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                return $this->redirectToRoute('app_enable2FA_TOTP');
+                return $this->redirectToRoute('app_enable2FA_TOTP', [
+                    'context' => $context
+                ]);
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
@@ -745,18 +1006,33 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
-            'swap' => true
+            'swap' => true,
+            'context' => $context
         ]);
     }
 
-    #[Route('/generate2FACode/swapMethod', name: 'app_2FA_generate_code_swap_method')]
-    public function generateCodeSwapMethod(Request $request): Response
+    #[Route(
+        '/{context}/generate2FACode/swapMethod',
+        name: 'app_2FA_generate_code_swap_method',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function generateCodeSwapMethod(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in.');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
+        }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
         }
 
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
@@ -768,32 +1044,58 @@ class TwoFAController extends AbstractController
             );
             $this->addFlash(
                 'success',
-                'The code was sent successfully.'
+                'A confirmation code was sent to you successfully.'
             );
-            return $this->redirectToRoute('app_swap2FA_disable_Local');
+            return $this->redirectToRoute('app_swap2FA_disable_Local', [
+                'context' => $context
+            ]);
         }
+        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+        );
         $this->addFlash(
             'error',
-            'Your code has already been sent to you previously.'
+            'Your code has already been sent to you previously. Wait ' .
+            $interval_minutes . ' minutes to request a code again'
         );
-        return $this->redirectToRoute('app_swap2FA_disable_Local');
+        return $this->redirectToRoute('app_swap2FA_disable_Local', [
+            'context' => $context
+        ]);
     }
 
-    #[Route('/2FASwapMethod/disable/TOTP', name: 'app_swap2FA_disable_TOTP')]
-    public function swapMethod2FADisableTOTP(Request $request): Response
+    #[Route(
+        '/{context}/2FASwapMethod/disable/TOTP',
+        name: 'app_swap2FA_disable_TOTP',
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
+    public function swapMethod2FADisableTOTP(string $context, Request $request): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // Ensure the user is logged in
         if (!$user instanceof UserInterface) {
-            $this->addFlash('error', 'You can only access this page logged in. ');
+            $this->addFlash('error', 'You can only access this page while logged in.');
             return $this->redirectToRoute('app_landing');
         }
+
+        // Handle access restrictions based on the context
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('error', 'Only admin users can access this page.');
+            return $this->redirectToRoute('app_dashboard_login');
+        }
+
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
             $this->addFlash(
                 'error',
                 'This account already has two factor authentication disabled.'
             );
-            return $this->redirectToRoute('app_configure2FA');
+            return $this->redirectToRoute('app_configure2FA', [
+                'context' => $context
+            ]);
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
@@ -818,7 +1120,9 @@ class TwoFAController extends AbstractController
                     'success',
                     'Two factor authentication successfully disabled'
                 );
-                return $this->redirectToRoute('app_2FA_firstSetup_local');
+                return $this->redirectToRoute('app_2FA_firstSetup_local', [
+                    'context' => $context
+                ]);
             }
             $this->addFlash('error', 'Invalid code');
         }
@@ -826,7 +1130,8 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
-            'swap' => true
+            'swap' => true,
+            'context' => $context
         ]);
     }
 }

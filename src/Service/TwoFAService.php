@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Event;
 use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -170,7 +171,7 @@ readonly class TwoFAService
                     )
                 )
                 ->to($user->getEmail())
-                ->subject('Your OpenRoaming Two Factor Authentication code')
+                ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code . '.')
                 ->htmlTemplate('email/user_code.html.twig')
                 ->context([
                     'uuid' => $user->getEmail(),
@@ -304,5 +305,23 @@ readonly class TwoFAService
             }
         }
         return false;
+    }
+
+    public function timeLeftToResendCode(User $user, string $eventType): int
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
+            $user,
+            $eventType
+        );
+        $lastAttemptTime = $lastEvent instanceof Event ?
+            $lastEvent->getEventDatetime() : $timeToResetAttempts;
+        $now = new DateTime();
+        $lastAttemptTime->modify('+' . $timeToResetAttempts . ' minutes');
+        $interval = date_diff($now, $lastAttemptTime);
+        $interval_minutes = $interval->days * 1440;
+        $interval_minutes += $interval->h * 60;
+        return $interval_minutes + $interval->i;
     }
 }

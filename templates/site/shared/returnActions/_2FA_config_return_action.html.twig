@@ -11,25 +11,25 @@
         {% endfor %}
     </p>
     {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
-        <a href="{{ app.session.get('session_admin') ? path('admin_page') : path('app_landing') }}"
+        <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
            class="w-[160px] btn-secondary">Go Back</a>
     {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value %}
         {% if user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
             {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
                 <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
             {% else %}
-                <a href="{{ app.session.get('session_admin') ? path('admin_page') : path('app_landing') }}"
+                <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
                    class="w-[160px] btn-secondary">Go Back</a>
             {% endif %}
         {% else %}
-            <a href="{{ app.session.get('session_admin') ? path('admin_page') : path('app_landing') }}"
+            <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
                class="w-[160px] btn-secondary">Go Back</a>
         {% endif %}
     {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value %}
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
             <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
         {% else %}
-            <a href="{{ app.session.get('session_admin') ? path('admin_page') : path('app_landing') }}"
+            <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
                class="w-[160px] btn-secondary">Go Back</a>
         {% endif %}
     {% endif %}

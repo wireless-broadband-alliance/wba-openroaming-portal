@@ -1120,6 +1120,7 @@ class SettingsController extends AbstractController
         $fetchChartPlatformStatus = $statisticsService->fetchChartPlatformStatus($startDate, $endDate);
         $fetchChartUserVerified = $statisticsService->fetchChartUserVerified($startDate, $endDate);
         $fetchChartSMSEmail = $statisticsService->fetchChartSMSEmail($startDate, $endDate);
+        $fetchChart2FA = $statisticsService->fetchChart2FA($startDate, $endDate);
 
         $memory_before = memory_get_usage();
         $memory_after = memory_get_usage();
@@ -1142,6 +1143,7 @@ class SettingsController extends AbstractController
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
             'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
+            'twoFADataJson' => json_encode($fetchChart2FA, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
         ]);

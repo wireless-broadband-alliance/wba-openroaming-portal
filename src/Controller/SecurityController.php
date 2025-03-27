@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\PlatformMode;
-use App\Enum\TwoFAType;
-use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -38,193 +36,24 @@ class SecurityController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route('/login/{type}', name: 'app_login')]
-    public function login(Request $request, AuthenticationUtils $authenticationUtils, $type): Response
+    #[Route('/login', name: 'app_login')]
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $platformMode = $data['PLATFORM_MODE']['value'];
+        if ($platformMode === PlatformMode::DEMO->value) {
+            return $this->redirectToRoute('app_landing');
+        }
 
         $user_sigin = new User();
         $form = $this->createForm(LoginFormType::class, $user_sigin);
         $form->handleRequest($request);
-        $user = $this->getUser();
-        $session = $request->getSession();
-        // Check if the user is already logged in and redirect them accordingly
-        if ($user instanceof User) {
-            $twoFAPlatformStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
-            // this "type" is obtained through the url
-            if ($type === 'admin' && $this->isGranted('ROLE_ADMIN')) {
-                if ($session->get('session_admin') === false) {
-                    return $this->redirectToRoute('saml_logout');
-                }
-                if ($twoFAPlatformStatus) {
-                    if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::DISABLED->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('admin_page');
-                        }
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::SMS->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_2FA_generate_code');
-                        }
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::EMAIL->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_2FA_generate_code');
-                        }
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::TOTP->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_verify2FA_TOTP');
-                        }
-                        return $this->redirectToRoute('admin_page');
-                    }
-                    if (
-                        $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
-                        $twoFAPlatformStatus === twoFAType::ENFORCED_FOR_ALL->value
-                    ) {
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::DISABLED->value ||
-                            $user->getTwoFAType() instanceof UserTwoFactorAuthenticationStatus
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_configure2FA');
-                        }
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::SMS->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_2FA_generate_code');
-                        }
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::EMAIL->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_2FA_generate_code');
-                        }
-                        if (
-                            $user->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::TOTP->value
-                        ) {
-                            $session->set('session_admin', true);
-                            return $this->redirectToRoute('app_verify2FA_TOTP');
-                        }
-                        return $this->redirectToRoute('app_configure2FA');
-                    }
-                }
-                return $this->redirectToRoute('admin_page');
-            }
-            $session->set('session_admin', false);
-            $platformMode = $data['PLATFORM_MODE']['value'];
-            if ($platformMode === PlatformMode::DEMO->value) {
-                return $this->redirectToRoute('saml_logout');
-            }
-            $verification = $user->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
-                return $this->redirectToRoute('app_email_code');
-            }
-            // Get 2fa status on platform
-            if ($twoFAPlatformStatus) {
-                // Check 2fa status on platform, after that we need to check user status to decide what case we have
-                if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value
-                    ) {
-                        return $this->redirectToRoute('app_landing');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::SMS->value
-                    ) {
-                        return $this->redirectToRoute('app_2FA_generate_code');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::EMAIL->value
-                    ) {
-                        return $this->redirectToRoute('app_2FA_generate_code');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::TOTP->value
-                    ) {
-                        return $this->redirectToRoute('app_verify2FA_TOTP');
-                    }
-                    return $this->redirectToRoute('app_landing');
-                }
-                if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value
-                    ) {
-                        return $this->redirectToRoute('app_configure2FA');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::SMS->value
-                    ) {
-                        return $this->redirectToRoute('app_2FA_generate_code');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::EMAIL->value
-                    ) {
-                        return $this->redirectToRoute('app_2FA_generate_code');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::TOTP->value
-                    ) {
-                        return $this->redirectToRoute('app_verify2FA_TOTP');
-                    }
-                    return $this->redirectToRoute('app_landing');
-                }
-                if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value
-                    ) {
-                        return $this->redirectToRoute('app_configure2FA');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::SMS->value
-                    ) {
-                        return $this->redirectToRoute('app_2FA_generate_code');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::EMAIL->value
-                    ) {
-                        return $this->redirectToRoute('app_2FA_generate_code');
-                    }
-                    if (
-                        $user->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::TOTP->value
-                    ) {
-                        return $this->redirectToRoute('app_verify2FA_TOTP');
-                    }
-                    return $this->redirectToRoute('app_configure2FA');
-                }
-                return $this->redirectToRoute('app_landing');
-            }
-            return $this->redirectToRoute('app_landing');
-        }
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -248,15 +77,6 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            return $this->render('admin/login_admin_landing.html.twig', [
-                'last_username' => $lastUsername,
-                'error' => $error,
-                'data' => $data,
-                'form' => $form,
-            ]);
-        }
-
         return $this->render('site/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
@@ -264,6 +84,54 @@ class SecurityController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/dashboard/login', name: 'app_dashboard_login')]
+    public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
+    {
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            return $this->redirectToRoute('admin_page');
+        }
+
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $user_sigin = new User();
+        $form = $this->createForm(LoginFormType::class, $user_sigin);
+        $form->handleRequest($request);
+
+        // Get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // Last username entered by the user (this will be empty if the user clicked the verification link)
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        // Check if there's a UUID parameter in the URL
+        $uuid = $request->query->get('uuid');
+        if ($uuid) {
+            // Try to find the user by UUID excluding admins
+            $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+            if ($user instanceof User) {
+                // If the user is found, set their email as the last username to pre-fill the email field
+                $lastUsername = $user->getUuid();
+            }
+        }
+
+        // Show an error message if the login attempt fails
+        if ($error instanceof AuthenticationException) {
+            $this->addFlash('error', $error->getMessage());
+        }
+
+        return $this->render('admin/login_admin_landing.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+            'data' => $data,
+            'form' => $form,
+        ]);
+    }
+
 
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void

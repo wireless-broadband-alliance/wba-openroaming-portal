@@ -87,7 +87,7 @@ primary features:
 
 ![Admin_Login](../assets/wba_screenshots/admin_page_login.png)
 
-The admin dashboard is only accessible after a secure login, accessible via **https://<portal_url>/login/admin**.
+The admin dashboard is only accessible after a secure login, accessible via **https://<portal_url>/dashboard/login**.
 
 To access the dashboard, administrators must provide their
 credentials **(default is: admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and

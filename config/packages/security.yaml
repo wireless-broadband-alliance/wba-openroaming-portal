@@ -4,8 +4,12 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
+        admin_user_provider:
+            entity:
+                class: App\Entity\User
+                property: uuid
         # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
+        user_provider:
             entity:
                 class: App\Entity\User
                 property: uuid
@@ -19,22 +23,44 @@ security:
             pattern: ^/api/
             stateless: true
             jwt: ~
-            provider: app_user_provider
+            provider: user_provider
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+
+        dashboard:
+            pattern: ^/dashboard
+            lazy: true
+            provider: admin_user_provider
+            custom_authenticators:
+                - App\Security\DashboardAuthenticator
+
+            form_login:
+                login_path: app_dashboard_login
+                check_path: app_dashboard_login
+                enable_csrf: true
+                username_parameter: uuid
+                password_parameter: password
+                default_target_path: /dashboard
+            logout:
+                path: saml_logout
+                target: /
+            entry_point: form_login
+
+        landing:
             pattern: ^/
             lazy: true
-            provider: app_user_provider
+            provider: user_provider
             # Integrate multiple custom authenticators here.
             custom_authenticators:
-                - App\Security\PasswordAuthenticator # Password-based authenticator
+                - App\Security\LandingAuthenticator # Password-based authenticator
 
             # Form login for password-based authentication.
             form_login:
                 login_path: app_login
                 check_path: app_login
+                username_parameter: uuid
+                password_parameter: password
                 enable_csrf: true
             saml:
                 identifier_attribute: sAMAccountName

@@ -43,21 +43,7 @@
         </p>
     </td>
 
-    {# Banned At #}
-    <td class="p-4 text-left">
-        <p class="font-semibold p-1">
-            {% if user.getBannedAt %}
-                <span class="pill-error">
-                    {{ user.bannedat|date('d/m/Y H:i') }}
-                </span>
-            {% else %}
-                <span class="pill-success">
-                    Not Banned
-                </span>
-            {% endif %}
-        </p>
-    </td>
-
+    {# 2FA status #}
     <td class="px-6 py-4 font-medium">
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
             <span class="pill-error">
@@ -79,6 +65,21 @@
                 TOTP
             </span>
         {% endif %}
+    </td>
+
+    {# Banned At #}
+    <td class="p-4 text-left">
+        <p class="font-semibold p-1">
+            {% if user.getBannedAt %}
+                <span class="pill-error">
+                    {{ user.bannedat|date('d/m/Y H:i') }}
+                </span>
+            {% else %}
+                <span class="pill-success">
+                    Not Banned
+                </span>
+            {% endif %}
+        </p>
     </td>
 
     {# Created At #}
