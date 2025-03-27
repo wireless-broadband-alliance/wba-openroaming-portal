@@ -670,7 +670,7 @@ class SettingsController extends AbstractController
             // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
-            $twoFactorAuthStatus = $submittedData['TWO_FACTOR_AUTH_STATUS'] ?? TwoFAType::NOT_ENFORCED->value;
+            $timeIntervalNotifications = $submittedData['TIME_INTERVAL_NOTIFICATION'] ?? 7;
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting !== null) {
@@ -701,10 +701,10 @@ class SettingsController extends AbstractController
                 $userDeleteTimeSetting->setValue($userDeleteTime);
                 $this->entityManager->persist($userDeleteTimeSetting);
             }
-            $twoFactorAuthStatusSetting = $settingsRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
-            if ($twoFactorAuthStatusSetting !== null) {
-                $twoFactorAuthStatusSetting->setValue($twoFactorAuthStatus);
-                $this->entityManager->persist($twoFactorAuthStatusSetting);
+            $timeIntervalNotificationsSetting = $settingsRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+            if ($timeIntervalNotificationsSetting !== null) {
+                $timeIntervalNotificationsSetting->setValue($timeIntervalNotifications);
+                $this->entityManager->persist($timeIntervalNotificationsSetting);
             }
             // Flush the changes to the database
             $this->entityManager->flush();
