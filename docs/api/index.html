@@ -496,25 +496,64 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "PLATFORM_MODE": {
-                                                                    "type": "boolean"
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "Live",
+                                                                        "Demo"
+                                                                    ],
+                                                                    "example": "Live",
+                                                                    "description": "The platform mode of the application. Possible values: Live or Demo."
                                                                 },
                                                                 "USER_VERIFICATION": {
-                                                                    "type": "boolean"
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "ON",
+                                                                        "OFF"
+                                                                    ],
+                                                                    "example": "ON",
+                                                                    "description": "Indicates whether user verification is enabled (ON) or disabled (OFF)."
                                                                 },
                                                                 "TURNSTILE_CHECKER": {
-                                                                    "type": "boolean"
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "ON",
+                                                                        "OFF"
+                                                                    ],
+                                                                    "example": "ON",
+                                                                    "description": "Indicates the status of the turnstile checker. Possible values: ON or OFF."
                                                                 },
                                                                 "CONTACT_EMAIL": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "support@example.com",
+                                                                    "description": "Contact email address for support or inquiries."
                                                                 },
                                                                 "TOS": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "LINK",
+                                                                        "TEXT_EDITOR"
+                                                                    ],
+                                                                    "example": "LINK",
+                                                                    "description": "Defines the type of Terms of Service. Possible values: LINK or TEXT_EDITOR."
                                                                 },
                                                                 "PRIVACY_POLICY": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "LINK",
+                                                                        "TEXT_EDITOR"
+                                                                    ],
+                                                                    "example": "TEXT_EDITOR",
+                                                                    "description": "Defines the type of Privacy Policy. Possible values: LINK or TEXT_EDITOR."
                                                                 },
                                                                 "TWO_FACTOR_AUTH_STATUS": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "NOT_ENFORCED",
+                                                                        "ENFORCED_FOR_LOCAL",
+                                                                        "ENFORCED_FOR_ALL"
+                                                                    ],
+                                                                    "example": "NOT_ENFORCED",
+                                                                    "description": "Status of two-factor authentication enforcement. Possible values: NOT_ENFORCED, ENFORCED_FOR_LOCAL, ENFORCED_FOR_ALL."
                                                                 }
                                                             }
                                                         },
@@ -522,19 +561,29 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "AUTH_METHOD_SAML_ENABLED": {
-                                                                    "type": "boolean"
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether SAML authentication is enabled (true) or disabled (false)."
                                                                 },
                                                                 "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": {
-                                                                    "type": "boolean"
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether Google login is enabled (true) or disabled (false)."
                                                                 },
                                                                 "AUTH_METHOD_REGISTER_ENABLED": {
-                                                                    "type": "boolean"
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether user registration is enabled (true) or disabled (false)."
                                                                 },
                                                                 "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": {
-                                                                    "type": "boolean"
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether traditional (username/password) login is enabled (true) or disabled (false)."
                                                                 },
                                                                 "AUTH_METHOD_SMS_REGISTER_ENABLED": {
-                                                                    "type": "boolean"
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether SMS-based registration is enabled (true) or disabled (false)."
                                                                 }
                                                             }
                                                         },
@@ -542,7 +591,9 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "TURNSTILE_KEY": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "example_turnstile_key",
+                                                                    "description": "The API key for the turnstile service."
                                                                 }
                                                             }
                                                         },
@@ -550,7 +601,9 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "GOOGLE_CLIENT_ID": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "example_google_client_id",
+                                                                    "description": "The Google client ID \n                                                            used for authentication."
                                                                 }
                                                             }
                                                         },
@@ -558,7 +611,9 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "MICROSOFT_CLIENT_ID": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "example_microsoft_client_id",
+                                                                    "description": "The Microsoft client ID \n                                                            used for authentication."
                                                                 }
                                                             }
                                                         },
@@ -566,16 +621,24 @@
                                                             "type": "object",
                                                             "properties": {
                                                                 "SAML_IDP_ENTITY_ID": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "https://example.com/saml/metadata",
+                                                                    "description": "The SAML Identity Provider entity ID."
                                                                 },
                                                                 "SAML_IDP_SSO_URL": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "https://example.com/saml/sso",
+                                                                    "description": "The SAML Identity Provider \n                                                            Single Sign-On URL."
                                                                 },
                                                                 "SAML_IDP_X509_CERT": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "MIIC...AB",
+                                                                    "description": "The SAML Identity Provider \n                                                            X.509 certificate."
                                                                 },
                                                                 "SAML_SP_ENTITY_ID": {
-                                                                    "type": "string"
+                                                                    "type": "string",
+                                                                    "example": "https://example.com/saml/sp",
+                                                                    "description": "The SAML Service Provider entity ID."
                                                                 }
                                                             }
                                                         }
@@ -725,12 +788,27 @@
                                                                 "type": "object",
                                                                 "properties": {
                                                                     "provider": {
-                                                                        "type": "string"
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                            "SAML Account",
+                                                                            "Google Account",
+                                                                            "Microsoft Account",
+                                                                            "Portal Account"
+                                                                        ],
+                                                                        "example": "Google Account",
+                                                                        "description": "The authentication provider for the user. Possible values: SAML Account, Google Account, Microsoft Account, Portal Account. If the provider is \"Portal Account\", the provider_id must be \"Email\" or \"Phone Number\"."
                                                                     },
                                                                     "provider_id": {
-                                                                        "type": "string"
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                            "Email",
+                                                                            "Phone Number"
+                                                                        ],
+                                                                        "example": "Email",
+                                                                        "description": "The unique identifier for the external authentication provider linked to the user. For \"Google Account\", this is an OAuth token. For \"Portal Account\", this must be either \"Email\" or \"Phone Number\"."
                                                                     }
-                                                                }
+                                                                },
+                                                                "description": "An array containing external authentication methods associated with the user. Each item specifies the provider and the unique provider ID. Special behavior: For Portal Account, the provider_id is restricted to the values 'Email' or 'Phone Number'."
                                                             }
                                                         },
                                                         "phone_number": {
@@ -1076,6 +1154,13 @@
                                                 "value": {
                                                     "success": false,
                                                     "error": "User account is banned from the system!"
+                                                }
+                                            },
+                                            "email_domain_not_allowed": {
+                                                "summary": "User email domain is not allowed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "our email domain is not allowed to use this platform!"
                                                 }
                                             }
                                         }
@@ -1613,6 +1698,13 @@
                                                 "value": {
                                                     "success": false,
                                                     "error": "User account is banned from the system!"
+                                                }
+                                            },
+                                            "email_domain_not_allowed": {
+                                                "summary": "User email domain is not allowed",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "our email domain is not allowed to use this platform!"
                                                 }
                                             }
                                         }
