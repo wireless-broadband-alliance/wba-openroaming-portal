@@ -64,9 +64,9 @@ readonly class VerificationCodeEmailGenerator
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent ?? null,
+            'user_agent' => $userAgent,
             'uuid' => $user->getUuid(),
-            'ip' => $ip ?? null,
+            'ip' => $ip,
         ];
         $this->eventActions->saveEvent(
             $user,
@@ -149,7 +149,14 @@ readonly class VerificationCodeEmailGenerator
             $attemptTime = $event->getEventDatetime();
             if ($attemptTime instanceof \DateTimeInterface) {
                 $now = new DateTime();
-                $attemptTime->modify('+' . $timeInterval . ' seconds');
+
+                // Check and cast to DateTime for modify() method
+                if ($attemptTime instanceof DateTime) {
+                    $attemptTime->modify('+' . $timeInterval . ' seconds');
+                } elseif ($attemptTime instanceof \DateTimeImmutable) {
+                    $attemptTime = $attemptTime->modify('+' . $timeInterval . ' seconds');
+                }
+
                 $interval = date_diff($now, $attemptTime);
                 $interval_seconds = $interval->days * 1440;
                 $interval_seconds += $interval->h * 60;
@@ -157,7 +164,8 @@ readonly class VerificationCodeEmailGenerator
                 return $interval_seconds + $interval->s;
             }
             return null;
-        } return null;
+        }
+        return null;
     }
 
     public function canResendCode(User $user, int $timeInterval): bool
