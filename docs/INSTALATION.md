@@ -148,8 +148,7 @@ If you are running the portal locally, you can
 use localhost for an IP address.
 And make sure to use **port 80**, it's the default port of the project.
 
-If you encounter any issues or have any questions along the way, don't hesitate to check to the [**Troubleshooting
-**](#troubleshooting) section on this README or reach out to our support team for assistance.
+If you encounter any issues or have any questions along the way, don't hesitate to check to the **Troubleshooting** section on this README or reach out to our support team for assistance.
 
 Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier
 to connect in any location! 💻📱
