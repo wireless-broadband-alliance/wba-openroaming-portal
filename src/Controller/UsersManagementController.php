@@ -413,6 +413,7 @@ class UsersManagementController extends AbstractController
 
             if ($user->getEmail()) {
                 $supportTeam = $data['title']['value'];
+                $contactEmail = $data['contactEmail']['value'];
                 // Send email
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
@@ -421,7 +422,12 @@ class UsersManagementController extends AbstractController
                     ->html(
                         $this->renderView(
                             'email/user_password.html.twig',
-                            ['password' => $newPassword, 'isNewUser' => false, 'supportTeam' => $supportTeam]
+                            [
+                                'password' => $newPassword,
+                                'isNewUser' => false,
+                                'supportTeam' => $supportTeam,
+                                'contactEmail' => $contactEmail
+                            ]
                         )
                     );
                 $mailer->send($email);
