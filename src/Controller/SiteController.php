@@ -682,7 +682,7 @@ class SiteController extends AbstractController
             } else {
                 $this->addFlash(
                     'warning',
-                    'This email does\'t exist, please make sure to create a account with a email on the platform!'
+                    'This email doesn\'t exist, please make sure to create a account with a email on the platform!'
                 );
             }
         }
