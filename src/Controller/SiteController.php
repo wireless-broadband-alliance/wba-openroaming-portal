@@ -140,7 +140,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_configure2FA');
             }
             // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-            if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
+            if ($currentUser->isForgotPasswordRequest()) {
                 $this->addFlash(
                     'error',
                     'You need to confirm the new password before download a profile!'
@@ -682,7 +682,7 @@ class SiteController extends AbstractController
             } else {
                 $this->addFlash(
                     'warning',
-                    'This email doesn\'t exist, please make sure to create a account with a email on the platform!'
+                    'This email does\'t exist, please make sure to create a account with a email on the platform!'
                 );
             }
         }
@@ -694,7 +694,6 @@ class SiteController extends AbstractController
 
     /**
      * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
     public function forgotPasswordUserSMS(
@@ -706,12 +705,12 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($this->getUser() instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash('error', 'You can\'t access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
                 'error',
                 'The portal is in Demo mode - it is not possible to use this verification method.'
@@ -834,15 +833,13 @@ class SiteController extends AbstractController
     #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
     public function forgotPasswordUserChecker(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        MailerInterface $mailer,
-        UserPasswordHasherInterface $passwordHasher,
+        UserPasswordHasherInterface $userPasswordHasher,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        if ($data['PLATFORM_MODE']['value'] == true) {
+        if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
                 'error',
                 'The portal is in Demo mode - it is not possible to use this verification method!'
@@ -854,6 +851,11 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         if (!$currentUser) {
             $this->addFlash('error', 'You can only access this page logged in.');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if (!$currentUser->isForgotPasswordRequest()) {
+            $this->addFlash('error', 'You can not access this page without a valid request!');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -889,7 +891,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
 
-            $user->setPassword($passwordHasher->hashPassword($user, $form->get('newPassword')->getData()));
+            $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('newPassword')->getData()));
             $user->setForgotPasswordRequest(false);
             $entityManager->persist($user);
             $entityManager->flush();
@@ -917,10 +919,6 @@ class SiteController extends AbstractController
         ]);
     }
 
-
-    /**
-     * @param $userAgent
-     */
     private function detectDevice($userAgent): string
     {
         $os = OSTypes::NONE->value;

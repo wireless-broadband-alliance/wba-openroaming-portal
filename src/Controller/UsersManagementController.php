@@ -409,6 +409,7 @@ class UsersManagementController extends AbstractController
             // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
+            $user->setForgotPasswordRequest(true);
             $em->flush();
 
             if ($user->getEmail()) {

@@ -73,6 +73,7 @@ class ProfileController extends AbstractController
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
+
         $session = $request->getSession();
         if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
@@ -557,6 +558,13 @@ class ProfileController extends AbstractController
             $this->redirectToRoute('app_landing');
             return true;
         }
+
+        if ($user->isForgotPasswordRequest()) {
+            $this->addFlash('error', 'Your account is currently with a request pending approval!');
+            $this->redirectToRoute('app_landing');
+            return true;
+        }
+
         return false;
     }
 }
