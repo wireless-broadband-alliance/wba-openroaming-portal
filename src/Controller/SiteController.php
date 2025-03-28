@@ -423,7 +423,6 @@ class SiteController extends AbstractController
      *
      * @return RedirectResponse
      * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     public function accountUser(

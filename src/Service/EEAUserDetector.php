@@ -10,10 +10,10 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EEAUserDetector
+readonly class EEAUserDetector
 {
     public function __construct(
-        private readonly RequestStack $requestStack,
+        private RequestStack $requestStack,
     ) {
     }
 
