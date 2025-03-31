@@ -248,6 +248,21 @@ readonly class TwoFAService
         return count($attempts) < 1;
     }
 
+    public function timeIntervalToSendCode(User $user, string $event): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            1,
+            $limitTime,
+            $event
+        );
+        return count($attempts) < 1;
+    }
+
     private function removeOTPCodes(User $user): void
     {
         $codes = $user->getOTPcodes();
@@ -323,5 +338,24 @@ readonly class TwoFAService
         $interval_minutes = $interval->days * 1440;
         $interval_minutes += $interval->h * 60;
         return $interval_minutes + $interval->i;
+    }
+
+    public function timeLeftToResendCodeTimeInterval(User $user, string $eventType): int
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
+            $user,
+            $eventType
+        );
+        $lastAttemptTime = $lastEvent instanceof Event ?
+            $lastEvent->getEventDatetime() : $timeToResetAttempts;
+        $now = new DateTime();
+        $lastAttemptTime->modify('+' . $timeToResetAttempts . ' seconds');
+        $interval = date_diff($now, $lastAttemptTime);
+        $interval_seconds = $interval->days * 1440;
+        $interval_seconds += $interval->h * 60;
+        $interval_seconds += $interval->i;
+        return $interval_seconds + $interval->s;
     }
 }

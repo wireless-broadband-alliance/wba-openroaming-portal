@@ -825,30 +825,39 @@ class TwoFAController extends AbstractController
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value)) {
-            $this->twoFAService->generate2FACode(
+            if ($this->twoFAService->timeIntervalToSendCode($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value)) {
+                $this->twoFAService->generate2FACode(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+                );
+                $this->addFlash(
+                    'success',
+                    'A confirmation code was sent to you successfully.'
+                );
+                return $this->redirectToRoute('app_2FA_first_verification_local', [
+                    'context' => $context
+                ]);
+            } else {
+                $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value);
+                $this->addFlash(
+                    'error',
+                    'You must wait ' .
+                    $interval_seconds . ' seconds before you can resend code'
+                );
+            }
+        } else {
+            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                 $user,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent'),
                 AnalyticalEventType::TWO_FA_CODE_ENABLE->value
             );
             $this->addFlash(
-                'success',
-                'A confirmation code was sent to you successfully.'
+                'error',
+                'Your code has already been sent to you previously. Wait ' .
+                $interval_minutes . ' minutes to request a code again'
             );
-            return $this->redirectToRoute('app_2FA_first_verification_local', [
-                'context' => $context
-            ]);
         }
-        $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-            $user,
-            AnalyticalEventType::TWO_FA_CODE_ENABLE->value
-        );
-        $this->addFlash(
-            'error',
-            'Your code has already been sent to you previously. Wait ' .
-            $interval_minutes . ' minutes to request a code again'
-        );
-
         return $this->redirectToRoute('app_2FA_first_verification_local', [
             'context' => $context
         ]);
