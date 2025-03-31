@@ -2,9 +2,14 @@
 
 namespace App\Service;
 
+use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\PlatformMode;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use DateTime;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,6 +22,8 @@ readonly class VerificationCodeEmailGenerator
         private UserRepository $userRepository,
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
+        private EventRepository $eventRepository,
+        private EventActions $eventActions
     ) {
     }
 
@@ -46,12 +53,27 @@ readonly class VerificationCodeEmailGenerator
      */
     public function createEmailAdminPage(
         User $user,
+        string $ip,
+        string $userAgent,
     ): Email {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
         $verificationCode = $this->generateVerificationCode($user);
+
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
+            'user_agent' => $userAgent,
+            'uuid' => $user->getUuid(),
+            'ip' => $ip,
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value,
+            new DateTime(),
+            $eventMetaData
+        );
 
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
@@ -119,5 +141,43 @@ readonly class VerificationCodeEmailGenerator
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail
             ]);
+    }
+
+    public function timeLeftToResendCode(int $timeInterval, ?Event $event): null|int
+    {
+        if ($event instanceof Event) {
+            $attemptTime = $event->getEventDatetime();
+            if ($attemptTime instanceof \DateTimeInterface) {
+                $now = new DateTime();
+
+                // Check and cast to DateTime for modify() method
+                if ($attemptTime instanceof DateTime) {
+                    $attemptTime->modify('+' . $timeInterval . ' seconds');
+                } elseif ($attemptTime instanceof \DateTimeImmutable) {
+                    $attemptTime = $attemptTime->modify('+' . $timeInterval . ' seconds');
+                }
+
+                $interval = date_diff($now, $attemptTime);
+                $interval_seconds = $interval->days * 1440;
+                $interval_seconds += $interval->h * 60;
+                $interval_seconds += $interval->i;
+                return $interval_seconds + $interval->s;
+            }
+            return null;
+        }
+        return null;
+    }
+
+    public function canResendCode(User $user, int $timeInterval): bool
+    {
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeInterval . ' seconds');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            1,
+            $limitTime,
+            AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
+        );
+        return count($attempts) < 1;
     }
 }

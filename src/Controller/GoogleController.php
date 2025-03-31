@@ -2,23 +2,23 @@
 
 namespace App\Controller;
 
-use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -48,6 +48,7 @@ class GoogleController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
+        private readonly UserStatusChecker $userStatusChecker,
     ) {
     }
 
@@ -109,7 +110,7 @@ class GoogleController extends AbstractController
         $lastname = $resourceOwner->getLastname();
 
         // Check if the email is valid
-        if (!$this->isValidEmail($email)) {
+        if (!$this->userStatusChecker->isValidEmail($email, UserProvider::GOOGLE_ACCOUNT->value)) {
             $this->addFlash('error', 'Sorry! Your email domain is not allowed to use this platform');
             return $this->redirectToRoute('app_landing');
         }
@@ -133,35 +134,6 @@ class GoogleController extends AbstractController
 
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
-    }
-
-    private function isValidEmail(string $email): bool
-    {
-        // Retrieve the valid domains setting from the database
-        $settingRepository = $this->entityManager->getRepository(Setting::class);
-        $validDomainsSetting = $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN']);
-
-        // Throw an exception if the setting is not found
-        if ($validDomainsSetting === null) {
-            throw new RuntimeException('VALID_DOMAINS_GOOGLE_LOGIN not found in the database.');
-        }
-
-        // If the valid domains setting is empty, allow all domains
-        $validDomains = $validDomainsSetting->getValue();
-        if (empty($validDomains)) {
-            return true;
-        }
-
-        // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $validDomains);
-        $validDomains = array_map('trim', $validDomains);
-
-        // Extract the domain from the email
-        $emailParts = explode('@', $email);
-        $domain = end($emailParts);
-
-        // Check if the domain is in the list of valid domains
-        return in_array($domain, $validDomains, true);
     }
 
     /**
@@ -193,11 +165,14 @@ class GoogleController extends AbstractController
             ]);
 
             if ($existingUserAuth === null) {
-                $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
+                $this->addFlash(
+                    'error',
+                    "Email already in use. Please use the original provider from this account!"
+                );
                 return null;
             }
 
-            // If a user with the given email exists and they don't have an external auth entry, return the user
+            // If a user with the given email exists, and they don't have an external auth entry, return the user
             return $userWithEmail;
         }
 
@@ -257,7 +232,7 @@ class GoogleController extends AbstractController
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
             /** @phpstan-ignore-next-line */
-            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : 'main';
+            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : FirewallType::LANDING->value;
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());

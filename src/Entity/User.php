@@ -1242,6 +1242,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'User account is banned from the system!',
                                         ],
                                     ],
+                                    'email_domain_not_allowed' => [
+                                        'summary' => 'User email domain is not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'our email domain is not allowed to use this platform!',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
@@ -1492,6 +1499,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                    'email_domain_not_allowed' => [
+                                        'summary' => 'User email domain is not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'our email domain is not allowed to use this platform!',
                                         ],
                                     ],
                                 ],

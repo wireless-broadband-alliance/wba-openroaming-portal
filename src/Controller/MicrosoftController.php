@@ -6,12 +6,14 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,6 +47,7 @@ class MicrosoftController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
+        private readonly UserStatusChecker $userStatusChecker,
     ) {
     }
 
@@ -105,7 +108,7 @@ class MicrosoftController extends AbstractController
         $lastname = $resourceOwner->getLastname();
 
         // Check if the email is valid
-        if (!$this->isValidEmail($email)) {
+        if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
             $this->addFlash('error', 'Sorry! Your email domain is not allowed to use this platform');
             return $this->redirectToRoute('app_landing');
         }
@@ -129,35 +132,6 @@ class MicrosoftController extends AbstractController
 
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
-    }
-
-    private function isValidEmail(string $email): bool
-    {
-        // Retrieve the valid domains setting from the database
-        $settingRepository = $this->entityManager->getRepository(Setting::class);
-        $validDomainsSetting = $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN']);
-
-        // Throw an exception if the setting is not found
-        if ($validDomainsSetting === null) {
-            throw new RuntimeException('VALID_DOMAINS_MICROSOFT_LOGIN not found in the database.');
-        }
-
-        // If the valid domains setting is empty, allow all domains
-        $validDomains = $validDomainsSetting->getValue();
-        if (empty($validDomains)) {
-            return true;
-        }
-
-        // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $validDomains);
-        $validDomains = array_map('trim', $validDomains);
-
-        // Extract the domain from the email
-        $emailParts = explode('@', $email);
-        $domain = end($emailParts);
-
-        // Check if the domain is in the list of valid domains
-        return in_array($domain, $validDomains, true);
     }
 
     private function findOrCreateMicrosoftUser(
@@ -250,7 +224,7 @@ class MicrosoftController extends AbstractController
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
             /** @phpstan-ignore-next-line */
-            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : 'main';
+            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : FirewallType::LANDING->value;
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());

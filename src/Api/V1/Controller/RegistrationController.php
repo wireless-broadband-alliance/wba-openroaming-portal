@@ -96,8 +96,15 @@ class RegistrationController extends AbstractController
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
             }
-            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
 
@@ -218,8 +225,15 @@ class RegistrationController extends AbstractController
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
             }
-            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
 
@@ -399,10 +413,18 @@ class RegistrationController extends AbstractController
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
             }
-            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
+
         // Check for missing fields and add them to the array errors
         $errors = [];
         if (empty($data['phone_number'])) {
@@ -536,12 +558,20 @@ class RegistrationController extends AbstractController
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
         if ($turnstileSetting === OperationMode::ON->value) {
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
             }
-            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
 

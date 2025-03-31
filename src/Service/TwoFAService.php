@@ -7,6 +7,8 @@ use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\TwoFAType;
+use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -248,6 +250,21 @@ readonly class TwoFAService
         return count($attempts) < 1;
     }
 
+    public function timeIntervalToSendCode(User $user, string $event): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            1,
+            $limitTime,
+            $event
+        );
+        return count($attempts) < 1;
+    }
+
     private function removeOTPCodes(User $user): void
     {
         $codes = $user->getOTPcodes();
@@ -323,5 +340,44 @@ readonly class TwoFAService
         $interval_minutes = $interval->days * 1440;
         $interval_minutes += $interval->h * 60;
         return $interval_minutes + $interval->i;
+    }
+
+    public function timeLeftToResendCodeTimeInterval(User $user, string $eventType): int
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
+            $user,
+            $eventType
+        );
+        $lastAttemptTime = $lastEvent instanceof Event ?
+            $lastEvent->getEventDatetime() : $timeToResetAttempts;
+        $now = new DateTime();
+        $lastAttemptTime->modify('+' . $timeToResetAttempts . ' seconds');
+        $interval = date_diff($now, $lastAttemptTime);
+        $interval_seconds = $interval->days * 1440;
+        $interval_seconds += $interval->h * 60;
+        $interval_seconds += $interval->i;
+        return $interval_seconds + $interval->s;
+    }
+
+    public function isTwoFARequired(User $user): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+            if (
+                $user->getUserExternalAuths()[0] &&
+                $user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+            ) {
+                return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;
+            }
+            return false;
+        }
+
+        if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_ALL->value) {
+            return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;
+        }
+
+        return false;
     }
 }

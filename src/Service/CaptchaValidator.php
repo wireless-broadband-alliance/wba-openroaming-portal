@@ -12,13 +12,13 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class CaptchaValidator
+readonly class CaptchaValidator
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly KernelInterface $kernel,
-        private readonly LoggerInterface $logger
+        private HttpClientInterface $httpClient,
+        private ParameterBagInterface $parameterBag,
+        private KernelInterface $kernel,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -37,7 +37,10 @@ class CaptchaValidator
             $this->logger->warning('CAPTCHA validation token is empty.', [
                 'client_ip' => $clientIp,
             ]);
-            return ['success' => false];
+            return [
+                'success' => false,
+                'error' => 'CAPTCHA validation token is empty'
+            ];
         }
 
         // Prepare API payload
