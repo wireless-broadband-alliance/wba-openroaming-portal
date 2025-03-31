@@ -318,10 +318,10 @@ class ProfileController extends AbstractController
             $radiusUser->getUsername(),
             $radiusUser->getValue(),
             $this->generateWindowsUuid(),
-            $this->settings['DOMAIN_NAME'],
-            $this->settings['RADIUS_TLS_NAME'],
-            $this->settings['RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'],
-            $this->settings['DISPLAY_NAME'],
+            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
         ], $profile);
 
         //Windows Specific
@@ -362,7 +362,7 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => $this->settings['PLATFORM_MODE'],
+            'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
             'type' => OSTypes::WINDOWS->value,
         ];
 
