@@ -67,12 +67,15 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($this->twoFAService->userNeedTwoFA($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         $session = $request->getSession();
         if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
         }
 
-        // TODO ADD LOGIC TO GET THE CURRENT STATE OF USER 2FA
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
@@ -153,6 +156,10 @@ class ProfileController extends AbstractController
         }
 
         if ($this->checkUserStatus($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->twoFAService->userNeedTwoFA($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -291,6 +298,10 @@ class ProfileController extends AbstractController
         }
 
         if ($this->checkUserStatus($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->twoFAService->userNeedTwoFA($user)) {
             return $this->redirectToRoute('app_landing');
         }
 

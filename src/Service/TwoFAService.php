@@ -7,6 +7,8 @@ use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\TwoFAType;
+use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -357,5 +359,25 @@ readonly class TwoFAService
         $interval_seconds += $interval->h * 60;
         $interval_seconds += $interval->i;
         return $interval_seconds + $interval->s;
+    }
+
+    public function userNeedTwoFA(User $user): bool
+    {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $twoFAPlatformStatus = $data["TWO_FACTOR_AUTH_STATUS"]["value"];
+        $userTwoFAPlatformStatus = $user->getTwoFAtype();
+        if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+            if (
+                $user->getUserExternalAuths()[0] &&
+                $user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+            ) {
+                return $userTwoFAPlatformStatus === UserTwoFactorAuthenticationStatus::DISABLED->value;
+            }
+            return false;
+        }
+        if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
+            return $userTwoFAPlatformStatus === UserTwoFactorAuthenticationStatus::DISABLED->value;
+        }
+        return false;
     }
 }
