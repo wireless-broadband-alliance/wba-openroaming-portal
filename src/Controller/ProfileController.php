@@ -530,7 +530,8 @@ class ProfileController extends AbstractController
             return true;
         }
 
-        if (!$user->isVerified() &&
+        if (
+            !$user->isVerified() &&
             $this->settingRepository->findOneBy(
                 ['name' => 'USER_VERIFICATION']
             )->getValue() === OperationMode::ON->value

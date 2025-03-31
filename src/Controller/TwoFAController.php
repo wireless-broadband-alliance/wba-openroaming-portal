@@ -843,7 +843,9 @@ class TwoFAController extends AbstractController
                     'context' => $context
                 ]);
             } else {
-                $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value);
+                $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
+                    $user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+                );
                 $this->addFlash(
                     'error',
                     'You must wait ' .
