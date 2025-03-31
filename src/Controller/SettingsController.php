@@ -268,7 +268,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
-            if ($type === 'settingTwoAF') {
+            if ($type === 'settingTwoFA') {
                 $command = 'php bin/console reset:twoFASettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
