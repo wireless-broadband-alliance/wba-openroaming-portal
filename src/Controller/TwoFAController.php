@@ -872,6 +872,16 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        // Ensure the can only access this route if it has an email || phone number
+        if (!$user->getEmail() && !$user->getPhoneNumber()) {
+            $this->addFlash(
+                'error',
+                'This account does not have a contact identifier (email or phone number) associated with it.
+                Please select another valid two-factor authentication if you want to configure one for this account.'
+            );
+            return $this->redirectToRoute('app_configure2FA');
+        }
+
         // Handle access restrictions based on the context
         if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('error', 'Only admin users can access this page.');
