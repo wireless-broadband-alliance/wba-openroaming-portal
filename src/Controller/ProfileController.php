@@ -67,7 +67,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($this->twoFAService->userNeedTwoFA($user)) {
+        if ($this->twoFAService->isTwoFARequired($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -159,7 +159,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($this->twoFAService->userNeedTwoFA($user)) {
+        if ($this->twoFAService->isTwoFARequired($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -301,7 +301,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($this->twoFAService->userNeedTwoFA($user)) {
+        if ($this->twoFAService->isTwoFARequired($user)) {
             return $this->redirectToRoute('app_landing');
         }
 

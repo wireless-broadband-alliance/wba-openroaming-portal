@@ -361,23 +361,23 @@ readonly class TwoFAService
         return $interval_seconds + $interval->s;
     }
 
-    public function userNeedTwoFA(User $user): bool
+    public function isTwoFARequired(User $user): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $twoFAPlatformStatus = $data["TWO_FACTOR_AUTH_STATUS"]["value"];
-        $userTwoFAPlatformStatus = $user->getTwoFAtype();
-        if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+        if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_LOCAL->value) {
             if (
                 $user->getUserExternalAuths()[0] &&
                 $user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
             ) {
-                return $userTwoFAPlatformStatus === UserTwoFactorAuthenticationStatus::DISABLED->value;
+                return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;
             }
             return false;
         }
-        if ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
-            return $userTwoFAPlatformStatus === UserTwoFactorAuthenticationStatus::DISABLED->value;
+
+        if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_ALL->value) {
+            return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;
         }
+
         return false;
     }
 }
