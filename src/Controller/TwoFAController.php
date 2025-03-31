@@ -100,6 +100,10 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
+        if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
@@ -888,6 +892,10 @@ class TwoFAController extends AbstractController
                 Please select another valid two-factor authentication if you want to configure one for this account.'
             );
             return $this->redirectToRoute('app_configure2FA');
+        }
+
+        if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            return $this->redirectToRoute('app_landing');
         }
 
         // Handle access restrictions based on the context
