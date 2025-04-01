@@ -160,16 +160,13 @@ class MicrosoftController extends AbstractController
                 'user' => $userWithEmail
             ]);
 
-            if ($existingUserAuth === null) {
+            if ($existingUserAuth) {
                 $this->addFlash(
                     'error',
                     "Email already in use. Please use the original provider from this account!"
                 );
                 return null;
             }
-
-            // If a user with the given email exists, and they don't have an external auth entry, return the user
-            return $userWithEmail;
         }
 
         // If no user exists, create a new user and a corresponding UserExternalAuth entry
