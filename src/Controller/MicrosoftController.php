@@ -101,11 +101,12 @@ class MicrosoftController extends AbstractController
         $microsoftUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
-        $email = $resourceOwner->getEmail();
-        /** @phpstan-ignore-next-line */
-        $firstname = $resourceOwner->getFirstname();
-        /** @phpstan-ignore-next-line */
-        $lastname = $resourceOwner->getLastname();
+        $data = $resourceOwner->toArray();
+
+        // Map the relevant details from the returned $data array
+        $email = $data['email'];
+        $firstname = $data['given_name'] ?? null;
+        $lastname = $data['family_name'] ?? null;
 
         // Check if the email is valid
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
