@@ -160,7 +160,7 @@ class MicrosoftController extends AbstractController
                 'user' => $userWithEmail
             ]);
 
-            if ($existingUserAuth) {
+            if ($existingUserAuth !== null) {
                 $this->addFlash(
                     'error',
                     "Email already in use. Please use the original provider from this account!"
