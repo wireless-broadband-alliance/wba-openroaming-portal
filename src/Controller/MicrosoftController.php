@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -20,7 +19,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -141,19 +139,29 @@ class MicrosoftController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Google user ID exists in UserExternalAuth
+        // Check if a user with the given Microsoft user ID exists in UserExternalAuth
         $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
             'provider' => UserProvider::MICROSOFT_ACCOUNT->value,
             'provider_id' => $microsoftUserId
         ]);
 
         if ($userExternalAuth !== null) {
-            // If a user with the given Google user ID exists, return the associated user
+            // If a user with the given Microsoft user ID exists, return the associated user
             return $userExternalAuth->getUser();
         }
 
         // Check if a user with the given email exists
-        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $userWithEmail = $queryBuilder
+            ->select('u')
+            ->from(User::class, 'u')
+            ->leftJoin('u.userExternalAuths', 'uea')
+            ->where('u.uuid = :uuid')
+            ->orWhere('uea.provider_id = :provider_id')
+            ->setParameter('uuid', $email)
+            ->setParameter('provider_id', $microsoftUserId)
+            ->getQuery()
+            ->getOneOrNullResult();
 
         if ($userWithEmail !== null) {
             $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
@@ -161,7 +169,10 @@ class MicrosoftController extends AbstractController
             ]);
 
             if ($existingUserAuth === null) {
-                $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
+                $this->addFlash(
+                    'error',
+                    "Email already in use. Please use the original provider from this account!"
+                );
                 return null;
             }
 
@@ -261,15 +272,16 @@ class MicrosoftController extends AbstractController
             'code' => $code,
         ]);
 
-        // Fetch user info from Google
+        // Fetch user info from Microsoft
         $resourceOwner = $client->fetchUserFromToken($accessToken);
+        /** @phpstan-ignore-next-line */
+        $data = $resourceOwner->toArray();
         $microsoftUserId = $resourceOwner->getId();
-        /** @phpstan-ignore-next-line */
-        $email = $resourceOwner->getEmail();
-        /** @phpstan-ignore-next-line */
-        $firstname = $resourceOwner->getFirstname();
-        /** @phpstan-ignore-next-line */
-        $lastname = $resourceOwner->getLastname();
+
+        // Map the relevant details from the returned $data array
+        $email = $data['email'];
+        $firstname = $data['given_name'] ?? null;
+        $lastname = $data['family_name'] ?? null;
 
         return $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
     }
