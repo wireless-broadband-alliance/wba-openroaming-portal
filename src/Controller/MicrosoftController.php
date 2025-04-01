@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -19,6 +20,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -151,17 +153,7 @@ class MicrosoftController extends AbstractController
         }
 
         // Check if a user with the given email exists
-        $queryBuilder = $this->entityManager->createQueryBuilder();
-        $userWithEmail = $queryBuilder
-            ->select('u')
-            ->from(User::class, 'u')
-            ->leftJoin('u.userExternalAuths', 'uea')
-            ->where('u.uuid = :uuid')
-            ->orWhere('uea.provider_id = :provider_id')
-            ->setParameter('uuid', $email)
-            ->setParameter('provider_id', $microsoftUserId)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
 
         if ($userWithEmail !== null) {
             $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
