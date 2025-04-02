@@ -100,6 +100,10 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
