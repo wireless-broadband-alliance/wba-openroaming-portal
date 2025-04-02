@@ -8,6 +8,7 @@ use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
@@ -347,6 +348,7 @@ class SiteController extends AbstractController
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
+            'context' => FirewallType::LANDING->value
         ]);
     }
 
