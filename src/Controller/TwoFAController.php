@@ -545,7 +545,9 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         if ($user instanceof User) {
-            $this->twoFAService->generateOTPCodes($user);
+            if ($user->getOTPcodes()->isEmpty()) {
+                $this->twoFAService->generateOTPCodes($user);
+            }
             return $this->render('site/twoFAAuthentication/otpCodes.html.twig', [
                 'data' => $data,
                 'codes' => $user->getOTPcodes(),
