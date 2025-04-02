@@ -290,7 +290,8 @@ https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
 These credentials can be found on the Microsoft Identity Platform
 by creating a new client_id & secret on the **Identity > Applications > App registrations.**.
 Follow this link for more instructions for how to get does items:
-https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-web-api-aspnet-sign-in?tabs=aspnet-workforce
+https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=certificate%2Cexpose-a-web-api
+https://learn.microsoft.com/pt-pt/azure/healthcare-apis/register-application
 
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`

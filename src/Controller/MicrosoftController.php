@@ -101,11 +101,12 @@ class MicrosoftController extends AbstractController
         $microsoftUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
-        $email = $resourceOwner->getEmail();
-        /** @phpstan-ignore-next-line */
-        $firstname = $resourceOwner->getFirstname();
-        /** @phpstan-ignore-next-line */
-        $lastname = $resourceOwner->getLastname();
+        $data = $resourceOwner->toArray();
+
+        // Map the relevant details from the returned $data array
+        $email = $data['email'];
+        $firstname = $data['given_name'] ?? null;
+        $lastname = $data['family_name'] ?? null;
 
         // Check if the email is valid
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
@@ -140,14 +141,14 @@ class MicrosoftController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Google user ID exists in UserExternalAuth
+        // Check if a user with the given Microsoft user ID exists in UserExternalAuth
         $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
             'provider' => UserProvider::MICROSOFT_ACCOUNT->value,
             'provider_id' => $microsoftUserId
         ]);
 
         if ($userExternalAuth !== null) {
-            // If a user with the given Google user ID exists, return the associated user
+            // If a user with the given Microsoft user ID exists, return the associated user
             return $userExternalAuth->getUser();
         }
 
@@ -159,13 +160,13 @@ class MicrosoftController extends AbstractController
                 'user' => $userWithEmail
             ]);
 
-            if ($existingUserAuth === null) {
-                $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
+            if ($existingUserAuth !== null) {
+                $this->addFlash(
+                    'error',
+                    "Email already in use. Please use the original provider from this account!"
+                );
                 return null;
             }
-
-            // If a user with the given email exists, and they don't have an external auth entry, return the user
-            return $userWithEmail;
         }
 
         // If no user exists, create a new user and a corresponding UserExternalAuth entry
@@ -260,15 +261,16 @@ class MicrosoftController extends AbstractController
             'code' => $code,
         ]);
 
-        // Fetch user info from Google
+        // Fetch user info from Microsoft
         $resourceOwner = $client->fetchUserFromToken($accessToken);
+        /** @phpstan-ignore-next-line */
+        $data = $resourceOwner->toArray();
         $microsoftUserId = $resourceOwner->getId();
-        /** @phpstan-ignore-next-line */
-        $email = $resourceOwner->getEmail();
-        /** @phpstan-ignore-next-line */
-        $firstname = $resourceOwner->getFirstname();
-        /** @phpstan-ignore-next-line */
-        $lastname = $resourceOwner->getLastname();
+
+        // Map the relevant details from the returned $data array
+        $email = $data['email'];
+        $firstname = $data['given_name'] ?? null;
+        $lastname = $data['family_name'] ?? null;
 
         return $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
     }
